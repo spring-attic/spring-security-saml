@@ -26,8 +26,8 @@
     
     <scm>
         <connection>scm:svn:https://src.springframework.org/svn/se-security/trunk/</connection>
-        <developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/</developerConnection>
-        <url>https://src.springframework.org/svn/se-security/trunk/</url>
+        <developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-saml</developerConnection>
+        <url>https://src.springframework.org/svn/se-security/trunk/spring-security-saml</url>
     </scm>    
     
     <repositories>

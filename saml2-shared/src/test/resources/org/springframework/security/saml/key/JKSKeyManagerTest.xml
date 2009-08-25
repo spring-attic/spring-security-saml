@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+    <bean id="keyStore" class="org.springframework.security.saml.key.JKSKeyManager">
+        <constructor-arg index="0" value="classpath:org/springframework/security/saml/key/keystore.jks" />
+        <constructor-arg index="1" value="nalle123" />
+    </bean>    
+
+</beans>

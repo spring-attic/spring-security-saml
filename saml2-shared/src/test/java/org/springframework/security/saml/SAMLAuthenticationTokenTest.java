@@ -1,0 +1,72 @@
+/* Copyright 2009 Vladimir Schäfer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.security.saml;
+
+import static junit.framework.Assert.assertEquals;
+import static org.easymock.EasyMock.createMock;
+import static org.junit.Assert.assertNull;
+import org.junit.Before;
+import org.junit.Test;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.springframework.security.saml.storage.SAMLMessageStorage;
+
+/**
+ * @author Vladimir Schäfer
+ */
+public class SAMLAuthenticationTokenTest {
+
+    SAMLAuthenticationToken token;
+    BasicSAMLMessageContext context;
+    SAMLMessageStorage storage;
+
+    @Before
+    public void initialize() {
+        context = new BasicSAMLMessageContext();
+        storage = createMock(SAMLMessageStorage.class);
+        token = new SAMLAuthenticationToken(context, storage);
+    }
+
+    @Test
+    public void testInitial() {
+        assertEquals(context, token.getCredentials());
+        assertNull(token.getPrincipal());
+        assertEquals(storage, token.getMessageStore());
+    }
+
+    /**
+     * Verifies that the token can't be set as authenticated.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetAuthenticated() {
+        token.setAuthenticated(true);
+    }
+
+    /**
+     * Verifies that the token can't be created without context.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateWithoutContext() {
+        token = new SAMLAuthenticationToken(null, createMock(SAMLMessageStorage.class));
+    }
+
+    /**
+     * Verifies that the token can't be created without context.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateWithoutStorage() {
+        token = new SAMLAuthenticationToken(new BasicSAMLMessageContext(), null);
+    }
+
+}

@@ -397,7 +397,7 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
         }
 
         // Validate users session is still valid
-        if (auth.getSessionNotOnOrAfter() != null && auth.getSessionNotOnOrAfter().isAfter(new Date().getTime())) {
+        if (auth.getSessionNotOnOrAfter() != null && !(new DateTime()).isBefore(auth.getSessionNotOnOrAfter())) {
             log.debug("Authentication session is not valid anymore", auth.getSessionNotOnOrAfter());
             throw new CredentialsExpiredException("Users authentication is expired");
         }

@@ -16,6 +16,7 @@ package org.springframework.security.saml;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,14 +24,20 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.AuthnStatement;
 import org.springframework.security.Authentication;
 import org.springframework.security.AuthenticationServiceException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.security.userdetails.User;
+import org.joda.time.DateTime;
+
+import java.util.LinkedList;
+import java.util.Arrays;
 
 /**
  * @author Vladimir Schäfer
@@ -76,11 +83,25 @@ public class SAMLAuthenticationProviderTest {
         expect(consumer.processResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
 
+        DateTime expiry = new DateTime().plusHours(4);
+        AuthnStatement as = createMock(AuthnStatement.class);
+        expect(assertion.getAuthnStatements()).andReturn(Arrays.asList(as));
+        expect(as.getSessionNotOnOrAfter()).andReturn(expiry);
+
+        replay(as);
         replayMock();
         Authentication authentication = provider.authenticate(token);
         assertEquals("Name", authentication.getName());
+        assertTrue(authentication instanceof ExpiringUsernameAuthenticationToken);
+
+        ExpiringUsernameAuthenticationToken t = (ExpiringUsernameAuthenticationToken) authentication;
+        assertEquals(expiry.toDate(), t.getTokenExpiration());
+
         verifyMock();
+        verify(as);
     }
+
+
 
     /**
      * Verifies that user details are filled correctly if set
@@ -99,6 +120,7 @@ public class SAMLAuthenticationProviderTest {
 
         expect(consumer.processResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
+        expect(assertion.getAuthnStatements()).andReturn(new LinkedList<AuthnStatement>());
         expect(details.loadUserBySAML(result)).andReturn(new User("test", "test", true, true, true, true, new GrantedAuthority[] {}));
 
         replayMock();

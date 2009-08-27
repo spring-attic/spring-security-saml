@@ -86,6 +86,7 @@
     <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
         <constructor-arg index="0" ref="metadata" />
         <property name="parser" ref="parserPool" />
+        <property name="resolver" ref="keyResolver" />
     </bean>
 
     <!-- Entry point to initialize authentication -->

@@ -389,6 +389,14 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
          */
     }
 
+    /**
+     * Verifies that authentication statement is valid. Checks the authInstant, sessionNotOnOrAfter and subjectLocality
+     * fields.
+     * @param auth statement to check
+     * @param context message context
+     * @return date of statement expiration or null if no such is defined
+     * @throws AuthenticationException in case the statement is invalid
+     */
     protected void verifyAuthenticationStatement(AuthnStatement auth, BasicSAMLMessageContext context) throws AuthenticationException {
         // Validate that user wasn't authenticated too long time ago
         if (!isDateTimeSkewValid(MAX_AUTHENTICATION_TIME, auth.getAuthnInstant())) {
@@ -413,7 +421,9 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
     }
 
     private boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
-        return time.isAfter(new Date().getTime() - skewInSec * 1000) && time.isBeforeNow();
+        long current = new Date().getTime();
+        int futureSkew = 3;
+        return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + futureSkew * 1000);
     }
 
 }

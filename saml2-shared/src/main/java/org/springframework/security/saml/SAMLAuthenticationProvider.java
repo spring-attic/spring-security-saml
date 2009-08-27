@@ -14,8 +14,10 @@
  */
 package org.springframework.security.saml;
 
+import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +27,19 @@ import org.springframework.security.AuthenticationServiceException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.AbstractAuthenticationToken;
 import org.springframework.security.providers.AuthenticationProvider;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
+import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
  * the token is valid to create an authenticated UsernamePasswordAuthenticationToken.
  *
- * @author Vladimir Schäfer 
+ * @author Vladimir Schäfer
  */
 public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
@@ -45,6 +50,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
     /**
      * Default constructor
+     *
      * @param consumer profile to use
      */
     public SAMLAuthenticationProvider(WebSSOProfileConsumer consumer) {
@@ -56,6 +62,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * SAMLAuthenticationToken and must contain filled BasicSAMLMessageContext. If the SAML inbound message
      * in the context is valid, UsernamePasswordAuthenticationToken with name given in the SAML message NameID
      * and assertion used to verify the user as credential are created and set as authenticated.
+     *
      * @param authentication SAMLAuthenticationToken to verify
      * @return UsernamePasswordAuthenticationToken with name as NameID value and SAMLCredential as credential object
      * @throws AuthenticationException user can't be authenticated due to an error
@@ -63,7 +70,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         if (!supports(authentication.getClass())) {
-            throw new IllegalArgumentException("Only SAMLAuthenticationToken is supported, "+authentication.getClass()+" was attempted");
+            throw new IllegalArgumentException("Only SAMLAuthenticationToken is supported, " + authentication.getClass() + " was attempted");
         }
 
         SAMLAuthenticationToken token = (SAMLAuthenticationToken) authentication;
@@ -84,15 +91,38 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         }
 
         String name = credential.getNameID().getValue();
-        UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(name, credential, new GrantedAuthority[0]);
+        Date expiration = getExpirationDate(credential);
+        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, name, credential, new GrantedAuthority[0]);
         processUserDetails(result, credential);
         return result;
     }
 
     /**
+     * Parses the SAMLCredential for expiration time. Locates all AuthnStatements present within the assertion
+     * (only one in most cases) and computes the expiration based on sessionNotOnOrAfter field.
+     *
+     * @param credential credential to use for expiration parsing.
+     * @return null if no expiration is present, expiration time onOrAfter which the token is not valid anymore
+     */
+    protected Date getExpirationDate(SAMLCredential credential) {
+        List<AuthnStatement> statementList = credential.getAuthenticationAssertion().getAuthnStatements();
+        DateTime expiration = null;
+        for (AuthnStatement statement : statementList) {
+            DateTime newExpiration = statement.getSessionNotOnOrAfter();
+            if (newExpiration != null) {
+                if (expiration == null || expiration.isAfter(newExpiration)) {
+                    expiration = newExpiration;
+                }
+            }
+        }
+        return expiration != null ? expiration.toDate() : null;
+    }
+
+    /**
      * Populates user data from SAMLCredential into UserDetails object.
-     * @param token token to store UserDetails to
-     * @param credential credential to load user from 
+     *
+     * @param token      token to store UserDetails to
+     * @param credential credential to load user from
      */
     protected void processUserDetails(AbstractAuthenticationToken token, SAMLCredential credential) {
         if (getUserDetails() != null) {
@@ -102,6 +132,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
     /**
      * Returns saml user details service used to load information about logged user from SAML data.
+     *
      * @return service or null if not set
      */
     public SAMLUserDetailsService getUserDetails() {
@@ -111,6 +142,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
     /**
      * The user details can be optionally set and is automatically called while user SAML assertion
      * is validated.
+     *
      * @param userDetails user details
      */
     public void setUserDetails(SAMLUserDetailsService userDetails) {
@@ -119,6 +151,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
     /**
      * SAMLAuthenticationToken is the only supported token.
+     *
      * @param aClass class to check for support
      * @return true if class is of type SAMLAuthenticationToken
      */

@@ -51,6 +51,7 @@
 
     <!-- Class is capable of generating SP metadata describing the currently running envirnment -->
     <bean id="metadataGenerator" class="org.springframework.security.saml.metadata.MetadataGenerator">
+        <property name="serverKeyAlias" value="apollo" />
         <property name="credentialResolver" ref="keyResolver"/>
     </bean>
 

@@ -50,6 +50,7 @@ import java.util.LinkedList;
  */
 public class MetadataGenerator implements ApplicationContextAware {
 
+    private String serverKeyAlias;
     private XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
     private ApplicationContext applicationContext;
     private CredentialResolver credentialResolver;
@@ -63,7 +64,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     protected KeyInfo getServerKeyInfo() {
         try {
             NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = getServerCredential("apollo");
+            Credential serverCredential = getServerCredential(serverKeyAlias);
             return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
         } catch (org.opensaml.xml.security.SecurityException e) {
             logger.error("Can't obtain key from keystore or generate key info", e);
@@ -121,7 +122,7 @@ public class MetadataGenerator implements ApplicationContextAware {
         SAMLObjectBuilder<KeyDescriptor> builder = (SAMLObjectBuilder<KeyDescriptor>) Configuration.getBuilderFactory().getBuilder(KeyDescriptor.DEFAULT_ELEMENT_NAME);
         KeyDescriptor descriptor = builder.buildObject();
         descriptor.setUse(type);
-        descriptor.setKeyInfo(getServerKeyInfo());
+        descriptor.setKeyInfo(key);
         return descriptor;
     }
 
@@ -209,5 +210,24 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public void setCredentialResolver(CredentialResolver credentialResolver) {
         this.credentialResolver = credentialResolver;
+    }
+
+    /**
+     * Alias of key used for signing of service provider SAML messages.
+     * @return key alias
+     */
+    public String getServerKeyAlias() {
+        return serverKeyAlias;
+    }
+
+    /**
+     * Alias in the keystore used for signing of messages sent by this service provider
+     * @param serverKeyAlias alias of an entry in the configured key store
+     */
+    public void setServerKeyAlias(String serverKeyAlias) {
+        if (serverKeyAlias == null) {
+            throw new IllegalArgumentException("ServerKeyAlias must be set");
+        }
+        this.serverKeyAlias = serverKeyAlias;
     }
 }

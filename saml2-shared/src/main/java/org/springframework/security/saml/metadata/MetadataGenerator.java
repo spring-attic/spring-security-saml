@@ -14,32 +14,33 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.credential.CredentialResolver;
-import org.opensaml.xml.security.*;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.Configuration;
-import org.opensaml.saml2.metadata.*;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
-import org.springframework.security.saml.SAMLProcessingFilter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.beans.BeansException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opensaml.Configuration;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.metadata.*;
+import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.security.CriteriaSet;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.credential.CredentialResolver;
+import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.xml.security.criteria.EntityIDCriteria;
+import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xml.signature.KeyInfo;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.saml.SAMLLogoutProcessingFilter;
+import org.springframework.security.saml.SAMLProcessingFilter;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * The class is responsible for generation of service provider metadata describing the application in
@@ -110,10 +111,12 @@ public class MetadataGenerator implements ApplicationContextAware {
         // Add POST consumer
         spDescriptor.getAssertionConsumerServices().add(getPOSTConsumerService(request, true, 0));
 
+        // Add POST logout service
+        spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(request));
+
         // Generate key info
-        KeyInfo serverKey = getServerKeyInfo();
-        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, serverKey));
-        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, serverKey));
+        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo()));
+        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo()));
 
         return spDescriptor;
     }
@@ -166,6 +169,15 @@ public class MetadataGenerator implements ApplicationContextAware {
         return consumer;
     }
 
+    protected SingleLogoutService getSingleLogoutService(HttpServletRequest request) {
+        SAMLObjectBuilder<SingleLogoutService> builder = (SAMLObjectBuilder<SingleLogoutService>) builderFactory.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
+        SingleLogoutService logoutService = builder.buildObject();
+        SAMLLogoutProcessingFilter logoutFilter = getSAMLLogoutFilter();
+        logoutService.setLocation(getServerURL(request, logoutFilter.getFilterProcessesUrl()));
+        logoutService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        return logoutService;
+    }
+
     /**
      * Creates URL at which the local server is capable of accepting incoming SAML messages.
      * @param request request parsed for server name, port, protocol and context
@@ -198,6 +210,19 @@ public class MetadataGenerator implements ApplicationContextAware {
             throw new SAMLRuntimeException("More then one SAML processing filter were defined in Spring configuration");
         } else {
             return (SAMLProcessingFilter) map.values().iterator().next();
+        }
+    }
+
+    private SAMLLogoutProcessingFilter getSAMLLogoutFilter() {
+        Map map = applicationContext.getBeansOfType(SAMLLogoutProcessingFilter.class);
+        if (map.size() == 0) {
+            logger.error("No SAML Processing filter was defined");
+            throw new SAMLRuntimeException("No SAML processing filter is defined in Spring configuration");
+        } else if (map.size() > 1) {
+            logger.error("More then one SAML Processing filter were defined");
+            throw new SAMLRuntimeException("More then one SAML processing filter were defined in Spring configuration");
+        } else {
+            return (SAMLLogoutProcessingFilter) map.values().iterator().next();
         }
     }
 

@@ -184,13 +184,14 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that invalid binding name fails with exception.
+     * Verifies that invalid binding name will be ingored and default used instead.
      *
      * @throws Exception error
      */
-    @Test(expected = SAMLException.class)
+    @Test
     public void testInvalidBinding() throws Exception {
         options.setBinding("invalid");
+        storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
         profile.initializeSSO(options, storage, request, response);
         verifyMock();

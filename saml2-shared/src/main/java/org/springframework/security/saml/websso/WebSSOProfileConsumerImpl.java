@@ -18,26 +18,17 @@ import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.criteria.UsageCriteria;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.AuthenticationException;
@@ -47,7 +38,6 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,27 +47,14 @@ import java.util.List;
  *
  * @author Vladimir Schäfer
  */
-public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
+public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements WebSSOProfileConsumer {
 
     private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerImpl.class);
 
     /**
-     * Maximum time from response creation when the message is deemed valid
-     */
-    private static int DEFAULT_RESPONSE_SKEW = 60;
-    /**
-     * Maximum time between assertion creation and current time when the assertion is usable
-     */
-    private static int MAX_ASSERTION_TIME = 3000;
-    /**
      * Maximum time between user's authentication and current time
      */
     private static int MAX_AUTHENTICATION_TIME = 7200;
-
-    /**
-     * Trust engine used to verify SAML signatures
-     */
-    private ExplicitKeySignatureTrustEngine trustEngine;
 
     protected static final String BEARER_CONFIRMATION = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
 
@@ -87,9 +64,7 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
      * @throws MetadataProviderException error initializing the provider
      */
     public WebSSOProfileConsumerImpl(MetadataManager metadata) throws MetadataProviderException {
-        MetadataCredentialResolver mdCredResolver = new MetadataCredentialResolver(metadata);
-        KeyInfoCredentialResolver keyInfoCredResolver = Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver();
-        trustEngine = new ExplicitKeySignatureTrustEngine(mdCredResolver, keyInfoCredResolver);
+        super(metadata, null, null, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()));
     }
 
     /**
@@ -193,7 +168,7 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
                     }
                 }
             }
-        }
+        }       
 
         // Make sure that at least one storage contains authentication statement and subject with bearer cofirmation
         if (subjectAssertion == null) {
@@ -317,31 +292,6 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
         }
     }
 
-    protected void verifyIssuer(Issuer issuer, BasicSAMLMessageContext context) throws SAMLException {
-        // Validat format of issuer
-        if (issuer.getFormat() != null && !issuer.getFormat().equals(NameIDType.ENTITY)) {
-            log.debug("Assertion invalidated by issuer type", issuer.getFormat());
-            throw new SAMLException("SAML Assertion is invalid");
-        }
-
-        // Validate that issuer is expected peer entity
-        if (!context.getPeerEntityMetadata().getEntityID().equals(issuer.getValue())) {
-            log.debug("Assertion invalidated by unexpected issuer value", issuer.getValue());
-            throw new SAMLException("SAML Assertion is invalid");
-        }
-    }
-
-    protected void verifySignature(Signature signature, String IDPEntityID) throws org.opensaml.xml.security.SecurityException, ValidationException {
-        SAMLSignatureProfileValidator validator = new SAMLSignatureProfileValidator();
-        validator.validate(signature);
-        CriteriaSet criteriaSet = new CriteriaSet();
-        criteriaSet.add(new EntityIDCriteria(IDPEntityID));
-        criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
-        criteriaSet.add(new UsageCriteria(UsageType.SIGNING));
-        log.debug("Verifying signature", signature);
-        trustEngine.validate(signature, criteriaSet);
-    }
-
     protected void verifyAssertionConditions(Conditions conditions, BasicSAMLMessageContext context, boolean audienceRequired) throws SAMLException {
         // If no conditions are implied, storage is deemed valid
         if (conditions == null) {
@@ -418,12 +368,6 @@ public class WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
                 }
             }
         }
-    }
-
-    private boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
-        long current = new Date().getTime();
-        int futureSkew = 3;
-        return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + futureSkew * 1000);
     }
 
 }

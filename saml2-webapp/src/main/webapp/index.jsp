@@ -116,5 +116,6 @@
 </p>
 
 <p>    
-    <a href="<c:url value="/saml/logout"/>">Logout</a>
+    <a href="<c:url value="/saml/logout"/>">Global Logout</a><br />
+    <a href="<c:url value="/saml/logout?local=true"/>">Local Logout</a>
 </p>

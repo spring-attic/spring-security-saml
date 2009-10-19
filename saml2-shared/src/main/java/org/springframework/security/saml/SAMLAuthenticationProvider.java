@@ -95,6 +95,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, name, credential, new GrantedAuthority[0]);
         processUserDetails(result, credential);
         return result;
+        
     }
 
     /**

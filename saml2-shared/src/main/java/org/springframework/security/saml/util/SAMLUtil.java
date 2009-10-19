@@ -14,13 +14,11 @@
  */
 package org.springframework.security.saml.util;
 
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
+import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
 import java.util.List;
 
@@ -73,7 +71,7 @@ public class SAMLUtil {
      * @return SSO service capable of handling the given binding
      * @throws MetadataProviderException if the service can't be determined
      */
-    public static SingleSignOnService getServiceForBinding(IDPSSODescriptor descriptor, String binding) throws MetadataProviderException {
+    public static SingleSignOnService getSSOServiceForBinding(IDPSSODescriptor descriptor, String binding) throws MetadataProviderException {
         List<SingleSignOnService> services = descriptor.getSingleSignOnServices();
         for (SingleSignOnService service : services) {
             if (binding.equals(service.getBinding())) {
@@ -82,6 +80,66 @@ public class SAMLUtil {
         }
         log.debug("No binding found for IDP with binding " + binding);
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
+    }
+
+    /**
+     * Returns Single logout service for given binding of the IDP.
+     *
+     * @param descriptor IDP to search for service in
+     * @param binding    binding supported by the service
+     * @return SSO service capable of handling the given binding
+     * @throws MetadataProviderException if the service can't be determined
+     */
+    public static SingleLogoutService getLogoutServiceForBinding(SSODescriptor descriptor, String binding) throws MetadataProviderException {
+        List<SingleLogoutService> services = descriptor.getSingleLogoutServices();
+        for (SingleLogoutService service : services) {
+            if (binding.equals(service.getBinding())) {
+                return service;
+            }
+        }
+        log.debug("No binding found for IDP with binding " + binding);
+        throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
+    }
+
+    public static String getLoginBinding(WebSSOProfileOptions options, IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
+
+        String requiredBinding = options.getBinding();
+        for (Endpoint idpEndpoint : idp.getSingleSignOnServices()) {
+            if (idpEndpoint.getBinding().equals(requiredBinding)) {
+                return requiredBinding;
+            }
+        }
+
+        return SAMLUtil.getDefaultBinding(idp);
+
+    }
+
+    public static String getLogoutBinding(IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
+
+        List<SingleLogoutService> logoutServices = idp.getSingleLogoutServices();
+        if (logoutServices.size() == 0) {
+            throw new MetadataProviderException("IDP doesn't contain any SingleLogout endpoints");
+        }
+
+        String binding = null;
+
+        // Let's find first binding supported by both IDP and SP
+        idp : for (SingleLogoutService idpService : logoutServices) {
+            for (SingleLogoutService spService : sp.getSingleLogoutServices()) {
+                if (idpService.getBinding().equals(spService.getBinding()) ) {
+                    binding = idpService.getBinding();
+                    break idp;
+                }
+            }
+        }
+
+        // In case there's no common endopoint let's use first available
+        if (binding == null) {
+            binding = idp.getSingleLogoutServices().iterator().next().getBinding();
+        }
+
+        return binding;
+
     }
 
     /**

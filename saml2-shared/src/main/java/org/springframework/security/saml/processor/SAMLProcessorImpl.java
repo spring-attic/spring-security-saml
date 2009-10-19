@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml.processor;
 
+import org.opensaml.Configuration;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
@@ -25,20 +26,27 @@ import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.security.SecurityPolicy;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.Configuration;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.credential.ChainingCredentialResolver;
 import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
+import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
+import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
+import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.springframework.security.saml.metadata.MetadataManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Processor is capable of parsing SAML message from HttpServletRequest and populate the BasicSAMLMessageContext
@@ -86,14 +94,19 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         samlContext.setLocalEntityMetadata(metadata.getEntityDescriptor(metadata.getHostedSPName()));
         samlContext.setPeerEntityRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
+        ChainingCredentialResolver chainedResolver = new ChainingCredentialResolver();
+        chainedResolver.getResolverChain().add(new MetadataCredentialResolver(metadata));
+        chainedResolver.getResolverChain().add(resolver);
+
         KeyInfoCredentialResolver keyInfoCredResolver = Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver();
-        ExplicitKeySignatureTrustEngine trustEngine = new ExplicitKeySignatureTrustEngine(resolver, keyInfoCredResolver);
+        ExplicitKeySignatureTrustEngine trustEngine = new ExplicitKeySignatureTrustEngine(chainedResolver, keyInfoCredResolver);
         SAMLProtocolMessageXMLSignatureSecurityPolicyRule signatureRule = new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(trustEngine);
 
         SecurityPolicy policy = new BasicSecurityPolicy();
         policy.getPolicyRules().add(signatureRule);
         StaticSecurityPolicyResolver resolver = new StaticSecurityPolicyResolver(policy);
         samlContext.setSecurityPolicyResolver(resolver);
+        samlContext.setInboundSAMLProtocol("urn:oasis:names:tc:SAML:2.0:protocol");
 
         getDecoder(request, samlContext).decode(samlContext);
         samlContext.setPeerEntityId(samlContext.getPeerEntityMetadata().getEntityID());
@@ -115,10 +128,10 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
         MessageDecoder decoder;
         if (request.getMethod().equals("POST")) {
-            samlContext.setInboundSAMLProtocol(SAMLConstants.SAML2_POST_BINDING_URI);
+            samlContext.setCommunicationProfileId(SAMLConstants.SAML2_POST_BINDING_URI);
             decoder = new HTTPPostDecoder(parser);
         } else if (request.getMethod().equals("GET")) {
-            samlContext.setInboundSAMLProtocol(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+            samlContext.setCommunicationProfileId(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
             decoder = new HTTPRedirectDeflateDecoder(parser);
         } else {
             throw new SAMLException("Unsupported request");

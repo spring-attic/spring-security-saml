@@ -24,9 +24,9 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
 import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.core.RequestAbstractType;
+import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -37,12 +37,17 @@ import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
+import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
+import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.security.CriteriaSet;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
@@ -81,6 +86,7 @@ public class AbstractProfileBase {
     protected XMLObjectBuilderFactory builderFactory;
     protected String signingKey;
     protected VelocityEngine velocityEngine;
+    protected Decrypter decryper;
 
     /**
      * Trust engine used to verify SAML signatures
@@ -103,6 +109,17 @@ public class AbstractProfileBase {
             log.debug("Error initializing velicoity engige", e);
             throw new RuntimeException("Error configuring velocity", e);
         }
+
+        // Decryption key
+        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(getSPSigningCredential());
+        // Way to obtain encrypted key info from XML
+        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
+        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+        // Entity used for decrypting of encrypted XML parts
+        this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
+
     }
 
     public AbstractProfileBase(MetadataManager metadata, String signingKey, CredentialResolver keyManager, SignatureTrustEngine trustEngine) {
@@ -145,6 +162,13 @@ public class AbstractProfileBase {
 
     protected void sendMessage(SAMLMessageStorage messageStorage, boolean sign, RequestAbstractType message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
 
+        sendMessage(sign, message, endpoint, response);
+        messageStorage.storeMessage(message.getID(), message);
+
+    }
+
+    protected void sendMessage(boolean sign, SignableSAMLObject message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
+
         BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject> samlContext = new BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject>();
         samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
         samlContext.setOutboundSAMLMessage(message);
@@ -156,8 +180,27 @@ public class AbstractProfileBase {
 
         MessageEncoder encoder = getEncoder(endpoint.getBinding());
         encoder.encode(samlContext);
-        messageStorage.storeMessage(message.getID(), message);
 
+    }
+
+    protected Status getStatus(String code, String statusMessage) {
+
+        SAMLObjectBuilder<StatusCode> codeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
+        StatusCode statusCode = codeBuilder.buildObject();
+        statusCode.setValue(code);
+
+        SAMLObjectBuilder<Status> statusBuilder = (SAMLObjectBuilder<Status>) builderFactory.getBuilder(Status.DEFAULT_ELEMENT_NAME);
+        Status status = statusBuilder.buildObject();
+        status.setStatusCode(statusCode);
+
+        if (statusMessage != null) {
+            SAMLObjectBuilder<StatusMessage> messageBuilder = (SAMLObjectBuilder<StatusMessage>) builderFactory.getBuilder(StatusMessage.DEFAULT_ELEMENT_NAME);
+            StatusMessage statusMessageObject = messageBuilder.buildObject();
+            statusMessageObject.setMessage(statusMessage);
+            status.setStatusMessage(statusMessageObject);
+        }
+
+        return status;
     }
 
     /**
@@ -167,14 +210,18 @@ public class AbstractProfileBase {
      * @param service service to use as destination for the request
      */
     protected void buildCommonAttributes(RequestAbstractType request, Endpoint service) {
-        SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
-        Issuer issuer = issuerBuilder.buildObject();
-        issuer.setValue(metadata.getHostedSPName());
         request.setID(generateID());
-        request.setIssuer(issuer);
+        request.setIssuer(getIssuer());
         request.setVersion(SAMLVersion.VERSION_20);
         request.setIssueInstant(new DateTime());
         request.setDestination(service.getLocation());
+    }
+
+    protected Issuer getIssuer() {
+        SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
+        Issuer issuer = issuerBuilder.buildObject();
+        issuer.setValue(metadata.getHostedSPName());
+        return issuer;
     }
 
     /**

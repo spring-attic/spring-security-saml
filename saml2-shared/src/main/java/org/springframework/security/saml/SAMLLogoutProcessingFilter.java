@@ -21,6 +21,7 @@ import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.Authentication;
@@ -73,7 +74,8 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
     public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler[] handlers) {
         super(logoutSuccessUrl, handlers);
-        setFilterProcessesUrl(DEFAUL_URL);
+        this.handlers = handlers;
+        this.setFilterProcessesUrl(DEFAUL_URL);
     }
 
     /**
@@ -116,9 +118,13 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 } else if (samlMessageContext.getInboundMessage() instanceof LogoutRequest) {
 
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    SAMLCredential credential = null;
+                    if (auth != null) {
+                        credential = (SAMLCredential) auth.getCredentials();
+                    }
 
                     // Process request and send response to the sender
-                    boolean logout = logoutProfile.processLogoutRequest(samlMessageContext, request, response);
+                    boolean logout = logoutProfile.processLogoutRequest(credential, samlMessageContext, response);
 
                     if (logout) {
                         for (LogoutHandler handler : handlers) {
@@ -134,6 +140,8 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 throw new SAMLRuntimeException("Error determining metadata contracts");
             } catch (MessageDecodingException e) {
                 throw new SAMLRuntimeException("Error decoding incoming SAML message");
+            } catch (MessageEncodingException e) {
+                throw new SAMLRuntimeException("Error encoding outgoing SAML message");
             } catch (org.opensaml.xml.security.SecurityException e) {
                 throw new SAMLRuntimeException("Incoming SAML message is invalid");
             }

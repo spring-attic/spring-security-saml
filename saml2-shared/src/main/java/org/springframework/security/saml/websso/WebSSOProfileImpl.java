@@ -28,6 +28,7 @@ import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.security.credential.KeyStoreCredentialResolver;
+import org.opensaml.xml.security.credential.CredentialResolver;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -50,12 +51,12 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * Initializes the profile.
      *
      * @param metadata   metadata manager to be used
-     * @param keyManager key manager
+     * @param keyResolver key manager
      * @param signingKey alias of key used for signing of assertions by local entity
      * @throws SAMLException error initializing the profile
      */
-    public WebSSOProfileImpl(MetadataManager metadata, KeyStoreCredentialResolver keyManager, String signingKey) throws SAMLException {
-        super(metadata, signingKey, keyManager);
+    public WebSSOProfileImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws SAMLException {
+        super(metadata, signingKey, keyResolver);
     }
 
     /**

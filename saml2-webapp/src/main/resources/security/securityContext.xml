@@ -11,6 +11,11 @@
         <security:intercept-url pattern="/favicon.ico" filters="none"/>
     </security:http>
 
+    <!-- Alias of the key used for SAML signing and encryption/decryption -->
+    <bean name="privateKey" class="java.lang.String">
+		<constructor-arg value="apollo" />
+	</bean>
+
     <!-- Key manager, set the JKS path and password to open the datastore -->
     <bean id="keyStore" class="org.springframework.security.saml.key.JKSKeyManager">
         <constructor-arg index="0" value="classpath:security/samlKeystore.jks"/>
@@ -50,7 +55,7 @@
 
     <!-- Class is capable of generating SP metadata describing the currently running envirnment -->
     <bean id="metadataGenerator" class="org.springframework.security.saml.metadata.MetadataGenerator">
-        <property name="serverKeyAlias" value="apollo"/>
+        <property name="serverKeyAlias" ref="privateKey"/>
         <property name="credentialResolver" ref="keyResolver"/>
     </bean>
 
@@ -94,7 +99,7 @@
         <constructor-arg index="0" ref="metadata"/>
         <constructor-arg index="1" ref="keyResolver"/>
         <!-- The name of key to use for encryption/signing purposes must be set here -->
-        <constructor-arg index="2" value="apollo"/>
+        <constructor-arg index="2" ref="privateKey"/>
     </bean>
 
     <!-- SAML 2.0 Logout Profile -->
@@ -103,7 +108,7 @@
         <constructor-arg index="0" ref="metadata"/>
         <constructor-arg index="1" ref="keyResolver"/>
         <!-- The name of key to use for encryption/signing purposes must be set here -->
-        <constructor-arg index="2" value="apollo"/>
+        <constructor-arg index="2" ref="privateKey"/>
     </bean>
 
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
@@ -157,6 +162,8 @@
     <!-- Consumer of assertions obtained from IDPs -->
     <bean id="webSSOprofileConsumber" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl" depends-on="bootstrap">
         <constructor-arg index="0" ref="metadata"/>
+        <constructor-arg index="1" ref="keyResolver"/>
+        <constructor-arg index="2" ref="privateKey"/>
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->

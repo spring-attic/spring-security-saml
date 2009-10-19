@@ -25,6 +25,7 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.security.credential.CredentialResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.CredentialsExpiredException;
@@ -44,6 +45,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     MetadataManager manager;
     XMLObjectBuilderFactory builderFactory;
     WebSSOProfileTestHelper helper;
+    CredentialResolver resolver;
 
     @Before
     public void initialize() throws Exception {
@@ -51,7 +53,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         context = new ClassPathXmlApplicationContext(resName);
         storage = createMock(SAMLMessageStorage.class);
         manager =  (MetadataManager) context.getBean("metadata", MetadataManager.class);
-        profile = new WebSSOProfileConsumerImpl(manager);
+        resolver = (CredentialResolver) context.getBean("keyResolver", CredentialResolver.class);
+        profile = new WebSSOProfileConsumerImpl(manager, resolver, "apollo");
         messageContext = new BasicSAMLMessageContext();
         builderFactory = Configuration.getBuilderFactory();
         helper = new WebSSOProfileTestHelper(builderFactory);

@@ -19,6 +19,7 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.xml.encryption.DecryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.Authentication;
@@ -88,6 +89,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         } catch (org.opensaml.xml.security.SecurityException e) {
             log.debug("Error validating signature", e);
             throw new AuthenticationServiceException("Error validating SAML message signature", e);
+        } catch (DecryptionException e) {
+            log.debug("Error decrypting SAML message", e);
+            throw new AuthenticationServiceException("Error decrypting SAML message", e);
         }
 
         String name = credential.getNameID().getValue();

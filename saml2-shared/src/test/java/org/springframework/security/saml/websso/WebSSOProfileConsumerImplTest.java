@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.security.credential.CredentialResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.security.CredentialsExpiredException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
 

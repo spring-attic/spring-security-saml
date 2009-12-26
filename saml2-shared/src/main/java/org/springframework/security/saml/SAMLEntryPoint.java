@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,14 @@ package org.springframework.security.saml;
 import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.springframework.security.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
-import org.springframework.security.ui.AuthenticationEntryPoint;
-import org.springframework.security.ui.FilterChainOrder;
-import org.springframework.security.ui.SpringSecurityFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -45,9 +44,9 @@ import java.io.IOException;
  * The other way is direct invocation of the entry point by accessing the DEFAULT_FILTER_URL. In this way user
  * can be forwarded to IDP after clicking for example login button.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
-public class SAMLEntryPoint extends SpringSecurityFilter implements AuthenticationEntryPoint {
+public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationEntryPoint {
 
     /**
      * In case this property is set to not null value the user will be redirected to this URL for selection
@@ -91,6 +90,10 @@ public class SAMLEntryPoint extends SpringSecurityFilter implements Authenticati
         return (request.getRequestURI().endsWith(getFilterSuffix()));
     }
 
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        doFilterHttp((HttpServletRequest) request, (HttpServletResponse) response, chain);
+    }
+
     /**
      * In case the DEFAULT_FILTER_URL is invoked directly, the filter will get called and initialize the
      * login sequence.
@@ -106,13 +109,13 @@ public class SAMLEntryPoint extends SpringSecurityFilter implements Authenticati
     /**
      * Sents AuthNRequest to the default IDP using any binding supported by both SP and IDP.
      *
-     * @param servletRequest  request
-     * @param servletResponse response
+     * @param request request
+     * @param response response
      * @param e               exception causing this entry point to be invoked
      * @throws IOException      error sending response
      * @throws ServletException error initializing SAML protocol
      */
-    public void commence(ServletRequest servletRequest, ServletResponse servletResponse, AuthenticationException e) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
         try {
             if (metadata == null) {
                 throw new ServletException("MetadataManager wasn't initialized in SAMLEntryPoint object");
@@ -120,10 +123,8 @@ public class SAMLEntryPoint extends SpringSecurityFilter implements Authenticati
             if (webSSOprofile == null) {
                 throw new ServletException("WebSSOProfile wasn't initialized in SAMLEntryPoint object");
             }
-            HttpServletRequest request = (HttpServletRequest) servletRequest;
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
             if (idpSelectionPath != null && !isLoginRequest(request)) {
-                request.getRequestDispatcher(idpSelectionPath).include(servletRequest, servletResponse);
+                request.getRequestDispatcher(idpSelectionPath).include(request, response);
             } else {
                 SAMLMessageStorage storage = new HttpSessionStorage(request);
                 WebSSOProfileOptions options = getProfileOptions(request, response, e);
@@ -228,7 +229,7 @@ public class SAMLEntryPoint extends SpringSecurityFilter implements Authenticati
         this.idpSelectionPath = idpSelectionPath;
     }
 
-    public int getOrder() {
-        return FilterChainOrder.PRE_AUTH_FILTER - 80;
-    }
+    //public int getOrder() {
+    //    return FilterChainOrder.PRE_AUTH_FILTER - 80;
+    //}
 }

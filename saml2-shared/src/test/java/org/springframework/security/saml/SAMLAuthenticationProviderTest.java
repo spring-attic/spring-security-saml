@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,22 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.AuthnStatement;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationServiceException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
-import org.springframework.security.userdetails.User;
 import org.joda.time.DateTime;
 
 import java.util.LinkedList;
 import java.util.Arrays;
 
 /**
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLAuthenticationProviderTest {
 

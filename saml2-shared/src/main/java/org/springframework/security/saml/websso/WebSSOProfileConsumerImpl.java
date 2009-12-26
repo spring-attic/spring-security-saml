@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.BadCredentialsException;
-import org.springframework.security.CredentialsExpiredException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -47,7 +47,7 @@ import java.util.List;
  * response from IDP. In case the response is correctly validated and no errors are found the SAMLCredential\
  * is created.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements WebSSOProfileConsumer {
 

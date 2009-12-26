@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.XMLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.config.SecurityConfigurationException;
 
 import java.util.*;
 
@@ -34,7 +33,7 @@ import java.util.*;
  * identity and service providers configured inside the chained metadata providers. Exactly one service provider can
  * be determined as hosted.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class MetadataManager extends ChainingMetadataProvider {
 
@@ -182,13 +181,11 @@ public class MetadataManager extends ChainingMetadataProvider {
 
     /**
      * Sets name of IDP to be used as default. In case the IDP is not present (wasn't loaded from any
-     * metadata provider) exception is thrown.
+     * metadata provider) runtime exception is thrown.
      *
      * @param defaultIDP IDP to set as default
-     * @throws org.springframework.security.config.SecurityConfigurationException
-     *          in case the defaultIDP is not configured in the system/
      */
-    public void setDefaultIDP(String defaultIDP) throws SecurityConfigurationException {
+    public void setDefaultIDP(String defaultIDP) {
 
         for (String s : getIDPEntityNames()) {
             if (s.equals(defaultIDP)) {
@@ -196,7 +193,7 @@ public class MetadataManager extends ChainingMetadataProvider {
                 return;
             }
         }
-        throw new SecurityConfigurationException("Attempt to set nonexisting IDP as default: " + defaultIDP);
+        throw new IllegalArgumentException("Attempt to set nonexisting IDP as default: " + defaultIDP);
     }
 
 }

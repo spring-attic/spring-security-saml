@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.springframework.security.providers.AbstractAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
  * SAML Token is used to pass SAMLContext object through to the SAML Authentication provider.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
 

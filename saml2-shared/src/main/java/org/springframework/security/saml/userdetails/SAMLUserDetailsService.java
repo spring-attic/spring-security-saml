@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 package org.springframework.security.saml.userdetails;
 
 import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
 /**
@@ -25,7 +25,7 @@ import org.springframework.security.userdetails.UsernameNotFoundException;
  * supposed to locate user in a arbitrary dataStore based on information present in the SAMLCredential
  * and return such a date in a form of application specific UserDetails object.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public interface SAMLUserDetailsService {
 
@@ -37,7 +37,7 @@ public interface SAMLUserDetailsService {
      * @param credential data populated from SAML message used to validate the user
      * @return a fully populated user record (never <code>null</code>)
      *
-     * @throws org.springframework.security.userdetails.UsernameNotFoundException if the user details object can't be populated
+     * @throws UsernameNotFoundException if the user details object can't be populated
      */
     UserDetails loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException;
 

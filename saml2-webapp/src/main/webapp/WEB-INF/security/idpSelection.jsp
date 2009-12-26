@@ -8,7 +8,7 @@
 
 <%
     WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletConfig().getServletContext());
-    MetadataManager mm = (MetadataManager) context.getBean("metadata", MetadataManager.class);
+    MetadataManager mm = context.getBean("metadata", MetadataManager.class);
     Set<String> idps = mm.getIDPEntityNames();
     pageContext.setAttribute("idp", idps);
 %>

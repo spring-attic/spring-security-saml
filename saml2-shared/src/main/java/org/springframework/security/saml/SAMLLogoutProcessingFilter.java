@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +24,26 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
-import org.springframework.security.ui.FilterChainOrder;
-import org.springframework.security.ui.logout.LogoutFilter;
-import org.springframework.security.ui.logout.LogoutHandler;
-import org.springframework.util.Assert;
-
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.util.UrlUtils;import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRequest;import javax.servlet.ServletResponse;import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
  * Filter processes arriving SAML Single Logout messages by delegating to the LogoutProfile.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
@@ -72,23 +72,23 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     private static final String DEFAUL_URL = "/saml/SingleLogout";
 
-    public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler[] handlers) {
-        super(logoutSuccessUrl, handlers);
-        this.handlers = handlers;
+    public SAMLLogoutProcessingFilter(final String logoutSuccessUrl, LogoutHandler[] handlers) {
+        // We use special inline handler which only performs redirect unless it was already done earlier
+        super(new SimpleUrlLogoutSuccessHandler() {            @Override            protected String getDefaultTargetUrl() {                if (StringUtils.hasText(logoutSuccessUrl)) {                    return logoutSuccessUrl;                } else {                    return super.getDefaultTargetUrl();                }            }            public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {                if (!response.isCommitted()) {                    super.onLogoutSuccess(request, response, authentication);                }            }        }, handlers);        Assert.isTrue(!StringUtils.hasLength(logoutSuccessUrl) || UrlUtils.isValidRedirectUrl(logoutSuccessUrl), logoutSuccessUrl + " isn't a valid redirect URL");        this.handlers = handlers;
         this.setFilterProcessesUrl(DEFAUL_URL);
     }
 
-    /**
+    @Override    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {        doFilterHttp((HttpServletRequest) req, (HttpServletResponse) res, chain);    }    /**
      * Filter loads SAML message from the request object and processes it. In case the message is of LogoutResponse
      * type it is validated and user is redirected to the success page. In case the message is invalid error
      * is logged and user is redirected to the success page anyway.
      * <p/>
      * In case the LogoutRequest message is received it will be verified and local session will be destroyed.
      *
-     * @param request http request
+     * @param request  http request
      * @param response http response
-     * @param chain chain
-     * @throws IOException error
+     * @param chain    chain
+     * @throws IOException      error
      * @throws ServletException error
      */
     public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -103,17 +103,13 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 BasicSAMLMessageContext samlMessageContext = processor.processSSO(request);
                 HttpSessionStorage storage = new HttpSessionStorage(request);
 
-                if (samlMessageContext.getInboundSAMLMessage() instanceof LogoutResponse) {
+                boolean doLogout = true;                if (samlMessageContext.getInboundSAMLMessage() instanceof LogoutResponse) {
 
                     try {
                         logoutProfile.processLogoutResponse(samlMessageContext, storage);
                     } catch (Exception e) {
                         log.warn("Received global logout response is invalid", e);
                     }
-
-                    // Let's redirect to the success page
-                    String targetUrl = determineTargetUrl(request, response);
-                    sendRedirect(request, response, targetUrl);
 
                 } else if (samlMessageContext.getInboundMessage() instanceof LogoutRequest) {
 
@@ -123,16 +119,12 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                         credential = (SAMLCredential) auth.getCredentials();
                     }
 
-                    // Process request and send response to the sender
-                    boolean logout = logoutProfile.processLogoutRequest(credential, samlMessageContext, response);
-
-                    if (logout) {
-                        for (LogoutHandler handler : handlers) {
-                            handler.logout(request, response, auth);
-                        }
-                    }
+                    // Process request and send response to the sender in case the request is valid
+                    doLogout = logoutProfile.processLogoutRequest(credential, samlMessageContext, response);
 
                 }
+
+                if (doLogout) {                    super.doFilter(request, response, chain);                }
 
             } catch (SAMLException e) {
                 throw new SAMLRuntimeException("Incoming SAML message is invalid");
@@ -154,11 +146,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
     }
 
-
-    public int getOrder() {
-        return FilterChainOrder.LOGOUT_FILTER - 1;
-    }
-
+    //public int getOrder() {    //   return FilterChainOrder.LOGOUT_FILTER - 1;    //}
     public void setSAMLProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }

@@ -1,5 +1,5 @@
-<%@ page import="org.springframework.security.context.SecurityContextHolder" %>
 <%@ page import="org.springframework.security.saml.SAMLCredential" %>
+<%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <h1>User has been authenticated</h1>

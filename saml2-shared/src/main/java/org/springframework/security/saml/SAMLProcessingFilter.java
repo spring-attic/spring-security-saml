@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,23 @@ import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
-import org.springframework.security.ui.AbstractProcessingFilter;
-import org.springframework.security.ui.FilterChainOrder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Filter processes arriving SAML messages by delegating to the WebSSOProfile. After the SAMLAuthenticationToken
  * is obtained, authentication providers are asked to authenticate it.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
-public class SAMLProcessingFilter extends AbstractProcessingFilter {
+public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
     /**
      * Profile to delegate SAML parsing to
@@ -42,6 +43,10 @@ public class SAMLProcessingFilter extends AbstractProcessingFilter {
     private SAMLProcessor processor;
 
     private static final String DEFAUL_URL = "/saml/SSO";
+
+    public SAMLProcessingFilter() {
+        super(DEFAUL_URL);
+    }
 
     /**
      * In case the login attribute is not present it is presumed that the call is made from the remote IDP
@@ -51,7 +56,7 @@ public class SAMLProcessingFilter extends AbstractProcessingFilter {
      * @return authentication object in case SAML data was found and valid
      * @throws AuthenticationException authentication failture
      */
-    public Authentication attemptAuthentication(HttpServletRequest request) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
             if (processor == null) {
                 throw new SAMLRuntimeException("SAMLProcessor instance wasn't set");
@@ -72,15 +77,19 @@ public class SAMLProcessingFilter extends AbstractProcessingFilter {
         }
     }
 
-    public String getDefaultFilterProcessesUrl() {
-        return DEFAUL_URL;
-    }
-
-    public int getOrder() {
-        return FilterChainOrder.AUTHENTICATION_PROCESSING_FILTER;
-    }
-
     public void setSAMLProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }
+
+    /**
+     * Sets default URL for redirect after login. In case user request a specific page which caused login initialization
+     * the page will be reused.
+     * @param url url to use as a default
+     */
+    public void setDefaultTargetUrl(String url) {
+        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
+        handler.setDefaultTargetUrl(url);
+        setAuthenticationSuccessHandler(handler);
+    }
+
 }

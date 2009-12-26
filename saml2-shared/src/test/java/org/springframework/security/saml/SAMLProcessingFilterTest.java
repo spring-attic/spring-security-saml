@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import org.junit.Test;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationManager;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.processor.SAMLProcessor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
 
 /**
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLProcessingFilterTest {
 
@@ -56,7 +56,7 @@ public class SAMLProcessingFilterTest {
     public void testMissingProcessor() {
         processingFiler.setSAMLProcessor(null);
         replayMock();
-        processingFiler.attemptAuthentication(request);
+        processingFiler.attemptAuthentication(request, null);
         verifyMock();
     }
 
@@ -68,7 +68,7 @@ public class SAMLProcessingFilterTest {
     public void testErrorDuringProcessing() throws Exception {
         expect(processor.processSSO(request)).andThrow(new SAMLException("Processing error"));
         replayMock();
-        processingFiler.attemptAuthentication(request);
+        processingFiler.attemptAuthentication(request, null);
         verifyMock();
     }
 
@@ -96,7 +96,7 @@ public class SAMLProcessingFilterTest {
 
         replay(manager);
         replayMock();
-        Authentication authentication = processingFiler.attemptAuthentication(request);
+        Authentication authentication = processingFiler.attemptAuthentication(request, null);
         assertEquals(token, authentication);
         verifyMock();
         verify(manager);

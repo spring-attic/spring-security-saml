@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Sch‰fer
+ * Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,18 @@ package org.springframework.security.saml;
 import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
-import org.springframework.security.ui.logout.LogoutFilter;
-import org.springframework.security.ui.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.util.Assert;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -39,7 +41,7 @@ import java.io.IOException;
  * <p/>
  * In case global logout is in question a LogoutRequest is sent to the IDP.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLLogoutFilter extends LogoutFilter {
 
@@ -78,10 +80,15 @@ public class SAMLLogoutFilter extends LogoutFilter {
         this.setFilterProcessesUrl(DEFAUL_FILTER_URL);
     }
 
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        doFilterHttp((HttpServletRequest) req, (HttpServletResponse) res, chain);
+    }
+
     /**
      * In case request parameter of name "local" is set to true or there is no authenticated user
      * only local logout will be performed and user will be redirected to the success page.
-     * Otherwise global logout procedure is initialized. 
+     * Otherwise global logout procedure is initialized.
      */
     public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
@@ -106,7 +113,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
                 } else {
 
-                    super.doFilterHttp(request, response, chain);
+                    super.doFilter(request, response, chain);
 
                 }
 

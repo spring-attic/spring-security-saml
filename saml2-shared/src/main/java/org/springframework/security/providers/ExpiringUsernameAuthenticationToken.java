@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,17 @@
  */
 package org.springframework.security.providers;
 
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
  * Authentication token with capability to disable itself after specific datetime. In case no expiration date is
  * specified for the token functionaility is exactly the same as of {@link UsernamePasswordAuthenticationToken}.
  *
- * @author Vladimir Sch‰fer 
+ * @author Vladimir Sch√§fer 
  */
 public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
@@ -46,9 +48,8 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
      * @param principal       principal
      * @param credentials     credentials
      * @param authorities     authorities
-     * @see UsernamePasswordAuthenticationToken#UsernamePasswordAuthenticationToken(Object, Object, org.springframework.security.GrantedAuthority[])
      */
-    public ExpiringUsernameAuthenticationToken(Date tokenExpiration, Object principal, Object credentials, GrantedAuthority[] authorities) {
+    public ExpiringUsernameAuthenticationToken(Date tokenExpiration, Object principal, Object credentials, Collection<GrantedAuthority> authorities) {
         super(principal, credentials, authorities);
         this.tokenExpiration = tokenExpiration;
     }    

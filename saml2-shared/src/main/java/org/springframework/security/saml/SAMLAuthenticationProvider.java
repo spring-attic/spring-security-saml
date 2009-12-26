@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.opensaml.xml.validation.ValidationException;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.AuthenticationServiceException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.AbstractAuthenticationToken;
-import org.springframework.security.providers.AuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
@@ -35,12 +35,13 @@ import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
  * the token is valid to create an authenticated UsernamePasswordAuthenticationToken.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
@@ -96,7 +97,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
         String name = credential.getNameID().getValue();
         Date expiration = getExpirationDate(credential);
-        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, name, credential, new GrantedAuthority[0]);
+        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, name, credential, new LinkedList<GrantedAuthority>());
         processUserDetails(result, credential);
         return result;
         

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@ package org.springframework.security.providers;
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.joda.time.DateTime;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * Test for the ExpiringUsernameAuthenticationToken.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class ExpiringUsernameAuthenticationTokenTest {
 
@@ -35,7 +35,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
      */
     @Test
     public void testExpirationNull() throws Exception {
-        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(null, null, null, new GrantedAuthority[] {});
+        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(null, null, null, new LinkedList<GrantedAuthority>());
         assertTrue(t.isAuthenticated());
     }
 
@@ -46,7 +46,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
     @Test
     public void testExpirationFuture() throws Exception {
         Date future = new DateTime().plusHours(2).toDate();
-        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new GrantedAuthority[] {});
+        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new LinkedList<GrantedAuthority>());
         assertTrue(t.isAuthenticated());
     }
 
@@ -57,7 +57,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
     @Test
     public void testExpirationFutureChange() throws Exception {
         Date future = new DateTime().plusMillis(300).toDate();
-        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new GrantedAuthority[] {});
+        ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new LinkedList<GrantedAuthority>());
         assertTrue(t.isAuthenticated());
         synchronized(this) {
             wait(600);

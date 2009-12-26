@@ -1,17 +1,18 @@
 <?xml version="1.0"?>
 <project>
+
     <parent>
         <artifactId>spring-security-saml2-parent</artifactId>
         <groupId>org.springframework.security.extensions</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-RC1-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.springframework.security.extensions</groupId>
     <artifactId>spring-security-saml2-webapp</artifactId>
     <packaging>war</packaging>
     <name>Spring Security SAML v2 example webapp</name>
-    <version>1.0-SNAPSHOT</version>
     <url>http://maven.apache.org</url>
+
     <build>
         <finalName>spring-security-saml2-webapp</finalName>
     </build>
@@ -21,13 +22,19 @@
         <dependency>
             <groupId>org.springframework.security.extensions</groupId>
             <artifactId>spring-security-saml2</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>2.5.4</version>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
 
         <dependency>

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
-import org.springframework.security.ui.SpringSecurityFilter;
-import org.springframework.security.ui.FilterChainOrder;
+import org.springframework.web.filter.GenericFilterBean;
 import org.w3c.dom.Element;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -40,9 +41,9 @@ import java.io.PrintWriter;
  * this application deployment. In case the application is configured to automatically generate metadata,
  * the generation occurs upon first invocation of this filter (first request made to the server).
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
-public class MetadataDisplayFilter extends SpringSecurityFilter {
+public class MetadataDisplayFilter extends GenericFilterBean {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
@@ -77,6 +78,10 @@ public class MetadataDisplayFilter extends SpringSecurityFilter {
         } else {
             return (request.getRequestURI().endsWith(DEFAULT_FILTER_URL));
         }
+    }
+
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        doFilterHttp((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 
     /**
@@ -145,9 +150,9 @@ public class MetadataDisplayFilter extends SpringSecurityFilter {
         }
     }
 
-    public int getOrder() {
-        return FilterChainOrder.PRE_AUTH_FILTER - 100;
-    }
+    //public int getOrder() {
+    //    return FilterChainOrder.PRE_AUTH_FILTER - 100;
+    //}
 
     public String getFilterSuffix() {
         return filterSuffix;

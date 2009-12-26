@@ -150,10 +150,6 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         }
     }
 
-    //public int getOrder() {
-    //    return FilterChainOrder.PRE_AUTH_FILTER - 100;
-    //}
-
     public String getFilterSuffix() {
         return filterSuffix;
     }

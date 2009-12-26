@@ -8,20 +8,20 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>spring-security-saml2-webapp</artifactId>
+    <artifactId>spring-security-saml2-sample</artifactId>
     <packaging>war</packaging>
-    <name>Spring Security SAML v2 example webapp</name>
+    <name>Spring Security SAML v2 sample webapp</name>
     <url>http://maven.apache.org</url>
 
     <build>
-        <finalName>spring-security-saml2-webapp</finalName>
+        <finalName>spring-security-saml2-sample</finalName>
     </build>
 
     <dependencies>
 
         <dependency>
             <groupId>org.springframework.security.extensions</groupId>
-            <artifactId>spring-security-saml2</artifactId>
+            <artifactId>spring-security-saml2-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 

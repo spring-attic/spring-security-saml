@@ -229,7 +229,4 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         this.idpSelectionPath = idpSelectionPath;
     }
 
-    //public int getOrder() {
-    //    return FilterChainOrder.PRE_AUTH_FILTER - 80;
-    //}
 }

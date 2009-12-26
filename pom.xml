@@ -17,8 +17,8 @@
     <inceptionYear>2009</inceptionYear>
 
     <modules>
-        <module>saml2-shared</module>
-        <module>saml2-webapp</module>
+        <module>saml2-core</module>
+        <module>saml2-sample</module>
     </modules>
 
     <licenses>

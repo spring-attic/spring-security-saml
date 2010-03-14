@@ -40,6 +40,8 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -161,11 +163,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         Assertion subjectAssertion = null;
+        List<Attribute> attributes = new LinkedList<Attribute>();
 
         // Verify assertions
         List<Assertion> assertionList = response.getAssertions();
         for (Assertion a : assertionList) {
             verifyAssertion(a, request, context);
+            // Find subject assertions
             if (a.getAuthnStatements().size() > 0) {
                 if (a.getSubject() != null && a.getSubject().getSubjectConfirmations() != null) {
                     for (SubjectConfirmation conf : a.getSubject().getSubjectConfirmations()) {
@@ -173,6 +177,15 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                             subjectAssertion = a;
                         }
                     }
+                }
+            }
+            // Process all attributes
+            for (AttributeStatement attStatement : a.getAttributeStatements()) {
+                for (Attribute att : attStatement.getAttributes()) {
+                    attributes.add(att);
+                }
+                for (EncryptedAttribute att : attStatement.getEncryptedAttributes()) {
+                    attributes.add(decryper.decrypt(att));
                 }
             }
         }
@@ -183,7 +196,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("Error validating SAML response");
         }
 
-        return new SAMLCredential((NameID) context.getSubjectNameIdentifier(), subjectAssertion, context.getPeerEntityMetadata().getEntityID());
+        return new SAMLCredential((NameID) context.getSubjectNameIdentifier(), subjectAssertion, context.getPeerEntityMetadata().getEntityID(), attributes);
+        
     }
 
     private void verifyAssertion(Assertion assertion, AuthnRequest request, BasicSAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,22 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
  * the token is valid to create an authenticated UsernamePasswordAuthenticationToken.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
@@ -96,12 +98,32 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
         Object userDetails = getUserDetails(credential);
         Object principal = getPrincipal(credential, userDetails);
+        Collection<GrantedAuthority> entitlements = getEntitlements(credential, userDetails);
 
         Date expiration = getExpirationDate(credential);
-        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, new LinkedList<GrantedAuthority>());
+        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, entitlements);
         result.setDetails(userDetails);
         return result;
 
+    }
+
+    /**
+     * Populates user data from SAMLCredential into UserDetails object. By default supplied implementation of the
+     * SAMLUserDetailsService is called and value of type UserDetails is returned. Users are encouraged to supply
+     * implementation of this class and also include correct implementation of the getAuthorities method in it, which
+     * is used to populate the entitlements inside the Authentication object.
+     * <p>
+     * If no SAMLUserDetailsService is specified null is returned.
+     *
+     * @param credential credential to load user from
+     * @return user details object corresponding to the SAML credentail or null if data can't be loaded
+     */
+    protected Object getUserDetails(SAMLCredential credential) {
+        if (getUserDetails() != null) {
+            return getUserDetails().loadUserBySAML(credential);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -115,6 +137,25 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      */
     protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
         return credential.getNameID().getValue();
+    }
+
+    /**
+     * Method is responsible for returning collection of users entitlements. Default implementation verifies
+     * whether userDetail object is of UserDetails type and returns userDetail.getAuthorities().
+     * <p/>
+     * In case object of other type is found empty list is returned. Users are supposed to override this
+     * method to provide custom parsing is such case.
+     *
+     * @param credential credential used to authenticate user during SSO
+     * @param userDetail user detail object returned from getUserDetails call
+     * @return collection of users entitlements, mustn't be null
+     */
+    protected Collection<GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
+        if (userDetail instanceof UserDetails) {
+            return ((UserDetails) userDetail).getAuthorities();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -136,20 +177,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
             }
         }
         return expiration != null ? expiration.toDate() : null;
-    }
-
-    /**
-     * Populates user data from SAMLCredential into UserDetails object.
-     *
-     * @param credential credential to load user from
-     * @return user details object corresponding to the SAML credentail or null if data can't be loaded
-     */
-    protected Object getUserDetails(SAMLCredential credential) {
-        if (getUserDetails() != null) {
-            return getUserDetails().loadUserBySAML(credential);
-        } else {
-            return null;
-        }
     }
 
     /**

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
  */
 package org.springframework.security.saml;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.easymock.EasyMock.*;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.AuthnStatement;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.opensaml.saml2.core.NameID;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
-import org.joda.time.DateTime;
 
-import java.util.LinkedList;
 import java.util.Arrays;
+import java.util.LinkedList;
+
+import static junit.framework.Assert.*;
+import static org.easymock.EasyMock.*;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class SAMLAuthenticationProviderTest {
 
@@ -70,6 +70,7 @@ public class SAMLAuthenticationProviderTest {
 
     /**
      * Verifies that auhentication process passess sucesfully if input is correct.
+     *
      * @throws Exception error
      */
     @Test
@@ -102,9 +103,10 @@ public class SAMLAuthenticationProviderTest {
     }
 
 
-
     /**
-     * Verifies that user details are filled correctly if set
+     * Verifies that user details are filled correctly if set and that entitlements of the user returned from
+     * the userDetails are set to the authentication object.
+     *
      * @throws Exception error
      */
     @Test
@@ -121,19 +123,23 @@ public class SAMLAuthenticationProviderTest {
         expect(consumer.processResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
         expect(assertion.getAuthnStatements()).andReturn(new LinkedList<AuthnStatement>());
-        expect(details.loadUserBySAML(result)).andReturn(new User("test", "test", true, true, true, true, new GrantedAuthority[] {}));
+        expect(details.loadUserBySAML(result)).andReturn(new User("test", "test", true, true, true, true, new GrantedAuthority[]{new GrantedAuthorityImpl("role1"), new GrantedAuthorityImpl("role2")}));
 
         replayMock();
         replay(details);
         Authentication authentication = provider.authenticate(token);
         assertEquals("Name", authentication.getName());
         assertNotNull(authentication.getDetails());
+        assertEquals(2, authentication.getAuthorities().size());
+        assertTrue(authentication.getAuthorities().contains(new GrantedAuthorityImpl("role1")));
+        assertTrue(authentication.getAuthorities().contains(new GrantedAuthorityImpl("role2")));
         verify(details);
         verifyMock();
     }
 
     /**
      * Verifies that upon SAMLException thrown from provider the provider will fail.
+     *
      * @throws Exception error
      */
     @Test(expected = AuthenticationServiceException.class)

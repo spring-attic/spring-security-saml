@@ -142,6 +142,7 @@
     </bean>
 
     <!-- Override default logout processing filter with the one processing SAML messages -->
+    <!-- First argument determines URL user will be redirected to after successful local logout -->
     <bean id="samlLogoutFilter" class="org.springframework.security.saml.SAMLLogoutFilter" depends-on="bootstrap">
         <constructor-arg index="0" value="/index.jsp"/>
         <constructor-arg index="1" ref="logoutHandler"/>
@@ -150,6 +151,7 @@
     </bean>
 
     <!-- Filter processing incoming logout messages -->
+    <!-- First argument determines URL user will be redirected to after successful global logout -->
     <bean id="samlLogoutProcessingFilter" class="org.springframework.security.saml.SAMLLogoutProcessingFilter"
           depends-on="bootstrap">
         <constructor-arg index="0" value="/index.jsp"/>

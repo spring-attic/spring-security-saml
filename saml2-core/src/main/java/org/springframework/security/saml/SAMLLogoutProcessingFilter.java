@@ -31,10 +31,8 @@ import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
-import org.springframework.security.web.util.UrlUtils;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -62,11 +60,6 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     SingleLogoutProfile logoutProfile;
 
     /**
-     * Logout handlers.
-     */
-    LogoutHandler[] handlers;
-
-    /**
      * Class logger.
      */
     private final static Logger log = LoggerFactory.getLogger(SAMLLogoutProcessingFilter.class);
@@ -76,26 +69,25 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     private static final String DEFAUL_URL = "/saml/SingleLogout";
 
-    public SAMLLogoutProcessingFilter(final String logoutSuccessUrl, LogoutHandler[] handlers) {
-        // We use a special inline handler which only performs redirect unless it was already done earlier
-        super(new SimpleUrlLogoutSuccessHandler() {
-            @Override
-            protected String getDefaultTargetUrl() {
-                if (StringUtils.hasText(logoutSuccessUrl)) {
-                    return logoutSuccessUrl;
-                } else {
-                    return super.getDefaultTargetUrl();
-                }
-            }
+    /**
+     * Constructor defines URL to redirect to after successful logout and handlers.
+     *
+     * @param logoutSuccessUrl user will be redirected to the url after successful logout
+     * @param handlers         handlers to invoke after logout
+     */
+    public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
+        super(logoutSuccessUrl, handlers);
+        this.setFilterProcessesUrl(DEFAUL_URL);
+    }
 
-            public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                if (!response.isCommitted()) {
-                    super.onLogoutSuccess(request, response, authentication);
-                }
-            }
-        }, handlers);
-        Assert.isTrue(!StringUtils.hasLength(logoutSuccessUrl) || UrlUtils.isValidRedirectUrl(logoutSuccessUrl), logoutSuccessUrl + " isn't a valid redirect URL");
-        this.handlers = handlers;
+    /**
+     * Constructor uses custom implementation for determining URL to redirect after successful logout.
+     *
+     * @param logoutSuccessHandler custom implementation of the logout logic
+     * @param handlers             handlers to invoke after logout
+     */
+    public SAMLLogoutProcessingFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
+        super(logoutSuccessHandler, handlers);
         this.setFilterProcessesUrl(DEFAUL_URL);
     }
 

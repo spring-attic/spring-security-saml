@@ -136,7 +136,7 @@
 
     <properties>
         <spring.version>3.0.0.RELEASE</spring.version>
-        <spring.security.version>3.0.0.RELEASE</spring.security.version>
+        <spring.security.version>3.0.3.CI-SNAPSHOT</spring.security.version>
     </properties>
 
 </project>

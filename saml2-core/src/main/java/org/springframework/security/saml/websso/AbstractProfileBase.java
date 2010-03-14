@@ -173,6 +173,7 @@ public class AbstractProfileBase {
 
         BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject> samlContext = new BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject>();
         samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
+        samlContext.setOutboundMessage(message);
         samlContext.setOutboundSAMLMessage(message);
         samlContext.setPeerEntityEndpoint(endpoint);
 

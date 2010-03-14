@@ -52,8 +52,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         storage = createMock(SAMLMessageStorage.class);
-        manager =  (MetadataManager) context.getBean("metadata", MetadataManager.class);
-        resolver = (CredentialResolver) context.getBean("keyResolver", CredentialResolver.class);
+        manager =  context.getBean("metadata", MetadataManager.class);
+        resolver = context.getBean("keyResolver", CredentialResolver.class);
         profile = new WebSSOProfileConsumerImpl(manager, resolver, "apollo");
         messageContext = new BasicSAMLMessageContext();
         builderFactory = Configuration.getBuilderFactory();

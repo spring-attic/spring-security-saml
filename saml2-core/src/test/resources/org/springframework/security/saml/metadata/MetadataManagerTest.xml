@@ -1,0 +1,37 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+
+    <!-- Initialization of OpenSAML library-->
+    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false" />
+
+    <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
+    <!-- Do no forget to call iniitalize method on providers -->
+    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager" depends-on="bootstrap">
+        <constructor-arg index="0">
+            <list>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testSP.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <property name="hostedSPName" value="hostedSP" />
+        <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
+        <property name="defaultIDP" value="nest3" />
+    </bean>
+
+    <!-- XML parser pool needed for OpenSAML parsing -->
+    <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
+
+</beans>

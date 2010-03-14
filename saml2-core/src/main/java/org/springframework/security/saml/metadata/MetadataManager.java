@@ -15,10 +15,7 @@
 package org.springframework.security.saml.metadata;
 
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -97,12 +94,42 @@ public class MetadataManager extends ChainingMetadataProvider {
         Set<String> result = new HashSet<String>();
         XMLObject object = provider.getMetadata();
         if (object instanceof EntityDescriptor) {
-            EntityDescriptor desc = (EntityDescriptor) object;
-            String entityID = desc.getEntityID();
-            log.debug("Found metadata entity with ID", entityID);
-            result.add(entityID);
+            addDescriptor(result, (EntityDescriptor) object);
+        } else if (object instanceof EntitiesDescriptor) {
+            addDescriptors(result, (EntitiesDescriptor) object);
         }
         return result;
+    }
+
+    /**
+     * Recursively parses descriptors object. Supports both nested entitiesDescriptor
+     * elements and leaf entityDescriptors. EntityID of all found descriptors are added
+     * to the result set.
+     * @param result result set
+     * @param descriptors descriptors to parse
+     */
+    private void addDescriptors(Set<String> result, EntitiesDescriptor descriptors){
+        if (descriptors.getEntitiesDescriptors() != null) {
+            for (EntitiesDescriptor descriptor : descriptors.getEntitiesDescriptors()) {
+                addDescriptors(result, descriptor);
+            }
+        }
+        if (descriptors.getEntityDescriptors() != null) {
+            for (EntityDescriptor descriptor : descriptors.getEntityDescriptors()) {
+                addDescriptor(result, descriptor);
+            }
+        }
+    }
+
+    /**
+     * Parses entityID from the descriptor and adds it to the result set.
+     * @param result result set
+     * @param descriptor descriptor to parse
+     */
+    private void addDescriptor(Set<String> result, EntityDescriptor descriptor){
+        String entityID = descriptor.getEntityID();
+        log.debug("Found metadata entity with ID", entityID);
+        result.add(entityID);
     }
 
     /**

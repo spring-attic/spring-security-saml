@@ -18,24 +18,23 @@ import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.xml.validation.ValidationException;
 import org.opensaml.xml.encryption.DecryptionException;
+import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 
 import java.util.Date;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
@@ -63,7 +62,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * Attempts to perform authentication of an Authentication object. The authentication must be of type
      * SAMLAuthenticationToken and must contain filled BasicSAMLMessageContext. If the SAML inbound message
      * in the context is valid, UsernamePasswordAuthenticationToken with name given in the SAML message NameID
-     * and assertion used to verify the user as credential are created and set as authenticated.
+     * and assertion used to verify the user as credential (SAMLCredential object) is created and set as authenticated.
      *
      * @param authentication SAMLAuthenticationToken to verify
      * @return UsernamePasswordAuthenticationToken with name as NameID value and SAMLCredential as credential object
@@ -95,12 +94,27 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
             throw new AuthenticationServiceException("Error decrypting SAML message", e);
         }
 
-        String name = credential.getNameID().getValue();
+        Object userDetails = getUserDetails(credential);
+        Object principal = getPrincipal(credential, userDetails);
+
         Date expiration = getExpirationDate(credential);
-        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, name, credential, new LinkedList<GrantedAuthority>());
-        processUserDetails(result, credential);
+        ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, new LinkedList<GrantedAuthority>());
+        result.setDetails(userDetails);
         return result;
-        
+
+    }
+
+    /**
+     * Method determines what will be stored as principal of the created Authentication object. By default
+     * string representation of the NameID returned from SAML message is used, other implementations can
+     * be created by overriding the method.
+     *
+     * @param credential credential used to authenticate user
+     * @param userDetail loaded user details, can be null
+     * @return principal to store inside Authentication object
+     */
+    protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
+        return credential.getNameID().getValue();
     }
 
     /**
@@ -127,12 +141,14 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
     /**
      * Populates user data from SAMLCredential into UserDetails object.
      *
-     * @param token      token to store UserDetails to
      * @param credential credential to load user from
+     * @return user details object corresponding to the SAML credentail or null if data can't be loaded
      */
-    protected void processUserDetails(AbstractAuthenticationToken token, SAMLCredential credential) {
+    protected Object getUserDetails(SAMLCredential credential) {
         if (getUserDetails() != null) {
-            token.setDetails(getUserDetails().loadUserBySAML(credential));
+            return getUserDetails().loadUserBySAML(credential);
+        } else {
+            return null;
         }
     }
 

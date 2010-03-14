@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import java.util.Map;
  * current deployment environment. All the URLs in the metadata will be derived from information in
  * the ServletContext.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class MetadataGenerator implements ApplicationContextAware {
 
@@ -189,14 +189,7 @@ public class MetadataGenerator implements ApplicationContextAware {
         if (!processingURL.startsWith("/")) {
             processingURL = "/" + processingURL;
         }
-        if (request.isSecure()) {
-            result.append("https://");
-        } else {
-            result.append("http://");
-        }
-        result.append(request.getServerName()).append(":").append(request.getServerPort());
-        result.append(request.getContextPath());
-        result.append(processingURL);
+        result.append(getEntityID(request)).append(processingURL);
         return result.toString();
     }
 

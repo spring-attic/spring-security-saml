@@ -44,6 +44,12 @@
             <timezone>+2</timezone>
         </developer>
     </developers>
+    
+    <contributors>
+        <contributor>
+            <name>Mandus Elfving</name>
+        </contributor>
+    </contributors>         
 
     <issueManagement>
         <system>jira</system>

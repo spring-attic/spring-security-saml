@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Sch‰fer
+ * Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.saml.util.SLF4JLogChute;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -63,7 +64,7 @@ import java.util.Random;
 /**
  * Base superclass for classes implementing processing of SAML messages.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class AbstractProfileBase {
 
@@ -104,6 +105,7 @@ public class AbstractProfileBase {
             velocityEngine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8");
             velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             velocityEngine.setProperty("classpath.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+            velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new SLF4JLogChute());
             velocityEngine.init();
         } catch (Exception e) {
             log.debug("Error initializing velicoity engige", e);

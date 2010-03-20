@@ -19,16 +19,18 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.util.XMLHelper;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StringReader;
 
 /**
  * SAMLObject is a wrapper around XMLObject instances of OpenSAML library As some XMLObjects are stored
  * inside the HttpSession (which could be potentially sent to another cluster members), we need
  * mechanism to enable serialization of these instances.
  *
- * @param <T> type of XMLObject
- *
  * @author Vladimir Schafer
+ * @param <T> type of XMLObject
  */
 public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
 
@@ -50,6 +52,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
      * Custom serialization logic which transform XMLObject into String.
      *
      * @param out output stream
+     *
      * @throws java.io.IOException error performing XMLObject serialization
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -60,7 +63,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
             out.writeUTF((String) serializedObject);
         } catch (MessageEncodingException e) {
             log.error("Error serializing SAML object", e);
-            throw new IOException("Error serializing SAML object");
+            throw new IOException("Error serializing SAML object", e);
         }
     }
 
@@ -68,6 +71,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
      * Deserializes XMLObject from the stream.
      *
      * @param in input stream contaiing XMLObject as String
+     *
      * @throws IOException            error deserializing String to XMLObject
      * @throws ClassNotFoundException class not found
      */
@@ -77,8 +81,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
             object = unmarshallMessage(new StringReader((String) serializedObject));
         } catch (MessageDecodingException e) {
             log.error("Error de-serializing SAML object", e);
-            throw new IOException("Error de-serializing SAML object");
+            throw new IOException("Error de-serializing SAML object", e);
         }
     }
-
 }

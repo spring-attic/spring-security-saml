@@ -106,15 +106,13 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * @param request  http request
      * @param response http response
      * @param chain    chain
+     *
      * @throws IOException      error
      * @throws ServletException error
      */
     public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-
         if (requiresLogout(request, response)) {
-
             try {
-
                 Assert.notNull(logoutProfile, "Logout profile wasn't initialized");
                 Assert.notNull(processor, "SAML Processor wasn't initialized");
                 logger.debug("Processing SAML2 logout message");
@@ -123,15 +121,12 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
                 boolean doLogout = true;
                 if (samlMessageContext.getInboundSAMLMessage() instanceof LogoutResponse) {
-
                     try {
                         logoutProfile.processLogoutResponse(samlMessageContext, storage);
                     } catch (Exception e) {
                         log.warn("Received global logout response is invalid", e);
                     }
-
                 } else if (samlMessageContext.getInboundMessage() instanceof LogoutRequest) {
-
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     SAMLCredential credential = null;
                     if (auth != null) {
@@ -140,31 +135,25 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
                     // Process request and send response to the sender in case the request is valid
                     doLogout = logoutProfile.processLogoutRequest(credential, samlMessageContext, response);
-
                 }
 
                 if (doLogout) {
                     super.doFilter(request, response, chain);
                 }
-
             } catch (SAMLException e) {
-                throw new SAMLRuntimeException("Incoming SAML message is invalid");
+                throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
             } catch (MetadataProviderException e) {
-                throw new SAMLRuntimeException("Error determining metadata contracts");
+                throw new SAMLRuntimeException("Error determining metadata contracts", e);
             } catch (MessageDecodingException e) {
-                throw new SAMLRuntimeException("Error decoding incoming SAML message");
+                throw new SAMLRuntimeException("Error decoding incoming SAML message", e);
             } catch (MessageEncodingException e) {
-                throw new SAMLRuntimeException("Error encoding outgoing SAML message");
+                throw new SAMLRuntimeException("Error encoding outgoing SAML message", e);
             } catch (org.opensaml.xml.security.SecurityException e) {
-                throw new SAMLRuntimeException("Incoming SAML message is invalid");
+                throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
             }
-
         } else {
-
             chain.doFilter(request, response);
-
         }
-
     }
 
     public void setSAMLProcessor(SAMLProcessor processor) {
@@ -179,5 +168,4 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     public String getFilterProcessesUrl() {
         return super.getFilterProcessesUrl();
     }
-
 }

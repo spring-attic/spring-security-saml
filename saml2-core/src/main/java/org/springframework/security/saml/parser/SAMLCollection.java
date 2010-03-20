@@ -48,6 +48,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
      * Custom serialization logic which transform List of XMLObject into List of Strings.
      *
      * @param out output stream
+     *
      * @throws java.io.IOException error performing XMLObject serialization
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -62,7 +63,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             out.writeObject(serializedObject);
         } catch (MessageEncodingException e) {
             log.error("Error serializing SAML object", e);
-            throw new IOException("Error serializing SAML object");
+            throw new IOException("Error serializing SAML object", e);
         }
     }
 
@@ -70,6 +71,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
      * Deserializes List of XMLObjects from the stream.
      *
      * @param in input stream containing XMLObject as String
+     *
      * @throws IOException            error deserializing String to XMLObject
      * @throws ClassNotFoundException class not found
      */
@@ -84,8 +86,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             object = items;
         } catch (MessageDecodingException e) {
             log.error("Error de-serializing SAML object", e);
-            throw new IOException("Error de-serializing SAML object");
+            throw new IOException("Error de-serializing SAML object", e);
         }
     }
-
- }
+}

@@ -19,12 +19,12 @@ import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +53,9 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
      * and contains a SAML assertion which is processed and authenticated.
      *
      * @param request request
+     *
      * @return authentication object in case SAML data was found and valid
+     *
      * @throws AuthenticationException authentication failture
      */
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -67,13 +69,13 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(samlMessageContext, storage);
             return getAuthenticationManager().authenticate(token);
         } catch (SAMLException e) {
-            throw new SAMLRuntimeException("Incoming SAML message is invalid");
+            throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
-            throw new SAMLRuntimeException("Error determining metadata contracts");
+            throw new SAMLRuntimeException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
-            throw new SAMLRuntimeException("Error decoding incoming SAML message");
+            throw new SAMLRuntimeException("Error decoding incoming SAML message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            throw new SAMLRuntimeException("Incoming SAML message is invalid");
+            throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         }
     }
 
@@ -84,6 +86,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     /**
      * Sets default URL for redirect after login. In case user request a specific page which caused login initialization
      * the page will be reused.
+     *
      * @param url url to use as a default
      */
     public void setDefaultTargetUrl(String url) {
@@ -91,5 +94,4 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         handler.setDefaultTargetUrl(url);
         setAuthenticationSuccessHandler(handler);
     }
-
 }

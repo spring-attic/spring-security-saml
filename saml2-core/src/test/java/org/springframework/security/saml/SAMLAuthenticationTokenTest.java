@@ -14,13 +14,14 @@
  */
 package org.springframework.security.saml;
 
-import static junit.framework.Assert.assertEquals;
-import static org.easymock.EasyMock.createMock;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+
+import static junit.framework.Assert.assertEquals;
+import static org.easymock.EasyMock.createMock;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Vladimir Schäfer
@@ -68,5 +69,4 @@ public class SAMLAuthenticationTokenTest {
     public void testCreateWithoutStorage() {
         token = new SAMLAuthenticationToken(new BasicSAMLMessageContext(), null);
     }
-
 }

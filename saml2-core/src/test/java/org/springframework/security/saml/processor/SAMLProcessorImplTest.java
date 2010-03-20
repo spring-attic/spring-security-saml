@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml.processor;
 
-import static junit.framework.Assert.*;
-import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
@@ -31,6 +29,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URL;
+
+import static junit.framework.Assert.*;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Vladimir Schäfer
@@ -74,7 +75,7 @@ public class SAMLProcessorImplTest {
      * @throws Exception error
      */
     @Test(expected = SecurityException.class)
-    public void testMessageReceipientInvalid() throws Exception {
+    public void testMessageRecipientInvalid() throws Exception {
         prepareHttpRequest("message/SAMLResponse.xml", "POST", "http://localhost:8080/unexpectedURL");
         replayMock();
         processor.processSSO(request);
@@ -142,5 +143,4 @@ public class SAMLProcessorImplTest {
     private void verifyMock() {
         verify(request);
     }
-
 }

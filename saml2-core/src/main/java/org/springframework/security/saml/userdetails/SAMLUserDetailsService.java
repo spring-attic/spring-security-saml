@@ -14,13 +14,13 @@
  */
 package org.springframework.security.saml.userdetails;
 
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.saml.SAMLCredential;
 
 /**
  * The SAMLUserDetailsService interface is similar to UserDetailsService with difference that SAML
- * data is used in order obtain information about the user. Implementors of the interface are
+ * data is used in order obtain information about the user. Implementers of the interface are
  * supposed to locate user in a arbitrary dataStore based on information present in the SAMLCredential
  * and return such a date in a form of application specific UserDetails object.
  *
@@ -32,15 +32,15 @@ public interface SAMLUserDetailsService {
      * The method is supposed to identify local account of user referenced by data in the SAML assertion
      * and return UserDetails object describing the user. In case the user has no local account, implementation
      * may decide to create one or just populate UserDetails object with data from assertion.
-     * <p>
+     * <p/>
      * Returned object should correctly implement the getAuthorities method as it will be used to populate
      * entitlements inside the Authentication object.
      *
      * @param credential data populated from SAML message used to validate the user
+     *
      * @return a fully populated user record (never <code>null</code>)
      *
      * @throws UsernameNotFoundException if the user details object can't be populated
      */
     UserDetails loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException;
-
 }

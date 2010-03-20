@@ -15,8 +15,8 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
  * SAML Token is used to pass SAMLContext object through to the SAML Authentication provider.
@@ -30,7 +30,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
     private SAMLMessageStorage messageStore;
 
     /**
-     * SAML cotext with content to verify
+     * SAML context with content to verify
      */
     private BasicSAMLMessageContext credentials;
 
@@ -62,7 +62,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
     }
 
     /**
-     * @return store used to retreive previously sent SAML request (if any was sent)
+     * @return store used to retrieve previously sent SAML request (if any was sent)
      */
     public SAMLMessageStorage getMessageStore() {
         return messageStore;
@@ -81,6 +81,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      * This object can never be authenticated, call with true result in exception.
      *
      * @param isAuthenticated only false value allowed
+     *
      * @throws IllegalArgumentException if isAuthenticated is true
      */
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
@@ -90,5 +91,4 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
         }
         super.setAuthenticated(false);
     }
-
 }

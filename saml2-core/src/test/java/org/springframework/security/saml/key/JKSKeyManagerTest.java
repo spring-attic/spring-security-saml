@@ -14,12 +14,13 @@
  */
 package org.springframework.security.saml.key;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Verifies that the keyStore class can be initialized and is able to return keys from
@@ -64,7 +65,7 @@ public class JKSKeyManagerTest {
     }
 
     /**
-     * Verifies hat invalid key names return null.
+     * Verifies that invalid key names return null.
      */
     @Test
     public void testGetEmptyKey() {
@@ -73,7 +74,7 @@ public class JKSKeyManagerTest {
     }
 
     /**
-     * Verifies the non existing keys return null.
+     * Verifies that non existing keys return null.
      */
     @Test
     public void testGetKeyNonExistent() {
@@ -81,7 +82,7 @@ public class JKSKeyManagerTest {
     }
 
     /**
-     * Verifies that the certificate can be retreived.
+     * Verifies that the certificate can be retrieved.
      */
     @Test
     public void testGetCertificate() {
@@ -89,11 +90,10 @@ public class JKSKeyManagerTest {
     }
 
     /**
-     * Verifies that attempt to load nonexisting certificate will return null.
+     * Verifies that attempt to load nonexistent certificate will return null.
      */
     @Test
     public void testGetCertificateNonExistent() {
         assertNull(keyManager.getCertificate("apollo13"));
     }
-
 }

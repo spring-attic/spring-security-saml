@@ -1,13 +1,13 @@
 package org.springframework.security.saml.websso;
 
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.Configuration;
-import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.joda.time.DateTime;
+import org.opensaml.Configuration;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Status;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.xml.XMLObjectBuilderFactory;
 
 /**
  * Helper class for creation of SAML parts for testing.
@@ -41,5 +41,4 @@ public class WebSSOProfileTestHelper {
         statement.setSessionNotOnOrAfter(expire);
         return statement;
     }
-
 }

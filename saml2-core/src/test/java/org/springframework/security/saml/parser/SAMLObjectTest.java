@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml.parser;
 
-import static junit.framework.Assert.assertEquals;
-import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLObjectBuilder;
@@ -31,6 +29,9 @@ import org.springframework.security.saml.SAMLTestBase;
 import org.w3c.dom.Element;
 
 import java.io.*;
+
+import static junit.framework.Assert.assertEquals;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Vladimir Schäfer
@@ -49,7 +50,7 @@ public class SAMLObjectTest extends SAMLTestBase {
     }
 
     /**
-     * Verfies that the inner object is set correctly.
+     * Verifies that the inner object is set correctly.
      */
     @Test
     public void testGetInnerObject() {
@@ -57,7 +58,7 @@ public class SAMLObjectTest extends SAMLTestBase {
     }
 
     /**
-     * Verfies that SAMLObject can't be creaed with null argument.
+     * Verifies that SAMLObject can't be created with null argument.
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNoNullArgument() {
@@ -70,7 +71,7 @@ public class SAMLObjectTest extends SAMLTestBase {
      * @throws Exception error
      */
     @Test(expected = IOException.class)
-    public void testMarshalWihoutPoolSet() throws Exception {
+    public void testMarshalWithoutPoolSet() throws Exception {
         new ParserPoolHolder(null);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         ObjectOutputStream stream = new ObjectOutputStream(outStream);
@@ -82,12 +83,12 @@ public class SAMLObjectTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that mashalling of object which doesn't have marhasller reigstered will fail.
+     * Verifies that marshalling of object which doesn't have marshaller registered will fail.
      *
      * @throws Exception error
      */
     @Test(expected = MessageEncodingException.class)
-    public void testMarshallObjectWithoutMashaller() throws Exception {
+    public void testMarshallObjectWithoutMarshaller() throws Exception {
         TestObject to = new TestObject("xxx", "", "");
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
@@ -149,7 +150,7 @@ public class SAMLObjectTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that errror during unmarshalling will be reported.
+     * Verifies that error during unmarshalling will be reported.
      *
      * @throws Exception error
      */
@@ -195,7 +196,7 @@ public class SAMLObjectTest extends SAMLTestBase {
 
         assertEquals("testID", desAssertion.getObject().getID());
 
-        // And for the second time, as we cacche some data
+        // And for the second time, as we cache some data
         outStream = new ByteArrayOutputStream();
         stream = new ObjectOutputStream(outStream);
         stream.writeObject(assertionObject);
@@ -206,5 +207,4 @@ public class SAMLObjectTest extends SAMLTestBase {
 
         assertEquals("testID", desAssertion.getObject().getID());
     }
-
 }

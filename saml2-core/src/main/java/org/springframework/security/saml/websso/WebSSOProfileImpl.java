@@ -27,7 +27,6 @@ import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.security.credential.KeyStoreCredentialResolver;
 import org.opensaml.xml.security.credential.CredentialResolver;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -50,9 +49,10 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     /**
      * Initializes the profile.
      *
-     * @param metadata   metadata manager to be used
+     * @param metadata    metadata manager to be used
      * @param keyResolver key manager
-     * @param signingKey alias of key used for signing of assertions by local entity
+     * @param signingKey  alias of key used for signing of assertions by local entity
+     *
      * @throws SAMLException error initializing the profile
      */
     public WebSSOProfileImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws SAMLException {
@@ -67,12 +67,12 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param messageStorage object capable of storing and retreiving SAML messages
      * @param request        request
      * @param response       response
+     *
      * @throws SAMLException             error initializing SSO
-     * @throws MetadataProviderException error retreiving needed metadata
+     * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
      */
     public AuthnRequest initializeSSO(WebSSOProfileOptions options, SAMLMessageStorage messageStorage, HttpServletRequest request, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
-
         // Initialize IDP and SP
         String idpId = options.getIdp();
         if (idpId == null) {
@@ -82,7 +82,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
         String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
 
-        AssertionConsumerService assertionConsubmerForBinding = SAMLUtil.getAssertionConsubmerForBinding(spDescriptor, binding);
+        AssertionConsumerService assertionConsubmerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
         SingleSignOnService bindingService = SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, binding);
         AuthnRequest authRequest = getAuthnRequest(options, idpId, assertionConsubmerForBinding, bindingService);
 
@@ -90,23 +90,23 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         sendMessage(messageStorage, idpssoDescriptor.getWantAuthnRequestsSigned(), authRequest, bindingService, response);
         return authRequest;
-
     }
 
     /**
-     * Returns AuthnRequest SAML message to be used to demand authentication from an IDP descibed using
-     * idpEntityDescriptor, with an expected reponse to the assertionConsumber address.
+     * Returns AuthnRequest SAML message to be used to demand authentication from an IDP described using
+     * idpEntityDescriptor, with an expected response to the assertionConsumer address.
      *
-     * @param options            preferences of message creation
-     * @param idpEntityId        entity ID of the IDP
-     * @param assertionConsumber assertion consumer where the IDP should respond
-     * @param bindingService     service used to deliver the request
+     * @param options           preferences of message creation
+     * @param idpEntityId       entity ID of the IDP
+     * @param assertionConsumer assertion consumer where the IDP should respond
+     * @param bindingService    service used to deliver the request
+     *
      * @return authnRequest ready to be sent to IDP
+     *
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retreiving metadata
      */
-    protected AuthnRequest getAuthnRequest(WebSSOProfileOptions options, String idpEntityId, AssertionConsumerService assertionConsumber, SingleSignOnService bindingService) throws SAMLException, MetadataProviderException {
-
+    protected AuthnRequest getAuthnRequest(WebSSOProfileOptions options, String idpEntityId, AssertionConsumerService assertionConsumer, SingleSignOnService bindingService) throws SAMLException, MetadataProviderException {
         SAMLObjectBuilder<AuthnRequest> builder = (SAMLObjectBuilder<AuthnRequest>) builderFactory.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest request = builder.buildObject();
 
@@ -115,7 +115,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         buildCommonAttributes(request, bindingService);
         buildScoping(request, idpEntityId, bindingService, options.isAllowProxy());
-        buildReturnAddress(request, assertionConsumber);
+        buildReturnAddress(request, assertionConsumer);
 
         return request;
     }
@@ -126,7 +126,8 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      *
      * @param request request
      * @param service service to deliver response to
-     * @throws MetadataProviderException error retreiving metadata information
+     *
+     * @throws MetadataProviderException error retrieving metadata information
      */
     private void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
         request.setVersion(SAMLVersion.VERSION_20);
@@ -143,7 +144,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param allowProxy  if true proxying will be allowed on the request
      */
     private void buildScoping(AuthnRequest request, String idpEntityId, SingleSignOnService serviceURI, boolean allowProxy) {
-
         SAMLObjectBuilder<IDPEntry> idpEntryBuilder = (SAMLObjectBuilder<IDPEntry>) builderFactory.getBuilder(IDPEntry.DEFAULT_ELEMENT_NAME);
         IDPEntry idpEntry = idpEntryBuilder.buildObject();
         idpEntry.setProviderID(idpEntityId);
@@ -163,5 +163,4 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         request.setScoping(scoping);
     }
-
 }

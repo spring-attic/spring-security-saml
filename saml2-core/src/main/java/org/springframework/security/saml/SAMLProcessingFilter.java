@@ -42,10 +42,10 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
      */
     private SAMLProcessor processor;
 
-    private static final String DEFAUL_URL = "/saml/SSO";
+    private static final String DEFAULT_URL = "/saml/SSO";
 
     public SAMLProcessingFilter() {
-        super(DEFAUL_URL);
+        super(DEFAULT_URL);
     }
 
     /**
@@ -56,14 +56,14 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
      *
      * @return authentication object in case SAML data was found and valid
      *
-     * @throws AuthenticationException authentication failture
+     * @throws AuthenticationException authentication failure
      */
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
             if (processor == null) {
                 throw new SAMLRuntimeException("SAMLProcessor instance wasn't set");
             }
-            logger.debug("Attempting SAML2 authentiction");
+            logger.debug("Attempting SAML2 authentication");
             BasicSAMLMessageContext samlMessageContext = processor.processSSO(request);
             HttpSessionStorage storage = new HttpSessionStorage(request);
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(samlMessageContext, storage);

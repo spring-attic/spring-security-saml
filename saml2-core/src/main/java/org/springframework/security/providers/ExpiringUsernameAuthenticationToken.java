@@ -22,9 +22,9 @@ import java.util.Date;
 
 /**
  * Authentication token with capability to disable itself after specific datetime. In case no expiration date is
- * specified for the token functionaility is exactly the same as of {@link UsernamePasswordAuthenticationToken}.
+ * specified for the token functionality is exactly the same as of {@link UsernamePasswordAuthenticationToken}.
  *
- * @author Vladimir Schäfer 
+ * @author Vladimir Schäfer
  */
 public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
@@ -33,6 +33,7 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
     /**
      * @param principal   principal
      * @param credentials credential
+     *
      * @see UsernamePasswordAuthenticationToken#UsernamePasswordAuthenticationToken(Object, Object)
      */
     public ExpiringUsernameAuthenticationToken(Object principal, Object credentials) {
@@ -52,11 +53,11 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
     public ExpiringUsernameAuthenticationToken(Date tokenExpiration, Object principal, Object credentials, Collection<GrantedAuthority> authorities) {
         super(principal, credentials, authorities);
         this.tokenExpiration = tokenExpiration;
-    }    
+    }
 
     /**
      * @return true in case the token is authenticated (determined by constructor call) and tokenExpiration
-     * is either null or the expiration time is on or after current time. 
+     *         is either null or the expiration time is on or after current time.
      */
     @Override
     public boolean isAuthenticated() {
@@ -68,7 +69,6 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
     }
 
     /**
-
      * @return null if no expiration is set, expiration date otherwise
      */
     public Date getTokenExpiration() {

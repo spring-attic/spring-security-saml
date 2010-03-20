@@ -14,9 +14,6 @@
  */
 package org.springframework.security.saml;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
@@ -26,16 +23,20 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
+ * @author Vladimir Schäfer
  */
 public class SAMLEntryPointTest {
 
@@ -115,6 +116,7 @@ public class SAMLEntryPointTest {
     /**
      * Verifies that entry point will redirect user to IDP selection if login parameter is not
      * set to true and idpSelectionPath is set.
+     *
      * @throws Exception error
      */
     @Test
@@ -136,6 +138,7 @@ public class SAMLEntryPointTest {
 
     /**
      * Verifies that entryPoint fails when invalid IDP is attempted.
+     *
      * @throws Exception error
      */
     @Test(expected = ServletException.class)
@@ -155,6 +158,7 @@ public class SAMLEntryPointTest {
 
     /**
      * Verifies that entryPoint fails when invalid IDP is attempted.
+     *
      * @throws Exception error
      */
     @Test
@@ -174,7 +178,8 @@ public class SAMLEntryPointTest {
     }
 
     /**
-     * Verfies that mising web profile fails whole operation. 
+     * Verifies that missing web profile fails whole operation.
+     *
      * @throws Exception error
      */
     @Test(expected = ServletException.class)
@@ -184,7 +189,8 @@ public class SAMLEntryPointTest {
     }
 
     /**
-     * Verfies that mising metadataManager fails whole operation.
+     * Verifies that missing metadata manager fails whole operation.
+     *
      * @throws Exception error
      */
     @Test(expected = ServletException.class)
@@ -206,5 +212,4 @@ public class SAMLEntryPointTest {
         verify(request);
         verify(ssoProfile);
     }
-
 }

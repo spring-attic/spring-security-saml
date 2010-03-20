@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
-  * @author Vladimir Schäfer
+ * @author Vladimir Schäfer
  */
 public class MetadataManagerTest {
 
@@ -35,12 +35,13 @@ public class MetadataManagerTest {
     public void initialize() throws Exception {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
-        manager =  context.getBean("metadata", MetadataManager.class);
+        manager = context.getBean("metadata", MetadataManager.class);
     }
 
     /**
      * Test verifies that metadata defined in Spring descriptor are loaded correctly, including
      * EntityDescriptors defined as nested.
+     *
      * @throws Exception error
      */
     @Test
@@ -59,7 +60,5 @@ public class MetadataManagerTest {
         assertNotNull(manager.getEntityDescriptor("nest2"));
         assertNotNull(manager.getEntityDescriptor("nest3"));
         assertNotNull(manager.getEntityDescriptor("http://localhost:8081/spring-security-saml2-webapp"));
-
     }
-
 }

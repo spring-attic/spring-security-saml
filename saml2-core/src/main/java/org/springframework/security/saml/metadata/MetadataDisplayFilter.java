@@ -51,7 +51,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      * Class storing all SAML metadata documents
      */
     private MetadataManager manager;
-    
+
     /**
      * Enables creation of metadata corresponding to the current deployment
      */
@@ -69,7 +69,9 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
     /**
      * The filter will be used in case the URL of the request ends with DEFAULT_FILTER_URL.
+     *
      * @param request request used to determine whether to enable this filter
+     *
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
@@ -87,7 +89,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     /**
      * The filter attempts to generate application metadata (if configured so) and in case the call is made
      * to the expected URL the metadata value is displayed and no further filters are invoked. Otherwise
-     * filterchain invocation continues. 
+     * filterchain invocation continues.
      */
     protected void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         initializeSystemMetadata(request);
@@ -100,15 +102,17 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
     /**
      * Method writes metadata document into given writer object.
+     *
      * @param writer output for metadata
-     * @throws ServletException error retreiving or writing the metadata
+     *
+     * @throws ServletException error retrieving or writing the metadata
      */
     protected void displayMetadata(PrintWriter writer) throws ServletException {
         try {
             String spEntityName = manager.getHostedSPName();
             EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName);
             if (descriptor == null) {
-                throw new ServletException("Metadata entitity with ID " + manager.getHostedSPName() + " wasn't found");
+                throw new ServletException("Metadata entity with ID " + manager.getHostedSPName() + " wasn't found");
             } else {
                 MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
                 Marshaller marshaller = marshallerFactory.getMarshaller(descriptor);
@@ -119,15 +123,17 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             logger.error("Error marshalling entity descriptor", e);
             throw new ServletException(e);
         } catch (MetadataProviderException e) {
-            logger.error("Error retreiving metadata", e);
-            throw new ServletException("Error retreiving metadata", e);
+            logger.error("Error retrieving metadata", e);
+            throw new ServletException("Error retrieving metadata", e);
         }
     }
 
     /**
      * Verifies whether generation is needed and if so the metadata document is created and stored in metadata
      * manager.
+     *
      * @param request request
+     *
      * @throws ServletException error
      */
     protected void initializeSystemMetadata(HttpServletRequest request) throws ServletException {

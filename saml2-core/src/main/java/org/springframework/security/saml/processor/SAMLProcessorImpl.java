@@ -37,16 +37,10 @@ import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.security.credential.ChainingCredentialResolver;
 import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
-import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
-import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
-import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.springframework.security.saml.metadata.MetadataManager;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Processor is capable of parsing SAML message from HttpServletRequest and populate the BasicSAMLMessageContext
@@ -73,11 +67,13 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * unmarshalled response.
      *
      * @param request request
+     *
      * @return SAML message context with filled information about the message
+     *
      * @throws org.opensaml.common.SAMLException
-     *          error retreiving the message from the request
+     *          error retrieving the message from the request
      * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
-     *          error retreiving metadat
+     *          error retrieving metadat
      * @throws org.opensaml.ws.message.decoder.MessageDecodingException
      *          error decoding the message
      * @throws org.opensaml.xml.security.SecurityException
@@ -120,12 +116,13 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * with SAML2_REDIRECT_BINDING.
      *
      * @param request     request
-     * @param samlContext saml context
+     * @param samlContext SAML context
+     *
      * @return decoder
+     *
      * @throws SAMLException in case no suitable decoder is found for given request
      */
     protected MessageDecoder getDecoder(HttpServletRequest request, BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> samlContext) throws SAMLException {
-
         MessageDecoder decoder;
         if (request.getMethod().equals("POST")) {
             samlContext.setCommunicationProfileId(SAMLConstants.SAML2_POST_BINDING_URI);

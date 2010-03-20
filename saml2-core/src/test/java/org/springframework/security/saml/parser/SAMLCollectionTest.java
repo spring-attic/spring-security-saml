@@ -18,26 +18,18 @@ package org.springframework.security.saml.parser;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.impl.ActionImpl;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallingException;
 import org.springframework.security.saml.SAMLTestBase;
-import org.w3c.dom.Element;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
-import static org.easymock.EasyMock.*;
 
 /**
  * @author Vladimir Schafer
@@ -49,7 +41,6 @@ public class SAMLCollectionTest extends SAMLTestBase {
 
     @Before
     public void initializeValues() {
-
         Attribute attribute1 = ((SAMLObjectBuilder<Attribute>) SAMLTestBase.builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
         attribute1.setName("name1");
         Attribute attribute2 = ((SAMLObjectBuilder<Attribute>) SAMLTestBase.builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
@@ -57,11 +48,10 @@ public class SAMLCollectionTest extends SAMLTestBase {
 
         attributes = new LinkedList<Attribute>(Arrays.asList(attribute1, attribute2));
         attributesObject = new SAMLCollection<Attribute>(attributes);
-
     }
 
     /**
-     * Verfies that the inner object is set correctly.
+     * Verifies that the inner object is set correctly.
      */
     @Test
     public void testGetInnerObject() {
@@ -69,7 +59,7 @@ public class SAMLCollectionTest extends SAMLTestBase {
     }
 
     /**
-     * Verfies that SAMLObject can't be creaed with null argument.
+     * Verifies that SAMLObject can't be created with null argument.
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNoNullArgument() {
@@ -123,7 +113,5 @@ public class SAMLCollectionTest extends SAMLTestBase {
         assertEquals("name1", desAssertion2.getObject().get(0).getName());
         assertEquals("name2", desAssertion2.getObject().get(1).getName());
         assertEquals(desAssertion, desAssertion2);
-
     }
-
 }

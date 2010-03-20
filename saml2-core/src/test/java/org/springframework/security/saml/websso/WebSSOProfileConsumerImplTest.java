@@ -14,7 +14,6 @@
  */
 package org.springframework.security.saml.websso;
 
-import static org.easymock.EasyMock.*;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +31,8 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Vladimir Schäfer
@@ -52,7 +53,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         storage = createMock(SAMLMessageStorage.class);
-        manager =  context.getBean("metadata", MetadataManager.class);
+        manager = context.getBean("metadata", MetadataManager.class);
         resolver = context.getBean("keyResolver", CredentialResolver.class);
         profile = new WebSSOProfileConsumerImpl(manager, resolver, "apollo");
         messageContext = new BasicSAMLMessageContext();
@@ -62,7 +63,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that in case SAML reponse object is missing from the cotext the processing fails.
+     * Verifies that in case SAML response object is missing from the context the processing fails.
+     *
      * @throws Exception error
      */
     @Test(expected = SAMLException.class)
@@ -72,7 +74,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that in case the response object is not of expceted type the processing will fail.
+     * Verifies that in case the response object is not of expected type the processing will fail.
+     *
      * @throws Exception error
      */
     @Test(expected = SAMLException.class)
@@ -86,6 +89,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     /**
      * Verifies that default authNStatement - currently created and expiring in three hours is accepted
      * by verification method.
+     *
      * @throws Exception error
      */
     @Test
@@ -96,10 +100,11 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
 
     /**
      * Verifies that in case the session expiry time is in the past the statement is rejected.
+     *
      * @throws Exception error
      */
     @Test(expected = CredentialsExpiredException.class)
-    public void testAuthNStatmenentWithExpiredSessionTime() throws Exception {
+    public void testAuthNStatementWithExpiredSessionTime() throws Exception {
         AuthnStatement statement = helper.getValidAuthStatement();
         DateTime past = new DateTime();
         past.minusHours(3);
@@ -114,6 +119,5 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     private void replyMock() {
         replay(storage);
     }
-
 }
 

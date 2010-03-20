@@ -50,7 +50,7 @@ import java.io.IOException;
 public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
     /**
-     * SAML message processor used to parse SAML messaage from inbound channel.
+     * SAML message processor used to parse SAML message from inbound channel.
      */
     SAMLProcessor processor;
 
@@ -67,7 +67,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * Default processing URL.
      */
-    private static final String DEFAUL_URL = "/saml/SingleLogout";
+    private static final String DEFAULT_URL = "/saml/SingleLogout";
 
     /**
      * Constructor defines URL to redirect to after successful logout and handlers.
@@ -77,7 +77,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
         super(logoutSuccessUrl, handlers);
-        this.setFilterProcessesUrl(DEFAUL_URL);
+        this.setFilterProcessesUrl(DEFAULT_URL);
     }
 
     /**
@@ -88,7 +88,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
         super(logoutSuccessHandler, handlers);
-        this.setFilterProcessesUrl(DEFAUL_URL);
+        this.setFilterProcessesUrl(DEFAULT_URL);
     }
 
     @Override

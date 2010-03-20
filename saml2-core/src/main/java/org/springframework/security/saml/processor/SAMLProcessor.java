@@ -14,8 +14,8 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 
@@ -24,8 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Vladimir Schäfer
  */
- public interface SAMLProcessor {
+public interface SAMLProcessor {
 
     BasicSAMLMessageContext processSSO(HttpServletRequest request) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-
 }

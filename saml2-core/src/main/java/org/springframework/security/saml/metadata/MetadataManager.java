@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * Class offering extra services on top of underlaying chaining MetadataProviders. Manager keeps track of all available
+ * Class offering extra services on top of underlying chaining MetadataProviders. Manager keeps track of all available
  * identity and service providers configured inside the chained metadata providers. Exactly one service provider can
  * be determined as hosted.
  *
@@ -73,7 +73,6 @@ public class MetadataManager extends ChainingMetadataProvider {
                 roleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
                 if (roleDescriptor != null) {
                     idpName.add(key);
-
                 }
                 roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
                 if (roleDescriptor != null) {
@@ -87,7 +86,9 @@ public class MetadataManager extends ChainingMetadataProvider {
      * Parses the provider and returns set of entityIDs contained inside the provider.
      *
      * @param provider provider to parse
+     *
      * @return set of entityIDs available in the provider
+     *
      * @throws MetadataProviderException error
      */
     private Set<String> parseProvider(MetadataProvider provider) throws MetadataProviderException {
@@ -105,10 +106,11 @@ public class MetadataManager extends ChainingMetadataProvider {
      * Recursively parses descriptors object. Supports both nested entitiesDescriptor
      * elements and leaf entityDescriptors. EntityID of all found descriptors are added
      * to the result set.
-     * @param result result set
+     *
+     * @param result      result set
      * @param descriptors descriptors to parse
      */
-    private void addDescriptors(Set<String> result, EntitiesDescriptor descriptors){
+    private void addDescriptors(Set<String> result, EntitiesDescriptor descriptors) {
         if (descriptors.getEntitiesDescriptors() != null) {
             for (EntitiesDescriptor descriptor : descriptors.getEntitiesDescriptors()) {
                 addDescriptors(result, descriptor);
@@ -123,10 +125,11 @@ public class MetadataManager extends ChainingMetadataProvider {
 
     /**
      * Parses entityID from the descriptor and adds it to the result set.
-     * @param result result set
+     *
+     * @param result     result set
      * @param descriptor descriptor to parse
      */
-    private void addDescriptor(Set<String> result, EntityDescriptor descriptor){
+    private void addDescriptor(Set<String> result, EntityDescriptor descriptor) {
         String entityID = descriptor.getEntityID();
         log.debug("Found metadata entity with ID", entityID);
         result.add(entityID);
@@ -135,7 +138,7 @@ public class MetadataManager extends ChainingMetadataProvider {
     /**
      * Returns set of names of all IDPs available in the metadata
      *
-     * @return set of entityID naems
+     * @return set of entityID names
      */
     public Set<String> getIDPEntityNames() {
         return Collections.unmodifiableSet(idpName);
@@ -151,7 +154,8 @@ public class MetadataManager extends ChainingMetadataProvider {
     }
 
     /**
-     * @param idpID name of IDP to chec
+     * @param idpID name of IDP to check
+     *
      * @return true if IDP entity ID is in the circle of trust with our entity
      */
     public boolean isIDPValid(String idpID) {
@@ -160,6 +164,7 @@ public class MetadataManager extends ChainingMetadataProvider {
 
     /**
      * @param spID entity ID of SP to check
+     *
      * @return true if given SP entity ID is valid in circle of trust
      */
     public boolean isSPValid(String spID) {
@@ -191,6 +196,7 @@ public class MetadataManager extends ChainingMetadataProvider {
      * it is returned. Otherwise first available IDP in IDP list is used.
      *
      * @return entity ID of IDP to use
+     *
      * @throws MetadataProviderException in case IDP can't be determined
      */
     public String getDefaultIDP() throws MetadataProviderException {
@@ -220,7 +226,6 @@ public class MetadataManager extends ChainingMetadataProvider {
                 return;
             }
         }
-        throw new IllegalArgumentException("Attempt to set nonexisting IDP as default: " + defaultIDP);
+        throw new IllegalArgumentException("Attempt to set nonexistent IDP as default: " + defaultIDP);
     }
-
 }

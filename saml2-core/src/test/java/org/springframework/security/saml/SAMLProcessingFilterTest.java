@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml;
 
-import static junit.framework.Assert.assertEquals;
-import static org.easymock.EasyMock.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
@@ -30,8 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
 
+import static junit.framework.Assert.assertEquals;
+import static org.easymock.EasyMock.*;
+
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class SAMLProcessingFilterTest {
 
@@ -50,7 +51,7 @@ public class SAMLProcessingFilterTest {
     }
 
     /**
-     * Verfifies that the SAMLProcessor collaborator must be set, otherwise exception is thrown
+     * Verifies that the SAMLProcessor collaborator must be set, otherwise exception is thrown
      */
     @Test(expected = SAMLRuntimeException.class)
     public void testMissingProcessor() {
@@ -62,6 +63,7 @@ public class SAMLProcessingFilterTest {
 
     /**
      * Verifies that error during processing results in error of whole authentication.
+     *
      * @throws Exception error
      */
     @Test(expected = SAMLRuntimeException.class)
@@ -79,7 +81,8 @@ public class SAMLProcessingFilterTest {
 
     /**
      * Verifies correct pass through the processing filter - process the request, create
-     * SAML authntication token and pass it to the authentication manager.
+     * SAML authentication token and pass it to the authentication manager.
+     *
      * @throws Exception error
      */
     @Test
@@ -113,5 +116,4 @@ public class SAMLProcessingFilterTest {
         verify(processor);
         verify(session);
     }
-
 }

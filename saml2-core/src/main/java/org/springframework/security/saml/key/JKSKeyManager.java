@@ -26,7 +26,6 @@ import java.security.cert.X509Certificate;
 
 /**
  * Serves as a wrapper for java security KeyStore of JKS type which can be conveniently initialized as a Spring bean.
- * 
  * <p>
  * The instance can be inserted into springConfiguration in a following manner:
  * <pre>
@@ -42,7 +41,7 @@ import java.security.cert.X509Certificate;
  *    </constructor-arg>
  * </pre>
  * </p>
- *
+ * <p/>
  * Class also provides convenience methods for loading of certificates and public keys.
  *
  * @author Vladimir Schäfer
@@ -52,12 +51,13 @@ public class JKSKeyManager {
     private final Logger log = LoggerFactory.getLogger(JKSKeyManager.class);
 
     /**
-     * Keystore to retreive keys from
+     * Keystore to retrieve keys from
      */
     private KeyStore ks;
 
     /**
      * Default constructor.
+     *
      * @param storeFile file pointing to the JKS keystore
      * @param storePass password to access the keystore
      */
@@ -67,6 +67,7 @@ public class JKSKeyManager {
 
     /**
      * Initializes the keystore using given properties.
+     *
      * @param storeFile file pointing to the JKS keystore
      * @param storePass password to open the keystore
      * @param storeType type of keystore
@@ -84,7 +85,9 @@ public class JKSKeyManager {
 
     /**
      * Returns certificate with the given alias from the keystore.
+     *
      * @param alias alias of certificate to find
+     *
      * @return certificate with the given alias or null if not found
      */
     public X509Certificate getCertificate(String alias) {
@@ -101,7 +104,9 @@ public class JKSKeyManager {
 
     /**
      * Returns public key with the given alias
+     *
      * @param alias alias of the key to find
+     *
      * @return public key of the alias or null if not found
      */
     public PublicKey getPublicKey(String alias) {

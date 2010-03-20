@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml.storage;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Audience;
@@ -24,6 +22,9 @@ import org.springframework.security.saml.parser.SAMLObject;
 
 import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Vladimir Schäfer
@@ -48,7 +49,7 @@ public class HttpSessionStorageTest {
 
         replay(session);
         cache = new HttpSessionStorage(session);
-        assertNull(cache.retreiveMessage("test"));
+        assertNull(cache.retrieveMessage("test"));
         assertNotNull(cache.getAllMessages());
         assertEquals(0, cache.getAllMessages().size());
         verify(session);
@@ -107,7 +108,7 @@ public class HttpSessionStorageTest {
 
         replay(session);
         cache = new HttpSessionStorage(session);
-        assertNull(cache.retreiveMessage("test"));
+        assertNull(cache.retrieveMessage("test"));
         assertNotNull(cache.getAllMessages());
         assertEquals(0, cache.getAllMessages().size());
         verify(session);
@@ -130,7 +131,7 @@ public class HttpSessionStorageTest {
         cache = new HttpSessionStorage(session);
         assertNotNull(cache.getAllMessages());
         assertEquals(1, cache.getAllMessages().size());
-        assertEquals(audienceMock, cache.retreiveMessage("testKey"));
+        assertEquals(audienceMock, cache.retrieveMessage("testKey"));
         verify(session);
     }
 
@@ -152,8 +153,8 @@ public class HttpSessionStorageTest {
         cache.storeMessage("testKey2", assertionMock);
         assertNotNull(cache.getAllMessages());
         assertEquals(2, cache.getAllMessages().size());
-        assertEquals(audienceMock, cache.retreiveMessage("testKey"));
-        assertEquals(assertionMock, cache.retreiveMessage("testKey2"));
+        assertEquals(audienceMock, cache.retrieveMessage("testKey"));
+        assertEquals(assertionMock, cache.retrieveMessage("testKey2"));
         verify(session);
     }
 
@@ -175,8 +176,7 @@ public class HttpSessionStorageTest {
         cache.storeMessage("testKey", assertionMock);
         assertNotNull(cache.getAllMessages());
         assertEquals(1, cache.getAllMessages().size());
-        assertEquals(assertionMock, cache.retreiveMessage("testKey"));
+        assertEquals(assertionMock, cache.retrieveMessage("testKey"));
         verify(session);
     }
-
 }

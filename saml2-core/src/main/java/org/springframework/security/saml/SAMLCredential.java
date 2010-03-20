@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Object is a storage for entities parsedd from SAML2 response during it's authentication. The object is stored
+ * Object is a storage for entities parsed from SAML2 response during it's authentication. The object is stored
  * as credential object inside the Authentication returned after the authentication success.
  * <p/>
  * The SAML entities (NameID, Assertion) are internally stored in SAMLObject to permit their serialization.
@@ -62,7 +62,7 @@ public class SAMLCredential implements Serializable {
      * @param IDPEntityID             identifier of IDP where the assertion came from
      * @param attributes              attributes collected from received assertions
      */
-    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, List<Attribute> attributes) {    
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, List<Attribute> attributes) {
         this.nameID = new SAMLObject<NameID>(nameID);
         this.authenticationAssertion = new SAMLObject<Assertion>(authenticationAssertion);
         this.IDPEntityID = IDPEntityID;
@@ -102,6 +102,7 @@ public class SAMLCredential implements Serializable {
      * Attributes are searched in order as received in SAML message.
      *
      * @param name name of attribute to find
+     *
      * @return the first occurrence of the attribute with the given name or null if not found
      */
     public Attribute getAttributeByName(String name) {
@@ -123,5 +124,4 @@ public class SAMLCredential implements Serializable {
     public List<Attribute> getAttributes() {
         return Collections.unmodifiableList(attributes.getObject());
     }
-
 }

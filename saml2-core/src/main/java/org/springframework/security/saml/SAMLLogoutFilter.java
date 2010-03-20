@@ -37,7 +37,7 @@ import java.io.IOException;
 /**
  * Logout filter leveraging SAML 2.0 Single Logout profile. Upon invocation of the filter URL it is
  * determined whether global (termination of all participating sessions) or local (termination of only
- * sesssion running within Spring Security) logout is requested based on request attribute.
+ * session running within Spring Security) logout is requested based on request attribute.
  * <p/>
  * In case global logout is in question a LogoutRequest is sent to the IDP.
  *
@@ -53,10 +53,10 @@ public class SAMLLogoutFilter extends LogoutFilter {
     /**
      * Default name of path suffix which will invoke this filter.
      */
-    private static final String DEFAUL_FILTER_URL = "/saml/logout";
+    private static final String DEFAULT_FILTER_URL = "/saml/logout";
 
     /**
-     * Name of paramatere of HttpRequest indicating whether this call should perform only local logout.
+     * Name of parameter of HttpRequest indicating whether this call should perform only local logout.
      * In case the value is true no global logout will be invoked.
      */
     protected static final String LOGOUT_PARAMETER = "local";
@@ -68,16 +68,17 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
     /**
      * Default constructor.
-     * @param successUrl url to use after logout in case of local logout
-     * @param localHandler handlers to be invoked when local logout is selected
+     *
+     * @param successUrl     url to use after logout in case of local logout
+     * @param localHandler   handlers to be invoked when local logout is selected
      * @param globalHandlers handlers to be invoked when global logout is selected
-     * @param profile profile to use for global logout
+     * @param profile        profile to use for global logout
      */
     public SAMLLogoutFilter(String successUrl, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers, SingleLogoutProfile profile) {
         super(successUrl, localHandler);
         this.globalHandlers = globalHandlers;
         this.profile = profile;
-        this.setFilterProcessesUrl(DEFAUL_FILTER_URL);
+        this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
     }
 
     @Override
@@ -110,13 +111,10 @@ public class SAMLLogoutFilter extends LogoutFilter {
                     for (LogoutHandler handler : globalHandlers) {
                         handler.logout(request, response, auth);
                     }
-
                 } else {
 
                     super.doFilter(request, response, chain);
-
                 }
-
             } catch (SAMLException e1) {
                 throw new ServletException("Error initializing global logout", e1);
             } catch (MetadataProviderException e1) {
@@ -124,22 +122,19 @@ public class SAMLLogoutFilter extends LogoutFilter {
             } catch (MessageEncodingException e1) {
                 throw new ServletException("Error encoding outgoing message", e1);
             }
-
         } else {
 
             chain.doFilter(request, response);
-
         }
-        
     }
 
     /**
      * @param request request
+     *
      * @return true if this HttpRequest should be directly forwarded to the IDP without selection of IDP.
      */
     protected boolean isGlobalLogout(HttpServletRequest request) {
         String login = request.getParameter(LOGOUT_PARAMETER);
         return login == null || !"true".equals(login.toLowerCase().trim());
     }
-
 }

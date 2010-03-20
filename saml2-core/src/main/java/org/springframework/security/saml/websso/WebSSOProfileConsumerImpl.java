@@ -40,13 +40,12 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Class is able to process Response objects returned from the IDP after SP initialized SSO or unsolicited
- * response from IDP. In case the response is correctly validated and no errors are found the SAMLCredential\
+ * response from IDP. In case the response is correctly validated and no errors are found the SAMLCredential
  * is created.
  *
  * @author Vladimir Schäfer
@@ -67,6 +66,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param metadata    metadata manager
      * @param keyResolver entity allowing resolving private keys of the service provider
+     * @param signingKey  signing key
+     *
      * @throws MetadataProviderException error initializing the provider
      */
     public WebSSOProfileConsumerImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws MetadataProviderException {
@@ -74,11 +75,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     }
 
     /**
-     * The inpuc context object must have set the properties related to the returned Response, which is validated
-     * and in case no errors are found the SAMLCredentail is returned.
+     * The input context object must have set the properties related to the returned Response, which is validated
+     * and in case no errors are found the SAMLCredential is returned.
      *
      * @param context context including response object
+     *
      * @return SAMLCredential with information about user
+     *
      * @throws SAMLException       in case the response is invalid
      * @throws org.opensaml.xml.security.SecurityException
      *                             in the signature on response can't be verified
@@ -108,7 +111,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("SAML status is not success code");
         }
 
-
         // Verify signature of the response if present
         if (response.getSignature() != null) {
             verifySignature(response.getSignature(), context.getPeerEntityId());
@@ -124,7 +126,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify response to field if present, set request if correct
         if (response.getInResponseTo() != null) {
-            XMLObject xmlObject = protocolCache.retreiveMessage(response.getInResponseTo());
+            XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
                 throw new SAMLException("Error validating SAML response");
@@ -145,7 +147,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             boolean found = false;
             for (AssertionConsumerService service : services) {
                 if (response.getDestination().equals(service.getLocation()) &&
-                        service.getBinding().equals(context.getCommunicationProfileId())) {
+                    service.getBinding().equals(context.getCommunicationProfileId())) {
                     found = true;
                     break;
                 }
@@ -190,14 +192,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
         }
 
-        // Make sure that at least one storage contains authentication statement and subject with bearer cofirmation
+        // Make sure that at least one storage contains authentication statement and subject with bearer confirmation
         if (subjectAssertion == null) {
             log.debug("Response doesn't contain authentication statement");
             throw new SAMLException("Error validating SAML response");
         }
 
         return new SAMLCredential((NameID) context.getSubjectNameIdentifier(), subjectAssertion, context.getPeerEntityMetadata().getEntityID(), attributes);
-        
     }
 
     private void verifyAssertion(Assertion assertion, AuthnRequest request, BasicSAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
@@ -230,11 +231,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param subject subject to validate
      * @param request request
      * @param context context
+     *
      * @throws SAMLException       error validating the object
      * @throws DecryptionException in case the NameID can't be decrypted
      */
     protected void verifySubject(Subject subject, AuthnRequest request, BasicSAMLMessageContext context) throws SAMLException, DecryptionException {
-
         boolean confirmed = false;
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
@@ -298,7 +299,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 context.setSubjectNameIdentifier(nameID);
                 return;
             }
-
         }
 
         log.debug("Assertion invalidated by subject confirmation - can't be confirmed by bearer method");
@@ -311,6 +311,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param signature signature to verify
      * @param context   context
+     *
      * @throws SAMLException       signature missing although required
      * @throws org.opensaml.xml.security.SecurityException
      *                             signature can't be validated
@@ -380,7 +381,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param auth    statement to check
      * @param context message context
-     * @return date of statement expiration or null if no such is defined
+     *
      * @throws AuthenticationException in case the statement is invalid
      */
     protected void verifyAuthenticationStatement(AuthnStatement auth, BasicSAMLMessageContext context) throws AuthenticationException {
@@ -405,5 +406,4 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
         }
     }
-
 }

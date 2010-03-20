@@ -61,9 +61,10 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     /**
      * Initializes the profile.
      *
-     * @param metadata   metadata manager to be used
+     * @param metadata           metadata manager to be used
      * @param credentialResolver key manager
-     * @param signingKey alias of key used for signing of assertions by local entity
+     * @param signingKey         alias of key used for signing of assertions by local entity
+     *
      * @throws SAMLException error initializing the profile
      */
     public SingleLogoutProfileImpl(MetadataManager metadata, CredentialResolver credentialResolver, String signingKey) throws SAMLException {
@@ -71,7 +72,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     }
 
     public void initializeLogout(SAMLCredential credential, SAMLMessageStorage messageStorage, HttpServletRequest request, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
-
         // If no user is logged in we do not initialize the protocol.
         if (credential == null) {
             return;
@@ -84,7 +84,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
         LogoutRequest logoutRequest = getLogoutRequest(credential, logoutServiceIDP);
         sendMessage(messageStorage, true, logoutRequest, logoutServiceIDP, response);
-
     }
 
     /**
@@ -92,12 +91,13 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      *
      * @param credential     information about assertions used to log current user in
      * @param bindingService service used to deliver the request
+     *
      * @return logoutRequest to be sent to IDP
+     *
      * @throws SAMLException             error creating the message
-     * @throws MetadataProviderException error retreiving metadata
+     * @throws MetadataProviderException error retrieving metadata
      */
     protected LogoutRequest getLogoutRequest(SAMLCredential credential, Endpoint bindingService) throws SAMLException, MetadataProviderException {
-
         SAMLObjectBuilder<LogoutRequest> builder = (SAMLObjectBuilder<LogoutRequest>) builderFactory.getBuilder(LogoutRequest.DEFAULT_ELEMENT_NAME);
         LogoutRequest request = builder.buildObject();
         buildCommonAttributes(request, bindingService);
@@ -124,11 +124,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         request.setNameID(nameID);
 
         return request;
-
     }
 
     public boolean processLogoutRequest(SAMLCredential credential, BasicSAMLMessageContext context, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
-
         SAMLObject message = context.getInboundSAMLMessage();
 
         // Verify type
@@ -164,7 +162,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             boolean found = false;
             for (SingleLogoutService service : services) {
                 if (logoutRequest.getDestination().equals(service.getLocation()) &&
-                        context.getCommunicationProfileId().equals(service.getBinding())) {
+                    context.getCommunicationProfileId().equals(service.getBinding())) {
                     found = true;
                     break;
                 }
@@ -253,11 +251,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         Status status = getStatus(StatusCode.SUCCESS_URI, null);
         sendLogoutResponse(status, context, response);
         return true;
-
     }
 
     protected void sendLogoutResponse(Status status, BasicSAMLMessageContext context, HttpServletResponse response) throws MetadataProviderException, SAMLException, MessageEncodingException {
-
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
 
@@ -276,7 +272,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         logoutResponse.setStatus(status);
 
         sendMessage(true, logoutResponse, logoutService, response);
-
     }
 
     private boolean equalsNameID(NameID a, NameID b) {
@@ -308,7 +303,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     }
 
     public void processLogoutResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
-
         SAMLObject message = context.getInboundSAMLMessage();
 
         // Verify type
@@ -331,9 +325,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         }
 
         // Verify response to field if present, set request if correct
-        // The inResponseTo field is optional, SAML 2.0 Core, 1542 
+        // The inResponseTo field is optional, SAML 2.0 Core, 1542
         if (response.getInResponseTo() != null) {
-            XMLObject xmlObject = protocolCache.retreiveMessage(response.getInResponseTo());
+            XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
                 throw new SAMLException("Error validating SAML response");
@@ -353,7 +347,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             boolean found = false;
             for (SingleLogoutService service : services) {
                 if (response.getDestination().equals(service.getLocation()) &&
-                        context.getCommunicationProfileId().equals(service.getBinding())) {
+                    context.getCommunicationProfileId().equals(service.getBinding())) {
                     found = true;
                     break;
                 }
@@ -385,7 +379,5 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             }
             log.warn("Received LogoutResponse has invalid status code", logMessage);
         }
-
     }
-
 }

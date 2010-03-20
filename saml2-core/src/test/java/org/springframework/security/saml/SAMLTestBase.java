@@ -14,8 +14,8 @@
  */
 package org.springframework.security.saml;
 
-import org.junit.BeforeClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.xml.XMLObjectBuilderFactory;

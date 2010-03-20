@@ -14,13 +14,12 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import org.opensaml.xml.XMLObject;
 
 /**
- * Class implements simple metadata provider which retreives EntityDescriptor from preconfigured object.
+ * Class implements simple metadata provider which retrieves EntityDescriptor from preconfigured object.
  *
  * @author Vladimir Schäfer
  */
@@ -33,13 +32,14 @@ public class MetadataMemoryProvider extends AbstractMetadataProvider {
 
     /**
      * Constructor settings descriptor in parameter as the only entity available from this provider.
+     *
      * @param descriptor descriptor to use
      */
     public MetadataMemoryProvider(EntityDescriptor descriptor) {
         this.descriptor = descriptor;
     }
 
-    /** 
+    /**
      * @return preconfigured entity descriptor
      */
     public XMLObject getMetadata() {

@@ -17,13 +17,13 @@ package org.springframework.security.saml;
 import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -39,7 +39,7 @@ import java.io.IOException;
  * with default binding.
  * <p/>
  * There are two ways the entry point can get invoked. Either user accesses a URL configured to require
- * some degree of authentication and throws AuhenticationEception which is handled and invokes the entry point.
+ * some degree of authentication and throws AuthenticationException which is handled and invokes the entry point.
  * <p/>
  * The other way is direct invocation of the entry point by accessing the DEFAULT_FILTER_URL. In this way user
  * can be forwarded to IDP after clicking for example login button.
@@ -60,7 +60,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     /**
      * Default name of path suffix which will invoke this filter.
      */
-    private static final String DEFAUL_FILTER_URL = "/saml/login";
+    private static final String DEFAULT_FILTER_URL = "/saml/login";
 
     /**
      * Name of parameter of HttpRequest telling entry point that the login should use specified idp.
@@ -68,7 +68,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected static final String IDP_PARAMETER = "idp";
 
     /**
-     * Name of paramatere of HttpRequest indicating whether this call should skip IDP selection
+     * Name of parameter of HttpRequest indicating whether this call should skip IDP selection
      * and send immediately SAML request. Calls from IDP selection must always set this attribute
      * to true.
      */
@@ -79,11 +79,11 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     private String filterSuffix;
 
-
     /**
      * The filter will be used in case the URL of the request ends with DEFAULT_FILTER_URL.
      *
      * @param request request used to determine whether to enable this filter
+     *
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
@@ -107,11 +107,12 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
-     * Sents AuthNRequest to the default IDP using any binding supported by both SP and IDP.
+     * Sends AuthNRequest to the default IDP using any binding supported by both SP and IDP.
      *
-     * @param request request
+     * @param request  request
      * @param response response
-     * @param e               exception causing this entry point to be invoked
+     * @param e        exception causing this entry point to be invoked
+     *
      * @throws IOException      error sending response
      * @throws ServletException error initializing SAML protocol
      */
@@ -140,23 +141,26 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
-     * Method is supposed to populate preferences used to construct the SAML message. Method can be overriden to provide
+     * Method is supposed to populate preferences used to construct the SAML message. Method can be overridden to provide
      * logic appropriate for given application.
      *
-     * @param request request
-     * @param reponse response
-     * @param e       exception causing invocation of this entry point (can be null)
-     * @return populated webSSOproile
+     * @param request   request
+     * @param response  response
+     * @param exception exception causing invocation of this entry point (can be null)
+     *
+     * @return populated webSSOprofile
+     *
      * @throws MetadataProviderException in case metadata loading fails
      * @throws ServletException          in case any other error occurs
      */
-    protected WebSSOProfileOptions getProfileOptions(HttpServletRequest request, HttpServletResponse reponse, AuthenticationException e) throws MetadataProviderException, ServletException {
+    protected WebSSOProfileOptions getProfileOptions(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws MetadataProviderException, ServletException {
         String idp = getIDP(request);
         return new WebSSOProfileOptions(idp, null);
     }
 
     /**
      * @param request request
+     *
      * @return true if this HttpRequest should be directly forwarded to the IDP without selection of IDP.
      */
     private boolean isLoginRequest(HttpServletRequest request) {
@@ -169,7 +173,9 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * IDP in our circle of trust. If it is null or the IDP is not configured then the default IDP is returned.
      *
      * @param request request
+     *
      * @return null if idp is not set or invalid, name of IDP otherwise
+     *
      * @throws MetadataProviderException in case no IDP is configured
      */
     protected String getIDP(HttpServletRequest request) throws MetadataProviderException {
@@ -201,7 +207,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     public String getFilterSuffix() {
         if (filterSuffix == null) {
-            return DEFAUL_FILTER_URL;
+            return DEFAULT_FILTER_URL;
         } else {
             return filterSuffix;
         }
@@ -228,5 +234,4 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     public void setIdpSelectionPath(String idpSelectionPath) {
         this.idpSelectionPath = idpSelectionPath;
     }
-
 }

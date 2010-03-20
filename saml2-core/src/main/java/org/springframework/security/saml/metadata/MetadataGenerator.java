@@ -180,8 +180,10 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     /**
      * Creates URL at which the local server is capable of accepting incoming SAML messages.
-     * @param request request parsed for server name, port, protocol and context
+     *
+     * @param request       request parsed for server name, port, protocol and context
      * @param processingURL local context at which processing filter is waiting
+     *
      * @return URL of local server
      */
     private String getServerURL(HttpServletRequest request, String processingURL) {
@@ -232,6 +234,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     /**
      * Alias of key used for signing of service provider SAML messages.
+     *
      * @return key alias
      */
     public String getServerKeyAlias() {
@@ -240,6 +243,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     /**
      * Alias in the keystore used for signing of messages sent by this service provider
+     *
      * @param serverKeyAlias alias of an entry in the configured key store
      */
     public void setServerKeyAlias(String serverKeyAlias) {

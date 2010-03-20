@@ -14,19 +14,19 @@
  */
 package org.springframework.security.saml;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.NameID;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * @author Vladimir Schäfer
@@ -62,6 +62,7 @@ public class SAMLCredentialTest extends SAMLTestBase {
 
     /**
      * Verifies that the SAMLCredential can be serialized/deserialized correctly.
+     *
      * @throws Exception error
      */
     @Test
@@ -77,5 +78,4 @@ public class SAMLCredentialTest extends SAMLTestBase {
         assertEquals("testName", desCredential.getNameID().getValue());
         assertEquals("testID", desCredential.getAuthenticationAssertion().getID());
     }
-
 }

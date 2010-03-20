@@ -17,7 +17,7 @@ package org.springframework.security.saml.parser;
 import org.opensaml.xml.parse.ParserPool;
 
 /**
- * Class is initialized from the Spring context and allows retreival of the ParserPool for code
+ * Class is initialized from the Spring context and allows retrieval of the ParserPool for code
  * not managed by Spring.
  *
  * @author Vladimir Schäfer
@@ -31,7 +31,8 @@ public class ParserPoolHolder {
 
     /**
      * Initializes the static parserPool property and makes it available for getPool calls.
-     * In case the pool was already previously initiliazed the last value will be overwritten.
+     * In case the pool was already previously initialized the last value will be overwritten.
+     *
      * @param pool pool to initialize the static property wih
      */
     public ParserPoolHolder(ParserPool pool) {
@@ -44,5 +45,4 @@ public class ParserPoolHolder {
     public static ParserPool getPool() {
         return pool;
     }
-
 }

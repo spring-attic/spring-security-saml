@@ -14,12 +14,8 @@
  */
 package org.springframework.security.saml.websso;
 
-import static junit.framework.Assert.assertNull;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.XMLObject;
@@ -33,6 +29,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import static junit.framework.Assert.assertNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Vladimir Schäfer
@@ -54,7 +54,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     public void initialize() throws Exception {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
-        profile = (WebSSOProfile) context.getBean("webSSOprofile", WebSSOProfile.class);
+        profile = context.getBean("webSSOprofile", WebSSOProfile.class);
 
         options = new WebSSOProfileOptions("http://localhost:8080/opensso", null);
 
@@ -75,7 +75,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
      */
     @Test(expected = MetadataProviderException.class)
     public void testNoSPNameSet() throws Exception {
-        MetadataManager manager = (MetadataManager) context.getBean("metadata", MetadataManager.class);
+        MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         manager.setHostedSPName(null);
         replyMock();
         profile.initializeSSO(options, storage, request, response);
@@ -102,7 +102,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
      */
     @Test(expected = MetadataProviderException.class)
     public void testMissingSP() throws Exception {
-        MetadataManager manager = (MetadataManager) context.getBean("metadata", MetadataManager.class);
+        MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         while (manager.getProviders().size() > 0) {
             manager.removeMetadataProvider(manager.getProviders().iterator().next());
         }
@@ -118,7 +118,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
      */
     @Test(expected = MetadataProviderException.class)
     public void testSPWithMissingData() throws Exception {
-        MetadataManager manager = (MetadataManager) context.getBean("metadata", MetadataManager.class);
+        MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         manager.setHostedSPName("http://localhost:8082/missingDescriptor");
         replyMock();
         profile.initializeSSO(options, storage, request, response);
@@ -184,7 +184,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that invalid binding name will be ingored and default used instead.
+     * Verifies that invalid binding name will be ignored and default used instead.
      *
      * @throws Exception error
      */
@@ -212,7 +212,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that IDP withoug any SSO binding can't be used.
+     * Verifies that IDP without any SSO binding can't be used.
      *
      * @throws Exception error
      */
@@ -227,7 +227,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verifies that IDP withoug any SSO binding can't be used.
+     * Verifies that IDP without any SSO binding can't be used.
      *
      * @throws Exception error
      */
@@ -240,7 +240,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verfies that passive option is correctly set on outgoing SAML message, if set in options.
+     * Verifies that passive option is correctly set on outgoing SAML message, if set in options.
      *
      * @throws Exception error
      */
@@ -301,5 +301,4 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         replay(request);
         replay(response);
     }
-
 }

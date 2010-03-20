@@ -108,7 +108,7 @@ public class AbstractProfileBase {
             velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new SLF4JLogChute());
             velocityEngine.init();
         } catch (Exception e) {
-            log.debug("Error initializing velicoity engige", e);
+            log.debug("Error initializing velocity engine", e);
             throw new RuntimeException("Error configuring velocity", e);
         }
 
@@ -121,7 +121,6 @@ public class AbstractProfileBase {
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
         // Entity used for decrypting of encrypted XML parts
         this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
-
     }
 
     public AbstractProfileBase(MetadataManager metadata, String signingKey, CredentialResolver keyManager, SignatureTrustEngine trustEngine) {
@@ -153,7 +152,7 @@ public class AbstractProfileBase {
 
     protected SPSSODescriptor getSPDescriptor(String spId) throws MetadataProviderException {
         if (spId == null) {
-            throw new MetadataProviderException("No hosted SP metadata ID is configured, please verify that property hostedSPName in metadata bean of your Spring configuration is correcly set");
+            throw new MetadataProviderException("No hosted SP metadata ID is configured, please verify that property hostedSPName in metadata bean of your Spring configuration is correctly set");
         }
         SPSSODescriptor spDescriptor = (SPSSODescriptor) metadata.getRole(metadata.getHostedSPName(), SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
         if (spDescriptor == null) {
@@ -163,14 +162,11 @@ public class AbstractProfileBase {
     }
 
     protected void sendMessage(SAMLMessageStorage messageStorage, boolean sign, RequestAbstractType message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
-
         sendMessage(sign, message, endpoint, response);
         messageStorage.storeMessage(message.getID(), message);
-
     }
 
     protected void sendMessage(boolean sign, SignableSAMLObject message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
-
         BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject> samlContext = new BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject>();
         samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
         samlContext.setOutboundMessage(message);
@@ -183,11 +179,9 @@ public class AbstractProfileBase {
 
         MessageEncoder encoder = getEncoder(endpoint.getBinding());
         encoder.encode(samlContext);
-
     }
 
     protected Status getStatus(String code, String statusMessage) {
-
         SAMLObjectBuilder<StatusCode> codeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
         StatusCode statusCode = codeBuilder.buildObject();
         statusCode.setValue(code);
@@ -207,7 +201,7 @@ public class AbstractProfileBase {
     }
 
     /**
-     * Fills the request with version, issueinstants and destination data.
+     * Fills the request with version, issue instants and destination data.
      *
      * @param request request to be filled
      * @param service service to use as destination for the request
@@ -255,7 +249,7 @@ public class AbstractProfileBase {
     }
 
     protected void verifyIssuer(Issuer issuer, BasicSAMLMessageContext context) throws SAMLException {
-        // Validat format of issuer
+        // Validate format of issuer
         if (issuer.getFormat() != null && !issuer.getFormat().equals(NameIDType.ENTITY)) {
             log.debug("Assertion invalidated by issuer type", issuer.getFormat());
             throw new SAMLException("SAML Assertion is invalid");
@@ -284,5 +278,4 @@ public class AbstractProfileBase {
         int futureSkew = 3;
         return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + futureSkew * 1000);
     }
-
 }

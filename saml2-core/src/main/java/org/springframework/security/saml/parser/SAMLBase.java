@@ -77,7 +77,9 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
      * Helper method that marshalls the given message.
      *
      * @param message message the marshall and serialize
+     *
      * @return marshalled message
+     *
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if the give message can not be marshalled into its DOM representation
      */
@@ -87,7 +89,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
             if (marshaller == null) {
                 throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "
-                        + message.getElementQName());
+                                                   + message.getElementQName());
             }
             Element messageElem = marshaller.marshall(message);
             if (log.isTraceEnabled()) {
@@ -104,7 +106,9 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
      * Helper method that deserializes and unmarshalls the message from the given stream.
      *
      * @param messageStream input stream containing the message
+     *
      * @return the inbound message
+     *
      * @throws org.opensaml.ws.message.decoder.MessageDecodingException
      *          thrown if there is a problem deserializing and unmarshalling the message
      */
@@ -116,7 +120,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             Element messageElem = messageDoc.getDocumentElement();
 
             if (log.isTraceEnabled()) {
-                log.trace("Unmrshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+                log.trace("Unmarshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
             }
 
             log.debug("Unmarshalling message DOM");
@@ -124,12 +128,12 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             if (unmarshaller == null) {
                 throw new MessageDecodingException(
                         "Unable to unmarshall message, no unmarshaller registered for message element "
-                                + XMLHelper.getNodeQName(messageElem));
+                        + XMLHelper.getNodeQName(messageElem));
             }
 
             T message = (T) unmarshaller.unmarshall(messageElem);
 
-            log.debug("Message succesfully unmarshalled");
+            log.debug("Message successfully unmarshalled");
             return message;
         } catch (XMLParserException e) {
             log.error("Encountered error parsing message into its DOM representation", e);
@@ -167,12 +171,10 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             // Otherwise let's compare the live values
             return object.equals(that.object);
         }
-
     }
 
     @Override
     public int hashCode() {
         return object.hashCode();
     }
-
 }

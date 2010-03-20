@@ -14,7 +14,6 @@
  */
 package org.springframework.security.saml.storage;
 
-
 import org.opensaml.xml.XMLObject;
 import org.springframework.security.saml.parser.SAMLObject;
 
@@ -25,9 +24,9 @@ import java.util.Hashtable;
 import java.util.Set;
 
 /**
- * Class implements storage of SAML messages and uses HttpSession as underlaying dataStore. As the XMLObjects
+ * Class implements storage of SAML messages and uses HttpSession as underlying dataStore. As the XMLObjects
  * can't be serialized and failover could thus be prevented, the messages are transformed into SAMLObject
- * which internally marshalles the content into XML during serialization.
+ * which internally marshalls the content into XML during serialization.
  *
  * @author Vladimir Schäfer
  */
@@ -39,7 +38,7 @@ public class HttpSessionStorage implements SAMLMessageStorage {
     private static final String SAML_STORAGE_KEY = "_springSamlStorageKey";
 
     /**
-     * Creates the storage object and initilizes it to load SAML messages from Session
+     * Creates the storage object and initializes it to load SAML messages from Session
      * found in the request object.
      *
      * @param request request to load/store messages from
@@ -89,14 +88,15 @@ public class HttpSessionStorage implements SAMLMessageStorage {
     /**
      * Returns previously stored message with the given ID or null, if there is no message
      * stored.
-     * <p>
-     * Message is stored in String format and must be unmashalled into XMLObject. Call to this
+     * <p/>
+     * Message is stored in String format and must be unmarshalled into XMLObject. Call to this
      * method may thus be expensive.
      *
-     * @param messageID ID of message to retreive
+     * @param messageID ID of message to retrieve
+     *
      * @return message found or null
      */
-    public XMLObject retreiveMessage(String messageID) {
+    public XMLObject retrieveMessage(String messageID) {
         SAMLObject o = messages.get(messageID);
         if (o == null) {
             return null;
@@ -108,6 +108,4 @@ public class HttpSessionStorage implements SAMLMessageStorage {
     public Set<String> getAllMessages() {
         return Collections.unmodifiableSet(messages.keySet());
     }
-
-
 }

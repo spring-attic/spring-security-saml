@@ -69,7 +69,7 @@ public class SAMLAuthenticationProviderTest {
     }
 
     /**
-     * Verifies that auhentication process passess sucesfully if input is correct.
+     * Verifies that authentication process passes successfully if input is correct.
      *
      * @throws Exception error
      */
@@ -101,7 +101,6 @@ public class SAMLAuthenticationProviderTest {
         verifyMock();
         verify(as);
     }
-
 
     /**
      * Verifies that user details are filled correctly if set and that entitlements of the user returned from
@@ -171,6 +170,5 @@ public class SAMLAuthenticationProviderTest {
         verify(nameID);
         verify(assertion);
     }
-
 }
 

@@ -67,7 +67,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * and assertion used to verify the user as credential (SAMLCredential object) is created and set as authenticated.
      *
      * @param authentication SAMLAuthenticationToken to verify
+     *
      * @return UsernamePasswordAuthenticationToken with name as NameID value and SAMLCredential as credential object
+     *
      * @throws AuthenticationException user can't be authenticated due to an error
      */
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -104,7 +106,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, entitlements);
         result.setDetails(userDetails);
         return result;
-
     }
 
     /**
@@ -112,11 +113,12 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * SAMLUserDetailsService is called and value of type UserDetails is returned. Users are encouraged to supply
      * implementation of this class and also include correct implementation of the getAuthorities method in it, which
      * is used to populate the entitlements inside the Authentication object.
-     * <p>
+     * <p/>
      * If no SAMLUserDetailsService is specified null is returned.
      *
      * @param credential credential to load user from
-     * @return user details object corresponding to the SAML credentail or null if data can't be loaded
+     *
+     * @return user details object corresponding to the SAML credential or null if data can't be loaded
      */
     protected Object getUserDetails(SAMLCredential credential) {
         if (getUserDetails() != null) {
@@ -133,6 +135,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      *
      * @param credential credential used to authenticate user
      * @param userDetail loaded user details, can be null
+     *
      * @return principal to store inside Authentication object
      */
     protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
@@ -148,6 +151,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      *
      * @param credential credential used to authenticate user during SSO
      * @param userDetail user detail object returned from getUserDetails call
+     *
      * @return collection of users entitlements, mustn't be null
      */
     protected Collection<GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
@@ -163,6 +167,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * (only one in most cases) and computes the expiration based on sessionNotOnOrAfter field.
      *
      * @param credential credential to use for expiration parsing.
+     *
      * @return null if no expiration is present, expiration time onOrAfter which the token is not valid anymore
      */
     protected Date getExpirationDate(SAMLCredential credential) {
@@ -202,10 +207,10 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * SAMLAuthenticationToken is the only supported token.
      *
      * @param aClass class to check for support
+     *
      * @return true if class is of type SAMLAuthenticationToken
      */
     public boolean supports(Class aClass) {
         return SAMLAuthenticationToken.class.isAssignableFrom(aClass);
     }
-
 }

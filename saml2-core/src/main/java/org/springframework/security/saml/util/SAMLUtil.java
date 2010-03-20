@@ -34,15 +34,17 @@ public class SAMLUtil {
     /**
      * Returns assertion consumer service of the given SP for the given binding. If the specified binding
      * can't be found, default binding is returned. In case no binding is marked as default, first binding
-     * for assertionConsumber endpoint is used. In case SP doesn't contain any assertionConsumber endpoind
+     * for assertionConsumer endpoint is used. In case SP doesn't contain any assertionConsumer endpoint
      * exception is thrown.
      *
      * @param descriptor descriptor to search for binding in
      * @param binding    binding type
+     *
      * @return consumer service capable of handling the given binding
+     *
      * @throws MetadataProviderException in case there is not service capable of handling the binding
      */
-    public static AssertionConsumerService getAssertionConsubmerForBinding(SPSSODescriptor descriptor, String binding) throws MetadataProviderException {
+    public static AssertionConsumerService getAssertionConsumerForBinding(SPSSODescriptor descriptor, String binding) throws MetadataProviderException {
         List<AssertionConsumerService> services = descriptor.getAssertionConsumerServices();
         AssertionConsumerService foundService = null;
         for (AssertionConsumerService service : services) {
@@ -68,7 +70,9 @@ public class SAMLUtil {
      *
      * @param descriptor IDP to search for service in
      * @param binding    binding supported by the service
+     *
      * @return SSO service capable of handling the given binding
+     *
      * @throws MetadataProviderException if the service can't be determined
      */
     public static SingleSignOnService getSSOServiceForBinding(IDPSSODescriptor descriptor, String binding) throws MetadataProviderException {
@@ -87,7 +91,9 @@ public class SAMLUtil {
      *
      * @param descriptor IDP to search for service in
      * @param binding    binding supported by the service
+     *
      * @return SSO service capable of handling the given binding
+     *
      * @throws MetadataProviderException if the service can't be determined
      */
     public static SingleLogoutService getLogoutServiceForBinding(SSODescriptor descriptor, String binding) throws MetadataProviderException {
@@ -111,7 +117,6 @@ public class SAMLUtil {
         }
 
         return SAMLUtil.getDefaultBinding(idp);
-
     }
 
     public static String getLogoutBinding(IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
@@ -124,28 +129,31 @@ public class SAMLUtil {
         String binding = null;
 
         // Let's find first binding supported by both IDP and SP
-        idp : for (SingleLogoutService idpService : logoutServices) {
+        idp:
+        for (SingleLogoutService idpService : logoutServices) {
             for (SingleLogoutService spService : sp.getSingleLogoutServices()) {
-                if (idpService.getBinding().equals(spService.getBinding()) ) {
+                if (idpService.getBinding().equals(spService.getBinding())) {
                     binding = idpService.getBinding();
                     break idp;
                 }
             }
         }
 
-        // In case there's no common endopoint let's use first available
+        // In case there's no common endpoint let's use first available
         if (binding == null) {
             binding = idp.getSingleLogoutServices().iterator().next().getBinding();
         }
 
         return binding;
-
     }
 
     /**
      * Returns default binding supported by IDP.
+     *
      * @param descriptor descriptor to return binding for
+     *
      * @return first binding in the list of supported
+     *
      * @throws MetadataProviderException no binding found
      */
     public static String getDefaultBinding(IDPSSODescriptor descriptor) throws MetadataProviderException {

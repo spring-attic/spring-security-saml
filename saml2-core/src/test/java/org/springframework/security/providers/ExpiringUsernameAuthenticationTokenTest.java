@@ -14,13 +14,15 @@
  */
 package org.springframework.security.providers;
 
-import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import org.springframework.security.core.GrantedAuthority;
 import org.joda.time.DateTime;
+import org.junit.Test;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for the ExpiringUsernameAuthenticationToken.
@@ -31,6 +33,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
 
     /**
      * Verifies that in case expiration date is not set the token is valid.
+     *
      * @throws Exception error
      */
     @Test
@@ -41,6 +44,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
 
     /**
      * Verifies that in case expiration date is set to the future the token is valid.
+     *
      * @throws Exception error
      */
     @Test
@@ -52,6 +56,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
 
     /**
      * Verifies that token changes from valid to invalid when time passes over the change point.
+     *
      * @throws Exception error
      */
     @Test
@@ -59,7 +64,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
         Date future = new DateTime().plusMillis(300).toDate();
         ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new LinkedList<GrantedAuthority>());
         assertTrue(t.isAuthenticated());
-        synchronized(this) {
+        synchronized (this) {
             wait(600);
         }
         assertFalse(t.isAuthenticated());
@@ -67,6 +72,7 @@ public class ExpiringUsernameAuthenticationTokenTest {
 
     /**
      * Verifies that constructor without expiration is always non authenticated..
+     *
      * @throws Exception error
      */
     @Test
@@ -74,5 +80,4 @@ public class ExpiringUsernameAuthenticationTokenTest {
         ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(null, null);
         assertFalse(t.isAuthenticated());
     }
-
 }

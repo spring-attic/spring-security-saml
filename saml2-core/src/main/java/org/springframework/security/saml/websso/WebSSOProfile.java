@@ -14,11 +14,11 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,5 +29,4 @@ import javax.servlet.http.HttpServletResponse;
 public interface WebSSOProfile {
 
     AuthnRequest initializeSSO(WebSSOProfileOptions options, SAMLMessageStorage messageStorage, HttpServletRequest request, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException;
-
 }

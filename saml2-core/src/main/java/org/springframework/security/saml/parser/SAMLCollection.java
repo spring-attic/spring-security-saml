@@ -63,7 +63,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             out.writeObject(serializedObject);
         } catch (MessageEncodingException e) {
             log.error("Error serializing SAML object", e);
-            throw new IOException("Error serializing SAML object", e);
+            throw new IOException("Error serializing SAML object: " +  e.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             object = items;
         } catch (MessageDecodingException e) {
             log.error("Error de-serializing SAML object", e);
-            throw new IOException("Error de-serializing SAML object", e);
+            throw new IOException("Error de-serializing SAML object: " + e.getMessage());
         }
     }
 }

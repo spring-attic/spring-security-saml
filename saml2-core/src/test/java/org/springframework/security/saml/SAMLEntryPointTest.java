@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class SAMLEntryPointTest {
 
@@ -48,7 +48,6 @@ public class SAMLEntryPointTest {
     HttpSession session;
     HttpServletRequest request;
     HttpServletResponse response;
-    MetadataManager manager;
 
     @Before
     public void initialize() throws Exception {
@@ -134,6 +133,69 @@ public class SAMLEntryPointTest {
         entryPoint.commence(request, response, null);
         verifyMock();
         verify(dispatcher);
+    }
+
+    /**
+     * Test verifies initial values returned from getProfileOptions, when no customization is in place.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testInitialProfileOptions() throws Exception {
+
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        assertTrue(ssoProfileOptions.isAllowProxy());
+        assertTrue(ssoProfileOptions.isIncludeScoping());
+        assertFalse(ssoProfileOptions.getForceAuthN());
+        assertFalse(ssoProfileOptions.getPassive());
+        assertNull(ssoProfileOptions.getBinding());
+
+    }
+
+    /**
+     * Test verifies that values returned from getProfileOptions can be customized.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testDefaultProfileOptions() throws Exception {
+
+        expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso").anyTimes();
+        replayMock();
+
+        WebSSOProfileOptions defaultOptions = new WebSSOProfileOptions();
+        defaultOptions.setIdp("ignoredValue");
+        defaultOptions.setAllowProxy(false);
+        defaultOptions.setIncludeScoping(false);
+        defaultOptions.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+
+        // Set default values
+        entryPoint.setDefaultProfileOptions(defaultOptions);
+
+        // Check that default values are used
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        assertFalse(ssoProfileOptions.isAllowProxy());
+        assertFalse(ssoProfileOptions.isIncludeScoping());
+        assertFalse(ssoProfileOptions.getForceAuthN());
+        assertFalse(ssoProfileOptions.getPassive());
+        assertEquals(SAMLConstants.SAML2_REDIRECT_BINDING_URI, ssoProfileOptions.getBinding());
+
+        // Check that value can't be altered after being set
+        defaultOptions.setIncludeScoping(true);
+        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        assertFalse(ssoProfileOptions.isIncludeScoping());
+
+        // Check that default values can be cleared
+        entryPoint.setDefaultProfileOptions(null);
+        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        assertTrue(ssoProfileOptions.isIncludeScoping());        
+
+        verifyMock();
+
     }
 
     /**

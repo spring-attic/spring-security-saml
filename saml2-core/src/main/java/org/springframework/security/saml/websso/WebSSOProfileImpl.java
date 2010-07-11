@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
  * process Response coming from IDP or IDP initialized SSO. HTTP-POST and HTTP-Redirect
  * bindings are supported.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProfile {
 
@@ -52,7 +52,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param metadata    metadata manager to be used
      * @param keyResolver key manager
      * @param signingKey  alias of key used for signing of assertions by local entity
-     *
      * @throws SAMLException error initializing the profile
      */
     public WebSSOProfileImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws SAMLException {
@@ -67,7 +66,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param messageStorage object capable of storing and retreiving SAML messages
      * @param request        request
      * @param response       response
-     *
      * @throws SAMLException             error initializing SSO
      * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
@@ -100,9 +98,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param idpEntityId       entity ID of the IDP
      * @param assertionConsumer assertion consumer where the IDP should respond
      * @param bindingService    service used to deliver the request
-     *
      * @return authnRequest ready to be sent to IDP
-     *
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retreiving metadata
      */
@@ -114,7 +110,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         request.setForceAuthn(options.getForceAuthN());
 
         buildCommonAttributes(request, bindingService);
-        buildScoping(request, idpEntityId, bindingService, options.isAllowProxy());
+        buildScoping(request, idpEntityId, bindingService, options);
         buildReturnAddress(request, assertionConsumer);
 
         return request;
@@ -126,7 +122,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      *
      * @param request request
      * @param service service to deliver response to
-     *
      * @throws MetadataProviderException error retrieving metadata information
      */
     private void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
@@ -141,26 +136,33 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param request     request to fill
      * @param idpEntityId id of the idp entity
      * @param serviceURI  destination to send the request to
-     * @param allowProxy  if true proxying will be allowed on the request
+     * @param options     options driving generation of the element
      */
-    private void buildScoping(AuthnRequest request, String idpEntityId, SingleSignOnService serviceURI, boolean allowProxy) {
-        SAMLObjectBuilder<IDPEntry> idpEntryBuilder = (SAMLObjectBuilder<IDPEntry>) builderFactory.getBuilder(IDPEntry.DEFAULT_ELEMENT_NAME);
-        IDPEntry idpEntry = idpEntryBuilder.buildObject();
-        idpEntry.setProviderID(idpEntityId);
-        idpEntry.setLoc(serviceURI.getLocation());
+    protected void buildScoping(AuthnRequest request, String idpEntityId, SingleSignOnService serviceURI, WebSSOProfileOptions options) {
 
-        SAMLObjectBuilder<IDPList> idpListBuilder = (SAMLObjectBuilder<IDPList>) builderFactory.getBuilder(IDPList.DEFAULT_ELEMENT_NAME);
-        IDPList idpList = idpListBuilder.buildObject();
-        idpList.getIDPEntrys().add(idpEntry);
+        if (options.isIncludeScoping()) {
 
-        SAMLObjectBuilder<Scoping> scopingBuilder = (SAMLObjectBuilder<Scoping>) builderFactory.getBuilder(Scoping.DEFAULT_ELEMENT_NAME);
-        Scoping scoping = scopingBuilder.buildObject();
-        scoping.setIDPList(idpList);
+            SAMLObjectBuilder<IDPEntry> idpEntryBuilder = (SAMLObjectBuilder<IDPEntry>) builderFactory.getBuilder(IDPEntry.DEFAULT_ELEMENT_NAME);
+            IDPEntry idpEntry = idpEntryBuilder.buildObject();
+            idpEntry.setProviderID(idpEntityId);
+            idpEntry.setLoc(serviceURI.getLocation());
 
-        if (allowProxy) {
-            scoping.setProxyCount(DEFAULT_PROXY_COUNT);
+            SAMLObjectBuilder<IDPList> idpListBuilder = (SAMLObjectBuilder<IDPList>) builderFactory.getBuilder(IDPList.DEFAULT_ELEMENT_NAME);
+            IDPList idpList = idpListBuilder.buildObject();
+            idpList.getIDPEntrys().add(idpEntry);
+
+            SAMLObjectBuilder<Scoping> scopingBuilder = (SAMLObjectBuilder<Scoping>) builderFactory.getBuilder(Scoping.DEFAULT_ELEMENT_NAME);
+            Scoping scoping = scopingBuilder.buildObject();
+            scoping.setIDPList(idpList);
+
+            if (options.isAllowProxy()) {
+                scoping.setProxyCount(DEFAULT_PROXY_COUNT);
+            }
+
+            request.setScoping(scoping);
+
         }
 
-        request.setScoping(scoping);
     }
+
 }

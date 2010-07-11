@@ -56,6 +56,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     private WebSSOProfile webSSOprofile;
     private MetadataManager metadata;
+    private WebSSOProfileOptions defaultOptions;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -83,7 +84,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * The filter will be used in case the URL of the request ends with DEFAULT_FILTER_URL.
      *
      * @param request request used to determine whether to enable this filter
-     *
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
@@ -112,7 +112,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @param request  request
      * @param response response
      * @param e        exception causing this entry point to be invoked
-     *
      * @throws IOException      error sending response
      * @throws ServletException error initializing SAML protocol
      */
@@ -142,25 +141,45 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     /**
      * Method is supposed to populate preferences used to construct the SAML message. Method can be overridden to provide
-     * logic appropriate for given application.
+     * logic appropriate for given application. In case defaultOptions object was set it will be used as basis for construction
+     * and request specific values will be update (idp field).
      *
      * @param request   request
      * @param response  response
      * @param exception exception causing invocation of this entry point (can be null)
-     *
      * @return populated webSSOprofile
-     *
      * @throws MetadataProviderException in case metadata loading fails
      * @throws ServletException          in case any other error occurs
      */
     protected WebSSOProfileOptions getProfileOptions(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws MetadataProviderException, ServletException {
-        String idp = getIDP(request);
-        return new WebSSOProfileOptions(idp, null);
+
+        WebSSOProfileOptions ssoProfileOptions;
+        if (defaultOptions != null) {
+            ssoProfileOptions = defaultOptions.clone();
+        } else {
+            ssoProfileOptions = new WebSSOProfileOptions();
+        }
+        ssoProfileOptions.setIdp(getIDP(request));
+
+        return ssoProfileOptions;
+
+    }
+
+    /**
+     * Sets object which determines default values to be used as basis for construction during getProfileOptions call.
+     *
+     * @param defaultOptions default object to use for options construction
+     */
+    public void setDefaultProfileOptions(WebSSOProfileOptions defaultOptions) {
+        if (defaultOptions != null) {
+            this.defaultOptions = defaultOptions.clone();
+        } else {
+            this.defaultOptions = null;
+        }
     }
 
     /**
      * @param request request
-     *
      * @return true if this HttpRequest should be directly forwarded to the IDP without selection of IDP.
      */
     private boolean isLoginRequest(HttpServletRequest request) {
@@ -173,9 +192,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * IDP in our circle of trust. If it is null or the IDP is not configured then the default IDP is returned.
      *
      * @param request request
-     *
      * @return null if idp is not set or invalid, name of IDP otherwise
-     *
      * @throws MetadataProviderException in case no IDP is configured
      */
     protected String getIDP(HttpServletRequest request) throws MetadataProviderException {
@@ -186,7 +203,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                     return idp;
                 }
             }
-            throw new MetadataProviderException("Given IDP alias is invalid");
+            throw new MetadataProviderException("Given IDP alias is invalid: " + s);
         }
         return metadata.getDefaultIDP();
     }

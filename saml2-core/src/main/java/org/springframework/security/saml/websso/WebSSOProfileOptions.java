@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,25 @@
  */
 package org.springframework.security.saml.websso;
 
+import java.io.Serializable;
+
 /**
  * JavaBean contains properties allowing customization of SAML request message sent to the IDP.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
-public class WebSSOProfileOptions {
+public class WebSSOProfileOptions implements Serializable, Cloneable {
 
     private String idp;
     private String binding;
 
     private boolean passive = false;
     private boolean forceAuthN = false;
+    private boolean includeScoping = true;
     private boolean allowProxy = true;
+
+    public WebSSOProfileOptions() {
+    }
 
     public WebSSOProfileOptions(String idp, String binding) {
         this.idp = idp;
@@ -49,6 +55,8 @@ public class WebSSOProfileOptions {
      * Sets binding to be used for connection to IDP and back. Following values are supported:
      * "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect".
      *
+     * @see org.opensaml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
+     * @see org.opensaml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
      * @param binding binding value
      */
     public void setBinding(String binding) {
@@ -77,6 +85,25 @@ public class WebSSOProfileOptions {
         this.forceAuthN = forceAuthN;
     }
 
+    /**
+     * True if scoping element should be included in the requests sent to IDP.
+     *
+     * @return true if scoping should be included
+     */
+    public boolean isIncludeScoping() {
+        return includeScoping;
+    }
+
+    public void setIncludeScoping(boolean includeScoping) {
+        this.includeScoping = includeScoping;
+    }
+
+    /**
+     * True is proxying should be allowed in requests sent to IDP as part of the generated Scoping element.
+     * Property includeScoping must be enabled for this value to take any effect.
+     *
+     * @return true if proxying is allowed
+     */
     public boolean isAllowProxy() {
         return allowProxy;
     }
@@ -84,4 +111,19 @@ public class WebSSOProfileOptions {
     public void setAllowProxy(boolean allowProxy) {
         this.allowProxy = allowProxy;
     }
+
+    /**
+     * Clones the current object.
+     * 
+     * @return clone
+     */
+    @Override
+    public WebSSOProfileOptions clone() {
+        try {
+            return (WebSSOProfileOptions) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Invalid cloning support", e);
+        }
+    }
+
 }

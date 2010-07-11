@@ -64,6 +64,11 @@
         <!-- OPTIONAL property: In case idpSelectionPath property is not set the user will be redirected to the default IDP -->
         <property name="idpSelectionPath" value="WEB-INF/security/idpSelection.jsp"/>
         <property name="metadata" ref="metadata"/>
+        <property name="defaultProfileOptions">
+            <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+                <property name="includeScoping" value="false" />
+            </bean>
+        </property>
     </bean>
 
     <!-- OPTIONAL bean: The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metatdata there -->

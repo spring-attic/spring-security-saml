@@ -198,7 +198,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("Error validating SAML response");
         }
 
-        return new SAMLCredential((NameID) context.getSubjectNameIdentifier(), subjectAssertion, context.getPeerEntityMetadata().getEntityID(), attributes);
+        NameID nameId = (NameID) context.getSubjectNameIdentifier();
+        if (nameId == null) {
+            throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
+        }
+        
+        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes);
+
     }
 
     private void verifyAssertion(Assertion assertion, AuthnRequest request, BasicSAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {

@@ -121,6 +121,7 @@ public class AbstractProfileBase {
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
         // Entity used for decrypting of encrypted XML parts
         this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
+        decryper.setRootInNewDocument(true);
     }
 
     public AbstractProfileBase(MetadataManager metadata, String signingKey, CredentialResolver keyManager, SignatureTrustEngine trustEngine) {

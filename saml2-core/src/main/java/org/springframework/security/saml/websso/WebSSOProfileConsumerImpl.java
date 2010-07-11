@@ -169,6 +169,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify assertions
         List<Assertion> assertionList = response.getAssertions();
+        List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
+        for (EncryptedAssertion ea : encryptedAssertionList) {
+        	assertionList.add(decryper.decrypt(ea));
+        }
+        
         for (Assertion a : assertionList) {
             verifyAssertion(a, request, context);
             // Find subject assertions

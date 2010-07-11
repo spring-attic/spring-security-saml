@@ -37,6 +37,7 @@ public class SAMLCredential implements Serializable {
     private SAMLObject<NameID> nameID;
     private SAMLObject<Assertion> authenticationAssertion;
     private String IDPEntityID;
+    private String relayState;
 
     /**
      * Collection of attributes received from assertions.
@@ -63,16 +64,30 @@ public class SAMLCredential implements Serializable {
      * @param attributes              attributes collected from received assertions
      */
     public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, List<Attribute> attributes) {
+        this(nameID, authenticationAssertion, IDPEntityID, null, attributes);
+    }
+
+    /**
+     * Created unmodifiable SAML credential object.
+     *
+     * @param nameID                  name ID of the authenticated entity, may be null
+     * @param authenticationAssertion assertion used to validate the entity
+     * @param IDPEntityID             identifier of IDP where the assertion came from
+     * @param relayState              relay state received from IDP in case of unsolicited response
+     * @param attributes              attributes collected from received assertions
+     */
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, String relayState, List<Attribute> attributes) {
         this.nameID = new SAMLObject<NameID>(nameID);
         this.authenticationAssertion = new SAMLObject<Assertion>(authenticationAssertion);
         this.IDPEntityID = IDPEntityID;
+        this.relayState = relayState;
         this.attributes = new SAMLCollection<Attribute>(attributes);
     }
 
     /**
      * NameID returned from IDP as part of the authentication process.
      *
-     * @return name id
+     * @return name id or null if there was no nameID in the assertion used to create the SAMLCredential
      */
     public NameID getNameID() {
         return nameID.getObject();
@@ -124,4 +139,12 @@ public class SAMLCredential implements Serializable {
     public List<Attribute> getAttributes() {
         return Collections.unmodifiableList(attributes.getObject());
     }
+
+    /**
+     * @return null if not set, relayState received from IDP otherwise
+     */
+    public String getRelayState() {
+        return relayState;
+    }
+    
 }

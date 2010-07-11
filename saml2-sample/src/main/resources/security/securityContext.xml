@@ -16,6 +16,17 @@
         <security:custom-filter before="LOGOUT_FILTER" ref="samlLogoutProcessingFilter"/>
     </security:http>
 
+    <!-- Handler deciding where to redirect user after successful login -->
+    <bean id="successRedirectHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+       <property name="defaultTargetUrl" value="/" />
+    </bean>
+    <!--
+    Use the following for interpreting RelayState coming from unsolicited response as redirect URL:
+    <bean id="successRedirectHandler" class="org.springframework.security.saml.SAMLRelayStateSuccessHandler">
+       <property name="defaultTargetUrl" value="/" />
+    </bean>
+    -->
+
     <!-- Register authentication manager with SAML provider -->
     <security:authentication-manager alias="authenticationManager">
         <security:authentication-provider ref="samlAuthenticationProvider"/>
@@ -136,9 +147,9 @@
     <bean id="samlProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter"
           depends-on="bootstrap">
         <property name="authenticationManager" ref="authenticationManager"/>
-        <property name="defaultTargetUrl" value="/"/>
         <property name="filterProcessesUrl" value="/saml/SSO"/>
         <property name="SAMLProcessor" ref="processor"/>
+        <property name="authenticationSuccessHandler" ref="successRedirectHandler" />
     </bean>
 
     <!-- Override default logout processing filter with the one processing SAML messages -->

@@ -84,14 +84,21 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     }
 
     /**
-     * Sets default URL for redirect after login. In case user request a specific page which caused login initialization
-     * the page will be reused.
+     * Use setAuthenticationSuccessHandler method and pass a custom handler instead.
      *
-     * @param url url to use as a default
+     * Creates a new successHandler and sets default URL for redirect after login. In case user requests a specific 
+     * page which caused the login process initialization the original page will be reused. Any existing handler
+     * will be overwritten.
+     *
+     * @see org.springframework.security.saml.SAMLRelayStateSuccessHandler
+     * @see org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
+     * @param url url to use as a default success redirect
      */
+    @Deprecated
     public void setDefaultTargetUrl(String url) {
         SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
         handler.setDefaultTargetUrl(url);
         setAuthenticationSuccessHandler(handler);
     }
+
 }

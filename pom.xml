@@ -44,7 +44,7 @@
             <timezone>+2</timezone>
         </developer>
     </developers>
-    
+
     <contributors>
         <contributor>
             <name>Mandus Elfving</name>
@@ -52,7 +52,7 @@
         <contributor>
             <name>Rob Moore</name>
         </contributor>
-    </contributors>         
+    </contributors>
 
     <issueManagement>
         <system>jira</system>
@@ -139,6 +139,17 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                  <execution>
+                    <goals>
+                       <goal>jar</goal>
+                    </goals>
+                  </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PublicKey;
@@ -44,7 +45,7 @@ import java.security.cert.X509Certificate;
  * <p/>
  * Class also provides convenience methods for loading of certificates and public keys.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class JKSKeyManager {
 
@@ -73,13 +74,22 @@ public class JKSKeyManager {
      * @param storeType type of keystore
      */
     private void initialize(File storeFile, String storePass, String storeType) {
+        InputStream inputStream = null;
         try {
-            InputStream inputStream = new FileInputStream(storeFile);
+            inputStream = new FileInputStream(storeFile);
             ks = KeyStore.getInstance(storeType);
             ks.load(inputStream, storePass.toCharArray());
         } catch (Exception e) {
             log.error("Error initializing key store", e);
             throw new RuntimeException("Error initializing keystore", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.debug("Error closing input stream for keystore.", e);
+                }
+            }
         }
     }
 

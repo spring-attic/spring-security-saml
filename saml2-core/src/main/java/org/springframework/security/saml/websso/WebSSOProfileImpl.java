@@ -86,7 +86,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         // TODO optionally implement support for authncontext, conditions, nameIDpolicy, subject
 
-        sendMessage(messageStorage, idpssoDescriptor.getWantAuthnRequestsSigned(), authRequest, bindingService, response);
+        sendMessage(messageStorage, spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned(), authRequest, bindingService, response);
         return authRequest;
     }
 

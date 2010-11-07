@@ -26,5 +26,6 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
  */
 public interface WebSSOProfileConsumer {
 
-    SAMLCredential processResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException;
+    SAMLCredential processAuthenticationResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException;
+    
 }

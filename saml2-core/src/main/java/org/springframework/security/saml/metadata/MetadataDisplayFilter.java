@@ -24,6 +24,7 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.web.filter.GenericFilterBean;
 import org.w3c.dom.Element;
 
@@ -142,7 +143,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             synchronized (MetadataManager.class) {
                 if (manager.getHostedSPName() == null) {
                     try {
-                        EntityDescriptor descriptor = generator.generateMetadata(request, true, true);
+                        // Use default if not set
+                        if (generator.getEntityPath() == null) {
+                            generator.setEntityPath(getEntityID(request));
+                        }
+                        EntityDescriptor descriptor = generator.generateMetadata();
                         logger.info("Created metadata for system with ID: " + descriptor.getEntityID());
                         MetadataProvider metadataProvider = new MetadataMemoryProvider(descriptor);
                         manager.addMetadataProvider(metadataProvider);
@@ -156,6 +161,13 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         }
     }
 
+    protected String getEntityID(HttpServletRequest request) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(request.getScheme()).append("://").append(request.getServerName());
+        sb.append(":").append(request.getServerPort()).append(request.getContextPath());
+        return sb.toString();
+    }
+
     public String getFilterSuffix() {
         return filterSuffix;
     }
@@ -164,11 +176,14 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         this.filterSuffix = filterSuffix;
     }
 
+    @Required
     public void setManager(MetadataManager manager) {
         this.manager = manager;
     }
 
+    @Required
     public void setGenerator(MetadataGenerator generator) {
         this.generator = generator;
     }
+    
 }

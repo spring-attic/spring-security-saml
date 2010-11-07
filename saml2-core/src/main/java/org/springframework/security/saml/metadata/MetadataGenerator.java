@@ -17,28 +17,35 @@ package org.springframework.security.saml.metadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
+import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.*;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.security.CriteriaSet;
+import org.opensaml.xml.io.Marshaller;
+import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.key.KeyManager;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -51,12 +58,35 @@ import java.util.Map;
  */
 public class MetadataGenerator implements ApplicationContextAware {
 
-    private String serverKeyAlias;
+    private String entityPath;
+
+    private boolean requestSigned = true;
+    private boolean wantAssertionSigned = true;
+    private boolean signMetadata = true;
+
+    private Collection<String> nameID = null;
+    private Collection<String> bindings = null;
+
+    private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
+            NameIDType.TRANSIENT,
+            NameIDType.PERSISTENT,
+            NameIDType.UNSPECIFIED,
+            NameIDType.X509_SUBJECT);
+
+    private static final Collection<String> defaultBindings = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI,
+            SAMLConstants.SAML2_ARTIFACT_BINDING_URI,
+            SAMLConstants.SAML2_REDIRECT_BINDING_URI,
+            SAMLConstants.SAML2_SOAP11_BINDING_URI);
+
     private XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
     private ApplicationContext applicationContext;
-    private CredentialResolver credentialResolver;
+    private KeyManager keyManager;
 
-    private final Log logger = LogFactory.getLog(this.getClass());
+    public MetadataGenerator(KeyManager keyManager) {
+        this.keyManager = keyManager;
+    }
+
+    private final Log logger = LogFactory.getLog(MetadataGenerator.class);
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -65,7 +95,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     protected KeyInfo getServerKeyInfo() {
         try {
             NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = getServerCredential(serverKeyAlias);
+            Credential serverCredential = keyManager.getSPSigningCredential();
             return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
         } catch (org.opensaml.xml.security.SecurityException e) {
             logger.error("Can't obtain key from keystore or generate key info", e);
@@ -73,32 +103,34 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
     }
 
-    private Credential getServerCredential(String entityID) throws org.opensaml.xml.security.SecurityException {
-        CriteriaSet cs = new CriteriaSet();
-        EntityIDCriteria criteria = new EntityIDCriteria(entityID);
-        cs.add(criteria);
-        Iterator<Credential> credentialIterator = credentialResolver.resolve(cs).iterator();
-        if (credentialIterator.hasNext()) {
-            return credentialIterator.next();
-        } else {
-            logger.error("Key with ID '" + entityID + "' wasn't found in the configured key store");
-            throw new SAMLRuntimeException("Key with ID '" + entityID + "' wasn't found in the configured key store");
-        }
-    }
+    public EntityDescriptor generateMetadata() {
 
-    public EntityDescriptor generateMetadata(HttpServletRequest request) {
-        return generateMetadata(request, true, true);
-    }
+        boolean requestSigned = isRequestSigned();
+        boolean assertionSigned = isWantAssertionSigned();
+        boolean signMetadata = isSignMetadata();
+        Collection<String> includedBindings = getBindings();
+        Collection<String> includedNameID = getNameID();
+        String entityID = getEntityPath();
 
-    public EntityDescriptor generateMetadata(HttpServletRequest request, boolean requestSigned, boolean wantAssertionSigned) {
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
-        descriptor.setEntityID(getEntityID(request));
-        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(request, requestSigned, wantAssertionSigned));
+        descriptor.setEntityID(entityID);
+        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityID, requestSigned, assertionSigned, includedBindings, includedNameID));
+
+        if (signMetadata) {
+            try {
+                signSAMLObject(descriptor, keyManager.getSPSigningCredential());
+            } catch (MessageEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return descriptor;
+
     }
 
-    protected SPSSODescriptor buildSPSSODescriptor(HttpServletRequest request, boolean requestSigned, boolean wantAssertionSigned) {
+    protected SPSSODescriptor buildSPSSODescriptor(String entityID, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedBindings, Collection<String> includedNameID) {
+
         SAMLObjectBuilder<SPSSODescriptor> builder = (SAMLObjectBuilder<SPSSODescriptor>) builderFactory.getBuilder(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         SPSSODescriptor spDescriptor = builder.buildObject();
         spDescriptor.setAuthnRequestsSigned(requestSigned);
@@ -106,19 +138,35 @@ public class MetadataGenerator implements ApplicationContextAware {
         spDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
 
         // Name ID
-        spDescriptor.getNameIDFormats().addAll(getNameIDFormat());
+        spDescriptor.getNameIDFormats().addAll(getNameIDFormat(includedNameID));
 
-        // Add POST consumer
-        spDescriptor.getAssertionConsumerServices().add(getPOSTConsumerService(request, true, 0));
-
-        // Add POST logout service
-        spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(request));
+        // Populate bindings
+        int index = 0;
+        boolean isDefault = true;
+        if (includedBindings.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityID, isDefault, index, SAMLConstants.SAML2_POST_BINDING_URI));
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_POST_BINDING_URI));
+            index++;
+            isDefault = false;
+        }
+        if (includedBindings.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityID, isDefault, index, SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            index++;
+            isDefault = false;
+        }
+        if (includedBindings.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
+        }
+        if (includedBindings.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_SOAP11_BINDING_URI));
+        }
 
         // Generate key info
         spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo()));
         spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo()));
 
         return spDescriptor;
+
     }
 
     protected KeyDescriptor getKeyDescriptor(UsageType type, KeyInfo key) {
@@ -129,69 +177,78 @@ public class MetadataGenerator implements ApplicationContextAware {
         return descriptor;
     }
 
-    protected Collection<NameIDFormat> getNameIDFormat() {
+    protected Collection<NameIDFormat> getNameIDFormat(Collection<String> includedNameID) {
         Collection<NameIDFormat> formats = new LinkedList<NameIDFormat>();
 
         SAMLObjectBuilder<NameIDFormat> builder = (SAMLObjectBuilder<NameIDFormat>) builderFactory.getBuilder(NameIDFormat.DEFAULT_ELEMENT_NAME);
         NameIDFormat nameID;
 
-        nameID = builder.buildObject();
-        nameID.setFormat(NameIDType.EMAIL);
-        formats.add(nameID);
+        if (includedNameID.contains(NameIDType.EMAIL)) {
+            nameID = builder.buildObject();
+            nameID.setFormat(NameIDType.EMAIL);
+            formats.add(nameID);
+        }
 
-        nameID = builder.buildObject();
-        nameID.setFormat(NameIDType.TRANSIENT);
-        formats.add(nameID);
+        if (includedNameID.contains(NameIDType.TRANSIENT)) {
+            nameID = builder.buildObject();
+            nameID.setFormat(NameIDType.TRANSIENT);
+            formats.add(nameID);
+        }
 
-        nameID = builder.buildObject();
-        nameID.setFormat(NameIDType.PERSISTENT);
-        formats.add(nameID);
+        if (includedNameID.contains(NameIDType.PERSISTENT)) {
+            nameID = builder.buildObject();
+            nameID.setFormat(NameIDType.PERSISTENT);
+            formats.add(nameID);
+        }
 
-        nameID = builder.buildObject();
-        nameID.setFormat(NameIDType.UNSPECIFIED);
-        formats.add(nameID);
+        if (includedNameID.contains(NameIDType.UNSPECIFIED)) {
+            nameID = builder.buildObject();
+            nameID.setFormat(NameIDType.UNSPECIFIED);
+            formats.add(nameID);
+        }
 
-        nameID = builder.buildObject();
-        nameID.setFormat(NameIDType.X509_SUBJECT);
-        formats.add(nameID);
+        if (includedNameID.contains(NameIDType.X509_SUBJECT)) {
+            nameID = builder.buildObject();
+            nameID.setFormat(NameIDType.X509_SUBJECT);
+            formats.add(nameID);
+        }
 
         return formats;
     }
 
-    protected AssertionConsumerService getPOSTConsumerService(HttpServletRequest request, boolean isDefault, int index) {
+    protected AssertionConsumerService getAssertionConsumerService(String entityID, boolean isDefault, int index, String binding) {
         SAMLObjectBuilder<AssertionConsumerService> builder = (SAMLObjectBuilder<AssertionConsumerService>) builderFactory.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         AssertionConsumerService consumer = builder.buildObject();
         SAMLProcessingFilter samlFilter = getSAMLFilter();
-        consumer.setLocation(getServerURL(request, samlFilter.getFilterProcessesUrl()));
-        consumer.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        consumer.setLocation(getServerURL(entityID, samlFilter.getFilterProcessesUrl()));
+        consumer.setBinding(binding);
         consumer.setIsDefault(isDefault);
         consumer.setIndex(index);
         return consumer;
     }
 
-    protected SingleLogoutService getSingleLogoutService(HttpServletRequest request) {
+    protected SingleLogoutService getSingleLogoutService(String entityID, String binding) {
         SAMLObjectBuilder<SingleLogoutService> builder = (SAMLObjectBuilder<SingleLogoutService>) builderFactory.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
         SingleLogoutService logoutService = builder.buildObject();
         SAMLLogoutProcessingFilter logoutFilter = getSAMLLogoutFilter();
-        logoutService.setLocation(getServerURL(request, logoutFilter.getFilterProcessesUrl()));
-        logoutService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        logoutService.setLocation(getServerURL(entityID, logoutFilter.getFilterProcessesUrl()));
+        logoutService.setBinding(binding);
         return logoutService;
     }
 
     /**
      * Creates URL at which the local server is capable of accepting incoming SAML messages.
      *
-     * @param request       request parsed for server name, port, protocol and context
+     * @param entityID entity ID
      * @param processingURL local context at which processing filter is waiting
-     *
      * @return URL of local server
      */
-    private String getServerURL(HttpServletRequest request, String processingURL) {
+    private String getServerURL(String entityID, String processingURL) {
         StringBuffer result = new StringBuffer();
         if (!processingURL.startsWith("/")) {
             processingURL = "/" + processingURL;
         }
-        result.append(getEntityID(request)).append(processingURL);
+        result.append(entityID).append(processingURL);
         return result.toString();
     }
 
@@ -221,35 +278,100 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
     }
 
-    protected String getEntityID(HttpServletRequest request) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(request.getScheme()).append("://").append(request.getServerName());
-        sb.append(":").append(request.getServerPort()).append(request.getContextPath());
-        return sb.toString();
-    }
-
-    public void setCredentialResolver(CredentialResolver credentialResolver) {
-        this.credentialResolver = credentialResolver;
-    }
-
     /**
-     * Alias of key used for signing of service provider SAML messages.
+     * Signs the given SAML message if it a {@link org.opensaml.common.SignableSAMLObject} and this encoder has signing credentials.
      *
-     * @return key alias
+     * @param outboundSAML      message to sign
+     * @param signingCredential credential to sign with
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     *          thrown if there is a problem marshalling or signing the outbound message
      */
-    public String getServerKeyAlias() {
-        return serverKeyAlias;
-    }
+    @SuppressWarnings("unchecked")
+    protected void signSAMLObject(SAMLObject outboundSAML, Credential signingCredential) throws MessageEncodingException {
 
-    /**
-     * Alias in the keystore used for signing of messages sent by this service provider
-     *
-     * @param serverKeyAlias alias of an entry in the configured key store
-     */
-    public void setServerKeyAlias(String serverKeyAlias) {
-        if (serverKeyAlias == null) {
-            throw new IllegalArgumentException("ServerKeyAlias must be set");
+        if (outboundSAML instanceof SignableSAMLObject && signingCredential != null) {
+            SignableSAMLObject signableMessage = (SignableSAMLObject) outboundSAML;
+
+            XMLObjectBuilder<Signature> signatureBuilder = Configuration.getBuilderFactory().getBuilder(
+                    Signature.DEFAULT_ELEMENT_NAME);
+            Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+
+            signature.setSigningCredential(signingCredential);
+            try {
+                //TODO pull SecurityConfiguration from SAMLMessageContext?  needs to be added
+                //TODO pull binding-specific keyInfoGenName from encoder setting, etc?
+                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, null);
+            } catch (org.opensaml.xml.security.SecurityException e) {
+                throw new MessageEncodingException("Error preparing signature for signing", e);
+            }
+
+            signableMessage.setSignature(signature);
+
+            try {
+                Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(signableMessage);
+                if (marshaller == null) {
+                    throw new MessageEncodingException("No marshaller registered for "
+                            + signableMessage.getElementQName() + ", unable to marshall in preperation for signing");
+                }
+                marshaller.marshall(signableMessage);
+
+                Signer.signObject(signature);
+            } catch (MarshallingException e) {
+                logger.error("Unable to marshall protocol message in preparation for signing", e);
+                throw new MessageEncodingException("Unable to marshall protocol message in preparation for signing", e);
+            } catch (SignatureException e) {
+                logger.error("Unable to sign protocol message", e);
+                throw new MessageEncodingException("Unable to sign protocol message", e);
+            }
         }
-        this.serverKeyAlias = serverKeyAlias;
     }
+
+    public boolean isRequestSigned() {
+        return requestSigned;
+    }
+
+    public void setRequestSigned(boolean requestSigned) {
+        this.requestSigned = requestSigned;
+    }
+
+    public boolean isWantAssertionSigned() {
+        return wantAssertionSigned;
+    }
+
+    public void setWantAssertionSigned(boolean wantAssertionSigned) {
+        this.wantAssertionSigned = wantAssertionSigned;
+    }
+
+    public boolean isSignMetadata() {
+        return signMetadata;
+    }
+
+    public void setSignMetadata(boolean signMetadata) {
+        this.signMetadata = signMetadata;
+    }
+
+    public Collection<String> getNameID() {
+        return nameID == null ? defaultNameID : nameID;
+    }
+
+    public void setNameID(Collection<String> nameID) {
+        this.nameID = nameID;
+    }
+
+    public Collection<String> getBindings() {
+        return bindings == null ? defaultBindings : bindings;
+    }
+
+    public void setBindings(Collection<String> bindings) {
+        this.bindings = bindings;
+    }
+
+    public String getEntityPath() {
+        return entityPath;
+    }
+
+    public void setEntityPath(String entityPath) {
+        this.entityPath = entityPath;
+    }
+
 }

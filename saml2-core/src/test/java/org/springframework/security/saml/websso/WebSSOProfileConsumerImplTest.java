@@ -24,12 +24,13 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.security.credential.CredentialResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import static org.easymock.EasyMock.*;
@@ -46,7 +47,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     MetadataManager manager;
     XMLObjectBuilderFactory builderFactory;
     WebSSOProfileTestHelper helper;
-    CredentialResolver resolver;
+    KeyManager resolver;
+    SAMLProcessor processor;
 
     @Before
     public void initialize() throws Exception {
@@ -54,8 +56,9 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         context = new ClassPathXmlApplicationContext(resName);
         storage = createMock(SAMLMessageStorage.class);
         manager = context.getBean("metadata", MetadataManager.class);
-        resolver = context.getBean("keyResolver", CredentialResolver.class);
-        profile = new WebSSOProfileConsumerImpl(manager, resolver, "apollo");
+        resolver = context.getBean("keyManager", KeyManager.class);
+        processor = context.getBean("processor", SAMLProcessor.class);
+        profile = new WebSSOProfileConsumerImpl(processor, manager, resolver, null);
         messageContext = new BasicSAMLMessageContext();
         builderFactory = Configuration.getBuilderFactory();
         helper = new WebSSOProfileTestHelper(builderFactory);
@@ -70,7 +73,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     @Test(expected = SAMLException.class)
     public void testMissingResponse() throws Exception {
         messageContext.setInboundMessage(null);
-        profile.processResponse(messageContext, storage);
+        profile.processAuthenticationResponse(messageContext, storage);
     }
 
     /**
@@ -83,7 +86,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         SAMLObjectBuilder<AuthnRequest> builder = (SAMLObjectBuilder<AuthnRequest>) builderFactory.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest authnRequest = builder.buildObject();
         messageContext.setInboundMessage(authnRequest);
-        profile.processResponse(messageContext, storage);
+        profile.processAuthenticationResponse(messageContext, storage);
     }
 
     /**

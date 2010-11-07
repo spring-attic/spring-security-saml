@@ -41,6 +41,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      * @param messageStore SAML message storage to be used during token evaluation
      */
     public SAMLAuthenticationToken(BasicSAMLMessageContext credentials, SAMLMessageStorage messageStore) {
+
         super(null);
 
         if (credentials == null || messageStore == null) {
@@ -50,6 +51,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
         this.credentials = credentials;
         this.messageStore = messageStore;
         setAuthenticated(false);
+
     }
 
     /**
@@ -91,4 +93,5 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
         }
         super.setAuthenticated(false);
     }
+    
 }

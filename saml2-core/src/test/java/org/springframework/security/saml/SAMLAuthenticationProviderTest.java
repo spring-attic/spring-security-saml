@@ -29,6 +29,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
+import org.springframework.security.saml.log.SAMLEmptyLogger;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
@@ -54,6 +55,7 @@ public class SAMLAuthenticationProviderTest {
     public void initialize() {
         consumer = createMock(WebSSOProfileConsumer.class);
         provider = new SAMLAuthenticationProvider(consumer);
+        provider.setSamlLogger(new SAMLEmptyLogger());
         messageStorage = createMock(SAMLMessageStorage.class);
         nameID = createMock(NameID.class);
         assertion = createMock(Assertion.class);
@@ -81,12 +83,12 @@ public class SAMLAuthenticationProviderTest {
         SAMLMessageStorage store = token.getMessageStore();
         SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
 
-        expect(consumer.processResponse(context, store)).andReturn(result);
+        expect(consumer.processAuthenticationResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
 
         DateTime expiry = new DateTime().plusHours(4);
         AuthnStatement as = createMock(AuthnStatement.class);
-        expect(assertion.getAuthnStatements()).andReturn(Arrays.asList(as));
+        expect(assertion.getAuthnStatements()).andReturn(Arrays.asList(as)).anyTimes();
         expect(as.getSessionNotOnOrAfter()).andReturn(expiry);
 
         replay(as);
@@ -119,7 +121,7 @@ public class SAMLAuthenticationProviderTest {
         SAMLMessageStorage store = token.getMessageStore();
         SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
 
-        expect(consumer.processResponse(context, store)).andReturn(result);
+        expect(consumer.processAuthenticationResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
         expect(assertion.getAuthnStatements()).andReturn(new LinkedList<AuthnStatement>());
         expect(details.loadUserBySAML(result)).andReturn(new User("test", "test", true, true, true, true, new GrantedAuthority[]{new GrantedAuthorityImpl("role1"), new GrantedAuthorityImpl("role2")}));
@@ -149,7 +151,7 @@ public class SAMLAuthenticationProviderTest {
         SAMLMessageStorage store = token.getMessageStore();
         SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
 
-        expect(consumer.processResponse(context, store)).andThrow(new SAMLException("Error"));
+        expect(consumer.processAuthenticationResponse(context, store)).andThrow(new SAMLException("Error"));
         expect(nameID.getValue()).andReturn("Name");
 
         replayMock();

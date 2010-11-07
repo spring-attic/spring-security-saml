@@ -16,8 +16,11 @@ package org.springframework.security.saml.websso;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -49,6 +52,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     HttpServletResponse response;
 
     ServletOutputStream output;
+    BasicSAMLMessageContext samlContext;
 
     @Before
     public void initialize() throws Exception {
@@ -66,6 +70,9 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         };
         expect(response.getOutputStream()).andReturn(output).anyTimes();
         storage = createMock(SAMLMessageStorage.class);
+        samlContext = new BasicSAMLMessageContext();
+        samlContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
+        samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
     }
 
     /**
@@ -78,7 +85,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         manager.setHostedSPName(null);
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -91,7 +98,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     public void testInvalidIDPNameSet() throws Exception {
         options.setIdp("testNonExistent");
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -107,7 +114,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
             manager.removeMetadataProvider(manager.getProviders().iterator().next());
         }
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -121,7 +128,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         manager.setHostedSPName("http://localhost:8082/missingDescriptor");
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -135,7 +142,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setIdp(null);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -150,7 +157,8 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertTrue(authnRequest.isSigned());
         assertNotNull(authnRequest.getSignature());
@@ -170,8 +178,9 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
 
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
 
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         assertNotNull(authnRequest.getID());
         assertNotNull(authnRequest.getIssueInstant());
         assertEquals(false, authnRequest.isForceAuthn());
@@ -193,7 +202,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setBinding("invalid");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -207,7 +216,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setIdp("http://localhost:8080/noBinding");
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -221,7 +230,8 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setIdp("http://localhost:8080/noSign");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertTrue(!authnRequest.isSigned());
     }
@@ -235,7 +245,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     public void testNoAvailableBinding() throws Exception {
         options.setIdp("http://localhost:8080/nonoBinding");
         replyMock();
-        profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
     }
 
@@ -249,7 +259,8 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setPassive(true);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(false, authnRequest.isForceAuthn());
         assertEquals(true, authnRequest.isPassive());
@@ -266,7 +277,8 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setForceAuthN(true);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(true, authnRequest.isForceAuthn());
         assertEquals(false, authnRequest.isPassive());
@@ -283,7 +295,8 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         options.setAllowProxy(false);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        AuthnRequest authnRequest = profile.initializeSSO(options, storage, request, response);
+        profile.sendAuthenticationRequest(samlContext, options, storage);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(false, authnRequest.isForceAuthn());
         assertEquals(false, authnRequest.isPassive());

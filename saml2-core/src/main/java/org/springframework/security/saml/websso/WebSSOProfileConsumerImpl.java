@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -27,7 +28,6 @@ import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
@@ -37,7 +37,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import java.util.LinkedList;
@@ -55,9 +57,9 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerImpl.class);
 
     /**
-     * Maximum time between user's authentication and current time
+     * Maximum time between users authentication and processing of the AuthNResponse message.
      */
-    private static int MAX_AUTHENTICATION_TIME = 7200;
+    private int maxAuthenticationAge = 7200;
 
     protected static final String BEARER_CONFIRMATION = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
 
@@ -65,13 +67,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * Initializes the authentication provider
      *
      * @param metadata    metadata manager
-     * @param keyResolver entity allowing resolving private keys of the service provider
-     * @param signingKey  signing key
-     *
+     * @param keyManager entity allowing resolving private keys of the service provider
+     * @param artifactMap storage place for artifacts when using the artifact binding
      * @throws MetadataProviderException error initializing the provider
      */
-    public WebSSOProfileConsumerImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws MetadataProviderException {
-        super(metadata, signingKey, keyResolver, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()));
+    public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws MetadataProviderException {
+        super(processor, metadata, keyManager, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()), artifactMap);
     }
 
     /**
@@ -79,15 +80,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * and in case no errors are found the SAMLCredential is returned.
      *
      * @param context context including response object
-     *
      * @return SAMLCredential with information about user
-     *
      * @throws SAMLException       in case the response is invalid
      * @throws org.opensaml.xml.security.SecurityException
      *                             in the signature on response can't be verified
      * @throws ValidationException in case the response structure is not conforming to the standard
      */
-    public SAMLCredential processResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    public SAMLCredential processAuthenticationResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
 
         AuthnRequest request = null;
         SAMLObject message = context.getInboundSAMLMessage();
@@ -119,8 +118,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify issue time
         DateTime time = response.getIssueInstant();
-        if (!isDateTimeSkewValid(DEFAULT_RESPONSE_SKEW, time)) {
-            log.debug("Response issue time is either too old or with date in the future");
+        if (!isDateTimeSkewValid(getResponseSkew(), time)) {
+            log.debug("Response issue time is either too old or with date in the future.");
             throw new SAMLException("Error validating SAML response");
         }
 
@@ -147,7 +146,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             boolean found = false;
             for (AssertionConsumerService service : services) {
                 if (response.getDestination().equals(service.getLocation()) &&
-                    service.getBinding().equals(context.getCommunicationProfileId())) {
+                        service.getBinding().equals(context.getCommunicationProfileId())) {
                     found = true;
                     break;
                 }
@@ -171,9 +170,9 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         List<Assertion> assertionList = response.getAssertions();
         List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
         for (EncryptedAssertion ea : encryptedAssertionList) {
-        	assertionList.add(decryper.decrypt(ea));
+            assertionList.add(decryper.decrypt(ea));
         }
-        
+
         for (Assertion a : assertionList) {
             verifyAssertion(a, request, context);
             // Find subject assertions
@@ -207,15 +206,15 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (nameId == null) {
             throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
         }
-        
+
         return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes);
 
     }
 
     private void verifyAssertion(Assertion assertion, AuthnRequest request, BasicSAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
         // Verify storage time skew
-        if (!isDateTimeSkewValid(MAX_ASSERTION_TIME, assertion.getIssueInstant())) {
-            log.debug("Authentication statement is too old to be used", assertion.getIssueInstant());
+        if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
+            log.debug("Authentication statement is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
             throw new CredentialsExpiredException("Users authentication credential is too old to be used");
         }
 
@@ -242,7 +241,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param subject subject to validate
      * @param request request
      * @param context context
-     *
      * @throws SAMLException       error validating the object
      * @throws DecryptionException in case the NameID can't be decrypted
      */
@@ -322,7 +320,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param signature signature to verify
      * @param context   context
-     *
      * @throws SAMLException       signature missing although required
      * @throws org.opensaml.xml.security.SecurityException
      *                             signature can't be validated
@@ -392,12 +389,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param auth    statement to check
      * @param context message context
-     *
      * @throws AuthenticationException in case the statement is invalid
      */
     protected void verifyAuthenticationStatement(AuthnStatement auth, BasicSAMLMessageContext context) throws AuthenticationException {
         // Validate that user wasn't authenticated too long time ago
-        if (!isDateTimeSkewValid(MAX_AUTHENTICATION_TIME, auth.getAuthnInstant())) {
+        if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
             log.debug("Authentication statement is too old to be used", auth.getAuthnInstant());
             throw new CredentialsExpiredException("Users authentication data is too old");
         }
@@ -417,4 +413,23 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
         }
     }
+
+    /**
+     * Maximum time between authentication of user and processing of an authentication statement.
+     *
+     * @return max authentication age, defaults to 7200
+     */
+    public int getMaxAuthenticationAge() {
+        return maxAuthenticationAge;
+    }
+
+    /**
+     * Sets maximum time between users authentication and processing of an authentication statement.
+     *
+     * @param maxAuthenticationAge authentication age
+     */
+    public void setMaxAuthenticationAge(int maxAuthenticationAge) {
+        this.maxAuthenticationAge = maxAuthenticationAge;
+    }
+
 }

@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,16 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-
-import javax.servlet.http.HttpServletRequest;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
 
 /**
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public interface SAMLProcessor {
 
-    BasicSAMLMessageContext processSSO(HttpServletRequest request) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
+    BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
+    BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
+    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign, String binding) throws SAMLException, MessageEncodingException;
+    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign) throws SAMLException, MessageEncodingException;
+    
 }

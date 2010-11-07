@@ -42,5 +42,6 @@ public interface SAMLUserDetailsService {
      *
      * @throws UsernameNotFoundException if the user details object can't be populated
      */
-    UserDetails loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException;
+    Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException;
+
 }

@@ -22,6 +22,7 @@ import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
+import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
@@ -49,6 +51,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
     private WebSSOProfileConsumer consumer;
 
     private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
+
+    protected SAMLLogger samlLogger;
+
     private SAMLUserDetailsService userDetails;
 
     /**
@@ -67,9 +72,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * and assertion used to verify the user as credential (SAMLCredential object) is created and set as authenticated.
      *
      * @param authentication SAMLAuthenticationToken to verify
-     *
      * @return UsernamePasswordAuthenticationToken with name as NameID value and SAMLCredential as credential object
-     *
      * @throws AuthenticationException user can't be authenticated due to an error
      */
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -84,17 +87,21 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         SAMLCredential credential;
 
         try {
-            credential = consumer.processResponse(context, store);
+            credential = consumer.processAuthenticationResponse(context, store);
         } catch (SAMLException e) {
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message", e);
         } catch (ValidationException e) {
             log.debug("Error validating signature", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context);
             throw new AuthenticationServiceException("Error validating SAML message signature", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
             log.debug("Error validating signature", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context);
             throw new AuthenticationServiceException("Error validating SAML message signature", e);
         } catch (DecryptionException e) {
             log.debug("Error decrypting SAML message", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context);
             throw new AuthenticationServiceException("Error decrypting SAML message", e);
         }
 
@@ -105,7 +112,11 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         Date expiration = getExpirationDate(credential);
         ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, entitlements);
         result.setDetails(userDetails);
+
+        samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.SUCCESS, context, result, null);
+
         return result;
+
     }
 
     /**
@@ -117,7 +128,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * If no SAMLUserDetailsService is specified null is returned.
      *
      * @param credential credential to load user from
-     *
      * @return user details object corresponding to the SAML credential or null if data can't be loaded
      */
     protected Object getUserDetails(SAMLCredential credential) {
@@ -135,7 +145,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      *
      * @param credential credential used to authenticate user
      * @param userDetail loaded user details, can be null
-     *
      * @return principal to store inside Authentication object
      */
     protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
@@ -151,7 +160,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      *
      * @param credential credential used to authenticate user during SSO
      * @param userDetail user detail object returned from getUserDetails call
-     *
      * @return collection of users entitlements, mustn't be null
      */
     protected Collection<GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
@@ -167,7 +175,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * (only one in most cases) and computes the expiration based on sessionNotOnOrAfter field.
      *
      * @param credential credential to use for expiration parsing.
-     *
      * @return null if no expiration is present, expiration time onOrAfter which the token is not valid anymore
      */
     protected Date getExpirationDate(SAMLCredential credential) {
@@ -207,10 +214,15 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
      * SAMLAuthenticationToken is the only supported token.
      *
      * @param aClass class to check for support
-     *
      * @return true if class is of type SAMLAuthenticationToken
      */
     public boolean supports(Class aClass) {
         return SAMLAuthenticationToken.class.isAssignableFrom(aClass);
     }
+
+    @Required
+    public void setSamlLogger(SAMLLogger samlLogger) {
+        this.samlLogger = samlLogger;
+    }
+
 }

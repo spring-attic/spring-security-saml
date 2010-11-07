@@ -1,4 +1,5 @@
-/* Copyright 2009 Vladimir Schäfer
+/*
+ * Copyright 2009-2010 Vladimir Schäfer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,10 @@
  */
 package org.springframework.security.saml.util;
 
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -29,7 +32,7 @@ import java.util.List;
  */
 public class SAMLUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);
+    private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);   
 
     /**
      * Returns assertion consumer service of the given SP for the given binding. If the specified binding
@@ -162,4 +165,41 @@ public class SAMLUtil {
         }
         throw new MetadataProviderException("No SSO binding found for IDP");
     }
+
+    public static IDPSSODescriptor getIDPSSODescriptor(EntityDescriptor idpEntityDescriptor) throws MessageDecodingException {
+
+        IDPSSODescriptor idpSSODescriptor = idpEntityDescriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
+        if (idpSSODescriptor == null) {
+            log.error("Could not find an IDPSSODescriptor in metadata.");
+            throw new MessageDecodingException("Could not find an IDPSSODescriptor in metadata.");
+        }
+
+        return idpSSODescriptor;
+
+    }
+
+    public static ArtifactResolutionService getArtifactResolutionService(IDPSSODescriptor idpssoDescriptor, int endpointIndex) throws MessageDecodingException {
+
+        List<ArtifactResolutionService> artifactResolutionServices = idpssoDescriptor.getArtifactResolutionServices();
+        if (artifactResolutionServices == null || artifactResolutionServices.size() == 0) {
+            log.error("Could not find any artifact resolution services in metadata.");
+            throw new MessageDecodingException("Could not find any artifact resolution services in metadata.");
+        }
+
+        ArtifactResolutionService artifactResolutionService = null;
+        for (ArtifactResolutionService ars : artifactResolutionServices) {
+            if (ars.getIndex() == endpointIndex) {
+                artifactResolutionService = ars;
+                break;
+            }
+        }
+
+        if (artifactResolutionService == null) {
+            throw new MessageDecodingException("Could not find artifact resolution service with index " + endpointIndex + " in IDP data.");
+        }
+
+        return artifactResolutionService;
+        
+    }
+
 }

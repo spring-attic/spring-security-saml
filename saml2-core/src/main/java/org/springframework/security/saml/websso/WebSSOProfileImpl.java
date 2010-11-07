@@ -17,23 +17,22 @@ package org.springframework.security.saml.websso;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.IDPEntry;
-import org.opensaml.saml2.core.IDPList;
-import org.opensaml.saml2.core.Scoping;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.artifact.SAMLArtifactMap;
+import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.security.credential.CredentialResolver;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 
 /**
  * Class implements WebSSO profile and offers capabilities for SP initialized SSO and
@@ -49,13 +48,14 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     /**
      * Initializes the profile.
      *
+     * @param processor   saml processor
      * @param metadata    metadata manager to be used
-     * @param keyResolver key manager
-     * @param signingKey  alias of key used for signing of assertions by local entity
+     * @param keyManager  key manager
+     * @param artifactMap storage place for artifacts when using the artifact binding
      * @throws SAMLException error initializing the profile
      */
-    public WebSSOProfileImpl(MetadataManager metadata, CredentialResolver keyResolver, String signingKey) throws SAMLException {
-        super(metadata, signingKey, keyResolver);
+    public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws SAMLException {
+        super(processor, metadata, keyManager, artifactMap);
     }
 
     /**
@@ -64,18 +64,18 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      *
      * @param options        values specified by caller to customize format of sent request
      * @param messageStorage object capable of storing and retreiving SAML messages
-     * @param request        request
-     * @param response       response
      * @throws SAMLException             error initializing SSO
      * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
      */
-    public AuthnRequest initializeSSO(WebSSOProfileOptions options, SAMLMessageStorage messageStorage, HttpServletRequest request, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendAuthenticationRequest(BasicSAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+
         // Initialize IDP and SP
         String idpId = options.getIdp();
         if (idpId == null) {
             idpId = metadata.getDefaultIDP();
         }
+
         IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
         SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
         String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
@@ -84,10 +84,18 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         SingleSignOnService bindingService = SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, binding);
         AuthnRequest authRequest = getAuthnRequest(options, idpId, assertionConsubmerForBinding, bindingService);
 
-        // TODO optionally implement support for authncontext, conditions, nameIDpolicy, subject
+        // TODO optionally implement support for conditions, subject
 
-        sendMessage(messageStorage, spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned(), authRequest, bindingService, response);
-        return authRequest;
+        context.setCommunicationProfileId(bindingService.getBinding());
+        context.setOutboundMessage(authRequest);
+        context.setOutboundSAMLMessage(authRequest);
+        context.setPeerEntityEndpoint(bindingService);
+        context.setPeerEntityId(idpssoDescriptor.getID());
+        context.setPeerEntityRoleMetadata(idpssoDescriptor);
+
+        processor.sendMessage(context, spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned());
+        messageStorage.storeMessage(authRequest.getID(), authRequest);
+
     }
 
     /**
@@ -110,10 +118,65 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         request.setForceAuthn(options.getForceAuthN());
 
         buildCommonAttributes(request, bindingService);
+        builNameIDPolicy(request, options);
+        buildAuthnContext(request, options);
         buildScoping(request, idpEntityId, bindingService, options);
         buildReturnAddress(request, assertionConsumer);
 
-        return request;
+           return request;
+    }
+
+    /**
+     * Fills the request with required AuthNContext according to selected options.
+     *
+     * @param request     request to fill
+     * @param options     options driving generation of the element
+     */
+    protected void builNameIDPolicy(AuthnRequest request, WebSSOProfileOptions options) {
+
+        if (options.getNameID() != null) {
+            SAMLObjectBuilder<NameIDPolicy> builder = (SAMLObjectBuilder<NameIDPolicy>) builderFactory.getBuilder(NameIDPolicy.DEFAULT_ELEMENT_NAME);
+            NameIDPolicy nameIDPolicy = builder.buildObject();
+            nameIDPolicy.setFormat(options.getNameID());
+            nameIDPolicy.setAllowCreate(options.isAllowCreate());
+            nameIDPolicy.setSPNameQualifier(getSPNameQualifier());
+            request.setNameIDPolicy(nameIDPolicy);
+        }
+
+    }
+
+    protected String getSPNameQualifier() {
+        return metadata.getHostedSPName();
+    }
+
+    /**
+     * Fills the request with required AuthNContext according to selected options.
+     *
+     * @param request     request to fill
+     * @param options     options driving generation of the element
+     */
+    protected void buildAuthnContext(AuthnRequest request, WebSSOProfileOptions options) {
+
+        Collection<String> contexts = options.getAuthnContexts();
+        if (contexts != null && contexts.size() > 0) {
+
+            SAMLObjectBuilder<RequestedAuthnContext> builder = (SAMLObjectBuilder<RequestedAuthnContext>) builderFactory.getBuilder(RequestedAuthnContext.DEFAULT_ELEMENT_NAME);
+            RequestedAuthnContext authnContext = builder.buildObject();
+            authnContext.setComparison(options.getAuthnContextComparison());
+
+            for (String context : contexts) {
+                
+                SAMLObjectBuilder<AuthnContextClassRef> contextRefBuilder = (SAMLObjectBuilder<AuthnContextClassRef>) builderFactory.getBuilder(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
+                AuthnContextClassRef authnContextClassRef = contextRefBuilder.buildObject();
+                authnContextClassRef.setAuthnContextClassRef(context);
+                authnContext.getAuthnContextClassRefs().add(authnContextClassRef);
+
+            }
+
+            request.setRequestedAuthnContext(authnContext);
+
+        }
+
     }
 
     /**

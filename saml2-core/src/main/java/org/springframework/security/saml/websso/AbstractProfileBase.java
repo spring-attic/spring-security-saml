@@ -15,15 +15,14 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
-import org.opensaml.common.*;
+import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
-import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
@@ -33,16 +32,11 @@ import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
 import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
 import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
@@ -53,11 +47,10 @@ import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.util.SLF4JLogChute;
+import org.springframework.security.saml.processor.SAMLProcessor;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Random;
 
@@ -69,74 +62,95 @@ import java.util.Random;
 public class AbstractProfileBase {
 
     /**
-     * Maximum time from response creation when the message is deemed valid
+     * Maximum time from response creation when the message is deemed valid.
      */
-    protected static int DEFAULT_RESPONSE_SKEW = 60;
+    private int responseSkew = 60;
 
     /**
      * Maximum time between assertion creation and current time when the assertion is usable
      */
-    protected static int MAX_ASSERTION_TIME = 3000;
+    private int maxAssertionTime = 3000;
 
     /**
      * Class logger.
      */
     protected final static Logger log = LoggerFactory.getLogger(WebSSOProfileImpl.class);
+
     protected MetadataManager metadata;
-    protected CredentialResolver keyManager;
     protected XMLObjectBuilderFactory builderFactory;
-    protected String signingKey;
-    protected VelocityEngine velocityEngine;
     protected Decrypter decryper;
+    protected SAMLProcessor processor;
 
     /**
      * Trust engine used to verify SAML signatures
      */
     protected SignatureTrustEngine trustEngine;
 
-    public AbstractProfileBase(MetadataManager metadata, String signingKey, CredentialResolver keyManager) {
+    /**
+     * Artifact map.
+     */
+    protected SAMLArtifactMap artifactMap;
+
+    public AbstractProfileBase(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) {
+
+        this.processor = processor;
         this.metadata = metadata;
-        this.signingKey = signingKey;
-        this.keyManager = keyManager;
+        this.artifactMap = artifactMap;
         this.builderFactory = Configuration.getBuilderFactory();
-        try {
-            velocityEngine = new VelocityEngine();
-            velocityEngine.setProperty(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
-            velocityEngine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8");
-            velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-            velocityEngine.setProperty("classpath.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-            velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new SLF4JLogChute());
-            velocityEngine.init();
-        } catch (Exception e) {
-            log.debug("Error initializing velocity engine", e);
-            throw new RuntimeException("Error configuring velocity", e);
-        }
 
         // Decryption key
-        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(getSPSigningCredential());
+        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(keyManager.getSPSigningCredential());
+
         // Way to obtain encrypted key info from XML
         ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
         encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+
         // Entity used for decrypting of encrypted XML parts
         this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
         decryper.setRootInNewDocument(true);
+
     }
 
-    public AbstractProfileBase(MetadataManager metadata, String signingKey, CredentialResolver keyManager, SignatureTrustEngine trustEngine) {
-        this(metadata, signingKey, keyManager);
+    /**
+     * Sets maximum difference between local time and time of the assertion creation which still allows
+     * message to be processed. Basically determines maximum difference between clocks of the IDP and SP machines.
+     * Defaults to 60.
+     *
+     * @param responseSkew response skew time (in seconds)
+     */
+    public void setResponseSkew(int responseSkew) {
+        this.responseSkew = responseSkew;
+    }
+
+    /**
+     * @return response skew time (in seconds)
+     */
+    public int getResponseSkew() {
+        return responseSkew;
+    }
+
+    /**
+     * Maximum time between assertion creation and current time when the assertion is usable
+     * @return max assertion time
+     */
+    public int getMaxAssertionTime() {
+        return maxAssertionTime;
+    }
+
+    /**
+     * Customizes max assertion time between assertion creation and it's usability. Default to 3000 seconds.
+     *
+     * @param maxAssertionTime time in seconds
+     */
+    public void setMaxAssertionTime(int maxAssertionTime) {
+        this.maxAssertionTime = maxAssertionTime;
+    }
+
+    public AbstractProfileBase(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SignatureTrustEngine trustEngine, SAMLArtifactMap artifactMap) {
+        this(processor, metadata, keyManager, artifactMap);
         this.trustEngine = trustEngine;
-    }
-
-    protected MessageEncoder getEncoder(String binding) throws SAMLException {
-        if (binding.equals(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            return new HTTPPostEncoder(velocityEngine, "/templates/saml2-post-binding.vm");
-        } else if (binding.equals(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
-            return new HTTPRedirectDeflateEncoder();
-        } else {
-            throw new SAMLException("Given binding is not supported");
-        }
     }
 
     protected IDPSSODescriptor getIDPDescriptor(String idpId) throws MetadataProviderException {
@@ -160,26 +174,6 @@ public class AbstractProfileBase {
             throw new MetadataProviderException("There was no SP metadata with ID " + metadata.getHostedSPName() + " found, please check metadata bean in your Spring configuration");
         }
         return spDescriptor;
-    }
-
-    protected void sendMessage(SAMLMessageStorage messageStorage, boolean sign, RequestAbstractType message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
-        sendMessage(sign, message, endpoint, response);
-        messageStorage.storeMessage(message.getID(), message);
-    }
-
-    protected void sendMessage(boolean sign, SignableSAMLObject message, Endpoint endpoint, HttpServletResponse response) throws SAMLException, MessageEncodingException {
-        BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject> samlContext = new BasicSAMLMessageContext<SAMLObject, SignableSAMLObject, SAMLObject>();
-        samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
-        samlContext.setOutboundMessage(message);
-        samlContext.setOutboundSAMLMessage(message);
-        samlContext.setPeerEntityEndpoint(endpoint);
-
-        if (sign) {
-            samlContext.setOutboundSAMLMessageSigningCredential(getSPSigningCredential());
-        }
-
-        MessageEncoder encoder = getEncoder(endpoint.getBinding());
-        encoder.encode(samlContext);
     }
 
     protected Status getStatus(String code, String statusMessage) {
@@ -223,23 +217,6 @@ public class AbstractProfileBase {
     }
 
     /**
-     * Returns Credential object used to sign the message issued by this entity.
-     * Public, X509 and Private keys are set in the credential.
-     *
-     * @return credential
-     */
-    protected Credential getSPSigningCredential() {
-        try {
-            CriteriaSet cs = new CriteriaSet();
-            EntityIDCriteria criteria = new EntityIDCriteria(signingKey);
-            cs.add(criteria);
-            return keyManager.resolveSingle(cs);
-        } catch (org.opensaml.xml.security.SecurityException e) {
-            throw new SAMLRuntimeException("Can't obtain SP signing key", e);
-        }
-    }
-
-    /**
      * Generates random ID to be used as Request/Response ID.
      *
      * @return random ID
@@ -276,7 +253,7 @@ public class AbstractProfileBase {
 
     protected boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
         long current = new Date().getTime();
-        int futureSkew = 3;
-        return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + futureSkew * 1000);
+        return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + skewInSec * 1000);
     }
+
 }

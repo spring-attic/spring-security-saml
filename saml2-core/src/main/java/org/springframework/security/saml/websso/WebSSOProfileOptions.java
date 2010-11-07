@@ -14,7 +14,10 @@
  */
 package org.springframework.security.saml.websso;
 
+import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
+
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * JavaBean contains properties allowing customization of SAML request message sent to the IDP.
@@ -26,10 +29,17 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     private String idp;
     private String binding;
 
+    // Name ID policy
+    private String nameID;
+    private boolean allowCreate;
+
     private boolean passive = false;
     private boolean forceAuthN = false;
     private boolean includeScoping = true;
     private boolean allowProxy = true;
+
+    private Collection<String> authnContexts;
+    private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.MINIMUM;
 
     public WebSSOProfileOptions() {
     }
@@ -55,9 +65,9 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      * Sets binding to be used for connection to IDP and back. Following values are supported:
      * "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect".
      *
+     * @param binding binding value
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
-     * @param binding binding value
      */
     public void setBinding(String binding) {
         this.binding = binding;
@@ -112,9 +122,17 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         this.allowProxy = allowProxy;
     }
 
+    public Collection<String> getAuthnContexts() {
+        return authnContexts;
+    }
+
+    public void setAuthnContexts(Collection<String> authnContexts) {
+        this.authnContexts = authnContexts;
+    }
+
     /**
      * Clones the current object.
-     * 
+     *
      * @return clone
      */
     @Override
@@ -126,4 +144,38 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         }
     }
 
+    public String getNameID() {
+        return nameID;
+    }
+
+    public void setNameID(String nameID) {
+        this.nameID = nameID;
+    }
+
+    public boolean isAllowCreate() {
+        return allowCreate;
+    }
+
+    public void setAllowCreate(boolean allowCreate) {
+        this.allowCreate = allowCreate;
+    }
+
+    /**
+     * @return comparison mode to use by default mode minimum is used
+     */
+    public AuthnContextComparisonTypeEnumeration getAuthnContextComparison() {
+        return authnContextComparison;
+    }
+
+    /**
+     * Sets comparison to use for WebSSO requests. No change for null values.
+     *
+     * @param authnContextComparison context to set
+     */
+    public void setAuthnContextComparison(AuthnContextComparisonTypeEnumeration authnContextComparison) {
+        if (authnContextComparison != null) {
+            this.authnContextComparison = authnContextComparison;
+        }
+    }
+    
 }

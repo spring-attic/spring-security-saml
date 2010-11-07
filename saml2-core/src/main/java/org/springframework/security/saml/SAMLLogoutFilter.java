@@ -16,10 +16,15 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -54,6 +59,11 @@ public class SAMLLogoutFilter extends LogoutFilter {
      * Default name of path suffix which will invoke this filter.
      */
     private static final String DEFAULT_FILTER_URL = "/saml/logout";
+
+    /**
+     * Logger of SAML messages.
+     */
+    protected SAMLLogger samlLogger;
 
     /**
      * Name of parameter of HttpRequest indicating whether this call should perform only local logout.
@@ -97,24 +107,33 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
         if (requiresLogout(request, response)) {
 
+            HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
+            HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+            BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+            context.setInboundMessageTransport(inTransport);
+            context.setOutboundMessageTransport(outTransport);
+
             try {
 
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-                if (auth != null && isGlobalLogout(request)) {
+                if (auth != null && isGlobalLogout(request, auth)) {
 
                     Assert.isInstanceOf(SAMLCredential.class, auth.getCredentials(), "Authentication object doesn't contain SAML credential");
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
                     HttpSessionStorage storage = new HttpSessionStorage(request);
-                    profile.initializeLogout(credential, storage, request, response);
+                    profile.sendLogoutRequest(context, credential, storage);
+                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
                     for (LogoutHandler handler : globalHandlers) {
                         handler.logout(request, response, auth);
                     }
+
                 } else {
 
                     super.doFilter(request, response, chain);
                 }
+
             } catch (SAMLException e1) {
                 throw new ServletException("Error initializing global logout", e1);
             } catch (MetadataProviderException e1) {
@@ -122,19 +141,29 @@ public class SAMLLogoutFilter extends LogoutFilter {
             } catch (MessageEncodingException e1) {
                 throw new ServletException("Error encoding outgoing message", e1);
             }
+
         } else {
 
             chain.doFilter(request, response);
         }
+
     }
 
     /**
-     * @param request request
+     * Performs global logout in case current user logged in using SAML and user hasn't selected local logout only
      *
-     * @return true if this HttpRequest should be directly forwarded to the IDP without selection of IDP.
+     * @param request request
+     * @param auth    currently logged in user
+     * @return true if single logout with IDP is required
      */
-    protected boolean isGlobalLogout(HttpServletRequest request) {
+    protected boolean isGlobalLogout(HttpServletRequest request, Authentication auth) {
         String login = request.getParameter(LOGOUT_PARAMETER);
-        return login == null || !"true".equals(login.toLowerCase().trim());
+        return (login == null || !"true".equals(login.toLowerCase().trim())) && (auth.getCredentials() instanceof SAMLCredential);
     }
+
+    @Required
+    public void setSamlLogger(SAMLLogger samlLogger) {
+        this.samlLogger = samlLogger;
+    }
+
 }

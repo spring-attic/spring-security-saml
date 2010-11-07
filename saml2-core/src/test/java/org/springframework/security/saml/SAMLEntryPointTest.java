@@ -16,6 +16,7 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -232,33 +233,11 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso");
-        expect(ssoProfile.initializeSSO((WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull(), eq(request), eq(response))).andReturn(null);
+        ssoProfile.sendAuthenticationRequest((BasicSAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
 
         replayMock();
         entryPoint.commence(request, response, null);
         verifyMock();
-    }
-
-    /**
-     * Verifies that missing web profile fails whole operation.
-     *
-     * @throws Exception error
-     */
-    @Test(expected = ServletException.class)
-    public void testMissingWebProfile() throws Exception {
-        entryPoint.setWebSSOprofile(null);
-        entryPoint.commence(request, response, null);
-    }
-
-    /**
-     * Verifies that missing metadata manager fails whole operation.
-     *
-     * @throws Exception error
-     */
-    @Test(expected = ServletException.class)
-    public void testMissingMetadataManager() throws Exception {
-        entryPoint.setMetadata(null);
-        entryPoint.commence(request, response, null);
     }
 
     private void replayMock() {

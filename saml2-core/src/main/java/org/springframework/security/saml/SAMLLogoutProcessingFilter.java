@@ -21,11 +21,14 @@ import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
@@ -52,17 +55,22 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * SAML message processor used to parse SAML message from inbound channel.
      */
-    SAMLProcessor processor;
+    protected SAMLProcessor processor;
 
     /**
      * Profile to delegate SAML parsing to
      */
-    SingleLogoutProfile logoutProfile;
+    protected SingleLogoutProfile logoutProfile;
+
+    /**
+     * Logger of SAML messages.
+     */
+    protected SAMLLogger samlLogger;
 
     /**
      * Class logger.
      */
-    private final static Logger log = LoggerFactory.getLogger(SAMLLogoutProcessingFilter.class);
+    protected final static Logger log = LoggerFactory.getLogger(SAMLLogoutProcessingFilter.class);
 
     /**
      * Default processing URL.
@@ -106,60 +114,85 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * @param request  http request
      * @param response http response
      * @param chain    chain
-     *
      * @throws IOException      error
      * @throws ServletException error
      */
     public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+
         if (requiresLogout(request, response)) {
+
+            HttpSessionStorage storage = new HttpSessionStorage(request);
+            HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
+            HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+            BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+            context.setInboundMessageTransport(inTransport);
+            context.setOutboundMessageTransport(outTransport);
+
+            Assert.notNull(logoutProfile, "Logout profile wasn't initialized");
+            Assert.notNull(processor, "SAML Processor wasn't initialized");
+            logger.debug("Processing SAML2 logout message");
+
             try {
-                Assert.notNull(logoutProfile, "Logout profile wasn't initialized");
-                Assert.notNull(processor, "SAML Processor wasn't initialized");
-                logger.debug("Processing SAML2 logout message");
-                BasicSAMLMessageContext samlMessageContext = processor.processSSO(request);
-                HttpSessionStorage storage = new HttpSessionStorage(request);
 
-                boolean doLogout = true;
-                if (samlMessageContext.getInboundSAMLMessage() instanceof LogoutResponse) {
-                    try {
-                        logoutProfile.processLogoutResponse(samlMessageContext, storage);
-                    } catch (Exception e) {
-                        log.warn("Received global logout response is invalid", e);
-                    }
-                } else if (samlMessageContext.getInboundMessage() instanceof LogoutRequest) {
-                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                    SAMLCredential credential = null;
-                    if (auth != null) {
-                        credential = (SAMLCredential) auth.getCredentials();
-                    }
+                processor.retrieveMessage(context);
 
-                    // Process request and send response to the sender in case the request is valid
-                    doLogout = logoutProfile.processLogoutRequest(credential, samlMessageContext, response);
-                }
-
-                if (doLogout) {
-                    super.doFilter(request, response, chain);
-                }
             } catch (SAMLException e) {
                 throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
             } catch (MetadataProviderException e) {
                 throw new SAMLRuntimeException("Error determining metadata contracts", e);
             } catch (MessageDecodingException e) {
                 throw new SAMLRuntimeException("Error decoding incoming SAML message", e);
-            } catch (MessageEncodingException e) {
-                throw new SAMLRuntimeException("Error encoding outgoing SAML message", e);
             } catch (org.opensaml.xml.security.SecurityException e) {
                 throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
             }
+
+            boolean doLogout = true;
+
+            if (context.getInboundSAMLMessage() instanceof LogoutResponse) {
+
+                try {
+                    logoutProfile.processLogoutResponse(context, storage);
+                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
+                } catch (Exception e) {
+                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.FAILURE, context);
+                    log.warn("Received global logout response is invalid", e);
+                }
+
+            } else if (context.getInboundMessage() instanceof LogoutRequest) {
+
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                SAMLCredential credential = null;
+                if (auth != null) {
+                    credential = (SAMLCredential) auth.getCredentials();
+                }
+
+                try {
+                    // Process request and send response to the sender in case the request is valid
+                    doLogout = logoutProfile.processLogoutRequest(context, credential);
+                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
+                } catch (Exception e) {
+                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.FAILURE, context);
+                    log.warn("Received global logout request is invalid", e);
+                }
+
+            }
+
+            if (doLogout) {
+                super.doFilter(request, response, chain);
+            }
+
         } else {
             chain.doFilter(request, response);
         }
+
     }
 
+    @Required
     public void setSAMLProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }
 
+    @Required
     public void setLogoutProfile(SingleLogoutProfile logoutProfile) {
         this.logoutProfile = logoutProfile;
     }
@@ -168,4 +201,10 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     public String getFilterProcessesUrl() {
         return super.getFilterProcessesUrl();
     }
+
+    @Required
+    public void setSamlLogger(SAMLLogger samlLogger) {
+        this.samlLogger = samlLogger;
+    }    
+
 }

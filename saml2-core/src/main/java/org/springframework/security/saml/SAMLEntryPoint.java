@@ -15,9 +15,14 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -57,6 +62,8 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     private WebSSOProfile webSSOprofile;
     private MetadataManager metadata;
     private WebSSOProfileOptions defaultOptions;
+
+    protected SAMLLogger samlLogger;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -116,20 +123,24 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @throws ServletException error initializing SAML protocol
      */
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
+
+        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
+        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        context.setInboundMessageTransport(inTransport);
+        context.setOutboundMessageTransport(outTransport);
+
         try {
-            if (metadata == null) {
-                throw new ServletException("MetadataManager wasn't initialized in SAMLEntryPoint object");
-            }
-            if (webSSOprofile == null) {
-                throw new ServletException("WebSSOProfile wasn't initialized in SAMLEntryPoint object");
-            }
+
             if (idpSelectionPath != null && !isLoginRequest(request)) {
                 request.getRequestDispatcher(idpSelectionPath).include(request, response);
             } else {
                 SAMLMessageStorage storage = new HttpSessionStorage(request);
                 WebSSOProfileOptions options = getProfileOptions(request, response, e);
-                webSSOprofile.initializeSSO(options, storage, request, response);
+                webSSOprofile.sendAuthenticationRequest(context, options, storage);
+                samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
             }
+
         } catch (SAMLException e1) {
             throw new ServletException("Error sending assertion", e1);
         } catch (MetadataProviderException e1) {
@@ -137,6 +148,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         } catch (MessageEncodingException e1) {
             throw new ServletException("Error encoding outgoing message", e1);
         }
+
     }
 
     /**
@@ -208,6 +220,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return metadata.getDefaultIDP();
     }
 
+    @Required
     public void setMetadata(MetadataManager metadata) {
         this.metadata = metadata;
     }
@@ -238,6 +251,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return webSSOprofile;
     }
 
+    @Required
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
         this.webSSOprofile = webSSOprofile;
     }
@@ -251,4 +265,10 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     public void setIdpSelectionPath(String idpSelectionPath) {
         this.idpSelectionPath = idpSelectionPath;
     }
+
+    @Required
+    public void setSamlLogger(SAMLLogger samlLogger) {
+        this.samlLogger = samlLogger;
+    }    
+    
 }

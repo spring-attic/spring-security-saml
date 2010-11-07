@@ -77,11 +77,13 @@ public class SAMLCredential implements Serializable {
      * @param attributes              attributes collected from received assertions
      */
     public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, String relayState, List<Attribute> attributes) {
+
         this.nameID = new SAMLObject<NameID>(nameID);
         this.authenticationAssertion = new SAMLObject<Assertion>(authenticationAssertion);
         this.IDPEntityID = IDPEntityID;
         this.relayState = relayState;
         this.attributes = new SAMLCollection<Attribute>(attributes);
+
     }
 
     /**
@@ -117,12 +119,11 @@ public class SAMLCredential implements Serializable {
      * Attributes are searched in order as received in SAML message.
      *
      * @param name name of attribute to find
-     *
      * @return the first occurrence of the attribute with the given name or null if not found
      */
     public Attribute getAttributeByName(String name) {
         for (Attribute attribute : getAttributes()) {
-            if (name.equals(attribute.getName())) {
+            if (name.equalsIgnoreCase(attribute.getName())) {
                 return attribute;
             }
         }
@@ -146,5 +147,5 @@ public class SAMLCredential implements Serializable {
     public String getRelayState() {
         return relayState;
     }
-    
+
 }

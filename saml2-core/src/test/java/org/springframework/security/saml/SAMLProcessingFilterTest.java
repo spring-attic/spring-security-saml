@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,7 +54,7 @@ public class SAMLProcessingFilterTest {
     /**
      * Verifies that the SAMLProcessor collaborator must be set, otherwise exception is thrown
      */
-    @Test(expected = SAMLRuntimeException.class)
+    @Test(expected = NullPointerException.class)
     public void testMissingProcessor() {
         processingFiler.setSAMLProcessor(null);
         replayMock();
@@ -68,7 +69,7 @@ public class SAMLProcessingFilterTest {
      */
     @Test(expected = SAMLRuntimeException.class)
     public void testErrorDuringProcessing() throws Exception {
-        expect(processor.processSSO(request)).andThrow(new SAMLException("Processing error"));
+        expect(processor.retrieveMessage((BasicSAMLMessageContext) notNull())).andThrow(new SAMLException("Processing error"));
         replayMock();
         processingFiler.attemptAuthentication(request, null);
         verifyMock();
@@ -92,7 +93,7 @@ public class SAMLProcessingFilterTest {
         AuthenticationManager manager = createMock(AuthenticationManager.class);
         processingFiler.setAuthenticationManager(manager);
 
-        expect(processor.processSSO(request)).andReturn(new BasicSAMLMessageContext());
+        expect(processor.retrieveMessage((BasicSAMLMessageContext) notNull())).andReturn(new BasicSAMLMessageContext());
         expect(manager.authenticate((Authentication) notNull())).andReturn(token);
         expect(request.getSession(true)).andReturn(session);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(new Hashtable());

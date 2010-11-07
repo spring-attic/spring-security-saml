@@ -21,6 +21,7 @@ import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -32,18 +33,17 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.security.credential.CredentialResolver;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -62,16 +62,17 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      * Initializes the profile.
      *
      * @param metadata           metadata manager to be used
-     * @param credentialResolver key manager
-     * @param signingKey         alias of key used for signing of assertions by local entity
+     * @param keyManager key manager
+     * @param artifactMap storage place for artifacts when using the artifact binding
      *
      * @throws SAMLException error initializing the profile
      */
-    public SingleLogoutProfileImpl(MetadataManager metadata, CredentialResolver credentialResolver, String signingKey) throws SAMLException {
-        super(metadata, signingKey, credentialResolver, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()));
+    public SingleLogoutProfileImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws SAMLException {
+        super(processor, metadata, keyManager, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()), artifactMap);
     }
 
-    public void initializeLogout(SAMLCredential credential, SAMLMessageStorage messageStorage, HttpServletRequest request, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+
         // If no user is logged in we do not initialize the protocol.
         if (credential == null) {
             return;
@@ -83,7 +84,17 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
         LogoutRequest logoutRequest = getLogoutRequest(credential, logoutServiceIDP);
-        sendMessage(messageStorage, true, logoutRequest, logoutServiceIDP, response);
+
+        context.setCommunicationProfileId(logoutServiceIDP.getBinding());
+        context.setOutboundMessage(logoutRequest);
+        context.setOutboundSAMLMessage(logoutRequest);
+        context.setPeerEntityEndpoint(logoutServiceIDP);
+        context.setPeerEntityId(idpDescriptor.getID());
+        context.setPeerEntityRoleMetadata(idpDescriptor);
+
+        processor.sendMessage(context, true);
+        messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
+
     }
 
     /**
@@ -98,6 +109,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      * @throws MetadataProviderException error retrieving metadata
      */
     protected LogoutRequest getLogoutRequest(SAMLCredential credential, Endpoint bindingService) throws SAMLException, MetadataProviderException {
+
         SAMLObjectBuilder<LogoutRequest> builder = (SAMLObjectBuilder<LogoutRequest>) builderFactory.getBuilder(LogoutRequest.DEFAULT_ELEMENT_NAME);
         LogoutRequest request = builder.buildObject();
         buildCommonAttributes(request, bindingService);
@@ -124,9 +136,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         request.setNameID(nameID);
 
         return request;
+
     }
 
-    public boolean processLogoutRequest(SAMLCredential credential, BasicSAMLMessageContext context, HttpServletResponse response) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public boolean processLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException {
+
         SAMLObject message = context.getInboundSAMLMessage();
 
         // Verify type
@@ -134,6 +148,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             log.warn("Received request is not of a LogoutRequest object type");
             throw new SAMLException("Error validating SAML request");
         }
+
         LogoutRequest logoutRequest = (LogoutRequest) message;
 
         // Verify signature of the response if present
@@ -143,12 +158,12 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             } catch (org.opensaml.xml.security.SecurityException e) {
                 log.warn("Validation of signature in LogoutRequest has failed, id: " + context.getInboundSAMLMessageId());
                 Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is invalid");
-                sendLogoutResponse(status, context, response);
+                sendLogoutResponse(status, context);
                 return false;
             } catch (ValidationException e) {
                 log.warn("Validation of signature in LogoutRequest has failed, id: " + context.getInboundSAMLMessageId());
                 Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is invalid");
-                sendLogoutResponse(status, context, response);
+                sendLogoutResponse(status, context);
                 return false;
             }
         }
@@ -168,9 +183,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
                 }
             }
             if (!found) {
-                log.warn("Destination of the request was not the expected value: ", logoutRequest.getDestination());
+                log.warn("Destination of the request {} does not match any singleLogout endpoint", logoutRequest.getDestination());
                 Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Destination URL of the request is invalid");
-                sendLogoutResponse(status, context, response);
+                sendLogoutResponse(status, context);
                 return false;
             }
         }
@@ -181,26 +196,26 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
                 Issuer issuer = logoutRequest.getIssuer();
                 verifyIssuer(issuer, context);
             } catch (SAMLException e) {
-                log.warn("Response issue time is either too old or with date in the future, id: " + context.getInboundSAMLMessageId());
+                log.warn("Response issue time is either too old or with date in the future, id {}", context.getInboundSAMLMessageId());
                 Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Issuer of the message is unknown");
-                sendLogoutResponse(status, context, response);
+                sendLogoutResponse(status, context);
                 return false;
             }
         }
 
         // Verify issue time
         DateTime time = logoutRequest.getIssueInstant();
-        if (!isDateTimeSkewValid(DEFAULT_RESPONSE_SKEW, time)) {
-            log.warn("Response issue time is either too old or with date in the future, id: " + context.getInboundSAMLMessageId());
+        if (!isDateTimeSkewValid(getResponseSkew(), time)) {
+            log.warn("Response issue time is either too old or with date in the future, id {}.", context.getInboundSAMLMessageId());
             Status status = getStatus(StatusCode.REQUESTER_URI, "Message has been issued too long time ago");
-            sendLogoutResponse(status, context, response);
+            sendLogoutResponse(status, context);
             return false;
         }
 
         // Check whether any user is logged in
         if (credential == null) {
             Status status = getStatus(StatusCode.UNKNOWN_PRINCIPAL_URI, "No user is logged in");
-            sendLogoutResponse(status, context, response);
+            sendLogoutResponse(status, context);
             return false;
         }
 
@@ -229,7 +244,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         // Fail if sessionIndex is not found in any assertion
         if (!indexFound) {
             Status status = getStatus(StatusCode.REQUESTER_URI, "The requested SessionIndex was not found");
-            sendLogoutResponse(status, context, response);
+            sendLogoutResponse(status, context);
             return false;
         }
 
@@ -238,22 +253,25 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             NameID nameID = getNameID(logoutRequest);
             if (nameID == null || !equalsNameID(credential.getNameID(), nameID)) {
                 Status status = getStatus(StatusCode.UNKNOWN_PRINCIPAL_URI, "The requested NameID is invalid");
-                sendLogoutResponse(status, context, response);
+                sendLogoutResponse(status, context);
                 return false;
             }
         } catch (DecryptionException e) {
             Status status = getStatus(StatusCode.RESPONDER_URI, "The NameID can't be decrypted");
-            sendLogoutResponse(status, context, response);
+            sendLogoutResponse(status, context);
             return false;
         }
 
         // Message is valid, let's logout
         Status status = getStatus(StatusCode.SUCCESS_URI, null);
-        sendLogoutResponse(status, context, response);
+        sendLogoutResponse(status, context);
+
         return true;
+
     }
 
-    protected void sendLogoutResponse(Status status, BasicSAMLMessageContext context, HttpServletResponse response) throws MetadataProviderException, SAMLException, MessageEncodingException {
+    protected void sendLogoutResponse(Status status, BasicSAMLMessageContext context) throws MetadataProviderException, SAMLException, MessageEncodingException {
+
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
 
@@ -268,10 +286,17 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         logoutResponse.setIssueInstant(new DateTime());
         logoutResponse.setInResponseTo(context.getOutboundSAMLMessageId());
         logoutResponse.setDestination(logoutService.getLocation());
-
         logoutResponse.setStatus(status);
 
-        sendMessage(true, logoutResponse, logoutService, response);
+        context.setCommunicationProfileId(logoutService.getBinding());
+        context.setOutboundMessage(logoutResponse);
+        context.setOutboundSAMLMessage(logoutResponse);
+        context.setPeerEntityEndpoint(logoutService);
+        context.setPeerEntityId(idpDescriptor.getID());
+        context.setPeerEntityRoleMetadata(idpDescriptor);
+
+        processor.sendMessage(context, true);
+
     }
 
     private boolean equalsNameID(NameID a, NameID b) {
@@ -303,6 +328,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     }
 
     public void processLogoutResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+
         SAMLObject message = context.getInboundSAMLMessage();
 
         // Verify type
@@ -319,7 +345,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify issue time
         DateTime time = response.getIssueInstant();
-        if (!isDateTimeSkewValid(DEFAULT_RESPONSE_SKEW, time)) {
+        if (!isDateTimeSkewValid(getResponseSkew(), time)) {
             log.debug("Response issue time is either too old or with date in the future");
             throw new SAMLException("Error validating SAML response");
         }

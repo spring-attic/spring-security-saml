@@ -19,8 +19,12 @@ import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -40,7 +44,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     /**
      * Profile to delegate SAML parsing to
      */
-    private SAMLProcessor processor;
+    protected SAMLProcessor processor;
 
     private static final String DEFAULT_URL = "/saml/SSO";
 
@@ -53,21 +57,22 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
      * and contains a SAML assertion which is processed and authenticated.
      *
      * @param request request
-     *
      * @return authentication object in case SAML data was found and valid
-     *
      * @throws AuthenticationException authentication failure
      */
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
+        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
+        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        context.setInboundMessageTransport(inTransport);
+        context.setOutboundMessageTransport(outTransport);
+
         try {
-            if (processor == null) {
-                throw new SAMLRuntimeException("SAMLProcessor instance wasn't set");
-            }
+
             logger.debug("Attempting SAML2 authentication");
-            BasicSAMLMessageContext samlMessageContext = processor.processSSO(request);
-            HttpSessionStorage storage = new HttpSessionStorage(request);
-            SAMLAuthenticationToken token = new SAMLAuthenticationToken(samlMessageContext, storage);
-            return getAuthenticationManager().authenticate(token);
+            processor.retrieveMessage(context);
+
         } catch (SAMLException e) {
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
@@ -77,22 +82,28 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         } catch (org.opensaml.xml.security.SecurityException e) {
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         }
+
+        HttpSessionStorage storage = new HttpSessionStorage(request);
+        SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
+        return getAuthenticationManager().authenticate(token);
+
     }
 
+    @Required
     public void setSAMLProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }
 
     /**
      * Use setAuthenticationSuccessHandler method and pass a custom handler instead.
-     *
-     * Creates a new successHandler and sets default URL for redirect after login. In case user requests a specific 
+     * <p/>
+     * Creates a new successHandler and sets default URL for redirect after login. In case user requests a specific
      * page which caused the login process initialization the original page will be reused. Any existing handler
      * will be overwritten.
      *
+     * @param url url to use as a default success redirect
      * @see org.springframework.security.saml.SAMLRelayStateSuccessHandler
      * @see org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
-     * @param url url to use as a default success redirect
      */
     @Deprecated
     public void setDefaultTargetUrl(String url) {

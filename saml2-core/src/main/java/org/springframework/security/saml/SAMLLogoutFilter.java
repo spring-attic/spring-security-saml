@@ -29,6 +29,7 @@ import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.util.Assert;
 
 import javax.servlet.FilterChain;
@@ -86,6 +87,21 @@ public class SAMLLogoutFilter extends LogoutFilter {
      */
     public SAMLLogoutFilter(String successUrl, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers, SingleLogoutProfile profile) {
         super(successUrl, localHandler);
+        this.globalHandlers = globalHandlers;
+        this.profile = profile;
+        this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
+    }
+
+    /**
+     * Default constructor.
+     *
+     * @param logoutSuccessHandler     handler to invoke upon successful logout
+     * @param localHandler   handlers to be invoked when local logout is selected
+     * @param globalHandlers handlers to be invoked when global logout is selected
+     * @param profile        profile to use for global logout
+     */
+    public SAMLLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers, SingleLogoutProfile profile) {
+        super(logoutSuccessHandler, localHandler);
         this.globalHandlers = globalHandlers;
         this.profile = profile;
         this.setFilterProcessesUrl(DEFAULT_FILTER_URL);

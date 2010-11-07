@@ -158,7 +158,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                     log.warn("Received global logout response is invalid", e);
                 }
 
-            } else if (context.getInboundMessage() instanceof LogoutRequest) {
+            } else if (context.getInboundSAMLMessage() instanceof LogoutRequest) {
 
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 SAMLCredential credential = null;

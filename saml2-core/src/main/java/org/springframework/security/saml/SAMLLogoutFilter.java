@@ -19,13 +19,13 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.HttpSessionStorage;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -52,18 +52,20 @@ import java.io.IOException;
 public class SAMLLogoutFilter extends LogoutFilter {
 
     /**
-     * Implementation of SAML logout profile.
-     */
-    private SingleLogoutProfile profile;
-
-    /**
      * Default name of path suffix which will invoke this filter.
      */
     private static final String DEFAULT_FILTER_URL = "/saml/logout";
 
     /**
+     * Implementation of SAML logout profile.
+     */
+    @Autowired
+    private SingleLogoutProfile profile;
+
+    /**
      * Logger of SAML messages.
      */
+    @Autowired
     protected SAMLLogger samlLogger;
 
     /**
@@ -83,27 +85,23 @@ public class SAMLLogoutFilter extends LogoutFilter {
      * @param successUrl     url to use after logout in case of local logout
      * @param localHandler   handlers to be invoked when local logout is selected
      * @param globalHandlers handlers to be invoked when global logout is selected
-     * @param profile        profile to use for global logout
      */
-    public SAMLLogoutFilter(String successUrl, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers, SingleLogoutProfile profile) {
+    public SAMLLogoutFilter(String successUrl, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers) {
         super(successUrl, localHandler);
         this.globalHandlers = globalHandlers;
-        this.profile = profile;
         this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
     }
 
     /**
      * Default constructor.
      *
-     * @param logoutSuccessHandler     handler to invoke upon successful logout
-     * @param localHandler   handlers to be invoked when local logout is selected
-     * @param globalHandlers handlers to be invoked when global logout is selected
-     * @param profile        profile to use for global logout
+     * @param logoutSuccessHandler handler to invoke upon successful logout
+     * @param localHandler         handlers to be invoked when local logout is selected
+     * @param globalHandlers       handlers to be invoked when global logout is selected
      */
-    public SAMLLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers, SingleLogoutProfile profile) {
+    public SAMLLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers) {
         super(logoutSuccessHandler, localHandler);
         this.globalHandlers = globalHandlers;
-        this.profile = profile;
         this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
     }
 
@@ -123,11 +121,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
         if (requiresLogout(request, response)) {
 
-            HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-            HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
-            BasicSAMLMessageContext context = new BasicSAMLMessageContext();
-            context.setInboundMessageTransport(inTransport);
-            context.setOutboundMessageTransport(outTransport);
+            BasicSAMLMessageContext context = getContext(request, response);
 
             try {
 
@@ -166,6 +160,33 @@ public class SAMLLogoutFilter extends LogoutFilter {
     }
 
     /**
+     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
+     * localEntityId and localEntityRole may be selected.
+     *
+     * @param request  request
+     * @param response response
+     * @return saml context
+     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
+     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
+     */
+    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
+        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
+        SAMLUtil.populateLocalEntity(context, request.getContextPath());
+        return context;
+    }
+
+    /**
+     * The filter will be used in case the URL of the request contains the DEFAULT_FILTER_URL.
+     *
+     * @param request request used to determine whether to enable this filter
+     * @return true if this filter should be used
+     */
+    @Override
+    protected boolean requiresLogout(HttpServletRequest request, HttpServletResponse response) {
+        return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
+    }
+
+    /**
      * Performs global logout in case current user logged in using SAML and user hasn't selected local logout only
      *
      * @param request request
@@ -177,9 +198,12 @@ public class SAMLLogoutFilter extends LogoutFilter {
         return (login == null || !"true".equals(login.toLowerCase().trim())) && (auth.getCredentials() instanceof SAMLCredential);
     }
 
-    @Required
     public void setSamlLogger(SAMLLogger samlLogger) {
         this.samlLogger = samlLogger;
+    }
+
+    public void setProfile(SingleLogoutProfile profile) {
+        this.profile = profile;
     }
 
 }

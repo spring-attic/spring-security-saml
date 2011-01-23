@@ -19,16 +19,13 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.HttpClientOutTransport;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
-import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.SAMLUtil;
 
 import java.io.IOException;
 
@@ -42,8 +39,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
     /**
      * @param httpClient client used to send SOAP messages
      */
-    public ArtifactResolutionProfileImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap, HttpClient httpClient) {
-        super(processor, metadata, keyManager, artifactMap);
+    public ArtifactResolutionProfileImpl(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -54,7 +50,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @param context     context with filled communicationProfileId, outboundMessage, outboundSAMLMessage, peerEntityEndpoint, peerEntityId, peerEntityMetadata, peerEntityRole, peerEntityRoleMetadata
      * @throws SAMLException             error processing artifact messages
      * @throws MessageEncodingException  error sending artifactRequest
-     * @throws MessageDecodingException  error retrieveing articatResponse
+     * @throws MessageDecodingException  error retrieving artifactResponse
      * @throws MetadataProviderException error resolving metadata
      * @throws org.opensaml.xml.security.SecurityException invalid message signature
      */
@@ -72,8 +68,10 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             context.setInboundMessageTransport(clientInTransport);
             context.setOutboundMessageTransport(clientOutTransport);
 
+            SAMLUtil.populateLocalEntity(context, endpointURI);
+
             // Send artifact retrieve message
-            processor.sendMessage(context, true);
+            processor.sendMessage(context, true, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
             int responseCode = httpClient.executeMethod(postMethod);
             if (responseCode != 200) {

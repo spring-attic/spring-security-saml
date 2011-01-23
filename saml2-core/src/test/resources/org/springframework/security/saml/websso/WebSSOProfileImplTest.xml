@@ -30,9 +30,6 @@
         <constructor-arg ref="processor"/>
         <constructor-arg ref="metadata"/>
         <constructor-arg ref="keyManager"/>
-        <constructor-arg>
-            <null/>
-        </constructor-arg>
     </bean>
 
     <!-- Central storage of cryptohraphic keys -->

@@ -18,7 +18,6 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -45,17 +44,11 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
     private static final int DEFAULT_PROXY_COUNT = 2;
 
-    /**
-     * Initializes the profile.
-     *
-     * @param processor   saml processor
-     * @param metadata    metadata manager to be used
-     * @param keyManager  key manager
-     * @param artifactMap storage place for artifacts when using the artifact binding
-     * @throws SAMLException error initializing the profile
-     */
-    public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws SAMLException {
-        super(processor, metadata, keyManager, artifactMap);
+    public WebSSOProfileImpl() {
+    }
+
+    public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
+        super(processor, manager, resolver);
     }
 
     /**

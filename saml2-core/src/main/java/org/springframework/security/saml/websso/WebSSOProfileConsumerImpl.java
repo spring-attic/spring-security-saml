@@ -18,18 +18,13 @@ import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,24 +51,17 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerImpl.class);
 
+    public WebSSOProfileConsumerImpl() {
+    }
+
+    public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
+        super(processor, manager, resolver);
+    }
+
     /**
      * Maximum time between users authentication and processing of the AuthNResponse message.
      */
     private int maxAuthenticationAge = 7200;
-
-    protected static final String BEARER_CONFIRMATION = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
-
-    /**
-     * Initializes the authentication provider
-     *
-     * @param metadata    metadata manager
-     * @param keyManager entity allowing resolving private keys of the service provider
-     * @param artifactMap storage place for artifacts when using the artifact binding
-     * @throws MetadataProviderException error initializing the provider
-     */
-    public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws MetadataProviderException {
-        super(processor, metadata, keyManager, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()), artifactMap);
-    }
 
     /**
      * The input context object must have set the properties related to the returned Response, which is validated
@@ -179,7 +167,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             if (a.getAuthnStatements().size() > 0) {
                 if (a.getSubject() != null && a.getSubject().getSubjectConfirmations() != null) {
                     for (SubjectConfirmation conf : a.getSubject().getSubjectConfirmations()) {
-                        if (BEARER_CONFIRMATION.equals(conf.getMethod())) {
+                        if (SubjectConfirmation.METHOD_BEARER.equals(conf.getMethod())) {
                             subjectAssertion = a;
                         }
                     }
@@ -248,7 +236,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         boolean confirmed = false;
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
-            if (BEARER_CONFIRMATION.equals(confirmation.getMethod())) {
+            if (SubjectConfirmation.METHOD_BEARER.equals(confirmation.getMethod())) {
 
                 SubjectConfirmationData data = confirmation.getSubjectConfirmationData();
 
@@ -407,7 +395,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (auth.getSubjectLocality() != null) {
             HTTPInTransport httpInTransport = (HTTPInTransport) context.getInboundMessageTransport();
             if (auth.getSubjectLocality().getAddress() != null) {
-                if (!httpInTransport.getPeerAddress().equals(auth.getSubjectLocality().getAddress())) {
+                if (!httpInTransport.getPeerAddress().equals(auth.getSubjectLocality().getAddress())) { // TODO Log message
                     throw new BadCredentialsException("User is accessing the service from invalid address");
                 }
             }

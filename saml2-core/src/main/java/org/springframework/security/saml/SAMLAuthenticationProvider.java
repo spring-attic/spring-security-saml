@@ -22,6 +22,7 @@ import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -48,19 +49,19 @@ import java.util.List;
  */
 public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
-    private WebSSOProfileConsumer consumer;
-
     private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
 
+    @Autowired
+    private WebSSOProfileConsumer consumer;
+
+    @Autowired
     protected SAMLLogger samlLogger;
 
     private SAMLUserDetailsService userDetails;
 
-    /**
-     * Default constructor
-     *
-     * @param consumer profile to use
-     */
+    public SAMLAuthenticationProvider() {
+    }
+
     public SAMLAuthenticationProvider(WebSSOProfileConsumer consumer) {
         this.consumer = consumer;
     }
@@ -220,9 +221,12 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         return SAMLAuthenticationToken.class.isAssignableFrom(aClass);
     }
 
-    @Required
     public void setSamlLogger(SAMLLogger samlLogger) {
         this.samlLogger = samlLogger;
+    }
+
+    public void setConsumer(WebSSOProfileConsumer consumer) {
+        this.consumer = consumer;
     }
 
 }

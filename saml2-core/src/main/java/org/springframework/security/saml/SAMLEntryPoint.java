@@ -18,14 +18,14 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -59,10 +59,15 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     private String idpSelectionPath;
 
-    private WebSSOProfile webSSOprofile;
-    private MetadataManager metadata;
     private WebSSOProfileOptions defaultOptions;
 
+    @Autowired
+    private WebSSOProfile webSSOprofile;
+
+    @Autowired
+    private MetadataManager metadata;
+
+    @Autowired
     protected SAMLLogger samlLogger;
 
     /**
@@ -85,17 +90,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     /**
      * User configured path which overrides the default value.
      */
-    private String filterSuffix;
-
-    /**
-     * The filter will be used in case the URL of the request ends with DEFAULT_FILTER_URL.
-     *
-     * @param request request used to determine whether to enable this filter
-     * @return true if this filter should be used
-     */
-    protected boolean processFilter(HttpServletRequest request) {
-        return (request.getRequestURI().endsWith(getFilterSuffix()));
-    }
+    private String filterProcessesUrl;
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         doFilterHttp((HttpServletRequest) request, (HttpServletResponse) response, chain);
@@ -114,6 +109,16 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
+     * The filter will be used in case the URL of the request contains the DEFAULT_FILTER_URL.
+     *
+     * @param request request used to determine whether to enable this filter
+     * @return true if this filter should be used
+     */
+    protected boolean processFilter(HttpServletRequest request) {
+        return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
+    }    
+
+    /**
      * Sends AuthNRequest to the default IDP using any binding supported by both SP and IDP.
      *
      * @param request  request
@@ -124,11 +129,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
 
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
-        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
-        context.setInboundMessageTransport(inTransport);
-        context.setOutboundMessageTransport(outTransport);
+        BasicSAMLMessageContext context = getContext(request, response);
 
         try {
 
@@ -149,6 +150,22 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             throw new ServletException("Error encoding outgoing message", e1);
         }
 
+    }
+
+    /**
+     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
+     * localEntityId and localEntityRole may be selected.
+     *
+     * @param request  request
+     * @param response response
+     * @return saml context
+     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
+     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
+     */
+    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
+        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
+        SAMLUtil.populateLocalEntity(context, request.getContextPath());
+        return context;
     }
 
     /**
@@ -220,7 +237,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return metadata.getDefaultIDP();
     }
 
-    @Required
     public void setMetadata(MetadataManager metadata) {
         this.metadata = metadata;
     }
@@ -235,23 +251,42 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return idpSelectionPath;
     }
 
-    public String getFilterSuffix() {
-        if (filterSuffix == null) {
+    public String getFilterProcessesUrl() {
+        if (filterProcessesUrl == null) {
             return DEFAULT_FILTER_URL;
         } else {
-            return filterSuffix;
+            return filterProcessesUrl;
         }
     }
 
+    public void setFilterProcessesUrl(String filterSuffix) {
+        this.filterProcessesUrl = filterSuffix;
+    }
+
+    /**
+     * Use getFilterProcessesUrl instead.
+     *
+     * @return suffix
+     */
+    @Deprecated
+    public String getFilterSuffix() {
+        return getFilterProcessesUrl();
+    }
+
+    /**
+     * Use setFilterProcessesUrl instead.
+     *
+     * @param filterSuffix filter suffix
+     */
+    @Deprecated
     public void setFilterSuffix(String filterSuffix) {
-        this.filterSuffix = filterSuffix;
+        setFilterProcessesUrl(filterSuffix);
     }
 
     public WebSSOProfile getWebSSOprofile() {
         return webSSOprofile;
     }
 
-    @Required
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
         this.webSSOprofile = webSSOprofile;
     }
@@ -266,9 +301,8 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         this.idpSelectionPath = idpSelectionPath;
     }
 
-    @Required
     public void setSamlLogger(SAMLLogger samlLogger) {
         this.samlLogger = samlLogger;
-    }    
-    
+    }
+
 }

@@ -21,16 +21,16 @@ import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -55,16 +55,19 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * SAML message processor used to parse SAML message from inbound channel.
      */
+    @Autowired
     protected SAMLProcessor processor;
 
     /**
      * Profile to delegate SAML parsing to
      */
+    @Autowired
     protected SingleLogoutProfile logoutProfile;
 
     /**
      * Logger of SAML messages.
      */
+    @Autowired
     protected SAMLLogger samlLogger;
 
     /**
@@ -122,11 +125,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
         if (requiresLogout(request, response)) {
 
             HttpSessionStorage storage = new HttpSessionStorage(request);
-            HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-            HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
-            BasicSAMLMessageContext context = new BasicSAMLMessageContext();
-            context.setInboundMessageTransport(inTransport);
-            context.setOutboundMessageTransport(outTransport);
+            BasicSAMLMessageContext context = getContext(request, response);
 
             Assert.notNull(logoutProfile, "Logout profile wasn't initialized");
             Assert.notNull(processor, "SAML Processor wasn't initialized");
@@ -187,12 +186,37 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
     }
 
-    @Required
+    /**
+     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
+     * localEntityId and localEntityRole may be selected.
+     *
+     * @param request  request
+     * @param response response
+     * @return saml context
+     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
+     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
+     */
+    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
+        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
+        SAMLUtil.populateLocalEntity(context, request.getContextPath());
+        return context;
+    }
+
+    /**
+     * The filter will be used in case the URL of the request contains the DEFAULT_FILTER_URL.
+     *
+     * @param request request used to determine whether to enable this filter
+     * @return true if this filter should be used
+     */
+    @Override
+    protected boolean requiresLogout(HttpServletRequest request, HttpServletResponse response) {
+        return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
+    }
+
     public void setSAMLProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }
 
-    @Required
     public void setLogoutProfile(SingleLogoutProfile logoutProfile) {
         this.logoutProfile = logoutProfile;
     }
@@ -202,9 +226,8 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
         return super.getFilterProcessesUrl();
     }
 
-    @Required
     public void setSamlLogger(SAMLLogger samlLogger) {
         this.samlLogger = samlLogger;
-    }    
+    }
 
 }

@@ -20,7 +20,6 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.binding.artifact.SAML2ArtifactType0004;
 import org.opensaml.saml2.binding.artifact.SAML2ArtifactType0004Builder;
 import org.opensaml.saml2.core.Artifact;
@@ -34,8 +33,6 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.util.Base64;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.util.SAMLUtil;
 
@@ -47,10 +44,6 @@ import java.security.NoSuchAlgorithmException;
  * using custom transport and retrieving the ArtifactResponse.
  */
 public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase implements ArtifactResolutionProfile {
-
-    public ArtifactResolutionProfileBase(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) {
-        super(processor, metadata, keyManager, artifactMap);
-    }
 
     /**
      * Creates ArtifactResolve message based in the artifactId, locates ArtifactResolutionService, populates SAMLContext

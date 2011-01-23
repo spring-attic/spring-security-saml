@@ -1,5 +1,5 @@
 <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-                Destination="http://localhost:8080/spring-security-saml2-webapp/saml/SSO"
+                Destination="http://localhost:8081/spring-security-saml2-webapp/saml/SSO"
                 ID="s21e557b7c90f913964d93057a7f1616178dc4f066" IssueInstant="2009-04-19T15:43:02Z" Version="2.0">
     <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://localhost:8080/opensso</saml:Issuer>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
@@ -16,7 +16,7 @@
             </Reference>
         </SignedInfo>
         <SignatureValue>
-            Cx+crhUo6HklLLjagRxEVScvJgxlV+91WVB7p5NHTUJ8S48i+uam1q8APwtOJ30sErio6g/Rvdoq
+            dCx+crhUo6HklLLjagRxEVScvJgxlV+91WVB7p5NHTUJ8S48i+uam1q8APwtOJ30sErio6g/Rvdoq
             F7LPs5CdYA2K72qn3TinWgHT+wtuOIDxnVHdGrSQkF7JdbAxrRyyqBBrBAgVYEhfAQ61gxBHFJh/
             v8SsiHcWVpyUQxtEM6c=
         </SignatureValue>
@@ -51,12 +51,12 @@
             </saml:NameID>
             <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
                 <saml:SubjectConfirmationData NotOnOrAfter="2009-04-19T15:53:02Z"
-                                              Recipient="http://localhost:8080/spring-security-saml2-webapp/saml/SSO"/>
+                                              Recipient="http://localhost:8081/spring-security-saml2-webapp/saml/SSO"/>
             </saml:SubjectConfirmation>
         </saml:Subject>
         <saml:Conditions NotBefore="2009-04-19T15:33:02Z" NotOnOrAfter="2009-04-19T15:53:02Z">
             <saml:AudienceRestriction>
-                <saml:Audience>http://localhost:8080/spring-security-saml2-webapp</saml:Audience>
+                <saml:Audience>http://localhost:8081/spring-security-saml2-webapp</saml:Audience>
             </saml:AudienceRestriction>
         </saml:Conditions>
         <saml:AuthnStatement AuthnInstant="2009-04-19T15:41:00Z"

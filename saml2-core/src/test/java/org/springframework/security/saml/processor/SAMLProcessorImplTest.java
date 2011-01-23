@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static junit.framework.Assert.*;
 import static org.easymock.EasyMock.*;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class SAMLProcessorImplTest {
 
@@ -118,7 +118,7 @@ public class SAMLProcessorImplTest {
      */
     @Test(expected = SecurityException.class)
     public void testMessageInvalidSignature() throws Exception {
-        prepareHttpRequest("message/SAMLResponseInvalidSignature.xml", "POST", "http://localhost:8080/spring-security-saml2-webapp/saml/SSO", "text/html");
+        prepareHttpRequest("message/SAMLResponseInvalidSignature.xml", "POST", "http://localhost:8081/spring-security-saml2-webapp/saml/SSO", "text/html");
         replayMock();
         processor.retrieveMessage(samlContext);
         verifyMock();
@@ -135,6 +135,7 @@ public class SAMLProcessorImplTest {
         expect(request.getParameter("SAMLRequest")).andReturn(null).anyTimes();
         expect(request.getParameter("SAMLResponse")).andReturn(message).anyTimes();
         expect(request.getParameter("RelayState")).andReturn("").anyTimes();
+        expect(request.getParameter("Signature")).andReturn("").anyTimes();
         expect(request.getRequestURI()).andReturn(urlP.getPath()).anyTimes();
         expect(request.getRequestURL()).andReturn(new StringBuffer(url)).anyTimes();
     }

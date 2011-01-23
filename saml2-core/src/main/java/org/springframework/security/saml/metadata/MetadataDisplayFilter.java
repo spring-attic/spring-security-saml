@@ -24,6 +24,7 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.web.filter.GenericFilterBean;
 import org.w3c.dom.Element;
@@ -51,11 +52,13 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     /**
      * Class storing all SAML metadata documents
      */
+    @Autowired
     private MetadataManager manager;
 
     /**
      * Enables creation of metadata corresponding to the current deployment
      */
+    @Autowired
     private MetadataGenerator generator;
 
     /**
@@ -176,12 +179,10 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         this.filterSuffix = filterSuffix;
     }
 
-    @Required
     public void setManager(MetadataManager manager) {
         this.manager = manager;
     }
 
-    @Required
     public void setGenerator(MetadataGenerator generator) {
         this.generator = generator;
     }

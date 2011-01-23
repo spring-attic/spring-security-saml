@@ -58,7 +58,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         manager = context.getBean("metadata", MetadataManager.class);
         resolver = context.getBean("keyManager", KeyManager.class);
         processor = context.getBean("processor", SAMLProcessor.class);
-        profile = new WebSSOProfileConsumerImpl(processor, manager, resolver, null);
+        profile = new WebSSOProfileConsumerImpl(processor, manager, resolver);
         messageContext = new BasicSAMLMessageContext();
         builderFactory = Configuration.getBuilderFactory();
         helper = new WebSSOProfileTestHelper(builderFactory);

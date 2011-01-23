@@ -56,6 +56,7 @@ public class SAMLProcessingFilterTest {
      */
     @Test(expected = NullPointerException.class)
     public void testMissingProcessor() {
+        expect(request.getContextPath()).andReturn("/saml");
         processingFiler.setSAMLProcessor(null);
         replayMock();
         processingFiler.attemptAuthentication(request, null);
@@ -69,6 +70,7 @@ public class SAMLProcessingFilterTest {
      */
     @Test(expected = SAMLRuntimeException.class)
     public void testErrorDuringProcessing() throws Exception {
+        expect(request.getContextPath()).andReturn("/saml");
         expect(processor.retrieveMessage((BasicSAMLMessageContext) notNull())).andThrow(new SAMLException("Processing error"));
         replayMock();
         processingFiler.attemptAuthentication(request, null);
@@ -93,6 +95,7 @@ public class SAMLProcessingFilterTest {
         AuthenticationManager manager = createMock(AuthenticationManager.class);
         processingFiler.setAuthenticationManager(manager);
 
+        expect(request.getContextPath()).andReturn("/saml");
         expect(processor.retrieveMessage((BasicSAMLMessageContext) notNull())).andReturn(new BasicSAMLMessageContext());
         expect(manager.authenticate((Authentication) notNull())).andReturn(token);
         expect(request.getSession(true)).andReturn(session);

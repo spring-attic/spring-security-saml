@@ -1,11 +1,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Initialization of OpenSAML library-->
-    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
+    <bean class="org.springframework.security.saml.SAMLBootstrap"/>
 
     <bean id="keyStore" class="org.springframework.security.saml.key.JKSKeyManager">
         <constructor-arg index="0" value="classpath:org/springframework/security/saml/key/keystore.jks"/>
@@ -32,7 +35,7 @@
     </bean>
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
-    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
+    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
         <constructor-arg ref="metadata"/>
         <constructor-arg ref="keyManager"/>
         <constructor-arg ref="bindings"/>
@@ -67,7 +70,7 @@
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager" depends-on="bootstrap">
+    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg index="0">
             <list>
                 <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
@@ -84,7 +87,7 @@
                 </bean>
             </list>
         </constructor-arg>
-        <property name="hostedSPName" value="http://localhost:8080/spring-security-saml2-webapp"/>
+        <property name="hostedSPName" value="http://localhost:8081/spring-security-saml2-webapp"/>
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
         <property name="defaultIDP" value="http://localhost:8080/opensso"/>
     </bean>
@@ -93,6 +96,7 @@
     <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
 
     <!-- Instantiator of the velocity engine -->
-    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine" />    
+    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
+          factory-method="getEngine"/>
 
 </beans>

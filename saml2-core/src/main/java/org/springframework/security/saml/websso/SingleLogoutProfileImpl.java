@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Schäfer
+ * Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,19 @@ import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -49,7 +43,7 @@ import java.util.List;
 /**
  * Implementation of the SAML 2.0 Single Logout profile.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class SingleLogoutProfileImpl extends AbstractProfileBase implements SingleLogoutProfile {
 
@@ -57,19 +51,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      * Class logger.
      */
     private final static Logger log = LoggerFactory.getLogger(SingleLogoutProfileImpl.class);
-
-    /**
-     * Initializes the profile.
-     *
-     * @param metadata           metadata manager to be used
-     * @param keyManager key manager
-     * @param artifactMap storage place for artifacts when using the artifact binding
-     *
-     * @throws SAMLException error initializing the profile
-     */
-    public SingleLogoutProfileImpl(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) throws SAMLException {
-        super(processor, metadata, keyManager, new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver()), artifactMap);
-    }
 
     public void sendLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
 

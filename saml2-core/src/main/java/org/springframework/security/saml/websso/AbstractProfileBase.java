@@ -30,6 +30,7 @@ import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.security.MetadataCriteria;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.XMLObjectBuilderFactory;
@@ -44,13 +45,16 @@ import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Random;
 
@@ -76,10 +80,17 @@ public class AbstractProfileBase {
      */
     protected final static Logger log = LoggerFactory.getLogger(WebSSOProfileImpl.class);
 
+    @Autowired
     protected MetadataManager metadata;
+
+    @Autowired
+    protected KeyManager keyManager;
+
+    @Autowired
+    protected SAMLProcessor processor;
+
     protected XMLObjectBuilderFactory builderFactory;
     protected Decrypter decryper;
-    protected SAMLProcessor processor;
 
     /**
      * Trust engine used to verify SAML signatures
@@ -87,16 +98,25 @@ public class AbstractProfileBase {
     protected SignatureTrustEngine trustEngine;
 
     /**
-     * Artifact map.
+     * Artifact map. // TODO autowire when ready
      */
     protected SAMLArtifactMap artifactMap;
 
-    public AbstractProfileBase(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SAMLArtifactMap artifactMap) {
-
-        this.processor = processor;
-        this.metadata = metadata;
-        this.artifactMap = artifactMap;
+    public AbstractProfileBase() {
         this.builderFactory = Configuration.getBuilderFactory();
+    }
+
+    public AbstractProfileBase(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
+
+        this();
+        this.processor = processor;
+        this.metadata = manager;
+        this.keyManager = resolver;
+
+    }
+
+    @PostConstruct
+    protected void init() {
 
         // Decryption key
         KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(keyManager.getSPSigningCredential());
@@ -106,6 +126,8 @@ public class AbstractProfileBase {
         encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+
+        trustEngine = new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
 
         // Entity used for decrypting of encrypted XML parts
         this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
@@ -148,8 +170,7 @@ public class AbstractProfileBase {
         this.maxAssertionTime = maxAssertionTime;
     }
 
-    public AbstractProfileBase(SAMLProcessor processor, MetadataManager metadata, KeyManager keyManager, SignatureTrustEngine trustEngine, SAMLArtifactMap artifactMap) {
-        this(processor, metadata, keyManager, artifactMap);
+    public AbstractProfileBase(SignatureTrustEngine trustEngine) {
         this.trustEngine = trustEngine;
     }
 
@@ -254,6 +275,22 @@ public class AbstractProfileBase {
     protected boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
         long current = new Date().getTime();
         return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + skewInSec * 1000);
+    }
+
+    public void setMetadata(MetadataManager metadata) {
+        this.metadata = metadata;
+    }
+
+    public void setKeyManager(KeyManager keyManager) {
+        this.keyManager = keyManager;
+    }
+
+    public void setProcessor(SAMLProcessor processor) {
+        this.processor = processor;
+    }
+
+    public void setArtifactMap(SAMLArtifactMap artifactMap) {
+        this.artifactMap = artifactMap;
     }
 
 }

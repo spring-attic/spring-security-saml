@@ -38,6 +38,7 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
@@ -80,11 +81,9 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     private XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
     private ApplicationContext applicationContext;
-    private KeyManager keyManager;
 
-    public MetadataGenerator(KeyManager keyManager) {
-        this.keyManager = keyManager;
-    }
+    @Autowired
+    private KeyManager keyManager;
 
     private final Log logger = LogFactory.getLog(MetadataGenerator.class);
 
@@ -372,6 +371,10 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public void setEntityPath(String entityPath) {
         this.entityPath = entityPath;
+    }
+
+    public void setKeyManager(KeyManager keyManager) {
+        this.keyManager = keyManager;
     }
 
 }

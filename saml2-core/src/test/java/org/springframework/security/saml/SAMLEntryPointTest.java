@@ -68,7 +68,7 @@ public class SAMLEntryPointTest {
     public void testInitial() {
         assertNull(entryPoint.getIdpSelectionPath());
         assertEquals(ssoProfile, entryPoint.getWebSSOprofile());
-        assertEquals("/saml/login", entryPoint.getFilterSuffix());
+        assertEquals("/saml/login", entryPoint.getFilterProcessesUrl());
     }
 
     /**
@@ -88,7 +88,7 @@ public class SAMLEntryPointTest {
         assertTrue(entryPoint.processFilter(request));
         assertFalse(entryPoint.processFilter(request));
         assertFalse(entryPoint.processFilter(request));
-        assertFalse(entryPoint.processFilter(request));
+        assertTrue(entryPoint.processFilter(request));
         verifyMock();
     }
 
@@ -125,6 +125,7 @@ public class SAMLEntryPointTest {
         RequestDispatcher dispatcher = createMock(RequestDispatcher.class);
 
         entryPoint.setIdpSelectionPath("/selectIDP");
+        expect(request.getContextPath()).andReturn("/saml");
         expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
         dispatcher.include(request, response);
@@ -208,6 +209,7 @@ public class SAMLEntryPointTest {
     public void testInvalidIDP() throws Exception {
         entryPoint.setIdpSelectionPath(null);
 
+        expect(request.getContextPath()).andReturn("/saml");
         expect(request.getSession(true)).andReturn(session);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
@@ -229,6 +231,7 @@ public class SAMLEntryPointTest {
         entryPoint.setIdpSelectionPath(null);
 
         expect(request.getSession(true)).andReturn(session);
+        expect(request.getContextPath()).andReturn("/saml");
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());

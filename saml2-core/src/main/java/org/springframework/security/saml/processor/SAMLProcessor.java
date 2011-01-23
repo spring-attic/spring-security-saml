@@ -27,7 +27,7 @@ public interface SAMLProcessor {
 
     BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
     BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign, String binding) throws SAMLException, MessageEncodingException;
-    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign) throws SAMLException, MessageEncodingException;
+    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign, String binding) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign) throws SAMLException, MetadataProviderException, MessageEncodingException;
     
 }

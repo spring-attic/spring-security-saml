@@ -14,6 +14,8 @@
  */
 package org.springframework.security.saml.processor;
 
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl;
@@ -21,6 +23,7 @@ import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
 import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.Transport;
@@ -29,8 +32,10 @@ import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.signature.SignatureTrustEngine;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Http SOAP 1.1 binding.
@@ -74,6 +79,14 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
 
     public String getCommunicationProfileId() {
         return SAMLConstants.SAML2_SOAP11_BINDING_URI;
+    }
+
+    @Override
+    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext) {
+
+        SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
+        securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+
     }
 
 }

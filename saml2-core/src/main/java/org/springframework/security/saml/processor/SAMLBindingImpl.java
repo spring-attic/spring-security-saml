@@ -14,8 +14,22 @@
  */
 package org.springframework.security.saml.processor;
 
+import org.opensaml.Configuration;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.ws.security.SecurityPolicyRule;
+import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.credential.ChainingCredentialResolver;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.metadata.MetadataManager;
+
+import java.util.List;
 
 /**
  * Implementation contains a static decoder instance returned in case conditions specified in
@@ -24,6 +38,15 @@ import org.opensaml.ws.message.encoder.MessageEncoder;
  * @author Vladimir Schaefer
  */
 public abstract class SAMLBindingImpl implements SAMLBinding {
+
+    @Autowired
+    KeyManager keyManager;
+
+    @Autowired
+    MetadataManager metadata;
+
+    @Autowired
+    ParserPool parserPool;
 
     MessageDecoder decoder;
     MessageEncoder encoder;
@@ -40,5 +63,25 @@ public abstract class SAMLBindingImpl implements SAMLBinding {
     public MessageEncoder getMessageEncoder() {
         return encoder;
     }
-    
+
+    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext) {
+    }
+
+    protected ChainingCredentialResolver getDefaultCredentialResolver() {
+
+        ChainingCredentialResolver chainedResolver = new ChainingCredentialResolver();
+        chainedResolver.getResolverChain().add(new MetadataCredentialResolver(metadata));
+        chainedResolver.getResolverChain().add(keyManager);
+        return chainedResolver;
+
+    }
+
+    protected SignatureTrustEngine getDefaultSignatureTrustEngine() {
+
+        KeyInfoCredentialResolver keyInfoCredResolver = Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver();
+        ChainingCredentialResolver resolver = getDefaultCredentialResolver();
+        return new ExplicitKeySignatureTrustEngine(resolver, keyInfoCredResolver);
+
+    }
+
 }

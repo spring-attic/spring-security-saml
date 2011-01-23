@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 Vladimir Schäfer
+ * Copyright 2009-2010 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,30 @@
  */
 package org.springframework.security.saml.util;
 
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
 import java.util.List;
 
 /**
  * Utility class for SAML entities
  *
- * @author Vladimir Schäfer
+ * @author Vladimir SchÃ¤fer
  */
 public class SAMLUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);   
+    private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);
 
     /**
      * Returns assertion consumer service of the given SP for the given binding. If the specified binding
@@ -42,9 +48,7 @@ public class SAMLUtil {
      *
      * @param descriptor descriptor to search for binding in
      * @param binding    binding type
-     *
      * @return consumer service capable of handling the given binding
-     *
      * @throws MetadataProviderException in case there is not service capable of handling the binding
      */
     public static AssertionConsumerService getAssertionConsumerForBinding(SPSSODescriptor descriptor, String binding) throws MetadataProviderException {
@@ -73,9 +77,7 @@ public class SAMLUtil {
      *
      * @param descriptor IDP to search for service in
      * @param binding    binding supported by the service
-     *
      * @return SSO service capable of handling the given binding
-     *
      * @throws MetadataProviderException if the service can't be determined
      */
     public static SingleSignOnService getSSOServiceForBinding(IDPSSODescriptor descriptor, String binding) throws MetadataProviderException {
@@ -94,9 +96,7 @@ public class SAMLUtil {
      *
      * @param descriptor IDP to search for service in
      * @param binding    binding supported by the service
-     *
      * @return SSO service capable of handling the given binding
-     *
      * @throws MetadataProviderException if the service can't be determined
      */
     public static SingleLogoutService getLogoutServiceForBinding(SSODescriptor descriptor, String binding) throws MetadataProviderException {
@@ -154,9 +154,7 @@ public class SAMLUtil {
      * Returns default binding supported by IDP.
      *
      * @param descriptor descriptor to return binding for
-     *
      * @return first binding in the list of supported
-     *
      * @throws MetadataProviderException no binding found
      */
     public static String getDefaultBinding(IDPSSODescriptor descriptor) throws MetadataProviderException {
@@ -199,7 +197,78 @@ public class SAMLUtil {
         }
 
         return artifactResolutionService;
-        
+
+    }
+
+    /**
+     * Method populates inboundMessageTransport, outboundMessageTransport, also tries to parse localEntityId and localEntityRole
+     * from the request.
+     *
+     * @param request  request
+     * @param response response
+     * @return populated context
+     */
+    public static BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
+
+        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
+        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        context.setInboundMessageTransport(inTransport);
+        context.setOutboundMessageTransport(outTransport);
+        return context;
+
+    }
+
+    /**
+     * Method tries to load localEntityId and localEntityRole from the request path. Path is supposed to be in format:
+     * https(s)://server:port/application/saml/filterName/alias/entityId/idp|sp?query. In case alias is missing from
+     * the path defaults are used. Otherwise entityId and sp or idp is entered into the context.
+     * <p/>
+     * Method doesn't verify whether entity with the found id exists in the metadata.
+     *
+     * @param context     context to populate fields localEntityId and localEntityRole for
+     * @param contextPath context path to parse entityId and entityRole from
+     */
+    public static void populateLocalEntity(BasicSAMLMessageContext context, String contextPath) {
+
+        if (contextPath == null || context == null) {
+            return;
+        }
+
+        int filterIndex = contextPath.indexOf("/alias/");
+        if (filterIndex != -1) {
+
+            String localEntityId = contextPath.substring(filterIndex + 7);
+            QName localEntityRole = null;
+
+            int entityTypePosition = localEntityId.lastIndexOf('/');
+            if (entityTypePosition != -1) {
+                String entityRole = localEntityId.substring(entityTypePosition + 1);
+                if ("idp".equalsIgnoreCase(entityRole)) {
+                    localEntityRole = IDPSSODescriptor.DEFAULT_ELEMENT_NAME;
+                } else {
+                    localEntityRole = SPSSODescriptor.DEFAULT_ELEMENT_NAME;
+                }
+                localEntityId = localEntityId.substring(0, entityTypePosition);
+            }
+
+            context.setLocalEntityId(localEntityId);
+            context.setLocalEntityRole(localEntityRole);
+
+        }
+
+    }
+
+    /**
+     * Determines whether filter with the given name should be invoked for the current request. Filter is used
+     * when requestURI contains the filterName.
+     *
+     * @param filterName name of the filter to search URI for
+     * @param request    request
+     * @return true if filter should be processed for this request
+     */
+    public static boolean processFilter(String filterName, HttpServletRequest request) {
+        return (request.getRequestURI().contains(filterName));
     }
 
 }

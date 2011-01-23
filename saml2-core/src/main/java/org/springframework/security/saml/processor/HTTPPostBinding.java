@@ -15,17 +15,29 @@
 package org.springframework.security.saml.processor;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml1.binding.encoding.HTTPPostEncoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.binding.security.SAML2HTTPPostSimpleSignRule;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransport;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.metadata.MetadataManager;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Http POST binding.
@@ -69,6 +81,15 @@ public class HTTPPostBinding extends SAMLBindingImpl {
 
     public String getCommunicationProfileId() {
         return SAMLConstants.SAML2_POST_BINDING_URI;
+    }
+
+    @Override
+    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext) {
+
+        SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
+        securityPolicy.add(new SAML2HTTPPostSimpleSignRule(engine, parserPool, engine.getKeyInfoResolver()));
+        securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+
     }
 
 }

@@ -14,14 +14,19 @@
  */
 package org.springframework.security.saml.processor;
 
+import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.Transport;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.signature.SignatureTrustEngine;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Implementation describes a single binding usable for parsing of a SAML message.
@@ -66,5 +71,13 @@ public interface SAMLBinding {
      * @return identifier
      */
     String getCommunicationProfileId();
+
+    /**
+     * Security rules to apply for incoming SAML messages received using the binding.
+     *
+     * @param securityPolicy storage for created policies
+     * @param samlContext processed context
+     */
+     void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext);
 
 }

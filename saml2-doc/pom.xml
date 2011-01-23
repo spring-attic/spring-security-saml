@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project>
+
+    <parent>
+        <artifactId>spring-security-saml2-parent</artifactId>
+        <groupId>org.springframework.security.extensions</groupId>
+        <version>1.0.0-RC1-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>spring-security-saml2-doc</artifactId>
+    <packaging>jar</packaging>
+    <name>Spring Security SAML v2 manual</name>
+    <url>http://maven.apache.org</url>
+
+    <dependencies>
+    </dependencies>
+
+</project>

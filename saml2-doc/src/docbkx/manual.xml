@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>  
+ <article xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">  
+  <title>Hello, World</title>  
+  <para>My first documentation with Docbook</para>  
+ </article>

@@ -1,0 +1,1640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book lang="en">
+  <title>RM5 IdM Counter Reference</title>
+
+  <bookinfo>
+    <copyright>
+      <year><!--@DOC_YEAR@--></year>
+
+      <holder>RM5 Software</holder>
+    </copyright>
+
+    <releaseinfo><!--@DOC_VERSION@--></releaseinfo>
+
+    <date>Created on<!--@DOC_DATE@--></date>
+
+    <productname>RM5 IdM</productname>
+    <othercredit/>
+
+    <authorgroup>
+      <corpauthor>RM5 Software</corpauthor>
+    </authorgroup>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata width="80%" fileref="images/logo.png" />
+      </imageobject>
+    </mediaobject>
+  </bookinfo>
+
+  <chapter id="chapter-introduction">
+    <title>Introduction</title>
+
+    <section id="section-what-this-manual-covers">
+      <title>What this manual covers</title>
+
+      <para>This manual describes the available counters in the RM5 IdM
+      application. The counters enable runtime monitoring of the application
+      state.</para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Counters</title>
+
+    <section>
+      <title>Counter table column descriptions</title>
+
+      <para>Counters are listed alphabetically in a table below. For each
+      counter, following information is presented:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Counter name</para>
+
+          <para>The name of counter. The name is used to identify the columns
+          in the counter result file.</para>
+        </listitem>
+
+        <listitem>
+          <para>Counter value</para>
+
+          <para>The value the the counter reports. This can be, for example
+          average time in milliseconds or number of events that occured per
+          second.</para>
+        </listitem>
+
+        <listitem>
+          <para>Counter type</para>
+
+          <para>The type of the counter. There are several counter types
+          available in the system. The type defines what kind of value the
+          counter reports.</para>
+        </listitem>
+
+        <listitem>
+          <para>Public</para>
+
+          <para>Public attribute defines if the counter is meant for public
+          use for administrators. If the counter is not public, it is meant
+          for only internal use for RM5 developers to help trouble shooting.
+          The description of internal counter is not necessary accurate and
+          might refer to some internal data structures of which the
+          administrators don't have to care about.</para>
+        </listitem>
+
+        <listitem>
+          <para>Description</para>
+
+          <para>The description of what the counter measures.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Counters table</title>
+
+      <para><informaltable frame="all">
+          <title>Counters</title>
+
+          <tgroup cols="4">
+            <colspec colname="_1" colwidth="1.6*" />
+
+            <colspec colname="_22" colwidth="1.5*" />
+
+            <colspec colname="_2" colwidth="0.55*" />
+
+            <colspec align="left" colname="_4" colwidth="0.35*" />
+
+            <thead>
+              <row>
+                <entry align="center">Counter name</entry>
+
+                <entry align="center">Value / Description</entry>
+
+                <entry align="center">Type</entry>
+
+                <entry align="center" rotate="">Public</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><emphasis
+                role="bold">Auth.cacheDelayQSize</emphasis></entry>
+
+                <entry>Number of items</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the number of delay
+                elements in the delay queue.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.cacheEventQSize</emphasis></entry>
+
+                <entry>Number of items</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the number of events
+                in the event queue.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.cacheMapSize</emphasis></entry>
+
+                <entry>Number of items</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the number of
+                session entres in the session cache. This value should always
+                be below the configured maximum cache size.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.getRolesRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the number of get
+                roles method calls per second made to Authrorization service.
+                Normally most of these calls should get the results from the
+                session cache.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.getRolesSQLTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time it
+                takes for Authorization service to get session role data from
+                database.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.getRolesSQLTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum time it
+                took to get the session data from database during the
+                monitoring interval.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.getRolesSQLTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                database queries the Authorization service does per second.
+                Each query means the Authorization service got the roles from
+                database instead of the cache. This should normally be a lot
+                smaller than the Auth.getRolesRate counter value.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.jmsMessagesRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displys the average rate of
+                JMS messages the Authorization service receives per
+                second.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Auth.rolesPerSession</emphasis></entry>
+
+                <entry>Number of items (avg)</entry>
+
+                <entry>Size</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of roles per session.</entry>
+              </row>
+              
+              <row>
+                <entry><emphasis
+                role="bold">Reporting.processedLogs</emphasis></entry>
+
+                <entry>Number of logs (total)</entry>
+
+                <entry>Incremental</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays total number of 
+                processed log records during historical data processing.</entry>
+              </row>
+              
+              <row>
+                <entry><emphasis
+                role="bold">Reporting.logProcessRate</emphasis></entry>
+
+                <entry>Logs per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays number of historical 
+                log records processed per second.</entry>
+              </row>
+              
+              <row>
+                <entry><emphasis
+                role="bold">Reporting.reportExecutionTime</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average and maximum time
+                for the generation of audit and on-demand reports.</entry>
+              </row>                                                
+              
+              <row>
+                <entry><emphasis
+                role="bold">Provisioning.syncTime</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time
+                the synchronization between EDB and FDB took.</entry>
+              </row>                                                
+
+              <row>
+                <entry><emphasis
+                role="bold">Provisioning.syncTime.Max</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the max time
+                the synchronization between EDB and FDB took.</entry>
+              </row>
+              
+              <row>
+                <entry><emphasis
+                role="bold">Provisioning.LDAPClient.syncTime</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time
+                the synchronization between FDB and LDAP took.</entry>
+              </row>                                                
+
+              <row>
+                <entry><emphasis
+                role="bold">Provisioning.LDAPClient.syncTime.Max</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the max time
+                the synchronization between FDB and LDAP took.</entry>
+              </row>              
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.errorRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of failed RADIUS requests per second.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.missingAccountRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of RADIUS requests per second that queried an account that
+                doesn't exist (invalid username).</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.rejectRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of rejected RADIUS responses per second.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.requestTime</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time it
+                took to process RADIUS request.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.requestTime.Max</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the max time it took
+                to process RADIUS request.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry><emphasis
+                role="bold">Radius.requestTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.radius">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of RADIUS requests per second. This includes both succesfull
+                and failed requests.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Security.loginFailedRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of failed login attempts per second made trough RM5 login
+                module.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Security.loginSuccessfulRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average number
+                of successful login attempts per second made trough RM5 login
+                module.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.searchTime</emphasis></entry>
+
+                <entry>Millisecond (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time it took to execute searches. The time is measured from CMP EntityBean search -methods.</entry>
+              </row>
+              
+              <row>
+                <entry><emphasis
+                role="bold">Server.searchTime.Max</emphasis></entry>
+
+                <entry>Millisecond (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum time it took to execute searches. The time is measured from CMP EntityBean search -methods.</entry>
+              </row>              
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvActionTime</emphasis></entry>
+
+                <entry>Millisecond</entry>
+
+                <entry>Time</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time it
+                took to resolve allowed actions.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvActionTime.Max</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the max time it took
+                to resolve allowed actions.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvActionTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                resolving allowed actions.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvSearchTime</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average time it
+                took to resolve allowed searches.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvSearchTime.Max</emphasis></entry>
+
+                <entry>Milliseconds</entry>
+
+                <entry>Time</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the max time it took
+                to resolve allowed searches.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.secResolvSearchTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                resolving allowed actions.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Server.securityCallRate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>No</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                method security checks.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.henkTiedotTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeHenkilonTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.henkTiedotTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeHenkilonTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.henkTiedotTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeHenkilonTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.kaytTehtRoolTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for both
+                <methodname>haeKayttajanTehtavaroolit</methodname> methods in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.kaytTehtRoolTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for both
+                <methodname>haeKayttajanTehtavaroolit</methodname> methods in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.kaytTehtRoolTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to both
+                <methodname>haeKayttajanTehtavaroolit</methodname> methods in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.paivitaTunnusTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>paivitaKayttajatunnuksenViimeisinKayttopvm</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.paivitaTunnusTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>paivitaKayttajatunnuksenViimeisinKayttopvm</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.paivitaTunnusTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>paivitaKayttajatunnuksenViimeisinKayttopvm</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmTiedotTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeKayttajaryhmanTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmTiedotTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeKayttajaryhmanTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmTiedotTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeKayttajaryhmanTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmValtTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeKayttajaryhmanValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmValtTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeKayttajaryhmanValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.ryhmValtTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeKayttajaryhmanValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolHoitosuhtTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeTehtavaroolinHoitosuhteet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolHoitosuhtTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeTehtavaroolinHoitosuhteet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolHoitosuhtTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeTehtavaroolinHoitosuhteet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolJaRyhmValtTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeTehtavaroolinJaKayttajaryhmanValtuudet</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolJaRyhmValtTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeTehtavaroolinJaKayttajaryhmanValtuudet</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolJaRyhmValtTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeTehtavaroolinJaKayttajaryhmanValtuudet</methodname>
+                in <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolKaikiValtTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeTehtavaroolinKaikkiValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolKaikiValtTime</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeTehtavaroolinKaikkiValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolKaikiValtTime</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeTehtavaroolinKaikkiValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolTiedotTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeTehtavaroolinTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolTiedotTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeTehtavaroolinTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolTiedotTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeTehtavaroolinTiedot</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolValtTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>haeTehtavaroolinValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolValtTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>haeTehtavaroolinValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">Smhf.tehtRoolValtTime.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>haeTehtavaroolinValtuudet</methodname> in
+                <classname>SiteMinderHelperFacade</classname>.</entry>
+              </row>
+
+	      
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.changeUserPassword</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>changeUserPassword</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.changeUserPassword.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>changeUserPassword</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.changeUserPassword.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>changeUserPassword</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+	      
+	       <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.resetFailedLogins</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>resetFailedLogins</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.resetFailedLogins.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>resetFailedLogins</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.resetFailedLogins.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>resetFailedLogins</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+	      
+	        <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.setPasswordChangeDate</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average
+                execution time for method
+                <methodname>setPasswordChangeDate</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.setPasswordChangeDate.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the maximum
+                execution time for method
+                <methodname>setPasswordChangeDate</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry><emphasis
+                role="bold">SmPwdData.setPasswordChangeDate.Rate</emphasis></entry>
+
+                <entry>Events per second</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row condition="_dbcond_feat.smhf">
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the average rate of
+                calls per second to method
+                <methodname>setPasswordChangeDate</methodname> in
+                <classname>SmPwdDataHelperFacade</classname>.</entry>
+              </row>
+	      
+	      
+	      
+              <row>
+                <entry><emphasis role="bold">System.memory</emphasis></entry>
+
+                <entry>Megabytes</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the currently used
+                memory reported by the JVM. The value is in megabytes. Note:
+                This used, free and allocated memory model is simplified
+                version of the actual Java virtual machine memory model. JVM
+                memory model is really much more complicated and these values
+                should treated as hints of the actual memory usage.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">System.memory.Free</emphasis></entry>
+
+                <entry>Megabytes</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the currently free
+                memory reported by the JVM. The value is in megabytes. The
+                free memory also contains the memory that is not allocated yet
+                but should be available to the JVM. The amount of allocated
+                memory is controlled by the JVM startup parameters. Note: This
+                used, free and allocated memory model is simplified version of
+                the actual Java virtual machine memory model. JVM memory model
+                is really much more complicated and these values should
+                treated as hints of the actual memory usage.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">System.memory.Alloc</emphasis></entry>
+
+                <entry>Megabytes</entry>
+
+                <entry>Absolute</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">Displays the currently
+                allocated memory reported by the JVM. The value is in
+                megabytes. The amount of allocated memory is controlled by the
+                JVM startup parameters. Note: This used, free and allocated
+                memory model is simplified version of the actual Java virtual
+                machine memory model. JVM memory model is really much more
+                complicated and these values should treated as hints of the
+                actual memory usage.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Ui.responseTime</emphasis></entry>
+
+                <entry>Milliseconds (avg)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">The average time it took to
+                process a request made to RM5 UI.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Ui.responseTime.Max</emphasis></entry>
+
+                <entry>Milliseconds (max)</entry>
+
+                <entry>Time</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">The maximum time it took to
+                process a request made to RM5 UI.</entry>
+              </row>
+
+              <row>
+                <entry><emphasis
+                role="bold">Ui.responseTime.Rate</emphasis></entry>
+
+                <entry>Events per second.</entry>
+
+                <entry>Rate</entry>
+
+                <entry>Yes</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry nameend="_4" namest="_22">The average rate of requests
+                made to RM5 UI.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable></para>
+    </section>
+  </chapter>
+</book>

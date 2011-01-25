@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Sch�fer
+ * Copyright 2009 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -34,7 +33,7 @@ import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 
@@ -43,7 +42,7 @@ import java.util.List;
 /**
  * Implementation of the SAML 2.0 Single Logout profile.
  *
- * @author Vladimir Sch�fer
+ * @author Vladimir Schaefer
  */
 public class SingleLogoutProfileImpl extends AbstractProfileBase implements SingleLogoutProfile {
 
@@ -52,7 +51,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      */
     private final static Logger log = LoggerFactory.getLogger(SingleLogoutProfileImpl.class);
 
-    public void sendLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         // If no user is logged in we do not initialize the protocol.
         if (credential == null) {
@@ -120,7 +119,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
     }
 
-    public boolean processLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         SAMLObject message = context.getInboundSAMLMessage();
 
@@ -251,7 +250,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
     }
 
-    protected void sendLogoutResponse(Status status, BasicSAMLMessageContext context) throws MetadataProviderException, SAMLException, MessageEncodingException {
+    protected void sendLogoutResponse(Status status, SAMLMessageContext context) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
@@ -308,7 +307,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         return id;
     }
 
-    public void processLogoutResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+    public void processLogoutResponse(SAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
 
         SAMLObject message = context.getInboundSAMLMessage();
 

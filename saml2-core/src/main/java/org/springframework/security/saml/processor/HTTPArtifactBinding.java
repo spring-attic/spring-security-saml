@@ -15,7 +15,7 @@
 package org.springframework.security.saml.processor;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPArtifactDecoderImpl;
@@ -79,7 +79,7 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
     }
 
     @Override
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext) {
+    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
 
         SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
         securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));

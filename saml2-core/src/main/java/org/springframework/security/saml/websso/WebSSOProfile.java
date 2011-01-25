@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch‰fer
+/* Copyright 2009 Vladimir Sch√§fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,16 @@
 package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public interface WebSSOProfile {
 
-    void sendAuthenticationRequest(BasicSAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
 }

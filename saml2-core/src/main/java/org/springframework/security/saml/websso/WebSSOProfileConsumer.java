@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir SchÃ¤fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public interface WebSSOProfileConsumer {
 
-    SAMLCredential processAuthenticationResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException;
+    SAMLCredential processAuthenticationResponse(SAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException;
     
 }

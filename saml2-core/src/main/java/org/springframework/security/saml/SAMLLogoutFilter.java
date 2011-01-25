@@ -16,13 +16,13 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -67,6 +67,9 @@ public class SAMLLogoutFilter extends LogoutFilter {
      */
     @Autowired
     protected SAMLLogger samlLogger;
+
+    @Autowired
+    protected SAMLContextProvider contextProvider;
 
     /**
      * Name of parameter of HttpRequest indicating whether this call should perform only local logout.
@@ -121,8 +124,6 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
         if (requiresLogout(request, response)) {
 
-            BasicSAMLMessageContext context = getContext(request, response);
-
             try {
 
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -130,6 +131,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
                 if (auth != null && isGlobalLogout(request, auth)) {
 
                     Assert.isInstanceOf(SAMLCredential.class, auth.getCredentials(), "Authentication object doesn't contain SAML credential");
+                    SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
                     HttpSessionStorage storage = new HttpSessionStorage(request);
                     profile.sendLogoutRequest(context, credential, storage);
@@ -142,6 +144,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
                 } else {
 
                     super.doFilter(request, response, chain);
+
                 }
 
             } catch (SAMLException e1) {
@@ -157,22 +160,6 @@ public class SAMLLogoutFilter extends LogoutFilter {
             chain.doFilter(request, response);
         }
 
-    }
-
-    /**
-     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
-     * localEntityId and localEntityRole may be selected.
-     *
-     * @param request  request
-     * @param response response
-     * @return saml context
-     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
-     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
-     */
-    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
-        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
-        SAMLUtil.populateLocalEntity(context, request.getContextPath());
-        return context;
     }
 
     /**
@@ -199,11 +186,31 @@ public class SAMLLogoutFilter extends LogoutFilter {
     }
 
     public void setSamlLogger(SAMLLogger samlLogger) {
+        Assert.notNull(samlLogger, "SAML Logger can't be null");
         this.samlLogger = samlLogger;
     }
 
     public void setProfile(SingleLogoutProfile profile) {
+        Assert.notNull(profile, "SingleLogoutProfile can't be null");
         this.profile = profile;
+    }
+
+    /**
+     * Sets entity responsible for populating local entity context data.
+     *
+     * @param contextProvider provider implementation
+     */
+    public void setContextProvider(SAMLContextProvider contextProvider) {
+        Assert.notNull(contextProvider, "Context provider can't be null");
+        this.contextProvider = contextProvider;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        Assert.notNull(profile, "Single logout profile must be set");
+        Assert.notNull(contextProvider, "Context provider must be set");
+        Assert.notNull(samlLogger, "SAML Logger must be set");
     }
 
 }

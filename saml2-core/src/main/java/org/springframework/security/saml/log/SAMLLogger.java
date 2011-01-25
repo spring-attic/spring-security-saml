@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Vladimir Schäfer
+ * Copyright 2010 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.springframework.security.saml.log;
 
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Implementations are supposed to log significant SAML operations.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public interface SAMLLogger {
 

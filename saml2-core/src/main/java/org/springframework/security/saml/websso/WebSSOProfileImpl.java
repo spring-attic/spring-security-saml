@@ -17,7 +17,6 @@ package org.springframework.security.saml.websso;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -25,7 +24,9 @@ import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -61,21 +62,27 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
      */
-    public void sendAuthenticationRequest(BasicSAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
-        // Initialize IDP and SP
+        // Initialize IDP based on options or use default
         String idpId = options.getIdp();
         if (idpId == null) {
             idpId = metadata.getDefaultIDP();
         }
 
-        IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
-        SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
-        String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
+        // Verify we deal with a local SP
+        if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
+            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
+        }
 
-        AssertionConsumerService assertionConsubmerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
+        IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
+        ExtendedMetadata idpExtendedMetadata = metadata.getExtendedMetadata(idpId);
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+
+        String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
+        AssertionConsumerService assertionConsumerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
         SingleSignOnService bindingService = SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, binding);
-        AuthnRequest authRequest = getAuthnRequest(options, idpId, assertionConsubmerForBinding, bindingService);
+        AuthnRequest authRequest = getAuthnRequest(options, idpId, assertionConsumerForBinding, bindingService);
 
         // TODO optionally implement support for conditions, subject
 
@@ -85,6 +92,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         context.setPeerEntityEndpoint(bindingService);
         context.setPeerEntityId(idpssoDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpssoDescriptor);
+        context.setPeerExtendedMetadata(idpExtendedMetadata);
 
         processor.sendMessage(context, spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned());
         messageStorage.storeMessage(authRequest.getID(), authRequest);

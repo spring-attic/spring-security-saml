@@ -15,12 +15,12 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorage;
@@ -29,6 +29,7 @@ import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -69,6 +70,9 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     @Autowired
     protected SAMLLogger samlLogger;
+
+    @Autowired
+    protected SAMLContextProvider contextProvider;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -129,13 +133,12 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
 
-        BasicSAMLMessageContext context = getContext(request, response);
-
         try {
 
             if (idpSelectionPath != null && !isLoginRequest(request)) {
                 request.getRequestDispatcher(idpSelectionPath).include(request, response);
             } else {
+                SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
                 SAMLMessageStorage storage = new HttpSessionStorage(request);
                 WebSSOProfileOptions options = getProfileOptions(request, response, e);
                 webSSOprofile.sendAuthenticationRequest(context, options, storage);
@@ -150,22 +153,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             throw new ServletException("Error encoding outgoing message", e1);
         }
 
-    }
-
-    /**
-     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
-     * localEntityId and localEntityRole may be selected.
-     *
-     * @param request  request
-     * @param response response
-     * @return saml context
-     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
-     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
-     */
-    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
-        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
-        SAMLUtil.populateLocalEntity(context, request.getContextPath());
-        return context;
     }
 
     /**
@@ -238,6 +225,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     public void setMetadata(MetadataManager metadata) {
+        Assert.notNull(metadata, "MetadataManager can't be null");
         this.metadata = metadata;
     }
 
@@ -288,6 +276,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
+        Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
         this.webSSOprofile = webSSOprofile;
     }
 
@@ -302,7 +291,27 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     public void setSamlLogger(SAMLLogger samlLogger) {
+        Assert.notNull(samlLogger, "SAML Logger can't be null");
         this.samlLogger = samlLogger;
+    }
+
+    /**
+     * Sets entity responsible for populating local entity context data.
+     *
+     * @param contextProvider provider implementation
+     */
+    public void setContextProvider(SAMLContextProvider contextProvider) {
+        Assert.notNull(contextProvider, "Context provider can't be null");
+        this.contextProvider = contextProvider;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        Assert.notNull(webSSOprofile, "WebSSO profile must be set");
+        Assert.notNull(metadata, "Metadata must be set");
+        Assert.notNull(samlLogger, "Logger must be set");
+        Assert.notNull(contextProvider, "Context provider must be set");
     }
 
 }

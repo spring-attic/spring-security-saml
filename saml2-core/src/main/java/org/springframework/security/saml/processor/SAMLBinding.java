@@ -14,7 +14,7 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
@@ -78,6 +78,6 @@ public interface SAMLBinding {
      * @param securityPolicy storage for created policies
      * @param samlContext processed context
      */
-     void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext);
+     void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext);
 
 }

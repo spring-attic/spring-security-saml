@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Sch�fer
+/* Copyright 2009 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.springframework.security.saml.processor;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
@@ -25,6 +24,7 @@ import org.opensaml.xml.security.SecurityException;
 import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URL;
@@ -33,13 +33,13 @@ import static junit.framework.Assert.*;
 import static org.easymock.EasyMock.*;
 
 /**
- * @author Vladimir Sch�fer
+ * @author Vladimir Schaefer
  */
 public class SAMLProcessorImplTest {
 
     ApplicationContext context;
     SAMLProcessorImpl processor;
-    BasicSAMLMessageContext samlContext;
+    SAMLMessageContext samlContext;
     HttpServletRequest request;
 
     @Before
@@ -48,7 +48,7 @@ public class SAMLProcessorImplTest {
         context = new ClassPathXmlApplicationContext(resName);
         processor = context.getBean("processor", SAMLProcessorImpl.class);
         request = createMock(HttpServletRequest.class);
-        samlContext = new BasicSAMLMessageContext();
+        samlContext = new SAMLMessageContext();
         samlContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
     }
 
@@ -61,7 +61,7 @@ public class SAMLProcessorImplTest {
     public void testPOSTResponseParsing() throws Exception {
         prepareHttpRequest("message/SAMLResponse.xml", "POST", "http://localhost:8080/spring-security-saml2-webapp/saml/SSO", "text/html");
         replayMock();
-        BasicSAMLMessageContext context = processor.retrieveMessage(samlContext);
+        SAMLMessageContext context = processor.retrieveMessage(samlContext);
         verifyMock();
 
         assertNotNull(context.getInboundSAMLMessage());
@@ -120,6 +120,7 @@ public class SAMLProcessorImplTest {
     public void testMessageInvalidSignature() throws Exception {
         prepareHttpRequest("message/SAMLResponseInvalidSignature.xml", "POST", "http://localhost:8081/spring-security-saml2-webapp/saml/SSO", "text/html");
         replayMock();
+        //samlContext.setpee
         processor.retrieveMessage(samlContext);
         verifyMock();
     }

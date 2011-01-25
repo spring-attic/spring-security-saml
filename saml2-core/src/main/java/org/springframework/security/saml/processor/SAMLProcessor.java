@@ -15,19 +15,19 @@
 package org.springframework.security.saml.processor;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * @author Vladimir Schäfer
  */
 public interface SAMLProcessor {
 
-    BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-    BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext context) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign, String binding) throws SAMLException, MetadataProviderException, MessageEncodingException;
-    BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext context, boolean sign) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    SAMLMessageContext retrieveMessage(SAMLMessageContext context, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
+    SAMLMessageContext retrieveMessage(SAMLMessageContext context) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
+    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign, String binding) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign) throws SAMLException, MetadataProviderException, MessageEncodingException;
     
 }

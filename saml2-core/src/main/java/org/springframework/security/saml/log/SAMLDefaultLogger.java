@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Vladimir Schäfer
+ * Copyright 2010 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  */
 package org.springframework.security.saml.log;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Default Logger implementation sending message logs into standard Log4J logger.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public class SAMLDefaultLogger implements SAMLLogger {
 
@@ -48,7 +47,7 @@ public class SAMLDefaultLogger implements SAMLLogger {
 
         if (operation == null) operation = "";
         if (result == null) result = "";
-        if (context == null) context = new BasicSAMLMessageContext();
+        if (context == null) context = new SAMLMessageContext();
 
         StringBuilder sb = new StringBuilder();
         sb.append(operation);

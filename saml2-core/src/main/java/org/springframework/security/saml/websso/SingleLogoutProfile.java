@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Schäfer
+ * Copyright 2009 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,18 @@
 package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.validation.ValidationException;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Implementing class must contain SAML Single Logout functionality according to SAML 2.0 Profiles
  * specification.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public interface SingleLogoutProfile {
 
@@ -46,7 +43,7 @@ public interface SingleLogoutProfile {
      * @throws MetadataProviderException in case idp metadata can't be resolved
      * @throws MessageEncodingException  in case message can't be sent using given binding
      */
-    void sendLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
     /**
      * Implementer must ensure that the incoming LogoutRequest stored in the context is verified and return true if
@@ -61,7 +58,7 @@ public interface SingleLogoutProfile {
      * @throws MetadataProviderException in case there are problems with determining idp metadata
      * @throws MessageEncodingException  in case message can't be sent
      */
-    boolean processLogoutRequest(BasicSAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
     /**
      * Implementer is responsible for processing of LogoutResponse message present in the context. In case the
@@ -76,6 +73,6 @@ public interface SingleLogoutProfile {
      *                             in case the signature of the message is not trusted
      * @throws ValidationException in case the signature of the message is invalid
      */
-    void processLogoutResponse(BasicSAMLMessageContext context, SAMLMessageStorage messageStorage) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;
+    void processLogoutResponse(SAMLMessageContext context, SAMLMessageStorage messageStorage) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;
 
 }

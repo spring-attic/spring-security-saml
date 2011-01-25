@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009-2011 Vladimir Schäfer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,26 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.XMLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- * Class offering extra services on top of underlying chaining MetadataProviders. Manager keeps track of all available
+ * Class offers extra services on top of the underlying chaining MetadataProviders. Manager keeps track of all available
  * identity and service providers configured inside the chained metadata providers. Exactly one service provider can
  * be determined as hosted.
  *
  * @author Vladimir Schäfer
  */
-public class MetadataManager extends ChainingMetadataProvider {
+public class MetadataManager extends ChainingMetadataProvider implements ExtendedMetadataProvider {
 
     private final Logger log = LoggerFactory.getLogger(MetadataManager.class);
 
     private String hostedSPName;
     private String defaultIDP;
+    private ExtendedMetadata defaultExtendedMetadata;
 
     /**
      * Set of IDP names available in the system.
@@ -50,11 +54,16 @@ public class MetadataManager extends ChainingMetadataProvider {
     private Set<String> spName;
 
     public MetadataManager(List<MetadataProvider> providers) throws MetadataProviderException {
+
         super();
+
         this.idpName = new HashSet<String>();
         this.spName = new HashSet<String>();
+        this.defaultExtendedMetadata = new ExtendedMetadata();
+
         setProviders(providers);
         initialize();
+
     }
 
     /**
@@ -64,31 +73,41 @@ public class MetadataManager extends ChainingMetadataProvider {
      * @throws MetadataProviderException error parsing data
      */
     protected synchronized void initialize() throws MetadataProviderException {
+
         idpName.clear();
         spName.clear();
+
         for (MetadataProvider provider : getProviders()) {
+
             Set<String> stringSet = parseProvider(provider);
             for (String key : stringSet) {
+
                 RoleDescriptor roleDescriptor;
                 roleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+
                 if (roleDescriptor != null) {
                     idpName.add(key);
                 }
+
                 roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
                 if (roleDescriptor != null) {
                     spName.add(key);
                 }
+
+                // Verify alias is unique
+                //getEntityIdForAlias(getExtendedMetadata(key).getAlias());
+
             }
+
         }
+
     }
 
     /**
      * Parses the provider and returns set of entityIDs contained inside the provider.
      *
      * @param provider provider to parse
-     *
      * @return set of entityIDs available in the provider
-     *
      * @throws MetadataProviderException error
      */
     private Set<String> parseProvider(MetadataProvider provider) throws MetadataProviderException {
@@ -155,7 +174,6 @@ public class MetadataManager extends ChainingMetadataProvider {
 
     /**
      * @param idpID name of IDP to check
-     *
      * @return true if IDP entity ID is in the circle of trust with our entity
      */
     public boolean isIDPValid(String idpID) {
@@ -164,7 +182,6 @@ public class MetadataManager extends ChainingMetadataProvider {
 
     /**
      * @param spID entity ID of SP to check
-     *
      * @return true if given SP entity ID is valid in circle of trust
      */
     public boolean isSPValid(String spID) {
@@ -196,7 +213,6 @@ public class MetadataManager extends ChainingMetadataProvider {
      * it is returned. Otherwise first available IDP in IDP list is used.
      *
      * @return entity ID of IDP to use
-     *
      * @throws MetadataProviderException in case IDP can't be determined
      */
     public String getDefaultIDP() throws MetadataProviderException {
@@ -226,6 +242,144 @@ public class MetadataManager extends ChainingMetadataProvider {
                 return;
             }
         }
-        throw new IllegalArgumentException("Attempt to set nonexistent IDP as default: " + defaultIDP);
+        throw new IllegalArgumentException("Attempt to set nonexistent IDP as a default: " + defaultIDP);
     }
+
+    /**
+     * Tries to locate ExtendedMetadata by trying one provider after another. Only providers implementing
+     * ExtendedMetadataProvider are considered.
+     * <p/>
+     * In case none of the providers can supply the extended version, the default is used.
+     *
+     * @param entityID entity ID to load extended metadata for
+     * @return extended metadata or defaults
+     * @throws MetadataProviderException never thrown
+     */
+    public ExtendedMetadata getExtendedMetadata(String entityID) throws MetadataProviderException {
+
+        for (MetadataProvider provider : getProviders()) {
+            if (provider instanceof ExtendedMetadataProvider) {
+                ExtendedMetadataProvider extendedProvider = (ExtendedMetadataProvider) provider;
+                ExtendedMetadata extendedMetadata = extendedProvider.getExtendedMetadata(entityID);
+                if (extendedMetadata != null) {
+                    return extendedMetadata;
+                }
+            }
+        }
+
+        return getDefaultExtendedMetadata();
+
+    }
+
+    /**
+     * Locates entity descriptor whose entityId SHA-1 hash equals the one in the parameter.
+     *
+     * @param hash hash of the entity descriptor
+     * @return found descriptor or null
+     */
+    public EntityDescriptor getEntityDescriptor(byte[] hash) throws MetadataProviderException {
+
+        for (String idp : idpName) {
+            if (compare(hash, idp)) {
+                return getEntityDescriptor(idp);
+            }
+        }
+
+        for (String sp : spName) {
+            if (compare(hash, sp)) {
+                return getEntityDescriptor(sp);
+            }
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Compares whether SHA-1 hash of the entityId equals the hashID.
+     * @param hashID hash id to compare
+     * @param entityId entity id to hash and verify
+     * @return true if values match
+     * @throws MetadataProviderException in case SHA-1 hash can't be initialized
+     */
+    private boolean compare(byte[] hashID, String entityId) throws MetadataProviderException {
+
+        try {
+
+            MessageDigest sha1Digester = MessageDigest.getInstance("SHA-1");
+            byte[] hashedEntityId = sha1Digester.digest(entityId.getBytes());
+
+            for (int i = 0; i < hashedEntityId.length; i++) {
+                if (hashedEntityId[i] != hashID[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new MetadataProviderException("SHA-1 message digest not available", e);
+        }
+
+    }
+
+    /**
+     * Tries to load entityId for entity with the given alias. Fails in case two entities with the same alias
+     * are configured in the system.
+     *
+     * @param entityAlias alias to locate id for
+     * @return entity id for the given alias or null if none exists
+     * @throws MetadataProviderException in case two entity have the same non-null alias
+     */
+    public String getEntityIdForAlias(String entityAlias) throws MetadataProviderException {
+
+        if (entityAlias == null) {
+            return null;
+        }
+
+        String entityId = null;
+
+        for (String idp : idpName) {
+            ExtendedMetadata extendedMetadata = getExtendedMetadata(idp);
+            if (entityAlias.equals(extendedMetadata.getAlias())) {
+                if (entityId != null) {
+                    throw new MetadataProviderException("Alias " + entityAlias + " is used both for entity " + entityId + " and " + idp);
+                } else {
+                    entityId = idp;
+                }
+            }
+        }
+
+        for (String sp : spName) {
+            ExtendedMetadata extendedMetadata = getExtendedMetadata(sp);
+            if (entityAlias.equals(extendedMetadata.getAlias())) {
+                if (entityId != null) {
+                    throw new MetadataProviderException("Alias " + entityAlias + " is used both for entity " + entityId + " and " + sp);
+                } else {
+                    entityId = sp;
+                }
+            }
+        }
+
+        return entityId;
+
+    }
+
+    /**
+     * @return default extended metadata to be used in case no entity specific version exists, never null
+     */
+    public ExtendedMetadata getDefaultExtendedMetadata() {
+        return defaultExtendedMetadata;
+    }
+
+    /**
+     * Sets default extended metadata to be used in case no version specific is available.
+     *
+     * @param defaultExtendedMetadata metadata, RuntimeException when null
+     */
+    public void setDefaultExtendedMetadata(ExtendedMetadata defaultExtendedMetadata) {
+        Assert.notNull(defaultExtendedMetadata, "ExtendedMetadata parameter mustn'be null");
+        this.defaultExtendedMetadata = defaultExtendedMetadata;
+    }
+
 }

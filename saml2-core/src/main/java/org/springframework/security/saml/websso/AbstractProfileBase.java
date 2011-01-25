@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Vladimir Schäfer
+ * Copyright 2009 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.opensaml.Configuration;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
@@ -50,6 +49,7 @@ import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
@@ -61,9 +61,9 @@ import java.util.Random;
 /**
  * Base superclass for classes implementing processing of SAML messages.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
-public class AbstractProfileBase {
+public abstract class AbstractProfileBase {
 
     /**
      * Maximum time from response creation when the message is deemed valid.
@@ -106,6 +106,10 @@ public class AbstractProfileBase {
         this.builderFactory = Configuration.getBuilderFactory();
     }
 
+    public AbstractProfileBase(SignatureTrustEngine trustEngine) {
+        this.trustEngine = trustEngine;
+    }
+
     public AbstractProfileBase(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
 
         this();
@@ -119,7 +123,7 @@ public class AbstractProfileBase {
     protected void init() {
 
         // Decryption key
-        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(keyManager.getSPSigningCredential());
+        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(keyManager.getDefaultCredential());
 
         // Way to obtain encrypted key info from XML
         ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
@@ -170,10 +174,6 @@ public class AbstractProfileBase {
         this.maxAssertionTime = maxAssertionTime;
     }
 
-    public AbstractProfileBase(SignatureTrustEngine trustEngine) {
-        this.trustEngine = trustEngine;
-    }
-
     protected IDPSSODescriptor getIDPDescriptor(String idpId) throws MetadataProviderException {
         if (!metadata.isIDPValid(idpId)) {
             log.debug("IDP name of the authenticated user is not valid", idpId);
@@ -190,9 +190,9 @@ public class AbstractProfileBase {
         if (spId == null) {
             throw new MetadataProviderException("No hosted SP metadata ID is configured, please verify that property hostedSPName in metadata bean of your Spring configuration is correctly set");
         }
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) metadata.getRole(metadata.getHostedSPName(), SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) metadata.getRole(spId, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
         if (spDescriptor == null) {
-            throw new MetadataProviderException("There was no SP metadata with ID " + metadata.getHostedSPName() + " found, please check metadata bean in your Spring configuration");
+            throw new MetadataProviderException("There was no SP metadata with ID " + spId + " found, please check metadata bean in your Spring configuration");
         }
         return spDescriptor;
     }
@@ -247,7 +247,7 @@ public class AbstractProfileBase {
         return 'a' + Long.toString(Math.abs(r.nextLong()), 20) + Long.toString(Math.abs(r.nextLong()), 20);
     }
 
-    protected void verifyIssuer(Issuer issuer, BasicSAMLMessageContext context) throws SAMLException {
+    protected void verifyIssuer(Issuer issuer, SAMLMessageContext context) throws SAMLException {
         // Validate format of issuer
         if (issuer.getFormat() != null && !issuer.getFormat().equals(NameIDType.ENTITY)) {
             log.debug("Assertion invalidated by issuer type", issuer.getFormat());

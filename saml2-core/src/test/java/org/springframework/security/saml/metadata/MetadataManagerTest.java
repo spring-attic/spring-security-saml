@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml.metadata;
 
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
@@ -49,16 +50,50 @@ public class MetadataManagerTest {
 
         assertEquals("nest3", manager.getDefaultIDP());
         assertEquals("hostedSP", manager.getHostedSPName());
-        assertEquals(3, manager.getIDPEntityNames().size());
+
+        assertEquals(4, manager.getIDPEntityNames().size());
+
         assertTrue(manager.getIDPEntityNames().contains("nest1"));
         assertTrue(manager.getIDPEntityNames().contains("nest2"));
         assertTrue(manager.getIDPEntityNames().contains("nest3"));
+        assertTrue(manager.getIDPEntityNames().contains("http://localhost:8080/opensso"));
+
         assertEquals(1, manager.getSPEntityNames().size());
         assertTrue(manager.getSPEntityNames().contains("http://localhost:8081/spring-security-saml2-webapp"));
 
         assertNotNull(manager.getEntityDescriptor("nest1"));
         assertNotNull(manager.getEntityDescriptor("nest2"));
         assertNotNull(manager.getEntityDescriptor("nest3"));
+        assertNotNull(manager.getEntityDescriptor("http://localhost:8080/opensso"));
         assertNotNull(manager.getEntityDescriptor("http://localhost:8081/spring-security-saml2-webapp"));
+        assertNotNull(manager.getExtendedMetadata("hostedSP"));
+
+        ExtendedMetadata extendedMetadata;
+
+        extendedMetadata = manager.getExtendedMetadata("http://localhost:8081/spring-security-saml2-webapp");
+        Assert.assertEquals("myAlias", extendedMetadata.getAlias());
+
+        extendedMetadata = manager.getExtendedMetadata("nest1");
+        Assert.assertEquals("myAliasDefault", extendedMetadata.getAlias());
+
+        extendedMetadata = manager.getExtendedMetadata("nest2");
+        Assert.assertEquals("nest2alias", extendedMetadata.getAlias());
+
+        extendedMetadata = manager.getExtendedMetadata("nest3");
+        Assert.assertEquals("myAliasDefault", extendedMetadata.getAlias());
+
+        extendedMetadata = manager.getExtendedMetadata("http://localhost:8080/opensso");
+        Assert.assertNull(extendedMetadata.getAlias());
+
     }
+
+    /**
+     * Verfies that null entityId can be used.
+     * @throws Exception error
+     */
+    @Test
+    public void testNullEntityId() throws Exception {
+        manager.getExtendedMetadata(null);
+    }
+
 }

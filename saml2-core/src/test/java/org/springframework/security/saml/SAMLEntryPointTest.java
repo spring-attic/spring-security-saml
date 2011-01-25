@@ -16,10 +16,10 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -125,7 +125,6 @@ public class SAMLEntryPointTest {
         RequestDispatcher dispatcher = createMock(RequestDispatcher.class);
 
         entryPoint.setIdpSelectionPath("/selectIDP");
-        expect(request.getContextPath()).andReturn("/saml");
         expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
         dispatcher.include(request, response);
@@ -236,7 +235,7 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso");
-        ssoProfile.sendAuthenticationRequest((BasicSAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
+        ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
 
         replayMock();
         entryPoint.commence(request, response, null);

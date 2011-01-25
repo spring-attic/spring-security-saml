@@ -1,8 +1,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Enable autowiring -->
+    <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Initialization of OpenSAML library-->
     <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
@@ -11,6 +15,8 @@
         <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
         <constructor-arg value="nalle123"/>
     </bean>
+
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
     <!-- Set keys which should be available to the system in the map, one of these keys must be also
          specified in the webSSOProfile later -->
@@ -127,6 +133,7 @@
         </bean>
     </util:list>
 
-    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine" />
+    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
+          factory-method="getEngine"/>
 
 </beans>

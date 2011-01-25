@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import static junit.framework.Assert.assertEquals;
@@ -24,17 +24,17 @@ import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertNull;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class SAMLAuthenticationTokenTest {
 
     SAMLAuthenticationToken token;
-    BasicSAMLMessageContext context;
+    SAMLMessageContext context;
     SAMLMessageStorage storage;
 
     @Before
     public void initialize() {
-        context = new BasicSAMLMessageContext();
+        context = new SAMLMessageContext();
         storage = createMock(SAMLMessageStorage.class);
         token = new SAMLAuthenticationToken(context, storage);
     }
@@ -67,6 +67,6 @@ public class SAMLAuthenticationTokenTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testCreateWithoutStorage() {
-        token = new SAMLAuthenticationToken(new BasicSAMLMessageContext(), null);
+        token = new SAMLAuthenticationToken(new SAMLMessageContext(), null);
     }
 }

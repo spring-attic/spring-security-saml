@@ -14,8 +14,8 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
@@ -32,7 +32,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
     /**
      * SAML context with content to verify
      */
-    private BasicSAMLMessageContext credentials;
+    private SAMLMessageContext credentials;
 
     /**
      * Default constructor initializing the context
@@ -40,7 +40,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      * @param credentials  SAML context object created after decoding
      * @param messageStore SAML message storage to be used during token evaluation
      */
-    public SAMLAuthenticationToken(BasicSAMLMessageContext credentials, SAMLMessageStorage messageStore) {
+    public SAMLAuthenticationToken(SAMLMessageContext credentials, SAMLMessageStorage messageStore) {
 
         super(null);
 
@@ -59,7 +59,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      *
      * @return context
      */
-    public BasicSAMLMessageContext getCredentials() {
+    public SAMLMessageContext getCredentials() {
         return this.credentials;
     }
 

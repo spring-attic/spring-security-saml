@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package org.springframework.security.saml.websso;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
@@ -24,6 +24,9 @@ import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLContextProviderImpl;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -38,7 +41,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class WebSSOProfileImplTest extends SAMLTestBase {
 
@@ -47,12 +50,12 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     SAMLMessageStorage storage;
 
     WebSSOProfileOptions options;
-
+    SAMLContextProvider contextProvider;
     HttpServletRequest request;
     HttpServletResponse response;
 
     ServletOutputStream output;
-    BasicSAMLMessageContext samlContext;
+    SAMLMessageContext samlContext;
 
     @Before
     public void initialize() throws Exception {
@@ -68,11 +71,22 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
             public void write(int b) throws IOException {
             }
         };
-        expect(response.getOutputStream()).andReturn(output).anyTimes();
+
         storage = createMock(SAMLMessageStorage.class);
-        samlContext = new BasicSAMLMessageContext();
+
+        contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
+
+        expect(request.getContextPath()).andReturn("/");
+        replyMock();
+
+        samlContext = contextProvider.getLocalEntity(request, response);
         samlContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
         samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
+
+        verifyMock();
+
+        expect(response.getOutputStream()).andReturn(output).anyTimes();
+
     }
 
     /**
@@ -80,10 +94,12 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = SAMLException.class)
     public void testNoSPNameSet() throws Exception {
-        MetadataManager manager = context.getBean("metadata", MetadataManager.class);
-        manager.setHostedSPName(null);
+        samlContext.setLocalEntityId(null);
+        samlContext.setLocalEntityMetadata(null);
+        samlContext.setLocalEntityRole(null);
+        samlContext.setLocalEntityRoleMetadata(null);
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
@@ -113,20 +129,6 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         while (manager.getProviders().size() > 0) {
             manager.removeMetadataProvider(manager.getProviders().iterator().next());
         }
-        replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
-        verifyMock();
-    }
-
-    /**
-     * Verifies that the processing fails if there are no SP hosted metadata configured.
-     *
-     * @throws Exception error
-     */
-    @Test(expected = MetadataProviderException.class)
-    public void testSPWithMissingData() throws Exception {
-        MetadataManager manager = context.getBean("metadata", MetadataManager.class);
-        manager.setHostedSPName("http://localhost:8082/missingDescriptor");
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
@@ -307,6 +309,9 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         verify(response);
         verify(request);
         verify(storage);
+        reset(response);
+        reset(request);
+        reset(storage);
     }
 
     private void replyMock() {

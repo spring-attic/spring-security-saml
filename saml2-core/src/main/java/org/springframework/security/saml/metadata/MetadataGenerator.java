@@ -94,10 +94,10 @@ public class MetadataGenerator implements ApplicationContextAware {
     protected KeyInfo getServerKeyInfo() {
         try {
             NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = keyManager.getSPSigningCredential();
+            Credential serverCredential = keyManager.getDefaultCredential();
             return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.error("Can't obtain key from keystore or generate key info", e);
+            logger.error("Can't obtain key from the keystore or generate key info", e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
         }
     }
@@ -118,7 +118,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
         if (signMetadata) {
             try {
-                signSAMLObject(descriptor, keyManager.getSPSigningCredential());
+                signSAMLObject(descriptor, keyManager.getDefaultCredential());
             } catch (MessageEncodingException e) {
                 throw new RuntimeException(e);
             }

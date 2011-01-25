@@ -15,7 +15,7 @@
 package org.springframework.security.saml.processor;
 
 import org.opensaml.Configuration;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
@@ -64,7 +64,7 @@ public abstract class SAMLBindingImpl implements SAMLBinding {
         return encoder;
     }
 
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, BasicSAMLMessageContext samlContext) {
+    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
     }
 
     protected ChainingCredentialResolver getDefaultCredentialResolver() {

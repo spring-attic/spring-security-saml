@@ -18,7 +18,6 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.saml2.core.NameID;
@@ -29,6 +28,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLEmptyLogger;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
@@ -77,7 +77,7 @@ public class SAMLAuthenticationProviderTest {
      */
     @Test
     public void testAuthenticate() throws Exception {
-        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        SAMLMessageContext context = new SAMLMessageContext();
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();
@@ -112,7 +112,7 @@ public class SAMLAuthenticationProviderTest {
      */
     @Test
     public void testAuthenticateUserDetails() throws Exception {
-        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        SAMLMessageContext context = new SAMLMessageContext();
 
         SAMLUserDetailsService details = createMock(SAMLUserDetailsService.class);
         provider.setUserDetails(details);
@@ -145,7 +145,7 @@ public class SAMLAuthenticationProviderTest {
      */
     @Test(expected = AuthenticationServiceException.class)
     public void testAuthenticateException() throws Exception {
-        BasicSAMLMessageContext context = new BasicSAMLMessageContext();
+        SAMLMessageContext context = new SAMLMessageContext();
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();

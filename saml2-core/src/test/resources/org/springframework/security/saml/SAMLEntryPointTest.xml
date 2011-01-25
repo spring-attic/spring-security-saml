@@ -5,10 +5,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:annotation-config/>
+    <!-- Enable autowiring -->
+    <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Initialization of OpenSAML library-->
     <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
+
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint" depends-on="metadata">
         <property name="filterSuffix" value="/saml/login"/>
@@ -58,8 +61,15 @@
         <constructor-arg index="0">
             <list>
                 <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
-                    <constructor-arg index="0">
+                    <constructor-arg>
                         <value type="java.io.File">classpath:testIDP.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+                      init-method="initialize">
+                    <constructor-arg>
+                        <value type="java.io.File">classpath:testSP.xml</value>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
@@ -67,6 +77,7 @@
         </constructor-arg>
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
         <property name="defaultIDP" value="http://localhost:8080/opensso"/>
+        <property name="hostedSPName" value="http://localhost:8081/spring-security-saml2-webapp"/>
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->

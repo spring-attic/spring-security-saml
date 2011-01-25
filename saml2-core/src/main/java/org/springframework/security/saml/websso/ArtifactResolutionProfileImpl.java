@@ -18,14 +18,15 @@ package org.springframework.security.saml.websso;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.HttpClientOutTransport;
-import org.springframework.security.saml.util.SAMLUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 import java.io.IOException;
 
@@ -34,6 +35,9 @@ import java.io.IOException;
  */
 public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase {
 
+    /**
+     * Client used to perform HTTP calls for artifact resolution.
+     */
     private HttpClient httpClient;
 
     /**
@@ -54,7 +58,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @throws MetadataProviderException error resolving metadata
      * @throws org.opensaml.xml.security.SecurityException invalid message signature
      */
-    protected void getArtifactResponse(String endpointURI, BasicSAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException {
+    protected void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException {
 
         PostMethod postMethod = null;
 
@@ -67,8 +71,6 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
             context.setInboundMessageTransport(clientInTransport);
             context.setOutboundMessageTransport(clientOutTransport);
-
-            SAMLUtil.populateLocalEntity(context, endpointURI);
 
             // Send artifact retrieve message
             processor.sendMessage(context, true, SAMLConstants.SAML2_SOAP11_BINDING_URI);

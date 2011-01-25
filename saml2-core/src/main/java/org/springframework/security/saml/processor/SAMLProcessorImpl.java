@@ -15,7 +15,6 @@
 package org.springframework.security.saml.processor;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -24,22 +23,22 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.security.SecurityPolicy;
-import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
 import org.opensaml.ws.transport.InTransport;
+import org.opensaml.xml.security.credential.Credential;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.util.Assert;
 
 import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
- * Processor is capable of parsing SAML message from HttpServletRequest and populate the BasicSAMLMessageContext
+ * Processor is capable of parsing SAML message from HttpServletRequest and populate the SAMLMessageContext
  * for further validations.
  *
  * @author Vladimir Schäfer
@@ -81,13 +80,17 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws MessageDecodingException  error decoding the message
      * @throws org.opensaml.xml.security.SecurityException         error verifying message
      */
-    public BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
         samlContext.setMetadataProvider(metadata);
 
-        populateLocalEntity(samlContext);
         populateSecurityPolicy(samlContext, binding);
 
+        QName peerEntityRole = samlContext.getPeerEntityRole();
+        if (peerEntityRole == null) {
+            peerEntityRole = IDPSSODescriptor.DEFAULT_ELEMENT_NAME;
+        }
+        samlContext.setPeerEntityRole(peerEntityRole);
         samlContext.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
 
         MessageDecoder decoder = binding.getMessageDecoder();
@@ -106,7 +109,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param samlContext saml context to set the policy to
      * @param binding binding used to retrieve the message
      */
-    protected void populateSecurityPolicy(BasicSAMLMessageContext samlContext, SAMLBinding binding) {
+    protected void populateSecurityPolicy(SAMLMessageContext samlContext, SAMLBinding binding) {
 
         SecurityPolicy policy = new BasicSecurityPolicy();
         binding.getSecurityPolicy(policy.getPolicyRules(), samlContext);
@@ -131,7 +134,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws org.opensaml.xml.security.SecurityException
      *          error verifying message
      */
-    public BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext samlContext, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
         return retrieveMessage(samlContext, getBinding(binding));
 
@@ -151,13 +154,13 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws org.opensaml.xml.security.SecurityException
      *          error verifying message
      */
-    public BasicSAMLMessageContext retrieveMessage(BasicSAMLMessageContext samlContext) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
         return retrieveMessage(samlContext, getBinding(samlContext.getInboundMessageTransport()));
 
     }
 
-    public BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext samlContext, boolean sign)
+    public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign)
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         Endpoint endpoint = samlContext.getPeerEntityEndpoint();
@@ -169,7 +172,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         
     }
 
-    public BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext samlContext, boolean sign, String bindingName) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, String bindingName) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         return sendMessage(samlContext, sign, getBinding(bindingName));
         
@@ -187,14 +190,15 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws MessageEncodingException in case message encoding fails
      * @throws MetadataProviderException in case metadata for required entities is not found
      */
-    protected BasicSAMLMessageContext sendMessage(BasicSAMLMessageContext samlContext, boolean sign, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    protected SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         samlContext.setMetadataProvider(metadata);
 
-        populateLocalEntity(samlContext);
+        verifyContext(samlContext);
 
         if (sign) {
-            samlContext.setOutboundSAMLMessageSigningCredential(keyManager.getSPSigningCredential());
+            Credential signingCredential = keyManager.getCredential(samlContext.getLocalExtendedMetadata().getSingingKey());
+            samlContext.setOutboundSAMLMessageSigningCredential(signingCredential);
         }
 
         MessageEncoder encoder = binding.getMessageEncoder();
@@ -205,46 +209,23 @@ public class SAMLProcessorImpl implements SAMLProcessor {
     }
 
     /**
-     * Method populates fields localEntityId, localEntityRole, localEntityMetadata, localEntityRoleMetadata and peerEntityRole.
-     * In case fields localEntityId, localEntiyRole or peerEntityRole are set they are used, defaults of default SP and IDP as a peer
-     * are used instead.
+     * Verifies that context contains all the required information related to the local entity.
      *
      * @param samlContext context to populate
      * @throws MetadataProviderException in case metadata do not contain expected entities
      */
-    protected void populateLocalEntity(BasicSAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void verifyContext(SAMLMessageContext samlContext) throws MetadataProviderException {
 
-        String localEntityId = samlContext.getLocalEntityId();
-        QName localEntityRole = samlContext.getLocalEntityRole();
-        QName peerEntityRole = samlContext.getPeerEntityRole();
-
-        if (localEntityId == null) {
-            localEntityId = metadata.getHostedSPName();
-        }
-        if (localEntityRole == null) {
-            localEntityRole = SPSSODescriptor.DEFAULT_ELEMENT_NAME;
-        }
-        if (peerEntityRole == null) {
-            peerEntityRole = IDPSSODescriptor.DEFAULT_ELEMENT_NAME;
-        }
-
-        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId);
-        RoleDescriptor roleDescriptor = metadata.getRole(localEntityId, localEntityRole, SAMLConstants.SAML20P_NS);
-
-        if (entityDescriptor == null || roleDescriptor == null) {
-            throw new MetadataProviderException("Metadata for entity " + localEntityId + " and role " + localEntityRole + " weren't found");
-        }
-
-        samlContext.setLocalEntityId(localEntityId);
-        samlContext.setLocalEntityRole(localEntityRole);
-        samlContext.setLocalEntityMetadata(entityDescriptor);
-        samlContext.setLocalEntityRoleMetadata(roleDescriptor);
-        samlContext.setPeerEntityRole(peerEntityRole);
+        Assert.notNull(samlContext.getLocalEntityId(), "Local entity id must be set in the context");
+        Assert.notNull(samlContext.getLocalEntityRole(), "Local entity role must be set in the context");
+        Assert.notNull(samlContext.getLocalEntityMetadata(), "Local entity metadata must be set in the context");
+        Assert.notNull(samlContext.getLocalEntityRoleMetadata(), "Local entity role metadata must be set in the context");
+        Assert.notNull(samlContext.getLocalExtendedMetadata(), "Local extended metadata must be set in the context");
 
     }
 
     /**
-     * Analyzes the transport object and returns the first binding capable of sending/extracing a SAML message from to/from it.
+     * Analyzes the transport object and returns the first binding capable of sending/extracting a SAML message from to/from it.
      * In case no binding is found SAMLException is thrown.
      *
      * @param transport transport type to get binding for

@@ -16,14 +16,12 @@ package org.springframework.security.saml;
 
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -31,6 +29,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
@@ -68,7 +67,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
     /**
      * Attempts to perform authentication of an Authentication object. The authentication must be of type
-     * SAMLAuthenticationToken and must contain filled BasicSAMLMessageContext. If the SAML inbound message
+     * SAMLAuthenticationToken and must contain filled SAMLMessageContext. If the SAML inbound message
      * in the context is valid, UsernamePasswordAuthenticationToken with name given in the SAML message NameID
      * and assertion used to verify the user as credential (SAMLCredential object) is created and set as authenticated.
      *
@@ -84,7 +83,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
 
         SAMLAuthenticationToken token = (SAMLAuthenticationToken) authentication;
         SAMLMessageStorage store = token.getMessageStore();
-        BasicSAMLMessageContext context = token.getCredentials();
+        SAMLMessageContext context = token.getCredentials();
         SAMLCredential credential;
 
         try {

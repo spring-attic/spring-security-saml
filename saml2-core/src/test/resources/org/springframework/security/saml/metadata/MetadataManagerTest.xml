@@ -5,30 +5,79 @@
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
 
     <!-- Initialization of OpenSAML library-->
-    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false" />
+    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager" depends-on="bootstrap">
+    <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager" depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
+
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+                      init-method="initialize">
                     <constructor-arg index="0">
-                        <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
+                        <value type="java.io.File">classpath:testIDP.xml</value>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
-                    <constructor-arg index="0">
-                        <value type="java.io.File">classpath:testSP.xml</value>
+
+                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+                    <constructor-arg>
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+                              init-method="initialize">
+                            <constructor-arg index="0">
+                                <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
+                            </constructor-arg>
+                            <property name="parserPool" ref="parserPool"/>
+                        </bean>
                     </constructor-arg>
-                    <property name="parserPool" ref="parserPool"/>
+                    <constructor-arg>
+                        <!-- Default alias -->
+                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                            <property name="alias" value="myAliasDefault"/>
+                        </bean>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <map>
+                            <!-- Unrelated (not provided by this instance), should be ignored -->
+                            <entry key="http://localhost:8081/spring-security-saml2-webapp">
+                                <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                                    <property name="alias" value="myAliasSpecific"/>
+                                </bean>
+                            </entry>
+                            <!-- Related to exactly one -->
+                            <entry key="nest2">
+                                <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                                    <property name="alias" value="nest2alias"/>
+                                </bean>
+                            </entry>
+                        </map>
+                    </constructor-arg>
                 </bean>
+
+                <!-- Default extended -->
+                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+                    <constructor-arg>
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+                              init-method="initialize">
+                            <constructor-arg index="0">
+                                <value type="java.io.File">classpath:testSP.xml</value>
+                            </constructor-arg>
+                            <property name="parserPool" ref="parserPool"/>
+                        </bean>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                            <property name="alias" value="myAlias"/>
+                        </bean>
+                    </constructor-arg>
+                </bean>
+
             </list>
         </constructor-arg>
-        <property name="hostedSPName" value="hostedSP" />
+        <property name="hostedSPName" value="hostedSP"/>
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
-        <property name="defaultIDP" value="nest3" />
+        <property name="defaultIDP" value="nest3"/>
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->

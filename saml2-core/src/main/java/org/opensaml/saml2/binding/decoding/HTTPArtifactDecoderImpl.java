@@ -62,7 +62,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
                     "Invalid message context type, this decoder only support SAMLMessageContext");
         }
 
-        SAMLMessageContext samlMessageContext = (SAMLMessageContext) messageContext;
+        org.springframework.security.saml.context.SAMLMessageContext samlMessageContext = (org.springframework.security.saml.context.SAMLMessageContext) messageContext;
 
         if (!(samlMessageContext.getInboundMessageTransport() instanceof HTTPInTransport)) {
             log.error("Invalid inbound message transport type, this decoder only support HTTPInTransport");
@@ -89,7 +89,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
 
         log.debug("Decoded RelayState: {}", samlMessageContext.getRelayState());
 
-        SAMLObject message = resolutionProfile.resolveArtifact(artifactId, getActualReceiverEndpointURI(samlMessageContext));
+        SAMLObject message = resolutionProfile.resolveArtifact(samlMessageContext, artifactId, getActualReceiverEndpointURI(samlMessageContext));
         samlMessageContext.setInboundSAMLMessage(message);
         populateMessageContext(samlMessageContext);
         

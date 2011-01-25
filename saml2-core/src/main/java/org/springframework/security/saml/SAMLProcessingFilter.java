@@ -16,18 +16,19 @@ package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,9 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     @Autowired
     protected SAMLProcessor processor;
 
+    @Autowired
+    protected SAMLContextProvider contextProvider;
+
     private static final String DEFAULT_URL = "/saml/SSO";
 
     public SAMLProcessingFilter() {
@@ -62,12 +66,14 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
      */
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        BasicSAMLMessageContext context = getContext(request, response);
-
         try {
 
+            SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
             logger.debug("Attempting SAML2 authentication");
             processor.retrieveMessage(context);
+            HttpSessionStorage storage = new HttpSessionStorage(request);
+            SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
+            return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
@@ -79,27 +85,6 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         }
 
-        HttpSessionStorage storage = new HttpSessionStorage(request);
-        SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
-        return getAuthenticationManager().authenticate(token);
-
-    }
-
-    /**
-     * Method populates the SAML context. Fields inbound and outbound transport must be filled. Also
-     * localEntityId and localEntityRole may be selected.
-     *
-     * @param request request
-     * @param response response
-     * @return saml context
-     *
-     * @see org.springframework.security.saml.util.SAMLUtil#getContext(HttpServletRequest, HttpServletResponse)
-     * @see org.springframework.security.saml.util.SAMLUtil#populateLocalEntity(BasicSAMLMessageContext, String)
-     */
-    protected BasicSAMLMessageContext getContext(HttpServletRequest request, HttpServletResponse response) {
-        BasicSAMLMessageContext context = SAMLUtil.getContext(request, response);
-        SAMLUtil.populateLocalEntity(context, request.getContextPath());
-        return context;
     }
 
     @Override
@@ -108,6 +93,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     }
 
     public void setSAMLProcessor(SAMLProcessor processor) {
+        Assert.notNull(processor, "SAML Processor can't be null");
         this.processor = processor;
     }
 
@@ -127,6 +113,23 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
         handler.setDefaultTargetUrl(url);
         setAuthenticationSuccessHandler(handler);
+    }
+
+    /**
+     * Sets entity responsible for populating local entity context data.
+     *
+     * @param contextProvider provider implementation
+     */
+    public void setContextProvider(SAMLContextProvider contextProvider) {
+        Assert.notNull(contextProvider, "Context provider can't be null");
+        this.contextProvider = contextProvider;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        Assert.notNull(processor, "SAMLProcessor must be set");
+        Assert.notNull(contextProvider, "Context provider must be set");
     }
 
 }

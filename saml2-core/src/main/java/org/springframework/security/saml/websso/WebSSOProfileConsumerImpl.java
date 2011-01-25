@@ -17,7 +17,6 @@ package org.springframework.security.saml.websso;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -32,6 +31,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
@@ -74,7 +74,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *                             in the signature on response can't be verified
      * @throws ValidationException in case the response structure is not conforming to the standard
      */
-    public SAMLCredential processAuthenticationResponse(BasicSAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
 
         AuthnRequest request = null;
         SAMLObject message = context.getInboundSAMLMessage();
@@ -199,7 +199,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     }
 
-    private void verifyAssertion(Assertion assertion, AuthnRequest request, BasicSAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    private void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
         // Verify storage time skew
         if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
             log.debug("Authentication statement is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
@@ -232,7 +232,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @throws SAMLException       error validating the object
      * @throws DecryptionException in case the NameID can't be decrypted
      */
-    protected void verifySubject(Subject subject, AuthnRequest request, BasicSAMLMessageContext context) throws SAMLException, DecryptionException {
+    protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
         boolean confirmed = false;
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
@@ -313,7 +313,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *                             signature can't be validated
      * @throws ValidationException signature is malformed
      */
-    protected void verifyAssertionSignature(Signature signature, BasicSAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
         if (signature != null && wantSigned) {
@@ -324,7 +324,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
     }
 
-    protected void verifyAssertionConditions(Conditions conditions, BasicSAMLMessageContext context, boolean audienceRequired) throws SAMLException {
+    protected void verifyAssertionConditions(Conditions conditions, SAMLMessageContext context, boolean audienceRequired) throws SAMLException {
         // If no conditions are implied, storage is deemed valid
         if (conditions == null) {
             return;
@@ -379,7 +379,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param context message context
      * @throws AuthenticationException in case the statement is invalid
      */
-    protected void verifyAuthenticationStatement(AuthnStatement auth, BasicSAMLMessageContext context) throws AuthenticationException {
+    protected void verifyAuthenticationStatement(AuthnStatement auth, SAMLMessageContext context) throws AuthenticationException {
         // Validate that user wasn't authenticated too long time ago
         if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
             log.debug("Authentication statement is too old to be used", auth.getAuthnInstant());

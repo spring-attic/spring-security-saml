@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Vladimir Schäfer
+ * Copyright 2010 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLObject;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Implementations must load referenced artifact using SAML artifact resolution protocol.
@@ -27,11 +28,12 @@ public interface ArtifactResolutionProfile {
      * Implementation must resolve artifact with the given ID, locate endpoint usable for it resolution
      * and load referenced SAML message.
      *
+     * @param context saml context with pre-populated local entity
      * @param artifactId artifact to resolve
      * @param endpointURI URI of the endpoint the message was sent to
      * @return message the artifact references
      * @throws MessageDecodingException in case message loading fails
      */
-    SAMLObject resolveArtifact(String artifactId, String endpointURI) throws MessageDecodingException;
+    SAMLObject resolveArtifact(SAMLMessageContext context, String artifactId, String endpointURI) throws MessageDecodingException;
 
 }

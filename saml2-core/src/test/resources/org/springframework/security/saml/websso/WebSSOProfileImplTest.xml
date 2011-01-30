@@ -35,7 +35,6 @@
     <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl" depends-on="bootstrap">
         <constructor-arg ref="processor"/>
         <constructor-arg ref="metadata"/>
-        <constructor-arg ref="keyManager"/>
     </bean>
 
     <!-- Central storage of cryptohraphic keys -->
@@ -91,8 +90,6 @@
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
     <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
-        <constructor-arg ref="metadata"/>
-        <constructor-arg ref="keyManager"/>
         <constructor-arg ref="bindings"/>
     </bean>
 

@@ -25,7 +25,6 @@ import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.web.filter.GenericFilterBean;
 import org.w3c.dom.Element;
 
@@ -145,20 +144,33 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         if (manager.getHostedSPName() == null) {
             synchronized (MetadataManager.class) {
                 if (manager.getHostedSPName() == null) {
+
                     try {
-                        // Use default if not set
-                        if (generator.getEntityPath() == null) {
-                            generator.setEntityPath(getEntityID(request));
+
+                        // Use default entityID if not set
+                        if (generator.getEntityBaseURL() == null) {
+                            generator.setEntityBaseURL(getEntityID(request));
                         }
+
+                        // Use default entityAlias if not set
+                        if (generator.getEntityAlias() == null) {
+                            generator.setEntityAlias(request.getContextPath());
+                        }
+
                         EntityDescriptor descriptor = generator.generateMetadata();
+                        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
+
                         logger.info("Created metadata for system with ID: " + descriptor.getEntityID());
-                        MetadataProvider metadataProvider = new MetadataMemoryProvider(descriptor);
+                        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(new MetadataMemoryProvider(descriptor), extendedMetadata);
+
                         manager.addMetadataProvider(metadataProvider);
                         manager.setHostedSPName(descriptor.getEntityID());
+
                     } catch (MetadataProviderException e) {
                         logger.error("Error generating system metadata", e);
                         throw new ServletException("Error generating system metadata", e);
                     }
+
                 }
             }
         }
@@ -167,7 +179,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     protected String getEntityID(HttpServletRequest request) {
         StringBuffer sb = new StringBuffer();
         sb.append(request.getScheme()).append("://").append(request.getServerName());
-        sb.append(":").append(request.getServerPort()).append(request.getContextPath());
+        sb.append(request.getContextPath());
         return sb.toString();
     }
 

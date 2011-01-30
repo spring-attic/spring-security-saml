@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009-2011 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  */
 package org.springframework.security.saml.parser;
 
+import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 
 /**
  * Class is initialized from the Spring context and allows retrieval of the ParserPool for code
  * not managed by Spring.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public class ParserPoolHolder {
 
     /**
      * Pool instance.
      */
-    private static ParserPool pool;
+    private static ParserPool pool = new BasicParserPool();
 
     /**
      * Initializes the static parserPool property and makes it available for getPool calls.

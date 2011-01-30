@@ -21,6 +21,7 @@ import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.ws.message.MessageContext;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HTTPInTransport;
+import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         }
 
         HTTPInTransport inTransport = (HTTPInTransport) samlMessageContext.getInboundMessageTransport();
+        HTTPOutTransport outTransport = (HTTPOutTransport) samlMessageContext.getOutboundMessageTransport();
 
         /*
          * Artifact parameter.
@@ -90,7 +92,13 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         log.debug("Decoded RelayState: {}", samlMessageContext.getRelayState());
 
         SAMLObject message = resolutionProfile.resolveArtifact(samlMessageContext, artifactId, getActualReceiverEndpointURI(samlMessageContext));
+
+        // Fix potentially overwritten transports and set constants
         samlMessageContext.setInboundSAMLMessage(message);
+        samlMessageContext.setInboundMessageTransport(inTransport);
+        samlMessageContext.setOutboundMessageTransport(outTransport);
+        samlMessageContext.setCommunicationProfileId(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+
         populateMessageContext(samlMessageContext);
         
     }

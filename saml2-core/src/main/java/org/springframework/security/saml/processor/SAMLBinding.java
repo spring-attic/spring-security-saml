@@ -14,18 +14,13 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
-import org.opensaml.ws.transport.Transport;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

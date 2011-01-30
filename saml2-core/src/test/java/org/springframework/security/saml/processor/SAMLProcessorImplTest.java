@@ -24,6 +24,7 @@ import org.opensaml.xml.security.SecurityException;
 import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,13 +44,20 @@ public class SAMLProcessorImplTest {
     HttpServletRequest request;
 
     @Before
-    public void initialize() {
+    public void initialize() throws Exception {
+
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         processor = context.getBean("processor", SAMLProcessorImpl.class);
+
         request = createMock(HttpServletRequest.class);
-        samlContext = new SAMLMessageContext();
-        samlContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
+        expect(request.getContextPath()).andReturn("/").anyTimes();
+
+        replayMock();
+        SAMLContextProvider contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
+        samlContext = contextProvider.getLocalEntity(request, null);
+        verifyMock();
+
     }
 
     /**
@@ -147,5 +155,6 @@ public class SAMLProcessorImplTest {
 
     private void verifyMock() {
         verify(request);
+        reset(request);
     }
 }

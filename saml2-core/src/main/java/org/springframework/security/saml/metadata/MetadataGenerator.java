@@ -59,11 +59,15 @@ import java.util.Map;
  */
 public class MetadataGenerator implements ApplicationContextAware {
 
-    private String entityPath;
+    private String entityBaseURL;
+    private String entityAlias;
 
     private boolean requestSigned = true;
     private boolean wantAssertionSigned = true;
     private boolean signMetadata = true;
+
+    private String signingKey = null;
+    private String encryptionKey = null;
 
     private Collection<String> nameID = null;
     private Collection<String> bindings = null;
@@ -94,12 +98,31 @@ public class MetadataGenerator implements ApplicationContextAware {
     protected KeyInfo getServerKeyInfo() {
         try {
             NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = keyManager.getDefaultCredential();
+            Credential serverCredential = keyManager.getCredential(signingKey);
             return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.error("Can't obtain key from the keystore or generate key info", e);
+            logger.error("Can't obtain key from the keystore or generate key info: " + signingKey, e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
         }
+    }
+
+    protected KeyInfo getServerEncryptionKeyInfo() {
+        try {
+            NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
+            Credential serverCredential = keyManager.getCredential(encryptionKey);
+            return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
+        } catch (org.opensaml.xml.security.SecurityException e) {
+            logger.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
+            throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
+        }
+    }
+
+    public ExtendedMetadata generateExtendedMetadata() {
+        ExtendedMetadata ex = new ExtendedMetadata();
+        ex.setEncryptionKey(encryptionKey);
+        ex.setSingingKey(signingKey);
+        ex.setAlias(entityAlias);
+        return ex;
     }
 
     public EntityDescriptor generateMetadata() {
@@ -109,16 +132,17 @@ public class MetadataGenerator implements ApplicationContextAware {
         boolean signMetadata = isSignMetadata();
         Collection<String> includedBindings = getBindings();
         Collection<String> includedNameID = getNameID();
-        String entityID = getEntityPath();
+        String entityBaseURL = getEntityBaseURL();
+        String entityAlias = getEntityAlias();
 
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
-        descriptor.setEntityID(entityID);
-        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityID, requestSigned, assertionSigned, includedBindings, includedNameID));
+        descriptor.setEntityID(entityBaseURL);
+        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedBindings, includedNameID));
 
         if (signMetadata) {
             try {
-                signSAMLObject(descriptor, keyManager.getDefaultCredential());
+                signSAMLObject(descriptor, keyManager.getCredential(signingKey));
             } catch (MessageEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -128,7 +152,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     }
 
-    protected SPSSODescriptor buildSPSSODescriptor(String entityID, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedBindings, Collection<String> includedNameID) {
+    protected SPSSODescriptor buildSPSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedBindings, Collection<String> includedNameID) {
 
         SAMLObjectBuilder<SPSSODescriptor> builder = (SAMLObjectBuilder<SPSSODescriptor>) builderFactory.getBuilder(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         SPSSODescriptor spDescriptor = builder.buildObject();
@@ -143,26 +167,26 @@ public class MetadataGenerator implements ApplicationContextAware {
         int index = 0;
         boolean isDefault = true;
         if (includedBindings.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityID, isDefault, index, SAMLConstants.SAML2_POST_BINDING_URI));
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_POST_BINDING_URI));
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_POST_BINDING_URI));
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_POST_BINDING_URI));
             index++;
             isDefault = false;
         }
         if (includedBindings.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityID, isDefault, index, SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
             index++;
             isDefault = false;
         }
         if (includedBindings.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
         }
         if (includedBindings.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityID, SAMLConstants.SAML2_SOAP11_BINDING_URI));
+            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_SOAP11_BINDING_URI));
         }
 
         // Generate key info
         spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo()));
-        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo()));
+        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerEncryptionKeyInfo()));
 
         return spDescriptor;
 
@@ -215,22 +239,22 @@ public class MetadataGenerator implements ApplicationContextAware {
         return formats;
     }
 
-    protected AssertionConsumerService getAssertionConsumerService(String entityID, boolean isDefault, int index, String binding) {
+    protected AssertionConsumerService getAssertionConsumerService(String entityBaseURL, String entityAlias, boolean isDefault, int index, String binding) {
         SAMLObjectBuilder<AssertionConsumerService> builder = (SAMLObjectBuilder<AssertionConsumerService>) builderFactory.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         AssertionConsumerService consumer = builder.buildObject();
         SAMLProcessingFilter samlFilter = getSAMLFilter();
-        consumer.setLocation(getServerURL(entityID, samlFilter.getFilterProcessesUrl()));
+        consumer.setLocation(getServerURL(entityBaseURL, entityAlias, samlFilter.getFilterProcessesUrl()));
         consumer.setBinding(binding);
         consumer.setIsDefault(isDefault);
         consumer.setIndex(index);
         return consumer;
     }
 
-    protected SingleLogoutService getSingleLogoutService(String entityID, String binding) {
+    protected SingleLogoutService getSingleLogoutService(String entityBaseURL, String entityAlias, String binding) {
         SAMLObjectBuilder<SingleLogoutService> builder = (SAMLObjectBuilder<SingleLogoutService>) builderFactory.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
         SingleLogoutService logoutService = builder.buildObject();
         SAMLLogoutProcessingFilter logoutFilter = getSAMLLogoutFilter();
-        logoutService.setLocation(getServerURL(entityID, logoutFilter.getFilterProcessesUrl()));
+        logoutService.setLocation(getServerURL(entityBaseURL, entityAlias, logoutFilter.getFilterProcessesUrl()));
         logoutService.setBinding(binding);
         return logoutService;
     }
@@ -238,17 +262,27 @@ public class MetadataGenerator implements ApplicationContextAware {
     /**
      * Creates URL at which the local server is capable of accepting incoming SAML messages.
      *
-     * @param entityID entity ID
+     * @param entityBaseURL entity ID
      * @param processingURL local context at which processing filter is waiting
      * @return URL of local server
      */
-    private String getServerURL(String entityID, String processingURL) {
+    private String getServerURL(String entityBaseURL, String entityAlias, String processingURL) {
+
         StringBuffer result = new StringBuffer();
+        result.append(entityBaseURL);
         if (!processingURL.startsWith("/")) {
-            processingURL = "/" + processingURL;
+            result.append("/");
         }
-        result.append(entityID).append(processingURL);
+        result.append(processingURL);
+        if (!processingURL.endsWith("/")) {
+            result.append("/");
+        }
+        if (entityAlias != null) {
+            result.append("alias/");
+            result.append(entityAlias);
+        }
         return result.toString();
+
     }
 
     private SAMLProcessingFilter getSAMLFilter() {
@@ -365,16 +399,32 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.bindings = bindings;
     }
 
-    public String getEntityPath() {
-        return entityPath;
+    public String getEntityBaseURL() {
+        return entityBaseURL;
     }
 
-    public void setEntityPath(String entityPath) {
-        this.entityPath = entityPath;
+    public String getEntityAlias() {
+        return entityAlias;
+    }
+
+    public void setEntityAlias(String entityAlias) {
+        this.entityAlias = entityAlias;
+    }
+
+    public void setEntityBaseURL(String entityBaseURL) {
+        this.entityBaseURL = entityBaseURL;
     }
 
     public void setKeyManager(KeyManager keyManager) {
         this.keyManager = keyManager;
+    }
+
+    public void setSigningKey(String signingKey) {
+        this.signingKey = signingKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
     }
 
 }

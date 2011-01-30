@@ -86,12 +86,20 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 roleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
 
                 if (roleDescriptor != null) {
-                    idpName.add(key);
+                    if (idpName.contains(key)) {
+                        throw new MetadataProviderException("Metadata contains two entities with the same entityID: " + key);
+                    } else {
+                        idpName.add(key);
+                    }
                 }
 
                 roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
                 if (roleDescriptor != null) {
-                    spName.add(key);
+                    if (spName.contains(key)) {
+                        throw new MetadataProviderException("Metadata contains two entities with the same entityID: " + key);
+                    } else {
+                        spName.add(key);
+                    }
                 }
 
                 // Verify alias is unique
@@ -297,7 +305,8 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     /**
      * Compares whether SHA-1 hash of the entityId equals the hashID.
-     * @param hashID hash id to compare
+     *
+     * @param hashID   hash id to compare
      * @param entityId entity id to hash and verify
      * @return true if values match
      * @throws MetadataProviderException in case SHA-1 hash can't be initialized

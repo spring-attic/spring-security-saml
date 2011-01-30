@@ -44,7 +44,7 @@ public class HTTPSOAP11DecoderImpl extends HTTPSOAP11Decoder {
     }
 
     /**
-     * In case message destination is set (was included in the message) check is made agains endpoint. Otherwise
+     * In case message destination is set (was included in the message) check is made against the endpoint. Otherwise
      * always passes.
      *
      * @param messageDestination destination from the SAML message

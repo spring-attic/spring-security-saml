@@ -14,25 +14,20 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl;
-import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
 import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
-import org.opensaml.ws.transport.Transport;
-import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.ws.transport.http.HTTPTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -40,7 +35,7 @@ import java.util.List;
 /**
  * Http SOAP 1.1 binding.
  *
- * @author Mandus Elfving
+ * @author Mandus Elfving, Vladimir Schaefer
  */
 public class HTTPSOAP11Binding extends SAMLBindingImpl {
 
@@ -84,7 +79,7 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
     @Override
     public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
 
-        SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
+        SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
         securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
 
     }

@@ -66,8 +66,6 @@
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
     <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
-        <constructor-arg ref="metadata"/>
-        <constructor-arg ref="keyManager"/>
         <constructor-arg ref="bindings"/>
     </bean>
 
@@ -107,6 +105,9 @@
             </constructor-arg>
         </bean>
     </util:list>
+
+    <!-- Provider of default SAML Context -->
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
 
     <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
           factory-method="getEngine"/>

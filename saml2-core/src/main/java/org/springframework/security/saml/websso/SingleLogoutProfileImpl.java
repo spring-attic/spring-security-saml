@@ -36,6 +36,7 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -134,7 +135,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         // Verify signature of the response if present
         if (logoutRequest.getSignature() != null) {
             try {
-                verifySignature(logoutRequest.getSignature(), context.getPeerEntityId());
+                verifySignature(logoutRequest.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
             } catch (org.opensaml.xml.security.SecurityException e) {
                 log.warn("Validation of signature in LogoutRequest has failed, id: " + context.getInboundSAMLMessageId());
                 Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is invalid");
@@ -230,7 +231,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         try {
             // Fail if NameId doesn't correspond to the currently logged user
-            NameID nameID = getNameID(logoutRequest);
+            NameID nameID = getNameID(context, logoutRequest);
             if (nameID == null || !equalsNameID(credential.getNameID(), nameID)) {
                 Status status = getStatus(StatusCode.UNKNOWN_PRINCIPAL_URI, "The requested NameID is invalid");
                 sendLogoutResponse(status, context);
@@ -297,10 +298,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         }
     }
 
-    protected NameID getNameID(LogoutRequest request) throws DecryptionException {
+    protected NameID getNameID(SAMLMessageContext context, LogoutRequest request) throws DecryptionException {
         NameID id;
         if (request.getEncryptedID() != null) {
-            id = (NameID) decryper.decrypt(request.getEncryptedID());
+            Assert.notNull(context.getLocalDecrypter(), "Can't decrypt NameID, no decrypter is set in the context");
+            id = (NameID) context.getLocalDecrypter().decrypt(request.getEncryptedID());
         } else {
             id = request.getNameID();
         }
@@ -320,7 +322,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify signature of the response if present
         if (response.getSignature() != null) {
-            verifySignature(response.getSignature(), context.getPeerEntityId());
+            verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
         }
 
         // Verify issue time

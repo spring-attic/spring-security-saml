@@ -14,27 +14,23 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
-import org.opensaml.saml2.binding.security.SAML2HTTPPostSimpleSignRule;
 import org.opensaml.saml2.binding.security.SAML2HTTPRedirectDeflateSignatureRule;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
-import org.opensaml.ws.transport.Transport;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransport;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.springframework.security.saml.websso.ArtifactResolutionProfile;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -83,7 +79,7 @@ public class HTTPRedirectDeflateBinding extends SAMLBindingImpl {
     @Override
     public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
 
-        SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
+        SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
         securityPolicy.add(new SAML2HTTPRedirectDeflateSignatureRule(engine));
         securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
 

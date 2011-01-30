@@ -71,13 +71,10 @@ public class SAMLProcessingFilterTest {
     /**
      * Verifies that the SAMLProcessor collaborator must be set, otherwise exception is thrown
      */
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testMissingProcessor() {
         expect(request.getContextPath()).andReturn("/saml");
         processingFiler.setSAMLProcessor(null);
-        replayMock();
-        processingFiler.attemptAuthentication(request, null);
-        verifyMock();
     }
 
     /**

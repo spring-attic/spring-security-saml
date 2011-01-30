@@ -25,7 +25,6 @@ import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
@@ -48,8 +47,8 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     public WebSSOProfileImpl() {
     }
 
-    public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
-        super(processor, manager, resolver);
+    public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager manager) {
+        super(processor, manager);
     }
 
     /**

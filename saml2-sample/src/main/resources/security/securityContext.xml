@@ -7,6 +7,7 @@
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Enable autowiring -->
+    <context:annotation-config />
     <context:component-scan base-package="org.springframework.security.saml"/>
 
     <security:http entry-point-ref="samlEntryPoint">
@@ -145,7 +146,6 @@
     <!-- Override default authentication processing filter with the one processing SAML messages -->
     <bean id="samlProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
         <property name="authenticationManager" ref="authenticationManager"/>
-        <property name="filterProcessesUrl" value="/saml/SSO"/>
         <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
     </bean>
 

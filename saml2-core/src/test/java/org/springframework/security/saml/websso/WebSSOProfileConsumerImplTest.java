@@ -26,12 +26,15 @@ import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.easymock.EasyMock.*;
 
@@ -49,20 +52,30 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     WebSSOProfileTestHelper helper;
     KeyManager resolver;
     SAMLProcessor processor;
+    SAMLContextProvider contextProvider;
 
     @Before
     public void initialize() throws Exception {
+
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         storage = createMock(SAMLMessageStorage.class);
         manager = context.getBean("metadata", MetadataManager.class);
         resolver = context.getBean("keyManager", KeyManager.class);
         processor = context.getBean("processor", SAMLProcessor.class);
-        profile = new WebSSOProfileConsumerImpl(processor, manager, resolver);
-        messageContext = new SAMLMessageContext();
+        profile = new WebSSOProfileConsumerImpl(processor, manager);
+        contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
+
+        HttpServletRequest request = createMock(HttpServletRequest.class);
+        expect(request.getContextPath()).andReturn("/").anyTimes();
+        replay(request);
+        messageContext = contextProvider.getLocalEntity(request, null);
+        verify(request);
+
         builderFactory = Configuration.getBuilderFactory();
         helper = new WebSSOProfileTestHelper(builderFactory);
         messageContext.setInboundMessage(helper.getValidResponse());
+
     }
 
     /**

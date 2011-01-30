@@ -33,7 +33,9 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.util.Base64;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.util.SAMLUtil;
 
 /**

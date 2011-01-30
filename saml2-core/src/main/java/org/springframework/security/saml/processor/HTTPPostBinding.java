@@ -15,7 +15,6 @@
 package org.springframework.security.saml.processor;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml1.binding.encoding.HTTPPostEncoder;
@@ -30,13 +29,9 @@ import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransport;
 import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -86,7 +81,7 @@ public class HTTPPostBinding extends SAMLBindingImpl {
     @Override
     public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
 
-        SignatureTrustEngine engine = getDefaultSignatureTrustEngine();
+        SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
         securityPolicy.add(new SAML2HTTPPostSimpleSignRule(engine, parserPool, engine.getKeyInfoResolver()));
         securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
 

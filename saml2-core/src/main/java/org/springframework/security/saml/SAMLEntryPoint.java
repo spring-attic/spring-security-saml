@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009-2011 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import java.io.IOException;
  * The other way is direct invocation of the entry point by accessing the DEFAULT_FILTER_URL. In this way user
  * can be forwarded to IDP after clicking for example login button.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationEntryPoint {
 
@@ -62,17 +62,10 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     private WebSSOProfileOptions defaultOptions;
 
-    @Autowired
     private WebSSOProfile webSSOprofile;
-
-    @Autowired
     private MetadataManager metadata;
-
-    @Autowired
-    protected SAMLLogger samlLogger;
-
-    @Autowired
-    protected SAMLContextProvider contextProvider;
+    private SAMLLogger samlLogger;
+    private SAMLContextProvider contextProvider;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -219,14 +212,9 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                     return idp;
                 }
             }
-            throw new MetadataProviderException("Given IDP alias is invalid: " + s);
+            throw new MetadataProviderException("Given IDP is invalid: " + s);
         }
         return metadata.getDefaultIDP();
-    }
-
-    public void setMetadata(MetadataManager metadata) {
-        Assert.notNull(metadata, "MetadataManager can't be null");
-        this.metadata = metadata;
     }
 
     /**
@@ -275,11 +263,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return webSSOprofile;
     }
 
-    public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
-        Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
-        this.webSSOprofile = webSSOprofile;
-    }
-
     /**
      * Sets path where request dispatcher will send user for IDP selection. In case it is null the default
      * server will always be used.
@@ -290,6 +273,13 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         this.idpSelectionPath = idpSelectionPath;
     }
 
+    @Autowired
+    public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
+        Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
+        this.webSSOprofile = webSSOprofile;
+    }
+
+    @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
         Assert.notNull(samlLogger, "SAML Logger can't be null");
         this.samlLogger = samlLogger;
@@ -300,9 +290,16 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      *
      * @param contextProvider provider implementation
      */
+    @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
+    }
+
+    @Autowired
+    public void setMetadata(MetadataManager metadata) {
+        Assert.notNull(metadata, "MetadataManager can't be null");
+        this.metadata = metadata;
     }
 
     @Override

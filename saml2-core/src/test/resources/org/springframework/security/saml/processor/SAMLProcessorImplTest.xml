@@ -36,8 +36,6 @@
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
     <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
-        <constructor-arg ref="metadata"/>
-        <constructor-arg ref="keyManager"/>
         <constructor-arg ref="bindings"/>
     </bean>
 
@@ -91,6 +89,9 @@
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
         <property name="defaultIDP" value="http://localhost:8080/opensso"/>
     </bean>
+
+    <!-- Provider of default SAML Context -->
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
 
     <!-- XML parser pool needed for OpenSAML parsing -->
     <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>

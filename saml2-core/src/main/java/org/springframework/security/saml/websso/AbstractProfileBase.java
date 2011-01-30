@@ -23,38 +23,29 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.security.MetadataCriteria;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.security.CriteriaSet;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Random;
 
@@ -63,7 +54,7 @@ import java.util.Random;
  *
  * @author Vladimir Schaefer
  */
-public abstract class AbstractProfileBase {
+public abstract class AbstractProfileBase implements InitializingBean {
 
     /**
      * Maximum time from response creation when the message is deemed valid.
@@ -80,63 +71,19 @@ public abstract class AbstractProfileBase {
      */
     protected final static Logger log = LoggerFactory.getLogger(WebSSOProfileImpl.class);
 
-    @Autowired
     protected MetadataManager metadata;
-
-    @Autowired
-    protected KeyManager keyManager;
-
-    @Autowired
     protected SAMLProcessor processor;
-
-    protected XMLObjectBuilderFactory builderFactory;
-    protected Decrypter decryper;
-
-    /**
-     * Trust engine used to verify SAML signatures
-     */
-    protected SignatureTrustEngine trustEngine;
-
-    /**
-     * Artifact map. // TODO autowire when ready
-     */
     protected SAMLArtifactMap artifactMap;
+    protected XMLObjectBuilderFactory builderFactory;
 
     public AbstractProfileBase() {
         this.builderFactory = Configuration.getBuilderFactory();
     }
 
-    public AbstractProfileBase(SignatureTrustEngine trustEngine) {
-        this.trustEngine = trustEngine;
-    }
-
-    public AbstractProfileBase(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
-
+    public AbstractProfileBase(SAMLProcessor processor, MetadataManager manager) {
         this();
         this.processor = processor;
         this.metadata = manager;
-        this.keyManager = resolver;
-
-    }
-
-    @PostConstruct
-    protected void init() {
-
-        // Decryption key
-        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(keyManager.getDefaultCredential());
-
-        // Way to obtain encrypted key info from XML
-        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
-        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
-
-        trustEngine = new ExplicitKeySignatureTrustEngine(new MetadataCredentialResolver(metadata), org.opensaml.xml.Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
-
-        // Entity used for decrypting of encrypted XML parts
-        this.decryper = new Decrypter(null, resolver, encryptedKeyResolver);
-        decryper.setRootInNewDocument(true);
-
     }
 
     /**
@@ -261,7 +208,12 @@ public abstract class AbstractProfileBase {
         }
     }
 
-    protected void verifySignature(Signature signature, String IDPEntityID) throws org.opensaml.xml.security.SecurityException, ValidationException {
+    protected void verifySignature(Signature signature, String IDPEntityID, SignatureTrustEngine trustEngine) throws org.opensaml.xml.security.SecurityException, ValidationException {
+
+        if (trustEngine == null) {
+            throw new SecurityException("Trust engine is not set, signature can't be verified");
+        }
+
         SAMLSignatureProfileValidator validator = new SAMLSignatureProfileValidator();
         validator.validate(signature);
         CriteriaSet criteriaSet = new CriteriaSet();
@@ -270,6 +222,7 @@ public abstract class AbstractProfileBase {
         criteriaSet.add(new UsageCriteria(UsageType.SIGNING));
         log.debug("Verifying signature", signature);
         trustEngine.validate(signature, criteriaSet);
+
     }
 
     protected boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
@@ -277,20 +230,25 @@ public abstract class AbstractProfileBase {
         return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + skewInSec * 1000);
     }
 
+    @Autowired
     public void setMetadata(MetadataManager metadata) {
         this.metadata = metadata;
     }
 
-    public void setKeyManager(KeyManager keyManager) {
-        this.keyManager = keyManager;
-    }
-
+    @Autowired(required = false)
     public void setProcessor(SAMLProcessor processor) {
         this.processor = processor;
     }
 
+    // TODO autowire when ready
     public void setArtifactMap(SAMLArtifactMap artifactMap) {
         this.artifactMap = artifactMap;
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        // TODO verify artifact map when ready
+        Assert.notNull(metadata, "Metadata must be set");
+        Assert.notNull(processor, "SAML Processor must be set");
     }
 
 }

@@ -16,7 +16,8 @@ package org.springframework.security.saml.processor;
 
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.*;
+import org.opensaml.saml2.metadata.Endpoint;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
@@ -26,11 +27,7 @@ import org.opensaml.ws.security.SecurityPolicy;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
 import org.opensaml.ws.transport.InTransport;
-import org.opensaml.xml.security.credential.Credential;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.util.Assert;
 
 import javax.xml.namespace.QName;
@@ -45,26 +42,27 @@ import java.util.Collection;
  */
 public class SAMLProcessorImpl implements SAMLProcessor {
 
-    @Autowired(required = true)
-    MetadataManager metadata;
+    /**
+     * Bindings supported by this processor.
+     */
+    protected Collection<SAMLBinding> bindings;
 
-    @Autowired(required = true)
-    KeyManager keyManager;
-
-    Collection<SAMLBinding> bindings;
-
+    /**
+     * Creates a processor supporting a single binding.
+     *
+     * @param binding binding
+     */
     public SAMLProcessorImpl(SAMLBinding binding) {
         this.bindings = Arrays.asList(binding);
     }
 
+    /**
+     * Creates a processor supporting multiple bindings.
+     *
+     * @param bindings bindings
+     */
     public SAMLProcessorImpl(Collection<SAMLBinding> bindings) {
         this.bindings = bindings;
-    }
-
-    public SAMLProcessorImpl(MetadataManager metadata, KeyManager keyManager, Collection<SAMLBinding> bindings) {
-        this.bindings = bindings;
-        this.metadata = metadata;
-        this.keyManager = keyManager;
     }
 
     /**
@@ -78,12 +76,12 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws SAMLException             error retrieving the message from the request
      * @throws MetadataProviderException error retrieving metadata
      * @throws MessageDecodingException  error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException         error verifying message
+     * @throws org.opensaml.xml.security.SecurityException
+     *                                   error verifying message
      */
     public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
-        samlContext.setMetadataProvider(metadata);
-
+        verifyContext(samlContext);
         populateSecurityPolicy(samlContext, binding);
 
         QName peerEntityRole = samlContext.getPeerEntityRole();
@@ -107,7 +105,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * SecurityPolicy is populated using getSecurityPolicy method of the used binding.
      *
      * @param samlContext saml context to set the policy to
-     * @param binding binding used to retrieve the message
+     * @param binding     binding used to retrieve the message
      */
     protected void populateSecurityPolicy(SAMLMessageContext samlContext, SAMLBinding binding) {
 
@@ -169,13 +167,13 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         }
 
         return sendMessage(samlContext, sign, getBinding(endpoint.getBinding()));
-        
+
     }
 
     public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, String bindingName) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         return sendMessage(samlContext, sign, getBinding(bindingName));
-        
+
     }
 
     /**
@@ -186,19 +184,17 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param sign        if true sent message is signed
      * @param binding     binding to use
      * @return context
-     * @throws SAMLException            in case message can't be sent
-     * @throws MessageEncodingException in case message encoding fails
+     * @throws SAMLException             in case message can't be sent
+     * @throws MessageEncodingException  in case message encoding fails
      * @throws MetadataProviderException in case metadata for required entities is not found
      */
     protected SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
-        samlContext.setMetadataProvider(metadata);
-
         verifyContext(samlContext);
 
         if (sign) {
-            Credential signingCredential = keyManager.getCredential(samlContext.getLocalExtendedMetadata().getSingingKey());
-            samlContext.setOutboundSAMLMessageSigningCredential(signingCredential);
+            Assert.notNull(samlContext.getLocalSigningCredential(), "Cannot sign outgoing message as no signing credential is set in the context");
+            samlContext.setOutboundSAMLMessageSigningCredential(samlContext.getLocalSigningCredential());
         }
 
         MessageEncoder encoder = binding.getMessageEncoder();
@@ -216,11 +212,13 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      */
     protected void verifyContext(SAMLMessageContext samlContext) throws MetadataProviderException {
 
+        Assert.notNull(samlContext.getMetadataProvider(), "Metadata provider must be set in the context");
         Assert.notNull(samlContext.getLocalEntityId(), "Local entity id must be set in the context");
         Assert.notNull(samlContext.getLocalEntityRole(), "Local entity role must be set in the context");
         Assert.notNull(samlContext.getLocalEntityMetadata(), "Local entity metadata must be set in the context");
         Assert.notNull(samlContext.getLocalEntityRoleMetadata(), "Local entity role metadata must be set in the context");
         Assert.notNull(samlContext.getLocalExtendedMetadata(), "Local extended metadata must be set in the context");
+        Assert.notNull(samlContext.getLocalTrustEngine(), "SignatureTrustEngine must be set in the samlContext");
 
     }
 
@@ -259,4 +257,5 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         }
         throw new SAMLException("Binding " + bindingName + " is not available, please check your configuration");
     }
+
 }

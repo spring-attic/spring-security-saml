@@ -32,10 +32,10 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.util.Assert;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -54,8 +54,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     public WebSSOProfileConsumerImpl() {
     }
 
-    public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager manager, KeyManager resolver) {
-        super(processor, manager, resolver);
+    public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager manager) {
+        super(processor, manager);
     }
 
     /**
@@ -100,7 +100,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify signature of the response if present
         if (response.getSignature() != null) {
-            verifySignature(response.getSignature(), context.getPeerEntityId());
+            verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
             context.setInboundSAMLMessageAuthenticated(true);
         }
 
@@ -158,7 +158,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         List<Assertion> assertionList = response.getAssertions();
         List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
         for (EncryptedAssertion ea : encryptedAssertionList) {
-            assertionList.add(decryper.decrypt(ea));
+            Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
+            assertionList.add(context.getLocalDecrypter().decrypt(ea));
         }
 
         for (Assertion a : assertionList) {
@@ -179,7 +180,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                     attributes.add(att);
                 }
                 for (EncryptedAttribute att : attStatement.getEncryptedAttributes()) {
-                    attributes.add(decryper.decrypt(att));
+                    Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Attribute, no decrypter is set in the context");
+                    attributes.add(context.getLocalDecrypter().decrypt(att));
                 }
             }
         }
@@ -289,7 +291,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             if (confirmed) {
                 NameID nameID;
                 if (subject.getEncryptedID() != null) {
-                    nameID = (NameID) decryper.decrypt(subject.getEncryptedID());
+                    Assert.notNull(context.getLocalDecrypter(), "Can't decrypt NameID, no decrypter is set in the context");
+                    nameID = (NameID) context.getLocalDecrypter().decrypt(subject.getEncryptedID());
                 } else {
                     nameID = subject.getNameID();
                 }
@@ -317,7 +320,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
         if (signature != null && wantSigned) {
-            verifySignature(signature, context.getPeerEntityMetadata().getEntityID());
+            verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned && !context.isInboundSAMLMessageAuthenticated()) {
             log.debug("Assertion must be signed, but is not");
             throw new SAMLException("SAML Assertion is invalid");

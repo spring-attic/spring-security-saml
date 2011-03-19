@@ -30,6 +30,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.util.Assert;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,13 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-    /**
-     * Profile to delegate SAML parsing to
-     */
-    @Autowired
     protected SAMLProcessor processor;
-
-    @Autowired
     protected SAMLContextProvider contextProvider;
 
     private static final String DEFAULT_URL = "/saml/SSO";
@@ -92,11 +87,6 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
     }
 
-    public void setSAMLProcessor(SAMLProcessor processor) {
-        Assert.notNull(processor, "SAML Processor can't be null");
-        this.processor = processor;
-    }
-
     /**
      * Use setAuthenticationSuccessHandler method and pass a custom handler instead.
      * <p/>
@@ -115,16 +105,32 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         setAuthenticationSuccessHandler(handler);
     }
 
+
     /**
-     * Sets entity responsible for populating local entity context data.
+     * Object capable of parse SAML messages from requests, must be set.
+     *
+     * @param processor processor
+     */
+    @Autowired
+    public void setSAMLProcessor(SAMLProcessor processor) {
+        Assert.notNull(processor, "SAML Processor can't be null");
+        this.processor = processor;
+    }
+
+    /**
+     * Sets entity responsible for populating local entity context data. Must be set.
      *
      * @param contextProvider provider implementation
      */
+    @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
     }
 
+    /**
+     * Verifies that required entities were autowired or set.
+     */
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();

@@ -52,25 +52,9 @@ import java.io.IOException;
  */
 public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
-    /**
-     * SAML message processor used to parse SAML message from inbound channel.
-     */
-    @Autowired
     protected SAMLProcessor processor;
-
-    /**
-     * Profile to delegate SAML parsing to
-     */
-    @Autowired
     protected SingleLogoutProfile logoutProfile;
-
-    /**
-     * Logger of SAML messages.
-     */
-    @Autowired
     protected SAMLLogger samlLogger;
-
-    @Autowired
     protected SAMLContextProvider contextProvider;
 
     /**
@@ -199,36 +183,60 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
         return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
     }
 
-    public void setSAMLProcessor(SAMLProcessor processor) {
-        Assert.notNull(processor, "SAML Processor can't be null");
-        this.processor = processor;
-    }
-
-    public void setLogoutProfile(SingleLogoutProfile logoutProfile) {
-        Assert.notNull(logoutProfile, "SingleLogoutProfile can't be null");
-        this.logoutProfile = logoutProfile;
-    }
-
     @Override
     public String getFilterProcessesUrl() {
         return super.getFilterProcessesUrl();
     }
 
+    /**
+     * Object capable of parse SAML messages from requests, must be set.
+     *
+     * @param processor processor
+     */
+    @Autowired
+    public void setSAMLProcessor(SAMLProcessor processor) {
+        Assert.notNull(processor, "SAML Processor can't be null");
+        this.processor = processor;
+    }
+
+    /**
+     * Profile for consumption of processed messages, must be set.
+     *
+     * @param logoutProfile profile
+     */
+    @Autowired
+    public void setLogoutProfile(SingleLogoutProfile logoutProfile) {
+        Assert.notNull(logoutProfile, "SingleLogoutProfile can't be null");
+        this.logoutProfile = logoutProfile;
+    }
+
+    /**
+     * Logger for SAML events, must be set.
+     *
+     * @param samlLogger logger
+     */
+    @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
         Assert.notNull(samlLogger, "SAML logger can't be null");
         this.samlLogger = samlLogger;
     }
 
     /**
-     * Sets entity responsible for populating local entity context data.
+     * Sets entity responsible for populating local entity context data. Must be set.
      *
      * @param contextProvider provider implementation
      */
+    @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
     }
 
+    /**
+     * Verifies that required entities were autowired or set.
+     *
+     * @throws ServletException
+     */
     @Override
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();

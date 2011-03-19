@@ -67,8 +67,8 @@ public class SAMLEntryPointTest {
     @Test
     public void testInitial() {
         assertNull(entryPoint.getIdpSelectionPath());
-        assertEquals(ssoProfile, entryPoint.getWebSSOprofile());
-        assertEquals("/saml/login", entryPoint.getFilterProcessesUrl());
+        assertEquals(ssoProfile, entryPoint.webSSOprofile);
+        assertEquals("/saml/login", entryPoint.filterProcessesUrl);
     }
 
     /**

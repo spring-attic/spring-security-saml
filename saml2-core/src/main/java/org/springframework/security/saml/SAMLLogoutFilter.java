@@ -56,19 +56,8 @@ public class SAMLLogoutFilter extends LogoutFilter {
      */
     private static final String DEFAULT_FILTER_URL = "/saml/logout";
 
-    /**
-     * Implementation of SAML logout profile.
-     */
-    @Autowired
-    private SingleLogoutProfile profile;
-
-    /**
-     * Logger of SAML messages.
-     */
-    @Autowired
+    protected SingleLogoutProfile profile;
     protected SAMLLogger samlLogger;
-
-    @Autowired
     protected SAMLContextProvider contextProvider;
 
     /**
@@ -80,7 +69,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
     /**
      * Handlers to be invoked during logout.
      */
-    private LogoutHandler[] globalHandlers;
+    protected LogoutHandler[] globalHandlers;
 
     /**
      * Default constructor.
@@ -185,26 +174,44 @@ public class SAMLLogoutFilter extends LogoutFilter {
         return (login == null || !"true".equals(login.toLowerCase().trim())) && (auth.getCredentials() instanceof SAMLCredential);
     }
 
+     /**
+     * Logger for SAML events, cannot be null, must be set.
+     *
+     * @param samlLogger logger
+     */
+    @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
         Assert.notNull(samlLogger, "SAML Logger can't be null");
         this.samlLogger = samlLogger;
     }
 
+    /**
+     * Profile for consumption of processed messages, cannot be null, must be set.
+     *
+     * @param profile profile
+     */
+    @Autowired
     public void setProfile(SingleLogoutProfile profile) {
         Assert.notNull(profile, "SingleLogoutProfile can't be null");
         this.profile = profile;
     }
 
     /**
-     * Sets entity responsible for populating local entity context data.
+     * Sets entity responsible for populating local entity context data. Cannot be null, must be set.
      *
      * @param contextProvider provider implementation
      */
+    @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
     }
 
+    /**
+     * Verifies that required entities were autowired or set.
+     *
+     * @throws ServletException
+     */
     @Override
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();

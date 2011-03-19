@@ -21,6 +21,7 @@ import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -34,7 +35,9 @@ import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
+import org.springframework.util.Assert;
 
+import javax.servlet.ServletException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -46,21 +49,25 @@ import java.util.List;
  *
  * @author Vladimir Schafer
  */
-public class SAMLAuthenticationProvider implements AuthenticationProvider {
+public class SAMLAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
     private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
 
-    @Autowired
-    private WebSSOProfileConsumer consumer;
-
-    @Autowired
+    protected WebSSOProfileConsumer consumer;
     protected SAMLLogger samlLogger;
+    protected SAMLUserDetailsService userDetails;
 
-    private SAMLUserDetailsService userDetails;
-
+    /**
+     * Default constructor, all required collaborators must be autowired or set.
+     */
     public SAMLAuthenticationProvider() {
     }
 
+    /**
+     * Default constructor with profile consumer, all other required collaborators must be autowired or set.
+     *
+     * @param consumer profile
+     */
     public SAMLAuthenticationProvider(WebSSOProfileConsumer consumer) {
         this.consumer = consumer;
     }
@@ -201,16 +208,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
     }
 
     /**
-     * The user details can be optionally set and is automatically called while user SAML assertion
-     * is validated.
-     *
-     * @param userDetails user details
-     */
-    public void setUserDetails(SAMLUserDetailsService userDetails) {
-        this.userDetails = userDetails;
-    }
-
-    /**
      * SAMLAuthenticationToken is the only supported token.
      *
      * @param aClass class to check for support
@@ -220,12 +217,47 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider {
         return SAMLAuthenticationToken.class.isAssignableFrom(aClass);
     }
 
+    /**
+     * The user details can be optionally set and is automatically called while user SAML assertion
+     * is validated.
+     *
+     * @param userDetails user details
+     */
+    @Autowired
+    public void setUserDetails(SAMLUserDetailsService userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    /**
+     * Logger for SAML events, cannot be null, must be set.
+     *
+     * @param samlLogger logger
+     */
+    @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
+        Assert.notNull(consumer, "SAMLLogger can't be null");
         this.samlLogger = samlLogger;
     }
 
+    /**
+     * Profile for consumption of processed messages, cannot be null, must be set.
+     *
+     * @param consumer consumer
+     */
+    @Autowired
     public void setConsumer(WebSSOProfileConsumer consumer) {
+        Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");
         this.consumer = consumer;
+    }
+
+    /**
+     * Verifies that required entities were autowired or set.
+     *
+     * @throws ServletException
+     */
+    public void afterPropertiesSet() throws ServletException {
+        Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");
+        Assert.notNull(samlLogger, "SAMLLogger can't be null");
     }
 
 }

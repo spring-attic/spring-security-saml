@@ -1,4 +1,4 @@
-/* Copyright 2010 Vladimir Schäfer
+/* Copyright 2010 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.springframework.security.saml;
 /**
  * Constant values for SAML module.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public class SAMLConstants {
     

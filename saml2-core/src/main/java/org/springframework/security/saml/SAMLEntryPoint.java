@@ -58,14 +58,12 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * In case this property is set to not null value the user will be redirected to this URL for selection
      * of IDP to use for login. In case it is null user will be redirected to the default IDP.
      */
-    private String idpSelectionPath;
-
-    private WebSSOProfileOptions defaultOptions;
-
-    private WebSSOProfile webSSOprofile;
-    private MetadataManager metadata;
-    private SAMLLogger samlLogger;
-    private SAMLContextProvider contextProvider;
+    protected String idpSelectionPath;
+    protected WebSSOProfileOptions defaultOptions;
+    protected WebSSOProfile webSSOprofile;
+    protected MetadataManager metadata;
+    protected SAMLLogger samlLogger;
+    protected SAMLContextProvider contextProvider;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -87,7 +85,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     /**
      * User configured path which overrides the default value.
      */
-    private String filterProcessesUrl;
+    protected String filterProcessesUrl = DEFAULT_FILTER_URL;
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         doFilterHttp((HttpServletRequest) request, (HttpServletResponse) response, chain);
@@ -96,6 +94,10 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     /**
      * In case the DEFAULT_FILTER_URL is invoked directly, the filter will get called and initialize the
      * login sequence.
+     *
+     * @param request  request
+     * @param response response
+     * @param chain    filter chain
      */
     protected void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (processFilter(request)) {
@@ -112,8 +114,8 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
-        return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
-    }    
+        return SAMLUtil.processFilter(filterProcessesUrl, request);
+    }
 
     /**
      * Sends AuthNRequest to the default IDP using any binding supported by both SP and IDP.
@@ -227,26 +229,14 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return idpSelectionPath;
     }
 
-    public String getFilterProcessesUrl() {
-        if (filterProcessesUrl == null) {
-            return DEFAULT_FILTER_URL;
-        } else {
-            return filterProcessesUrl;
-        }
-    }
-
-    public void setFilterProcessesUrl(String filterSuffix) {
-        this.filterProcessesUrl = filterSuffix;
-    }
-
     /**
-     * Use getFilterProcessesUrl instead.
+     * Sets suffix processed by this entry point. Cannot be null. By default value /saml/login is used.
      *
-     * @return suffix
+     * @param filterSuffix suffix
      */
-    @Deprecated
-    public String getFilterSuffix() {
-        return getFilterProcessesUrl();
+    public void setFilterProcessesUrl(String filterSuffix) {
+        Assert.notNull(filterSuffix, "Suffix cannot be null");
+        this.filterProcessesUrl = filterSuffix;
     }
 
     /**
@@ -259,10 +249,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         setFilterProcessesUrl(filterSuffix);
     }
 
-    public WebSSOProfile getWebSSOprofile() {
-        return webSSOprofile;
-    }
-
     /**
      * Sets path where request dispatcher will send user for IDP selection. In case it is null the default
      * server will always be used.
@@ -273,12 +259,22 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         this.idpSelectionPath = idpSelectionPath;
     }
 
+    /**
+     * Profile for consumption of processed messages, cannot be null, must be set.
+     *
+     * @param webSSOprofile profile
+     */
     @Autowired
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
         Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
         this.webSSOprofile = webSSOprofile;
     }
 
+    /**
+     * Logger for SAML events, cannot be null, must be set.
+     *
+     * @param samlLogger logger
+     */
     @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
         Assert.notNull(samlLogger, "SAML Logger can't be null");
@@ -296,12 +292,22 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         this.contextProvider = contextProvider;
     }
 
+    /**
+     * Metadata manager, cannot be null, must be set.
+     *
+     * @param metadata manager
+     */
     @Autowired
     public void setMetadata(MetadataManager metadata) {
         Assert.notNull(metadata, "MetadataManager can't be null");
         this.metadata = metadata;
     }
 
+    /**
+     * Verifies that required entities were autowired or set.
+     *
+     * @throws ServletException
+     */
     @Override
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();

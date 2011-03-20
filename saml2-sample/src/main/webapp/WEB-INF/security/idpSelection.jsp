@@ -35,3 +35,7 @@
     </table>
 </form>
 </p>
+
+<p>
+    <a href="<c:url value="/saml/web/metadata"/>">Metadata information</a>
+</p>

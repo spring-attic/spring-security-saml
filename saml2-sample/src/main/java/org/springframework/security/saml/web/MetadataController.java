@@ -113,7 +113,9 @@ public class MetadataController {
 
         if (metadata.isStore()) {
 
-            MetadataProvider metadataProvider = new ExtendedMetadataDelegate(new MetadataMemoryProvider(descriptor), extendedMetadata);
+            MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
+            memoryProvider.initialize();
+            MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
             metadataManager.addMetadataProvider(metadataProvider);
             metadataManager.setHostedSPName(descriptor.getEntityID());
             metadataManager.setRefreshRequired(true);

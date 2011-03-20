@@ -166,7 +166,9 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                         ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
 
                         logger.info("Created metadata for system with ID: " + descriptor.getEntityID());
-                        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(new MetadataMemoryProvider(descriptor), extendedMetadata);
+                        MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
+                        memoryProvider.initialize();
+                        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
 
                         manager.addMetadataProvider(metadataProvider);
                         manager.setHostedSPName(descriptor.getEntityID());

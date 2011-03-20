@@ -14,6 +14,17 @@
         </param-value>
     </context-param>
 
+    <servlet>
+        <servlet-name>saml</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>saml</servlet-name>
+        <url-pattern>/saml/web/*</url-pattern>
+    </servlet-mapping>
+
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>

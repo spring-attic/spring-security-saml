@@ -12,12 +12,13 @@
 
     <security:http entry-point-ref="samlEntryPoint">
         <security:intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
+        <security:intercept-url pattern="/saml/web/**" filters="none"/>
         <security:intercept-url pattern="/logout.jsp" filters="none"/>
         <security:intercept-url pattern="/login.jsp" filters="none"/>
         <security:intercept-url pattern="/favicon.ico" filters="none"/>
         <security:custom-filter position="PRE_AUTH_FILTER" ref="metadataFilter"/>
         <security:custom-filter before="PRE_AUTH_FILTER" ref="samlEntryPoint"/>
-        <security:custom-filter after="AUTHENTICATION_PROCESSING_FILTER" ref="samlProcessingFilter"/>
+        <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlProcessingFilter"/>
         <security:custom-filter after="LOGOUT_FILTER" ref="samlLogoutFilter"/>
         <security:custom-filter before="LOGOUT_FILTER" ref="samlLogoutProcessingFilter"/>
     </security:http>
@@ -49,11 +50,6 @@
     <!-- Logger for SAML messages and events -->
     <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>
 
-    <!-- Alias of the key used for SAML signing and encryption/decryption -->
-    <bean name="privateKey" class="java.lang.String">
-        <constructor-arg value="apollo"/>
-    </bean>
-
     <!-- Key manager, set the JKS path and password to open the datastore -->
     <bean id="keyStore" class="org.springframework.security.saml.key.JKSKeyManager">
         <constructor-arg value="classpath:security/samlKeystore.jks"/>
@@ -63,7 +59,9 @@
     <!-- Set keys which should be available to the system in the map, one of these keys must be also
          specified in the webSSOProfile later -->
     <bean id="keyResolver" class="org.opensaml.xml.security.credential.KeyStoreCredentialResolver">
-        <constructor-arg ref="keyStore"/>
+        <constructor-arg>
+            <bean factory-bean="keyStore" factory-method="getKeyStore"/>
+        </constructor-arg>
         <constructor-arg>
             <map>
                 <entry key="apollo" value="nalle123"/>
@@ -74,7 +72,7 @@
     <!-- Central storage of cryptohraphic keys -->
     <bean id="keyManager" class="org.springframework.security.saml.key.KeyManager">
         <constructor-arg ref="keyResolver"/>
-        <constructor-arg ref="privateKey"/>
+        <constructor-arg value="apollo"/>
     </bean>
 
     <!-- Entry point to initialize authentication, default values taken from properties file -->
@@ -102,7 +100,7 @@
     <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
         <constructor-arg>
             <list>
-                <bean class="org.springframework.security.saml.metadata.AbstractMetadataDelegate">
+                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
                         <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
                               init-method="initialize">
@@ -110,6 +108,10 @@
                                 <value type="java.io.File">classpath:security/idp.xml</value>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool"/>
+                        </bean>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
                         </bean>
                     </constructor-arg>
                 </bean>

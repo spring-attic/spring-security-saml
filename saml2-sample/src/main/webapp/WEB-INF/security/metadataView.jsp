@@ -1,7 +1,9 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
-<head>Spring Security SAML Extension - Metadata</head>
+<head>
+    <title>Spring Security SAML Extension - Metadata</title>
+</head>
 <body>
 
 <h1>Metadata detail</h1>
@@ -87,7 +89,8 @@
         <tr>
             <td>Metadata:</td>
             <td>
-                <textarea rows="15" cols="100" readonly="true"><c:out value="${metadata.serializedMetadata}"/></textarea>
+                <textarea rows="15" cols="100" readonly="true"><c:out
+                        value="${metadata.serializedMetadata}"/></textarea>
             </td>
         </tr>
 

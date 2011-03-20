@@ -148,13 +148,18 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                     try {
 
                         // Use default entityID if not set
+                        if (generator.getEntityId() == null) {
+                            generator.setEntityId(getEntityID(request));
+                        }
+
+                        // Use default entityID if not set
                         if (generator.getEntityBaseURL() == null) {
                             generator.setEntityBaseURL(getEntityID(request));
                         }
 
                         // Use default entityAlias if not set
                         if (generator.getEntityAlias() == null) {
-                            generator.setEntityAlias(request.getContextPath());
+                            generator.setEntityAlias(request.getContextPath().substring(1));
                         }
 
                         EntityDescriptor descriptor = generator.generateMetadata();

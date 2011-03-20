@@ -71,7 +71,8 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             context.setOutboundMessageTransport(clientOutTransport);
 
             // Send artifact retrieve message
-            processor.sendMessage(context, true, SAMLConstants.SAML2_SOAP11_BINDING_URI);
+            boolean signMessage = context.getPeerExtendedMetadata().isRequireArtifactResolveSigned();
+            processor.sendMessage(context, signMessage, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
             int responseCode = httpClient.executeMethod(postMethod);
             if (responseCode != 200) {

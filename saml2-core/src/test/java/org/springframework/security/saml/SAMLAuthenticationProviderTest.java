@@ -81,7 +81,7 @@ public class SAMLAuthenticationProviderTest {
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();
-        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
+        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP", "testSP");
 
         expect(consumer.processAuthenticationResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
@@ -119,7 +119,7 @@ public class SAMLAuthenticationProviderTest {
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();
-        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
+        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP", "localSP");
 
         expect(consumer.processAuthenticationResponse(context, store)).andReturn(result);
         expect(nameID.getValue()).andReturn("Name");
@@ -149,7 +149,7 @@ public class SAMLAuthenticationProviderTest {
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();
-        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP");
+        SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP", "localSP");
 
         expect(consumer.processAuthenticationResponse(context, store)).andThrow(new SAMLException("Error"));
         expect(nameID.getValue()).andReturn("Name");

@@ -223,7 +223,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      *
      * @param userDetails user details
      */
-    @Autowired
+    @Autowired(required = false)
     public void setUserDetails(SAMLUserDetailsService userDetails) {
         this.userDetails = userDetails;
     }
@@ -235,7 +235,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      */
     @Autowired
     public void setSamlLogger(SAMLLogger samlLogger) {
-        Assert.notNull(consumer, "SAMLLogger can't be null");
+        Assert.notNull(samlLogger, "SAMLLogger can't be null");
         this.samlLogger = samlLogger;
     }
 

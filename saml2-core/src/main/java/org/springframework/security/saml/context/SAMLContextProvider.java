@@ -16,6 +16,7 @@
 package org.springframework.security.saml.context;
 
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.springframework.security.saml.SAMLCredential;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,5 +39,17 @@ public interface SAMLContextProvider {
      * @throws MetadataProviderException in case of metadata problems
      */
     SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException;
+
+    /**
+     * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
+     * as message transports. Local entity is populated based on the SAMLCredential.
+     *
+     * @param request  request
+     * @param response response
+     * @param credential credential to load entity for
+     * @return context
+     * @throws MetadataProviderException in case of metadata problems
+     */
+    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response, SAMLCredential credential) throws MetadataProviderException;
 
 }

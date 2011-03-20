@@ -36,7 +36,8 @@ public class SAMLCredential implements Serializable {
 
     private SAMLObject<NameID> nameID;
     private SAMLObject<Assertion> authenticationAssertion;
-    private String IDPEntityID;
+    private String localEntityID;
+    private String remoteEntityID;
     private String relayState;
 
     /**
@@ -49,10 +50,11 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity
      * @param authenticationAssertion assertion used to validate the entity
-     * @param IDPEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID             identifier of IDP where the assertion came from
+     * @param localEntityID           local entity ID
      */
-    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID) {
-        this(nameID, authenticationAssertion, IDPEntityID, Collections.<Attribute>emptyList());
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, String localEntityID) {
+        this(nameID, authenticationAssertion, remoteEntityID, Collections.<Attribute>emptyList(), localEntityID);
     }
 
     /**
@@ -60,11 +62,12 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity
      * @param authenticationAssertion assertion used to validate the entity
-     * @param IDPEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID             identifier of IDP where the assertion came from
      * @param attributes              attributes collected from received assertions
+     * @param localEntityID           local entity ID
      */
-    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, List<Attribute> attributes) {
-        this(nameID, authenticationAssertion, IDPEntityID, null, attributes);
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, List<Attribute> attributes, String localEntityID) {
+        this(nameID, authenticationAssertion, remoteEntityID, null, attributes, localEntityID);
     }
 
     /**
@@ -72,17 +75,19 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity, may be null
      * @param authenticationAssertion assertion used to validate the entity
-     * @param IDPEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID             identifier of IDP where the assertion came from
      * @param relayState              relay state received from IDP in case of unsolicited response
      * @param attributes              attributes collected from received assertions
+     * @param localEntityID           local entity ID
      */
-    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String IDPEntityID, String relayState, List<Attribute> attributes) {
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, String relayState, List<Attribute> attributes, String localEntityID) {
 
         this.nameID = new SAMLObject<NameID>(nameID);
         this.authenticationAssertion = new SAMLObject<Assertion>(authenticationAssertion);
-        this.IDPEntityID = IDPEntityID;
+        this.remoteEntityID = remoteEntityID;
         this.relayState = relayState;
         this.attributes = new SAMLCollection<Attribute>(attributes);
+        this.localEntityID = localEntityID;
 
     }
 
@@ -109,8 +114,8 @@ public class SAMLCredential implements Serializable {
      *
      * @return IDP entity ID
      */
-    public String getIDPEntityID() {
-        return IDPEntityID;
+    public String getRemoteEntityID() {
+        return remoteEntityID;
     }
 
     /**
@@ -146,6 +151,15 @@ public class SAMLCredential implements Serializable {
      */
     public String getRelayState() {
         return relayState;
+    }
+
+    /**
+     * Entity ID of the local actor.
+     *
+     * @return entity ID
+     */
+    public String getLocalEntityID() {
+        return localEntityID;
     }
 
 }

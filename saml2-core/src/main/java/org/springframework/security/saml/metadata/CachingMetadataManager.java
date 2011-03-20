@@ -27,30 +27,30 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Metadata manager caches all results of EntityDescriptors loaded from the providers. Cache is cleaned
  * whenever some of the providers published an observed message.
- * <p>
- * Class is synchronized using internal ReentrantReadWriteLock.
+ * <p/>
+ * The class is synchronized using the superclass ReentrantReadWriteLock.
  *
  * @author Vladimir Schaefer
  */
 public class CachingMetadataManager extends MetadataManager {
 
-    // Lock for the instance
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     // Cache for alias data
-    private final Map<String, String> aliasCache;
+    private Map<String, String> aliasCache;
 
     // Cache for basic metadata
-    private final Map<String, EntityDescriptor> basicMetadataCache;
+    private Map<String, EntityDescriptor> basicMetadataCache;
 
     // Cache for basic metadata based on SHA-1 hash of the entityID
-    private final Map<byte[], EntityDescriptor> hashMetadataCache;
+    private Map<byte[], EntityDescriptor> hashMetadataCache;
 
     // Cache for extended metadata
-    private final Map<String, ExtendedMetadata> extendedMetadataCache;
+    private Map<String, ExtendedMetadata> extendedMetadataCache;
+
+    // Lock for the cache
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
-     * Creates caching metadata provider and registers itself to change notifications from the providers.
+     * Creates caching metadata provider.
      *
      * @param providers providers to include
      * @throws MetadataProviderException error initializing
@@ -59,12 +59,40 @@ public class CachingMetadataManager extends MetadataManager {
 
         super(providers);
 
-        getObservers().add(new MetadataProviderObserver());
-
         this.aliasCache = new HashMap<String, String>();
         this.basicMetadataCache = new HashMap<String, EntityDescriptor>();
         this.hashMetadataCache = new HashMap<byte[], EntityDescriptor>();
         this.extendedMetadataCache = new HashMap<String, ExtendedMetadata>();
+
+    }
+
+    /**
+     * Guaranteed to be called by the superclass as part of the initialization.
+     *
+     * @throws MetadataProviderException
+     */
+    @Override
+    public void refreshMetadata() throws MetadataProviderException {
+
+        try {
+
+            lock.writeLock().lock();
+            log.debug("Clearing metadata cache");
+
+            // Clear the caches so they get reinitialized as needed from the new data
+            this.aliasCache = new HashMap<String, String>();
+            this.basicMetadataCache = new HashMap<String, EntityDescriptor>();
+            this.hashMetadataCache = new HashMap<byte[], EntityDescriptor>();
+            this.extendedMetadataCache = new HashMap<String, ExtendedMetadata>();
+
+            // Do whatever it takes to refresh the metadata
+            super.refreshMetadata();
+
+        } finally {
+
+            lock.writeLock().unlock();
+
+        }
 
     }
 
@@ -118,14 +146,14 @@ public class CachingMetadataManager extends MetadataManager {
      * Attempts to load value from the cache, in case it doesn't exist locates it from the chainingProvider and adds
      * to the cache.
      *
-     * @param cache caching map
-     * @param key key to find the value
+     * @param cache       caching map
+     * @param key         key to find the value
      * @param valueLoader loader to load value in case it is not present in the cache
-     * @param <T> type of cache
+     * @param <T>         type of cache
      * @return found value or null if not found
      * @throws MetadataProviderException error or null key
      */
-    private <T,U> T getFromCacheOrUpdate(Map<U,T> cache, U key, ValueLoader<T,U> valueLoader) throws MetadataProviderException {
+    private <T, U> T getFromCacheOrUpdate(Map<U, T> cache, U key, ValueLoader<T, U> valueLoader) throws MetadataProviderException {
 
         if (key == null) {
             return null;
@@ -164,47 +192,33 @@ public class CachingMetadataManager extends MetadataManager {
     }
 
     /**
-     * Observer which clears the cache upon any notification from any provider.
-     */
-    private class MetadataProviderObserver implements ObservableMetadataProvider.Observer {
-
-        /** {@inheritDoc} */
-        public void onEvent(MetadataProvider provider) {
-            lock.writeLock().lock();
-            basicMetadataCache.clear();
-            extendedMetadataCache.clear();
-            lock.writeLock().unlock();
-        }
-
-    }
-
-    /**
      * Interface whose implementations should load value related to the given identifier.
+     *
      * @param <T> found value, null if not found
      */
-    private interface ValueLoader<T,U> {
+    private interface ValueLoader<T, U> {
         T getValue(U identifier) throws MetadataProviderException;
     }
 
-    private final ValueLoader<String,String> aliasLoader = new ValueLoader<String,String>() {
+    private final ValueLoader<String, String> aliasLoader = new ValueLoader<String, String>() {
         public String getValue(String identifier) throws MetadataProviderException {
             return CachingMetadataManager.super.getEntityIdForAlias(identifier);
         }
     };
 
-    private final ValueLoader<EntityDescriptor,String> entityLoader = new ValueLoader<EntityDescriptor,String>() {
+    private final ValueLoader<EntityDescriptor, String> entityLoader = new ValueLoader<EntityDescriptor, String>() {
         public EntityDescriptor getValue(String identifier) throws MetadataProviderException {
             return CachingMetadataManager.super.getEntityDescriptor(identifier);
         }
     };
 
-    private final ValueLoader<EntityDescriptor,byte[]> entityHashLoader = new ValueLoader<EntityDescriptor,byte[]>() {
+    private final ValueLoader<EntityDescriptor, byte[]> entityHashLoader = new ValueLoader<EntityDescriptor, byte[]>() {
         public EntityDescriptor getValue(byte[] identifier) throws MetadataProviderException {
             return CachingMetadataManager.super.getEntityDescriptor(identifier);
         }
     };
 
-    private final ValueLoader<ExtendedMetadata,String> extendedLoader = new ValueLoader<ExtendedMetadata,String>() {
+    private final ValueLoader<ExtendedMetadata, String> extendedLoader = new ValueLoader<ExtendedMetadata, String>() {
         public ExtendedMetadata getValue(String identifier) throws MetadataProviderException {
             return CachingMetadataManager.super.getExtendedMetadata(identifier);
         }

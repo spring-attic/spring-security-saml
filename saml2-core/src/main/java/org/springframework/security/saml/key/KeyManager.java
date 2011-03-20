@@ -69,4 +69,8 @@ public class KeyManager implements CredentialResolver {
         return getCredential(null);
     }
 
+    public String getDefaultCredentialName() {
+        return defaultKey;
+    }
+
 }

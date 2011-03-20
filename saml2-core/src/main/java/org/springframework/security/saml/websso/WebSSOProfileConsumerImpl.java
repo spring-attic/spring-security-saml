@@ -107,7 +107,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify issue time
         DateTime time = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            log.debug("Response issue time is either too old or with date in the future.");
+            log.debug("Response issue time is either too old or with date in the future, skew {}, time {}.", getResponseSkew(), time);
             throw new SAMLException("Error validating SAML response");
         }
 
@@ -197,7 +197,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
         }
 
-        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes);
+        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes, context.getLocalEntityId());
 
     }
 
@@ -319,7 +319,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
-        if (signature != null && wantSigned) {
+        if (signature != null && wantSigned) { // TODO verify this
             verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned && !context.isInboundSAMLMessageAuthenticated()) {
             log.debug("Assertion must be signed, but is not");

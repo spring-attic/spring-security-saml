@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +29,21 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class SAMLCredentialTest extends SAMLTestBase {
 
     SAMLCredential credential;
     NameID nameID;
     Assertion assertion;
-    final SAMLTestBase SAMLTestBase = new SAMLTestBase();
 
     @Before
     public void initializeValues() {
         nameID = ((SAMLObjectBuilder<NameID>) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME)).buildObject();
         assertion = ((SAMLObjectBuilder<Assertion>) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
-
         nameID.setValue("testName");
         assertion.setID("testID");
-        credential = new SAMLCredential(nameID, assertion, "testIDP");
+        credential = new SAMLCredential(nameID, assertion, "testIDP", "testSP");
     }
 
     /**
@@ -57,7 +55,7 @@ public class SAMLCredentialTest extends SAMLTestBase {
         assertNotNull(credential.getAuthenticationAssertion());
         assertEquals("testName", credential.getNameID().getValue());
         assertEquals("testID", credential.getAuthenticationAssertion().getID());
-        assertEquals("testIDP", credential.getIDPEntityID());
+        assertEquals("testIDP", credential.getRemoteEntityID());
     }
 
     /**

@@ -29,11 +29,6 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 public class SAMLMessageContext extends BasicSAMLMessageContext {
 
     /**
-     * Alias identifying the entity via URL.
-     */
-    private String localAlias;
-
-    /**
      * Object capable of decrypting data signed for this entity.
      */
     private Decrypter localDecrypter;
@@ -57,14 +52,6 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
      * Mechanism able to determine whether incoming message signature should be trusted.
      */
     private SignatureTrustEngine localTrustEngine;
-
-    public String getLocalAlias() {
-        return localAlias;
-    }
-
-    public void setLocalAlias(String localAlias) {
-        this.localAlias = localAlias;
-    }
 
     public ExtendedMetadata getLocalExtendedMetadata() {
         return localExtendedMetadata;

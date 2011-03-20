@@ -22,9 +22,15 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
+import org.springframework.util.Assert;
+import sun.misc.Regexp;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for SAML entities
@@ -205,6 +211,53 @@ public class SAMLUtil {
      */
     public static boolean processFilter(String filterName, HttpServletRequest request) {
         return (request.getRequestURI().contains(filterName));
+    }
+
+    /**
+     * Helper method compares whether SHA-1 hash of the entityId equals the hashID.
+     *
+     * @param hashID   hash id to compare
+     * @param entityId entity id to hash and verify
+     * @return true if values match
+     * @throws MetadataProviderException in case SHA-1 hash can't be initialized
+     */
+    public static boolean compare(byte[] hashID, String entityId) throws MetadataProviderException {
+
+        try {
+
+            MessageDigest sha1Digester = MessageDigest.getInstance("SHA-1");
+            byte[] hashedEntityId = sha1Digester.digest(entityId.getBytes());
+
+            for (int i = 0; i < hashedEntityId.length; i++) {
+                if (hashedEntityId[i] != hashID[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new MetadataProviderException("SHA-1 message digest not available", e);
+        }
+
+    }
+
+    /**
+     * Verifies that the alias is valid.
+     *
+     * @param alias alias to verify
+     * @throws MetadataProviderException in case any validation problem is found
+     */
+    public static void verifyAlias(String alias, String entityId) throws MetadataProviderException {
+
+        if (alias == null) {
+            throw new MetadataProviderException("Alias for entity " + entityId + " is null");
+        } else if (alias.length() == 0) {
+            throw new MetadataProviderException("Alias for entity " + entityId + " is empty");
+        } else if (!alias.matches("\\p{ASCII}*")) {
+            throw new MetadataProviderException("Only ASCII characters can be used in the alias " + alias + " for entity " + entityId);
+        }
+
     }
 
 }

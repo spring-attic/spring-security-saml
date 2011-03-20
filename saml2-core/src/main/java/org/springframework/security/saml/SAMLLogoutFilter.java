@@ -109,8 +109,6 @@ public class SAMLLogoutFilter extends LogoutFilter {
      */
     public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        Assert.notNull(profile, "LogoutProfile wasn't initialized in SAMLLogoutEntry object");
-
         if (requiresLogout(request, response)) {
 
             try {
@@ -120,13 +118,13 @@ public class SAMLLogoutFilter extends LogoutFilter {
                 if (auth != null && isGlobalLogout(request, auth)) {
 
                     Assert.isInstanceOf(SAMLCredential.class, auth.getCredentials(), "Authentication object doesn't contain SAML credential");
-                    SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+                    SAMLMessageContext context = contextProvider.getLocalEntity(request, response, (SAMLCredential) auth.getCredentials());
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
                     HttpSessionStorage storage = new HttpSessionStorage(request);
                     profile.sendLogoutRequest(context, credential, storage);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
-                    for (LogoutHandler handler : globalHandlers) {
+                    for (LogoutHandler handler : globalHandlers) { // TODO remove?
                         handler.logout(request, response, auth);
                     }
 

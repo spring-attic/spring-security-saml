@@ -97,7 +97,7 @@ public class SAMLEntryPointTest {
      */
     @Test
     public void testProcessFilterDefault() {
-        entryPoint.setFilterSuffix(null);
+
         expect(request.getRequestURI()).andReturn("/web/saml/login");
         expect(request.getRequestURI()).andReturn("/saml/login");
         expect(request.getRequestURI()).andReturn("/login");

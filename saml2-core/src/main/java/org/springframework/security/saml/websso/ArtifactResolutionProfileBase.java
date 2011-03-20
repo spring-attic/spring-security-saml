@@ -33,9 +33,8 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.util.Base64;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.util.SAMLUtil;
 
 /**
@@ -73,6 +72,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
                 throw new MetadataProviderException("Cannot localize sender entity by SHA-1 hash from the artifact");
             }
 
+            ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(idpEntityDescriptor.getID());
             IDPSSODescriptor idpssoDescriptor = SAMLUtil.getIDPSSODescriptor(idpEntityDescriptor);
             ArtifactResolutionService artifactResolutionService = SAMLUtil.getArtifactResolutionService(idpssoDescriptor, endpointIndex);
 
@@ -87,6 +87,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             context.setPeerEntityMetadata(idpEntityDescriptor);
             context.setPeerEntityRole(idpssoDescriptor.getElementQName());
             context.setPeerEntityRoleMetadata(idpssoDescriptor);
+            context.setPeerExtendedMetadata(extendedMetadata);
 
             getArtifactResponse(endpointURI, context);
 

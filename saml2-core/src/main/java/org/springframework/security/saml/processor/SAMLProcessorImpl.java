@@ -28,6 +28,7 @@ import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
 import org.opensaml.ws.transport.InTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.util.Assert;
 
 import javax.xml.namespace.QName;
@@ -95,6 +96,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         samlContext.setCommunicationProfileId(binding.getCommunicationProfileId());
         decoder.decode(samlContext);
         samlContext.setPeerEntityId(samlContext.getPeerEntityMetadata().getEntityID());
+        samlContext.setPeerExtendedMetadata(((MetadataManager)samlContext.getMetadataProvider()).getExtendedMetadata(samlContext.getPeerEntityId()));
 
         return samlContext;
 

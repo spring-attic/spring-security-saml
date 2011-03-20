@@ -59,12 +59,15 @@ import java.util.Map;
  */
 public class MetadataGenerator implements ApplicationContextAware {
 
+    private String entityId;
     private String entityBaseURL;
     private String entityAlias;
 
     private boolean requestSigned = true;
     private boolean wantAssertionSigned = true;
     private boolean signMetadata = true;
+
+
 
     private String signingKey = null;
     private String encryptionKey = null;
@@ -122,22 +125,37 @@ public class MetadataGenerator implements ApplicationContextAware {
         ex.setEncryptionKey(encryptionKey);
         ex.setSingingKey(signingKey);
         ex.setAlias(entityAlias);
+        ex.setLocal(true);
         return ex;
     }
 
     public EntityDescriptor generateMetadata() {
 
+        if (signingKey == null) {
+            signingKey = keyManager.getDefaultCredentialName();
+        }
+        if (encryptionKey == null) {
+            encryptionKey = keyManager.getDefaultCredentialName();
+        }
+
         boolean requestSigned = isRequestSigned();
         boolean assertionSigned = isWantAssertionSigned();
         boolean signMetadata = isSignMetadata();
+
         Collection<String> includedBindings = getBindings();
         Collection<String> includedNameID = getNameID();
+
+        String entityId = getEntityId();
         String entityBaseURL = getEntityBaseURL();
         String entityAlias = getEntityAlias();
 
+        if (entityId == null || entityBaseURL == null) {
+            throw new RuntimeException("Required attributes weren't set");
+        }
+
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
-        descriptor.setEntityID(entityBaseURL);
+        descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedBindings, includedNameID));
 
         if (signMetadata) {
@@ -425,6 +443,14 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getEntityId() {
+        return entityId;
     }
 
 }

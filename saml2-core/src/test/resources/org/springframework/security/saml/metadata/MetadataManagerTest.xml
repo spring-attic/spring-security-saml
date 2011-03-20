@@ -51,6 +51,8 @@
                                     <property name="alias" value="nest2alias"/>
                                 </bean>
                             </entry>
+                            <!-- Related to exactly one -->
+
                         </map>
                     </constructor-arg>
                 </bean>
@@ -78,6 +80,7 @@
         <property name="hostedSPName" value="hostedSP"/>
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
         <property name="defaultIDP" value="nest3"/>
+        <property name="refreshCheckInterval" value="100"/>
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->

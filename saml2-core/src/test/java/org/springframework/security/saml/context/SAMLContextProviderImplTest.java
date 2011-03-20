@@ -17,85 +17,164 @@ package org.springframework.security.saml.context;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.metadata.MetadataManager;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
+import static org.easymock.EasyMock.*;
 
 /**
  * Test for the SAMLUtil class.
  *
  * @author Vladimir Schaefer
  */
-public class SAMLContextProviderImplTest {
+public class SAMLContextProviderImplTest extends SAMLTestBase {
 
+    HttpServletRequest request;
+    HttpServletResponse response;
+
+    SAMLCredential credential;
+    ApplicationContext context;
     SAMLContextProviderImpl contextProvider;
+    MetadataManager metadata;
 
     @Before
     public void init() {
-        contextProvider = new SAMLContextProviderImpl();
+
+        String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
+        context = new ClassPathXmlApplicationContext(resName);
+        contextProvider = (SAMLContextProviderImpl) context.getBean("contextProvider");
+        metadata = (MetadataManager) context.getBean("metadata");
+        request = createMock(HttpServletRequest.class);
+        response = createMock(HttpServletResponse.class);
+
+
+
+    }
+
+    protected SAMLCredential getCredential(String localEntityID) {
+        NameID nameID = ((SAMLObjectBuilder<NameID>) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME)).buildObject();
+        Assertion assertion = ((SAMLObjectBuilder<Assertion>) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
+        nameID.setValue("testName");
+        assertion.setID("testID");
+        credential = new SAMLCredential(nameID, assertion, "testIDP", localEntityID);
+        return credential;
+    }
+
+    protected void replayMock() {
+        replay(request);
+        replay(response);
+    }
+
+    protected  void verifyMock() {
+        verify(request);
+        verify(response);
     }
 
     @Test
-    public void testPopulateLocalEntityNullContext() {
-        contextProvider.populateLocalAlias(null, null);
+    public void testPopulateLocalEntityNullPath() throws Exception {
+        expect(request.getContextPath()).andReturn("");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
+        assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
     }
 
     @Test
-    public void testPopulateLocalEntityNullPath() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, null);
-        assertNull(context.getLocalEntityId());
-        assertNull(context.getLocalEntityRole());
-    }
-
-    @Test
-    public void testPopulateLocalEntityNoAlias() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO");
-        assertNull(context.getLocalEntityId());
-        assertNull(context.getLocalEntityRole());
+    public void testPopulateLocalEntityNoAlias() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
+        assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
     }    
 
     @Test
-    public void testPopulateLocalEntityAliasNoRole() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO/alias/my.entity");
-        assertEquals("my.entity", context.getLocalAlias());
-        assertNull(context.getLocalEntityRole());
-    }
-
-    @Test
-    public void testPopulateLocalEntityAliasSPRole() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO/alias/my.entity/sp");
-        assertEquals("my.entity", context.getLocalAlias());
+    public void testPopulateLocalEntityAliasNoRole() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO/alias/myAlias");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals("testSP2", context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
     }
 
     @Test
-    public void testPopulateLocalEntityAliasIDPRole() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO/alias/my.entity/iDp");
-        assertEquals("my.entity", context.getLocalAlias());
-        assertEquals(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
-    }
-
-    @Test
-    public void testPopulateLocalEntityComplexAliasIDPRole() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO/alias/http://www.saml.org/test/SSO/idp");
-        assertEquals("http://www.saml.org/test/SSO", context.getLocalAlias());
-        assertEquals(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
-    }
-
-    @Test
-    public void testPopulateLocalEntityAliasDefaultRole() {
-        SAMLMessageContext context = new SAMLMessageContext();
-        contextProvider.populateLocalAlias(context, "/SSO/alias/my.entity/invalid");
-        assertEquals("my.entity", context.getLocalAlias());
+    public void testPopulateLocalEntityAliasSPRole() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/sp");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals("testSP2", context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
+    }
+
+    @Test
+    public void testPopulateLocalEntityAliasDefaultRole() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/invalid");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals("testSP2", context.getLocalEntityId());
+        assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
+    }
+
+    @Test(expected = MetadataProviderException.class)
+    public void testPopulateLocalEntityAliasInvalidRole() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/idp");
+        replayMock();
+        contextProvider.getLocalEntity(request, response);
+    }
+
+    @Test
+    public void testPopulateLocalEntityAliasIDPRole() throws Exception {
+        expect(request.getContextPath()).andReturn("/SSO/alias/myIdpAlias/iDp");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals("http://localhost:8080/noSign", context.getLocalEntityId());
+        assertEquals(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
+    }
+
+    @Test(expected = MetadataProviderException.class)
+    public void testPopulateLocalEntityComplexAliasIDPRole_missingRole_SP() throws Exception {
+        expect(request.getContextPath()).andReturn("/saml/SSO/test/alias/myIdpAlias/test");
+        replayMock();
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+        assertEquals("http://localhost:8080/noSign", context.getLocalEntityId());
+        assertEquals(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
+    }
+
+    @Test
+    public void testPopulateCredentialLocalEntity() throws Exception {
+        replayMock();
+        SAMLCredential credential = getCredential("testSP2");
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response, credential);
+        assertEquals("testSP2", context.getLocalEntityId());
+        assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        verifyMock();
+    }
+
+    @Test(expected = MetadataProviderException.class)
+    public void testPopulateCredentialLocalEntity_invalidName() throws Exception {
+        replayMock();
+        SAMLCredential credential = getCredential(null);
+        contextProvider.getLocalEntity(request, response, credential);
     }
 
 }

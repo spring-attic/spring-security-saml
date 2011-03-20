@@ -80,5 +80,5 @@ public class SAMLDefaultLogger implements SAMLLogger {
     public void setLogMessages(boolean logMessages) {
         this.logMessages = logMessages;
     }
-    
+
 }

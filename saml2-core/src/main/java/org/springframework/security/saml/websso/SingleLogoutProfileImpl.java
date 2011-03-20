@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
@@ -59,8 +60,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return;
         }
 
-        IDPSSODescriptor idpDescriptor = getIDPDescriptor(credential.getIDPEntityID());
-        SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
+        IDPSSODescriptor idpDescriptor = getIDPDescriptor(credential.getRemoteEntityID());
+        ExtendedMetadata idpExtendedMetadata = context.getLocalExtendedMetadata();
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
 
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
@@ -72,8 +74,10 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setPeerEntityEndpoint(logoutServiceIDP);
         context.setPeerEntityId(idpDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpDescriptor);
+        context.setPeerExtendedMetadata(idpExtendedMetadata);
 
-        processor.sendMessage(context, true);
+        boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
+        processor.sendMessage(context, signMessage);
         messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
 
     }
@@ -83,9 +87,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      *
      * @param credential     information about assertions used to log current user in
      * @param bindingService service used to deliver the request
-     *
      * @return logoutRequest to be sent to IDP
-     *
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retrieving metadata
      */
@@ -132,21 +134,12 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         LogoutRequest logoutRequest = (LogoutRequest) message;
 
-        // Verify signature of the response if present
-        if (logoutRequest.getSignature() != null) {
-            try {
-                verifySignature(logoutRequest.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
-            } catch (org.opensaml.xml.security.SecurityException e) {
-                log.warn("Validation of signature in LogoutRequest has failed, id: " + context.getInboundSAMLMessageId());
-                Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is invalid");
-                sendLogoutResponse(status, context);
-                return false;
-            } catch (ValidationException e) {
-                log.warn("Validation of signature in LogoutRequest has failed, id: " + context.getInboundSAMLMessageId());
-                Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is invalid");
-                sendLogoutResponse(status, context);
-                return false;
-            }
+        // Make sure request was authenticated if required, authentication is done as part of the binding processing
+        if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutRequestSigned()) {
+            log.warn("Logout Request object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
+            Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is required");
+            sendLogoutResponse(status, context);
+            return false;
         }
 
         // Verify destination
@@ -158,7 +151,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             boolean found = false;
             for (SingleLogoutService service : services) {
                 if (logoutRequest.getDestination().equals(service.getLocation()) &&
-                    context.getCommunicationProfileId().equals(service.getBinding())) {
+                        context.getCommunicationProfileId().equals(service.getBinding())) {
                     found = true;
                     break;
                 }
@@ -276,7 +269,8 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setPeerEntityId(idpDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpDescriptor);
 
-        processor.sendMessage(context, true);
+        boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutResponseSigned();
+        processor.sendMessage(context, signMessage);
 
     }
 
@@ -320,9 +314,10 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         }
         LogoutResponse response = (LogoutResponse) message;
 
-        // Verify signature of the response if present
-        if (response.getSignature() != null) {
-            verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
+        // Make sure request was authenticated if required, authentication is done as part of the binding processing
+        if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutResponseSigned()) {
+            log.debug("Logout Response object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
+            throw new SAMLException("Logout Response object is required to be signed");
         }
 
         // Verify issue time
@@ -340,6 +335,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
                 throw new SAMLException("Error validating SAML response");
             } else if (xmlObject instanceof LogoutRequest) {
+                // Expected
             } else {
                 log.debug("Sent request was of different type then received response", response.getInResponseTo());
                 throw new SAMLException("Error validating SAML response");
@@ -355,7 +351,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             boolean found = false;
             for (SingleLogoutService service : services) {
                 if (response.getDestination().equals(service.getLocation()) &&
-                    context.getCommunicationProfileId().equals(service.getBinding())) {
+                        context.getCommunicationProfileId().equals(service.getBinding())) {
                     found = true;
                     break;
                 }

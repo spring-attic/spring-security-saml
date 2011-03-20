@@ -120,7 +120,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                 MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
                 Marshaller marshaller = marshallerFactory.getMarshaller(descriptor);
                 Element element = marshaller.marshall(descriptor);
-                writer.print(XMLHelper.prettyPrintXML(element));
+                writer.print(XMLHelper.nodeToString(element));
             }
         } catch (MarshallingException e) {
             logger.error("Error marshalling entity descriptor", e);

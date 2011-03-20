@@ -221,7 +221,10 @@ public abstract class AbstractProfileBase implements InitializingBean {
         criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         criteriaSet.add(new UsageCriteria(UsageType.SIGNING));
         log.debug("Verifying signature", signature);
-        trustEngine.validate(signature, criteriaSet);
+
+        if (!trustEngine.validate(signature, criteriaSet)) {
+            throw new ValidationException("Signature is not trusted or invalid");
+        }
 
     }
 

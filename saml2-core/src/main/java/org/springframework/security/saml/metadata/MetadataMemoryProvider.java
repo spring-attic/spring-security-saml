@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schï¿½fer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@ package org.springframework.security.saml.metadata;
 
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
+import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.XMLObject;
 
 /**
  * Class implements simple metadata provider which retrieves EntityDescriptor from preconfigured object.
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schï¿½fer
  */
 public class MetadataMemoryProvider extends AbstractMetadataProvider {
 
@@ -45,4 +46,10 @@ public class MetadataMemoryProvider extends AbstractMetadataProvider {
     public XMLObject getMetadata() {
         return descriptor;
     }
+
+    @Override
+    protected XMLObject doGetMetadata() throws MetadataProviderException {
+        return descriptor;
+    }
+
 }

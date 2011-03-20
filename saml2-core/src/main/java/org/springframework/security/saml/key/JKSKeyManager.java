@@ -16,9 +16,8 @@ package org.springframework.security.saml.key;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -62,7 +61,7 @@ public class JKSKeyManager {
      * @param storeFile file pointing to the JKS keystore
      * @param storePass password to access the keystore
      */
-    public JKSKeyManager(File storeFile, String storePass) {
+    public JKSKeyManager(Resource storeFile, String storePass) {
         initialize(storeFile, storePass, "JKS");
     }
 
@@ -73,10 +72,10 @@ public class JKSKeyManager {
      * @param storePass password to open the keystore
      * @param storeType type of keystore
      */
-    private void initialize(File storeFile, String storePass, String storeType) {
+    private void initialize(Resource storeFile, String storePass, String storeType) {
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(storeFile);
+            inputStream = storeFile.getInputStream();
             ks = KeyStore.getInstance(storeType);
             ks.load(inputStream, storePass.toCharArray());
         } catch (Exception e) {

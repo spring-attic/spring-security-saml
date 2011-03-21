@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schaefer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallingException;
+import org.opensaml.xml.parse.ParserPool;
 import org.springframework.security.saml.SAMLTestBase;
 import org.w3c.dom.Element;
 
@@ -34,7 +35,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.easymock.EasyMock.*;
 
 /**
- * @author Vladimir Schäfer
+ * @author Vladimir Schaefer
  */
 public class SAMLObjectTest extends SAMLTestBase {
 
@@ -70,7 +71,7 @@ public class SAMLObjectTest extends SAMLTestBase {
      *
      * @throws Exception error
      */
-    @Test(expected = IOException.class)
+    @Test(expected = RuntimeException.class)
     public void testMarshalWithoutPoolSet() throws Exception {
         new ParserPoolHolder(null);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -79,7 +80,34 @@ public class SAMLObjectTest extends SAMLTestBase {
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outStream.toByteArray());
         ObjectInputStream input = new ObjectInputStream(inputStream);
-        input.readObject();
+        SAMLBase o = (SAMLBase) input.readObject();
+        o.getObject();
+
+    }
+
+    /**
+     * Verifies that deserializaion succeeds when parser pool is set when the object is accessed.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testMarshalWithLazyPoolSet() throws Exception {
+
+        ParserPool pool = ParserPoolHolder.getPool();
+        new ParserPoolHolder(null);
+
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        ObjectOutputStream stream = new ObjectOutputStream(outStream);
+        stream.writeObject(assertionObject);
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(outStream.toByteArray());
+        ObjectInputStream input = new ObjectInputStream(inputStream);
+        SAMLBase o = (SAMLBase) input.readObject();
+
+        new ParserPoolHolder(pool);
+
+        o.getObject();
+
     }
 
     /**
@@ -123,7 +151,7 @@ public class SAMLObjectTest extends SAMLTestBase {
      *
      * @throws Exception error
      */
-    @Test(expected = IOException.class)
+    @Test(expected = RuntimeException.class)
     public void testNoUnmarshaller() throws Exception {
 
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -137,10 +165,12 @@ public class SAMLObjectTest extends SAMLTestBase {
 
         try {
             Configuration.getUnmarshallerFactory().deregisterUnmarshaller(assertion.getElementQName());
-            input.readObject();
+            SAMLBase o = (SAMLBase) input.readObject();
+            o.getObject();
         } finally {
             Configuration.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);
         }
+
     }
 
     class TestObject extends ActionImpl {
@@ -154,7 +184,7 @@ public class SAMLObjectTest extends SAMLTestBase {
      *
      * @throws Exception error
      */
-    @Test(expected = IOException.class)
+    @Test(expected = RuntimeException.class)
     public void testWrongXMLInStream() throws Exception {
 
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -172,7 +202,8 @@ public class SAMLObjectTest extends SAMLTestBase {
 
         try {
             replay(mock);
-            input.readObject();
+            SAMLBase o = (SAMLBase) input.readObject();
+            o.getObject();
             verify(mock);
         } finally {
             Configuration.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);

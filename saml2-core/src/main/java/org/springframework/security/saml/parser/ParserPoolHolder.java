@@ -14,7 +14,6 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 
 /**
@@ -28,7 +27,7 @@ public class ParserPoolHolder {
     /**
      * Pool instance.
      */
-    private static ParserPool pool = new BasicParserPool();
+    private static ParserPool pool;
 
     /**
      * Initializes the static parserPool property and makes it available for getPool calls.
@@ -46,4 +45,5 @@ public class ParserPoolHolder {
     public static ParserPool getPool() {
         return pool;
     }
+
 }

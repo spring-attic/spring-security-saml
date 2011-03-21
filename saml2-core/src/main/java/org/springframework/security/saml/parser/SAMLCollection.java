@@ -44,11 +44,18 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
         super(object);
     }
 
+    @Override
+    public List<T> getObject() {
+        if (object == null) { // Lazy parse
+            parse();
+        }
+        return super.getObject();
+    }
+
     /**
      * Custom serialization logic which transform List of XMLObject into List of Strings.
      *
      * @param out output stream
-     *
      * @throws java.io.IOException error performing XMLObject serialization
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -63,30 +70,40 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             out.writeObject(serializedObject);
         } catch (MessageEncodingException e) {
             log.error("Error serializing SAML object", e);
-            throw new IOException("Error serializing SAML object: " +  e.getMessage());
+            throw new IOException("Error serializing SAML object: " + e.getMessage());
         }
     }
 
     /**
-     * Deserializes List of XMLObjects from the stream.
+     * Deserializes List of XMLObjects from the stream. Parsing of the content is done lazily upon access
+     * to the object. The reason for this is the fact that parser pool may not be initialized during system startup
+     * and the object may be stored in a serialized session.
      *
      * @param in input stream containing XMLObject as String
-     *
      * @throws IOException            error deserializing String to XMLObject
      * @throws ClassNotFoundException class not found
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        this.serializedObject = (ArrayList<String>) in.readObject();
+    }
+
+    /**
+     * Lazily parsers serialized data.
+     */
+    private void parse() {
         try {
-            ArrayList<String> serializedItems = (ArrayList<String>) in.readObject();
-            List<T> items = new LinkedList<T>();
-            for (String item : serializedItems) {
-                items.add(unmarshallMessage(new StringReader(item)));
+            ArrayList<String> serializedItems = (ArrayList<String>) serializedObject;
+            if (serializedItems != null) {
+                List<T> items = new LinkedList<T>();
+                for (String item : serializedItems) {
+                    items.add(unmarshallMessage(new StringReader(item)));
+                }
+                object = items;
             }
-            this.serializedObject = serializedItems;
-            object = items;
         } catch (MessageDecodingException e) {
             log.error("Error de-serializing SAML object", e);
-            throw new IOException("Error de-serializing SAML object: " + e.getMessage());
+            throw new RuntimeException("Error de-serializing SAML object: " + e.getMessage());
         }
     }
+
 }

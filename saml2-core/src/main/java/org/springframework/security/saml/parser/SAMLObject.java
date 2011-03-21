@@ -23,14 +23,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * SAMLObject is a wrapper around XMLObject instances of OpenSAML library As some XMLObjects are stored
  * inside the HttpSession (which could be potentially sent to another cluster members), we need
  * mechanism to enable serialization of these instances.
  *
- * @author Vladimir Schafer
  * @param <T> type of XMLObject
+ * @author Vladimir Schafer
  */
 public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
 
@@ -45,6 +48,9 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
 
     @Override
     public T getObject() {
+        if (object == null) { // Lazy parse
+            parse();
+        }
         return super.getObject();
     }
 
@@ -52,7 +58,6 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
      * Custom serialization logic which transform XMLObject into String.
      *
      * @param out output stream
-     *
      * @throws java.io.IOException error performing XMLObject serialization
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -68,20 +73,30 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
     }
 
     /**
-     * Deserializes XMLObject from the stream.
+     * Deserializes XMLObject from the stream. Parsing of the content is done lazily upon access
+     * to the object. The reason for this is the fact that parser pool may not be initialized during system startup
+     * and the object may be stored in a serialized session.
      *
      * @param in input stream contaiing XMLObject as String
-     *
      * @throws IOException            error deserializing String to XMLObject
      * @throws ClassNotFoundException class not found
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        serializedObject = in.readUTF();
+    }
+
+    /**
+     * Lazily parsers serialized data.
+     */
+    private void parse() {
         try {
-            serializedObject = in.readUTF();
-            object = unmarshallMessage(new StringReader((String) serializedObject));
+            if (serializedObject != null) {
+                object = unmarshallMessage(new StringReader((String) serializedObject));
+            }
         } catch (MessageDecodingException e) {
             log.error("Error de-serializing SAML object", e);
-            throw new IOException("Error de-serializing SAML object: " + e.getMessage());
+            throw new RuntimeException("Error de-serializing SAML object: " + e.getMessage());
         }
     }
+
 }

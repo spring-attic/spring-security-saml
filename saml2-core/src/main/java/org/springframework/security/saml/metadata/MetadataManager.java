@@ -134,13 +134,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     /**
      * Method can be repeatedly called to browse all configured providers and load SP and IDP names which
-     * are supported by them. In case an error occurs during initialization the old configuration stays.
-     * <p/>
-     * In case
-     *
-     * @throws MetadataProviderException error parsing data
+     * are supported by them. Providers which fail during initialization are ignored for this refresh.
      */
-    public void refreshMetadata() throws MetadataProviderException {
+    public void refreshMetadata() {
 
         try {
 
@@ -167,8 +163,16 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                 for (MetadataProvider provider : getProviders()) {
 
-                    log.debug("Refreshing metadata provider {}", provider.toString());
-                    initializeProvider(provider);
+                    try {
+
+                        log.debug("Refreshing metadata provider {}", provider.toString());
+                        initializeProvider(provider);
+
+                    } catch (MetadataProviderException e) {
+
+                        log.error("Initialization of metadata provider {} failed, provider will be ignored", provider, e);
+
+                    }
 
                 }
 
@@ -191,11 +195,39 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     }
 
+    /**
+     * Adds a new metadata provider to the managed list.
+     *
+     * @param newProvider provider
+     * @throws MetadataProviderException in case provider can't be added
+     */
     @Override
     public void addMetadataProvider(MetadataProvider newProvider) throws MetadataProviderException {
 
-        super.addMetadataProvider(newProvider);
-        setRefreshRequired(true);
+        try {
+
+            lock.writeLock().lock();
+            super.addMetadataProvider(newProvider);
+            setRefreshRequired(true);
+
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+    }
+
+    @Override
+    public void removeMetadataProvider(MetadataProvider provider) {
+
+        try {
+
+            lock.writeLock().lock();
+            super.removeMetadataProvider(provider);
+            setRefreshRequired(true);
+
+        } finally {
+            lock.writeLock().unlock();
+        }
 
     }
 
@@ -210,7 +242,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             if (roleDescriptor != null) {
                 if (idpName.contains(key)) {
-                    throw new MetadataProviderException("Metadata contains two entities with the same entityID: " + key);
+                    log.warn("Provider {} contains entity {} with IDP which was already contained in another metadata provider and will be ignored", provider, key);
                 } else {
                     idpName.add(key);
                 }
@@ -219,7 +251,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
             if (roleDescriptor != null) {
                 if (spName.contains(key)) {
-                    throw new MetadataProviderException("Metadata contains two entities with the same entityID: " + key);
+                    log.warn("Provider {} contains entity {} which SP which was already contained in another metadata provider and will be ignored", provider, key);
                 } else {
                     spName.add(key);
                 }
@@ -238,12 +270,15 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                     // Verify alias is unique
                     if (aliasSet.contains(alias)) {
-                        throw new MetadataProviderException("Alias " + alias + " is not unique for all entities, please make sure alias is either not set or unique");
-                    } else {
-                        aliasSet.add(alias);
-                    }
 
-                    log.debug("Local entity {} available under alias {}", key, alias);
+                        log.warn("Provider {} contains alias {} which is not unique and will be ignored", provider, alias);
+
+                    } else {
+
+                        aliasSet.add(alias);
+                        log.debug("Local entity {} available under alias {}", key, alias);
+
+                    }
 
                 } else {
 
@@ -427,30 +462,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     }
 
     /**
-     * Sets name of IDP to be used as default. In case the IDP is not present (wasn't loaded from any
-     * metadata provider) runtime exception is thrown.
+     * Sets name of IDP to be used as default.
      *
      * @param defaultIDP IDP to set as default
      */
     public void setDefaultIDP(String defaultIDP) {
-
-        /*try { // TODO
-
-            lock.writeLock().lock();
-
-            if (isIDPValid(defaultIDP)) {
-                this.defaultIDP = defaultIDP;
-                return;
-            }
-
-            throw new IllegalArgumentException("Attempt to set nonexistent IDP as a default: " + defaultIDP);
-
-        } finally {
-
-            lock.writeLock().unlock();
-
-        }*/
-
+        this.defaultIDP = defaultIDP;
     }
 
     /**

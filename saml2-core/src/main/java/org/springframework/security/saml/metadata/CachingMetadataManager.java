@@ -17,7 +17,6 @@ package org.springframework.security.saml.metadata;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,11 +67,9 @@ public class CachingMetadataManager extends MetadataManager {
 
     /**
      * Guaranteed to be called by the superclass as part of the initialization.
-     *
-     * @throws MetadataProviderException
      */
     @Override
-    public void refreshMetadata() throws MetadataProviderException {
+    public void refreshMetadata() {
 
         try {
 

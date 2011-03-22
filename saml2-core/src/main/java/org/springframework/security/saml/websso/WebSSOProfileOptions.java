@@ -39,7 +39,7 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     private boolean allowProxy = true;
 
     private Collection<String> authnContexts;
-    private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.MINIMUM;
+    private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.EXACT;
 
     public WebSSOProfileOptions() {
     }

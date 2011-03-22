@@ -3,11 +3,10 @@ package org.springframework.security.saml.websso;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.*;
 import org.opensaml.xml.XMLObjectBuilderFactory;
+
+import java.util.Collection;
 
 /**
  * Helper class for creation of SAML parts for testing.
@@ -41,4 +40,36 @@ public class WebSSOProfileTestHelper {
         statement.setSessionNotOnOrAfter(expire);
         return statement;
     }
+
+    protected RequestedAuthnContext getRequestedAuthnContext(AuthnContextComparisonTypeEnumeration comparison, Collection<String> contexts) {
+
+        SAMLObjectBuilder<RequestedAuthnContext> builder = (SAMLObjectBuilder<RequestedAuthnContext>) builderFactory.getBuilder(RequestedAuthnContext.DEFAULT_ELEMENT_NAME);
+        RequestedAuthnContext authnContext = builder.buildObject();
+        authnContext.setComparison(comparison);
+
+        for (String context : contexts) {
+            authnContext.getAuthnContextClassRefs().add(getClassRef(context));
+        }
+
+        return authnContext;
+
+    }
+
+    protected AuthnContextClassRef getClassRef(String context) {
+        SAMLObjectBuilder<AuthnContextClassRef> contextRefBuilder = (SAMLObjectBuilder<AuthnContextClassRef>) builderFactory.getBuilder(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
+        AuthnContextClassRef authnContextClassRef = contextRefBuilder.buildObject();
+        authnContextClassRef.setAuthnContextClassRef(context);
+        return authnContextClassRef;
+    }
+
+    protected AuthnContext getAuthnContext(AuthnContextClassRef classRef, AuthnContextDeclRef declRef) {
+
+        SAMLObjectBuilder<AuthnContext> builder = (SAMLObjectBuilder<AuthnContext>) builderFactory.getBuilder(AuthnContext.DEFAULT_ELEMENT_NAME);
+        AuthnContext authnContext = builder.buildObject();
+        authnContext.setAuthnContextClassRef(classRef);
+        authnContext.setAuthnContextDeclRef(declRef);
+        return authnContext;
+
+    }
+
 }

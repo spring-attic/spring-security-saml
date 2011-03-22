@@ -20,12 +20,13 @@ import org.junit.Test;
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.impl.AuthnContextClassRefImpl;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.SAMLTestBase;
@@ -35,6 +36,8 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.Arrays;
 
 import static org.easymock.EasyMock.*;
 
@@ -111,7 +114,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     @Test
     public void testDefaultAuthNStatementPasses() throws Exception {
         AuthnStatement statement = helper.getValidAuthStatement();
-        profile.verifyAuthenticationStatement(statement, messageContext);
+        profile.verifyAuthenticationStatement(statement, null, messageContext);
     }
 
     /**
@@ -125,7 +128,29 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         DateTime past = new DateTime();
         past.minusHours(3);
         statement.setSessionNotOnOrAfter(past);
-        profile.verifyAuthenticationStatement(statement, messageContext);
+        profile.verifyAuthenticationStatement(statement, null, messageContext);
+    }
+
+    /**
+     * Verifies that authnContext with exact comparison passes once one of the classRefs is satisifed.
+     * @throws Exception error
+     */
+    @Test
+    public void testAuthnExactComparison() throws Exception {
+        RequestedAuthnContext requestedAuthnContext = helper.getRequestedAuthnContext(AuthnContextComparisonTypeEnumeration.EXACT, Arrays.asList("test", "test2"));
+        AuthnContext authnContext = helper.getAuthnContext(helper.getClassRef("test2"), null);
+        profile.verifyAuthnContext(requestedAuthnContext, authnContext, null);
+    }
+
+    /**
+     * Verifies that authnContext with exact comparison fails when none is satisfied.
+     * @throws Exception error
+     */
+    @Test(expected = InsufficientAuthenticationException.class)
+    public void testAuthnExactComparison_none() throws Exception {
+        RequestedAuthnContext requestedAuthnContext = helper.getRequestedAuthnContext(AuthnContextComparisonTypeEnumeration.EXACT, Arrays.asList("test", "test2"));
+        AuthnContext authnContext = helper.getAuthnContext(helper.getClassRef("test5"), null);
+        profile.verifyAuthnContext(requestedAuthnContext, authnContext, null);
     }
 
     private void verifyMock() {

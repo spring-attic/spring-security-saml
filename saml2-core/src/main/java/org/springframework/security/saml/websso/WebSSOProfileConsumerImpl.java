@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -201,7 +202,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     }
 
-    private void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
         // Verify storage time skew
         if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
             log.debug("Authentication statement is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
@@ -218,7 +219,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (assertion.getAuthnStatements().size() > 0) {
             verifyAssertionConditions(assertion.getConditions(), context, true);
             for (AuthnStatement statement : assertion.getAuthnStatements()) {
-                verifyAuthenticationStatement(statement, context);
+                if (request != null) {
+                    verifyAuthenticationStatement(statement, request.getRequestedAuthnContext(), context);
+                } else {
+                    verifyAuthenticationStatement(statement, null, context);
+                }
             }
         } else {
             verifyAssertionConditions(assertion.getConditions(), context, false);
@@ -379,10 +384,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * fields.
      *
      * @param auth    statement to check
+     * @param requestedAuthnContext original requested context can be null for unsolicited messages or when no context was requested
      * @param context message context
      * @throws AuthenticationException in case the statement is invalid
      */
-    protected void verifyAuthenticationStatement(AuthnStatement auth, SAMLMessageContext context) throws AuthenticationException {
+    protected void verifyAuthenticationStatement(AuthnStatement auth, RequestedAuthnContext requestedAuthnContext, SAMLMessageContext context) throws AuthenticationException {
         // Validate that user wasn't authenticated too long time ago
         if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
             log.debug("Authentication statement is too old to be used", auth.getAuthnInstant());
@@ -395,6 +401,9 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new CredentialsExpiredException("Users authentication is expired");
         }
 
+        // Verify context
+        verifyAuthnContext(requestedAuthnContext, auth.getAuthnContext(), context);
+
         if (auth.getSubjectLocality() != null) {
             HTTPInTransport httpInTransport = (HTTPInTransport) context.getInboundMessageTransport();
             if (auth.getSubjectLocality().getAddress() != null) {
@@ -403,6 +412,58 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 }
             }
         }
+    }
+
+    /**
+     * Implementation is expected to verify that the requested authentication context corresponds with the received value.
+     * Identity provider sending the context can be loaded from the SAMLContext.
+     * <p>
+     * By default verification is done only for "exact" context. It is checked whether received context contains one of the requested
+     * method.
+     * <p>
+     * In case requestedAuthnContext is null no verification is done.
+     * <p>
+     * Method can be reimplemented in subclasses.
+     *
+     * @param requestedAuthnContext context requested in the original request, null for unsolicited messages or when no context was required
+     * @param receivedContext context from the response message
+     * @param context saml context
+     * @throws InsufficientAuthenticationException in case expected context doesn't correspond with the received value
+     */
+    protected void verifyAuthnContext(RequestedAuthnContext requestedAuthnContext, AuthnContext receivedContext, SAMLMessageContext context) throws InsufficientAuthenticationException {
+
+        if (requestedAuthnContext != null && AuthnContextComparisonTypeEnumeration.EXACT.equals(requestedAuthnContext.getComparison())) {
+
+            String classRef = null, declRef = null;
+
+            if (receivedContext.getAuthnContextClassRef() != null) {
+                classRef = receivedContext.getAuthnContextClassRef().getAuthnContextClassRef();
+            }
+
+            if (requestedAuthnContext.getAuthnContextClassRefs() != null) {
+                for (AuthnContextClassRef classRefRequested : requestedAuthnContext.getAuthnContextClassRefs()) {
+                    if (classRefRequested.getAuthnContextClassRef().equals(classRef)) {
+                        return;
+                    }
+                }
+            }
+
+            if (receivedContext.getAuthnContextDeclRef() != null) {
+                declRef = receivedContext.getAuthnContextDeclRef().getAuthnContextDeclRef();
+            }
+
+            if (requestedAuthnContext.getAuthnContextDeclRefs() != null) {
+                for (AuthnContextDeclRef declRefRequested : requestedAuthnContext.getAuthnContextDeclRefs()) {
+                    if (declRefRequested.getAuthnContextDeclRef().equals(declRef)) {
+                        return;
+                    }
+                }
+            }
+
+            throw new InsufficientAuthenticationException("Response doesn't contain any of the requested authentication context class or declaration references");
+
+        }
+
     }
 
     /**

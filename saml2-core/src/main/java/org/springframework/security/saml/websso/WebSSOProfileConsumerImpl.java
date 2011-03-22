@@ -380,8 +380,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     }
 
     /**
-     * Verifies that authentication statement is valid. Checks the authInstant, sessionNotOnOrAfter and subjectLocality
-     * fields.
+     * Verifies that authentication statement is valid. Checks the authInstant and sessionNotOnOrAfter fields.
      *
      * @param auth    statement to check
      * @param requestedAuthnContext original requested context can be null for unsolicited messages or when no context was requested
@@ -389,6 +388,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @throws AuthenticationException in case the statement is invalid
      */
     protected void verifyAuthenticationStatement(AuthnStatement auth, RequestedAuthnContext requestedAuthnContext, SAMLMessageContext context) throws AuthenticationException {
+
         // Validate that user wasn't authenticated too long time ago
         if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
             log.debug("Authentication statement is too old to be used", auth.getAuthnInstant());
@@ -404,14 +404,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify context
         verifyAuthnContext(requestedAuthnContext, auth.getAuthnContext(), context);
 
-        if (auth.getSubjectLocality() != null) {
-            HTTPInTransport httpInTransport = (HTTPInTransport) context.getInboundMessageTransport();
-            if (auth.getSubjectLocality().getAddress() != null) {
-                if (!httpInTransport.getPeerAddress().equals(auth.getSubjectLocality().getAddress())) { // TODO Log message
-                    throw new BadCredentialsException("User is accessing the service from invalid address");
-                }
-            }
-        }
     }
 
     /**

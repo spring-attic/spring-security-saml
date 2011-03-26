@@ -18,6 +18,7 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -135,6 +136,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
             if (!ecpRequest && idpSelectionPath != null && !isLoginRequest(request)) {
 
+                logger.debug("Initializing IDP selection");
                 request.getRequestDispatcher(idpSelectionPath).include(request, response);
 
             } else {
@@ -144,13 +146,19 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                 WebSSOProfileOptions options = getProfileOptions(request, response, context, e);
 
                 if (ecpRequest) {
+
                     if (webSSOprofileECP == null) {
                         throw new ServletException("ECP profile isn't available in the entry point, check your configuration");
                     } else {
+                        logger.debug("Processing ECP request");
                         webSSOprofileECP.sendAuthenticationRequest(context, options, storage);
                     }
+
                 } else {
+
+                    logger.debug("Processing WebSSO request");
                     webSSOprofile.sendAuthenticationRequest(context, options, storage);
+
                 }
 
                 samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
@@ -176,13 +184,13 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @return whether the request comes from an ECP-enabled client or not
      */
     protected boolean isECPRequest(HttpServletRequest request) {
-        String acceptHeader = request.getHeader("Accept");
 
-        return acceptHeader != null
+        String acceptHeader = request.getHeader("Accept");
+        String paosHeader = request.getHeader(SAMLConstants.PAOS_HTTP_HEADER);
+        return acceptHeader != null && paosHeader != null
                 && acceptHeader.contains(SAMLConstants.PAOS_HTTP_ACCEPT_HEADER)
-                && ("ver='" + org.opensaml.common.xml.SAMLConstants.PAOS_NS + "';'"
-                + org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS + "'").equals(
-                request.getHeader(SAMLConstants.PAOS_HTTP_HEADER));
+                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.PAOS_NS)
+                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS);
     }
 
     /**
@@ -301,6 +309,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @param webSSOprofile profile
      */
     @Autowired
+    @Qualifier("webSSOprofile")
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
         Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
         this.webSSOprofile = webSSOprofile;
@@ -310,6 +319,8 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         return webSSOprofileECP;
     }
 
+    @Autowired(required = false)
+    @Qualifier("ecpprofile")
     public void setWebSSOprofileECP(WebSSOProfile webSSOprofileECP) {
         this.webSSOprofileECP = webSSOprofileECP;
     }

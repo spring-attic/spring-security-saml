@@ -3,6 +3,11 @@
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%@ page import="java.util.Set" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head>
+    <title>Spring Security SAML Extension - Metadata</title>
+</head>
+<body>
 
 <h1>IDP selection</h1>
 
@@ -39,3 +44,6 @@
 <p>
     <a href="<c:url value="/saml/web/metadata"/>">Metadata information</a>
 </p>
+
+</body>
+</html>

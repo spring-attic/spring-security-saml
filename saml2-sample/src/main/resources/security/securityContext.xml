@@ -189,7 +189,7 @@
     <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
 
     <!-- SAML 2.0 ECP profile -->
-    <bean id="ecpProfile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl"/>
+    <bean id="ecpprofile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl"/>
     
     <!-- SAML 2.0 Logout Profile -->
     <bean id="logoutprofile" class="org.springframework.security.saml.websso.SingleLogoutProfileImpl"/>

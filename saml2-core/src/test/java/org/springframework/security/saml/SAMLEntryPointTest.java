@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml;
 
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.xml.SAMLConstants;
@@ -129,6 +130,7 @@ public class SAMLEntryPointTest {
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
         expect(request.getHeader("Accept")).andReturn(
                 "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
         dispatcher.include(request, response);
 
         replay(dispatcher);
@@ -218,7 +220,7 @@ public class SAMLEntryPointTest {
         expect(request.getParameter("idp")).andReturn("testIDP");
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
         replayMock();
         entryPoint.commence(request, response, null);
         verifyMock();
@@ -241,11 +243,47 @@ public class SAMLEntryPointTest {
         expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso");
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
         ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
 
         replayMock();
         entryPoint.commence(request, response, null);
         verifyMock();
+    }
+
+    /**
+     * Test check on whether request supports ECP - it doesn't in this case.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testECPRequest_no() throws Exception {
+
+        expect(request.getHeader("Accept")).andReturn(
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
+
+        replayMock();
+        Assert.assertFalse(entryPoint.isECPRequest(request));
+        verifyMock();
+
+    }
+
+    /**
+     * Test check on whether request supports ECP - it doesn in this case.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testECPRequest_yes() throws Exception {
+
+        expect(request.getHeader("Accept")).andReturn("text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5, application/vnd.paos+xml");
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn("ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'");
+
+        replayMock();
+        Assert.assertTrue(entryPoint.isECPRequest(request));
+        verifyMock();
+
     }
 
     private void replayMock() {

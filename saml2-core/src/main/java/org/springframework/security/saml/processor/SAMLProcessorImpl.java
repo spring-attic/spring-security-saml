@@ -95,6 +95,11 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         MessageDecoder decoder = binding.getMessageDecoder();
         samlContext.setCommunicationProfileId(binding.getCommunicationProfileId());
         decoder.decode(samlContext);
+
+        if (samlContext.getPeerEntityMetadata() == null) {
+            throw new MetadataProviderException("Metadata for issuer " + samlContext.getInboundMessageIssuer() + " wasn't found");
+        }
+
         samlContext.setPeerEntityId(samlContext.getPeerEntityMetadata().getEntityID());
         samlContext.setPeerExtendedMetadata(((MetadataManager)samlContext.getMetadataProvider()).getExtendedMetadata(samlContext.getPeerEntityId()));
 

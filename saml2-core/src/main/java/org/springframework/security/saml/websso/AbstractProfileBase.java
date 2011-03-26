@@ -146,8 +146,8 @@ public abstract class AbstractProfileBase implements InitializingBean {
     }
 
     /**
-     * Method calls the processor and sends the message containted in the context. Subclasses can provide additional
-     * processing before the message delivery.
+     * Method calls the processor and sends the message contained in the context. Subclasses can provide additional
+     * processing before the message delivery. Message is sent using binding defined in the peer entity of the context.
      *
      * @param context context
      * @param sign whether the message should be signed
@@ -157,6 +157,21 @@ public abstract class AbstractProfileBase implements InitializingBean {
      */
     protected void sendMessage(SAMLMessageContext context, boolean sign) throws MetadataProviderException, SAMLException, MessageEncodingException {
         processor.sendMessage(context, sign);
+    }
+
+    /**
+     * Method calls the processor and sends the message contained in the context. Subclasses can provide additional
+     * processing before the message delivery. Message is sent using the specified binding.
+     *
+     * @param context context
+     * @param sign whether the message should be signed
+     * @param binding binding to use to send the message
+     * @throws MetadataProviderException metadata error
+     * @throws SAMLException SAML encoding error
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException message encoding error
+     */
+    protected void sendMessage(SAMLMessageContext context, boolean sign, String binding) throws MetadataProviderException, SAMLException, MessageEncodingException {
+        processor.sendMessage(context, sign, binding);
     }
 
     protected Status getStatus(String code, String statusMessage) {

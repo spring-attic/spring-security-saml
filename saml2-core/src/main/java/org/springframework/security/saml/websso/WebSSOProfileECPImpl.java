@@ -58,13 +58,6 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
         AssertionConsumerService assertionConsumer = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, SAMLConstants.SAML2_PAOS_BINDING_URI);
 
-        SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
-        SOAPHelper.addHeaderBlock(context, getECPRequest(options));
-
-        if (context.getRelayState() != null) {
-            SOAPHelper.addHeaderBlock(context, getRelayState(context.getRelayState()));
-        }
-
         // The last parameter refers to the IdP that should receive the message. However,
         // in ECP, we don't know in advance which IdP will be contacted.
         AuthnRequest authRequest = getAuthnRequest(options, assertionConsumer, null);
@@ -73,7 +66,14 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         context.setOutboundMessage(getEnvelope());
         context.setOutboundSAMLMessage(authRequest);
 
-        sendMessage(context, spDescriptor.isAuthnRequestsSigned());
+        SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
+        SOAPHelper.addHeaderBlock(context, getECPRequest(options));
+
+        if (context.getRelayState() != null) {
+            SOAPHelper.addHeaderBlock(context, getRelayState(context.getRelayState()));
+        }
+
+        sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
         messageStorage.storeMessage(authRequest.getID(), authRequest);
 
     }

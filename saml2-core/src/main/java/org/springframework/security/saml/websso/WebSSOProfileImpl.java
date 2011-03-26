@@ -143,16 +143,19 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             NameIDPolicy nameIDPolicy = builder.buildObject();
             nameIDPolicy.setFormat(options.getNameID());
             nameIDPolicy.setAllowCreate(options.isAllowCreate());
-
-            // TODO The SPNameQualifier seems invalid when interacting with a Shibboleth IdP
             nameIDPolicy.setSPNameQualifier(getSPNameQualifier());
             request.setNameIDPolicy(nameIDPolicy);
         }
 
     }
 
+    /**
+     * SAML-Core 2218, Specifies that returned subject identifier should be returned in the namespace of the given SP.
+     *
+     * @return by default returns null
+     */
     protected String getSPNameQualifier() {
-        return metadata.getHostedSPName(); // TODO Fix
+        return null;
     }
 
     /**
@@ -202,9 +205,9 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     /**
      * Fills the request with information about scoping, including IDP in the scope IDP List.
      *
-     * @param request        request to fill
-     * @param serviceURI     destination to send the request to
-     * @param options        options driving generation of the element, contains list of allowed IDPs
+     * @param request    request to fill
+     * @param serviceURI destination to send the request to
+     * @param options    options driving generation of the element, contains list of allowed IDPs
      */
     protected void buildScoping(AuthnRequest request, SingleSignOnService serviceURI, WebSSOProfileOptions options) {
 

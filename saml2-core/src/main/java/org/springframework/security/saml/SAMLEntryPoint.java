@@ -144,23 +144,19 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                 SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
                 SAMLMessageStorage storage = new HttpSessionStorage(request);
                 WebSSOProfileOptions options = getProfileOptions(request, response, context, e);
+                WebSSOProfile profile = webSSOprofile;
 
                 if (ecpRequest) {
-
-                    if (webSSOprofileECP == null) {
-                        throw new ServletException("ECP profile isn't available in the entry point, check your configuration");
+                    if (webSSOprofileECP != null) {
+                        logger.debug("Processing request using ECP profile");
+                        profile = webSSOprofileECP;
                     } else {
-                        logger.debug("Processing ECP request");
-                        webSSOprofileECP.sendAuthenticationRequest(context, options, storage);
+                        logger.debug("Request supports ECP but ECP profile isn't configured, using WebSSO");
                     }
-
-                } else {
-
-                    logger.debug("Processing WebSSO request");
-                    webSSOprofile.sendAuthenticationRequest(context, options, storage);
-
                 }
 
+                logger.debug("Processing SSO request");
+                profile.sendAuthenticationRequest(context, options, storage);
                 samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
 
             }
@@ -200,7 +196,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      *
      * @param request   request
      * @param response  response
-     * @param context containing local entity
+     * @param context   containing local entity
      * @param exception exception causing invocation of this entry point (can be null)
      * @return populated webSSOprofile
      * @throws MetadataProviderException in case metadata loading fails

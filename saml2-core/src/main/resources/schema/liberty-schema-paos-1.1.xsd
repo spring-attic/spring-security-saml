@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:liberty:paos:20 03-08"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"
+           xmlns="urn:liberty:paos:2003-08"
+           elementFormDefault="qualified"
+    	   attributeFormDefault="unqualified">
+    <xs:annotation>
+        <xs:documentation>
+            The source code in this XSD file was excerpted verbatim from:
+            
+            Liberty Reverse HTTP Binding
+            Version 1.1
+            14th December 2004
+            
+            Copyright (c) 2003-2005 Liberty Alliance participants, see
+            http://www.projectliberty.org/specs/idws f_1_1_copyrights.php
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:import namespace="http://schemas.xmlsoap. org/soap/envelope/"
+               schemaLocation="http://schemas.xml soap.org/soap/envelope/"/>
+    <xs:include schemaLocation="liberty-utility-v1.1.xsd"/>
+    
+    <xs:element name="Request" type="RequestType"/>
+    <xs:complexType name="RequestType">
+        <xs:attribute name="responseConsumerURL" type="xs:anyURI" use="required"/>
+        <xs:attribute name="service" type="xs:anyURI" use="required"/>
+        <xs:attribute name="messageID" type="IDType" use="optional"/>
+        <xs:attribute ref="S:mustUnderstand" use="required"/>
+        <xs:attribute ref="S:actor" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="Response" type="ResponseType"/>
+    <xs:complexType name="ResponseType">
+        <xs:attribute name="refToMessageID" type="IDType" use="optional"/>
+        <xs:attribute ref="S:mustUnderstand" use="required"/>
+        <xs:attribute ref="S:actor" use="required"/>
+    </xs:complexType>
+</xs:schema>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<paos:Response xmlns:paos="urn:liberty:paos:2003-08"
+               xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/"
+    refToMessageID="6c3a4f8b9c2d"
+    soap11:mustUnderstand="1"
+    soap11:actor= "http://schemas.xmlsoap.org/soap/actor/next" />

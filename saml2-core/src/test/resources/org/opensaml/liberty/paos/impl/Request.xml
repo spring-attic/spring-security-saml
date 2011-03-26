@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<paos:Request xmlns:paos="urn:liberty:paos:2003-08"
+              xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/"
+    soap11:actor="http://schemas.xmlsoap.org/soap/actor/next"
+    soap11:mustUnderstand="1"
+    responseConsumerURL="https://identity-service/SAML2/ECP"
+    service="urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp" />

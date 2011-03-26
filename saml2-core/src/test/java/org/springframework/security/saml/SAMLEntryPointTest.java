@@ -127,6 +127,8 @@ public class SAMLEntryPointTest {
         entryPoint.setIdpSelectionPath("/selectIDP");
         expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
+        expect(request.getHeader("Accept")).andReturn(
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         dispatcher.include(request, response);
 
         replay(dispatcher);
@@ -144,9 +146,9 @@ public class SAMLEntryPointTest {
     @Test
     public void testInitialProfileOptions() throws Exception {
 
-        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
         assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
-        assertTrue(ssoProfileOptions.isAllowProxy());
+        assertEquals(new Integer(2), ssoProfileOptions.getProxyCount());
         assertTrue(ssoProfileOptions.isIncludeScoping());
         assertFalse(ssoProfileOptions.getForceAuthN());
         assertFalse(ssoProfileOptions.getPassive());
@@ -167,7 +169,7 @@ public class SAMLEntryPointTest {
 
         WebSSOProfileOptions defaultOptions = new WebSSOProfileOptions();
         defaultOptions.setIdp("ignoredValue");
-        defaultOptions.setAllowProxy(false);
+        defaultOptions.setProxyCount(0);
         defaultOptions.setIncludeScoping(false);
         defaultOptions.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
 
@@ -175,9 +177,9 @@ public class SAMLEntryPointTest {
         entryPoint.setDefaultProfileOptions(defaultOptions);
 
         // Check that default values are used
-        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
         assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
-        assertFalse(ssoProfileOptions.isAllowProxy());
+        assertEquals(new Integer(0), ssoProfileOptions.getProxyCount());
         assertFalse(ssoProfileOptions.isIncludeScoping());
         assertFalse(ssoProfileOptions.getForceAuthN());
         assertFalse(ssoProfileOptions.getPassive());
@@ -185,13 +187,13 @@ public class SAMLEntryPointTest {
 
         // Check that value can't be altered after being set
         defaultOptions.setIncludeScoping(true);
-        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
         assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
         assertFalse(ssoProfileOptions.isIncludeScoping());
 
         // Check that default values can be cleared
         entryPoint.setDefaultProfileOptions(null);
-        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null);
+        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
         assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
         assertTrue(ssoProfileOptions.isIncludeScoping());        
 
@@ -214,6 +216,8 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter("idp")).andReturn("testIDP");
+        expect(request.getHeader("Accept")).andReturn(
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
         replayMock();
         entryPoint.commence(request, response, null);
@@ -235,6 +239,8 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso");
+        expect(request.getHeader("Accept")).andReturn(
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
 
         replayMock();

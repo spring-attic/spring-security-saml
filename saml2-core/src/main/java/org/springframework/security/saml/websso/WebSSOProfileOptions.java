@@ -18,6 +18,7 @@ import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * JavaBean contains properties allowing customization of SAML request message sent to the IDP.
@@ -28,15 +29,17 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
 
     private String idp;
     private String binding;
+    private Set<String> allowedIDPs;
+    private String providerName;
 
     // Name ID policy
     private String nameID;
     private boolean allowCreate;
 
     private boolean passive = false;
-    private boolean forceAuthN = false;
+    private boolean forceAuthn = false;
     private boolean includeScoping = true;
-    private boolean allowProxy = true;
+    private Integer proxyCount = 2;
 
     private Collection<String> authnContexts;
     private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.EXACT;
@@ -83,16 +86,22 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         return passive;
     }
 
+    /**
+     * Sets whether the IdP should refrain from interacting with the user during the authentication process. Boolean
+     * values will be marshalled to either "true" or "false".
+     *
+     * @param passive true if passive authentication is allowed, false otherwise
+     */
     public void setPassive(Boolean passive) {
         this.passive = passive;
     }
 
     public boolean getForceAuthN() {
-        return forceAuthN;
+        return forceAuthn;
     }
 
     public void setForceAuthN(Boolean forceAuthN) {
-        this.forceAuthN = forceAuthN;
+        this.forceAuthn = forceAuthN;
     }
 
     /**
@@ -109,17 +118,23 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     }
 
     /**
-     * True is proxying should be allowed in requests sent to IDP as part of the generated Scoping element.
-     * Property includeScoping must be enabled for this value to take any effect.
-     *
-     * @return true if proxying is allowed
+     * @return null to skip proxyCount, 0 to disable proxying, >0 to allow proxying
      */
-    public boolean isAllowProxy() {
-        return allowProxy;
+    public Integer getProxyCount() {
+        return proxyCount;
     }
 
-    public void setAllowProxy(boolean allowProxy) {
-        this.allowProxy = allowProxy;
+    /**
+     * Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. In case value is null
+     * the proxyCount attribute is omitted. Use zero to disable proxying or value >0 to specify how many hops are allowed.
+     * <p>
+     * Property includeScoping must be enabled for this value to take any effect.
+     * </p>
+     *
+     * @param proxyCount null to skip proxyCount in the AuthnRequest, 0 to disable proxying, >0 to allow proxying
+     */
+    public void setProxyCount(Integer proxyCount) {
+        this.proxyCount = proxyCount;
     }
 
     public Collection<String> getAuthnContexts() {
@@ -144,10 +159,20 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * NameID to used or null to omit NameIDPolicy from request.
+     *
+     * @return name ID
+     */
     public String getNameID() {
         return nameID;
     }
 
+    /**
+     * When set determines which NameIDPolicy will be requested as part of the AuthnRequest sent to the IDP.
+     *
+     * @param nameID name ID
+     */
     public void setNameID(String nameID) {
         this.nameID = nameID;
     }
@@ -177,5 +202,40 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
             this.authnContextComparison = authnContextComparison;
         }
     }
-    
+
+    public Set<String> getAllowedIDPs() {
+        return allowedIDPs;
+    }
+
+    /**
+     * List of IDPs which are allowed to process the created AuthnRequest. IDP the request will be sent to is added
+     * automatically. In case value is null the allowedIDPs will not be included in the Scoping element.
+     * <p>
+     * Property includeScoping must be enabled for this value to take any effect.
+     * </p>
+     *
+     * @param allowedIDPs IDPs enabled to process the created authnRequest, null to skip the attribute from scoptin
+     */
+    public void setAllowedIDPs(Set<String> allowedIDPs) {
+        this.allowedIDPs = allowedIDPs;
+    }
+
+    /**
+     * Human readable name of the local entity.
+     *
+     * @return entity name
+     */
+    public String getProviderName() {
+        return providerName;
+    }
+
+    /**
+     * Sets human readable name of the local entity used in ECP profile.
+     *
+     * @param providerName provider name
+     */
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
 }

@@ -28,7 +28,6 @@
           class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
         <property name="defaultTargetUrl" value="/"/>
     </bean>
-
     <!--
     Use the following for interpreting RelayState coming from unsolicited response as redirect URL:
     <bean id="successRedirectHandler" class="org.springframework.security.saml.SAMLRelayStateSuccessHandler">
@@ -68,7 +67,7 @@
             </map>
         </constructor-arg>
     </bean>
-
+    
     <!-- Central storage of cryptohraphic keys -->
     <bean id="keyManager" class="org.springframework.security.saml.key.KeyManager">
         <constructor-arg ref="keyResolver"/>
@@ -117,7 +116,7 @@
                 </bean>
                 <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider" init-method="initialize">
                     <!-- URL containing the metadata -->
-                    <constructor-arg>
+                    <constructor-arg> 
                         <value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
                     </constructor-arg>
                     <!-- Timeout for metadata loading in ms -->
@@ -133,7 +132,7 @@
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
         <property name="defaultIDP" value="http://localhost:8080/opensso"/>
     </bean>
-
+    
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
     <bean id="samlAuthenticationProvider" class="org.springframework.security.saml.SAMLAuthenticationProvider">
         <!-- OPTIONAL property: can be used to store/load user data after login -->
@@ -141,29 +140,28 @@
         <property name="userDetails" ref="bean" />
         -->
     </bean>
-
+    
     <!-- Provider of default SAML Context -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
-
     <!-- Override default authentication processing filter with the one processing SAML messages -->
     <bean id="samlProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
         <property name="authenticationManager" ref="authenticationManager"/>
         <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
     </bean>
-
+    
     <!-- Logout handler terminating local session -->
     <bean id="logoutHandler"
           class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
         <property name="invalidateHttpSession" value="false"/>
     </bean>
-
+    
     <!-- Override default logout processing filter with the one processing SAML messages -->
     <bean id="samlLogoutFilter" class="org.springframework.security.saml.SAMLLogoutFilter">
         <constructor-arg ref="successLogoutHandler"/>
         <constructor-arg ref="logoutHandler"/>
         <constructor-arg ref="logoutHandler"/>
     </bean>
-
+    
     <!-- Filter processing incoming logout messages -->
     <!-- First argument determines URL user will be redirected to after successful global logout -->
     <bean id="samlLogoutProcessingFilter" class="org.springframework.security.saml.SAMLLogoutProcessingFilter">
@@ -179,19 +177,23 @@
                 <ref bean="postBinding"/>
                 <ref bean="artifactBinding"/>
                 <ref bean="soapBinding"/>
+                <ref bean="paosBinding"/>
             </list>
         </constructor-arg>
     </bean>
-
+    
     <!-- SAML 2.0 Assertion Consumer -->
     <bean id="webSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl"/>
-
-    <!-- SAML 2.0 Web SSO profile -->
+    
+    <!-- SAML 2.0 Web SSO profile --> 
     <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
 
+    <!-- SAML 2.0 ECP profile -->
+    <bean id="ecpProfile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl"/>
+    
     <!-- SAML 2.0 Logout Profile -->
     <bean id="logoutprofile" class="org.springframework.security.saml.websso.SingleLogoutProfileImpl"/>
-
+    
     <!-- Bindings, encoders and decoders used for creating and parsing messages -->
     <bean id="postBinding" class="org.springframework.security.saml.processor.HTTPPostBinding">
         <constructor-arg ref="parserPool"/>
@@ -223,9 +225,13 @@
         <constructor-arg ref="parserPool"/>
     </bean>
 
+    <bean id="paosBinding" class="org.springframework.security.saml.processor.HTTPPAOS11Binding">
+        <constructor-arg ref="parserPool" />
+    </bean>
+    
     <!-- Initialization of OpenSAML library-->
     <bean class="org.springframework.security.saml.SAMLBootstrap"/>
-
+    
     <!-- Initialization of the velocity engine -->
     <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
           factory-method="getEngine"/>

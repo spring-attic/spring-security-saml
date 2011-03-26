@@ -77,7 +77,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
-        processor.sendMessage(context, signMessage);
+        sendMessage(context, signMessage);
         messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
 
     }
@@ -270,7 +270,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setPeerEntityRoleMetadata(idpDescriptor);
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutResponseSigned();
-        processor.sendMessage(context, signMessage);
+        sendMessage(context, signMessage);
 
     }
 

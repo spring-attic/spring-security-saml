@@ -32,6 +32,7 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Class implements WebSSO profile and offers capabilities for SP initialized SSO and
@@ -41,8 +42,6 @@ import java.util.Collection;
  * @author Vladimir Schafer
  */
 public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProfile {
-
-    private static final int DEFAULT_PROXY_COUNT = 2;
 
     public WebSSOProfileImpl() {
     }
@@ -63,25 +62,27 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      */
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
+        // Verify we deal with a local SP
+        if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
+            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
+        }
+
         // Initialize IDP based on options or use default
         String idpId = options.getIdp();
         if (idpId == null) {
             idpId = metadata.getDefaultIDP();
         }
 
-        // Verify we deal with a local SP
-        if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
-            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
-        }
-
+        // Load the entities
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
         ExtendedMetadata idpExtendedMetadata = metadata.getExtendedMetadata(idpId);
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-
         String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
-        AssertionConsumerService assertionConsumerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
         SingleSignOnService bindingService = SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, binding);
-        AuthnRequest authRequest = getAuthnRequest(options, idpId, assertionConsumerForBinding, bindingService);
+        boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
+
+        AssertionConsumerService assertionConsumerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
+        AuthnRequest authRequest = getAuthnRequest(options, assertionConsumerForBinding, bindingService);
 
         // TODO optionally implement support for conditions, subject
 
@@ -93,7 +94,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         context.setPeerEntityRoleMetadata(idpssoDescriptor);
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
-        processor.sendMessage(context, spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned());
+        sendMessage(context, sign);
         messageStorage.storeMessage(authRequest.getID(), authRequest);
 
     }
@@ -103,14 +104,16 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * idpEntityDescriptor, with an expected response to the assertionConsumer address.
      *
      * @param options           preferences of message creation
-     * @param idpEntityId       entity ID of the IDP
      * @param assertionConsumer assertion consumer where the IDP should respond
      * @param bindingService    service used to deliver the request
      * @return authnRequest ready to be sent to IDP
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retreiving metadata
      */
-    protected AuthnRequest getAuthnRequest(WebSSOProfileOptions options, String idpEntityId, AssertionConsumerService assertionConsumer, SingleSignOnService bindingService) throws SAMLException, MetadataProviderException {
+    protected AuthnRequest getAuthnRequest(WebSSOProfileOptions options,
+                                           AssertionConsumerService assertionConsumer,
+                                           SingleSignOnService bindingService) throws SAMLException,
+            MetadataProviderException {
         SAMLObjectBuilder<AuthnRequest> builder = (SAMLObjectBuilder<AuthnRequest>) builderFactory.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest request = builder.buildObject();
 
@@ -118,19 +121,20 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         request.setForceAuthn(options.getForceAuthN());
 
         buildCommonAttributes(request, bindingService);
+
+        buildScoping(request, bindingService, options);
         builNameIDPolicy(request, options);
         buildAuthnContext(request, options);
-        buildScoping(request, idpEntityId, bindingService, options);
         buildReturnAddress(request, assertionConsumer);
 
-           return request;
+        return request;
     }
 
     /**
      * Fills the request with required AuthNContext according to selected options.
      *
-     * @param request     request to fill
-     * @param options     options driving generation of the element
+     * @param request request to fill
+     * @param options options driving generation of the element
      */
     protected void builNameIDPolicy(AuthnRequest request, WebSSOProfileOptions options) {
 
@@ -139,6 +143,8 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             NameIDPolicy nameIDPolicy = builder.buildObject();
             nameIDPolicy.setFormat(options.getNameID());
             nameIDPolicy.setAllowCreate(options.isAllowCreate());
+
+            // TODO The SPNameQualifier seems invalid when interacting with a Shibboleth IdP
             nameIDPolicy.setSPNameQualifier(getSPNameQualifier());
             request.setNameIDPolicy(nameIDPolicy);
         }
@@ -146,14 +152,14 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     }
 
     protected String getSPNameQualifier() {
-        return metadata.getHostedSPName();
+        return metadata.getHostedSPName(); // TODO Fix
     }
 
     /**
      * Fills the request with required AuthNContext according to selected options.
      *
-     * @param request     request to fill
-     * @param options     options driving generation of the element
+     * @param request request to fill
+     * @param options options driving generation of the element
      */
     protected void buildAuthnContext(AuthnRequest request, WebSSOProfileOptions options) {
 
@@ -165,7 +171,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             authnContext.setComparison(options.getAuthnContextComparison());
 
             for (String context : contexts) {
-                
+
                 SAMLObjectBuilder<AuthnContextClassRef> contextRefBuilder = (SAMLObjectBuilder<AuthnContextClassRef>) builderFactory.getBuilder(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
                 AuthnContextClassRef authnContextClassRef = contextRefBuilder.buildObject();
                 authnContextClassRef.setAuthnContextClassRef(context);
@@ -196,35 +202,58 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     /**
      * Fills the request with information about scoping, including IDP in the scope IDP List.
      *
-     * @param request     request to fill
-     * @param idpEntityId id of the idp entity
-     * @param serviceURI  destination to send the request to
-     * @param options     options driving generation of the element
+     * @param request        request to fill
+     * @param serviceURI     destination to send the request to
+     * @param options        options driving generation of the element, contains list of allowed IDPs
      */
-    protected void buildScoping(AuthnRequest request, String idpEntityId, SingleSignOnService serviceURI, WebSSOProfileOptions options) {
+    protected void buildScoping(AuthnRequest request, SingleSignOnService serviceURI, WebSSOProfileOptions options) {
 
         if (options.isIncludeScoping()) {
 
-            SAMLObjectBuilder<IDPEntry> idpEntryBuilder = (SAMLObjectBuilder<IDPEntry>) builderFactory.getBuilder(IDPEntry.DEFAULT_ELEMENT_NAME);
-            IDPEntry idpEntry = idpEntryBuilder.buildObject();
-            idpEntry.setProviderID(idpEntityId);
-            idpEntry.setLoc(serviceURI.getLocation());
-
-            SAMLObjectBuilder<IDPList> idpListBuilder = (SAMLObjectBuilder<IDPList>) builderFactory.getBuilder(IDPList.DEFAULT_ELEMENT_NAME);
-            IDPList idpList = idpListBuilder.buildObject();
-            idpList.getIDPEntrys().add(idpEntry);
-
+            Set<String> idpEntityNames = options.getAllowedIDPs();
+            IDPList idpList = buildIDPList(idpEntityNames, serviceURI);
             SAMLObjectBuilder<Scoping> scopingBuilder = (SAMLObjectBuilder<Scoping>) builderFactory.getBuilder(Scoping.DEFAULT_ELEMENT_NAME);
             Scoping scoping = scopingBuilder.buildObject();
             scoping.setIDPList(idpList);
-
-            if (options.isAllowProxy()) {
-                scoping.setProxyCount(DEFAULT_PROXY_COUNT);
-            }
-
+            scoping.setProxyCount(options.getProxyCount());
             request.setScoping(scoping);
 
         }
+
+    }
+
+    /**
+     * Builds an IdP List out of the idpEntityNames
+     *
+     * @param idpEntityNames The IdPs Entity IDs to include in the IdP List, no list is created when null
+     * @param serviceURI     The binding service for an IdP for a specific binding. Should be null
+     *                       if there is more than one IdP in the list or if the destination IdP is not known in
+     *                       advance.
+     * @return an IdP List or null when idpEntityNames is null
+     */
+    protected IDPList buildIDPList(Set<String> idpEntityNames, SingleSignOnService serviceURI) {
+
+        if (idpEntityNames == null) {
+            return null;
+        }
+
+        SAMLObjectBuilder<IDPEntry> idpEntryBuilder = (SAMLObjectBuilder<IDPEntry>) builderFactory.getBuilder(IDPEntry.DEFAULT_ELEMENT_NAME);
+        SAMLObjectBuilder<IDPList> idpListBuilder = (SAMLObjectBuilder<IDPList>) builderFactory.getBuilder(IDPList.DEFAULT_ELEMENT_NAME);
+        IDPList idpList = idpListBuilder.buildObject();
+
+        for (String entityID : idpEntityNames) {
+            IDPEntry idpEntry = idpEntryBuilder.buildObject();
+            idpEntry.setProviderID(entityID);
+            idpList.getIDPEntrys().add(idpEntry);
+
+            // The service URI would be null if the SP does not know in advance
+            // to which IdP the request is sent to.
+            if (serviceURI != null) {
+                idpEntry.setLoc(serviceURI.getLocation());
+            }
+        }
+
+        return idpList;
 
     }
 

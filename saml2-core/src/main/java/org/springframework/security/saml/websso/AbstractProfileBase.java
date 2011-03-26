@@ -29,6 +29,7 @@ import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 import org.opensaml.security.SAMLSignatureProfileValidator;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.security.CriteriaSet;
 import org.opensaml.xml.security.credential.UsageType;
@@ -144,6 +145,20 @@ public abstract class AbstractProfileBase implements InitializingBean {
         return spDescriptor;
     }
 
+    /**
+     * Method calls the processor and sends the message containted in the context. Subclasses can provide additional
+     * processing before the message delivery.
+     *
+     * @param context context
+     * @param sign whether the message should be signed
+     * @throws MetadataProviderException metadata error
+     * @throws SAMLException SAML encoding error
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException message encoding error
+     */
+    protected void sendMessage(SAMLMessageContext context, boolean sign) throws MetadataProviderException, SAMLException, MessageEncodingException {
+        processor.sendMessage(context, sign);
+    }
+
     protected Status getStatus(String code, String statusMessage) {
         SAMLObjectBuilder<StatusCode> codeBuilder = (SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME);
         StatusCode statusCode = codeBuilder.buildObject();
@@ -170,11 +185,17 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * @param service service to use as destination for the request
      */
     protected void buildCommonAttributes(RequestAbstractType request, Endpoint service) {
+
         request.setID(generateID());
         request.setIssuer(getIssuer());
         request.setVersion(SAMLVersion.VERSION_20);
         request.setIssueInstant(new DateTime());
-        request.setDestination(service.getLocation());
+
+        if (service != null) {
+            // Service is now known when we do not know which IDP will be used
+            request.setDestination(service.getLocation());
+        }
+
     }
 
     protected Issuer getIssuer() {

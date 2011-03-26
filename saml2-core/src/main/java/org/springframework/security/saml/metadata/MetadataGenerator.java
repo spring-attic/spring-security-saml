@@ -67,8 +67,6 @@ public class MetadataGenerator implements ApplicationContextAware {
     private boolean wantAssertionSigned = true;
     private boolean signMetadata = true;
 
-
-
     private String signingKey = null;
     private String encryptionKey = null;
 
@@ -82,6 +80,7 @@ public class MetadataGenerator implements ApplicationContextAware {
             NameIDType.X509_SUBJECT);
 
     private static final Collection<String> defaultBindings = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI,
+            SAMLConstants.SAML2_PAOS_BINDING_URI,
             SAMLConstants.SAML2_ARTIFACT_BINDING_URI,
             SAMLConstants.SAML2_REDIRECT_BINDING_URI,
             SAMLConstants.SAML2_SOAP11_BINDING_URI);
@@ -192,6 +191,11 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
         if (includedBindings.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
             spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            index++;
+            isDefault = false;
+        }
+        if (includedBindings.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_PAOS_BINDING_URI));
             index++;
             isDefault = false;
         }

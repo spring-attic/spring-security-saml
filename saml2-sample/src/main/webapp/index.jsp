@@ -36,6 +36,27 @@
 <p>
 <table>
     <tr>
+        <td colspan="2"><b>Principal's Attributes</b></td>
+    </tr>
+    
+    <c:forEach var="attribute"
+               items="${credential.attributes}">
+    <tr>
+        <td width="300"><c:out value="${attribute.friendlyName}"/></td>
+        <td>
+            <c:forEach var="attributeValue"
+                       items="${attribute.attributeValues}">
+                <c:out value="${attributeValue.value}"/>&nbsp;
+            </c:forEach>
+        </td>
+    </tr>
+    </c:forEach>
+</table>
+</p>
+
+<p>
+<table>
+    <tr>
         <td colspan="2"><b>Subject confirmation</b></td>
     </tr>
     <tr>

@@ -61,6 +61,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected String idpSelectionPath;
     protected WebSSOProfileOptions defaultOptions;
     protected WebSSOProfile webSSOprofile;
+    protected WebSSOProfile webSSOprofileECP;
     protected MetadataManager metadata;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
@@ -130,14 +131,30 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
         try {
 
-            if (idpSelectionPath != null && !isLoginRequest(request)) {
+            boolean ecpRequest = isECPRequest(request);
+
+            if (!ecpRequest && idpSelectionPath != null && !isLoginRequest(request)) {
+
                 request.getRequestDispatcher(idpSelectionPath).include(request, response);
+
             } else {
+
                 SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
                 SAMLMessageStorage storage = new HttpSessionStorage(request);
-                WebSSOProfileOptions options = getProfileOptions(request, response, e);
-                webSSOprofile.sendAuthenticationRequest(context, options, storage);
+                WebSSOProfileOptions options = getProfileOptions(request, response, context, e);
+
+                if (ecpRequest) {
+                    if (webSSOprofileECP == null) {
+                        throw new ServletException("ECP profile isn't available in the entry point, check your configuration");
+                    } else {
+                        webSSOprofileECP.sendAuthenticationRequest(context, options, storage);
+                    }
+                } else {
+                    webSSOprofile.sendAuthenticationRequest(context, options, storage);
+                }
+
                 samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
+
             }
 
         } catch (SAMLException e1) {
@@ -151,18 +168,37 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
+     * Analyzes the request headers in order to determine if it comes from an ECP-enabled
+     * client and based on this decides whether ECP profile will be used. Subclasses can override
+     * the method to control when is the ECP invoked.
+     *
+     * @param request request to analyze
+     * @return whether the request comes from an ECP-enabled client or not
+     */
+    protected boolean isECPRequest(HttpServletRequest request) {
+        String acceptHeader = request.getHeader("Accept");
+
+        return acceptHeader != null
+                && acceptHeader.contains(SAMLConstants.PAOS_HTTP_ACCEPT_HEADER)
+                && ("ver='" + org.opensaml.common.xml.SAMLConstants.PAOS_NS + "';'"
+                + org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS + "'").equals(
+                request.getHeader(SAMLConstants.PAOS_HTTP_HEADER));
+    }
+
+    /**
      * Method is supposed to populate preferences used to construct the SAML message. Method can be overridden to provide
      * logic appropriate for given application. In case defaultOptions object was set it will be used as basis for construction
      * and request specific values will be update (idp field).
      *
      * @param request   request
      * @param response  response
+     * @param context containing local entity
      * @param exception exception causing invocation of this entry point (can be null)
      * @return populated webSSOprofile
      * @throws MetadataProviderException in case metadata loading fails
      * @throws ServletException          in case any other error occurs
      */
-    protected WebSSOProfileOptions getProfileOptions(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws MetadataProviderException, ServletException {
+    protected WebSSOProfileOptions getProfileOptions(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context, AuthenticationException exception) throws MetadataProviderException, ServletException {
 
         WebSSOProfileOptions ssoProfileOptions;
         if (defaultOptions != null) {
@@ -268,6 +304,14 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     public void setWebSSOprofile(WebSSOProfile webSSOprofile) {
         Assert.notNull(webSSOprofile, "WebSSOPRofile can't be null");
         this.webSSOprofile = webSSOprofile;
+    }
+
+    public WebSSOProfile getWebSSOprofileECP() {
+        return webSSOprofileECP;
+    }
+
+    public void setWebSSOprofileECP(WebSSOProfile webSSOprofileECP) {
+        this.webSSOprofileECP = webSSOprofileECP;
     }
 
     /**

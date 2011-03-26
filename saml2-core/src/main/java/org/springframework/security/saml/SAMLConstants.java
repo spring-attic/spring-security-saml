@@ -28,5 +28,8 @@ public class SAMLConstants {
 
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILURE = "FAILURE";
+    
+    public static final String PAOS_HTTP_ACCEPT_HEADER = "application/vnd.paos+xml";
+    public static final String PAOS_HTTP_HEADER = "PAOS";
 
 }

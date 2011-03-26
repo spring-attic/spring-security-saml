@@ -16,8 +16,8 @@
         <security:intercept-url pattern="/logout.jsp" filters="none"/>
         <security:intercept-url pattern="/login.jsp" filters="none"/>
         <security:intercept-url pattern="/favicon.ico" filters="none"/>
-        <security:custom-filter position="PRE_AUTH_FILTER" ref="metadataFilter"/>
-        <security:custom-filter before="PRE_AUTH_FILTER" ref="samlEntryPoint"/>
+        <security:custom-filter before="PRE_AUTH_FILTER" ref="metadataFilter"/>
+        <security:custom-filter position="PRE_AUTH_FILTER" ref="samlEntryPoint"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlProcessingFilter"/>
         <security:custom-filter after="LOGOUT_FILTER" ref="samlLogoutFilter"/>
         <security:custom-filter before="LOGOUT_FILTER" ref="samlLogoutProcessingFilter"/>
@@ -78,7 +78,7 @@
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
         <property name="filterSuffix" value="/saml/login"/>
         <!-- OPTIONAL property: In case idpSelectionPath property is not set the user will be redirected to the default IDP -->
-        <property name="idpSelectionPath" value="WEB-INF/security/idpSelection.jsp"/>
+        <property name="idpSelectionPath" value="/WEB-INF/security/idpSelection.jsp"/>
         <property name="defaultProfileOptions">
             <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
                 <property name="includeScoping" value="false"/>

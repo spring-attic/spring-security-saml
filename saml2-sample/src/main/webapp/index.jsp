@@ -1,6 +1,13 @@
 <%@ page import="org.springframework.security.saml.SAMLCredential" %>
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>User authenticated</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
 
 <h1>User has been authenticated</h1>
 
@@ -38,18 +45,18 @@
     <tr>
         <td colspan="2"><b>Principal's Attributes</b></td>
     </tr>
-    
+
     <c:forEach var="attribute"
                items="${credential.attributes}">
-    <tr>
-        <td width="300"><c:out value="${attribute.friendlyName}"/></td>
-        <td>
-            <c:forEach var="attributeValue"
-                       items="${attribute.attributeValues}">
-                <c:out value="${attributeValue.value}"/>&nbsp;
-            </c:forEach>
-        </td>
-    </tr>
+        <tr>
+            <td width="300"><c:out value="${attribute.friendlyName}"/></td>
+            <td>
+                <c:forEach var="attributeValue"
+                           items="${attribute.attributeValues}">
+                    <c:out value="${attributeValue.value}"/>&nbsp;
+                </c:forEach>
+            </td>
+        </tr>
     </c:forEach>
 </table>
 </p>
@@ -136,11 +143,14 @@
 </table>
 </p>
 
-<p>    
-    <a href="<c:url value="/saml/logout"/>">Global Logout</a><br />
+<p>
+    <a href="<c:url value="/saml/logout"/>">Global Logout</a><br/>
     <a href="<c:url value="/saml/logout?local=true"/>">Local Logout</a>
 </p>
 
 <p>
     <a href="<c:url value="/saml/web/metadata"/>">Metadata information</a>
 </p>
+
+</body>
+</html>

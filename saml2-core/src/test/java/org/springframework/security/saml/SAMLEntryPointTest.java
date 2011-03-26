@@ -128,9 +128,9 @@ public class SAMLEntryPointTest {
         entryPoint.setIdpSelectionPath("/selectIDP");
         expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
-        expect(request.getHeader("Accept")).andReturn(
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        expect(request.getHeader("Accept")).andReturn("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
+        response.setContentType("text/html");
         dispatcher.include(request, response);
 
         replay(dispatcher);

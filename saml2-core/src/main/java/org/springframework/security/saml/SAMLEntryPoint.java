@@ -136,8 +136,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
             if (!ecpRequest && idpSelectionPath != null && !isLoginRequest(request)) {
 
-                logger.debug("Initializing IDP selection");
-                request.getRequestDispatcher(idpSelectionPath).include(request, response);
+                initializeSelection(request, response);
 
             } else {
 
@@ -168,6 +167,23 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         } catch (MessageEncodingException e1) {
             throw new ServletException("Error encoding outgoing message", e1);
         }
+
+    }
+
+    /**
+     * Method is expected to initialize IDP selection in the client's browser by including appropriate source. By default
+     * page located at idpSelectionPath is included.
+     *
+     * @param request request
+     * @param response response
+     * @throws ServletException error
+     * @throws IOException io error
+     */
+    protected void initializeSelection(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        logger.debug("Initializing IDP selection");
+        response.setContentType("text/html");
+        request.getRequestDispatcher(idpSelectionPath).include(request, response);
 
     }
 

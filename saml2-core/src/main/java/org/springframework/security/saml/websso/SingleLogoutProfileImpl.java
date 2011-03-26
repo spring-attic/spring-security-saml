@@ -66,7 +66,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
 
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
-        LogoutRequest logoutRequest = getLogoutRequest(credential, logoutServiceIDP);
+        LogoutRequest logoutRequest = getLogoutRequest(context, credential, logoutServiceIDP);
 
         context.setCommunicationProfileId(logoutServiceIDP.getBinding());
         context.setOutboundMessage(logoutRequest);
@@ -85,17 +85,18 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     /**
      * Returns logout request message ready to be sent to the IDP.
      *
+     * @param context message context
      * @param credential     information about assertions used to log current user in
      * @param bindingService service used to deliver the request
      * @return logoutRequest to be sent to IDP
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retrieving metadata
      */
-    protected LogoutRequest getLogoutRequest(SAMLCredential credential, Endpoint bindingService) throws SAMLException, MetadataProviderException {
+    protected LogoutRequest getLogoutRequest(SAMLMessageContext context, SAMLCredential credential, Endpoint bindingService) throws SAMLException, MetadataProviderException {
 
         SAMLObjectBuilder<LogoutRequest> builder = (SAMLObjectBuilder<LogoutRequest>) builderFactory.getBuilder(LogoutRequest.DEFAULT_ELEMENT_NAME);
         LogoutRequest request = builder.buildObject();
-        buildCommonAttributes(request, bindingService);
+        buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
 
         // Add session indexes
         SAMLObjectBuilder<SessionIndex> sessionIndexBuilder = (SAMLObjectBuilder<SessionIndex>) builderFactory.getBuilder(SessionIndex.DEFAULT_ELEMENT_NAME);
@@ -255,7 +256,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         SingleLogoutService logoutService = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
 
         logoutResponse.setID(generateID());
-        logoutResponse.setIssuer(getIssuer());
+        logoutResponse.setIssuer(getIssuer(context.getLocalEntityId()));
         logoutResponse.setVersion(SAMLVersion.VERSION_20);
         logoutResponse.setIssueInstant(new DateTime());
         logoutResponse.setInResponseTo(context.getOutboundSAMLMessageId());

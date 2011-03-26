@@ -82,7 +82,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
 
         AssertionConsumerService assertionConsumerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
-        AuthnRequest authRequest = getAuthnRequest(options, assertionConsumerForBinding, bindingService);
+        AuthnRequest authRequest = getAuthnRequest(context, options, assertionConsumerForBinding, bindingService);
 
         // TODO optionally implement support for conditions, subject
 
@@ -103,6 +103,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * Returns AuthnRequest SAML message to be used to demand authentication from an IDP described using
      * idpEntityDescriptor, with an expected response to the assertionConsumer address.
      *
+     * @param context message context
      * @param options           preferences of message creation
      * @param assertionConsumer assertion consumer where the IDP should respond
      * @param bindingService    service used to deliver the request
@@ -110,7 +111,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @throws SAMLException             error creating the message
      * @throws MetadataProviderException error retreiving metadata
      */
-    protected AuthnRequest getAuthnRequest(WebSSOProfileOptions options,
+    protected AuthnRequest getAuthnRequest(SAMLMessageContext context, WebSSOProfileOptions options,
                                            AssertionConsumerService assertionConsumer,
                                            SingleSignOnService bindingService) throws SAMLException,
             MetadataProviderException {
@@ -120,7 +121,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         request.setIsPassive(options.getPassive());
         request.setForceAuthn(options.getForceAuthN());
 
-        buildCommonAttributes(request, bindingService);
+        buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
 
         buildScoping(request, bindingService, options);
         builNameIDPolicy(request, options);

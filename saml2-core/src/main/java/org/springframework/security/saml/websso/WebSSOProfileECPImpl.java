@@ -55,19 +55,19 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage)
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
-        SPSSODescriptor spDescriptor = getSPDescriptor(metadata.getHostedSPName());
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         AssertionConsumerService assertionConsumer = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, SAMLConstants.SAML2_PAOS_BINDING_URI);
 
         // The last parameter refers to the IdP that should receive the message. However,
         // in ECP, we don't know in advance which IdP will be contacted.
-        AuthnRequest authRequest = getAuthnRequest(options, assertionConsumer, null);
+        AuthnRequest authRequest = getAuthnRequest(context, options, assertionConsumer, null);
 
         context.setCommunicationProfileId(SAMLConstants.SAML2_PAOS_BINDING_URI);
         context.setOutboundMessage(getEnvelope());
         context.setOutboundSAMLMessage(authRequest);
 
         SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
-        SOAPHelper.addHeaderBlock(context, getECPRequest(options));
+        SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
 
         if (context.getRelayState() != null) {
             SOAPHelper.addHeaderBlock(context, getRelayState(context.getRelayState()));
@@ -92,7 +92,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
     }
 
-    protected Request getECPRequest(WebSSOProfileOptions options) {
+    protected Request getECPRequest(SAMLMessageContext context, WebSSOProfileOptions options) {
 
         SAMLObjectBuilder<Request> ecpRequestBuilder = (SAMLObjectBuilder<Request>) builderFactory.getBuilder(Request.DEFAULT_ELEMENT_NAME);
         Request ecpRequest = ecpRequestBuilder.buildObject();
@@ -102,7 +102,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
         ecpRequest.setPassive(options.getPassive());
         ecpRequest.setProviderName(options.getProviderName());
-        ecpRequest.setIssuer(getIssuer());
+        ecpRequest.setIssuer(getIssuer(context.getLocalEntityId()));
 
         Set<String> idpEntityNames = options.getAllowedIDPs();
         if (options.isIncludeScoping() && idpEntityNames != null) {

@@ -196,13 +196,14 @@ public abstract class AbstractProfileBase implements InitializingBean {
     /**
      * Fills the request with version, issue instants and destination data.
      *
+     * @param localEntityId entityId of the local party acting as message issuer
      * @param request request to be filled
      * @param service service to use as destination for the request
      */
-    protected void buildCommonAttributes(RequestAbstractType request, Endpoint service) {
+    protected void buildCommonAttributes(String localEntityId, RequestAbstractType request, Endpoint service) {
 
         request.setID(generateID());
-        request.setIssuer(getIssuer());
+        request.setIssuer(getIssuer(localEntityId));
         request.setVersion(SAMLVersion.VERSION_20);
         request.setIssueInstant(new DateTime());
 
@@ -213,10 +214,10 @@ public abstract class AbstractProfileBase implements InitializingBean {
 
     }
 
-    protected Issuer getIssuer() {
+    protected Issuer getIssuer(String localEntityId) {
         SAMLObjectBuilder<Issuer> issuerBuilder = (SAMLObjectBuilder<Issuer>) builderFactory.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
         Issuer issuer = issuerBuilder.buildObject();
-        issuer.setValue(metadata.getHostedSPName());
+        issuer.setValue(localEntityId);
         return issuer;
     }
 

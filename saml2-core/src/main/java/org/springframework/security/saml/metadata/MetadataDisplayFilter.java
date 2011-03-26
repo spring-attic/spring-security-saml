@@ -25,6 +25,10 @@ import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.util.SAMLUtil;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 import org.w3c.dom.Element;
 
@@ -51,14 +55,17 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     /**
      * Class storing all SAML metadata documents
      */
-    @Autowired
-    private MetadataManager manager;
+    protected MetadataManager manager;
 
     /**
      * Enables creation of metadata corresponding to the current deployment
      */
-    @Autowired
-    private MetadataGenerator generator;
+    protected MetadataGenerator generator;
+
+    /**
+     * Provider for context based on URL
+     */
+    protected SAMLContextProvider contextProvider;
 
     /**
      * The URL processed by this filter must end with this suffix in order to be processed.
@@ -78,11 +85,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
-        if (filterSuffix != null) {
-            return (request.getRequestURI().endsWith(filterSuffix));
-        } else {
-            return (request.getRequestURI().endsWith(DEFAULT_FILTER_URL));
+        String filterKey = filterSuffix;
+        if (filterSuffix == null) {
+            filterKey = DEFAULT_FILTER_URL;
         }
+        return SAMLUtil.processFilter(filterKey, request);
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -99,20 +106,25 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         if (!processFilter(request)) {
             chain.doFilter(request, response);
         } else {
-            displayMetadata(response.getWriter());
+            try {
+                SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+                String entityId = context.getLocalEntityId();
+                displayMetadata(entityId, response.getWriter());
+            } catch (MetadataProviderException e) {
+                throw new ServletException("Error initializing metadata", e);
+            }
         }
     }
 
     /**
      * Method writes metadata document into given writer object.
      *
+     * @param spEntityName id of entity to display metadata for
      * @param writer output for metadata
-     *
      * @throws ServletException error retrieving or writing the metadata
      */
-    protected void displayMetadata(PrintWriter writer) throws ServletException {
+    protected void displayMetadata(String spEntityName, PrintWriter writer) throws ServletException {
         try {
-            String spEntityName = manager.getHostedSPName();
             EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName);
             if (descriptor == null) {
                 throw new ServletException("Metadata entity with ID " + manager.getHostedSPName() + " wasn't found");
@@ -172,6 +184,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
                         manager.addMetadataProvider(metadataProvider);
                         manager.setHostedSPName(descriptor.getEntityID());
+                        manager.refreshMetadata();
 
                     } catch (MetadataProviderException e) {
                         logger.error("Error generating system metadata", e);
@@ -198,12 +211,32 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         this.filterSuffix = filterSuffix;
     }
 
+    @Autowired
     public void setManager(MetadataManager manager) {
         this.manager = manager;
     }
 
+    @Autowired
     public void setGenerator(MetadataGenerator generator) {
         this.generator = generator;
     }
-    
+
+    @Autowired
+    public void setContextProvider(SAMLContextProvider contextProvider) {
+        this.contextProvider = contextProvider;
+    }
+
+    /**
+     * Verifies that required entities were autowired or set.
+     *
+     * @throws ServletException
+     */
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        Assert.notNull(generator, "Metadata generator must be set");
+        Assert.notNull(manager, "MetadataManager must be set");
+        Assert.notNull(contextProvider, "Context provider must be set");
+    }
+
 }

@@ -77,7 +77,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             ArtifactResolutionService artifactResolutionService = SAMLUtil.getArtifactResolutionService(idpssoDescriptor, endpointIndex);
 
             // Create SAML message for artifact resolution
-            ArtifactResolve artifactResolve = createArtifactResolve(artifactId, artifactResolutionService);
+            ArtifactResolve artifactResolve = createArtifactResolve(context, artifactId, artifactResolutionService);
 
             context.setCommunicationProfileId(artifactResolutionService.getBinding());
             context.setOutboundMessage(artifactResolve);
@@ -145,7 +145,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
      */
     protected abstract void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException;
 
-    protected ArtifactResolve createArtifactResolve(String artifactId, Endpoint endpoint) {
+    protected ArtifactResolve createArtifactResolve(SAMLMessageContext context, String artifactId, Endpoint endpoint) {
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
 
@@ -158,7 +158,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
         ArtifactResolve artifactResolve = artifactResolveBuilder.buildObject();
         artifactResolve.setArtifact(artifact);
 
-        buildCommonAttributes(artifactResolve, endpoint);
+        buildCommonAttributes(context.getLocalEntityId(), artifactResolve, endpoint);
 
         return artifactResolve;
 

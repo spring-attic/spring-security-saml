@@ -67,8 +67,13 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     private Set<String> trustedKeys;
 
-    private boolean requireLogoutRequestSigned;
+    /**
+     * SAML specification mandates that incoming LogoutRequests must be authenticated.
+     */
+    private boolean requireLogoutRequestSigned = true;
+
     private boolean requireLogoutResponseSigned;
+
     private boolean requireArtifactResolveSigned;
 
     /**

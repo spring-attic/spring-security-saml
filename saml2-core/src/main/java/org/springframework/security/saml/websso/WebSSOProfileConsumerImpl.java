@@ -324,9 +324,9 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
-        if (signature != null && wantSigned) { // TODO verify this
+        if (signature != null) {
             verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
-        } else if (wantSigned && !context.isInboundSAMLMessageAuthenticated()) {
+        } else if (wantSigned) {
             log.debug("Assertion must be signed, but is not");
             throw new SAMLException("SAML Assertion is invalid");
         }

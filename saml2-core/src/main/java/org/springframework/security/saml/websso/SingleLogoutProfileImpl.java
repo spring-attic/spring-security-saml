@@ -85,7 +85,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
     /**
      * Returns logout request message ready to be sent to the IDP.
      *
-     * @param context message context
+     * @param context        message context
      * @param credential     information about assertions used to log current user in
      * @param bindingService service used to deliver the request
      * @return logoutRequest to be sent to IDP
@@ -194,11 +194,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return false;
         }
 
-        // TODO
-        if (logoutRequest.getNotOnOrAfter() != null) {
-
-        }
-
         // Find index for which the logout is requested
         boolean indexFound = false;
         if (logoutRequest.getSessionIndexes() != null && logoutRequest.getSessionIndexes().size() > 0) {
@@ -218,9 +213,16 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Fail if sessionIndex is not found in any assertion
         if (!indexFound) {
+
+            // Check logout request still valid and store request
+            if (logoutRequest.getNotOnOrAfter() != null) {
+                // TODO store request for assertions possibly arriving later
+            }
+
             Status status = getStatus(StatusCode.REQUESTER_URI, "The requested SessionIndex was not found");
             sendLogoutResponse(status, context);
             return false;
+
         }
 
         try {

@@ -915,7 +915,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     @Autowired
     public void setKeyManager(KeyManager keyManager) {
-        this.keyManager = keyManager; // TODO check was set
+        this.keyManager = keyManager;
     }
 
 }

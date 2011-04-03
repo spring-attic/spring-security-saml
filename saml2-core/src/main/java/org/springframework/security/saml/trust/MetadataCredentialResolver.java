@@ -83,9 +83,9 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
 
             if (usage.equals(UsageType.UNSPECIFIED)) {
                 Collection<Credential> credentials = new LinkedList<Credential>();
-                if (extendedMetadata.getSingingKey() != null) {
-                    log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSingingKey(), entityID);
-                    credentials.add(keyManager.getCredential(extendedMetadata.getSingingKey()));
+                if (extendedMetadata.getSigningKey() != null) {
+                    log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSigningKey(), entityID);
+                    credentials.add(keyManager.getCredential(extendedMetadata.getSigningKey()));
                 }
                 if (extendedMetadata.getEncryptionKey() != null) {
                     log.debug("Using customized encryption key {} from extended metadata for entityID {}", extendedMetadata.getEncryptionKey(), entityID);
@@ -95,9 +95,9 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
                     return credentials;
                 }
             } else if (usage.equals(UsageType.SIGNING)) {
-                if (extendedMetadata.getSingingKey() != null) {
-                    log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSingingKey(), entityID);
-                    return Collections.singleton(keyManager.getCredential(extendedMetadata.getSingingKey()));
+                if (extendedMetadata.getSigningKey() != null) {
+                    log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSigningKey(), entityID);
+                    return Collections.singleton(keyManager.getCredential(extendedMetadata.getSigningKey()));
                 }
             } else if (usage.equals(UsageType.ENCRYPTION)) {
                 if (extendedMetadata.getEncryptionKey() != null) {

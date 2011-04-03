@@ -176,7 +176,7 @@ public class MetadataController {
         metadata.setRequireLogoutRequestSigned(extendedMetadata.isRequireLogoutRequestSigned());
         metadata.setRequireLogoutResponseSigned(extendedMetadata.isRequireLogoutResponseSigned());
         metadata.setEncryptionKey(extendedMetadata.getEncryptionKey());
-        metadata.setSigningKey(extendedMetadata.getSingingKey());
+        metadata.setSigningKey(extendedMetadata.getSigningKey());
         // TODO TLS key
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
@@ -263,7 +263,7 @@ public class MetadataController {
                 "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
                 "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n" +
-                "           <property name=\"singingKey\" value=\"").append(metadata.getSingingKey()).append("\"/>\n" +
+                "           <property name=\"signingKey\" value=\"").append(metadata.getSigningKey()).append("\"/>\n" +
                 "           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n" +

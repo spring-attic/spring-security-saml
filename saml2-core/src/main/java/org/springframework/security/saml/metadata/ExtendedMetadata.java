@@ -47,7 +47,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * Key (stored in the local keystore) used for signing/verifying signature of messages sent/coming from this
      * entity. For local entities private key must be available, for remote entities only public key is required.
      */
-    private String singingKey;
+    private String signingKey;
 
     /**
      * Key (stored in the local keystore) used for encryption/decryption of messages coming/sent from this entity. For local entities
@@ -133,8 +133,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      *
      * @return signing key, default if null
      */
-    public String getSingingKey() {
-        return singingKey;
+    public String getSigningKey() {
+        return signingKey;
     }
 
     /**
@@ -143,10 +143,10 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * <p/>
      * Value can be used to override credential contained in the remote metadata.
      *
-     * @param singingKey key for creation/verification of signatures
+     * @param signingKey key for creation/verification of signatures
      */
-    public void setSingingKey(String singingKey) {
-        this.singingKey = singingKey;
+    public void setSigningKey(String signingKey) {
+        this.signingKey = signingKey;
     }
 
     /**

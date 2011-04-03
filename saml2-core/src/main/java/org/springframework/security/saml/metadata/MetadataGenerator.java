@@ -123,7 +123,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public void generateExtendedMetadata(ExtendedMetadata metadata) {
         metadata.setEncryptionKey(encryptionKey);
-        metadata.setSingingKey(signingKey);
+        metadata.setSigningKey(signingKey);
         metadata.setAlias(entityAlias);
         metadata.setLocal(true);
     }

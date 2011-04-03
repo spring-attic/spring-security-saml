@@ -232,8 +232,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         samlContext.setLocalEntityRoleMetadata(roleDescriptor);
         samlContext.setLocalExtendedMetadata(extendedMetadata);
 
-        if (extendedMetadata.getSingingKey() != null) {
-            samlContext.setLocalSigningCredential(keyManager.getCredential(extendedMetadata.getSingingKey()));
+        if (extendedMetadata.getSigningKey() != null) {
+            samlContext.setLocalSigningCredential(keyManager.getCredential(extendedMetadata.getSigningKey()));
         } else {
             samlContext.setLocalSigningCredential(keyManager.getDefaultCredential());
         }

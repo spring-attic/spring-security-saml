@@ -311,37 +311,44 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             }
 
             // Verify extended metadata
-            ExtendedMetadata extendedMetadata = getExtendedMetadata(key);
+            ExtendedMetadata extendedMetadata = getExtendedMetadata(key, provider);
 
-            if (extendedMetadata.isLocal()) {
+            if (extendedMetadata != null) {
 
-                String alias = extendedMetadata.getAlias();
-                if (alias != null) {
+                if (extendedMetadata.isLocal()) {
 
-                    // Verify alias is valid
-                    SAMLUtil.verifyAlias(alias, key);
+                    String alias = extendedMetadata.getAlias();
+                    if (alias != null) {
 
-                    // Verify alias is unique
-                    if (aliasSet.contains(alias)) {
+                        // Verify alias is valid
+                        SAMLUtil.verifyAlias(alias, key);
 
-                        log.warn("Provider {} contains alias {} which is not unique and will be ignored", provider, alias);
+                        // Verify alias is unique
+                        if (aliasSet.contains(alias)) {
+
+                            log.warn("Provider {} contains alias {} which is not unique and will be ignored", provider, alias);
+
+                        } else {
+
+                            aliasSet.add(alias);
+                            log.debug("Local entity {} available under alias {}", key, alias);
+
+                        }
 
                     } else {
 
-                        aliasSet.add(alias);
-                        log.debug("Local entity {} available under alias {}", key, alias);
+                        log.debug("Local entity {} doesn't have an alias", key);
 
                     }
 
                 } else {
 
-                    log.debug("Local entity {} doesn't have an alias", key);
+                    log.debug("Remote entity {} available", key);
 
                 }
-
             } else {
 
-                log.debug("Remote entity {} available", key);
+                log.debug("No extended metadata available for entity {}", key);
 
             }
 
@@ -678,12 +685,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             lock.readLock().lock();
 
             for (MetadataProvider provider : getProviders()) {
-                if (provider instanceof ExtendedMetadataProvider) {
-                    ExtendedMetadataProvider extendedProvider = (ExtendedMetadataProvider) provider;
-                    ExtendedMetadata extendedMetadata = extendedProvider.getExtendedMetadata(entityID);
-                    if (extendedMetadata != null) {
-                        return extendedMetadata.clone();
-                    }
+                ExtendedMetadata extendedMetadata = getExtendedMetadata(entityID, provider);
+                if (extendedMetadata != null) {
+                    return extendedMetadata;
                 }
             }
 
@@ -695,6 +699,17 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         }
 
+    }
+
+    private ExtendedMetadata getExtendedMetadata(String entityID, MetadataProvider provider) throws MetadataProviderException {
+        if (provider instanceof ExtendedMetadataProvider) {
+            ExtendedMetadataProvider extendedProvider = (ExtendedMetadataProvider) provider;
+            ExtendedMetadata extendedMetadata = extendedProvider.getExtendedMetadata(entityID);
+            if (extendedMetadata != null) {
+                return extendedMetadata.clone();
+            }
+        }
+        return null;
     }
 
     /**

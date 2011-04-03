@@ -88,8 +88,7 @@
             <list>
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
-                              init-method="initialize">
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                             <constructor-arg>
                                 <value type="java.io.File">classpath:security/idp.xml</value>
                             </constructor-arg>
@@ -101,7 +100,7 @@
                         </bean>
                     </constructor-arg>
                 </bean>
-                <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider" init-method="initialize">
+                <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
                     <!-- URL containing the metadata -->
                     <constructor-arg>
                         <value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>

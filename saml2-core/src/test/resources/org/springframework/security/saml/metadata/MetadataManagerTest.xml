@@ -27,9 +27,7 @@
           depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
-                      init-method="initialize">
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                     <constructor-arg index="0">
                         <value type="java.io.File">classpath:testIDP.xml</value>
                     </constructor-arg>
@@ -38,8 +36,7 @@
 
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
-                              init-method="initialize">
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                             <constructor-arg index="0">
                                 <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
                             </constructor-arg>
@@ -75,8 +72,7 @@
                 <!-- Default extended -->
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
-                              init-method="initialize">
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                             <constructor-arg index="0">
                                 <value type="java.io.File">classpath:testSP.xml</value>
                             </constructor-arg>

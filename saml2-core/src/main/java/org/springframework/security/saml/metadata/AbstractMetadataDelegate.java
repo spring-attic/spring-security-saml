@@ -36,7 +36,7 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
     /**
      * Wrapped entity the calls are delegated to.
      */
-    private AbstractMetadataProvider delegate;
+    private MetadataProvider delegate;
 
     /**
      * Observers, loaded from the provider.
@@ -49,7 +49,7 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
      *
      * @param delegate delegate to use, can't be null
      */
-    public AbstractMetadataDelegate(AbstractMetadataProvider delegate) {
+    public AbstractMetadataDelegate(MetadataProvider delegate) {
         Assert.notNull(delegate, "Delegate can't be null");
         this.delegate = delegate;
         if (delegate instanceof ObservableMetadataProvider) {
@@ -102,8 +102,28 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
     /**
      * @return original object the calls are delegated to
      */
-    public AbstractMetadataProvider getDelegate() {
+    public MetadataProvider getDelegate() {
         return delegate;
+    }
+
+    /**
+     * Equality is based on the object this class delegates to.
+     * @param obj object
+     * @return true when obj equals delegate, in case obj is a wrapper itself only its delegate is compared
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ExtendedMetadataDelegate) {
+            ExtendedMetadataDelegate del = (ExtendedMetadataDelegate) obj;
+            return delegate.equals(del.getDelegate());
+        } else {
+            return delegate.equals(obj);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
     }
 
 }

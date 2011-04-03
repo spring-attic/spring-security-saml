@@ -68,7 +68,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     // Timer used to refresh the metadata upon changes
     private Timer timer;
 
-    // Internal of metadata refresh checking
+    // Internal of metadata refresh checking in ms
     private long refreshCheckInterval = 10000l;
 
     // Flag indicating whether metadata needs to be reloaded
@@ -78,7 +78,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     protected KeyManager keyManager;
 
     // All providers which were added, not all may be active
-    private List<MetadataProvider> availableProviders;
+    private List<ExtendedMetadataDelegate> availableProviders;
 
     /**
      * Set of IDP names available in the system.
@@ -112,7 +112,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         this.idpName = new HashSet<String>();
         this.spName = new HashSet<String>();
         this.defaultExtendedMetadata = new ExtendedMetadata();
-        availableProviders = new LinkedList<MetadataProvider>();
+        availableProviders = new LinkedList<ExtendedMetadataDelegate>();
 
         setProviders(providers);
         getObservers().add(new MetadataProviderObserver());
@@ -159,14 +159,19 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             lock.writeLock().lock();
 
             availableProviders.clear();
-            availableProviders.addAll(newProviders);
-            setRefreshRequired(true);
+            if (newProviders != null) {
+                for (MetadataProvider provider : newProviders) {
+                    addMetadataProvider(provider);
+                }
+            }
 
         } finally {
 
             lock.writeLock().unlock();
 
         }
+
+        setRefreshRequired(true);
 
     }
 
@@ -202,12 +207,14 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 spName = new HashSet<String>();
                 aliasSet = new HashSet<String>();
 
-                for (MetadataProvider provider : availableProviders) {
+                for (ExtendedMetadataDelegate provider : availableProviders) {
 
                     try {
 
                         log.debug("Refreshing metadata provider {}", provider.toString());
+                        initializeProviderFilters(provider);
                         initializeProvider(provider);
+                        initializeProviderData(provider);
 
                         // Make provider available for queries
                         super.addMetadataProvider(provider);
@@ -257,34 +264,75 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         try {
 
             lock.writeLock().lock();
-            availableProviders.add(newProvider);
-            setRefreshRequired(true);
+
+            ExtendedMetadataDelegate wrappedProvider = getWrappedProvider(newProvider);
+            availableProviders.add(wrappedProvider);
 
         } finally {
             lock.writeLock().unlock();
         }
 
+        setRefreshRequired(true);
+
+    }
+
+
+    private ExtendedMetadataDelegate getWrappedProvider(MetadataProvider provider) {
+        if (!(provider instanceof ExtendedMetadataDelegate)) {
+            log.debug("Wrapping metadata provider {} with extendedMetadataDelegate", provider);
+            return new ExtendedMetadataDelegate(provider);
+        } else {
+            return (ExtendedMetadataDelegate) provider;
+        }
     }
 
     @Override
     public void removeMetadataProvider(MetadataProvider provider) {
 
+        if (provider == null) {
+            return;
+        }
+
         try {
 
             lock.writeLock().lock();
-            availableProviders.remove(provider);
-            super.removeMetadataProvider(provider);
-            setRefreshRequired(true);
+
+            ExtendedMetadataDelegate wrappedProvider = getWrappedProvider(provider);
+            availableProviders.remove(wrappedProvider);
+            super.removeMetadataProvider(wrappedProvider);
 
         } finally {
             lock.writeLock().unlock();
         }
 
+        setRefreshRequired(true);
+
     }
 
-    private void initializeProvider(MetadataProvider provider) throws MetadataProviderException {
+    /**
+     * Method is expected to make sure that the provider is properly initialized. Also all loaded filters should get
+     * applied.
+     *
+     * @param provider provider to initialize
+     * @throws MetadataProviderException error
+     */
+    protected void initializeProvider(ExtendedMetadataDelegate provider) throws MetadataProviderException {
 
-        initializeProviderFilters(provider);
+        // Initialize provider and perform signature verification
+        log.debug("Initializing extendedMetadataDelegate {}", provider);
+        provider.initialize();
+
+    }
+
+    /**
+     * Method populates local storage of IDP and SP names and verifies any name conflicts which might arise.
+     *
+     * @param provider provider to initialize
+     * @throws MetadataProviderException error
+     */
+    protected void initializeProviderData(ExtendedMetadataDelegate provider) throws MetadataProviderException {
+
+        log.debug("Initializing provider data {}", provider);
 
         List<String> stringSet = parseProvider(provider);
 
@@ -368,40 +416,40 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * @param provider provider to check
      * @throws MetadataProviderException in case initialization fails
      */
-    protected void initializeProviderFilters(MetadataProvider provider) throws MetadataProviderException {
+    protected void initializeProviderFilters(ExtendedMetadataDelegate provider) throws MetadataProviderException {
 
-        AbstractMetadataProvider metadataProvider;
-
-        if (provider instanceof ExtendedMetadataDelegate) {
-            metadataProvider = ((ExtendedMetadataDelegate) provider).getDelegate();
-        } else if (provider instanceof AbstractMetadataProvider) {
-            metadataProvider = (AbstractMetadataProvider) provider;
-        } else {
-            throw new MetadataProviderException("Metadata provider doesn't extend AbstractMetadataProvider class");
-        }
-
-        if (metadataProvider.isInitialized()) {
+        if (provider.isTrustFiltersInitialized()) {
 
             log.debug("Metadata provider was already initialized, signature validation will be skipped");
-            // TODO check our filter is included, warn/fail otherwise
 
         } else {
 
-            boolean requireSignature = false;
+            boolean requireSignature = provider.isMetadataRequireSignature();
             SignatureTrustEngine trustEngine = getTrustEngine(provider);
+            SignatureValidationFilter filter = new SignatureValidationFilter(trustEngine);
+            filter.setRequireSignature(requireSignature);
 
-            if (provider instanceof ExtendedMetadataDelegate) {
+            log.debug("Created new trust manager for metadata provider {}", provider);
 
-                ExtendedMetadataDelegate metadata = (ExtendedMetadataDelegate) provider;
-                requireSignature = metadata.isMetadataRequireSignature();
-
+            // Combine any existing filters with the signature verification
+            MetadataFilter currentFilter = provider.getMetadataFilter();
+            if (currentFilter != null) {
+                if (currentFilter instanceof MetadataFilterChain) {
+                    log.debug("Adding trust filter into existing chain");
+                    MetadataFilterChain chain = (MetadataFilterChain) currentFilter;
+                    chain.getFilters().add(filter);
+                } else {
+                    log.debug("Combining filter with the existing in a new chain");
+                    MetadataFilterChain chain = new MetadataFilterChain();
+                    chain.getFilters().add(currentFilter);
+                    chain.getFilters().add(filter);
+                }
+            } else {
+                log.debug("Adding signature filter");
+                provider.setMetadataFilter(filter);
             }
 
-            SignatureValidationFilter filter = new SignatureValidationFilter(trustEngine);
-            filter.setRequireSignature(requireSignature);        // TODO combine existing filters
-            provider.setMetadataFilter(filter);
-
-            metadataProvider.initialize();
+            provider.setTrustFiltersInitialized(true);
 
         }
 

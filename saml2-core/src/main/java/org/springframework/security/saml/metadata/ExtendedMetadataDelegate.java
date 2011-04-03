@@ -16,7 +16,10 @@ package org.springframework.security.saml.metadata;
 
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
+import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +29,9 @@ import java.util.Set;
  * extended metadata.
  */
 public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implements ExtendedMetadataProvider {
+
+    // Class logger
+    protected final Logger log = LoggerFactory.getLogger(ExtendedMetadataDelegate.class);
 
     /**
      * When true metadata will only be accepted if correctly signed.
@@ -62,11 +68,17 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
     private Map<String, ExtendedMetadata> extendedMetadataMap;
 
     /**
+     * Flag indicates that delegated metadata already contains all information required to perform signature
+     * and trust verification of the included metadata.
+     */
+    private boolean trustFiltersInitialized;
+
+    /**
      * Uses provider for normal entity data, for each entity available in the delegate returns given defaults.
      *
      * @param delegate delegate with available entities
      */
-    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate) {
+    public ExtendedMetadataDelegate(MetadataProvider delegate) {
         this(delegate, null, null);
     }
 
@@ -76,7 +88,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param delegate        delegate with available entities
      * @param defaultMetadata default extended metadata, can be null
      */
-    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, ExtendedMetadata defaultMetadata) {
+    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata) {
         this(delegate, defaultMetadata, null);
     }
 
@@ -86,7 +98,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param delegate            delegate with available entities
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, Map<String, ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(MetadataProvider delegate, Map<String, ExtendedMetadata> extendedMetadataMap) {
         this(delegate, null, extendedMetadataMap);
     }
 
@@ -98,7 +110,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param defaultMetadata     default extended metadata, can be null
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, ExtendedMetadata defaultMetadata, Map<String, ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata, Map<String, ExtendedMetadata> extendedMetadataMap) {
         super(delegate);
         if (defaultMetadata == null) {
             this.defaultMetadata = new ExtendedMetadata();
@@ -141,6 +153,21 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
             return extendedMetadata;
         }
 
+    }
+
+    /**
+     * Method performs initialization of the provider it delegates to.
+     *
+     * @throws MetadataProviderException in case initialization fails
+     */
+    public void initialize() throws MetadataProviderException {
+        if (getDelegate() instanceof AbstractMetadataProvider) {
+            log.debug("Initializing delegate");
+            AbstractMetadataProvider provider = (AbstractMetadataProvider) getDelegate();
+            provider.initialize();
+        } else {
+            log.debug("Cannot initialize delegate, doesn't extend AbstractMetadataProvider");
+        }
     }
 
     /**
@@ -209,6 +236,14 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      */
     public void setForceMetadataRevocationCheck(boolean forceMetadataRevocationCheck) {
         this.forceMetadataRevocationCheck = forceMetadataRevocationCheck;
+    }
+
+    protected boolean isTrustFiltersInitialized() {
+        return trustFiltersInitialized;
+    }
+
+    protected void setTrustFiltersInitialized(boolean trustFiltersInitialized) {
+        this.trustFiltersInitialized = trustFiltersInitialized;
     }
 
 }

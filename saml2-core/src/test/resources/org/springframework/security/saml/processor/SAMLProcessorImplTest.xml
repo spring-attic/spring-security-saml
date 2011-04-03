@@ -59,13 +59,13 @@
     <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg index="0">
             <list>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                     <constructor-arg index="0">
                         <value type="java.io.File">classpath:testIDP.xml</value>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider" init-method="initialize">
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
                     <constructor-arg index="0">
                         <value type="java.io.File">classpath:testSP.xml</value>
                     </constructor-arg>

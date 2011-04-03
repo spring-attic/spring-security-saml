@@ -20,7 +20,13 @@ package org.springframework.security.saml;
  * @author Vladimir Schaefer
  */
 public class SAMLConstants {
-    
+
+    /**
+     * Constant identifying special version of the KeyInfoGenerator used to include credentials in generated
+     * metadata.
+     */
+    public static final String SAML_METADATA_KEY_INFO_GENERATOR = "MetadataKeyInfoGenerator";
+
     public static final String AUTH_N_REQUEST = "AuthNRequest";
     public static final String AUTH_N_RESPONSE = "AuthNResponse";
     public static final String LOGOUT_REQUEST = "LogoutRequest";

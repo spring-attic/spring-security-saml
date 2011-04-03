@@ -10,28 +10,16 @@
     <!-- Initialization of OpenSAML library-->
     <bean class="org.springframework.security.saml.SAMLBootstrap"/>
 
-    <bean id="keyStore" class="org.springframework.security.saml.key.JKSKeyManager">
-        <constructor-arg index="0" value="classpath:org/springframework/security/saml/key/keystore.jks"/>
-        <constructor-arg index="1" value="nalle123"/>
-    </bean>
-
-    <!-- Set keys which should be available to the system in the map, one of these keys must be also
-         specified in the webSSOProfile later -->
-    <bean id="keyResolver" class="org.opensaml.xml.security.credential.KeyStoreCredentialResolver">
-        <constructor-arg index="0">
-            <bean factory-bean="keyStore" factory-method="getKeyStore"/>
-        </constructor-arg>
-        <constructor-arg index="1">
+    <!-- Central storage of cryptographic keys -->
+    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+        <constructor-arg type="java.lang.String" value="nalle123"/>
+        <constructor-arg>
             <map>
                 <entry key="apollo" value="nalle123"/>
             </map>
         </constructor-arg>
-    </bean>
-
-    <!-- Central storage of cryptohraphic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.key.KeyManager">
-        <constructor-arg ref="keyResolver"/>
-        <constructor-arg value="apollo"/>
+        <constructor-arg type="java.lang.String" value="apollo"/>
     </bean>
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->

@@ -15,6 +15,7 @@
 package org.springframework.security.saml.metadata;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Class contains additional information describing a SAML entity. Metadata can be used both for local entities
@@ -25,31 +26,77 @@ import java.io.Serializable;
  */
 public class ExtendedMetadata implements Serializable, Cloneable {
 
-    private boolean isLocal = false;
+    /**
+     * Setting of the value determines whether the entity is deployed locally (hosted on the current installation) or
+     * whether it's an entity deployed elsewhere.
+     */
+    private boolean local = false;
+
+    /**
+     * Local alias of the entity used for construction of well-known metadata address and determining target
+     * entity from incoming requests.
+     */
     private String alias;
+
+    /**
+     * Profile used for trust verification, MetaIOP by default. Only relevant for local entities.
+     */
+    private String securityProfile;
+
+    /**
+     * Key (stored in the local keystore) used for signing/verifying signature of messages sent/coming from this
+     * entity. For local entities private key must be available, for remote entities only public key is required.
+     */
     private String singingKey;
+
+    /**
+     * Key (stored in the local keystore) used for encryption/decryption of messages coming/sent from this entity. For local entities
+     * private key must be available, for remote entities only public key is required.
+     */
     private String encryptionKey;
+
+    /**
+     * Key used for verification of SSL/TLS connections. For local entities key is included in the generated metadata when specified.
+     * For remote entities key is used to for server authentication of SSL/TLS when specified and when MetaIOP security profile is used.
+     */
+    private String tlsKey;
+
+    /**
+     * Keys used as anchors for trust verification when PKIX mode is enabled for the local entity. In case no keys are specified
+     * all keys in the keyStore will be treated as trusted.
+     */
+    private Set<String> trustedKeys;
+
     private boolean requireLogoutRequestSigned;
     private boolean requireLogoutResponseSigned;
     private boolean requireArtifactResolveSigned;
 
     /**
-     * True in case entity is deployed locally.
+     * Security profile to use for this local entity - MetaIOP (default) or PKIX.
      *
-     * @return local flag
+     * @return profile
      */
-    public boolean isLocal() {
-        return isLocal;
+    public String getSecurityProfile() {
+        return securityProfile;
     }
 
     /**
-     * Flag indicates whether current entity is deployed locally or remotely. Local entities are the ones deployed as
-     * part of the SAML Extension. Usually there is exactly one local entity.
+     * Sets profile used for verification of signatures, encryption and TLS. The following profiles are available:
+     * <p/>
+     * MetaIOP profile (by default):
+     * <br/>
+     * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
+     * or revocation of certificates is done in this mode. All keys must be known in advance.
+     * <p/>
+     * PKIX profile:
+     * <br/>
+     * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
+     * configured as trusted anchors. Same set of trusted keys is used for server verification in TLS connections.
      *
-     * @param local local flag
+     * @param securityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
      */
-    public void setLocal(boolean local) {
-        isLocal = local;
+    public void setSecurityProfile(String securityProfile) {
+        this.securityProfile = securityProfile;
     }
 
     /**
@@ -171,6 +218,41 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     public void setRequireArtifactResolveSigned(boolean requireArtifactResolveSigned) {
         this.requireArtifactResolveSigned = requireArtifactResolveSigned;
+    }
+
+    /**
+     * Trusted keys usable for signature and server SSL/TLS verification for entities with PKIX verification enabled.
+     *
+     * @return trusted keys
+     */
+    public Set<String> getTrustedKeys() {
+        return trustedKeys;
+    }
+
+    /**
+     * Set of keys used as anchors for PKIX verification of messages coming from this entity. Only applicable for
+     * remote entities and used when local entity has the PKIX profile enabled.
+     * <p/>
+     * When no trusted keys are specified all keys in the keyManager are treated as trusted.
+     *
+     * @param trustedKeys keys
+     */
+    public void setTrustedKeys(Set<String> trustedKeys) {
+        this.trustedKeys = trustedKeys;
+    }
+
+    public boolean isLocal() {
+        return local;
+    }
+
+    /**
+     * When set to true entity is treated as locally deployed and will be able to accepte messages on endpoints determined
+     * by the selected alias.
+     *
+     * @param local true when entity is deployed locally
+     */
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 
     /**

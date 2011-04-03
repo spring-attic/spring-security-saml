@@ -14,9 +14,13 @@
  */
 package org.springframework.security.saml;
 
+import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
+import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -41,9 +45,23 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
             PaosBootstrap.bootstrap();
             ParserPool pool = beanFactory.getBean(ParserPool.class);
             new ParserPoolHolder(pool);
+            setMetadataKeyInfoGenerator();
         } catch (ConfigurationException e) {
             throw new BootstrapException("Error invoking OpenSAML bootrap", e);
         }
+    }
+
+    /**
+     * Method registers extension specific KeyInfoGenerator which emits .
+     *
+     * @see SAMLConstants#SAML_METADATA_KEY_INFO_GENERATOR
+     */
+    protected void setMetadataKeyInfoGenerator() {
+        NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
+        X509KeyInfoGeneratorFactory generator = new X509KeyInfoGeneratorFactory();
+        generator.setEmitEntityCertificate(true);
+        generator.setEmitEntityCertificateChain(true);
+        manager.registerFactory(SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR, generator);
     }
 
 }

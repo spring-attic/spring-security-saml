@@ -16,18 +16,23 @@ package org.springframework.security.saml.metadata;
 
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
-import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
+import org.opensaml.saml2.metadata.provider.*;
+import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.security.x509.*;
+import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.trust.AllowAllSignatureTrustEngine;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -37,6 +42,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * be determined as hosted.
  * <p/>
  * The class is synchronized using in internal ReentrantReadWriteLock.
+ * <p/>
+ * All metadata providers are kept in two groups - available providers - which contain all the ones users have registered,
+ * and active providers - all those which passed validation. List of active providers is updated during each refresh.
  *
  * @author Vladimir Schaefer
  */
@@ -52,7 +60,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     private final ReentrantReadWriteLock refreshLock = new ReentrantReadWriteLock();
 
     private String hostedSPName;
+
     private String defaultIDP;
+
     private ExtendedMetadata defaultExtendedMetadata;
 
     // Timer used to refresh the metadata upon changes
@@ -63,6 +73,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     // Flag indicating whether metadata needs to be reloaded
     private boolean refreshRequired = true;
+
+    // Storage for cryptographic data used to verify metadata signatures
+    protected KeyManager keyManager;
+
+    // All providers which were added, not all may be active
+    private List<MetadataProvider> availableProviders;
 
     /**
      * Set of IDP names available in the system.
@@ -96,6 +112,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         this.idpName = new HashSet<String>();
         this.spName = new HashSet<String>();
         this.defaultExtendedMetadata = new ExtendedMetadata();
+        availableProviders = new LinkedList<MetadataProvider>();
 
         setProviders(providers);
         getObservers().add(new MetadataProviderObserver());
@@ -109,6 +126,8 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * @throws MetadataProviderException error
      */
     public final void afterPropertiesSet() throws MetadataProviderException {
+
+        Assert.notNull(keyManager, "KeyManager must be set");
 
         // Create timer if needed
         if (refreshCheckInterval > 0) {
@@ -130,6 +149,25 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         if (timer != null) {
             timer.cancel();
         }
+    }
+
+    @Override
+    public void setProviders(List<MetadataProvider> newProviders) throws MetadataProviderException {
+
+        try {
+
+            lock.writeLock().lock();
+
+            availableProviders.clear();
+            availableProviders.addAll(newProviders);
+            setRefreshRequired(true);
+
+        } finally {
+
+            lock.writeLock().unlock();
+
+        }
+
     }
 
     /**
@@ -156,21 +194,28 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 // Let's load new metadata lists
                 lock.writeLock().lock();
 
+                // Remove existing providers, they'll get repopulated
+                super.setProviders(Collections.<MetadataProvider>emptyList());
+
                 // Reinitialize the sets
                 idpName = new HashSet<String>();
                 spName = new HashSet<String>();
                 aliasSet = new HashSet<String>();
 
-                for (MetadataProvider provider : getProviders()) {
+                for (MetadataProvider provider : availableProviders) {
 
                     try {
 
                         log.debug("Refreshing metadata provider {}", provider.toString());
                         initializeProvider(provider);
 
+                        // Make provider available for queries
+                        super.addMetadataProvider(provider);
+                        log.debug("Metadata provider was initialized {}", provider.toString());
+
                     } catch (MetadataProviderException e) {
 
-                        log.error("Initialization of metadata provider {} failed, provider will be ignored", provider, e);
+                        log.error("Initialization of metadata provider " + provider + " failed, provider will be ignored", e);
 
                     }
 
@@ -180,6 +225,10 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 setRefreshRequired(false);
 
                 log.debug("Reloading metadata was finished");
+
+            } catch (MetadataProviderException e) {
+
+                throw new RuntimeException("Error clearing existing providers");
 
             } finally {
 
@@ -196,7 +245,8 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     }
 
     /**
-     * Adds a new metadata provider to the managed list.
+     * Adds a new metadata provider to the managed list. At first provider is only registered and will be validated
+     * upon next round of metadata refreshing or call to refreshMetadata.
      *
      * @param newProvider provider
      * @throws MetadataProviderException in case provider can't be added
@@ -207,7 +257,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         try {
 
             lock.writeLock().lock();
-            super.addMetadataProvider(newProvider);
+            availableProviders.add(newProvider);
             setRefreshRequired(true);
 
         } finally {
@@ -222,6 +272,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         try {
 
             lock.writeLock().lock();
+            availableProviders.remove(provider);
             super.removeMetadataProvider(provider);
             setRefreshRequired(true);
 
@@ -232,6 +283,8 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     }
 
     private void initializeProvider(MetadataProvider provider) throws MetadataProviderException {
+
+        initializeProviderFilters(provider);
 
         List<String> stringSet = parseProvider(provider);
 
@@ -297,13 +350,140 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     }
 
     /**
+     * Method is automatically called during each attempt to initialize the provider data. It expects to load
+     * all filters required for metadata verification. It must also be ensured that metadata provider is ready to be used
+     * after call to this method.
+     * <p/>
+     * Each provider must extend AbstractMetadataProvider or be of ExtendedMetadataDelegate type.
+     * <p/>
+     * By default a SignatureValidationFilter is added together with any existing filters.
+     *
+     * @param provider provider to check
+     * @throws MetadataProviderException in case initialization fails
+     */
+    protected void initializeProviderFilters(MetadataProvider provider) throws MetadataProviderException {
+
+        AbstractMetadataProvider metadataProvider;
+
+        if (provider instanceof ExtendedMetadataDelegate) {
+            metadataProvider = ((ExtendedMetadataDelegate) provider).getDelegate();
+        } else if (provider instanceof AbstractMetadataProvider) {
+            metadataProvider = (AbstractMetadataProvider) provider;
+        } else {
+            throw new MetadataProviderException("Metadata provider doesn't extend AbstractMetadataProvider class");
+        }
+
+        if (metadataProvider.isInitialized()) {
+
+            log.debug("Metadata provider was already initialized, signature validation will be skipped");
+            // TODO check our filter is included, warn/fail otherwise
+
+        } else {
+
+            boolean requireSignature = false;
+            SignatureTrustEngine trustEngine = getTrustEngine(provider);
+
+            if (provider instanceof ExtendedMetadataDelegate) {
+
+                ExtendedMetadataDelegate metadata = (ExtendedMetadataDelegate) provider;
+                requireSignature = metadata.isMetadataRequireSignature();
+
+            }
+
+            SignatureValidationFilter filter = new SignatureValidationFilter(trustEngine);
+            filter.setRequireSignature(requireSignature);        // TODO combine existing filters
+            provider.setMetadataFilter(filter);
+
+            metadataProvider.initialize();
+
+        }
+
+    }
+
+    /**
+     * Method is expected to create a trust engine used to verify signatures from this provider.
+     *
+     * @param provider provider to create engine for
+     * @return trust engine or null to skip trust verification
+     */
+    protected SignatureTrustEngine getTrustEngine(MetadataProvider provider) {
+
+        Set<String> trustedKeys = null;
+        boolean verifyTrust = true;
+        boolean forceRevocationCheck = false;
+
+        if (provider instanceof ExtendedMetadataDelegate) {
+            ExtendedMetadataDelegate metadata = (ExtendedMetadataDelegate) provider;
+            trustedKeys = metadata.getMetadataTrustedKeys();
+            verifyTrust = metadata.isMetadataTrustCheck();
+            forceRevocationCheck = metadata.isForceMetadataRevocationCheck();
+        }
+
+        if (verifyTrust) {
+
+            log.debug("Setting trust verification for metadata provider {}", provider);
+
+            CertPathPKIXValidationOptions pkixOptions = new CertPathPKIXValidationOptions();
+
+            if (forceRevocationCheck) {
+                log.debug("Revocation checking forced to true");
+                pkixOptions.setForceRevocationEnabled(true);
+            } else {
+                log.debug("Revocation checking not forced");
+                pkixOptions.setForceRevocationEnabled(false);
+            }
+
+            return new PKIXSignatureTrustEngine(
+                    getPKIXResolver(provider, trustedKeys, null),
+                    Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(),
+                    new CertPathPKIXTrustEvaluator(pkixOptions),
+                    new BasicX509CredentialNameEvaluator());
+
+        } else {
+
+            log.debug("Trust verification skipped for metadata provider {}", provider);
+            return new AllowAllSignatureTrustEngine(Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+
+        }
+
+    }
+
+    /**
+     * Method is expected to construct information resolver with all trusted data available for the given provider.
+     *
+     * @param provider     provider
+     * @param trustedKeys  trusted keys for the providers
+     * @param trustedNames trusted names for the providers (always null)
+     * @return information resolver
+     */
+    protected PKIXValidationInformationResolver getPKIXResolver(MetadataProvider provider, Set<String> trustedKeys, Set<String> trustedNames) {
+
+        // Use all available keys
+        if (trustedKeys == null) {
+            trustedKeys = keyManager.getAvailableCredentials();
+        }
+
+        // Resolve allowed certificates to build the anchors
+        List<X509Certificate> certificates = new LinkedList<X509Certificate>();
+        for (String key : trustedKeys) {
+            log.debug("Adding PKIX trust anchor {} for metadata verification of provider {}", key, provider);
+            certificates.add(keyManager.getCertificate(key));
+        }
+
+        List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();
+        info.add(new BasicPKIXValidationInformation(certificates, null, 4));
+        return new StaticPKIXValidationInformationResolver(info, trustedNames);
+
+    }
+
+    /**
      * Parses the provider and returns set of entityIDs contained inside the provider.
      *
      * @param provider provider to parse
      * @return set of entityIDs available in the provider
      * @throws MetadataProviderException error
      */
-    private List<String> parseProvider(MetadataProvider provider) throws MetadataProviderException {
+    protected List<String> parseProvider(MetadataProvider provider) throws MetadataProviderException {
 
         List<String> result = new LinkedList<String>();
 
@@ -321,12 +501,17 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     /**
      * Recursively parses descriptors object. Supports both nested entitiesDescriptor
      * elements and leaf entityDescriptors. EntityID of all found descriptors are added
-     * to the result set.
+     * to the result set. Signatures on all found entities are verified using the given policy
+     * and trust engine.
      *
-     * @param result      result set
+     * @param result      result set of parsed entity IDs
      * @param descriptors descriptors to parse
+     * @throws MetadataProviderException in case signature validation fails
      */
-    private void addDescriptors(List<String> result, EntitiesDescriptor descriptors) {
+    private void addDescriptors(List<String> result, EntitiesDescriptor descriptors) throws MetadataProviderException {
+
+        log.debug("Found metadata EntitiesDescriptor with ID", descriptors.getID());
+
         if (descriptors.getEntitiesDescriptors() != null) {
             for (EntitiesDescriptor descriptor : descriptors.getEntitiesDescriptors()) {
                 addDescriptors(result, descriptor);
@@ -337,18 +522,21 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 addDescriptor(result, descriptor);
             }
         }
+
     }
 
     /**
-     * Parses entityID from the descriptor and adds it to the result set.
+     * Parses entityID from the descriptor and adds it to the result set.  Signatures on all found entities
+     * are verified using the given policy and trust engine.
      *
      * @param result     result set
      * @param descriptor descriptor to parse
+     * @throws MetadataProviderException in case signature validation fails
      */
-    private void addDescriptor(List<String> result, EntityDescriptor descriptor) {
+    private void addDescriptor(List<String> result, EntityDescriptor descriptor) throws MetadataProviderException {
 
         String entityID = descriptor.getEntityID();
-        log.debug("Found metadata entity with ID", entityID);
+        log.debug("Found metadata EntityDescriptor with ID", entityID);
         result.add(entityID);
 
     }
@@ -566,7 +754,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             for (String idp : idpName) {
                 ExtendedMetadata extendedMetadata = getExtendedMetadata(idp);
-                if (entityAlias.equals(extendedMetadata.getAlias())) {
+                if (extendedMetadata.isLocal() && entityAlias.equals(extendedMetadata.getAlias())) {
                     if (entityId != null) {
                         throw new MetadataProviderException("Alias " + entityAlias + " is used both for entity " + entityId + " and " + idp);
                     } else {
@@ -577,7 +765,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             for (String sp : spName) {
                 ExtendedMetadata extendedMetadata = getExtendedMetadata(sp);
-                if (entityAlias.equals(extendedMetadata.getAlias())) {
+                if (extendedMetadata.isLocal() && entityAlias.equals(extendedMetadata.getAlias())) {
                     if (entityId != null) {
                         throw new MetadataProviderException("Alias " + entityAlias + " is used both for entity " + entityId + " and " + sp);
                     } else {
@@ -708,6 +896,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             setRefreshRequired(true);
         }
 
+    }
+
+    @Autowired
+    public void setKeyManager(KeyManager keyManager) {
+        this.keyManager = keyManager; // TODO check was set
     }
 
 }

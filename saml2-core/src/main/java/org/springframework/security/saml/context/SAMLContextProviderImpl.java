@@ -23,7 +23,6 @@ import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.Configuration;
@@ -33,13 +32,17 @@ import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
+import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
+import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.trust.MetadataCredentialResolver;
+import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.util.Assert;
 
 import javax.servlet.ServletException;
@@ -66,6 +69,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     protected KeyManager keyManager;
     protected MetadataManager metadata;
+    protected MetadataCredentialResolver metadataResolver;
+    protected PKIXInformationResolver pkixResolver;
 
     /**
      * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
@@ -235,6 +240,12 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
+    /**
+     * Populates a decrypter based on settings in the extended metadata or using a default credential when no
+     * encryption credential is specified in the extended metadata.
+     *
+     * @param samlContext context to populate decryptor for.
+     */
     protected void populateDecrypter(SAMLMessageContext samlContext) {
 
         // Locate encryption key for this entity
@@ -249,6 +260,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         // Extracts EncryptedKey from the encrypted XML using the encryptedKeyResolver and attempts to decrypt it
         // using private keys supplied by the resolver.
         KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(encryptionCredential);
+
         Decrypter decrypter = new Decrypter(null, resolver, encryptedKeyResolver);
         decrypter.setRootInNewDocument(true);
 
@@ -256,12 +268,21 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
+    /**
+     * Based on the settings in the extended metadata either creates a PKIX trust engine with trusted keys specified
+     * in the extended metadata as anchors or (by default) an explicit trust engine using data from the metadata or
+     * from the values overriden in the ExtendedMetadata.
+     *
+     * @param samlContext context to populate
+     */
     protected void populateTrustEngine(SAMLMessageContext samlContext) {
-
-        MetadataCredentialResolver credentialResolver = new MetadataCredentialResolver(metadata);
-        ExplicitKeySignatureTrustEngine trustEngine = new ExplicitKeySignatureTrustEngine(credentialResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
-        samlContext.setLocalTrustEngine(trustEngine);
-
+        SignatureTrustEngine engine;
+        if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
+            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+        } else {
+            engine = new ExplicitKeySignatureTrustEngine(metadataResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+        }
+        samlContext.setLocalTrustEngine(engine);
     }
 
     @Autowired
@@ -275,13 +296,18 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
-     * Verifies that required entities were autowired or set.
+     * Verifies that required entities were autowired or set and initializes resolvers used to construct trust engines.
      *
      * @throws javax.servlet.ServletException
      */
     public void afterPropertiesSet() throws ServletException {
+
         Assert.notNull(keyManager, "Key manager must be set");
         Assert.notNull(metadata, "Metadata must be set");
+
+        metadataResolver = new MetadataCredentialResolver(metadata, keyManager);
+        pkixResolver = new PKIXInformationResolver(metadataResolver, metadata, keyManager);
+
     }
 
 }

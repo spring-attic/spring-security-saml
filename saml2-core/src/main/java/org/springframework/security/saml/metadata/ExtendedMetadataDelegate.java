@@ -15,16 +15,41 @@
 package org.springframework.security.saml.metadata;
 
 import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
+import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class enables delegation of normal entity metadata loading to the selected provider while enhancing data with
  * extended metadata.
  */
 public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implements ExtendedMetadataProvider {
+
+    /**
+     * When true metadata will only be accepted if correctly signed.
+     */
+    private boolean metadataRequireSignature = false;
+
+    /**
+     * When true metadata signature will be verified for trust using PKIX with metadataTrustedKeys
+     * as anchors.
+     */
+    private boolean metadataTrustCheck = true;
+
+    /**
+     * Determines whether check for certificate revocation should always be done as part of the PKIX validation.
+     * Revocation is evaluated by the underlaying JCE implementation and depending on configuration may include
+     * CRL and OCSP verification of the certificate in question.
+     */
+    private boolean forceMetadataRevocationCheck = false;
+
+    /**
+     * Keys stored in the KeyManager which can be used to verify whether signature of the metadata is trusted.
+     * If not set any key stored in the keyManager is considered as trusted.
+     */
+    private Set<String> metadataTrustedKeys = null;
 
     /**
      * Metadata to use in case map doesn't contain any value.
@@ -34,25 +59,34 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
     /**
      * EntityID specific metadata.
      */
-    private Map<String,ExtendedMetadata> extendedMetadataMap;
+    private Map<String, ExtendedMetadata> extendedMetadataMap;
 
     /**
      * Uses provider for normal entity data, for each entity available in the delegate returns given defaults.
      *
      * @param delegate delegate with available entities
+     */
+    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate) {
+        this(delegate, null, null);
+    }
+
+    /**
+     * Uses provider for normal entity data, for each entity available in the delegate returns given defaults.
+     *
+     * @param delegate        delegate with available entities
      * @param defaultMetadata default extended metadata, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata) {
+    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, ExtendedMetadata defaultMetadata) {
         this(delegate, defaultMetadata, null);
     }
 
     /**
      * Uses provider for normal entity data, tries to locate extended metadata by search in the map.
      *
-     * @param delegate delegate with available entities
+     * @param delegate            delegate with available entities
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, Map<String,ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, Map<String, ExtendedMetadata> extendedMetadataMap) {
         this(delegate, null, extendedMetadataMap);
     }
 
@@ -60,13 +94,17 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * Uses provider for normal entity data, tries to locate extended metadata by search in the map, in case it's not found
      * uses the default.
      *
-     * @param delegate delegate with available entities
-     * @param defaultMetadata default extended metadata, can be null
+     * @param delegate            delegate with available entities
+     * @param defaultMetadata     default extended metadata, can be null
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata, Map<String,ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(AbstractMetadataProvider delegate, ExtendedMetadata defaultMetadata, Map<String, ExtendedMetadata> extendedMetadataMap) {
         super(delegate);
-        this.defaultMetadata = defaultMetadata;
+        if (defaultMetadata == null) {
+            this.defaultMetadata = new ExtendedMetadata();
+        } else {
+            this.defaultMetadata = defaultMetadata;
+        }
         this.extendedMetadataMap = extendedMetadataMap;
     }
 
@@ -103,6 +141,74 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
             return extendedMetadata;
         }
 
+    }
+
+    /**
+     * If set returns set of keys which can be used to verify whether signature of the metadata is trusted. When
+     * not set any of the keys in the configured KeyManager can be used to verify trust.
+     * <p/>
+     * By default the value is null.
+     *
+     * @return trusted keys or null
+     */
+    public Set<String> getMetadataTrustedKeys() {
+        return metadataTrustedKeys;
+    }
+
+    /**
+     * Set of aliases of keys present in the KeyManager which can be used to verify whether signature on metadata entity
+     * is trusted. When set to null any key of KeyManager can be used to verify trust.
+     *
+     * @param metadataTrustedKeys keys or null
+     */
+    public void setMetadataTrustedKeys(Set<String> metadataTrustedKeys) {
+        this.metadataTrustedKeys = metadataTrustedKeys;
+    }
+
+    /**
+     * Flag indicating whether metadata must be signed.
+     * <p/>
+     * By default signature is not required.
+     *
+     * @return signature flag
+     */
+    public boolean isMetadataRequireSignature() {
+        return metadataRequireSignature;
+    }
+
+    /**
+     * When set to true metadata from this provider should only be accepted when correctly signed and verified. Metadata with
+     * an invalid signature or signed by a not-trusted credential will be ignored.
+     *
+     * @param metadataRequireSignature flag to set
+     */
+    public void setMetadataRequireSignature(boolean metadataRequireSignature) {
+        this.metadataRequireSignature = metadataRequireSignature;
+    }
+
+    public boolean isMetadataTrustCheck() {
+        return metadataTrustCheck;
+    }
+
+    public void setMetadataTrustCheck(boolean metadataTrustCheck) {
+        this.metadataTrustCheck = metadataTrustCheck;
+    }
+
+    public boolean isForceMetadataRevocationCheck() {
+        return forceMetadataRevocationCheck;
+    }
+
+    /**
+     * Determines whether check for certificate revocation should always be done as part of the PKIX validation.
+     * Revocation is evaluated by the underlaying JCE implementation and depending on configuration may include
+     * CRL and OCSP verification of the certificate in question.
+     * <p/>
+     * When set to false revocation is only performed when MetadataManager includes CRLs
+     *
+     * @param forceMetadataRevocationCheck revocation flag
+     */
+    public void setForceMetadataRevocationCheck(boolean forceMetadataRevocationCheck) {
+        this.forceMetadataRevocationCheck = forceMetadataRevocationCheck;
     }
 
 }

@@ -109,6 +109,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             try {
                 SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
                 String entityId = context.getLocalEntityId();
+                response.setContentType("application/samlmetadata+xml"); // SAML_Meta, 4.1.1 - line 1235
                 displayMetadata(entityId, response.getWriter());
             } catch (MetadataProviderException e) {
                 throw new ServletException("Error initializing metadata", e);
@@ -152,9 +153,12 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      * @throws ServletException error
      */
     protected void initializeSystemMetadata(HttpServletRequest request) throws ServletException {
+
         // In case the hosted SP metadata weren't initialized, let's do it now
         if (manager.getHostedSPName() == null) {
+
             synchronized (MetadataManager.class) {
+
                 if (manager.getHostedSPName() == null) {
 
                     try {
@@ -175,7 +179,8 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                         }
 
                         EntityDescriptor descriptor = generator.generateMetadata();
-                        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
+                        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
+                        generator.generateExtendedMetadata(extendedMetadata);
 
                         logger.info("Created metadata for system with ID: " + descriptor.getEntityID());
                         MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
@@ -192,8 +197,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                     }
 
                 }
+
             }
+
         }
+
     }
 
     protected String getEntityID(HttpServletRequest request) {

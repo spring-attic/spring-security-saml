@@ -1,3 +1,17 @@
+/* Copyright 2011 Vladimir Schafer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.security.saml.web;
 
 import org.opensaml.Configuration;
@@ -7,7 +21,10 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.util.XMLHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.JKSKeyManager;
 import org.springframework.security.saml.metadata.*;
@@ -22,9 +39,9 @@ import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class allows manipulation of metadata from web UI.
@@ -32,6 +49,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/metadata")
 public class MetadataController {
+
+    private final Logger log = LoggerFactory.getLogger(MetadataController.class);
 
     @Autowired
     MetadataGenerator generator;
@@ -61,7 +80,7 @@ public class MetadataController {
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataGenerator.jsp", true));
         MetadataForm defaultForm = new MetadataForm();
 
-        model.addObject("availableKeys", getAvailableKeys());
+        model.addObject("availableKeys", getAvailablePrivateKeys());
         defaultForm.setBaseURL(getBaseURL(request));
         defaultForm.setEntityId(getEntityId(request));
         defaultForm.setAlias(getEntityId(request));
@@ -76,20 +95,9 @@ public class MetadataController {
 
         new MetadataValidator(metadataManager).validate(metadata, bindingResult);
 
-        if (!bindingResult.hasErrors() && metadata.isStore()) {
-            EntityDescriptor entityDescriptor = metadataManager.getEntityDescriptor(metadata.getEntityId());
-            if (entityDescriptor != null) {
-                bindingResult.rejectValue("entityId", null, "Selected entity ID is already used");
-            }
-            String idForAlias = metadataManager.getEntityIdForAlias(metadata.getAlias());
-            if (idForAlias != null) {
-                bindingResult.rejectValue("alias", null, "Selected alias is already used");
-            }
-        }
-
         if (bindingResult.hasErrors()) {
             ModelAndView modelAndView = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataGenerator.jsp", true));
-            modelAndView.addObject("availableKeys", getAvailableKeys());
+            modelAndView.addObject("availableKeys", getAvailablePrivateKeys());
             return modelAndView;
         }
 
@@ -102,11 +110,15 @@ public class MetadataController {
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
 
+        // TODO other
+
         //generator.setBindings();
         //generator.setNameID();
 
         EntityDescriptor descriptor = generator.generateMetadata();
-        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
+        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
+        generator.generateExtendedMetadata(extendedMetadata);
+        extendedMetadata.setSecurityProfile(metadata.getSecurityProfile());
         extendedMetadata.setRequireLogoutRequestSigned(metadata.isRequireLogoutRequestSigned());
         extendedMetadata.setRequireLogoutResponseSigned(metadata.isRequireLogoutResponseSigned());
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
@@ -155,6 +167,7 @@ public class MetadataController {
         String fileName = getFileName(entityDescriptor);
 
         metadata.setLocal(extendedMetadata.isLocal());
+        metadata.setSecurityProfile(extendedMetadata.getSecurityProfile());
         metadata.setSerializedMetadata(getMetadataAsString(entityDescriptor));
         metadata.setConfiguration(getConfiguration(fileName, extendedMetadata));
         metadata.setEntityId(entityDescriptor.getEntityID());
@@ -164,6 +177,7 @@ public class MetadataController {
         metadata.setRequireLogoutResponseSigned(extendedMetadata.isRequireLogoutResponseSigned());
         metadata.setEncryptionKey(extendedMetadata.getEncryptionKey());
         metadata.setSigningKey(extendedMetadata.getSingingKey());
+        // TODO TLS key
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
         model.addObject("metadata", metadata);
@@ -183,22 +197,36 @@ public class MetadataController {
     }
 
     protected String getBaseURL(HttpServletRequest request) {
+
         StringBuffer sb = new StringBuffer();
         sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
         sb.append(request.getContextPath());
-        return sb.toString();
+
+        String baseURL = sb.toString();
+        log.debug("Base URL {}", baseURL);
+        return baseURL;
+
     }
 
     protected String getEntityId(HttpServletRequest request) {
+        log.debug("Server name used as entity id {}", request.getServerName());
         return request.getServerName();
     }
 
-    protected Map<String, String> getAvailableKeys() throws KeyStoreException {
+    protected Map<String, String> getAvailablePrivateKeys() throws KeyStoreException {
         Map<String, String> availableKeys = new HashMap<String, String>();
-        Enumeration<String> aliases = keyManager.getKeyStore().aliases();
-        while (aliases.hasMoreElements()) {
-            String key = aliases.nextElement();
-            availableKeys.put(key, key);
+        Set<String> aliases = keyManager.getAvailableCredentials();
+        for (String key : aliases) {
+            try {
+                log.debug("Found key {}", key);
+                Credential credential = keyManager.getCredential(key);
+                if (credential.getPrivateKey() != null) {
+                    log.debug("Adding private key with alias {} and entityID {}", key, credential.getEntityId());
+                    availableKeys.put(key, key + " (" + credential.getEntityId() + ")");
+                }
+            } catch (Exception e) {
+                log.debug("Error loading key", e);
+            }
         }
         return availableKeys;
     }
@@ -222,8 +250,7 @@ public class MetadataController {
         StringBuilder sb = new StringBuilder();
         sb.append("<bean class=\"org.springframework.security.saml.metadata.ExtendedMetadataDelegate\">\n" +
                 "    <constructor-arg>\n" +
-                "        <bean class=\"org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider\"\n" +
-                "              init-method=\"initialize\">\n" +
+                "        <bean class=\"org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider\">\n" +
                 "            <constructor-arg>\n" +
                 "                <value type=\"java.io.File\">classpath:security/").append(fileName).append("</value>\n" +
                 "            </constructor-arg>\n" +
@@ -232,7 +259,9 @@ public class MetadataController {
                 "    </constructor-arg>\n" +
                 "    <constructor-arg>\n" +
                 "        <bean class=\"org.springframework.security.saml.metadata.ExtendedMetadata\">\n" +
+                "           <property name=\"local\" value=\"true\"/>\n" +
                 "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
+                "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n" +
                 "           <property name=\"singingKey\" value=\"").append(metadata.getSingingKey()).append("\"/>\n" +
                 "           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +

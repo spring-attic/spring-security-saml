@@ -34,9 +34,6 @@ import java.util.List;
 public abstract class SAMLBindingImpl implements SAMLBinding {
 
     @Autowired
-    KeyManager keyManager;
-
-    @Autowired
     MetadataManager metadata;
 
     @Autowired

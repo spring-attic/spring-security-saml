@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="test_ca2"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>dKuqNSl+8TmVBgcHejLGbW+2CBE=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>NhTnkRP4tkKUE1tuXgXacN8ro8uw/ylRvxWQASIVHIQUSyYPgIxQJJ4hQH7Ge7I3lrnwkinkVlhQTKdjyzi8jDvLeiaV1mklW0aWSKDmBWxx2yT5WRMODUzU788utwJGcjBBSU5dRhDSsZyeR4URtQgtpPWX82gOljyvZvA3294=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDfjCCAuegAwIBAgIBATANBgkqhkiG9w0BAQUFADBwMQswCQYDVQQGEwJGSTEXMBUGA1UEChMO
+U0FNTCBFeHRlbnNpb24xHTAbBgNVBAMTFFRlc3QgQ0EgSW50ZXJtZWRpYXJ5MSkwJwYJKoZIhvcN
+AQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbTAeFw0xMTA0MDIxNTE0MTBaFw0yMTAzMzAx
+NTE0MTBaMGExCzAJBgNVBAYTAkZJMRUwEwYDVQQLEwxSTTUgU29mdHdhcmUxEDAOBgNVBAMTB3Rl
+c3RjYTIxKTAnBgkqhkiG9w0BCQEWGnZsYWRpbWlyLnNjaGFmZXJAZ21haWwuY29tMIGfMA0GCSqG
+SIb3DQEBAQUAA4GNADCBiQKBgQCtuIIYbTL5EoIPsFnC1TBeHHs+QcPQF5y0N6yXIqO4EStC4/+V
+44CE26TfL/tWqGMOxj7e8QP/p2l+qEL5nZSQgaMogEmBAwR4kgDRu8M5rfZ6lXjsVdzSj0HWp3/E
+Ije6uncQG8fSrN+1tYbSvkkPb0YGgx9wcbbQmE1masvg8wIDAQABo4IBNTCCATEwHQYDVR0OBBYE
+FCqaLVtQBuM25k+XfI8zTGIbC5n5MIHEBgNVHSMEgbwwgbmAFIwQuoSoYpcPGeCabxDv/8WLJyIB
+oYGdpIGaMIGXMQswCQYDVQQGEwJGSTEQMA4GA1UECBMHVXVzaW1hYTERMA8GA1UEBxMISGVsc2lu
+a2kxFzAVBgNVBAoTDlNBTUwgRXh0ZW5zaW9uMR8wHQYDVQQDExZTQU1MIEV4dGVuc2lvbiBUZXN0
+IENBMSkwJwYJKoZIhvcNAQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbYIBATAMBgNVHRME
+BTADAQH/MDsGA1UdHwQ0MDIwMKAuoCyGKmh0dHBzOi8vd3d3LmV4YW1wbGUuY29tL2V4YW1wbGUt
+Y2EtY3JsLnBlbTANBgkqhkiG9w0BAQUFAAOBgQAfsGsAn/X/SwYYQUrj1RlFt0QiWAra5w+smN0O
+qMNx4inDuaik4eTk6tI0EtULXSuG9OZoqEGGpt5KeE24oCV2EaVI6HjS6PWFIFA+jY4+biAbkoTy
+GuPfNiGkdUeS7Y1r4LINTXJIO7zPzqjOs9ZsOHwmfwiXUd253pxeesXBDg==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><md:KeyDescriptor use="signing"><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>MIIDfjCCAuegAwIBAgIBATANBgkqhkiG9w0BAQUFADBwMQswCQYDVQQGEwJGSTEXMBUGA1UEChMO
+U0FNTCBFeHRlbnNpb24xHTAbBgNVBAMTFFRlc3QgQ0EgSW50ZXJtZWRpYXJ5MSkwJwYJKoZIhvcN
+AQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbTAeFw0xMTA0MDIxNTE0MTBaFw0yMTAzMzAx
+NTE0MTBaMGExCzAJBgNVBAYTAkZJMRUwEwYDVQQLEwxSTTUgU29mdHdhcmUxEDAOBgNVBAMTB3Rl
+c3RjYTIxKTAnBgkqhkiG9w0BCQEWGnZsYWRpbWlyLnNjaGFmZXJAZ21haWwuY29tMIGfMA0GCSqG
+SIb3DQEBAQUAA4GNADCBiQKBgQCtuIIYbTL5EoIPsFnC1TBeHHs+QcPQF5y0N6yXIqO4EStC4/+V
+44CE26TfL/tWqGMOxj7e8QP/p2l+qEL5nZSQgaMogEmBAwR4kgDRu8M5rfZ6lXjsVdzSj0HWp3/E
+Ije6uncQG8fSrN+1tYbSvkkPb0YGgx9wcbbQmE1masvg8wIDAQABo4IBNTCCATEwHQYDVR0OBBYE
+FCqaLVtQBuM25k+XfI8zTGIbC5n5MIHEBgNVHSMEgbwwgbmAFIwQuoSoYpcPGeCabxDv/8WLJyIB
+oYGdpIGaMIGXMQswCQYDVQQGEwJGSTEQMA4GA1UECBMHVXVzaW1hYTERMA8GA1UEBxMISGVsc2lu
+a2kxFzAVBgNVBAoTDlNBTUwgRXh0ZW5zaW9uMR8wHQYDVQQDExZTQU1MIEV4dGVuc2lvbiBUZXN0
+IENBMSkwJwYJKoZIhvcNAQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbYIBATAMBgNVHRME
+BTADAQH/MDsGA1UdHwQ0MDIwMKAuoCyGKmh0dHBzOi8vd3d3LmV4YW1wbGUuY29tL2V4YW1wbGUt
+Y2EtY3JsLnBlbTANBgkqhkiG9w0BAQUFAAOBgQAfsGsAn/X/SwYYQUrj1RlFt0QiWAra5w+smN0O
+qMNx4inDuaik4eTk6tI0EtULXSuG9OZoqEGGpt5KeE24oCV2EaVI6HjS6PWFIFA+jY4+biAbkoTy
+GuPfNiGkdUeS7Y1r4LINTXJIO7zPzqjOs9ZsOHwmfwiXUd253pxeesXBDg==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use="encryption"><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>MIIDfjCCAuegAwIBAgIBATANBgkqhkiG9w0BAQUFADBwMQswCQYDVQQGEwJGSTEXMBUGA1UEChMO
+U0FNTCBFeHRlbnNpb24xHTAbBgNVBAMTFFRlc3QgQ0EgSW50ZXJtZWRpYXJ5MSkwJwYJKoZIhvcN
+AQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbTAeFw0xMTA0MDIxNTE0MTBaFw0yMTAzMzAx
+NTE0MTBaMGExCzAJBgNVBAYTAkZJMRUwEwYDVQQLEwxSTTUgU29mdHdhcmUxEDAOBgNVBAMTB3Rl
+c3RjYTIxKTAnBgkqhkiG9w0BCQEWGnZsYWRpbWlyLnNjaGFmZXJAZ21haWwuY29tMIGfMA0GCSqG
+SIb3DQEBAQUAA4GNADCBiQKBgQCtuIIYbTL5EoIPsFnC1TBeHHs+QcPQF5y0N6yXIqO4EStC4/+V
+44CE26TfL/tWqGMOxj7e8QP/p2l+qEL5nZSQgaMogEmBAwR4kgDRu8M5rfZ6lXjsVdzSj0HWp3/E
+Ije6uncQG8fSrN+1tYbSvkkPb0YGgx9wcbbQmE1masvg8wIDAQABo4IBNTCCATEwHQYDVR0OBBYE
+FCqaLVtQBuM25k+XfI8zTGIbC5n5MIHEBgNVHSMEgbwwgbmAFIwQuoSoYpcPGeCabxDv/8WLJyIB
+oYGdpIGaMIGXMQswCQYDVQQGEwJGSTEQMA4GA1UECBMHVXVzaW1hYTERMA8GA1UEBxMISGVsc2lu
+a2kxFzAVBgNVBAoTDlNBTUwgRXh0ZW5zaW9uMR8wHQYDVQQDExZTQU1MIEV4dGVuc2lvbiBUZXN0
+IENBMSkwJwYJKoZIhvcNAQkBFhp2bGFkaW1pci5zY2hhZmVyQGdtYWlsLmNvbYIBATAMBgNVHRME
+BTADAQH/MDsGA1UdHwQ0MDIwMKAuoCyGKmh0dHBzOi8vd3d3LmV4YW1wbGUuY29tL2V4YW1wbGUt
+Y2EtY3JsLnBlbTANBgkqhkiG9w0BAQUFAAOBgQAfsGsAn/X/SwYYQUrj1RlFt0QiWAra5w+smN0O
+qMNx4inDuaik4eTk6tI0EtULXSuG9OZoqEGGpt5KeE24oCV2EaVI6HjS6PWFIFA+jY4+biAbkoTy
+GuPfNiGkdUeS7Y1r4LINTXJIO7zPzqjOs9ZsOHwmfwiXUd253pxeesXBDg==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/spring-security-saml2-sample/saml/SingleLogout/alias/test_ca2"/><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8080/spring-security-saml2-sample/saml/SingleLogout/alias/test_ca2"/><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://localhost:8080/spring-security-saml2-sample/saml/SingleLogout/alias/test_ca2"/><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat><md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/spring-security-saml2-sample/saml/SSO/alias/test_ca2" index="0" isDefault="true"/><md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="http://localhost:8080/spring-security-saml2-sample/saml/SSO/alias/test_ca2" index="1" isDefault="false"/><md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS" Location="http://localhost:8080/spring-security-saml2-sample/saml/SSO/alias/test_ca2" index="2" isDefault="false"/></md:SPSSODescriptor></md:EntityDescriptor>

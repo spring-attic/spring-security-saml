@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009 Vladimir Schafer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNull;
  * Verifies that the keyStore class can be initialized and is able to return keys from
  * the keystore which contains one key aliased "apollo".
  *
- * @author Vladimir Schäfer
+ * @author Vladimir Schafer
  */
 public class JKSKeyManagerTest {
 
@@ -37,7 +37,7 @@ public class JKSKeyManagerTest {
     public void init() {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
-        keyManager = (JKSKeyManager) context.getBean("keyStore");
+        keyManager = (JKSKeyManager) context.getBean("keyManager");
     }
 
     /**
@@ -61,7 +61,7 @@ public class JKSKeyManagerTest {
      */
     @Test(expected = RuntimeException.class)
     public void testInitialize() {
-        new JKSKeyManager(null, "xxx");
+        new JKSKeyManager(null, "xxx", null, null);
     }
 
     /**

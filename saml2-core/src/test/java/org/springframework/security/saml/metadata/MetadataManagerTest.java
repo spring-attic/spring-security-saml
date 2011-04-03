@@ -42,6 +42,7 @@ public class MetadataManagerTest {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         manager = context.getBean("metadata", MetadataManager.class);
+        manager.refreshMetadata();
     }
 
     /**

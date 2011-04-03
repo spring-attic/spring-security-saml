@@ -84,6 +84,28 @@
                 </small>
             </td>
         </tr>
+        <tr>
+            <td>Security profile:</td>
+            <td>
+                <form:select path="securityProfile" multiple="false">
+                    <form:option value="metaiop">MetaIOP</form:option>
+                    <form:option value="pkix">PKIX</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="securityProfile"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>
+                    <p>Security profile determines how is trust of signature, encryption and SSL/TLS credentials handled. In
+                    MetaIOP mode credential is deemed valid when it's declared in the metadata document of the peer entity. No
+                    validation of the credentials is made. The value is recommended as a default.
+                    <p>PKIX profile verifies credentials against a set of trust anchors. By default certificates present in the
+                    metadata are treated as trust anchors together with the additional selected trusted keys.
+                </small>
+            </td>
+        </tr>
 
         <tr>
             <td>&nbsp;</td>

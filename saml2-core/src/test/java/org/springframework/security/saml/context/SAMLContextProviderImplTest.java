@@ -60,8 +60,6 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
 
-
-
     }
 
     protected SAMLCredential getCredential(String localEntityID) {

@@ -32,6 +32,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.signature.Signature;
@@ -52,7 +53,7 @@ import java.util.Map;
 
 /**
  * The class is responsible for generation of service provider metadata describing the application in
- * current deployment environment. All the URLs in the metadata will be derived from information in
+ * the current deployment environment. All the URLs in the metadata will be derived from information in
  * the ServletContext.
  *
  * @author Vladimir Schäfer
@@ -98,34 +99,33 @@ public class MetadataGenerator implements ApplicationContextAware {
     }
 
     protected KeyInfo getServerKeyInfo() {
-        try {
-            NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = keyManager.getCredential(signingKey);
-            return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
-        } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.error("Can't obtain key from the keystore or generate key info: " + signingKey, e);
-            throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
-        }
+        // TODO add TLS key
+        Credential serverCredential = keyManager.getCredential(signingKey);
+        return generateKeyInfoForCredential(serverCredential);
     }
 
     protected KeyInfo getServerEncryptionKeyInfo() {
+        Credential serverCredential = keyManager.getCredential(encryptionKey);
+        return generateKeyInfoForCredential(serverCredential);
+    }
+
+    protected KeyInfo generateKeyInfoForCredential(Credential credential) {
         try {
             NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            Credential serverCredential = keyManager.getCredential(encryptionKey);
-            return manager.getDefaultManager().getFactory(serverCredential).newInstance().generate(serverCredential);
+            SecurityHelper.getKeyInfoGenerator(credential, null, getKeyInfoGeneratorName());
+            KeyInfoGeneratorFactory factory = manager.getDefaultManager().getFactory(credential);
+            return factory.newInstance().generate(credential);
         } catch (org.opensaml.xml.security.SecurityException e) {
             logger.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
         }
     }
 
-    public ExtendedMetadata generateExtendedMetadata() {
-        ExtendedMetadata ex = new ExtendedMetadata();
-        ex.setEncryptionKey(encryptionKey);
-        ex.setSingingKey(signingKey);
-        ex.setAlias(entityAlias);
-        ex.setLocal(true);
-        return ex;
+    public void generateExtendedMetadata(ExtendedMetadata metadata) {
+        metadata.setEncryptionKey(encryptionKey);
+        metadata.setSingingKey(signingKey);
+        metadata.setAlias(entityAlias);
+        metadata.setLocal(true);
     }
 
     public EntityDescriptor generateMetadata() {
@@ -353,9 +353,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
             signature.setSigningCredential(signingCredential);
             try {
-                //TODO pull SecurityConfiguration from SAMLMessageContext?  needs to be added
-                //TODO pull binding-specific keyInfoGenName from encoder setting, etc?
-                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, null);
+                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, getKeyInfoGeneratorName());
             } catch (org.opensaml.xml.security.SecurityException e) {
                 throw new MessageEncodingException("Error preparing signature for signing", e);
             }
@@ -379,6 +377,16 @@ public class MetadataGenerator implements ApplicationContextAware {
                 throw new MessageEncodingException("Unable to sign protocol message", e);
             }
         }
+    }
+
+    /**
+     * Name of the KeyInfoGenerator registered at default KeyInfoGeneratorManager.
+     *
+     * @return key info generator name
+     * @see Configuration#getGlobalSecurityConfiguration().getKeyInfoGeneratorManager()
+     */
+    protected String getKeyInfoGeneratorName() {
+        return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
     }
 
     public boolean isRequestSigned() {

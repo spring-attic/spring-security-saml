@@ -73,6 +73,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     private static final String DEFAULT_FILTER_URL = "saml/metadata";
 
     /**
+     * Default alias for generated entities.
+     */
+    private static final String DEFAULT_ALIAS = "defaultAlias";
+
+    /**
      * User configured path which overrides the default value.
      */
     private String filterSuffix;
@@ -163,26 +168,32 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
                     try {
 
-                        // Use default entityID if not set
-                        if (generator.getEntityId() == null) {
-                            generator.setEntityId(getEntityID(request));
-                        }
+                        logger.debug("No default metadata configured, generating with default values");
 
-                        // Use default entityID if not set
-                        if (generator.getEntityBaseURL() == null) {
-                            generator.setEntityBaseURL(getEntityID(request));
-                        }
+                        String alias = DEFAULT_ALIAS;
 
                         // Use default entityAlias if not set
                         if (generator.getEntityAlias() == null) {
-                            generator.setEntityAlias(request.getContextPath().substring(1));
+                            generator.setEntityAlias(alias);
+                        } else {
+                            alias = generator.getEntityAlias();
+                        }
+
+                        // Use default baseURL if not set
+                        if (generator.getEntityBaseURL() == null) {
+                            generator.setEntityBaseURL(getDefaultBaseURL(request));
+                        }
+
+                        // Use default entityID if not set
+                        if (generator.getEntityId() == null) {
+                            generator.setEntityId(getDefaultEntityID(request, alias));
                         }
 
                         EntityDescriptor descriptor = generator.generateMetadata();
                         ExtendedMetadata extendedMetadata = new ExtendedMetadata();
                         generator.generateExtendedMetadata(extendedMetadata);
 
-                        logger.info("Created metadata for system with ID: " + descriptor.getEntityID());
+                        logger.info("Created default metadata for system with entityID: " + descriptor.getEntityID());
                         MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
                         memoryProvider.initialize();
                         MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
@@ -204,9 +215,18 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
     }
 
-    protected String getEntityID(HttpServletRequest request) {
+    protected String getDefaultEntityID(HttpServletRequest request, String alias) {
         StringBuffer sb = new StringBuffer();
-        sb.append(request.getScheme()).append("://").append(request.getServerName());
+        sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
+        sb.append(request.getContextPath());
+        sb.append("/saml/metadata/alias/");
+        sb.append(alias);
+        return sb.toString();
+    }
+
+    protected String getDefaultBaseURL(HttpServletRequest request) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
         sb.append(request.getContextPath());
         return sb.toString();
     }

@@ -120,6 +120,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         request.setIsPassive(options.getPassive());
         request.setForceAuthn(options.getForceAuthN());
+        request.setProviderName(options.getProviderName());
 
         buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
 

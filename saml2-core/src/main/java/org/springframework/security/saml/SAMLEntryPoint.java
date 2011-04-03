@@ -182,8 +182,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected void initializeSelection(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         logger.debug("Initializing IDP selection");
-        response.setContentType("text/html");
-        request.getRequestDispatcher(idpSelectionPath).include(request, response);
+        request.getRequestDispatcher(idpSelectionPath).forward(request, response);
 
     }
 

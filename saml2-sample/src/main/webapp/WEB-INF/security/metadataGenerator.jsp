@@ -136,6 +136,18 @@
         </tr>
 
         <tr>
+            <td>SSL/TLS key:</td>
+            <td><form:select path="tlsKey" items="${availableKeys}"/></td>
+            <td class="error"><form:errors path="tlsKey"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>Key used to authenticate this instance for SSL/TLS connections.</small>
+            </td>
+        </tr>
+
+        <tr>
             <td>Sign metadata:</td>
             <td>
                 <form:select path="signMetadata" multiple="false">

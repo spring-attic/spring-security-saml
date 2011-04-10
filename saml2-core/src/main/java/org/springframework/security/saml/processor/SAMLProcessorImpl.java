@@ -27,6 +27,8 @@ import org.opensaml.ws.security.SecurityPolicy;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
 import org.opensaml.ws.transport.InTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.util.Assert;
@@ -42,6 +44,8 @@ import java.util.Collection;
  * @author Vladimir Schäfer
  */
 public class SAMLProcessorImpl implements SAMLProcessor {
+
+    private final static Logger log = LoggerFactory.getLogger(SAMLProcessorImpl.class);
 
     /**
      * Bindings supported by this processor.
@@ -81,6 +85,8 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      *                                   error verifying message
      */
     public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+
+        log.debug("Retrieving message using binding {}", binding.getCommunicationProfileId());
 
         verifyContext(samlContext);
         populateSecurityPolicy(samlContext, binding);
@@ -226,6 +232,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         Assert.notNull(samlContext.getLocalEntityRoleMetadata(), "Local entity role metadata must be set in the context");
         Assert.notNull(samlContext.getLocalExtendedMetadata(), "Local extended metadata must be set in the context");
         Assert.notNull(samlContext.getLocalTrustEngine(), "SignatureTrustEngine must be set in the samlContext");
+        Assert.notNull(samlContext.getLocalSSLTrustEngine(), "SSL Trust Engine must be set in the samlContext");
 
     }
 

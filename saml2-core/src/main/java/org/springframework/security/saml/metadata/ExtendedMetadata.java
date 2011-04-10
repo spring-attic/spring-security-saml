@@ -226,6 +226,26 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
+     * Key used to authenticate instance against remote servers.
+     *
+     * @return tls key
+     */
+    public String getTlsKey() {
+        return tlsKey;
+    }
+
+    /**
+     * Alias of the key used to authenticate this instance against peer servers using SSL/TLS connections. When
+     * not set default credential will be used. Alias must be associated with a key containing a private key and being
+     * of X509 type.
+     *
+     * @param tlsKey tls key
+     */
+    public void setTlsKey(String tlsKey) {
+        this.tlsKey = tlsKey;
+    }
+
+    /**
      * Trusted keys usable for signature and server SSL/TLS verification for entities with PKIX verification enabled.
      *
      * @return trusted keys

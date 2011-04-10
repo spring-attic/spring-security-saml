@@ -109,6 +109,7 @@ public class MetadataController {
         generator.setWantAssertionSigned(metadata.isWantAssertionSigned());
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
+        generator.setTlsKey(metadata.getTlsKey());
 
         // TODO other
 
@@ -177,7 +178,7 @@ public class MetadataController {
         metadata.setRequireLogoutResponseSigned(extendedMetadata.isRequireLogoutResponseSigned());
         metadata.setEncryptionKey(extendedMetadata.getEncryptionKey());
         metadata.setSigningKey(extendedMetadata.getSigningKey());
-        // TODO TLS key
+        metadata.setTlsKey(extendedMetadata.getTlsKey());
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
         model.addObject("metadata", metadata);
@@ -262,8 +263,9 @@ public class MetadataController {
                 "           <property name=\"local\" value=\"true\"/>\n" +
                 "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
                 "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
-                "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n" +
                 "           <property name=\"signingKey\" value=\"").append(metadata.getSigningKey()).append("\"/>\n" +
+                "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n" +
+                "           <property name=\"tlsKey\" value=\"").append(metadata.getTlsKey()).append("\"/>\n" +
                 "           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n" +

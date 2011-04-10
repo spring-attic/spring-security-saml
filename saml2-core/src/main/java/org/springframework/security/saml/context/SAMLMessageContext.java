@@ -18,6 +18,8 @@ package org.springframework.security.saml.context;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.trust.TrustEngine;
+import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 
@@ -28,31 +30,19 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
  */
 public class SAMLMessageContext extends BasicSAMLMessageContext {
 
-    /**
-     * Object capable of decrypting data signed for this entity.
-     */
     private Decrypter localDecrypter;
-
-    /**
-     * Credential used to sign messages sent from this entity.
-     */
     private Credential localSigningCredential;
-
-    /**
-     * Extended metadata of the local entity
-     */
     private ExtendedMetadata localExtendedMetadata;
-
-    /**
-     * Extended metadata of the peer entity
-     */
+    private SignatureTrustEngine localTrustEngine;
+    private TrustEngine<X509Credential> localSSLTrustEngine;
+    private X509Credential localSSLCredential;
     private ExtendedMetadata peerExtendedMetadata;
 
     /**
-     * Mechanism able to determine whether incoming message signature should be trusted.
+     * Extended metadata of the local entity
+     *
+     * @return local extended metadata
      */
-    private SignatureTrustEngine localTrustEngine;
-
     public ExtendedMetadata getLocalExtendedMetadata() {
         return localExtendedMetadata;
     }
@@ -61,6 +51,11 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.localExtendedMetadata = localExtendedMetadata;
     }
 
+    /**
+     * Extended metadata of the peer entity.
+     *
+     * @return metadata
+     */
     public ExtendedMetadata getPeerExtendedMetadata() {
         return peerExtendedMetadata;
     }
@@ -69,6 +64,11 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.peerExtendedMetadata = peerExtendedMetadata;
     }
 
+    /**
+     * Object capable of decrypting data signed for this entity.
+     *
+     * @return decrypter
+     */
     public Decrypter getLocalDecrypter() {
         return localDecrypter;
     }
@@ -77,6 +77,11 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.localDecrypter = localDecrypter;
     }
 
+    /**
+     * Mechanism able to determine whether incoming message signature should be trusted.
+     *
+     * @return trust engine used for verification of signatures coming from peers
+     */
     public SignatureTrustEngine getLocalTrustEngine() {
         return localTrustEngine;
     }
@@ -85,12 +90,43 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.localTrustEngine = localTrustEngine;
     }
 
+    /**
+     * Credential used to sign messages sent from this entity.
+     *
+     * @return credential
+     */
     public Credential getLocalSigningCredential() {
         return localSigningCredential;
     }
 
     public void setLocalSigningCredential(Credential localSigningCredential) {
         this.localSigningCredential = localSigningCredential;
+    }
+
+    /**
+     * Trust engine used to verify server certificate in SSL/TLS connections.
+     *
+     * @return engine
+     */
+    public TrustEngine<X509Credential> getLocalSSLTrustEngine() {
+        return localSSLTrustEngine;
+    }
+
+    public void setLocalSSLTrustEngine(TrustEngine<X509Credential> localSSLTrustEngine) {
+        this.localSSLTrustEngine = localSSLTrustEngine;
+    }
+
+    /**
+     * Credential used to authenticate this instance against peers using SSL/TLS .
+     *
+     * @return credential
+     */
+    public X509Credential getLocalSSLCredential() {
+        return localSSLCredential;
+    }
+
+    public void setLocalSSLCredential(X509Credential localSSLCredential) {
+        this.localSSLCredential = localSSLCredential;
     }
 
 }

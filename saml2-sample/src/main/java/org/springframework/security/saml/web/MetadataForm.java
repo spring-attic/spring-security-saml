@@ -30,6 +30,7 @@ public class MetadataForm {
 
     private String signingKey;
     private String encryptionKey;
+    private String tlsKey;
 
     private boolean local;
 
@@ -42,7 +43,7 @@ public class MetadataForm {
     public MetadataForm() {
     }
 
-// TODO nameID, bindings
+    // TODO nameID, bindings
 
     public String getEntityId() {
         return entityId;
@@ -170,6 +171,14 @@ public class MetadataForm {
 
     public void setSecurityProfile(String securityProfile) {
         this.securityProfile = securityProfile;
+    }
+
+    public String getTlsKey() {
+        return tlsKey;
+    }
+
+    public void setTlsKey(String tlsKey) {
+        this.tlsKey = tlsKey;
     }
 
 }

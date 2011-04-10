@@ -261,6 +261,10 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     @Override
     public void addMetadataProvider(MetadataProvider newProvider) throws MetadataProviderException {
 
+        if (newProvider == null) {
+            throw new IllegalArgumentException("Null provider can't be added");
+        }
+
         try {
 
             lock.writeLock().lock();
@@ -276,21 +280,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     }
 
-
-    private ExtendedMetadataDelegate getWrappedProvider(MetadataProvider provider) {
-        if (!(provider instanceof ExtendedMetadataDelegate)) {
-            log.debug("Wrapping metadata provider {} with extendedMetadataDelegate", provider);
-            return new ExtendedMetadataDelegate(provider);
-        } else {
-            return (ExtendedMetadataDelegate) provider;
-        }
-    }
-
     @Override
     public void removeMetadataProvider(MetadataProvider provider) {
 
         if (provider == null) {
-            return;
+            throw new IllegalArgumentException("Null provider can't be removed");
         }
 
         try {
@@ -307,6 +301,15 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         setRefreshRequired(true);
 
+    }
+
+    private ExtendedMetadataDelegate getWrappedProvider(MetadataProvider provider) {
+        if (!(provider instanceof ExtendedMetadataDelegate)) {
+            log.debug("Wrapping metadata provider {} with extendedMetadataDelegate", provider);
+            return new ExtendedMetadataDelegate(provider);
+        } else {
+            return (ExtendedMetadataDelegate) provider;
+        }
     }
 
     /**

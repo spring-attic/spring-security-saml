@@ -54,6 +54,10 @@
             <td>Encryption key:</td>
             <td><form:input readonly="true" path="encryptionKey"/></td>
         </tr>
+        <tr>
+            <td>SSL/TLS key:</td>
+            <td><form:input readonly="true" path="tlsKey"/></td>
+        </tr>
 
         <tr>
             <td>Require signed LogoutRequest:</td>

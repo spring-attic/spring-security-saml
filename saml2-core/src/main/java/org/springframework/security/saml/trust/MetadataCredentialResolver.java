@@ -80,9 +80,9 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
         try {
 
             ExtendedMetadata extendedMetadata = manager.getExtendedMetadata(entityID);
+            Collection<Credential> credentials = new LinkedList<Credential>();
 
             if (usage.equals(UsageType.UNSPECIFIED)) {
-                Collection<Credential> credentials = new LinkedList<Credential>();
                 if (extendedMetadata.getSigningKey() != null) {
                     log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSigningKey(), entityID);
                     credentials.add(keyManager.getCredential(extendedMetadata.getSigningKey()));
@@ -91,23 +91,26 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
                     log.debug("Using customized encryption key {} from extended metadata for entityID {}", extendedMetadata.getEncryptionKey(), entityID);
                     credentials.add(keyManager.getCredential(extendedMetadata.getEncryptionKey()));
                 }
-                if (credentials.size() > 0) {
-                    return credentials;
+                if (extendedMetadata.getTlsKey() != null) {
+                    log.debug("Using customized TLS key {} from extended metadata for entityID {}", extendedMetadata.getEncryptionKey(), entityID);
+                    credentials.add(keyManager.getCredential(extendedMetadata.getTlsKey()));
                 }
             } else if (usage.equals(UsageType.SIGNING)) {
                 if (extendedMetadata.getSigningKey() != null) {
                     log.debug("Using customized signing key {} from extended metadata for entityID {}", extendedMetadata.getSigningKey(), entityID);
-                    return Collections.singleton(keyManager.getCredential(extendedMetadata.getSigningKey()));
+                    credentials.add(keyManager.getCredential(extendedMetadata.getSigningKey()));
                 }
             } else if (usage.equals(UsageType.ENCRYPTION)) {
                 if (extendedMetadata.getEncryptionKey() != null) {
                     log.debug("Using customized encryption key {} from extended metadata for entityID {}", extendedMetadata.getEncryptionKey(), entityID);
-                    return Collections.singleton(keyManager.getCredential(extendedMetadata.getEncryptionKey()));
+                    credentials.add(keyManager.getCredential(extendedMetadata.getEncryptionKey()));
                 }
             }
 
             log.debug("No customized signature or encryption keys configured for entityID {}, using metadata", entityID);
-            return super.retrieveFromMetadata(entityID, role, protocol, usage);    //To change body of overridden methods use File | Settings | File Templates.
+            credentials.addAll(super.retrieveFromMetadata(entityID, role, protocol, usage));
+
+            return credentials;
 
         } catch (MetadataProviderException e) {
             throw new SecurityException("Error loading metadata information", e);

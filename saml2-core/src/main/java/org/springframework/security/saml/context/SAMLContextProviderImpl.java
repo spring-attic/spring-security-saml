@@ -32,6 +32,10 @@ import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
+import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
+import org.opensaml.xml.security.trust.TrustEngine;
+import org.opensaml.xml.security.x509.PKIXX509CredentialTrustEngine;
+import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
@@ -83,20 +87,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
 
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
-
         SAMLMessageContext context = new SAMLMessageContext();
-
-        context.setMetadataProvider(metadata);
-        context.setInboundMessageTransport(inTransport);
-        context.setOutboundMessageTransport(outTransport);
-
         populateEntityId(context, request.getContextPath());
-        populateLocalEntity(context);
-        populateDecrypter(context);
-        populateTrustEngine(context);
-
+        populateContext(request, response, context);
         return context;
 
     }
@@ -113,21 +106,27 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response, SAMLCredential credential) throws MetadataProviderException {
 
+        SAMLMessageContext context = new SAMLMessageContext();
+        populateEntityId(context, credential);
+        populateContext(request, response, context);
+        return context;
+
+    }
+
+    private void populateContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
         HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
-
-        SAMLMessageContext context = new SAMLMessageContext();
 
         context.setMetadataProvider(metadata);
         context.setInboundMessageTransport(inTransport);
         context.setOutboundMessageTransport(outTransport);
 
-        populateEntityId(context, credential);
         populateLocalEntity(context);
         populateDecrypter(context);
+        populateSSLCredential(context);
         populateTrustEngine(context);
-
-        return context;
+        populateSSLTrustEngine(context);
 
     }
 
@@ -241,6 +240,25 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
+     * Populates X509 Credential used to authenticate this machine against peer servers. Uses key with alias specified
+     * in extended metadata under TlsKey, when not set uses the default credential.
+     *
+     * @param samlContext context to populate
+     */
+    protected void populateSSLCredential(SAMLMessageContext samlContext) {
+
+        X509Credential tlsCredential;
+        if (samlContext.getLocalExtendedMetadata().getTlsKey() != null) {
+            tlsCredential = (X509Credential) keyManager.getCredential(samlContext.getLocalExtendedMetadata().getTlsKey());
+        } else {
+            tlsCredential = (X509Credential) keyManager.getDefaultCredential();
+        }
+
+        samlContext.setLocalSSLCredential(tlsCredential);
+
+    }
+
+    /**
      * Populates a decrypter based on settings in the extended metadata or using a default credential when no
      * encryption credential is specified in the extended metadata.
      *
@@ -285,6 +303,23 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         samlContext.setLocalTrustEngine(engine);
     }
 
+    /**
+     * Based on the settings in the extended metadata either creates a PKIX trust engine with trusted keys specified
+     * in the extended metadata as anchors or (by default) an explicit trust engine using data from the metadata or
+     * from the values overriden in the ExtendedMetadata. The trust engine is used to verify SSL connections.
+     *
+     * @param samlContext context to populate
+     */
+    protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {
+        TrustEngine<X509Credential> engine;
+        if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
+            engine = new PKIXX509CredentialTrustEngine(pkixResolver);
+        } else {
+            engine = new ExplicitX509CertificateTrustEngine(metadataResolver);
+        }
+        samlContext.setLocalSSLTrustEngine(engine);
+    }
+
     @Autowired
     public void setMetadata(MetadataManager metadata) {
         this.metadata = metadata;
@@ -306,6 +341,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         Assert.notNull(metadata, "Metadata must be set");
 
         metadataResolver = new MetadataCredentialResolver(metadata, keyManager);
+        metadataResolver.setMeetAllCriteria(false);
+        metadataResolver.setUnevaluableSatisfies(true);
         pkixResolver = new PKIXInformationResolver(metadataResolver, metadata, keyManager);
 
     }

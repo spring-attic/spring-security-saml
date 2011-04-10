@@ -70,6 +70,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     private String signingKey = null;
     private String encryptionKey = null;
+    private String tlsKey = null;
 
     private Collection<String> nameID = null;
     private Collection<String> bindings = null;
@@ -98,14 +99,13 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
-    protected KeyInfo getServerKeyInfo() {
-        // TODO add TLS key
-        Credential serverCredential = keyManager.getCredential(signingKey);
-        return generateKeyInfoForCredential(serverCredential);
-    }
-
-    protected KeyInfo getServerEncryptionKeyInfo() {
-        Credential serverCredential = keyManager.getCredential(encryptionKey);
+    protected KeyInfo getServerKeyInfo(String alias) {
+        Credential serverCredential = keyManager.getCredential(alias);
+        if (serverCredential == null) {
+            throw new RuntimeException("Key for alias " + alias + " not found");
+        } else if (serverCredential.getPrivateKey() == null) {
+            throw new RuntimeException("Key with alias " + alias + " doesn't have a private key");
+        }
         return generateKeyInfoForCredential(serverCredential);
     }
 
@@ -125,6 +125,7 @@ public class MetadataGenerator implements ApplicationContextAware {
         metadata.setEncryptionKey(encryptionKey);
         metadata.setSigningKey(signingKey);
         metadata.setAlias(entityAlias);
+        metadata.setTlsKey(tlsKey);
         metadata.setLocal(true);
     }
 
@@ -207,8 +208,13 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
 
         // Generate key info
-        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo()));
-        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerEncryptionKeyInfo()));
+        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo(signingKey)));
+        spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo(encryptionKey)));
+
+        // Include TLS key with unspecified usage in case it differs from the singing and encryption keys
+        if (tlsKey != null && !(tlsKey.equals(encryptionKey)) && !(tlsKey.equals(signingKey))) {
+            spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.UNSPECIFIED, getServerKeyInfo(tlsKey)));
+        }
 
         return spDescriptor;
 
@@ -463,6 +469,14 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public String getEntityId() {
         return entityId;
+    }
+
+    public String getTlsKey() {
+        return tlsKey;
+    }
+
+    public void setTlsKey(String tlsKey) {
+        this.tlsKey = tlsKey;
     }
 
 }

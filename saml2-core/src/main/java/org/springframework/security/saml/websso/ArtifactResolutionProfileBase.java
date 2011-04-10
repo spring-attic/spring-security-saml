@@ -72,7 +72,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
                 throw new MetadataProviderException("Cannot localize sender entity by SHA-1 hash from the artifact");
             }
 
-            ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(idpEntityDescriptor.getID());
+            ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(idpEntityDescriptor.getEntityID());
             IDPSSODescriptor idpssoDescriptor = SAMLUtil.getIDPSSODescriptor(idpEntityDescriptor);
             ArtifactResolutionService artifactResolutionService = SAMLUtil.getArtifactResolutionService(idpssoDescriptor, endpointIndex);
 
@@ -83,7 +83,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             context.setOutboundMessage(artifactResolve);
             context.setOutboundSAMLMessage(artifactResolve);
             context.setPeerEntityEndpoint(artifactResolutionService);
-            context.setPeerEntityId(idpEntityDescriptor.getID());
+            context.setPeerEntityId(idpEntityDescriptor.getEntityID());
             context.setPeerEntityMetadata(idpEntityDescriptor);
             context.setPeerEntityRole(idpssoDescriptor.getElementQName());
             context.setPeerEntityRoleMetadata(idpssoDescriptor);

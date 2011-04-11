@@ -77,33 +77,59 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
         ExtendedMetadata idpExtendedMetadata = metadata.getExtendedMetadata(idpId);
-        String binding = SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor);
-        SingleSignOnService bindingService = SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, binding);
-        boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
-
-        AssertionConsumerService assertionConsumerForBinding = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, binding);
-        AuthnRequest authRequest = getAuthnRequest(context, options, assertionConsumerForBinding, bindingService);
+        SingleSignOnService ssoService = getSingleSignOnService(idpssoDescriptor, spDescriptor, options);
+        AssertionConsumerService consumerService = getAssertionConsumerService(idpssoDescriptor, spDescriptor, options, null);
+        AuthnRequest authRequest = getAuthnRequest(context, options, consumerService, ssoService);
 
         // TODO optionally implement support for conditions, subject
 
-        context.setCommunicationProfileId(bindingService.getBinding());
+        context.setCommunicationProfileId(ssoService.getBinding());
         context.setOutboundMessage(authRequest);
         context.setOutboundSAMLMessage(authRequest);
-        context.setPeerEntityEndpoint(bindingService);
+        context.setPeerEntityEndpoint(ssoService);
         context.setPeerEntityId(idpssoDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpssoDescriptor);
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
+        boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
         sendMessage(context, sign);
         messageStorage.storeMessage(authRequest.getID(), authRequest);
 
     }
 
     /**
+     * Method determines SingleSignOn service used to deliver AuthNRequest to the IDP. Service also determines the used binding.
+     * When set value binding from WebSSOProfileOptions is used to prioritize the service.
+     *
+     * @param idpssoDescriptor idp
+     * @param spDescriptor     sp
+     * @param options          user supplied preferences
+     * @return service to send message to
+     * @throws MetadataProviderException in case service can't be determined
+     */
+    protected SingleSignOnService getSingleSignOnService(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options) throws MetadataProviderException {
+        return SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor));
+    }
+
+    /**
+     * Determines assertion consumer service where IDP should send reply to the AuthnRequest.
+     *
+     * @param idpssoDescriptor idp, can be null when no IDP is known in advance
+     * @param spDescriptor     sp
+     * @param options          user supplied preferences
+     * @param binding binding to be used, overrides other settings
+     * @return consumer service or null
+     * @throws MetadataProviderException in case index supplied in options is invalid or no consumer service can be found
+     */
+    protected AssertionConsumerService getAssertionConsumerService(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options, String binding) throws MetadataProviderException {
+        return SAMLUtil.getAssertionConsumerForBinding(idpssoDescriptor, spDescriptor, options, binding);
+    }
+
+    /**
      * Returns AuthnRequest SAML message to be used to demand authentication from an IDP described using
      * idpEntityDescriptor, with an expected response to the assertionConsumer address.
      *
-     * @param context message context
+     * @param context           message context
      * @param options           preferences of message creation
      * @param assertionConsumer assertion consumer where the IDP should respond
      * @param bindingService    service used to deliver the request
@@ -113,14 +139,15 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      */
     protected AuthnRequest getAuthnRequest(SAMLMessageContext context, WebSSOProfileOptions options,
                                            AssertionConsumerService assertionConsumer,
-                                           SingleSignOnService bindingService) throws SAMLException,
-            MetadataProviderException {
+                                           SingleSignOnService bindingService) throws SAMLException, MetadataProviderException {
+
         SAMLObjectBuilder<AuthnRequest> builder = (SAMLObjectBuilder<AuthnRequest>) builderFactory.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest request = builder.buildObject();
 
         request.setIsPassive(options.getPassive());
         request.setForceAuthn(options.getForceAuthN());
         request.setProviderName(options.getProviderName());
+        request.setVersion(SAMLVersion.VERSION_20);
 
         buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
 
@@ -195,13 +222,14 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * to be used to deliver response from the IDP.
      *
      * @param request request
-     * @param service service to deliver response to
+     * @param service service to deliver response to, building is skipped when null
      * @throws MetadataProviderException error retrieving metadata information
      */
-    private void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
-        request.setVersion(SAMLVersion.VERSION_20);
-        request.setAssertionConsumerServiceURL(service.getLocation());
-        request.setProtocolBinding(service.getBinding());
+    protected void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
+        if (service != null) {
+            request.setAssertionConsumerServiceURL(service.getLocation());
+            request.setProtocolBinding(service.getBinding());
+        }
     }
 
     /**

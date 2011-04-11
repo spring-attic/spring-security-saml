@@ -22,15 +22,11 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
-import org.springframework.util.Assert;
-import sun.misc.Regexp;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utility class for SAML entities
@@ -42,35 +38,62 @@ public class SAMLUtil {
     private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);
 
     /**
-     * Returns assertion consumer service of the given SP for the given binding. If the specified binding
-     * can't be found, default binding is returned. In case no binding is marked as default, first binding
-     * for assertionConsumer endpoint is used. In case SP doesn't contain any assertionConsumer endpoint
-     * exception is thrown.
+     * Returns assertion consumer service of the given SP.
+     * <p/>
+     * When binding is specified locates assertionConsumer which can accept message using given binding. Fails is none is found.
+     * <p/>
+     * When no binding is specified (null) tries to locate consumer service determined by the WebSSOProfileOptions field
+     * assertionConsumerIndex. In case index is invalid processing fails.
+     * <p/>
+     * When options do not contain any index default consumer service is used or first consumer service when no default
+     * is specified.
      *
-     * @param descriptor descriptor to search for binding in
-     * @param binding    binding type
-     * @return consumer service capable of handling the given binding
-     * @throws MetadataProviderException in case there is not service capable of handling the binding
+     * @param idpssoDescriptor idp, can be null when no IDP is known in advance
+     * @param spDescriptor     sp
+     * @param options          user supplied preferences
+     * @param binding          binding to be used, overrides other settings
+     * @return consumer service or null
+     * @throws MetadataProviderException in case index supplied in options is invalid or no consumer service can be found
      */
-    public static AssertionConsumerService getAssertionConsumerForBinding(SPSSODescriptor descriptor, String binding) throws MetadataProviderException {
-        List<AssertionConsumerService> services = descriptor.getAssertionConsumerServices();
-        AssertionConsumerService foundService = null;
-        for (AssertionConsumerService service : services) {
-            if (binding.equals(service.getBinding())) {
-                return service;
-            } else if (foundService == null) {
-                foundService = service;
+    public static AssertionConsumerService getAssertionConsumerForBinding(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options, String binding) throws MetadataProviderException {
+
+        List<AssertionConsumerService> services = spDescriptor.getAssertionConsumerServices();
+
+        // Fixed binding
+        if (binding != null) {
+            for (AssertionConsumerService service : services) {
+                if (binding.equals(service.getBinding())) {
+                    log.debug("Using consumer service determined by fixed binding {}", binding);
+                    return service;
+                }
             }
+            throw new MetadataProviderException("No consumer service found for binding " + binding);
         }
 
-        if (descriptor.getDefaultAssertionConsumerService() != null) {
-            return descriptor.getDefaultAssertionConsumerService();
-        } else if (foundService != null) {
-            return foundService;
+        // Use user preference
+        if (options.getAssertionConsumerIndex() != null) {
+            for (AssertionConsumerService service : services) {
+                if (options.getAssertionConsumerIndex().equals(service.getIndex())) {
+                    log.debug("Using consumer service determined by user preference with binding {}", service.getBinding());
+                    return service;
+                }
+            }
+            throw new MetadataProviderException("AssertionConsumerIndex " + options.getAssertionConsumerIndex() + " not found for spDescriptor " + spDescriptor);
         }
 
-        log.debug("No binding found for SP with binding " + binding);
-        throw new MetadataProviderException("Binding " + binding + " is not supported for this SP and no other was found");
+        if (spDescriptor.getDefaultAssertionConsumerService() != null) {
+            AssertionConsumerService service = spDescriptor.getDefaultAssertionConsumerService();
+            log.debug("Using default consumer service with binding {}", service.getBinding());
+            return service;
+        } else if (services.size() > 0) {
+            AssertionConsumerService service = services.iterator().next();
+            log.debug("Using first available consumer service with binding {}", service.getBinding());
+            return service;
+        } else {
+            log.debug("No consumer service found for SP");
+            throw new MetadataProviderException("Service provider has no available consumer services " + spDescriptor);
+        }
+
     }
 
     /**
@@ -111,6 +134,15 @@ public class SAMLUtil {
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
     }
 
+    /**
+     * Selects binding used to sent message to the IDP.
+     *
+     * @param options user specified preferences
+     * @param idp     idp
+     * @param sp      sp
+     * @return binding to use for message delivery
+     * @throws MetadataProviderException error
+     */
     public static String getLoginBinding(WebSSOProfileOptions options, IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
 
         String requiredBinding = options.getBinding();

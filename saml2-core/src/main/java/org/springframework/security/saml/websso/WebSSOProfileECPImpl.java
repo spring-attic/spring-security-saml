@@ -32,7 +32,6 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.util.SAMLUtil;
 
 import java.util.Set;
 
@@ -56,7 +55,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-        AssertionConsumerService assertionConsumer = SAMLUtil.getAssertionConsumerForBinding(spDescriptor, SAMLConstants.SAML2_PAOS_BINDING_URI);
+        AssertionConsumerService assertionConsumer = getAssertionConsumerService(null, spDescriptor, options, SAMLConstants.SAML2_PAOS_BINDING_URI);
 
         // The last parameter refers to the IdP that should receive the message. However,
         // in ECP, we don't know in advance which IdP will be contacted.

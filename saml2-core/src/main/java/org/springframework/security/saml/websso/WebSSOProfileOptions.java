@@ -31,6 +31,7 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     private String binding;
     private Set<String> allowedIDPs;
     private String providerName;
+    private Integer assertionConsumerIndex;
 
     // Name ID policy
     private String nameID;
@@ -65,12 +66,12 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     }
 
     /**
-     * Sets binding to be used for connection to IDP and back. Following values are supported:
-     * "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect".
+     * Sets binding to be used for for sending SAML message to IDP.
      *
      * @param binding binding value
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
+     * @see org.opensaml.common.xml.SAMLConstants#SAML2_PAOS_BINDING_URI
      */
     public void setBinding(String binding) {
         this.binding = binding;
@@ -236,6 +237,20 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      */
     public void setProviderName(String providerName) {
         this.providerName = providerName;
+    }
+
+    public Integer getAssertionConsumerIndex() {
+        return assertionConsumerIndex;
+    }
+
+    /**
+     * When set determines assertionConsumerService and binding to which should IDP send response. By default
+     * service is determined automatically. Available indexes can be found in metadata of this service provider.
+     *
+     * @param assertionConsumerIndex index
+     */
+    public void setAssertionConsumerIndex(Integer assertionConsumerIndex) {
+        this.assertionConsumerIndex = assertionConsumerIndex;
     }
 
 }

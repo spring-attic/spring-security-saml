@@ -29,6 +29,7 @@ import org.opensaml.xml.security.criteria.UsageCriteria;
 import org.opensaml.xml.security.x509.BasicPKIXValidationInformation;
 import org.opensaml.xml.security.x509.PKIXValidationInformation;
 import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -218,7 +219,13 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
 
         Collection<X509Certificate> anchors = new LinkedList<X509Certificate>();
         for (Credential key : metadataCredentials) {
-            anchors.add((X509Certificate) key.getPublicKey());
+            if (key instanceof X509Credential) {
+                X509Credential cred = (X509Credential) key;
+                log.debug("Using key {} as a trust anchor", cred.getEntityCertificate().getSubjectDN());
+                anchors.add(cred.getEntityCertificate());
+            } else {
+                log.debug("Key {} is not of X509Credential type, skipping", key.getEntityId());
+            }
         }
 
         PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, null, getPKIXDepth());

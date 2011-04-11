@@ -17,6 +17,8 @@ package org.springframework.security.saml.metadata;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -185,6 +187,35 @@ public class MetadataManagerTest {
 
         // Make sure the verifiers passsed witnout problems
         assertVerifiers(verifiers);
+
+    }
+
+    /**
+     * Test verifies that new metadata provider can be added after manager has already been created.
+     * @throws Exception error
+     */
+    @Test
+    public void testMetadataChanges() throws Exception {
+
+        MetadataProvider newProvider = context.getBean("singleProvider", MetadataProvider.class);
+        assertNull(manager.getEntityDescriptor("http://localhost:8080/noBinding"));
+
+        manager.addMetadataProvider(newProvider);
+        manager.refreshMetadata();
+        assertNotNull(manager.getEntityDescriptor("http://localhost:8080/noBinding"));
+
+        boolean found = false;
+        for (ExtendedMetadataDelegate provider : manager.getAvailableProviders()) {
+            if (newProvider.equals(provider) || newProvider.equals(provider.getDelegate()) ) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue("Added provider wasn't found in the list of active providers", found);
+
+        manager.removeMetadataProvider(newProvider);
+        manager.refreshMetadata();
+        assertNull(manager.getEntityDescriptor("http://localhost:8080/noBinding"));
 
     }
 

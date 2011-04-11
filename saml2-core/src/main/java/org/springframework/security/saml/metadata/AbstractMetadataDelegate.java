@@ -117,7 +117,7 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
             ExtendedMetadataDelegate del = (ExtendedMetadataDelegate) obj;
             return delegate.equals(del.getDelegate());
         } else {
-            return delegate.equals(obj);
+            return false;
         }
     }
 

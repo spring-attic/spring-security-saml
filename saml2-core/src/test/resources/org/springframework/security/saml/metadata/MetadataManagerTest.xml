@@ -94,6 +94,15 @@
         <property name="refreshCheckInterval" value="100"/>
     </bean>
 
+    <!-- A provider we will add/remove from metadata manager -->
+    <bean id="singleProvider" class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+          init-method="initialize">
+        <constructor-arg index="0">
+            <value type="java.io.File">classpath:testIDPNoSSOBinding.xml</value>
+        </constructor-arg>
+        <property name="parserPool" ref="parserPool"/>
+    </bean>
+
     <!-- XML parser pool needed for OpenSAML parsing -->
     <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
 

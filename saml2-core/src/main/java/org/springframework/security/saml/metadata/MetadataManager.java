@@ -254,6 +254,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     /**
      * Adds a new metadata provider to the managed list. At first provider is only registered and will be validated
      * upon next round of metadata refreshing or call to refreshMetadata.
+     * <p>
+     * Unless provider already extends class ExtendedMetadataDelegate it will be automatically wrapped in it as part of the
+     * addition.
      *
      * @param newProvider provider
      * @throws MetadataProviderException in case provider can't be added
@@ -280,6 +283,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
     }
 
+    /**
+     * Removes existing metadata provider from the availability list. Provider will be completely removed
+     * during next manager refresh.
+     *
+     * @param provider provider to remove
+     */
     @Override
     public void removeMetadataProvider(MetadataProvider provider) {
 
@@ -293,13 +302,45 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             ExtendedMetadataDelegate wrappedProvider = getWrappedProvider(provider);
             availableProviders.remove(wrappedProvider);
-            super.removeMetadataProvider(wrappedProvider);
 
         } finally {
             lock.writeLock().unlock();
         }
 
         setRefreshRequired(true);
+
+    }
+
+    /**
+     * Method provides list of active providers - those which are valid and can be queried for metadata. Returned
+     * value is a copy.
+     *
+     * @return active providers
+     */
+    public List<MetadataProvider> getProviders() {
+
+        try {
+            lock.readLock().lock();
+            return new ArrayList<MetadataProvider>(super.getProviders());
+        } finally {
+            lock.readLock().unlock();
+        }
+
+    }
+    /**
+     * Method provides list of all available providers. Not all of these providers may be used in case their validation failed.
+     * Returned value is a copy of the data.
+     *
+     * @return all available providers
+     */
+    public List<ExtendedMetadataDelegate> getAvailableProviders() {
+
+        try {
+            lock.readLock().lock();
+            return new ArrayList<ExtendedMetadataDelegate>(availableProviders);
+        } finally {
+            lock.readLock().unlock();
+        }
 
     }
 
@@ -355,7 +396,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
             if (roleDescriptor != null) {
                 if (spName.contains(key)) {
-                    log.warn("Provider {} contains entity {} which SP which was already contained in another metadata provider and will be ignored", provider, key);
+                    log.warn("Provider {} contains entity {} which was already included in another metadata provider and will be ignored", provider, key);
                 } else {
                     spName.add(key);
                 }
@@ -397,6 +438,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                     log.debug("Remote entity {} available", key);
 
                 }
+
             } else {
 
                 log.debug("No extended metadata available for entity {}", key);
@@ -423,7 +465,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         if (provider.isTrustFiltersInitialized()) {
 
-            log.debug("Metadata provider was already initialized, signature validation will be skipped");
+            log.debug("Metadata provider was already initialized, signature filter initialization will be skipped");
 
         } else {
 
@@ -438,11 +480,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             MetadataFilter currentFilter = provider.getMetadataFilter();
             if (currentFilter != null) {
                 if (currentFilter instanceof MetadataFilterChain) {
-                    log.debug("Adding trust filter into existing chain");
+                    log.debug("Adding signature filter into existing chain");
                     MetadataFilterChain chain = (MetadataFilterChain) currentFilter;
                     chain.getFilters().add(filter);
                 } else {
-                    log.debug("Combining filter with the existing in a new chain");
+                    log.debug("Combining signature filter with the existing in a new chain");
                     MetadataFilterChain chain = new MetadataFilterChain();
                     chain.getFilters().add(currentFilter);
                     chain.getFilters().add(filter);

@@ -126,6 +126,8 @@ public class SAMLEntryPointTest {
         RequestDispatcher dispatcher = createMock(RequestDispatcher.class);
 
         entryPoint.setIdpSelectionPath("/selectIDP");
+        expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
+        expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn(null);
         expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
         expect(request.getHeader("Accept")).andReturn("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -216,7 +218,9 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
-        expect(request.getParameter("idp")).andReturn("testIDP");
+        expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
+        expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("testIDP").times(2);
+        expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
@@ -239,7 +243,9 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
-        expect(request.getParameter("idp")).andReturn("http://localhost:8080/opensso");
+        expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
+        expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("http://localhost:8080/opensso").times(2);
+        expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);

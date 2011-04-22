@@ -22,8 +22,12 @@ import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.common.Extensions;
+import org.opensaml.saml2.common.impl.ExtensionsBuilder;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.*;
+import org.opensaml.samlext.idpdisco.DiscoveryResponse;
+import org.opensaml.util.URLBuilder;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
@@ -38,18 +42,17 @@ import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.util.Pair;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
 import org.springframework.security.saml.key.KeyManager;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The class is responsible for generation of service provider metadata describing the application in
@@ -74,6 +77,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     private Collection<String> nameID = null;
     private Collection<String> bindings = null;
+    private boolean includeDiscovery = true;
 
     private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
@@ -207,6 +211,12 @@ public class MetadataGenerator implements ApplicationContextAware {
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_SOAP11_BINDING_URI));
         }
 
+        // Build extensions
+        Extensions extensions = buildExtensions(entityBaseURL, entityAlias);
+        if (extensions != null) {
+            spDescriptor.setExtensions(extensions);
+        }
+
         // Generate key info
         spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo(signingKey)));
         spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo(encryptionKey)));
@@ -217,6 +227,26 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
 
         return spDescriptor;
+
+    }
+
+    protected Extensions buildExtensions(String entityBaseURL, String entityURL) {
+
+        boolean include = false;
+        Extensions extensions = new ExtensionsBuilder().buildObject();
+
+        // Add discovery
+        if (isIncludeDiscovery()) {
+            DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityURL);
+            extensions.getUnknownXMLObjects().add(discoveryService);
+            include = true;
+        }
+
+        if (include) {
+            return extensions;
+        } else {
+            return null;
+        }
 
     }
 
@@ -278,6 +308,17 @@ public class MetadataGenerator implements ApplicationContextAware {
         return consumer;
     }
 
+    protected DiscoveryResponse getDiscoveryService(String entityBaseURL, String entityAlias) {
+        SAMLObjectBuilder<DiscoveryResponse> builder = (SAMLObjectBuilder<DiscoveryResponse>) builderFactory.getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+        DiscoveryResponse discovery = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+        discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
+        SAMLEntryPoint entryPoint = getSAMLEntryPoint();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
+        discovery.setLocation(getServerURL(entityBaseURL, entityAlias, entryPoint.getFilterProcessesUrl(), params));
+        return discovery;
+    }
+
     protected SingleLogoutService getSingleLogoutService(String entityBaseURL, String entityAlias, String binding) {
         SAMLObjectBuilder<SingleLogoutService> builder = (SAMLObjectBuilder<SingleLogoutService>) builderFactory.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
         SingleLogoutService logoutService = builder.buildObject();
@@ -296,6 +337,20 @@ public class MetadataGenerator implements ApplicationContextAware {
      */
     private String getServerURL(String entityBaseURL, String entityAlias, String processingURL) {
 
+        return getServerURL(entityBaseURL, entityAlias, processingURL, null);
+
+    }
+
+    /**
+     * Creates URL at which the local server is capable of accepting incoming SAML messages.
+     *
+     * @param entityBaseURL entity ID
+     * @param processingURL local context at which processing filter is waiting
+     * @param parameters    key - value pairs to be included as query part of the generated url, can be null
+     * @return URL of local server
+     */
+    private String getServerURL(String entityBaseURL, String entityAlias, String processingURL, Map<String, String> parameters) {
+
         StringBuffer result = new StringBuffer();
         result.append(entityBaseURL);
         if (!processingURL.startsWith("/")) {
@@ -309,7 +364,23 @@ public class MetadataGenerator implements ApplicationContextAware {
             result.append("alias/");
             result.append(entityAlias);
         }
-        return result.toString();
+
+        String resultString = result.toString();
+
+        if (parameters == null || parameters.size() == 0) {
+
+            return resultString;
+
+        } else {
+
+            // Add parameters
+            URLBuilder returnUrlBuilder = new URLBuilder(resultString);
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                returnUrlBuilder.getQueryParams().add(new Pair<String, String>(entry.getKey(), entry.getValue()));
+            }
+            return returnUrlBuilder.buildURL();
+
+        }
 
     }
 
@@ -323,6 +394,19 @@ public class MetadataGenerator implements ApplicationContextAware {
             throw new SAMLRuntimeException("More then one SAML processing filter were defined in Spring configuration");
         } else {
             return (SAMLProcessingFilter) map.values().iterator().next();
+        }
+    }
+
+    private SAMLEntryPoint getSAMLEntryPoint() {
+        Map map = applicationContext.getBeansOfType(SAMLEntryPoint.class);
+        if (map.size() == 0) {
+            logger.error("No SAML entry point was defined");
+            throw new SAMLRuntimeException("No SAML entry point is defined in Spring configuration");
+        } else if (map.size() > 1) {
+            logger.error("More then one SAML Entry points were defined");
+            throw new SAMLRuntimeException("More then one SAML entry points were defined in Spring configuration");
+        } else {
+            return (SAMLEntryPoint) map.values().iterator().next();
         }
     }
 
@@ -477,6 +561,19 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     public void setTlsKey(String tlsKey) {
         this.tlsKey = tlsKey;
+    }
+
+    public boolean isIncludeDiscovery() {
+        return includeDiscovery;
+    }
+
+    /**
+     * When true discovery profile metadata pointing to the default SAMLEntryPoint will be generated.
+     *
+     * @param includeDiscovery discovery
+     */
+    public void setIncludeDiscovery(boolean includeDiscovery) {
+        this.includeDiscovery = includeDiscovery;
     }
 
 }

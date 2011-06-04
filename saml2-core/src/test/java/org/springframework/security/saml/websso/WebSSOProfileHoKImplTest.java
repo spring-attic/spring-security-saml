@@ -29,6 +29,7 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.saml.util.SAMLUtil;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +43,7 @@ import static org.junit.Assert.*;
 /**
  * @author Vladimir Schafer
  */
-public class WebSSOProfileImplTest extends SAMLTestBase {
+public class WebSSOProfileHoKImplTest extends SAMLTestBase {
 
     ApplicationContext context;
     WebSSOProfile profile;
@@ -160,10 +161,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
-        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
-        assertTrue(authnRequest.isSigned());
-        assertNotNull(authnRequest.getSignature());
     }
 
     /**
@@ -188,10 +186,10 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         assertEquals(false, authnRequest.isForceAuthn());
         assertEquals(false, authnRequest.isPassive());
         assertEquals("http://localhost:8081/spring-security-saml2-webapp", authnRequest.getIssuer().getValue());
-        assertEquals("http://localhost:8081/spring-security-saml2-webapp/saml/SSO", authnRequest.getAssertionConsumerServiceURL());
-        assertEquals("http://localhost:8080/opensso/SSORedirect/metaAlias/idp", authnRequest.getDestination());
+        assertEquals("http://localhost:8081/spring-security-saml2-webapp/saml/HoKSSO", authnRequest.getAssertionConsumerServiceURL());
+        assertEquals("http://localhost:8080/opensso/SSOHoK/metaAlias/idp", authnRequest.getDestination());
         assertEquals(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI, authnRequest.getProtocolBinding());
-        assertEquals(org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI, samlContext.getPeerEntityEndpoint().getBinding());
+        assertEquals(org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLUtil.getBindingForEndpoint(samlContext.getPeerEntityEndpoint()));
         verifyMock();
 
     }
@@ -212,13 +210,13 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
 
     /**
      * Verifies that specifying consumer index which is not supported by the given profile will fail.
-     * The referred index uses Holder-of-Key binding.
+     * The referred index uses HTTP-POST binding without support for HoK.
      *
      * @throws Exception error
      */
     @Test(expected = MetadataProviderException.class)
     public void testUnsupportedConsumerIndex() throws Exception {
-        options.setAssertionConsumerIndex(1);
+        options.setAssertionConsumerIndex(0);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
@@ -251,22 +249,6 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
-    }
-
-    /**
-     * Verifies that IDP without any SSO binding can't be used.
-     *
-     * @throws Exception error
-     */
-    @Test
-    public void testNoSigningRequired() throws Exception {
-        options.setIdp("http://localhost:8080/noSign");
-        storage.storeMessage((String) notNull(), (XMLObject) notNull());
-        replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
-        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
-        verifyMock();
-        assertTrue(!authnRequest.isSigned());
     }
 
     /**
@@ -350,4 +332,5 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         replay(request);
         replay(response);
     }
+
 }

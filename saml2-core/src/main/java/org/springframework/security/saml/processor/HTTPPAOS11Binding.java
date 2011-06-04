@@ -15,15 +15,16 @@
  */
 package org.springframework.security.saml.processor;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.liberty.binding.decoding.HTTPPAOS11Decoder;
 import org.opensaml.liberty.binding.encoding.HTTPPAOS11Encoder;
+import org.opensaml.ws.message.decoder.MessageDecoder;
+import org.opensaml.ws.message.encoder.MessageEncoder;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.parse.ParserPool;
-import org.springframework.security.saml.processor.HTTPSOAP11Binding;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
 
@@ -31,7 +32,11 @@ public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
 		super(new HTTPPAOS11Decoder(parserPool), new HTTPPAOS11Encoder());
 	}
 
-	@Override
+    public HTTPPAOS11Binding(MessageDecoder decoder, MessageEncoder encoder) {
+        super(decoder, encoder);
+    }
+
+    @Override
     public boolean supports(InTransport transport) {
 	    if (transport instanceof HttpServletRequestAdapter) {
 	        HttpServletRequestAdapter t = (HttpServletRequestAdapter) transport;

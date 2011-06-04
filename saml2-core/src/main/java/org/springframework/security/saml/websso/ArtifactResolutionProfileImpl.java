@@ -59,6 +59,11 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
         this.httpClient = httpClient;
     }
 
+    @Override
+    public String getProfileIdentifier() {
+        return org.springframework.security.saml.SAMLConstants.SAML2_ARTIFACT_PROFILE_URI;
+    }
+
     /**
      * Uses HTTPClient to send and retrieve ArtifactMessages.
      *

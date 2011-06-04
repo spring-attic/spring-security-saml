@@ -36,6 +36,7 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private SignatureTrustEngine localTrustEngine;
     private TrustEngine<X509Credential> localSSLTrustEngine;
     private X509Credential localSSLCredential;
+    private X509Credential peerSSLCredential;
     private ExtendedMetadata peerExtendedMetadata;
 
     /**
@@ -127,6 +128,20 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
 
     public void setLocalSSLCredential(X509Credential localSSLCredential) {
         this.localSSLCredential = localSSLCredential;
+    }
+
+    /**
+     * Certificate used the peer entity used to authenticate against our server as part of the SSL/TLS
+     * connection. Only used for peer initiated communication.
+     *
+     * @return peer credential, when available
+     */
+    public X509Credential getPeerSSLCredential() {
+        return peerSSLCredential;
+    }
+
+    public void setPeerSSLCredential(X509Credential peerSSLCredential) {
+        this.peerSSLCredential = peerSSLCredential;
     }
 
 }

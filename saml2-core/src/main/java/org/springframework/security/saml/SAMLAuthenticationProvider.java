@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -94,6 +95,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
         SAMLCredential credential;
 
         try {
+            // TODO hok - use correct processing filter based on profile
             credential = consumer.processAuthenticationResponse(context, store);
         } catch (SAMLException e) {
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
@@ -245,6 +247,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      * @param consumer consumer
      */
     @Autowired
+    @Qualifier("webSSOprofileConsumer")
     public void setConsumer(WebSSOProfileConsumer consumer) {
         Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");
         this.consumer = consumer;

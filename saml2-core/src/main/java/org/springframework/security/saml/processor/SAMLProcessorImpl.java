@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
 import javax.xml.namespace.QName;
@@ -107,7 +108,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         }
 
         samlContext.setPeerEntityId(samlContext.getPeerEntityMetadata().getEntityID());
-        samlContext.setPeerExtendedMetadata(((MetadataManager)samlContext.getMetadataProvider()).getExtendedMetadata(samlContext.getPeerEntityId()));
+        samlContext.setPeerExtendedMetadata(((MetadataManager) samlContext.getMetadataProvider()).getExtendedMetadata(samlContext.getPeerEntityId()));
 
         return samlContext;
 
@@ -171,6 +172,17 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
     }
 
+    /**
+     * Method sends SAML message contained in the context to the specified peerEntityEnpoint. Binding is automatically
+     * determined based on the selected endpoint.
+     *
+     * @param samlContext context
+     * @param sign        true when sent message should be signed
+     * @return resulting context, might be a copy
+     * @throws SAMLException
+     * @throws MetadataProviderException
+     * @throws MessageEncodingException
+     */
     public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign)
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
@@ -179,7 +191,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
             throw new SAMLException("Could not get peer entity endpoint");
         }
 
-        return sendMessage(samlContext, sign, getBinding(endpoint.getBinding()));
+        return sendMessage(samlContext, sign, getBinding(endpoint));
 
     }
 
@@ -254,6 +266,21 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
         throw new SAMLException("Unsupported request");
 
+    }
+
+    /**
+     * Determines binding to be used for the given endpoint. By default binding returned from getBinding call on the
+     * endpoint is used. Speciall handling is used for Holder of Key WebSSO profile endpoints where real binding
+     * is stored under hoksso:ProtocolBinding attribute.
+     *
+     * @param endpoint endpoint t
+     * @return binding
+     * @throws SAMLException in case binding can't be found
+     * @throws MetadataProviderException in case binding of the endpoint can't be determined
+     * @see SAMLUtil#getBindingForEndpoint(org.opensaml.saml2.metadata.Endpoint)
+     */
+    protected SAMLBinding getBinding(Endpoint endpoint) throws SAMLException, MetadataProviderException {
+        return getBinding(SAMLUtil.getBindingForEndpoint(endpoint));
     }
 
     /**

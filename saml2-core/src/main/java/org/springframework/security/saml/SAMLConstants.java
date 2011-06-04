@@ -14,6 +14,10 @@
  */
 package org.springframework.security.saml;
 
+import org.opensaml.saml2.core.AuthnRequest;
+
+import javax.xml.namespace.QName;
+
 /**
  * Constant values for SAML module.
  *
@@ -27,6 +31,31 @@ public class SAMLConstants {
      */
     public static final String SAML_METADATA_KEY_INFO_GENERATOR = "MetadataKeyInfoGenerator";
 
+    /**
+     * Identifier of the WebSSO profile.
+     */
+    public static final String SAML2_WEBSSO_PROFILE_URI = "urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser";
+
+    /**
+     * Identifier of the WebSSO HoK profile.
+     */
+    public static final String SAML2_HOK_WEBSSO_PROFILE_URI = "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser";
+
+    /**
+     * Identifier of the ECP profile.
+     */
+    public static final String SAML2_ECP_PROFILE_URI = "urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp";
+
+    /**
+     * Identifier of the Artifact profile.
+     */
+    public static final String SAML2_ARTIFACT_PROFILE_URI = "urn:oasis:names:tc:SAML:2.0:profiles:artifact";
+
+    /**
+     * Identifier of the Single Logout profile.
+     */
+    public static final String SAML2_SLO_PROFILE_URI = "urn:oasis:names:tc:SAML:2.0:profiles:SSO:logout";
+
     public static final String AUTH_N_REQUEST = "AuthNRequest";
     public static final String AUTH_N_RESPONSE = "AuthNResponse";
     public static final String LOGOUT_REQUEST = "LogoutRequest";
@@ -37,5 +66,10 @@ public class SAMLConstants {
     
     public static final String PAOS_HTTP_ACCEPT_HEADER = "application/vnd.paos+xml";
     public static final String PAOS_HTTP_HEADER = "PAOS";
+
+    /**
+     * Qualified name of the attribute used to convey binding information in the Holder of Key metadata endpoint.
+     */
+    public static final QName WEBSSO_HOK_METADATA_ATT_NAME = new QName(org.springframework.security.saml.SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI, AuthnRequest.PROTOCOL_BINDING_ATTRIB_NAME);
 
 }

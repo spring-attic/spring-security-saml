@@ -65,7 +65,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * Default processing URL.
      */
-    private static final String DEFAULT_URL = "/saml/SingleLogout";
+    public static final String SINGLE_LOGOUT_URL = "/saml/SingleLogout";
 
     /**
      * Constructor defines URL to redirect to after successful logout and handlers.
@@ -75,7 +75,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
         super(logoutSuccessUrl, handlers);
-        this.setFilterProcessesUrl(DEFAULT_URL);
+        this.setFilterProcessesUrl(SINGLE_LOGOUT_URL);
     }
 
     /**
@@ -86,7 +86,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
         super(logoutSuccessHandler, handlers);
-        this.setFilterProcessesUrl(DEFAULT_URL);
+        this.setFilterProcessesUrl(SINGLE_LOGOUT_URL);
     }
 
     @Override

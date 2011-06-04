@@ -30,7 +30,6 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.util.Assert;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,10 +44,17 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
 
-    private static final String DEFAULT_URL = "/saml/SSO";
+    /**
+     * URL for Web SSO profile responses or unsolicited requests
+     */
+    public static final String WEBSSO_URL = "/saml/SSO";
 
     public SAMLProcessingFilter() {
-        super(DEFAULT_URL);
+        super(WEBSSO_URL);
+    }
+
+    protected SAMLProcessingFilter(String defaultFilterProcessesUrl) {
+        super(defaultFilterProcessesUrl);
     }
 
     /**
@@ -64,7 +70,8 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         try {
 
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
-            logger.debug("Attempting SAML2 authentication");
+            context.setCommunicationProfileId(getProfileName());
+            logger.debug("Attempting SAML2 authentication using profile " + getProfileName());
             processor.retrieveMessage(context);
             HttpSessionStorage storage = new HttpSessionStorage(request);
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
@@ -80,6 +87,15 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         }
 
+    }
+
+    /**
+     * Name of the profile this used for authentication.
+     *
+     * @return profile name
+     */
+    protected String getProfileName() {
+        return SAMLConstants.SAML2_WEBSSO_PROFILE_URI;
     }
 
     @Override

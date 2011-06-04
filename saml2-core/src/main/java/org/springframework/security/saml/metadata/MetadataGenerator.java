@@ -24,6 +24,7 @@ import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.common.Extensions;
 import org.opensaml.saml2.common.impl.ExtensionsBuilder;
+import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.samlext.idpdisco.DiscoveryResponse;
@@ -50,8 +51,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
 import org.springframework.security.saml.key.KeyManager;
 
+import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
@@ -78,6 +81,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     private Collection<String> nameID = null;
     private Collection<String> bindings = null;
     private boolean includeDiscovery = true;
+    private boolean includeHokSSO = true;
 
     private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
@@ -141,6 +145,9 @@ public class MetadataGenerator implements ApplicationContextAware {
         if (encryptionKey == null) {
             encryptionKey = keyManager.getDefaultCredentialName();
         }
+        if (tlsKey == null) {
+            tlsKey = keyManager.getDefaultCredentialName();
+        }
 
         boolean requestSigned = isRequestSigned();
         boolean assertionSigned = isWantAssertionSigned();
@@ -185,26 +192,30 @@ public class MetadataGenerator implements ApplicationContextAware {
         // Name ID
         spDescriptor.getNameIDFormats().addAll(getNameIDFormat(includedNameID));
 
-        // Populate bindings
+        // Populate endpoints
         int index = 0;
         boolean isDefault = true;
         if (includedBindings.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_POST_BINDING_URI));
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_POST_BINDING_URI));
-            index++;
             isDefault = false;
+            if (isIncludeHokSSO()) {
+                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+            }
         }
         if (includedBindings.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
-            index++;
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
             isDefault = false;
+            if (isIncludeHokSSO()) {
+                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            }
         }
         if (includedBindings.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, SAMLConstants.SAML2_PAOS_BINDING_URI));
-            index++;
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
             isDefault = false;
         }
         if (includedBindings.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
+            // Assertion consumer MUST NOT be used with HTTP Redirect, Profiles 424, same applies to HoK profile
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
         }
         if (includedBindings.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
@@ -297,33 +308,37 @@ public class MetadataGenerator implements ApplicationContextAware {
         return formats;
     }
 
-    protected AssertionConsumerService getAssertionConsumerService(String entityBaseURL, String entityAlias, boolean isDefault, int index, String binding) {
+    protected AssertionConsumerService getAssertionConsumerService(String entityBaseURL, String entityAlias, boolean isDefault, int index, String filterURL, String binding) {
         SAMLObjectBuilder<AssertionConsumerService> builder = (SAMLObjectBuilder<AssertionConsumerService>) builderFactory.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         AssertionConsumerService consumer = builder.buildObject();
-        SAMLProcessingFilter samlFilter = getSAMLFilter();
-        consumer.setLocation(getServerURL(entityBaseURL, entityAlias, samlFilter.getFilterProcessesUrl()));
+        consumer.setLocation(getServerURL(entityBaseURL, entityAlias, filterURL));
         consumer.setBinding(binding);
         consumer.setIsDefault(isDefault);
         consumer.setIndex(index);
         return consumer;
     }
 
+    protected AssertionConsumerService getHoKAssertionConsumerService(String entityBaseURL, String entityAlias, boolean isDefault, int index, String filterURL, String binding) {
+        AssertionConsumerService hokAssertionConsumer = getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index, filterURL, org.springframework.security.saml.SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI);
+        QName consumerName = new QName(org.springframework.security.saml.SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI, AuthnRequest.PROTOCOL_BINDING_ATTRIB_NAME, "hoksso");
+        hokAssertionConsumer.getUnknownAttributes().put(consumerName, binding);
+        return hokAssertionConsumer;
+    }
+
     protected DiscoveryResponse getDiscoveryService(String entityBaseURL, String entityAlias) {
         SAMLObjectBuilder<DiscoveryResponse> builder = (SAMLObjectBuilder<DiscoveryResponse>) builderFactory.getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         DiscoveryResponse discovery = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
-        SAMLEntryPoint entryPoint = getSAMLEntryPoint();
         Map<String, String> params = new HashMap<String, String>();
         params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
-        discovery.setLocation(getServerURL(entityBaseURL, entityAlias, entryPoint.getFilterProcessesUrl(), params));
+        discovery.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params));
         return discovery;
     }
 
     protected SingleLogoutService getSingleLogoutService(String entityBaseURL, String entityAlias, String binding) {
         SAMLObjectBuilder<SingleLogoutService> builder = (SAMLObjectBuilder<SingleLogoutService>) builderFactory.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
         SingleLogoutService logoutService = builder.buildObject();
-        SAMLLogoutProcessingFilter logoutFilter = getSAMLLogoutFilter();
-        logoutService.setLocation(getServerURL(entityBaseURL, entityAlias, logoutFilter.getFilterProcessesUrl()));
+        logoutService.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLLogoutFilterPath()));
         logoutService.setBinding(binding);
         return logoutService;
     }
@@ -384,20 +399,15 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     }
 
-    private SAMLProcessingFilter getSAMLFilter() {
-        Map map = applicationContext.getBeansOfType(SAMLProcessingFilter.class);
-        if (map.size() == 0) {
-            logger.error("No SAML Processing filter was defined");
-            throw new SAMLRuntimeException("No SAML processing filter is defined in Spring configuration");
-        } else if (map.size() > 1) {
-            logger.error("More then one SAML Processing filter were defined");
-            throw new SAMLRuntimeException("More then one SAML processing filter were defined in Spring configuration");
-        } else {
-            return (SAMLProcessingFilter) map.values().iterator().next();
-        }
+    private String getSAMLWebSSOProcessingFilterPath() {
+        return SAMLProcessingFilter.WEBSSO_URL;
     }
 
-    private SAMLEntryPoint getSAMLEntryPoint() {
+    private String getSAMLWebSSOHoKProcessingFilterPath() {
+        return SAMLWebSSOHoKProcessingFilter.WEBSSO_HOK_URL;
+    }
+
+    private String getSAMLEntryPointPath() {
         Map map = applicationContext.getBeansOfType(SAMLEntryPoint.class);
         if (map.size() == 0) {
             logger.error("No SAML entry point was defined");
@@ -406,21 +416,12 @@ public class MetadataGenerator implements ApplicationContextAware {
             logger.error("More then one SAML Entry points were defined");
             throw new SAMLRuntimeException("More then one SAML entry points were defined in Spring configuration");
         } else {
-            return (SAMLEntryPoint) map.values().iterator().next();
+            return ((SAMLEntryPoint) map.values().iterator().next()).getFilterProcessesUrl();
         }
     }
 
-    private SAMLLogoutProcessingFilter getSAMLLogoutFilter() {
-        Map map = applicationContext.getBeansOfType(SAMLLogoutProcessingFilter.class);
-        if (map.size() == 0) {
-            logger.error("No SAML Processing filter was defined");
-            throw new SAMLRuntimeException("No SAML processing filter is defined in Spring configuration");
-        } else if (map.size() > 1) {
-            logger.error("More then one SAML Processing filter were defined");
-            throw new SAMLRuntimeException("More then one SAML processing filter were defined in Spring configuration");
-        } else {
-            return (SAMLLogoutProcessingFilter) map.values().iterator().next();
-        }
+    private String getSAMLLogoutFilterPath() {
+        return SAMLLogoutProcessingFilter.SINGLE_LOGOUT_URL;
     }
 
     /**
@@ -574,6 +575,19 @@ public class MetadataGenerator implements ApplicationContextAware {
      */
     public void setIncludeDiscovery(boolean includeDiscovery) {
         this.includeDiscovery = includeDiscovery;
+    }
+
+    public boolean isIncludeHokSSO() {
+        return includeHokSSO;
+    }
+
+    /**
+     * When true an Holder-of-key WebSSO profile enpoint will be included.
+     *
+     * @param includeHokSSO hok sso
+     */
+    public void setIncludeHokSSO(boolean includeHokSSO) {
+        this.includeHokSSO = includeHokSSO;
     }
 
 }

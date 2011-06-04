@@ -18,20 +18,18 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
+import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.util.SAMLUtil;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,6 +46,11 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
     public WebSSOProfileImpl(SAMLProcessor processor, MetadataManager manager) {
         super(processor, manager);
+    }
+
+    @Override
+    public String getProfileIdentifier() {
+        return SAMLConstants.SAML2_WEBSSO_PROFILE_URI;
     }
 
     /**
@@ -77,8 +80,8 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
         ExtendedMetadata idpExtendedMetadata = metadata.getExtendedMetadata(idpId);
-        SingleSignOnService ssoService = getSingleSignOnService(idpssoDescriptor, spDescriptor, options);
-        AssertionConsumerService consumerService = getAssertionConsumerService(idpssoDescriptor, spDescriptor, options, null);
+        SingleSignOnService ssoService = getSingleSignOnService(options, idpssoDescriptor, spDescriptor);
+        AssertionConsumerService consumerService = getAssertionConsumerService(options, idpssoDescriptor, spDescriptor);
         AuthnRequest authRequest = getAuthnRequest(context, options, consumerService, ssoService);
 
         // TODO optionally implement support for conditions, subject
@@ -98,31 +101,155 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     }
 
     /**
-     * Method determines SingleSignOn service used to deliver AuthNRequest to the IDP. Service also determines the used binding.
-     * When set value binding from WebSSOProfileOptions is used to prioritize the service.
+     * Method determines SingleSignOn service (and thus binding) to be used to deliver AuthnRequest to the IDP.
+     * When binding is specified in the WebSSOProfileOptions it is honored. Otherwise first suitable binding is used.
      *
+     * @param options          user supplied preferences, binding attribute is used
      * @param idpssoDescriptor idp
      * @param spDescriptor     sp
-     * @param options          user supplied preferences
      * @return service to send message to
-     * @throws MetadataProviderException in case service can't be determined
+     * @throws MetadataProviderException in case binding from the options is invalid or not found or when no default service can be found
      */
-    protected SingleSignOnService getSingleSignOnService(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options) throws MetadataProviderException {
-        return SAMLUtil.getSSOServiceForBinding(idpssoDescriptor, SAMLUtil.getLoginBinding(options, idpssoDescriptor, spDescriptor));
+    protected SingleSignOnService getSingleSignOnService(WebSSOProfileOptions options, IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor) throws MetadataProviderException {
+
+        // User specified value
+        String userBinding = options.getBinding();
+
+        // Find the endpoint
+        List<SingleSignOnService> services = idpssoDescriptor.getSingleSignOnServices();
+        for (SingleSignOnService service : services) {
+            if (isEndpointSupported(service)) {
+                if (userBinding != null) {
+                    if (isEndpointMatching(service, userBinding)) {
+                        log.debug("Found user specified binding");
+                        return service;
+                    }
+                } else {
+                    // Use as a default
+                    return service;
+                }
+            }
+        }
+
+        // No value found
+        if (userBinding != null) {
+            log.debug("User specified binding {} not found for IDP", userBinding);
+            throw new MetadataProviderException("User specified binding is not supported by the Identity Provider using profile " + getProfileIdentifier());
+        } else {
+            log.debug("No binding found for IDP " + userBinding);
+            throw new MetadataProviderException("No supported binding was found for profile " + getProfileIdentifier());
+        }
+
     }
 
     /**
-     * Determines assertion consumer service where IDP should send reply to the AuthnRequest.
+     * Determines endpoint where should the identity provider return the SAML message. Endpoint also implies the used
+     * binding. In case assertionConsumerIndex in the WebSSOProfileOptions is specified the endpoint with the given ID is used.
+     * Otherwise assertionConsumerService marked as default is used when present, otherwise first found supported
+     * assertionConsumerService is used.
+     * <p/>
+     * In case endpoint determined by the webSSOProfileOptions index is not supported by the profile
+     * an exception is raised.
      *
-     * @param idpssoDescriptor idp, can be null when no IDP is known in advance
-     * @param spDescriptor     sp
      * @param options          user supplied preferences
-     * @param binding binding to be used, overrides other settings
+     * @param idpSSODescriptor idp, can be null when no IDP is known in advance
+     * @param spDescriptor     sp
      * @return consumer service or null
-     * @throws MetadataProviderException in case index supplied in options is invalid or no consumer service can be found
+     * @throws MetadataProviderException in case index supplied in options is invalid or unsupported or no supported consumer service can be found
      */
-    protected AssertionConsumerService getAssertionConsumerService(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options, String binding) throws MetadataProviderException {
-        return SAMLUtil.getAssertionConsumerForBinding(idpssoDescriptor, spDescriptor, options, binding);
+    protected AssertionConsumerService getAssertionConsumerService(WebSSOProfileOptions options, IDPSSODescriptor idpSSODescriptor, SPSSODescriptor spDescriptor) throws MetadataProviderException {
+
+        List<AssertionConsumerService> services = spDescriptor.getAssertionConsumerServices();
+
+        // Use user preference
+        if (options.getAssertionConsumerIndex() != null) {
+            for (AssertionConsumerService service : services) {
+                if (options.getAssertionConsumerIndex().equals(service.getIndex())) {
+                    if (!isEndpointSupported(service)) {
+                        throw new MetadataProviderException("Endpoint designated by the value in the WebSSOProfileOptions is not supported by this profile");
+                    } else {
+                        log.debug("Using consumer service determined by user preference with binding {}", service.getBinding());
+                        return service;
+                    }
+                }
+            }
+            throw new MetadataProviderException("AssertionConsumerIndex " + options.getAssertionConsumerIndex() + " not found for spDescriptor " + spDescriptor);
+        }
+
+        // Use default
+        if (spDescriptor.getDefaultAssertionConsumerService() != null && isEndpointSupported(spDescriptor.getDefaultAssertionConsumerService())) {
+            AssertionConsumerService service = spDescriptor.getDefaultAssertionConsumerService();
+            log.debug("Using default consumer service with binding {}", service.getBinding());
+            return service;
+        }
+
+        // Iterate and find first match
+        if (services.size() > 0) {
+            for (AssertionConsumerService service : services) {
+                if (isEndpointSupported(service)) {
+                    log.debug("Using first available consumer service with binding {}", service.getBinding());
+                    return service;
+                }
+            }
+        }
+
+        log.debug("No supported assertion consumer service found for SP");
+        throw new MetadataProviderException("Service provider has no assertion consumer services available for the selected profile" + spDescriptor);
+
+    }
+
+    /**
+     * Determines whether given endpoint can be used together with the specified binding.
+     * <p>
+     * By default value of the binding in the endpoint is compared for equality with the user provided binding.
+     * <p>
+     * Method is automatically called for verification of user supplied binding value in the WebSSOProfileOptions.
+     *
+     * @param endpoint endpoint to check
+     * @param binding  binding the endpoint must support for the method to return true
+     * @return true if given endpoint can be used with the binding
+     * @throws MetadataProviderException in case match between binding and the endpoint can't be determined
+     */
+    protected boolean isEndpointMatching(Endpoint endpoint, String binding) throws MetadataProviderException {
+        return binding.equals(getEndpointBinding(endpoint));
+    }
+
+    /**
+     * Method is expected to return binding used to transfer messages to this endpoint.
+     *
+     * @param endpoint endpoint
+     * @return binding
+     * @throws MetadataProviderException in case binding can't be determined
+     */
+    protected String getEndpointBinding(Endpoint endpoint) throws MetadataProviderException {
+        return endpoint.getBinding();
+    }
+
+    /**
+     * Determines whether given SingleSignOn service can be used together with this profile. Bindings POST, Artifact
+     * and Redirect are supported for WebSSO.
+     *
+     * @param endpoint endpoint
+     * @return true if endpoint is supported
+     * @throws MetadataProviderException in case system can't verify whether endpoint is supported or not
+     */
+    protected boolean isEndpointSupported(SingleSignOnService endpoint) throws MetadataProviderException {
+        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) ||
+                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding()) ||
+                org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI.equals(endpoint.getBinding());
+    }
+
+    /**
+     * Determines whether given AssertionConsumerService can be used to deliver messages consumable by this profile. Bindings
+     * POST and Artifact are supported for WebSSO.
+     *
+     * @param endpoint endpoint
+     * @return true if endpoint is supported
+     * @throws MetadataProviderException in case system can't verify whether endpoint is supported or not
+     */
+    protected boolean isEndpointSupported(AssertionConsumerService endpoint) throws MetadataProviderException {
+        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) |
+                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding());
     }
 
     /**
@@ -157,6 +284,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         buildReturnAddress(request, assertionConsumer);
 
         return request;
+
     }
 
     /**
@@ -228,7 +356,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     protected void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
         if (service != null) {
             request.setAssertionConsumerServiceURL(service.getLocation());
-            request.setProtocolBinding(service.getBinding());
+            request.setProtocolBinding(getEndpointBinding(service));
         }
     }
 

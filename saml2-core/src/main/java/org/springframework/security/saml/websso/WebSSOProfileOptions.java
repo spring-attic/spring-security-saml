@@ -15,6 +15,7 @@
 package org.springframework.security.saml.websso;
 
 import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.springframework.security.saml.SAMLConstants;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.Set;
 public class WebSSOProfileOptions implements Serializable, Cloneable {
 
     private String idp;
+    private String profile = SAMLConstants.SAML2_WEBSSO_PROFILE_URI;
     private String binding;
     private Set<String> allowedIDPs;
     private String providerName;
@@ -72,6 +74,7 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
      * @see org.opensaml.common.xml.SAMLConstants#SAML2_PAOS_BINDING_URI
+     * @see org.springframework.security.saml.SAMLConstants#SAML2_HOK_WEBSSO_PROFILE_URI
      */
     public void setBinding(String binding) {
         this.binding = binding;
@@ -251,6 +254,22 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      */
     public void setAssertionConsumerIndex(Integer assertionConsumerIndex) {
         this.assertionConsumerIndex = assertionConsumerIndex;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    /**
+     * Sets profile to be used for sending this SSO request. By default WebSSO defined in the core SAML 2 specification
+     * is used. The Holder-of-Key WebSSO profile can be used as an alternative. Used profile determines
+     *
+     * @param profile profile
+     * @see SAMLConstants#SAML2_WEBSSO_PROFILE_URI
+     * @see SAMLConstants#SAML2_HOK_WEBSSO_PROFILE_URI
+     */
+    public void setProfile(String profile) {
+        this.profile = profile;
     }
 
 }

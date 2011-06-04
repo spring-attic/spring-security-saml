@@ -23,22 +23,27 @@ import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.ws.security.ServletRequestX509CredentialAdapter;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
 import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
 import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
 import org.opensaml.xml.security.trust.TrustEngine;
+import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.PKIXX509CredentialTrustEngine;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SAMLCredential;
@@ -47,12 +52,15 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
+import org.springframework.security.saml.websso.WebSSOProfileImpl;
 import org.springframework.util.Assert;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 /**
  * Class is responsible for parsing HttpRequest/Response and determining which local entity (IDP/SP) is responsible
@@ -61,6 +69,8 @@ import javax.xml.namespace.QName;
  * @author Vladimir Schaefer
  */
 public class SAMLContextProviderImpl implements SAMLContextProvider, InitializingBean {
+
+    protected final static Logger logger = LoggerFactory.getLogger(SAMLContextProviderImpl.class);
 
     // Way to obtain encrypted key info from XML Encryption
     private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
@@ -125,6 +135,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         populateLocalEntity(context);
         populateDecrypter(context);
         populateSSLCredential(context);
+        populatePeerSSLCredential(context);
         populateTrustEngine(context);
         populateSSLTrustEngine(context);
 
@@ -256,6 +267,28 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         samlContext.setLocalSSLCredential(tlsCredential);
 
+    }
+
+    /**
+     * Tries to load peer SSL certificate from the inbound message transport using attribute
+     * "javax.servlet.request.X509Certificate". If found sets peerSSLCredential in the context.
+     *
+     * @param samlContext context to populate
+     */
+    protected void populatePeerSSLCredential(SAMLMessageContext samlContext) {
+/*
+        X509Certificate[] chain = (X509Certificate[]) samlContext.getInboundMessageTransport().getAttribute(ServletRequestX509CredentialAdapter.X509_CERT_REQUEST_ATTRIBUTE);
+
+        if (chain != null && chain.length > 0) {
+
+            logger.debug("Found certificate chain from request {}", chain[0]);
+            BasicX509Credential credential = new BasicX509Credential();
+            credential.setEntityCertificate(chain[0]);
+            credential.setEntityCertificateChain(Arrays.asList(chain));
+            samlContext.setPeerSSLCredential(credential);
+
+        }
+*/
     }
 
     /**

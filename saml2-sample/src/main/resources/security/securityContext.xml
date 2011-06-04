@@ -16,12 +16,19 @@
         <security:intercept-url pattern="/logout.jsp" filters="none"/>
         <security:intercept-url pattern="/login.jsp" filters="none"/>
         <security:intercept-url pattern="/favicon.ico" filters="none"/>
-        <security:custom-filter before="PRE_AUTH_FILTER" ref="metadataFilter"/>
-        <security:custom-filter position="PRE_AUTH_FILTER" ref="samlEntryPoint"/>
-        <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlProcessingFilter"/>
-        <security:custom-filter after="LOGOUT_FILTER" ref="samlLogoutFilter"/>
-        <security:custom-filter before="LOGOUT_FILTER" ref="samlLogoutProcessingFilter"/>
+        <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
     </security:http>
+
+    <bean id="samlFilter" class="org.springframework.security.web.FilterChainProxy">
+        <security:filter-chain-map path-type="ant">
+            <security:filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
+            <security:filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
+            <security:filter-chain pattern="/saml/metadata/**" filters="metadataFilter"/>
+            <security:filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/>
+            <security:filter-chain pattern="/saml/SSOHoK/**" filters="samlWebSSOHoKProcessingFilter"/>
+            <security:filter-chain pattern="/saml/SingleLogout/**" filters="samlLogoutProcessingFilter"/>
+        </security:filter-chain-map>
+    </bean>
 
     <!-- Handler deciding where to redirect user after successful login -->
     <bean id="successRedirectHandler"
@@ -129,8 +136,15 @@
 
     <!-- Provider of default SAML Context -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
-    <!-- Override default authentication processing filter with the one processing SAML messages -->
-    <bean id="samlProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
+
+    <!-- Processing filter for WebSSO profile messages -->
+    <bean id="samlWebSSOProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
+    </bean>
+
+    <!-- Processing filter for WebSSO Holder-of-Key profile -->
+    <bean id="samlWebSSOHoKProcessingFilter" class="org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter">
         <property name="authenticationManager" ref="authenticationManager"/>
         <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
     </bean>
@@ -168,11 +182,17 @@
         </constructor-arg>
     </bean>
 
-    <!-- SAML 2.0 Assertion Consumer -->
+    <!-- SAML 2.0 WebSSO Assertion Consumer -->
     <bean id="webSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl"/>
+
+    <!-- SAML 2.0 Holder-of-Key WebSSO Assertion Consumer -->
+    <bean id="hokWebSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl"/>
 
     <!-- SAML 2.0 Web SSO profile -->
     <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
+
+    <!-- SAML 2.0 Holder-of-Key Web SSO profile -->
+    <bean id="hokWebSSOProfile" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl"/>
 
     <!-- SAML 2.0 ECP profile -->
     <bean id="ecpprofile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl"/>

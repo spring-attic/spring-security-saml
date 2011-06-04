@@ -18,15 +18,18 @@ package org.opensaml.liberty.binding.encoding;
 
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLObject;
+import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.encoding.BaseSAML2MessageEncoder;
 import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
+import org.opensaml.saml2.ecp.RelayState;
 import org.opensaml.ws.message.MessageContext;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.soap.common.SOAPObjectBuilder;
 import org.opensaml.ws.soap.soap11.Body;
 import org.opensaml.ws.soap.soap11.Envelope;
+import org.opensaml.ws.soap.util.SOAPHelper;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransportUtils;
 import org.opensaml.xml.XMLObject;
@@ -70,6 +73,11 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             throw new MessageEncodingException("No outbound SAML message contained in message context");
         }
 
+        // Add RelayState SOAP header if required
+        if (samlMsgCtx.getRelayState() != null) {
+            SOAPHelper.addHeaderBlock(samlMsgCtx, getRelayState(samlMsgCtx.getRelayState()));
+        }
+
         signMessage(samlMsgCtx);
 
         // Contains the entire envelope with any specified headers, but no body
@@ -94,6 +102,30 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             log.error("Unable to write message content to outbound stream", e);
             throw new MessageEncodingException("Unable to write message content to outbound stream", e);
         }
+
+    }
+
+    /**
+     * Method creates a relayState element usable with the ECP profile.
+     * @param relayStateValue value to include, mustn't be null
+     * @return relay state object
+     */
+    protected RelayState getRelayState(String relayStateValue) {
+
+        if (relayStateValue == null) {
+            throw new IllegalArgumentException("RelayStateValue can't be null");
+        }
+        if (relayStateValue.length() > 80) {
+            throw new IllegalArgumentException("Relay state can't exceed size 80 when using ECP profile");
+        }
+
+        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        SAMLObjectBuilder<RelayState> relayStateBuilder = (SAMLObjectBuilder<RelayState>) builderFactory.getBuilder(RelayState.DEFAULT_ELEMENT_NAME);
+        RelayState relayState = relayStateBuilder.buildObject();
+        relayState.setSOAP11Actor(RelayState.SOAP11_ACTOR_NEXT);
+        relayState.setSOAP11MustUnderstand(true);
+        relayState.setValue(relayStateValue);
+        return relayState;
 
     }
 

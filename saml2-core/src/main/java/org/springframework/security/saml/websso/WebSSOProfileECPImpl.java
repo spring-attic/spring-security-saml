@@ -19,18 +19,16 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.ecp.RelayState;
 import org.opensaml.saml2.ecp.Request;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.soap.common.SOAPObjectBuilder;
 import org.opensaml.ws.soap.soap11.Envelope;
 import org.opensaml.ws.soap.util.SOAPHelper;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.metadata.MetadataManager;
-import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import java.util.Set;
@@ -43,11 +41,9 @@ import java.util.Set;
  */
 public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
-    public WebSSOProfileECPImpl() {
-    }
-
-    public WebSSOProfileECPImpl(SAMLProcessor processor, MetadataManager manager) {
-        super(processor, manager);
+    @Override
+    public String getProfileIdentifier() {
+        return org.springframework.security.saml.SAMLConstants.SAML2_ECP_PROFILE_URI;
     }
 
     @Override
@@ -55,7 +51,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-        AssertionConsumerService assertionConsumer = getAssertionConsumerService(null, spDescriptor, options, SAMLConstants.SAML2_PAOS_BINDING_URI);
+        AssertionConsumerService assertionConsumer = getAssertionConsumerService(options, null, spDescriptor);
 
         // The last parameter refers to the IdP that should receive the message. However,
         // in ECP, we don't know in advance which IdP will be contacted.
@@ -68,13 +64,19 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
         SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
 
-        if (context.getRelayState() != null) {
-            SOAPHelper.addHeaderBlock(context, getRelayState(context.getRelayState()));
-        }
-
         sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
         messageStorage.storeMessage(authRequest.getID(), authRequest);
 
+    }
+
+    @Override
+    protected boolean isEndpointSupported(AssertionConsumerService endpoint) {
+        return SAMLConstants.SAML2_PAOS_BINDING_URI.equals(endpoint.getBinding());
+    }
+
+    @Override
+    protected boolean isEndpointSupported(SingleSignOnService endpoint) {
+        return false;
     }
 
     protected org.opensaml.liberty.paos.Request getPAOSRequest(AssertionConsumerService assertionConsumer) {
@@ -116,29 +118,6 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
         SOAPObjectBuilder<Envelope> envelopeBuilder = (SOAPObjectBuilder<Envelope>) builderFactory.getBuilder(Envelope.DEFAULT_ELEMENT_NAME);
         return envelopeBuilder.buildObject();
-
-    }
-
-    /**
-     * Method creates a relayState element usable with the ECP profile.
-     * @param relayStateValue value to include, mustn't be null
-     * @return relay state object
-     */
-    protected RelayState getRelayState(String relayStateValue) {
-
-        if (relayStateValue == null) {
-            throw new IllegalArgumentException("RelayStateValue can't be null");
-        }
-        if (relayStateValue.length() > 80) {
-            throw new IllegalArgumentException("Relay state can't exceed size 80 when using ECP profile");
-        }
-
-        SAMLObjectBuilder<RelayState> relayStateBuilder = (SAMLObjectBuilder<RelayState>) builderFactory.getBuilder(RelayState.DEFAULT_ELEMENT_NAME);
-        RelayState relayState = relayStateBuilder.buildObject();
-        relayState.setSOAP11Actor(RelayState.SOAP11_ACTOR_NEXT);
-        relayState.setSOAP11MustUnderstand(true);
-        relayState.setValue(relayStateValue);
-        return relayState;
 
     }
 

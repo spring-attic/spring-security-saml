@@ -19,7 +19,7 @@
 </p>
 
 <form:form commandName="metadata" action="create">
-    <table width="700">
+    <table>
 
         <tr>
             <td>Store for the current session:</td>
@@ -163,6 +163,31 @@
                 <small>If true the generated metadata will be digitally signed using the specified signature key.
                 </small>
             </td>
+        </tr>
+
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>Include IDP Discovery profile:</td>
+            <td>
+                <form:select path="includeDiscovery" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeDiscovery"/></td>
+        </tr>
+        <tr>
+            <td>Include Holder-of-Key WebSSO profile:</td>
+            <td>
+                <form:select path="includeHokSSO" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeHokSSO"/></td>
         </tr>
 
         <tr>

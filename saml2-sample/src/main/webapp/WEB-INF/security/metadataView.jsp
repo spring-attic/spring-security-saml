@@ -19,10 +19,10 @@
     <p>
         <c:choose>
             <c:when test="${metadata.alias != null}">
-                <a href="<c:url value="/saml/metadata/alias/${metadata.alias}"/>">Direct entity metadata</a>
+                <a href="<c:url value="/saml/metadata/alias/${metadata.alias}"/>">Download entity metadata</a>
             </c:when>
             <c:otherwise>
-                <a href="<c:url value="/saml/metadata"/>">Direct entity metadata</a>
+                <a href="<c:url value="/saml/metadata"/>">Download entity metadata</a>
             </c:otherwise>
         </c:choose>
     </p>

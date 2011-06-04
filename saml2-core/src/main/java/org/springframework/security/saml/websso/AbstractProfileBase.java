@@ -88,6 +88,13 @@ public abstract class AbstractProfileBase implements InitializingBean {
     }
 
     /**
+     * Implementation are expected to provide an unique identifier for the profile this class implements.
+     *
+     * @return profile name
+     */
+    public abstract String getProfileIdentifier();
+
+    /**
      * Sets maximum difference between local time and time of the assertion creation which still allows
      * message to be processed. Basically determines maximum difference between clocks of the IDP and SP machines.
      * Defaults to 60.
@@ -107,6 +114,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
 
     /**
      * Maximum time between assertion creation and current time when the assertion is usable
+     *
      * @return max assertion time
      */
     public int getMaxAssertionTime() {
@@ -150,10 +158,11 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * processing before the message delivery. Message is sent using binding defined in the peer entity of the context.
      *
      * @param context context
-     * @param sign whether the message should be signed
+     * @param sign    whether the message should be signed
      * @throws MetadataProviderException metadata error
-     * @throws SAMLException SAML encoding error
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException message encoding error
+     * @throws SAMLException             SAML encoding error
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     *                                   message encoding error
      */
     protected void sendMessage(SAMLMessageContext context, boolean sign) throws MetadataProviderException, SAMLException, MessageEncodingException {
         processor.sendMessage(context, sign);
@@ -164,11 +173,12 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * processing before the message delivery. Message is sent using the specified binding.
      *
      * @param context context
-     * @param sign whether the message should be signed
+     * @param sign    whether the message should be signed
      * @param binding binding to use to send the message
      * @throws MetadataProviderException metadata error
-     * @throws SAMLException SAML encoding error
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException message encoding error
+     * @throws SAMLException             SAML encoding error
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     *                                   message encoding error
      */
     protected void sendMessage(SAMLMessageContext context, boolean sign, String binding) throws MetadataProviderException, SAMLException, MessageEncodingException {
         processor.sendMessage(context, sign, binding);
@@ -197,8 +207,8 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * Fills the request with version, issue instants and destination data.
      *
      * @param localEntityId entityId of the local party acting as message issuer
-     * @param request request to be filled
-     * @param service service to use as destination for the request
+     * @param request       request to be filled
+     * @param service       service to use as destination for the request
      */
     protected void buildCommonAttributes(String localEntityId, RequestAbstractType request, Endpoint service) {
 

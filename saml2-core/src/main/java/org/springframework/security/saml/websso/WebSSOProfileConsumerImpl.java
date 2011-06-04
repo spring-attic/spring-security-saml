@@ -20,17 +20,16 @@ import org.opensaml.common.SAMLObject;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
@@ -57,6 +56,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     public WebSSOProfileConsumerImpl(SAMLProcessor processor, MetadataManager manager) {
         super(processor, manager);
+    }
+
+    @Override
+    public String getProfileIdentifier() {
+        return SAMLConstants.SAML2_WEBSSO_PROFILE_URI;
     }
 
     /**
@@ -170,7 +174,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 if (a.getSubject() != null && a.getSubject().getSubjectConfirmations() != null) {
                     for (SubjectConfirmation conf : a.getSubject().getSubjectConfirmations()) {
                         if (SubjectConfirmation.METHOD_BEARER.equals(conf.getMethod())) {
-                            subjectAssertion = a;
+                            subjectAssertion = a; // TODO HoK
                         }
                     }
                 }
@@ -203,6 +207,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     }
 
     protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+
         // Verify storage time skew
         if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
             log.debug("Authentication statement is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
@@ -228,6 +233,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         } else {
             verifyAssertionConditions(assertion.getConditions(), context, false);
         }
+
     }
 
     /**
@@ -261,6 +267,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
                 // Validate not on or after
                 if (data.getNotOnOrAfter().isBeforeNow()) {
+                    log.debug("Invalidated by notOnOrAfter");
                     confirmed = false;
                     continue;
                 }

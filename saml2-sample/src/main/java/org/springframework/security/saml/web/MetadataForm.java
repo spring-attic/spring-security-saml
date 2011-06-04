@@ -34,6 +34,9 @@ public class MetadataForm {
 
     private boolean local;
 
+    private boolean includeHokSSO = false;
+    private boolean includeDiscovery = false;
+
     private boolean requestSigned = true;
     private boolean wantAssertionSigned;
     private boolean requireLogoutRequestSigned;
@@ -181,4 +184,19 @@ public class MetadataForm {
         this.tlsKey = tlsKey;
     }
 
+    public boolean isIncludeHokSSO() {
+        return includeHokSSO;
+    }
+
+    public void setIncludeHokSSO(boolean includeHokSSO) {
+        this.includeHokSSO = includeHokSSO;
+    }
+
+    public boolean isIncludeDiscovery() {
+        return includeDiscovery;
+    }
+
+    public void setIncludeDiscovery(boolean includeDiscovery) {
+        this.includeDiscovery = includeDiscovery;
+    }
 }

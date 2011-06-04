@@ -111,8 +111,10 @@ public class MetadataController {
         generator.setEncryptionKey(metadata.getEncryptionKey());
         generator.setTlsKey(metadata.getTlsKey());
 
-        // TODO other
+        generator.setIncludeHokSSO(metadata.isIncludeHokSSO());
+        generator.setIncludeDiscovery(metadata.isIncludeDiscovery());
 
+        // TODO other fields
         //generator.setBindings();
         //generator.setNameID();
 
@@ -179,6 +181,8 @@ public class MetadataController {
         metadata.setEncryptionKey(extendedMetadata.getEncryptionKey());
         metadata.setSigningKey(extendedMetadata.getSigningKey());
         metadata.setTlsKey(extendedMetadata.getTlsKey());
+
+        // TODO other fields
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
         model.addObject("metadata", metadata);

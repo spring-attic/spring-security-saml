@@ -71,6 +71,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected WebSSOProfileOptions defaultOptions;
     protected WebSSOProfile webSSOprofile;
     protected WebSSOProfile webSSOprofileECP;
+    protected WebSSOProfile webSSOprofileHoK;
     protected MetadataManager metadata;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
@@ -147,6 +148,8 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * <p/>
      * IDPDiscovery URL is configured using idpDiscoveryURL property. Setting property "login" of the HTTP request to "true" will
      * force login which means that all IDP discovery mechanisms will be skipped and either default IDP or IDP specified in the request will be used.
+     * <p/>
+     * Subclasses can customize the WebSSO initialization behavior.
      *
      * @param request  request
      * @param response response
@@ -179,6 +182,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
             } else {
 
+                // Web SSO
                 initializeSSO(request, response, e);
 
             }
@@ -198,6 +202,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         SAMLMessageStorage storage = new HttpSessionStorage(request);
         WebSSOProfileOptions options = getProfileOptions(request, response, context, e);
+        options.setProfile(SAMLConstants.SAML2_ECP_PROFILE_URI);
 
         logger.debug("Processing SSO using ECP profile");
         webSSOprofileECP.sendAuthenticationRequest(context, options, storage);
@@ -205,14 +210,32 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     }
 
+    /**
+     * Initializes WebSSO profile or WebSSO Holder-of-Key profile. Selection is made based on settings in the WebSSOProfileOptions
+     * profile field. Values "urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser" are
+     * recognized, normal WebSSO is used by default when no value or invalid value is found.
+     *
+     * @see SAMLConstants#SAML2_WEBSSO_PROFILE_URI
+     * @see SAMLConstants#SAML2_HOK_WEBSSO_PROFILE_URI
+     */
     protected void initializeSSO(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws MetadataProviderException, ServletException, SAMLException, MessageEncodingException {
 
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         SAMLMessageStorage storage = new HttpSessionStorage(request);
         WebSSOProfileOptions options = getProfileOptions(request, response, context, e);
 
+        WebSSOProfile ssoProfile = webSSOprofile;
+
+        if (options.getProfile() != null && SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(options.getProfile())) {
+            if (webSSOprofileHoK != null) {
+                ssoProfile = webSSOprofileHoK;
+            } else {
+                logger.warn("WebSSOProfileOptions specified WebSSO HoK profile to be used, but profile is not configured in the EntryPoint, normal WebSSO will be used instead");
+            }
+        }
+
         logger.debug("Processing SSO request");
-        webSSOprofile.sendAuthenticationRequest(context, options, storage);
+        ssoProfile.sendAuthenticationRequest(context, options, storage);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
 
     }
@@ -430,6 +453,16 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     @Qualifier("ecpprofile")
     public void setWebSSOprofileECP(WebSSOProfile webSSOprofileECP) {
         this.webSSOprofileECP = webSSOprofileECP;
+    }
+
+    public WebSSOProfile getWebSSOprofileHoK() {
+        return webSSOprofileHoK;
+    }
+
+    @Autowired(required = false)
+    @Qualifier("hokWebSSOProfile")
+    public void setWebSSOprofileHoK(WebSSOProfile webSSOprofileHoK) {
+        this.webSSOprofileHoK = webSSOprofileHoK;
     }
 
     /**

@@ -20,7 +20,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 /**
  * Factory class for creating VelocityEngine instance.
  *
- * @author Vladimir Sch‰fer
+ * @author Vladimir Sch√§fer
  */
 public class VelocityFactory {
 

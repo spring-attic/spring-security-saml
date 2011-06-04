@@ -1,0 +1,122 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Enable autowiring -->
+    <context:component-scan base-package="org.springframework.security.saml"/>
+
+    <!-- Initialization of OpenSAML library-->
+    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
+
+    <!-- Central storage of cryptographic keys -->
+    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+        <constructor-arg type="java.lang.String" value="nalle123"/>
+        <constructor-arg>
+            <map>
+                <entry key="apollo" value="nalle123"/>
+            </map>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String" value="apollo"/>
+    </bean>
+
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
+
+    <!-- Entry point to initialize authentication -->
+    <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileHoKImpl" depends-on="bootstrap">
+    </bean>
+
+    <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
+    <!-- Do no forget to call iniitalize method on providers -->
+    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager" depends-on="bootstrap">
+        <constructor-arg index="0">
+            <list>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testIDP.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testSP.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testSPMissingDescriptor.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testIDPNoSigning.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg index="0">
+                        <value type="java.io.File">classpath:testIDPNoSSOBinding.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <property name="hostedSPName" value="http://localhost:8081/spring-security-saml2-webapp"/>
+        <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
+        <property name="defaultIDP" value="http://localhost:8080/opensso"/>
+    </bean>
+
+    <!-- XML parser pool needed for OpenSAML parsing -->
+    <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
+
+    <!-- Class loading incoming SAML messages from httpRequest stream -->
+    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
+        <constructor-arg ref="bindings"/>
+    </bean>
+
+    <!-- Bindings, encoders and decoders used for creating and parsing messages -->
+    <util:list id="bindings">
+        <bean class="org.springframework.security.saml.processor.HTTPPostBinding">
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.decoding.HTTPPostDecoder">
+                    <constructor-arg ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.encoding.HTTPPostEncoder">
+                    <constructor-arg ref="velocityEngine"/>
+                    <constructor-arg value="/templates/saml2-post-binding.vm"/>
+                </bean>
+            </constructor-arg>
+        </bean>
+        <bean class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder">
+                    <constructor-arg ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder"/>
+            </constructor-arg>
+        </bean>
+        <bean class="org.springframework.security.saml.processor.HTTPSOAP11Binding">
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl">
+                    <constructor-arg ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder"/>
+            </constructor-arg>
+        </bean>
+    </util:list>
+
+    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
+          factory-method="getEngine"/>
+
+</beans>

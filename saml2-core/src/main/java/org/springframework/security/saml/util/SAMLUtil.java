@@ -15,17 +15,22 @@
  */
 package org.springframework.security.saml.util;
 
+import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.X509Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.namespace.QName;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -38,81 +43,30 @@ public class SAMLUtil {
     private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);
 
     /**
-     * Returns assertion consumer service of the given SP.
-     * <p/>
-     * When binding is specified locates assertionConsumer which can accept message using given binding. Fails is none is found.
-     * <p/>
-     * When no binding is specified (null) tries to locate consumer service determined by the WebSSOProfileOptions field
-     * assertionConsumerIndex. In case index is invalid processing fails.
-     * <p/>
-     * When options do not contain any index default consumer service is used or first consumer service when no default
-     * is specified.
+     * Method determines binding supported by the given endpoint. Usually the biding is encoded in the binding attribute
+     * of the endpoint, but in some cases more processing is needed (e.g. for HoK profile).
      *
-     * @param idpssoDescriptor idp, can be null when no IDP is known in advance
-     * @param spDescriptor     sp
-     * @param options          user supplied preferences
-     * @param binding          binding to be used, overrides other settings
-     * @return consumer service or null
-     * @throws MetadataProviderException in case index supplied in options is invalid or no consumer service can be found
+     * @param endpoint endpoint
+     * @return binding supported by the endpoint
+     * @throws MetadataProviderException in case binding can't be determined
      */
-    public static AssertionConsumerService getAssertionConsumerForBinding(IDPSSODescriptor idpssoDescriptor, SPSSODescriptor spDescriptor, WebSSOProfileOptions options, String binding) throws MetadataProviderException {
+    public static String getBindingForEndpoint(Endpoint endpoint) throws MetadataProviderException {
 
-        List<AssertionConsumerService> services = spDescriptor.getAssertionConsumerServices();
+        String bindingName = endpoint.getBinding();
 
-        // Fixed binding
-        if (binding != null) {
-            for (AssertionConsumerService service : services) {
-                if (binding.equals(service.getBinding())) {
-                    log.debug("Using consumer service determined by fixed binding {}", binding);
-                    return service;
-                }
-            }
-            throw new MetadataProviderException("No consumer service found for binding " + binding);
-        }
-
-        // Use user preference
-        if (options.getAssertionConsumerIndex() != null) {
-            for (AssertionConsumerService service : services) {
-                if (options.getAssertionConsumerIndex().equals(service.getIndex())) {
-                    log.debug("Using consumer service determined by user preference with binding {}", service.getBinding());
-                    return service;
-                }
-            }
-            throw new MetadataProviderException("AssertionConsumerIndex " + options.getAssertionConsumerIndex() + " not found for spDescriptor " + spDescriptor);
-        }
-
-        if (spDescriptor.getDefaultAssertionConsumerService() != null) {
-            AssertionConsumerService service = spDescriptor.getDefaultAssertionConsumerService();
-            log.debug("Using default consumer service with binding {}", service.getBinding());
-            return service;
-        } else if (services.size() > 0) {
-            AssertionConsumerService service = services.iterator().next();
-            log.debug("Using first available consumer service with binding {}", service.getBinding());
-            return service;
-        } else {
-            log.debug("No consumer service found for SP");
-            throw new MetadataProviderException("Service provider has no available consumer services " + spDescriptor);
-        }
-
-    }
-
-    /**
-     * Returns SSOService for given binding of the IDP.
-     *
-     * @param descriptor IDP to search for service in
-     * @param binding    binding supported by the service
-     * @return SSO service capable of handling the given binding
-     * @throws MetadataProviderException if the service can't be determined
-     */
-    public static SingleSignOnService getSSOServiceForBinding(IDPSSODescriptor descriptor, String binding) throws MetadataProviderException {
-        List<SingleSignOnService> services = descriptor.getSingleSignOnServices();
-        for (SingleSignOnService service : services) {
-            if (binding.equals(service.getBinding())) {
-                return service;
+        // For HoK profile the used binding is determined in a different way
+        if (org.springframework.security.saml.SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(bindingName)) {
+            QName attributeName = org.springframework.security.saml.SAMLConstants.WEBSSO_HOK_METADATA_ATT_NAME;
+            String endpointLocation = endpoint.getUnknownAttributes().get(attributeName);
+            if (endpointLocation != null) {
+                bindingName = endpointLocation;
+            } else {
+                throw new MetadataProviderException("Holder of Key profile endpoint doesn't contain attribute hoksso:ProtocolBinding");
             }
         }
-        log.debug("No binding found for IDP with binding " + binding);
-        throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
+
+        return bindingName;
+
     }
 
     /**
@@ -132,27 +86,6 @@ public class SAMLUtil {
         }
         log.debug("No binding found for IDP with binding " + binding);
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
-    }
-
-    /**
-     * Selects binding used to sent message to the IDP.
-     *
-     * @param options user specified preferences
-     * @param idp     idp
-     * @param sp      sp
-     * @return binding to use for message delivery
-     * @throws MetadataProviderException error
-     */
-    public static String getLoginBinding(WebSSOProfileOptions options, IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
-
-        String requiredBinding = options.getBinding();
-        for (Endpoint idpEndpoint : idp.getSingleSignOnServices()) {
-            if (idpEndpoint.getBinding().equals(requiredBinding)) {
-                return requiredBinding;
-            }
-        }
-
-        return SAMLUtil.getDefaultBinding(idp);
     }
 
     public static String getLogoutBinding(IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
@@ -289,6 +222,56 @@ public class SAMLUtil {
         } else if (!alias.matches("\\p{ASCII}*")) {
             throw new MetadataProviderException("Only ASCII characters can be used in the alias " + alias + " for entity " + entityId);
         }
+
+    }
+
+    /**
+     * Parses list of all Base64 encoded certificates found inside the KeyInfo element. All present X509Data
+     * elements are processed.
+     *
+     * @param keyInfo key info to parse
+     * @return found base64 encoded certificates
+     */
+    public static List<String> getBase64EncodeCertificates(KeyInfo keyInfo) {
+
+        List<String> certList = new LinkedList<String>();
+
+        if (keyInfo == null) {
+            return certList;
+        }
+
+        List<X509Data> x509Datas = keyInfo.getX509Datas();
+        for (X509Data x509Data : x509Datas) {
+            if (x509Data != null) {
+                certList.addAll(getBase64EncodedCertificates(x509Data));
+            }
+        }
+
+        return certList;
+
+    }
+
+    /**
+     * Parses list of Base64 encoded certificates present in the X509Data element.
+     *
+     * @param x509Data data to parse
+     * @return list with 0..n certificates
+     */
+    public static List<String> getBase64EncodedCertificates(X509Data x509Data) {
+
+        List<String> certList = new LinkedList<String>();
+
+        if (x509Data == null) {
+            return certList;
+        }
+
+        for (org.opensaml.xml.signature.X509Certificate xmlCert : x509Data.getX509Certificates()) {
+            if (xmlCert != null && xmlCert.getValue() != null) {
+                certList.add(xmlCert.getValue());
+            }
+        }
+
+        return certList;
 
     }
 

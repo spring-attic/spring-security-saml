@@ -32,6 +32,7 @@ import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
@@ -52,6 +53,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
      * Class logger.
      */
     private final static Logger log = LoggerFactory.getLogger(SingleLogoutProfileImpl.class);
+
+    @Override
+    public String getProfileIdentifier() {
+        return SAMLConstants.SAML2_SLO_PROFILE_URI;
+    }
 
     public void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
 

@@ -327,6 +327,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         }
 
     }
+
     /**
      * Method provides list of all available providers. Not all of these providers may be used in case their validation failed.
      * Returned value is a copy of the data.
@@ -937,12 +938,14 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * @param refreshRequired true if refresh is required
      */
     public void setRefreshRequired(boolean refreshRequired) {
+
         try {
             refreshLock.writeLock().lock();
             this.refreshRequired = refreshRequired;
         } finally {
             refreshLock.writeLock().unlock();
         }
+
     }
 
 

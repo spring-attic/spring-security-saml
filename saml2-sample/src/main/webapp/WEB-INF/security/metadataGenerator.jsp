@@ -1,3 +1,4 @@
+<%@ page import="org.opensaml.common.xml.SAMLConstants" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -20,6 +21,13 @@
 
 <form:form commandName="metadata" action="create">
     <table>
+
+        <tr>
+            <td colspan="2">
+                <br/>
+                <input type="submit" value="Generate metadata"/>
+            </td>
+        </tr>
 
         <tr>
             <td>Store for the current session:</td>
@@ -170,31 +178,6 @@
         </tr>
 
         <tr>
-            <td>Include IDP Discovery profile:</td>
-            <td>
-                <form:select path="includeDiscovery" multiple="false">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-            <td class="error"><form:errors path="includeDiscovery"/></td>
-        </tr>
-        <tr>
-            <td>Include Holder-of-Key WebSSO profile:</td>
-            <td>
-                <form:select path="includeHokSSO" multiple="false">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-            <td class="error"><form:errors path="includeHokSSO"/></td>
-        </tr>
-
-        <tr>
-            <td>&nbsp;</td>
-        </tr>
-
-        <tr>
             <td>Sign sent AuthNRequests:</td>
             <td>
                 <form:select path="requestSigned" multiple="false">
@@ -246,12 +229,68 @@
         </tr>
 
         <tr>
+            <td>&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>Single sign-on bindings:</td>
+            <td>
+                <table>
+                    <tr><th>Default</th><th>Name</th></tr>
+                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="0" id="sso_0"/></td><td><label for="sso_0">SSO Artifact</label></td></tr>
+                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="1" id="sso_1"/></td><td><label for="sso_1">SSO HTTP-POST</label></td></tr>
+                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="2" id="sso_2"/></td><td><label for="sso_2">SSO PAOS</label></td></tr>
+                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="3" id="sso_3"/></td><td><label for="sso_3">HoK SSO Artifact</label></td></tr>
+                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="4" id="sso_4"/></td><td><label for="sso_4">HoK SSO HTTP-POST</label></td></tr>
+                </table>
+            </td>
+            <td class="error"><form:errors path="assertionConsumerIndex"/></td>
+        </tr>
+
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>Include WebSSO profile:</td>
+            <td>
+                <form:select path="includeSSO" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeHokSSO"/></td>
+        </tr>
+        <tr>
+            <td>Include Holder-of-Key WebSSO profile:</td>
+            <td>
+                <form:select path="includeHokSSO" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeHokSSO"/></td>
+        </tr>
+        <tr>
+            <td>Include IDP Discovery profile:</td>
+            <td>
+                <form:select path="includeDiscovery" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeDiscovery"/></td>
+        </tr>
+
+        <tr>
             <td colspan="2">
                 <br/>
                 <input type="submit" value="Generate metadata"/>
             </td>
         </tr>
+
     </table>
+
 </form:form>
 
 <p>

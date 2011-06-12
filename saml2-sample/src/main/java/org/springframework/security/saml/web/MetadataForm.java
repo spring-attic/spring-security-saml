@@ -34,6 +34,9 @@ public class MetadataForm {
 
     private boolean local;
 
+    private int assertionConsumerIndex = 0;
+
+    private boolean includeSSO = true;
     private boolean includeHokSSO = false;
     private boolean includeDiscovery = false;
 
@@ -184,12 +187,12 @@ public class MetadataForm {
         this.tlsKey = tlsKey;
     }
 
-    public boolean isIncludeHokSSO() {
-        return includeHokSSO;
+    public int getAssertionConsumerIndex() {
+        return assertionConsumerIndex;
     }
 
-    public void setIncludeHokSSO(boolean includeHokSSO) {
-        this.includeHokSSO = includeHokSSO;
+    public void setAssertionConsumerIndex(int assertionConsumerIndex) {
+        this.assertionConsumerIndex = assertionConsumerIndex;
     }
 
     public boolean isIncludeDiscovery() {
@@ -199,4 +202,21 @@ public class MetadataForm {
     public void setIncludeDiscovery(boolean includeDiscovery) {
         this.includeDiscovery = includeDiscovery;
     }
+
+    public boolean isIncludeHokSSO() {
+        return includeHokSSO;
+    }
+
+    public void setIncludeHokSSO(boolean includeHokSSO) {
+        this.includeHokSSO = includeHokSSO;
+    }
+
+    public boolean isIncludeSSO() {
+        return includeSSO;
+    }
+
+    public void setIncludeSSO(boolean includeSSO) {
+        this.includeSSO = includeSSO;
+    }
+
 }

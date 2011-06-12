@@ -31,6 +31,7 @@ import org.springframework.security.saml.metadata.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -40,6 +41,7 @@ import org.w3c.dom.Element;
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,8 +71,37 @@ public class MetadataController {
         model.addObject("hostedSP", metadataManager.getHostedSPName());
         model.addObject("spList", metadataManager.getSPEntityNames());
         model.addObject("idpList", metadataManager.getIDPEntityNames());
+        model.addObject("metadata", metadataManager.getAvailableProviders());
 
         return model;
+
+    }
+
+    @RequestMapping(value = "/refresh")
+    public ModelAndView refreshMetadata() throws MetadataProviderException {
+
+        metadataManager.refreshMetadata();
+        return metadataList();
+
+    }
+
+    @RequestMapping(value = "/provider")
+    public ModelAndView displayProvider(@RequestParam("providerIndex") int providerIndex) {
+
+        ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/providerView.jsp", true));
+        ExtendedMetadataDelegate delegate = metadataManager.getAvailableProviders().get(providerIndex);
+        model.addObject("provider", delegate);
+        model.addObject("providerIndex", providerIndex);
+        return model;
+
+    }
+
+    @RequestMapping(value = "/removeProvider")
+    public ModelAndView removeProvider(@RequestParam int providerIndex) throws MetadataProviderException {
+
+        ExtendedMetadataDelegate delegate = metadataManager.getAvailableProviders().get(providerIndex);
+        metadataManager.removeMetadataProvider(delegate);
+        return metadataList();
 
     }
 
@@ -110,12 +141,19 @@ public class MetadataController {
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
         generator.setTlsKey(metadata.getTlsKey());
+        generator.setAssertionConsumerIndex(metadata.getAssertionConsumerIndex());
 
-        generator.setIncludeHokSSO(metadata.isIncludeHokSSO());
+        if (!metadata.isIncludeSSO()) {
+            generator.setBindingsSSO(null);
+        }
+
+        if (!metadata.isIncludeHokSSO()) {
+            generator.setBindingsHoKSSO(null);
+        }
+
         generator.setIncludeDiscovery(metadata.isIncludeDiscovery());
 
         // TODO other fields
-        //generator.setBindings();
         //generator.setNameID();
 
         EntityDescriptor descriptor = generator.generateMetadata();

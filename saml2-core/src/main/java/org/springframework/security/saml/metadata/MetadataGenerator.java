@@ -79,9 +79,13 @@ public class MetadataGenerator implements ApplicationContextAware {
     private String tlsKey = null;
 
     private Collection<String> nameID = null;
-    private Collection<String> bindings = null;
-    private boolean includeDiscovery = true;
-    private boolean includeHokSSO = true;
+
+    private int assertionConsumerIndex = 0;
+    private Collection<String> bindingsSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_PAOS_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+    private Collection<String> bindingsHoKSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+    private Collection<String> bindingsSLO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLConstants.SAML2_SOAP11_BINDING_URI);
+
+    private boolean includeDiscovery = false;
 
     private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
@@ -153,7 +157,6 @@ public class MetadataGenerator implements ApplicationContextAware {
         boolean assertionSigned = isWantAssertionSigned();
         boolean signMetadata = isSignMetadata();
 
-        Collection<String> includedBindings = getBindings();
         Collection<String> includedNameID = getNameID();
 
         String entityId = getEntityId();
@@ -167,7 +170,7 @@ public class MetadataGenerator implements ApplicationContextAware {
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
         descriptor.setEntityID(entityId);
-        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedBindings, includedNameID));
+        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
 
         if (signMetadata) {
             try {
@@ -181,7 +184,7 @@ public class MetadataGenerator implements ApplicationContextAware {
 
     }
 
-    protected SPSSODescriptor buildSPSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedBindings, Collection<String> includedNameID) {
+    protected SPSSODescriptor buildSPSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedNameID) {
 
         SAMLObjectBuilder<SPSSODescriptor> builder = (SAMLObjectBuilder<SPSSODescriptor>) builderFactory.getBuilder(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         SPSSODescriptor spDescriptor = builder.buildObject();
@@ -194,31 +197,31 @@ public class MetadataGenerator implements ApplicationContextAware {
 
         // Populate endpoints
         int index = 0;
-        boolean isDefault = true;
-        if (includedBindings.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+
+        // Assertion consumer MUST NOT be used with HTTP Redirect, Profiles 424, same applies to HoK profile
+        if (bindingsSSO.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+        }
+        if (bindingsSSO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+        }
+        if (bindingsSSO.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
+        }
+        if (bindingsHoKSSO.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+        }
+        if (bindingsHoKSSO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
+            spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+        }
+
+        if (bindingsSLO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_POST_BINDING_URI));
-            isDefault = false;
-            if (isIncludeHokSSO()) {
-                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
-            }
         }
-        if (includedBindings.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
-            isDefault = false;
-            if (isIncludeHokSSO()) {
-                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
-            }
-        }
-        if (includedBindings.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, isDefault, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
-            isDefault = false;
-        }
-        if (includedBindings.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
-            // Assertion consumer MUST NOT be used with HTTP Redirect, Profiles 424, same applies to HoK profile
+        if (bindingsSLO.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
         }
-        if (includedBindings.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
+        if (bindingsSLO.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
             spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_SOAP11_BINDING_URI));
         }
 
@@ -313,7 +316,9 @@ public class MetadataGenerator implements ApplicationContextAware {
         AssertionConsumerService consumer = builder.buildObject();
         consumer.setLocation(getServerURL(entityBaseURL, entityAlias, filterURL));
         consumer.setBinding(binding);
-        consumer.setIsDefault(isDefault);
+        if (isDefault) {
+            consumer.setIsDefault(true);
+        }
         consumer.setIndex(index);
         return consumer;
     }
@@ -512,14 +517,6 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.nameID = nameID;
     }
 
-    public Collection<String> getBindings() {
-        return bindings == null ? defaultBindings : bindings;
-    }
-
-    public void setBindings(Collection<String> bindings) {
-        this.bindings = bindings;
-    }
-
     public String getEntityBaseURL() {
         return entityBaseURL;
     }
@@ -564,6 +561,50 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.tlsKey = tlsKey;
     }
 
+    public Collection<String> getBindingsSSO() {
+        return bindingsSSO == null ? defaultBindings : bindingsSSO;
+    }
+
+    public void setBindingsSSO(Collection<String> bindingsSSO) {
+        if (bindingsSSO == null) {
+            this.bindingsSSO = Collections.emptySet();
+        } else {
+            this.bindingsSSO = bindingsSSO;
+        }
+    }
+
+    public Collection<String> getBindingsSLO() {
+        return bindingsSLO;
+    }
+
+    public void setBindingsSLO(Collection<String> bindingsSLO) {
+        if (bindingsSLO == null) {
+            this.bindingsSLO = Collections.emptySet();
+        } else {
+            this.bindingsSLO = bindingsSLO;
+        }
+    }
+
+    public Collection<String> getBindingsHoKSSO() {
+        return bindingsHoKSSO;
+    }
+
+    public void setBindingsHoKSSO(Collection<String> bindingsHoKSSO) {
+        if (bindingsHoKSSO == null) {
+            this.bindingsHoKSSO = Collections.emptySet();
+        } else {
+            this.bindingsHoKSSO = bindingsHoKSSO;
+        }
+    }
+
+    public XMLObjectBuilderFactory getBuilderFactory() {
+        return builderFactory;
+    }
+
+    public void setBuilderFactory(XMLObjectBuilderFactory builderFactory) {
+        this.builderFactory = builderFactory;
+    }
+
     public boolean isIncludeDiscovery() {
         return includeDiscovery;
     }
@@ -577,17 +618,12 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.includeDiscovery = includeDiscovery;
     }
 
-    public boolean isIncludeHokSSO() {
-        return includeHokSSO;
+    public int getAssertionConsumerIndex() {
+        return assertionConsumerIndex;
     }
 
-    /**
-     * When true an Holder-of-key WebSSO profile enpoint will be included.
-     *
-     * @param includeHokSSO hok sso
-     */
-    public void setIncludeHokSSO(boolean includeHokSSO) {
-        this.includeHokSSO = includeHokSSO;
+    public void setAssertionConsumerIndex(int assertionConsumerIndex) {
+        this.assertionConsumerIndex = assertionConsumerIndex;
     }
 
 }

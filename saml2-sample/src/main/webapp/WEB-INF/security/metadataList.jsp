@@ -43,5 +43,17 @@
     <c:if test="${empty idpList}"> - </c:if>
 </p>
 
+<p>
+    Metadata providers:<br/>
+    <c:forEach var="entity" items="${metadata}" varStatus="status">
+        <a href="<c:url value="/saml/web/metadata/provider"><c:param name="providerIndex" value="${status.index}"/></c:url>">
+            <c:out value="${entity}"/></a><br/>
+    </c:forEach>
+</p>
+
+<form action="<c:url value="/saml/web/metadata/refresh"/>">
+    <input type="submit" value="Refersh metadata"/>
+</form>
+
 </body>
 </html>

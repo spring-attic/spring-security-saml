@@ -87,7 +87,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      */
     public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
-        log.debug("Retrieving message using binding {}", binding.getCommunicationProfileId());
+        log.debug("Retrieving message using binding {}", binding.getBindingURI());
 
         verifyContext(samlContext);
         populateSecurityPolicy(samlContext, binding);
@@ -98,9 +98,10 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         }
         samlContext.setPeerEntityRole(peerEntityRole);
         samlContext.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
+        samlContext.setInboundSAMLBinding(binding.getBindingURI());
 
+        // Decode the message
         MessageDecoder decoder = binding.getMessageDecoder();
-        samlContext.setCommunicationProfileId(binding.getCommunicationProfileId());
         decoder.decode(samlContext);
 
         if (samlContext.getPeerEntityMetadata() == null) {
@@ -292,7 +293,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      */
     protected SAMLBinding getBinding(String bindingName) throws SAMLException {
         for (SAMLBinding binding : bindings) {
-            if (binding.getCommunicationProfileId().equals(bindingName)) {
+            if (binding.getBindingURI().equals(bindingName)) {
                 return binding;
             }
         }

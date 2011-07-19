@@ -72,7 +72,7 @@ public class HTTPRedirectDeflateBinding extends SAMLBindingImpl {
         return transport instanceof HTTPOutTransport;
     }
 
-    public String getCommunicationProfileId() {
+    public String getBindingURI() {
         return SAMLConstants.SAML2_REDIRECT_BINDING_URI;
     }
 

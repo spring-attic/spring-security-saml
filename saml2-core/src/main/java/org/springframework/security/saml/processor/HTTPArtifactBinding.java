@@ -74,7 +74,7 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
         return transport instanceof HTTPOutTransport;
     }
 
-    public String getCommunicationProfileId() {
+    public String getBindingURI() {
         return SAMLConstants.SAML2_ARTIFACT_BINDING_URI;
     }
 

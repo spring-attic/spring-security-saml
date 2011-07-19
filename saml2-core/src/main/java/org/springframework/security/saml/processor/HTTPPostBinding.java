@@ -74,7 +74,7 @@ public class HTTPPostBinding extends SAMLBindingImpl {
         return transport instanceof HTTPOutTransport;
     }
 
-    public String getCommunicationProfileId() {
+    public String getBindingURI() {
         return SAMLConstants.SAML2_POST_BINDING_URI;
     }
 

@@ -50,7 +50,7 @@ public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
     }
 
     @Override
-	public String getCommunicationProfileId() {
+	public String getBindingURI() {
 		return SAMLConstants.SAML2_PAOS_BINDING_URI;
 	}
 

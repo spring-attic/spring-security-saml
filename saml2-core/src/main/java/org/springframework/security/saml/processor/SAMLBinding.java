@@ -65,7 +65,7 @@ public interface SAMLBinding {
      *
      * @return identifier
      */
-    String getCommunicationProfileId();
+    String getBindingURI();
 
     /**
      * Security rules to apply for incoming SAML messages received using the binding.

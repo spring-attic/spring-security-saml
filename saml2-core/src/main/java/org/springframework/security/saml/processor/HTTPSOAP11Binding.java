@@ -72,7 +72,7 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
         return transport instanceof HTTPOutTransport;
     }
 
-    public String getCommunicationProfileId() {
+    public String getBindingURI() {
         return SAMLConstants.SAML2_SOAP11_BINDING_URI;
     }
 

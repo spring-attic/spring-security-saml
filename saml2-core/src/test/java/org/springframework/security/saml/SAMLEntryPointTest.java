@@ -14,18 +14,22 @@
  */
 package org.springframework.security.saml;
 
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
-import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,7 +47,7 @@ import static org.junit.Assert.assertTrue;
 public class SAMLEntryPointTest {
 
     ApplicationContext context;
-
+    ServletContext servletContext;
     SAMLEntryPoint entryPoint;
     WebSSOProfile ssoProfile;
 
@@ -51,15 +55,18 @@ public class SAMLEntryPointTest {
     HttpServletRequest request;
     HttpServletResponse response;
 
+    MetadataManager metadata;
+
     @Before
     public void initialize() throws Exception {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         entryPoint = (SAMLEntryPoint) context.getBean("samlEntryPoint");
+        servletContext = createMock(ServletContext.class);
+        metadata = (MetadataManager) context.getBean("metadata");
         ssoProfile = createMock(WebSSOProfile.class);
-
         entryPoint.setWebSSOprofile(ssoProfile);
-
+        entryPoint.setServletContext(servletContext);
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
         session = createMock(HttpSession.class);
@@ -67,9 +74,8 @@ public class SAMLEntryPointTest {
 
     @Test
     public void testInitial() {
-        assertNull(entryPoint.getIdpSelectionPath());
         assertEquals(ssoProfile, entryPoint.webSSOprofile);
-        assertEquals("/saml/login", entryPoint.filterProcessesUrl);
+        assertEquals("/saml/login", SAMLEntryPoint.FILTER_URL);
     }
 
     /**
@@ -77,12 +83,12 @@ public class SAMLEntryPointTest {
      */
     @Test
     public void testProcessFilter() {
-        entryPoint.setFilterSuffix("/saml/sso");
-        expect(request.getRequestURI()).andReturn("/web/saml/sso");
-        expect(request.getRequestURI()).andReturn("/saml/sso");
+
+        expect(request.getRequestURI()).andReturn("/web/saml/login");
+        expect(request.getRequestURI()).andReturn("/saml/login");
         expect(request.getRequestURI()).andReturn("/saml");
-        expect(request.getRequestURI()).andReturn("/sso/");
-        expect(request.getRequestURI()).andReturn("/saml/sso/");
+        expect(request.getRequestURI()).andReturn("/login/");
+        expect(request.getRequestURI()).andReturn("/saml/login/");
 
         replayMock();
         assertTrue(entryPoint.processFilter(request));
@@ -115,30 +121,77 @@ public class SAMLEntryPointTest {
     }
 
     /**
-     * Verifies that entry point will redirect user to IDP selection if login parameter is not
-     * set to true and idpSelectionPath is set.
+     * Verifies that entry point will redirect user to IDP selection when discovery is enabled and no IDP was
+     * specified in request. Default URL for local IDP Discovery Service is used as not URL is in extended metadata.
      *
      * @throws Exception error
      */
     @Test
-    public void testIDPSelection() throws Exception {
+    public void testIDPSelection_defaultURL() throws Exception {
 
-        RequestDispatcher dispatcher = createMock(RequestDispatcher.class);
-
-        entryPoint.setIdpSelectionPath("/selectIDP");
+        expect(request.getContextPath()).andReturn("/app");
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn(null);
-        expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
-        expect(request.getRequestDispatcher("/selectIDP")).andReturn(dispatcher);
-        expect(request.getHeader("Accept")).andReturn("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
-        dispatcher.forward(request, response);
+        expect(servletContext.getContextPath()).andReturn("/samlApp");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
+        response.sendRedirect("/samlApp/saml/discovery?returnIDParam=idp&entityID=http://localhost:8081/spring-security-saml2-webapp");
 
-        replay(dispatcher);
         replayMock();
         entryPoint.commence(request, response, null);
         verifyMock();
-        verify(dispatcher);
+
+    }
+
+    /**
+     * Verifies that entry point will redirect user to IDP selection when discovery is enabled and no IDP was
+     * specified in request. URL from metadata is used in this case.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testIDPSelection_metadataURL() throws Exception {
+
+        SAMLMessageContext context = new SAMLMessageContext();
+        ExtendedMetadata metadata = new ExtendedMetadata();
+        metadata.setIdpDiscoveryEnabled(true);
+        metadata.setIdpDiscoveryURL("http://test.fi/idpDisco/");
+        context.setLocalExtendedMetadata(metadata);
+        context.setLocalEntityId("localId");
+
+        context.setInboundMessageTransport(new HttpServletRequestAdapter(request));
+        context.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
+
+        response.sendRedirect("http://test.fi/idpDisco/?entityID=localId&returnIDParam=idp");
+
+        replayMock();
+        entryPoint.initializeDiscovery(context);
+        verifyMock();
+
+    }
+
+    /**
+     * Verifies that entry point will redirect user to IDP selection when discovery is enabled and no IDP was
+     * specified in request. The test should fail as the specfied url is invalid.
+     *
+     * @throws Exception error
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testIDPSelection_invalidDiscoURL() throws Exception {
+
+        SAMLMessageContext context = new SAMLMessageContext();
+        ExtendedMetadata metadata = new ExtendedMetadata();
+        metadata.setIdpDiscoveryEnabled(true);
+        metadata.setIdpDiscoveryURL("test.fi/idpDisco/");
+        context.setLocalExtendedMetadata(metadata);
+        context.setLocalEntityId("localId");
+
+        context.setInboundMessageTransport(new HttpServletRequestAdapter(request));
+        context.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
+
+        replayMock();
+        entryPoint.initializeDiscovery(context);
+        verifyMock();
+
     }
 
     /**
@@ -149,8 +202,7 @@ public class SAMLEntryPointTest {
     @Test
     public void testInitialProfileOptions() throws Exception {
 
-        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
-        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(new SAMLMessageContext(), null);
         assertEquals(new Integer(2), ssoProfileOptions.getProxyCount());
         assertTrue(ssoProfileOptions.isIncludeScoping());
         assertFalse(ssoProfileOptions.getForceAuthN());
@@ -171,7 +223,6 @@ public class SAMLEntryPointTest {
         replayMock();
 
         WebSSOProfileOptions defaultOptions = new WebSSOProfileOptions();
-        defaultOptions.setIdp("ignoredValue");
         defaultOptions.setProxyCount(0);
         defaultOptions.setIncludeScoping(false);
         defaultOptions.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
@@ -180,8 +231,7 @@ public class SAMLEntryPointTest {
         entryPoint.setDefaultProfileOptions(defaultOptions);
 
         // Check that default values are used
-        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
-        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        WebSSOProfileOptions ssoProfileOptions = entryPoint.getProfileOptions(new SAMLMessageContext(), null);
         assertEquals(new Integer(0), ssoProfileOptions.getProxyCount());
         assertFalse(ssoProfileOptions.isIncludeScoping());
         assertFalse(ssoProfileOptions.getForceAuthN());
@@ -190,14 +240,12 @@ public class SAMLEntryPointTest {
 
         // Check that value can't be altered after being set
         defaultOptions.setIncludeScoping(true);
-        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
-        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        ssoProfileOptions = entryPoint.getProfileOptions(new SAMLMessageContext(), null);
         assertFalse(ssoProfileOptions.isIncludeScoping());
 
         // Check that default values can be cleared
         entryPoint.setDefaultProfileOptions(null);
-        ssoProfileOptions = entryPoint.getProfileOptions(request, response, null, null);
-        assertEquals("http://localhost:8080/opensso", ssoProfileOptions.getIdp());
+        ssoProfileOptions = entryPoint.getProfileOptions(new SAMLMessageContext(), null);
         assertTrue(ssoProfileOptions.isIncludeScoping());        
 
         verifyMock();
@@ -211,7 +259,6 @@ public class SAMLEntryPointTest {
      */
     @Test(expected = ServletException.class)
     public void testInvalidIDP() throws Exception {
-        entryPoint.setIdpSelectionPath(null);
 
         expect(request.getContextPath()).andReturn("/saml");
         expect(request.getSession(true)).andReturn(session);
@@ -220,7 +267,7 @@ public class SAMLEntryPointTest {
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("testIDP").times(2);
-        expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
@@ -236,24 +283,24 @@ public class SAMLEntryPointTest {
      */
     @Test
     public void testCorrectIDP() throws Exception {
-        entryPoint.setIdpSelectionPath(null);
 
         expect(request.getSession(true)).andReturn(session);
         expect(request.getContextPath()).andReturn("/saml");
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
-        expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
-        expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("http://localhost:8080/opensso").times(2);
-        expect(request.getParameter(SAMLEntryPoint.LOGIN_PARAMETER)).andReturn("false");
-        expect(request.getHeader("Accept")).andReturn(
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
+        expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("http://localhost:8080/opensso");
+
+        expect(request.getHeader("Accept")).andReturn("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
+
         ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
 
         replayMock();
         entryPoint.commence(request, response, null);
         verifyMock();
+
     }
 
     /**
@@ -269,7 +316,7 @@ public class SAMLEntryPointTest {
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
 
         replayMock();
-        Assert.assertFalse(entryPoint.isECPRequest(request));
+        assertFalse(SAMLUtil.isECPRequest(request));
         verifyMock();
 
     }
@@ -286,7 +333,7 @@ public class SAMLEntryPointTest {
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn("ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'");
 
         replayMock();
-        Assert.assertTrue(entryPoint.isECPRequest(request));
+        assertTrue(SAMLUtil.isECPRequest(request));
         verifyMock();
 
     }
@@ -296,6 +343,7 @@ public class SAMLEntryPointTest {
         replay(request);
         replay(response);
         replay(session);
+        replay(servletContext);
     }
 
     private void verifyMock() {
@@ -303,5 +351,7 @@ public class SAMLEntryPointTest {
         verify(response);
         verify(request);
         verify(ssoProfile);
+        verify(servletContext);
     }
+
 }

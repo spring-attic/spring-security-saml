@@ -54,7 +54,8 @@ public class SAMLAuthenticationProviderTest {
     @Before
     public void initialize() {
         consumer = createMock(WebSSOProfileConsumer.class);
-        provider = new SAMLAuthenticationProvider(consumer);
+        provider = new SAMLAuthenticationProvider();
+        provider.setConsumer(consumer);
         provider.setSamlLogger(new SAMLEmptyLogger());
         messageStorage = createMock(SAMLMessageStorage.class);
         nameID = createMock(NameID.class);
@@ -78,6 +79,7 @@ public class SAMLAuthenticationProviderTest {
     @Test
     public void testAuthenticate() throws Exception {
         SAMLMessageContext context = new SAMLMessageContext();
+        context.setCommunicationProfileId(SAMLConstants.SAML2_WEBSSO_PROFILE_URI);
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, messageStorage);
         SAMLMessageStorage store = token.getMessageStore();
@@ -113,6 +115,7 @@ public class SAMLAuthenticationProviderTest {
     @Test
     public void testAuthenticateUserDetails() throws Exception {
         SAMLMessageContext context = new SAMLMessageContext();
+        context.setCommunicationProfileId(SAMLConstants.SAML2_WEBSSO_PROFILE_URI);
 
         SAMLUserDetailsService details = createMock(SAMLUserDetailsService.class);
         provider.setUserDetails(details);

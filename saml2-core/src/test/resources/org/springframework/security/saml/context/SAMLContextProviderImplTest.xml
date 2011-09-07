@@ -14,7 +14,6 @@
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint" depends-on="metadata">
-        <property name="filterSuffix" value="/saml/login"/>
         <property name="metadata" ref="metadata"/>
         <property name="samlLogger" ref="samlLogger"/>
         <property name="webSSOprofile" ref="webSSOprofile"/>

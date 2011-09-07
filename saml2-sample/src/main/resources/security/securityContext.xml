@@ -16,6 +16,7 @@
         <security:intercept-url pattern="/logout.jsp" filters="none"/>
         <security:intercept-url pattern="/login.jsp" filters="none"/>
         <security:intercept-url pattern="/favicon.ico" filters="none"/>
+        <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
     </security:http>
 
@@ -23,10 +24,11 @@
         <security:filter-chain-map path-type="ant">
             <security:filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
             <security:filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
-            <security:filter-chain pattern="/saml/metadata/**" filters="metadataFilter"/>
+            <security:filter-chain pattern="/saml/metadata/**" filters="metadataDisplayFilter"/>
             <security:filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/>
             <security:filter-chain pattern="/saml/SSOHoK/**" filters="samlWebSSOHoKProcessingFilter"/>
             <security:filter-chain pattern="/saml/SingleLogout/**" filters="samlLogoutProcessingFilter"/>
+            <security:filter-chain pattern="/saml/discovery/**" filters="samlIDPDiscovery"/>
         </security:filter-chain-map>
     </bean>
 
@@ -43,9 +45,8 @@
     -->
 
     <!-- Handler for successful logout -->
-    <bean id="successLogoutHandler"
-          class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
-        <property name="defaultTargetUrl" value="/"/>
+    <bean id="successLogoutHandler" class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+        <property name="defaultTargetUrl" value="/logout.jsp"/>
     </bean>
 
     <!-- Register authentication manager with SAML provider -->
@@ -70,9 +71,6 @@
 
     <!-- Entry point to initialize authentication, default values taken from properties file -->
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
-        <property name="filterSuffix" value="/saml/login"/>
-        <!-- OPTIONAL property: In case idpSelectionPath property is not set the user will be redirected to the default IDP -->
-        <property name="idpSelectionPath" value="/WEB-INF/security/idpSelection.jsp"/>
         <property name="defaultProfileOptions">
             <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
                 <property name="includeScoping" value="false"/>
@@ -80,13 +78,20 @@
         </property>
     </bean>
 
-    <!-- OPTIONAL bean: The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metatdata there -->
-    <bean id="metadataFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter">
-        <property name="filterSuffix" value="/saml/metadata"/>
+    <!-- IDP Discovery Service -->
+    <bean id="samlIDPDiscovery" class="org.springframework.security.saml.SAMLDiscovery">
+        <property name="idpSelectionPath" value="/WEB-INF/security/idpSelection.jsp"/>
     </bean>
 
-    <!-- Class is capable of generating SP metadata describing the currently running environnment -->
-    <bean id="metadataGenerator" class="org.springframework.security.saml.metadata.MetadataGenerator"/>
+    <!-- Filter automatically generates default SP metadata -->
+    <bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+        <constructor-arg>
+            <bean class="org.springframework.security.saml.metadata.MetadataGenerator"/>
+        </constructor-arg>
+    </bean>
+
+    <!-- The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there -->
+    <bean id="metadataDisplayFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter"/>
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->

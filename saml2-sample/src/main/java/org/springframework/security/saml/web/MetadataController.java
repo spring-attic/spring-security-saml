@@ -31,7 +31,6 @@ import org.springframework.security.saml.metadata.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,7 +40,6 @@ import org.w3c.dom.Element;
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,9 +51,6 @@ import java.util.Set;
 public class MetadataController {
 
     private final Logger log = LoggerFactory.getLogger(MetadataController.class);
-
-    @Autowired
-    MetadataGenerator generator;
 
     @Autowired
     MetadataManager metadataManager;
@@ -131,6 +126,9 @@ public class MetadataController {
             modelAndView.addObject("availableKeys", getAvailablePrivateKeys());
             return modelAndView;
         }
+
+        MetadataGenerator generator = new MetadataGenerator();
+        generator.setKeyManager(keyManager);
 
         generator.setEntityId(metadata.getEntityId());
         generator.setEntityAlias(metadata.getAlias());

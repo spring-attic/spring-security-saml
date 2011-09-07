@@ -27,6 +27,7 @@ import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallingException;
 import org.opensaml.xml.parse.ParserPool;
 import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.w3c.dom.Element;
 
 import java.io.*;
@@ -121,7 +122,7 @@ public class SAMLObjectTest extends SAMLTestBase {
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
         Configuration.getMarshallerFactory().deregisterMarshaller(to.getElementQName());
-        tso.marshallMessage(to);
+        SAMLUtil.marshallMessage(to);
     }
 
     /**

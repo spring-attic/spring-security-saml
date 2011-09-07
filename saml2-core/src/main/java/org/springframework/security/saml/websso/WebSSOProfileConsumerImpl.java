@@ -17,6 +17,7 @@ package org.springframework.security.saml.websso;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
+import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -37,6 +38,7 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -130,23 +132,33 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
         }
 
-        // Verify destination
-        if (response.getDestination() != null) {
-            SPSSODescriptor localDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+        // Verify that message was received at the expected endpoint
+        verifyEndpoint(context.getLocalEntityEndpoint(), response.getDestination());
 
-            // Check if destination is correct on this SP
-            List<AssertionConsumerService> services = localDescriptor.getAssertionConsumerServices();
-            boolean found = false;
-            for (AssertionConsumerService service : services) {
-                if (response.getDestination().equals(service.getLocation()) &&
-                        service.getBinding().equals(context.getCommunicationProfileId())) {
-                    found = true;
-                    break;
+        // Verify endpoint requested in the original request
+        AssertionConsumerService assertionConsumerService = (AssertionConsumerService) context.getLocalEntityEndpoint();
+        if (request.getAssertionConsumerServiceIndex() != null) {
+            if (!request.getAssertionConsumerServiceIndex().equals(assertionConsumerService.getIndex())) {
+                log.info("SAML response was received at a different endpoint index than was requested");
+            }
+        } else {
+            String requestedResponseURL = request.getAssertionConsumerServiceURL();
+            String requestedBinding = request.getProtocolBinding();
+            if (requestedResponseURL != null) {
+                String responseLocation;
+                if (assertionConsumerService.getResponseLocation() != null) {
+                    responseLocation = assertionConsumerService.getResponseLocation();
+                } else {
+                    responseLocation = assertionConsumerService.getLocation();
+                }
+                if (!requestedResponseURL.equals(responseLocation)) {
+                    log.info("SAML response was received at a different endpoint URL {} than was requested {}", responseLocation, requestedResponseURL);
                 }
             }
-            if (!found) {
-                log.debug("Destination of the response was not the expected value", response.getDestination());
-                throw new SAMLException("Error validating SAML response");
+            if (requestedBinding != null) {
+                if (!requestedBinding.equals(context.getInboundSAMLBinding())) {
+                    log.info("SAML response was received using a different binding {} than was requested {}", context.getInboundSAMLBinding(), requestedBinding);
+                }
             }
         }
 
@@ -163,22 +175,46 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         List<Assertion> assertionList = response.getAssertions();
         List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
         for (EncryptedAssertion ea : encryptedAssertionList) {
-            Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
-            assertionList.add(context.getLocalDecrypter().decrypt(ea));
+            try {
+                Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
+                Assertion decryptedAssertion = context.getLocalDecrypter().decrypt(ea);
+                assertionList.add(decryptedAssertion);
+            } catch (DecryptionException e) {
+                log.debug("Decryption of received assertion failed, assertion will be skipped", e);
+            }
         }
 
+        // Find the assertion to be used for session creation, other assertions are ignored
         for (Assertion a : assertionList) {
-            verifyAssertion(a, request, context);
-            // Find subject assertions
+
+            // We're only interested in assertions with AuthnStatement
             if (a.getAuthnStatements().size() > 0) {
-                if (a.getSubject() != null && a.getSubject().getSubjectConfirmations() != null) {
-                    for (SubjectConfirmation conf : a.getSubject().getSubjectConfirmations()) {
-                        if (SubjectConfirmation.METHOD_BEARER.equals(conf.getMethod())) {
-                            subjectAssertion = a; // TODO HoK
-                        }
-                    }
+                try {
+                    // Verify that the assertion is valid
+                    verifyAssertion(a, request, context);
+                } catch (AuthenticationException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
+                } catch (SAMLRuntimeException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
+                } catch (SAMLException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
+                } catch (org.opensaml.xml.security.SecurityException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
+                } catch (ValidationException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
+                } catch (DecryptionException e) {
+                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
+                    continue;
                 }
             }
+
+            subjectAssertion = a;
+
             // Process all attributes
             for (AttributeStatement attStatement : a.getAttributeStatements()) {
                 for (Attribute att : attStatement.getAttributes()) {
@@ -189,11 +225,14 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                     attributes.add(context.getLocalDecrypter().decrypt(att));
                 }
             }
+
+            break;
+
         }
 
         // Make sure that at least one storage contains authentication statement and subject with bearer confirmation
         if (subjectAssertion == null) {
-            log.debug("Response doesn't contain authentication statement");
+            log.debug("Response doesn't any valid assertion which would pass subject validation");
             throw new SAMLException("Error validating SAML response");
         }
 
@@ -202,15 +241,32 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
         }
 
-        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes, context.getLocalEntityId());
+        // Populate custom data, if any
+        Serializable additionalData = processAdditionalData(context);
 
+        // Create the credential
+        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes, context.getLocalEntityId(), additionalData);
+
+    }
+
+    /**
+     * This is a hook method enabling subclasses to process additional data from the SAML exchange, like assertions with different confirmations
+     * or additional attributes. The returned object is stored inside the SAMLCredential. Implementation is responsible for ensuring compliance
+     * with the SAML specification. The method is called once all the other processing was finished and incoming message is deemed as valid.
+     *
+     * @param context context containing incoming message
+     * @return object to store in the credential, null by default
+     * @throws SAMLException in case processing fails
+     */
+    protected Serializable processAdditionalData(SAMLMessageContext context) throws SAMLException {
+        return null;
     }
 
     protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
 
         // Verify storage time skew
         if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
-            log.debug("Authentication statement is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
+            log.debug("Assertion is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
             throw new CredentialsExpiredException("Users authentication credential is too old to be used");
         }
 
@@ -218,7 +274,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Advice is ignored, core 574
         verifyIssuer(assertion.getIssuer(), context);
         verifyAssertionSignature(assertion.getSignature(), context);
-        verifySubject(assertion.getSubject(), request, context);
+
+        // Check subject
+        if (assertion.getSubject() != null) {
+            verifySubject(assertion.getSubject(), request, context);
+        } else {
+            throw new SAMLException("Assertion without subject is discarded");
+        }
 
         // Assertion with authentication statement must contain audience restriction
         if (assertion.getAuthnStatements().size() > 0) {
@@ -246,61 +308,59 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @throws DecryptionException in case the NameID can't be decrypted
      */
     protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
-        boolean confirmed = false;
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
+
             if (SubjectConfirmation.METHOD_BEARER.equals(confirmation.getMethod())) {
 
+                log.debug("Processing Bearer subject confirmation");
                 SubjectConfirmationData data = confirmation.getSubjectConfirmationData();
 
                 // Bearer must have confirmation 554
                 if (data == null) {
-                    log.debug("Assertion invalidated by missing confirmation data");
-                    throw new SAMLException("SAML Assertion is invalid");
+                    log.debug("Bearer SubjectConfirmation invalidated by missing confirmation data");
+                    continue;
                 }
 
                 // Not before forbidden by core 558
                 if (data.getNotBefore() != null) {
-                    log.debug("Assertion contains not before in bearer confirmation, which is forbidden");
-                    throw new SAMLException("SAML Assertion is invalid");
+                    log.debug("Bearer SubjectConfirmation invalidated by not before which is forbidden");
+                    continue;
                 }
 
                 // Validate not on or after
                 if (data.getNotOnOrAfter().isBeforeNow()) {
-                    log.debug("Invalidated by notOnOrAfter");
-                    confirmed = false;
+                    log.debug("Bearer SubjectConfirmation invalidated by notOnOrAfter");
                     continue;
                 }
 
                 // Validate in response to
                 if (request != null) {
                     if (data.getInResponseTo() == null) {
-                        log.debug("Assertion invalidated by subject confirmation - missing inResponseTo field");
-                        throw new SAMLException("SAML Assertion is invalid");
+                        log.debug("Bearer SubjectConfirmation invalidated by missing inResponseTo field");
+                        continue;
                     } else {
                         if (!data.getInResponseTo().equals(request.getID())) {
-                            log.debug("Assertion invalidated by subject confirmation - invalid in response to");
-                            throw new SAMLException("SAML Assertion is invalid");
+                            log.debug("Bearer SubjectConfirmation invalidated by invalid in response to");
+                            continue;
                         }
                     }
                 }
 
                 // Validate recipient
                 if (data.getRecipient() == null) {
-                    log.debug("Assertion invalidated by subject confirmation - recipient is missing in bearer confirmation");
-                    throw new SAMLException("SAML Assertion is invalid");
+                    log.debug("Bearer SubjectConfirmation invalidated by missing recipient");
+                    continue;
                 } else {
-                    SPSSODescriptor spssoDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-                    for (AssertionConsumerService service : spssoDescriptor.getAssertionConsumerServices()) {
-                        if (context.getCommunicationProfileId().equals(service.getBinding()) && service.getLocation().equals(data.getRecipient())) {
-                            confirmed = true;
-                        }
+                    try {
+                        verifyEndpoint(context.getLocalEntityEndpoint(), data.getRecipient());
+                    } catch (SAMLException e) {
+                        log.debug("Bearer SubjectConfirmation invalidated by recipient assertion consumer URL, found {}", data.getRecipient());
+                        continue;
                     }
                 }
-            }
 
-            // Was the subject confirmed by this confirmation data? If so let's store the subject in context.
-            if (confirmed) {
+                // Was the subject confirmed by this confirmation data? If so let's store the subject in the context.
                 NameID nameID;
                 if (subject.getEncryptedID() != null) {
                     Assert.notNull(context.getLocalDecrypter(), "Can't decrypt NameID, no decrypter is set in the context");
@@ -310,11 +370,14 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 }
                 context.setSubjectNameIdentifier(nameID);
                 return;
+
             }
+
         }
 
-        log.debug("Assertion invalidated by subject confirmation - can't be confirmed by bearer method");
+        log.debug("Assertion invalidated by subject confirmation - can't be confirmed by the bearer method");
         throw new SAMLException("SAML Assertion is invalid");
+
     }
 
     /**
@@ -340,6 +403,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     }
 
     protected void verifyAssertionConditions(Conditions conditions, SAMLMessageContext context, boolean audienceRequired) throws SAMLException {
+
         // If no conditions are implied, storage is deemed valid
         if (conditions == null) {
             return;
@@ -378,20 +442,32 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("SAML response is not intended for this entity");
         }
 
-        /** ? BUG
-         if (conditions.getConditions().size() > 0) {
-         log.debug("Assertion contain not understood conditions");
-         throw new SAMLException("SAML response is not valid");
-         }
-         */
+        // Check conditions
+        verifyConditions(context, conditions.getConditions());
+
+    }
+
+    /**
+     * Verifies conditions of the assertions. By default system doesn't understand any conditions and processing
+     * fails when some are present.
+     *
+     * @param context    message context
+     * @param conditions conditions
+     * @throws SAMLException in case conditions are not empty
+     */
+    protected void verifyConditions(SAMLMessageContext context, List<Condition> conditions) throws SAMLException {
+        if (conditions != null && conditions.size() > 0) {
+            log.debug("Assertion contain not understood conditions");
+            throw new SAMLException("SAML response is not valid");
+        }
     }
 
     /**
      * Verifies that authentication statement is valid. Checks the authInstant and sessionNotOnOrAfter fields.
      *
-     * @param auth    statement to check
+     * @param auth                  statement to check
      * @param requestedAuthnContext original requested context can be null for unsolicited messages or when no context was requested
-     * @param context message context
+     * @param context               message context
      * @throws AuthenticationException in case the statement is invalid
      */
     protected void verifyAuthenticationStatement(AuthnStatement auth, RequestedAuthnContext requestedAuthnContext, SAMLMessageContext context) throws AuthenticationException {
@@ -416,18 +492,19 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     /**
      * Implementation is expected to verify that the requested authentication context corresponds with the received value.
      * Identity provider sending the context can be loaded from the SAMLContext.
-     * <p>
+     * <p/>
      * By default verification is done only for "exact" context. It is checked whether received context contains one of the requested
      * method.
-     * <p>
+     * <p/>
      * In case requestedAuthnContext is null no verification is done.
-     * <p>
+     * <p/>
      * Method can be reimplemented in subclasses.
      *
      * @param requestedAuthnContext context requested in the original request, null for unsolicited messages or when no context was required
-     * @param receivedContext context from the response message
-     * @param context saml context
-     * @throws InsufficientAuthenticationException in case expected context doesn't correspond with the received value
+     * @param receivedContext       context from the response message
+     * @param context               saml context
+     * @throws InsufficientAuthenticationException
+     *          in case expected context doesn't correspond with the received value
      */
     protected void verifyAuthnContext(RequestedAuthnContext requestedAuthnContext, AuthnContext receivedContext, SAMLMessageContext context) throws InsufficientAuthenticationException {
 

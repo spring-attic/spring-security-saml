@@ -45,6 +45,11 @@ import org.springframework.security.saml.util.SAMLUtil;
  */
 public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase implements ArtifactResolutionProfile {
 
+    @Override
+    public String getProfileIdentifier() {
+        return org.springframework.security.saml.SAMLConstants.SAML2_ARTIFACT_PROFILE_URI;
+    }
+
     /**
      * Creates ArtifactResolve message based in the artifactId, locates ArtifactResolutionService, populates SAMLContext
      * and performs artifact retrieval. Message included in the response is returned.
@@ -79,7 +84,8 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             // Create SAML message for artifact resolution
             ArtifactResolve artifactResolve = createArtifactResolve(context, artifactId, artifactResolutionService);
 
-            context.setCommunicationProfileId(artifactResolutionService.getBinding());
+            context.setCommunicationProfileId(getProfileIdentifier());
+            context.setInboundSAMLBinding(artifactResolutionService.getBinding());
             context.setOutboundMessage(artifactResolve);
             context.setOutboundSAMLMessage(artifactResolve);
             context.setPeerEntityEndpoint(artifactResolutionService);

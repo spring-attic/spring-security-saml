@@ -51,6 +51,7 @@ public class MetadataGeneratorTest {
 
         generator.setEntityBaseURL("http://localhost");
         generator.setEntityId("my_entity");
+        generator.setIncludeDiscovery(true);
         EntityDescriptor metadata = generator.generateMetadata();
 
         assertEquals("my_entity", metadata.getEntityID());
@@ -58,6 +59,8 @@ public class MetadataGeneratorTest {
         assertNotNull(spssoDescriptor);
 
         // Discovery
+        assertNotNull(spssoDescriptor.getExtensions());
+        assertNotNull(spssoDescriptor.getExtensions().getUnknownXMLObjects());
         assertTrue(spssoDescriptor.getExtensions().getUnknownXMLObjects().size() == 1);
 
     }

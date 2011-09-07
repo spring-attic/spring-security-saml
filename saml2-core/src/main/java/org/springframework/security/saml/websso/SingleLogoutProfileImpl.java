@@ -66,7 +66,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return;
         }
 
-        IDPSSODescriptor idpDescriptor = getIDPDescriptor(credential.getRemoteEntityID());
+        IDPSSODescriptor idpDescriptor = SAMLUtil.getIDPDescriptor(metadata, credential.getRemoteEntityID());
         ExtendedMetadata idpExtendedMetadata = context.getLocalExtendedMetadata();
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
@@ -74,7 +74,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
         LogoutRequest logoutRequest = getLogoutRequest(context, credential, logoutServiceIDP);
 
-        context.setCommunicationProfileId(logoutServiceIDP.getBinding());
+        context.setCommunicationProfileId(getProfileIdentifier());
         context.setOutboundMessage(logoutRequest);
         context.setOutboundSAMLMessage(logoutRequest);
         context.setPeerEntityEndpoint(logoutServiceIDP);
@@ -149,26 +149,14 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return false;
         }
 
-        // Verify destination
-        if (logoutRequest.getDestination() != null) {
-            SPSSODescriptor localDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-
-            // Check if destination is correct on this SP
-            List<SingleLogoutService> services = localDescriptor.getSingleLogoutServices();
-            boolean found = false;
-            for (SingleLogoutService service : services) {
-                if (logoutRequest.getDestination().equals(service.getLocation()) &&
-                        context.getCommunicationProfileId().equals(service.getBinding())) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                log.warn("Destination of the request {} does not match any singleLogout endpoint", logoutRequest.getDestination());
-                Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Destination URL of the request is invalid");
-                sendLogoutResponse(status, context);
-                return false;
-            }
+        try {
+            // Verify destination
+            verifyEndpoint(context.getLocalEntityEndpoint(), logoutRequest.getDestination());
+        } catch (SAMLException e) {
+            log.warn("Destination of the request {} does not match any singleLogout endpoint", logoutRequest.getDestination());
+            Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Destination URL of the request is invalid");
+            sendLogoutResponse(status, context);
+            return false;
         }
 
         // Verify issuer
@@ -258,7 +246,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
 
-        IDPSSODescriptor idpDescriptor = getIDPDescriptor(context.getPeerEntityId());
+        IDPSSODescriptor idpDescriptor = SAMLUtil.getIDPDescriptor(metadata, context.getPeerEntityId());
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
         SingleLogoutService logoutService = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
@@ -271,7 +259,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         logoutResponse.setDestination(logoutService.getLocation());
         logoutResponse.setStatus(status);
 
-        context.setCommunicationProfileId(logoutService.getBinding());
+        context.setCommunicationProfileId(getProfileIdentifier());
         context.setOutboundMessage(logoutResponse);
         context.setOutboundSAMLMessage(logoutResponse);
         context.setPeerEntityEndpoint(logoutService);
@@ -360,7 +348,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             boolean found = false;
             for (SingleLogoutService service : services) {
                 if (response.getDestination().equals(service.getLocation()) &&
-                        context.getCommunicationProfileId().equals(service.getBinding())) {
+                        context.getInboundSAMLBinding().equals(service.getBinding())) {
                     found = true;
                     break;
                 }

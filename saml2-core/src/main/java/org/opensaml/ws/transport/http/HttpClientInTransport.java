@@ -25,9 +25,9 @@ import java.util.List;
 /**
  * Implementation of HTTPInTransport delegating to a HTTPClient postMethod object.
  *
- * @author Mandus Elfving
+ * @author Mandus Elfving, Vladimir Schafer
  */
-public class HttpClientInTransport implements HTTPInTransport {
+public class HttpClientInTransport implements HTTPInTransport, LocationAwareInTransport {
 
     private final PostMethod postMethod;
     private final String endpointURI;

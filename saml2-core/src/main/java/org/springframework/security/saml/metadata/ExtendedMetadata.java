@@ -39,6 +39,21 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String alias;
 
     /**
+     * When true IDP discovery will be invoked before SSO.
+     */
+    private boolean idpDiscoveryEnabled = false;
+
+    /**
+     * URL of the IDP Discovery service user should be redirected to upon request to determine which IDP to use.
+     */
+    private String idpDiscoveryURL;
+
+    /**
+     * Indicates whether Enhanced Client/Proxy profile should be used for requests which support it.
+     */
+    private boolean ecpEnabled = false;
+
+    /**
      * Profile used for trust verification, MetaIOP by default. Only relevant for local entities.
      */
     private String securityProfile;
@@ -278,6 +293,30 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     public void setLocal(boolean local) {
         this.local = local;
+    }
+
+    public String getIdpDiscoveryURL() {
+        return idpDiscoveryURL;
+    }
+
+    public void setIdpDiscoveryURL(String idpDiscoveryURL) {
+        this.idpDiscoveryURL = idpDiscoveryURL;
+    }
+
+    public boolean isIdpDiscoveryEnabled() {
+        return idpDiscoveryEnabled;
+    }
+
+    public void setIdpDiscoveryEnabled(boolean idpDiscoveryEnabled) {
+        this.idpDiscoveryEnabled = idpDiscoveryEnabled;
+    }
+
+    public void setEcpEnabled(boolean ecpEnabled) {
+        this.ecpEnabled = ecpEnabled;
+    }
+
+    public boolean isEcpEnabled() {
+        return ecpEnabled;
     }
 
     /**

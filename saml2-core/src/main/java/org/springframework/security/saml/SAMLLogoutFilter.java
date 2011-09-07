@@ -27,6 +27,7 @@ import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
+import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -51,11 +52,6 @@ import java.io.IOException;
  */
 public class SAMLLogoutFilter extends LogoutFilter {
 
-    /**
-     * Default name of path suffix which will invoke this filter.
-     */
-    private static final String DEFAULT_FILTER_URL = "/saml/logout";
-
     protected SingleLogoutProfile profile;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
@@ -72,6 +68,11 @@ public class SAMLLogoutFilter extends LogoutFilter {
     protected LogoutHandler[] globalHandlers;
 
     /**
+     * URL this filter processes
+     */
+    public static final String FILTER_URL = "/saml/logout";
+
+    /**
      * Default constructor.
      *
      * @param successUrl     url to use after logout in case of local logout
@@ -81,7 +82,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
     public SAMLLogoutFilter(String successUrl, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers) {
         super(successUrl, localHandler);
         this.globalHandlers = globalHandlers;
-        this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
+        this.setFilterProcessesUrl(FILTER_URL);
     }
 
     /**
@@ -94,20 +95,27 @@ public class SAMLLogoutFilter extends LogoutFilter {
     public SAMLLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler[] localHandler, LogoutHandler[] globalHandlers) {
         super(logoutSuccessHandler, localHandler);
         this.globalHandlers = globalHandlers;
-        this.setFilterProcessesUrl(DEFAULT_FILTER_URL);
+        this.setFilterProcessesUrl(FILTER_URL);
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        doFilterHttp((HttpServletRequest) req, (HttpServletResponse) res, chain);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        FilterInvocation fi = new FilterInvocation(request, response, chain);
+        processLogout(fi.getRequest(), fi.getResponse(), chain);
     }
 
     /**
      * In case request parameter of name "local" is set to true or there is no authenticated user
      * only local logout will be performed and user will be redirected to the success page.
      * Otherwise global logout procedure is initialized.
+     *
+     * @param request  http request
+     * @param response http response
+     * @param chain    chain
+     * @throws IOException      error
+     * @throws ServletException error
      */
-    public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void processLogout(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         if (requiresLogout(request, response)) {
 
@@ -117,16 +125,19 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
                 if (auth != null && isGlobalLogout(request, auth)) {
 
-                    Assert.isInstanceOf(SAMLCredential.class, auth.getCredentials(), "Authentication object doesn't contain SAML credential");
+                    Assert.isInstanceOf(SAMLCredential.class, auth.getCredentials(), "Authentication object doesn't contain SAML credential, cannot perform global logout");
+
+                    // Terminate the session first
+                    for (LogoutHandler handler : globalHandlers) {
+                        handler.logout(request, response, auth);
+                    }
+
+                    // Notify session participants using SAML Single Logout profile
                     SAMLMessageContext context = contextProvider.getLocalEntity(request, response, (SAMLCredential) auth.getCredentials());
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
                     HttpSessionStorage storage = new HttpSessionStorage(request);
                     profile.sendLogoutRequest(context, credential, storage);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
-
-                    for (LogoutHandler handler : globalHandlers) { // TODO remove?
-                        handler.logout(request, response, auth);
-                    }
 
                 } else {
 

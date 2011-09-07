@@ -35,18 +35,6 @@ public class WebSSOProfileHoKImpl extends WebSSOProfileImpl {
         return SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI;
     }
 
-    /**
-     * Takes into account the way HoK profile and parses the real binding from the hoksso:ProtocolBinding attribute.
-     *
-     * @param endpoint endpoint to load binding for
-     * @return binding name
-     * @throws MetadataProviderException in case binding name can't be determined
-     */
-    @Override
-    protected String getEndpointBinding(Endpoint endpoint) throws MetadataProviderException {
-        return SAMLUtil.getBindingForEndpoint(endpoint);
-    }
-
     @Override
     protected boolean isEndpointSupported(SingleSignOnService endpoint) throws MetadataProviderException {
 

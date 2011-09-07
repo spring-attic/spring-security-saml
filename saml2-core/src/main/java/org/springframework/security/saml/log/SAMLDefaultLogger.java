@@ -15,12 +15,15 @@
  */
 package org.springframework.security.saml.log;
 
+import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HTTPInTransport;
+import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.util.SAMLUtil;
 
 /**
  * Default Logger implementation sending message logs into standard Log4J logger.
@@ -61,16 +64,22 @@ public class SAMLDefaultLogger implements SAMLLogger {
             sb.append(transport.getPeerAddress());
         }
 
-        log.info(sb.toString());
-
         if (logMessages) {
-            if (context.getInboundSAMLMessage() != null) {
-                // TODO
-            }
-            if (context.getOutboundSAMLMessage() != null) {
-                // TODO
+            try {
+                if (context.getInboundSAMLMessage() != null) {
+                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                    sb.append(";").append(messageStr);
+                }
+                if (context.getOutboundSAMLMessage() != null) {
+                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                    sb.append(";").append(messageStr);
+                }
+            } catch (MessageEncodingException e1) {
+                log.warn("Error marshaling message during logging", e1);
             }
         }
+
+        log.info(sb.toString());
 
     }
 

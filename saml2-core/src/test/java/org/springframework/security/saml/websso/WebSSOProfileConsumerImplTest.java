@@ -71,6 +71,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
 
         HttpServletRequest request = createMock(HttpServletRequest.class);
         expect(request.getContextPath()).andReturn("/").anyTimes();
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null).anyTimes();
         replay(request);
         messageContext = contextProvider.getLocalEntity(request, null);
         verify(request);

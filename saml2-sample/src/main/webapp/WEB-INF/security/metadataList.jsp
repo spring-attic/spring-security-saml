@@ -13,6 +13,10 @@
 <a href="<c:url value="/saml/web/metadata/generate"/>">
     Generate new service provider metadata
 </a>
+<br/>
+<a href="<c:url value="/saml/login"/>">
+    Initialize Single Sign-On
+</a>
 
 <p>
     Default hosted service provider: <br/>

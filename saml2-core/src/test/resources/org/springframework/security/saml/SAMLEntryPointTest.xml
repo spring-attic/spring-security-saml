@@ -14,7 +14,6 @@
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint" depends-on="metadata">
-        <property name="filterSuffix" value="/saml/login"/>
         <property name="metadata" ref="metadata"/>
         <property name="samlLogger" ref="samlLogger"/>
         <property name="webSSOprofile" ref="webSSOprofile"/>
@@ -52,11 +51,21 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <value type="java.io.File">classpath:testSP.xml</value>
+                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                            <constructor-arg>
+                                <value type="java.io.File">classpath:testSP.xml</value>
+                            </constructor-arg>
+                            <property name="parserPool" ref="parserPool"/>
+                        </bean>
                     </constructor-arg>
-                    <property name="parserPool" ref="parserPool"/>
+                    <constructor-arg>
+                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                            <property name="idpDiscoveryEnabled" value="true"/>
+                            <property name="ecpEnabled" value="true"/>
+                        </bean>
+                    </constructor-arg>
                 </bean>
             </list>
         </constructor-arg>

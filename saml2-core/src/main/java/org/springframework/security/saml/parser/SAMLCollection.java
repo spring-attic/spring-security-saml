@@ -17,6 +17,7 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.util.XMLHelper;
+import org.springframework.security.saml.util.SAMLUtil;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -63,7 +64,7 @@ public class SAMLCollection<T extends XMLObject> extends SAMLBase<T, List<T>> {
             if (serializedObject == null) {
                 ArrayList<String> serializedItems = new ArrayList<String>();
                 for (T item : getObject()) {
-                    serializedItems.add(XMLHelper.nodeToString(marshallMessage(item)));
+                    serializedItems.add(XMLHelper.nodeToString(SAMLUtil.marshallMessage(item)));
                 }
                 serializedObject = serializedItems;
             }

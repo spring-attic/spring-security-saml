@@ -44,10 +44,7 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Pair;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
@@ -64,7 +61,7 @@ import java.util.*;
  *
  * @author Vladimir Schäfer
  */
-public class MetadataGenerator implements ApplicationContextAware {
+public class MetadataGenerator {
 
     private String entityId;
     private String entityBaseURL;
@@ -85,7 +82,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     private Collection<String> bindingsHoKSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
     private Collection<String> bindingsSLO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
-    private boolean includeDiscovery = false;
+    private boolean includeDiscovery = true;
 
     private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
@@ -93,22 +90,17 @@ public class MetadataGenerator implements ApplicationContextAware {
             NameIDType.UNSPECIFIED,
             NameIDType.X509_SUBJECT);
 
-    private static final Collection<String> defaultBindings = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI,
-            SAMLConstants.SAML2_PAOS_BINDING_URI,
-            SAMLConstants.SAML2_ARTIFACT_BINDING_URI,
-            SAMLConstants.SAML2_REDIRECT_BINDING_URI,
-            SAMLConstants.SAML2_SOAP11_BINDING_URI);
+    protected XMLObjectBuilderFactory builderFactory;
 
-    private XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private KeyManager keyManager;
+    protected KeyManager keyManager;
 
     private final Log logger = LogFactory.getLog(MetadataGenerator.class);
 
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    /**
+     * Default constructor.
+     */
+    public MetadataGenerator() {
+        this.builderFactory = Configuration.getBuilderFactory();
     }
 
     protected KeyInfo getServerKeyInfo(String alias) {
@@ -134,6 +126,8 @@ public class MetadataGenerator implements ApplicationContextAware {
     }
 
     public void generateExtendedMetadata(ExtendedMetadata metadata) {
+        metadata.setEcpEnabled(false);
+        metadata.setIdpDiscoveryEnabled(true);
         metadata.setEncryptionKey(encryptionKey);
         metadata.setSigningKey(signingKey);
         metadata.setAlias(entityAlias);
@@ -405,7 +399,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     }
 
     private String getSAMLWebSSOProcessingFilterPath() {
-        return SAMLProcessingFilter.WEBSSO_URL;
+        return SAMLProcessingFilter.FILTER_URL;
     }
 
     private String getSAMLWebSSOHoKProcessingFilterPath() {
@@ -413,20 +407,11 @@ public class MetadataGenerator implements ApplicationContextAware {
     }
 
     private String getSAMLEntryPointPath() {
-        Map map = applicationContext.getBeansOfType(SAMLEntryPoint.class);
-        if (map.size() == 0) {
-            logger.error("No SAML entry point was defined");
-            throw new SAMLRuntimeException("No SAML entry point is defined in Spring configuration");
-        } else if (map.size() > 1) {
-            logger.error("More then one SAML Entry points were defined");
-            throw new SAMLRuntimeException("More then one SAML entry points were defined in Spring configuration");
-        } else {
-            return ((SAMLEntryPoint) map.values().iterator().next()).getFilterProcessesUrl();
-        }
+        return SAMLEntryPoint.FILTER_URL;
     }
 
     private String getSAMLLogoutFilterPath() {
-        return SAMLLogoutProcessingFilter.SINGLE_LOGOUT_URL;
+        return SAMLLogoutProcessingFilter.FILTER_URL;
     }
 
     /**
@@ -533,6 +518,7 @@ public class MetadataGenerator implements ApplicationContextAware {
         this.entityBaseURL = entityBaseURL;
     }
 
+    @Autowired
     public void setKeyManager(KeyManager keyManager) {
         this.keyManager = keyManager;
     }
@@ -562,7 +548,7 @@ public class MetadataGenerator implements ApplicationContextAware {
     }
 
     public Collection<String> getBindingsSSO() {
-        return bindingsSSO == null ? defaultBindings : bindingsSSO;
+        return bindingsSSO;
     }
 
     public void setBindingsSSO(Collection<String> bindingsSSO) {
@@ -597,14 +583,6 @@ public class MetadataGenerator implements ApplicationContextAware {
         }
     }
 
-    public XMLObjectBuilderFactory getBuilderFactory() {
-        return builderFactory;
-    }
-
-    public void setBuilderFactory(XMLObjectBuilderFactory builderFactory) {
-        this.builderFactory = builderFactory;
-    }
-
     public boolean isIncludeDiscovery() {
         return includeDiscovery;
     }
@@ -625,5 +603,6 @@ public class MetadataGenerator implements ApplicationContextAware {
     public void setAssertionConsumerIndex(int assertionConsumerIndex) {
         this.assertionConsumerIndex = assertionConsumerIndex;
     }
+
 
 }

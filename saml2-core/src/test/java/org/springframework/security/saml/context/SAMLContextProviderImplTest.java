@@ -84,6 +84,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityNullPath() throws Exception {
         expect(request.getContextPath()).andReturn("");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
@@ -94,6 +95,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityNoAlias() throws Exception {
         expect(request.getContextPath()).andReturn("/SSO");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
@@ -104,6 +106,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityAliasNoRole() throws Exception {
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("testSP2", context.getLocalEntityId());
@@ -114,6 +117,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityAliasSPRole() throws Exception {
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/sp");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("testSP2", context.getLocalEntityId());
@@ -124,6 +128,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityAliasDefaultRole() throws Exception {
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/invalid");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("testSP2", context.getLocalEntityId());
@@ -141,6 +146,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
     @Test
     public void testPopulateLocalEntityAliasIDPRole() throws Exception {
         expect(request.getContextPath()).andReturn("/SSO/alias/myIdpAlias/iDp");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("http://localhost:8080/noSign", context.getLocalEntityId());
@@ -160,6 +166,7 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateCredentialLocalEntity() throws Exception {
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
         SAMLCredential credential = getCredential("testSP2");
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response, credential);

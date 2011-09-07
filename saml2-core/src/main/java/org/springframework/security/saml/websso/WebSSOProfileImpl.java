@@ -16,9 +16,13 @@ package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
+import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.*;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.security.saml.SAMLConstants;
@@ -60,6 +64,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param options        values specified by caller to customize format of sent request
      * @param messageStorage object capable of storing and retreiving SAML messages
      * @throws SAMLException             error initializing SSO
+     * @throws SAMLRuntimeException in case context doesn't contain required entities or contains invalid data
      * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
      */
@@ -67,26 +72,25 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         // Verify we deal with a local SP
         if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
-            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
+            throw new SAMLRuntimeException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
         }
 
-        // Initialize IDP based on options or use default
-        String idpId = options.getIdp();
-        if (idpId == null) {
-            idpId = metadata.getDefaultIDP();
-        }
-
-        // Load the entities
+        // Load the entities from the context
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-        IDPSSODescriptor idpssoDescriptor = getIDPDescriptor(idpId);
-        ExtendedMetadata idpExtendedMetadata = metadata.getExtendedMetadata(idpId);
+        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) context.getPeerEntityRoleMetadata();
+        ExtendedMetadata idpExtendedMetadata = context.getPeerExtendedMetadata();
+
+        if (spDescriptor == null || idpssoDescriptor == null || idpExtendedMetadata == null) {
+            throw new SAMLRuntimeException("SPSSODescriptor, IDPSSODescriptor or IDPExtendedMetadata are not present in the SAMLContext");
+        }
+
         SingleSignOnService ssoService = getSingleSignOnService(options, idpssoDescriptor, spDescriptor);
         AssertionConsumerService consumerService = getAssertionConsumerService(options, idpssoDescriptor, spDescriptor);
         AuthnRequest authRequest = getAuthnRequest(context, options, consumerService, ssoService);
 
         // TODO optionally implement support for conditions, subject
 
-        context.setCommunicationProfileId(ssoService.getBinding());
+        context.setCommunicationProfileId(getProfileIdentifier());
         context.setOutboundMessage(authRequest);
         context.setOutboundSAMLMessage(authRequest);
         context.setPeerEntityEndpoint(ssoService);
@@ -196,33 +200,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         log.debug("No supported assertion consumer service found for SP");
         throw new MetadataProviderException("Service provider has no assertion consumer services available for the selected profile" + spDescriptor);
 
-    }
-
-    /**
-     * Determines whether given endpoint can be used together with the specified binding.
-     * <p>
-     * By default value of the binding in the endpoint is compared for equality with the user provided binding.
-     * <p>
-     * Method is automatically called for verification of user supplied binding value in the WebSSOProfileOptions.
-     *
-     * @param endpoint endpoint to check
-     * @param binding  binding the endpoint must support for the method to return true
-     * @return true if given endpoint can be used with the binding
-     * @throws MetadataProviderException in case match between binding and the endpoint can't be determined
-     */
-    protected boolean isEndpointMatching(Endpoint endpoint, String binding) throws MetadataProviderException {
-        return binding.equals(getEndpointBinding(endpoint));
-    }
-
-    /**
-     * Method is expected to return binding used to transfer messages to this endpoint.
-     *
-     * @param endpoint endpoint
-     * @return binding
-     * @throws MetadataProviderException in case binding can't be determined
-     */
-    protected String getEndpointBinding(Endpoint endpoint) throws MetadataProviderException {
-        return endpoint.getBinding();
     }
 
     /**
@@ -355,7 +332,12 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      */
     protected void buildReturnAddress(AuthnRequest request, AssertionConsumerService service) throws MetadataProviderException {
         if (service != null) {
-            request.setAssertionConsumerServiceURL(service.getLocation());
+            // AssertionConsumerServiceURL + ProtocolBinding is mutually exclusive with AssertionConsumerServiceIndex, we use the first one here
+            if (service.getResponseLocation() != null) {
+                request.setAssertionConsumerServiceURL(service.getResponseLocation());
+            } else {
+                request.setAssertionConsumerServiceURL(service.getLocation());
+            }
             request.setProtocolBinding(getEndpointBinding(service));
         }
     }

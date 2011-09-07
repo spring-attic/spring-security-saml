@@ -57,7 +57,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         // in ECP, we don't know in advance which IdP will be contacted.
         AuthnRequest authRequest = getAuthnRequest(context, options, assertionConsumer, null);
 
-        context.setCommunicationProfileId(SAMLConstants.SAML2_PAOS_BINDING_URI);
+        context.setCommunicationProfileId(getProfileIdentifier());
         context.setOutboundMessage(getEnvelope());
         context.setOutboundSAMLMessage(authRequest);
 

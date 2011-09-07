@@ -51,6 +51,7 @@ public class SAMLProcessorImplTest {
         processor = context.getBean("processor", SAMLProcessorImpl.class);
 
         request = createMock(HttpServletRequest.class);
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(request.getContextPath()).andReturn("/").anyTimes();
 
         replayMock();
@@ -67,6 +68,7 @@ public class SAMLProcessorImplTest {
      */
     @Test
     public void testPOSTResponseParsing() throws Exception {
+
         prepareHttpRequest("message/SAMLResponse.xml", "POST", "http://localhost:8080/spring-security-saml2-webapp/saml/SSO", "text/html");
         replayMock();
         SAMLMessageContext context = processor.retrieveMessage(samlContext);
@@ -128,7 +130,6 @@ public class SAMLProcessorImplTest {
     public void testMessageInvalidSignature() throws Exception {
         prepareHttpRequest("message/SAMLResponseInvalidSignature.xml", "POST", "http://localhost:8081/spring-security-saml2-webapp/saml/SSO", "text/html");
         replayMock();
-        //samlContext.setpee
         processor.retrieveMessage(samlContext);
         verifyMock();
     }
@@ -147,6 +148,7 @@ public class SAMLProcessorImplTest {
         expect(request.getParameter("Signature")).andReturn("").anyTimes();
         expect(request.getRequestURI()).andReturn(urlP.getPath()).anyTimes();
         expect(request.getRequestURL()).andReturn(new StringBuffer(url)).anyTimes();
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null).anyTimes();
     }
 
     private void replayMock() {

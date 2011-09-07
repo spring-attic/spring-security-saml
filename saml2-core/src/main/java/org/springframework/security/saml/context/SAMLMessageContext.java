@@ -17,6 +17,7 @@ package org.springframework.security.saml.context;
 
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.trust.TrustEngine;
 import org.opensaml.xml.security.x509.X509Credential;
@@ -36,8 +37,11 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private SignatureTrustEngine localTrustEngine;
     private TrustEngine<X509Credential> localSSLTrustEngine;
     private X509Credential localSSLCredential;
+    private Endpoint localEntityEndpoint;
     private X509Credential peerSSLCredential;
     private ExtendedMetadata peerExtendedMetadata;
+    private boolean peerUserSelected;
+    private String inboundSAMLBinding;
 
     /**
      * Extended metadata of the local entity
@@ -144,4 +148,48 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.peerSSLCredential = peerSSLCredential;
     }
 
+    /**
+     * Binding used to deliver the current message.
+     *
+     * @return incoming binding
+     */
+    public String getInboundSAMLBinding() {
+        return inboundSAMLBinding;
+    }
+
+    /**
+     * Binding used to deliver the current message.
+     *
+     * @param inboundSAMLBinding binding
+     */
+    public void setInboundSAMLBinding(String inboundSAMLBinding) {
+        this.inboundSAMLBinding = inboundSAMLBinding;
+    }
+
+    /**
+     * Endpoint the incoming message (if any) was received at.
+     *
+     * @return endpoint for incoming messages, null otherwise
+     */
+    public Endpoint getLocalEntityEndpoint() {
+        return localEntityEndpoint;
+    }
+
+    public void setLocalEntityEndpoint(Endpoint localEntityEndpoint) {
+        this.localEntityEndpoint = localEntityEndpoint;
+    }
+
+    /**
+     * Determines whether the peer entity was determined automatically (e.g. using defaults) or whether
+     * it's a result of explicit user selection.
+     *
+     * @return true if peer (IDP) was chosen by user
+     */
+    public boolean isPeerUserSelected() {
+        return peerUserSelected;
+    }
+
+    public void setPeerUserSelected(boolean peerUserSelected) {
+        this.peerUserSelected = peerUserSelected;
+    }
 }

@@ -45,9 +45,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -128,29 +130,6 @@ public abstract class AbstractProfileBase implements InitializingBean {
      */
     public void setMaxAssertionTime(int maxAssertionTime) {
         this.maxAssertionTime = maxAssertionTime;
-    }
-
-    protected IDPSSODescriptor getIDPDescriptor(String idpId) throws MetadataProviderException {
-        if (!metadata.isIDPValid(idpId)) {
-            log.debug("IDP name of the authenticated user is not valid", idpId);
-            throw new MetadataProviderException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
-        }
-        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
-        if (idpssoDescriptor == null) {
-            throw new MetadataProviderException("Given IDP " + idpId + " doesn't contain any IDPSSODescriptor element");
-        }
-        return idpssoDescriptor;
-    }
-
-    protected SPSSODescriptor getSPDescriptor(String spId) throws MetadataProviderException {
-        if (spId == null) {
-            throw new MetadataProviderException("No hosted SP metadata ID is configured, please verify that property hostedSPName in metadata bean of your Spring configuration is correctly set");
-        }
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) metadata.getRole(spId, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
-        if (spDescriptor == null) {
-            throw new MetadataProviderException("There was no SP metadata with ID " + spId + " found, please check metadata bean in your Spring configuration");
-        }
-        return spDescriptor;
     }
 
     /**
@@ -247,11 +226,30 @@ public abstract class AbstractProfileBase implements InitializingBean {
             log.debug("Assertion invalidated by issuer type", issuer.getFormat());
             throw new SAMLException("SAML Assertion is invalid");
         }
-
         // Validate that issuer is expected peer entity
         if (!context.getPeerEntityMetadata().getEntityID().equals(issuer.getValue())) {
             log.debug("Assertion invalidated by unexpected issuer value", issuer.getValue());
             throw new SAMLException("SAML Assertion is invalid");
+        }
+    }
+
+    /**
+     * Verifies that the destination URL intended in the message matches with the endpoint address. The URL message
+     * was ultimately received doesn't need to necessarily match the one defined in the metadata (in case of e.g. reverse-proxying
+     * of messages).
+     *
+     * @param endpoint endpoint the message was received at
+     * @param destination URL of the endpoint the message was intended to be sent to by the peer or null when not included
+     * @throws SAMLException in case endpoint doesn't match
+     */
+    protected void verifyEndpoint(Endpoint endpoint, String destination) throws SAMLException {
+        // Verify that destination in the response matches one of the available endpoints
+        if (destination != null) {
+            if (destination.equals(endpoint.getLocation())) {
+            } else if (destination.equals(endpoint.getResponseLocation())) {
+            } else {
+                throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs");
+            }
         }
     }
 
@@ -273,6 +271,33 @@ public abstract class AbstractProfileBase implements InitializingBean {
             throw new ValidationException("Signature is not trusted or invalid");
         }
 
+    }
+
+    /**
+     * Method is expected to return binding used to transfer messages to this endpoint. For some profiles the
+     * binding attribute in the metadata contains the profile name, method correctly parses the real binding
+     * in these situations.
+     *
+     * @param endpoint endpoint
+     * @return binding
+     */
+    protected String getEndpointBinding(Endpoint endpoint) {
+        return SAMLUtil.getBindingForEndpoint(endpoint);
+    }
+
+    /**
+     * Determines whether given endpoint can be used together with the specified binding.
+     * <p>
+     * By default value of the binding in the endpoint is compared for equality with the user provided binding.
+     * <p>
+     * Method is automatically called for verification of user supplied binding value in the WebSSOProfileOptions.
+     *
+     * @param endpoint endpoint to check
+     * @param binding  binding the endpoint must support for the method to return true
+     * @return true if given endpoint can be used with the binding
+     */
+    protected boolean isEndpointMatching(Endpoint endpoint, String binding) {
+        return binding.equals(getEndpointBinding(endpoint));
     }
 
     protected boolean isDateTimeSkewValid(int skewInSec, DateTime time) {

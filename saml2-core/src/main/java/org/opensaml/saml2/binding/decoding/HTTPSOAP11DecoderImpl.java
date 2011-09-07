@@ -19,6 +19,7 @@ import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
+import org.opensaml.ws.transport.http.LocationAwareInTransport;
 import org.opensaml.xml.parse.ParserPool;
 
 /**
@@ -35,8 +36,8 @@ public class HTTPSOAP11DecoderImpl extends HTTPSOAP11Decoder {
     protected String getActualReceiverEndpointURI(SAMLMessageContext messageContext) throws MessageDecodingException {
 
         InTransport inTransport = messageContext.getInboundMessageTransport();
-        if (inTransport instanceof HttpClientInTransport) {
-            return ((HttpClientInTransport) inTransport).getLocalAddress();
+        if (inTransport instanceof LocationAwareInTransport) {
+            return ((LocationAwareInTransport)inTransport).getLocalAddress();
         } else {
             return super.getActualReceiverEndpointURI(messageContext);
         }

@@ -16,15 +16,23 @@
 package org.springframework.security.saml.util;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.xml.Configuration;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.io.Marshaller;
+import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.signature.X509Data;
+import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.websso.WebSSOProfileOptions;
+import org.springframework.security.saml.metadata.MetadataManager;
+import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
@@ -40,7 +48,7 @@ import java.util.List;
  */
 public class SAMLUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLUtil.class);
+    private final static Logger logger = LoggerFactory.getLogger(SAMLUtil.class);
 
     /**
      * Method determines binding supported by the given endpoint. Usually the biding is encoded in the binding attribute
@@ -50,7 +58,7 @@ public class SAMLUtil {
      * @return binding supported by the endpoint
      * @throws MetadataProviderException in case binding can't be determined
      */
-    public static String getBindingForEndpoint(Endpoint endpoint) throws MetadataProviderException {
+    public static String getBindingForEndpoint(Endpoint endpoint) {
 
         String bindingName = endpoint.getBinding();
 
@@ -61,7 +69,7 @@ public class SAMLUtil {
             if (endpointLocation != null) {
                 bindingName = endpointLocation;
             } else {
-                throw new MetadataProviderException("Holder of Key profile endpoint doesn't contain attribute hoksso:ProtocolBinding");
+                throw new SAMLRuntimeException("Holder of Key profile endpoint doesn't contain attribute hoksso:ProtocolBinding");
             }
         }
 
@@ -84,7 +92,7 @@ public class SAMLUtil {
                 return service;
             }
         }
-        log.debug("No binding found for IDP with binding " + binding);
+        logger.debug("No binding found for IDP with binding " + binding);
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
     }
 
@@ -134,7 +142,7 @@ public class SAMLUtil {
 
         IDPSSODescriptor idpSSODescriptor = idpEntityDescriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
         if (idpSSODescriptor == null) {
-            log.error("Could not find an IDPSSODescriptor in metadata.");
+            logger.error("Could not find an IDPSSODescriptor in metadata.");
             throw new MessageDecodingException("Could not find an IDPSSODescriptor in metadata.");
         }
 
@@ -142,11 +150,35 @@ public class SAMLUtil {
 
     }
 
+    /**
+     * Loads the assertionConsumerIndex designated by the index. In case an index is specified the consumer
+     * is located and returned, otherwise default consumer is used.
+     *
+     * @param ssoDescriptor descriptor
+     * @param index         to load, can be null
+     * @return consumer service
+     * @throws org.opensaml.common.SAMLRuntimeException
+     *          in case assertionConsumerService with given index isn't found
+     */
+    public static AssertionConsumerService getConsumerService(SPSSODescriptor ssoDescriptor, Integer index) {
+        if (index != null) {
+            for (AssertionConsumerService service : ssoDescriptor.getAssertionConsumerServices()) {
+                if (index.equals(service.getIndex())) {
+                    logger.debug("Found assertionConsumerService with index {} and binding {}", index, service.getBinding());
+                    return service;
+                }
+            }
+            throw new SAMLRuntimeException("AssertionConsumerService with index " + index + " wasn't found for ServiceProvider " + ssoDescriptor.getID() + ", please check your metadata");
+        }
+        logger.debug("Index for AssertionConsumerService not specified, returning default");
+        return ssoDescriptor.getDefaultAssertionConsumerService();
+    }
+
     public static ArtifactResolutionService getArtifactResolutionService(IDPSSODescriptor idpssoDescriptor, int endpointIndex) throws MessageDecodingException {
 
         List<ArtifactResolutionService> artifactResolutionServices = idpssoDescriptor.getArtifactResolutionServices();
         if (artifactResolutionServices == null || artifactResolutionServices.size() == 0) {
-            log.error("Could not find any artifact resolution services in metadata.");
+            logger.error("Could not find any artifact resolution services in metadata.");
             throw new MessageDecodingException("Could not find any artifact resolution services in metadata.");
         }
 
@@ -273,6 +305,99 @@ public class SAMLUtil {
 
         return certList;
 
+    }
+
+    /**
+     * Analyzes the request headers in order to determine if it comes from an ECP-enabled
+     * client and based on this decides whether ECP profile will be used. Subclasses can override
+     * the method to control when is the ECP invoked.
+     *
+     * @param request request to analyze
+     * @return whether the request comes from an ECP-enabled client or not
+     */
+    public static boolean isECPRequest(HttpServletRequest request) {
+
+        String acceptHeader = request.getHeader("Accept");
+        String paosHeader = request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER);
+        return acceptHeader != null && paosHeader != null
+                && acceptHeader.contains(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER)
+                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.PAOS_NS)
+                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS);
+
+    }
+
+    /**
+     * Method helps to identify which endpoint is used to process the current message. It expects a list of potential
+     * endpoints based on the current profile and selects the one which uses the specified binding and contains the
+     * filterURL in it's name. We presume that each profile-binding combination has a unique name. We also presume
+     * that filterURL string is contained exactly once in the endpoint location.
+     *
+     * @param endpoints      endpoints to check
+     * @param messageBinding binding
+     * @param filterURL      url of the filter processing the request
+     * @param <T>            type of the endpoint
+     * @return first endpoint satisfying the filterURL and binding conditions
+     * @throws SAMLException in case endpoint can't be found
+     */
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, String filterURL) throws SAMLException {
+        for (T endpoint : endpoints) {
+            String binding = getBindingForEndpoint(endpoint);
+            // Check that destination and binding matches
+            if (binding.equals(messageBinding)) {
+                if (endpoint.getLocation().contains(filterURL)) {
+                    return endpoint;
+                } else if (endpoint.getResponseLocation() != null && endpoint.getResponseLocation().contains(filterURL)) {
+                    return endpoint;
+                }
+            }
+        }
+        throw new SAMLException("Endpoint with message binding " + messageBinding + " and filter URL " + filterURL + " wasn't found");
+    }
+
+    /**
+     * Loads IDP descriptor for entity with the given entityID. Fails when it can't be found.
+     * @param metadata metadata manager
+     * @param idpId entity ID
+     * @return descriptor
+     * @throws MetadataProviderException in case descriptor can't be found
+     */
+    public static IDPSSODescriptor getIDPDescriptor(MetadataManager metadata, String idpId) throws MetadataProviderException {
+        if (!metadata.isIDPValid(idpId)) {
+            logger.debug("IDP name of the authenticated user is not valid", idpId);
+            throw new MetadataProviderException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
+        }
+        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+        if (idpssoDescriptor == null) {
+            throw new MetadataProviderException("Given IDP " + idpId + " doesn't contain any IDPSSODescriptor element");
+        }
+        return idpssoDescriptor;
+    }
+
+    /**
+     * Helper method that marshals the given message.
+     *
+     * @param message message the marshall and serialize
+     * @return marshaled message
+     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     *          thrown if the give message can not be marshaled into its DOM representation
+     */
+    public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
+        logger.debug("Marshalling message");
+        try {
+            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
+            if (marshaller == null) {
+                throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "
+                                                   + message.getElementQName());
+            }
+            Element messageElem = marshaller.marshall(message);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+            }
+            return messageElem;
+        } catch (MarshallingException e) {
+            logger.error("Encountered error marshalling message to its DOM representation", e);
+            throw new MessageEncodingException("Encountered error marshalling message into its DOM representation", e);
+        }
     }
 
 }

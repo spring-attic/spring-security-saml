@@ -39,6 +39,7 @@ public class SAMLCredential implements Serializable {
     private String localEntityID;
     private String remoteEntityID;
     private String relayState;
+    private Serializable additionalData;
 
     /**
      * Collection of attributes received from assertions.
@@ -50,7 +51,7 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity
      * @param authenticationAssertion assertion used to validate the entity
-     * @param remoteEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID          identifier of IDP where the assertion came from
      * @param localEntityID           local entity ID
      */
     public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, String localEntityID) {
@@ -62,7 +63,7 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity
      * @param authenticationAssertion assertion used to validate the entity
-     * @param remoteEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID          identifier of IDP where the assertion came from
      * @param attributes              attributes collected from received assertions
      * @param localEntityID           local entity ID
      */
@@ -75,20 +76,34 @@ public class SAMLCredential implements Serializable {
      *
      * @param nameID                  name ID of the authenticated entity, may be null
      * @param authenticationAssertion assertion used to validate the entity
-     * @param remoteEntityID             identifier of IDP where the assertion came from
+     * @param remoteEntityID          identifier of IDP where the assertion came from
      * @param relayState              relay state received from IDP in case of unsolicited response
      * @param attributes              attributes collected from received assertions
      * @param localEntityID           local entity ID
      */
     public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, String relayState, List<Attribute> attributes, String localEntityID) {
+        this(nameID, authenticationAssertion, remoteEntityID, relayState, attributes, localEntityID, null);
+    }
 
+    /**
+     * Created unmodifiable SAML credential object which contains additional customer specified data.
+     *
+     * @param nameID                  name ID of the authenticated entity, may be null
+     * @param authenticationAssertion assertion used to validate the entity
+     * @param remoteEntityID          identifier of IDP where the assertion came from
+     * @param relayState              relay state received from IDP in case of unsolicited response
+     * @param attributes              attributes collected from received assertions
+     * @param localEntityID           local entity ID
+     * @param additionalData          custom data created by profile customization
+     */
+    public SAMLCredential(NameID nameID, Assertion authenticationAssertion, String remoteEntityID, String relayState, List<Attribute> attributes, String localEntityID, Serializable additionalData) {
         this.nameID = new SAMLObject<NameID>(nameID);
         this.authenticationAssertion = new SAMLObject<Assertion>(authenticationAssertion);
         this.remoteEntityID = remoteEntityID;
         this.relayState = relayState;
         this.attributes = new SAMLCollection<Attribute>(attributes);
         this.localEntityID = localEntityID;
-
+        this.additionalData = additionalData;
     }
 
     /**

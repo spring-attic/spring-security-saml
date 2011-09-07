@@ -28,8 +28,6 @@ import java.util.Set;
  */
 public class WebSSOProfileOptions implements Serializable, Cloneable {
 
-    private String idp;
-    private String profile = SAMLConstants.SAML2_WEBSSO_PROFILE_URI;
     private String binding;
     private Set<String> allowedIDPs;
     private String providerName;
@@ -50,17 +48,8 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     public WebSSOProfileOptions() {
     }
 
-    public WebSSOProfileOptions(String idp, String binding) {
-        this.idp = idp;
+    public WebSSOProfileOptions(String binding) {
         this.binding = binding;
-    }
-
-    public String getIdp() {
-        return idp;
-    }
-
-    public void setIdp(String idp) {
-        this.idp = idp;
     }
 
     public String getBinding() {
@@ -254,22 +243,6 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      */
     public void setAssertionConsumerIndex(Integer assertionConsumerIndex) {
         this.assertionConsumerIndex = assertionConsumerIndex;
-    }
-
-    public String getProfile() {
-        return profile;
-    }
-
-    /**
-     * Sets profile to be used for sending this SSO request. By default WebSSO defined in the core SAML 2 specification
-     * is used. The Holder-of-Key WebSSO profile can be used as an alternative. Used profile determines
-     *
-     * @param profile profile
-     * @see SAMLConstants#SAML2_WEBSSO_PROFILE_URI
-     * @see SAMLConstants#SAML2_HOK_WEBSSO_PROFILE_URI
-     */
-    public void setProfile(String profile) {
-        this.profile = profile;
     }
 
 }

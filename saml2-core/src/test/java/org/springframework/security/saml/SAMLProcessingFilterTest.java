@@ -14,28 +14,24 @@
  */
 package org.springframework.security.saml;
 
+import org.easymock.Capture;
+import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
+import org.opensaml.common.xml.*;
+import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Hashtable;
 
 import static junit.framework.Assert.assertEquals;
@@ -44,7 +40,8 @@ import static org.easymock.EasyMock.*;
 /**
  * @author Vladimir Schafer
  */
-public class SAMLProcessingFilterTest {
+public class
+        SAMLProcessingFilterTest {
 
     ApplicationContext context;
     SAMLProcessingFilter processingFiler;
@@ -85,6 +82,7 @@ public class SAMLProcessingFilterTest {
     @Test(expected = SAMLRuntimeException.class)
     public void testErrorDuringProcessing() throws Exception {
         expect(request.getContextPath()).andReturn("/saml");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(processor.retrieveMessage((SAMLMessageContext) notNull())).andThrow(new SAMLException("Processing error"));
         replayMock();
         processingFiler.attemptAuthentication(request, null);
@@ -94,6 +92,35 @@ public class SAMLProcessingFilterTest {
     @Test
     public void testDefaultURL() {
         assertEquals("/saml/SSO", processingFiler.getFilterProcessesUrl());
+    }
+
+    /**
+     * Verifies that endpoint check fails when message is received using unsupported binding.
+     *
+     * @throws Exception error
+     */
+    @Test(expected = SAMLRuntimeException.class)
+    public void testInvalidBinding() throws Exception {
+
+        AuthenticationManager manager = createMock(AuthenticationManager.class);
+        processingFiler.setAuthenticationManager(manager);
+
+        expect(request.getContextPath()).andReturn("/saml");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
+        final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
+        expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
+            public SAMLMessageContext answer() throws Throwable {
+                context.getValue().setInboundSAMLBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                return context.getValue();
+            }
+        });
+
+        replay(manager);
+        replayMock();
+        processingFiler.attemptAuthentication(request, null);
+        verifyMock();
+        verify(manager);
+
     }
 
     /**
@@ -110,7 +137,14 @@ public class SAMLProcessingFilterTest {
         processingFiler.setAuthenticationManager(manager);
 
         expect(request.getContextPath()).andReturn("/saml");
-        expect(processor.retrieveMessage((SAMLMessageContext) notNull())).andReturn(new SAMLMessageContext());
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
+        final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
+        expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
+            public SAMLMessageContext answer() throws Throwable {
+                context.getValue().setInboundSAMLBinding(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI);
+                return context.getValue();
+            }
+        });
         expect(manager.authenticate((Authentication) notNull())).andReturn(token);
         expect(request.getSession(true)).andReturn(session);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(new Hashtable());
@@ -121,6 +155,7 @@ public class SAMLProcessingFilterTest {
         assertEquals(token, authentication);
         verifyMock();
         verify(manager);
+
     }
 
     private void replayMock() {

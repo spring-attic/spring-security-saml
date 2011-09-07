@@ -16,6 +16,7 @@ package org.springframework.security.saml;
 
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
@@ -55,23 +56,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
 
     protected WebSSOProfileConsumer consumer;
+    protected WebSSOProfileConsumer hokConsumer;
     protected SAMLLogger samlLogger;
     protected SAMLUserDetailsService userDetails;
-
-    /**
-     * Default constructor, all required collaborators must be autowired or set.
-     */
-    public SAMLAuthenticationProvider() {
-    }
-
-    /**
-     * Default constructor with profile consumer, all other required collaborators must be autowired or set.
-     *
-     * @param consumer profile
-     */
-    public SAMLAuthenticationProvider(WebSSOProfileConsumer consumer) {
-        this.consumer = consumer;
-    }
 
     /**
      * Attempts to perform authentication of an Authentication object. The authentication must be of type
@@ -95,8 +82,16 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
         SAMLCredential credential;
 
         try {
-            // TODO hok - use correct processing filter based on profile
-            credential = consumer.processAuthenticationResponse(context, store);
+            if (SAMLConstants.SAML2_WEBSSO_PROFILE_URI.equals(context.getCommunicationProfileId())) {
+                credential = consumer.processAuthenticationResponse(context, store);
+            } else if (SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(context.getCommunicationProfileId())) {
+                credential = hokConsumer.processAuthenticationResponse(context, store);
+            } else {
+                throw new SAMLException("Unsupported profile encountered in the context " + context.getCommunicationProfileId());
+            }
+        } catch (SAMLRuntimeException e) {
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
+            throw new AuthenticationServiceException("Error validating SAML message", e);
         } catch (SAMLException e) {
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message", e);
@@ -242,7 +237,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     }
 
     /**
-     * Profile for consumption of processed messages, cannot be null, must be set.
+     * Profile for consumption of processed messages, must be set.
      *
      * @param consumer consumer
      */
@@ -254,12 +249,24 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     }
 
     /**
+     * Profile for consumption of processed messages using the Holder-of-Key profile, must be set.
+     *
+     * @param hokConsumer holder-of-key consumer
+     */
+    @Autowired
+    @Qualifier("hokWebSSOprofileConsumer")
+    public void setHokConsumer(WebSSOProfileConsumer hokConsumer) {
+        this.hokConsumer = hokConsumer;
+    }
+
+    /**
      * Verifies that required entities were autowired or set.
      *
      * @throws ServletException
      */
     public void afterPropertiesSet() throws ServletException {
         Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");
+        Assert.notNull(hokConsumer, "WebSSO Profile HoK Consumer can't be null");
         Assert.notNull(samlLogger, "SAMLLogger can't be null");
     }
 

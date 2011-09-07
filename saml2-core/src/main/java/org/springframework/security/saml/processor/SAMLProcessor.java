@@ -1,4 +1,4 @@
-/* Copyright 2009 Vladimir Schäfer
+/* Copyright 2009-2011 Vladimir Schäfer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
+ * Implementation is responsible for sending and receiving SAML messages using any of the supported binding. Processor
+ * is unaware of the content of the messages or of the profile as part of which they're exchanged. Is is responsibility
+ * of the caller to properly fill SAMLMessageContext with all required data.
+ *
  * @author Vladimir Schäfer
  */
 public interface SAMLProcessor {

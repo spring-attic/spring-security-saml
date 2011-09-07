@@ -49,7 +49,7 @@ public class MetadataForm {
     public MetadataForm() {
     }
 
-    // TODO nameID, bindings
+    // TODO nameID, bindings, discovery URL
 
     public String getEntityId() {
         return entityId;

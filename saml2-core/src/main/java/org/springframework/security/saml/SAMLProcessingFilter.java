@@ -18,6 +18,8 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -41,16 +43,18 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
+    protected final static Logger logger = LoggerFactory.getLogger(SAMLProcessingFilter.class);
+
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
 
     /**
      * URL for Web SSO profile responses or unsolicited requests
      */
-    public static final String WEBSSO_URL = "/saml/SSO";
+    public static final String FILTER_URL = "/saml/SSO";
 
     public SAMLProcessingFilter() {
-        super(WEBSSO_URL);
+        super(FILTER_URL);
     }
 
     protected SAMLProcessingFilter(String defaultFilterProcessesUrl) {
@@ -69,10 +73,12 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
         try {
 
+            logger.debug("Attempting SAML2 authentication using profile {}", getProfileName());
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
             context.setCommunicationProfileId(getProfileName());
-            logger.debug("Attempting SAML2 authentication using profile " + getProfileName());
             processor.retrieveMessage(context);
+            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
+
             HttpSessionStorage storage = new HttpSessionStorage(request);
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
             return getAuthenticationManager().authenticate(token);

@@ -65,7 +65,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * Default processing URL.
      */
-    public static final String SINGLE_LOGOUT_URL = "/saml/SingleLogout";
+    public static final String FILTER_URL = "/saml/SingleLogout";
 
     /**
      * Constructor defines URL to redirect to after successful logout and handlers.
@@ -75,7 +75,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
         super(logoutSuccessUrl, handlers);
-        this.setFilterProcessesUrl(SINGLE_LOGOUT_URL);
+        this.setFilterProcessesUrl(FILTER_URL);
     }
 
     /**
@@ -86,12 +86,12 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      */
     public SAMLLogoutProcessingFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
         super(logoutSuccessHandler, handlers);
-        this.setFilterProcessesUrl(SINGLE_LOGOUT_URL);
+        this.setFilterProcessesUrl(FILTER_URL);
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        doFilterHttp((HttpServletRequest) req, (HttpServletResponse) res, chain);
+        processLogout((HttpServletRequest) req, (HttpServletResponse) res, chain);
     }
 
     /**
@@ -107,19 +107,19 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * @throws IOException      error
      * @throws ServletException error
      */
-    public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+     public void processLogout(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         if (requiresLogout(request, response)) {
 
-            HttpSessionStorage storage = new HttpSessionStorage(request);
             SAMLMessageContext context;
-
-            logger.debug("Processing SAML2 logout message");
 
             try {
 
+                logger.debug("Processing SAML2 logout message");
                 context = contextProvider.getLocalEntity(request, response);
+                context.setCommunicationProfileId(getProfileName());
                 processor.retrieveMessage(context);
+                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
 
             } catch (SAMLException e) {
                 throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
@@ -136,6 +136,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
             if (context.getInboundSAMLMessage() instanceof LogoutResponse) {
 
                 try {
+                    HttpSessionStorage storage = new HttpSessionStorage(request);
                     logoutProfile.processLogoutResponse(context, storage);
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
                 } catch (Exception e) {
@@ -170,6 +171,15 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
             chain.doFilter(request, response);
         }
 
+    }
+
+    /**
+     * Name of the profile processed by this class.
+     *
+     * @return profile name
+     */
+    protected String getProfileName() {
+        return SAMLConstants.SAML2_SLO_PROFILE_URI;
     }
 
     /**

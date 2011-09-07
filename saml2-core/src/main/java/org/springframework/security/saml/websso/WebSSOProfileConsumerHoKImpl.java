@@ -16,8 +16,6 @@ package org.springframework.security.saml.websso;
 
 import org.opensaml.common.SAMLException;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.signature.KeyInfo;
@@ -65,53 +63,56 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
      */
     protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
 
-        boolean confirmed = false;
-
         String userAgentCertificate = getUserAgentBase64Certificate(context);
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
 
             if (SubjectConfirmation.METHOD_HOLDER_OF_KEY.equals(confirmation.getMethod())) {
 
+                log.debug("Processing Holder-of-Key subject confirmation");
                 SubjectConfirmationData data = confirmation.getSubjectConfirmationData();
 
                 // HoK must have confirmation 554
                 if (data == null) {
-                    log.debug("Assertion invalidated by missing subject confirmation data");
-                    throw new SAMLException("SAML Assertion is invalid");
+                    log.debug("HoK SubjectConfirmation invalidated by missing confirmation data");
+                    continue;
                 }
 
                 if (!(data instanceof KeyInfoConfirmationDataType)) {
-                    log.debug("Cannot verify Holder-of-Key assertion, confirmation data is not of KeyInformationDataType");
-                    throw new SAMLException("Cannot verify Holder-of-Key assertion, confirmation data is not of KeyInformationDataType");
+                    log.debug("HoK SubjectConfirmation invalidated by confirmation data not being of KeyInformationDataType type");
+                    continue;
                 }
 
                 // Verify found certificate corresponds to peer certificate from SSL/TLS
                 KeyInfoConfirmationDataType keyInfoConfirmation = (KeyInfoConfirmationDataType) data;
+                boolean foundUserAgent = false;
                 info:
                 for (XMLObject xmlInfo : keyInfoConfirmation.getKeyInfos()) {
                     KeyInfo keyInfo = (KeyInfo) xmlInfo;
                     List<String> certificates = SAMLUtil.getBase64EncodeCertificates(keyInfo);
                     for (String confirmationCert : certificates) {
+                        log.debug("Comparing user agent certificate {} with certificate in HoK key info {}", userAgentCertificate, confirmationCert);
                         if (userAgentCertificate.equals(confirmationCert)) {
                             log.debug("User agent certificate confirmed");
-                            confirmed = true;
+                            foundUserAgent = true;
                             break info;
                         }
                     }
                 }
+                if (!foundUserAgent) {
+                    log.debug("HoK SubjectConfirmation invalidated by confirmation keyInfo not corresponding to certificate supplied by user agent");
+                    continue;
+                }
 
                 // Validate not before
                 if (data.getNotBefore() != null && data.getNotBefore().isAfterNow()) {
-                    log.debug("Invalidated by notBefore");
-                    confirmed = false;
+                    log.debug("HoK SubjectConfirmation invalidated by notBefore field");
                     continue;
                 }
 
                 // Validate not on or after
                 if (data.getNotBefore() != null && data.getNotOnOrAfter().isBeforeNow()) {
-                    log.debug("Invalidated by notOnOrAfter");
-                    confirmed = false;
+                    log.debug("HoK SubjectConfirmation invalidated by expired notOnOrAfter");
                     continue;
                 }
 
@@ -119,25 +120,23 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
                 if (request != null) {
                     if (data.getInResponseTo() != null) {
                         if (!data.getInResponseTo().equals(request.getID())) {
-                            log.debug("Assertion invalidated by subject confirmation - invalid in response to");
-                            throw new SAMLException("SAML Assertion is invalid");
+                            log.debug("HoK SubjectConfirmation invalidated by invalid in response to field");
+                            continue;
                         }
                     }
                 }
 
                 // Validate recipient if present
                 if (data.getRecipient() != null) {
-                    SPSSODescriptor spssoDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-                    for (AssertionConsumerService service : spssoDescriptor.getAssertionConsumerServices()) {
-                        if (context.getCommunicationProfileId().equals(service.getBinding()) && service.getLocation().equals(data.getRecipient())) {
-                            confirmed = true;
-                        }
+                    try {
+                        verifyEndpoint(context.getLocalEntityEndpoint(), data.getRecipient());
+                    } catch (SAMLException e) {
+                        log.debug("HoK SubjectConfirmation invalidated by recipient assertion consumer URL, found {}", data.getRecipient());
+                        continue;
                     }
                 }
-            }
 
-            // Was the subject confirmed by this confirmation data? If so let's store the subject in context.
-            if (confirmed) {
+                // Was the subject confirmed by this confirmation data? If so let's store the subject in context.
                 NameID nameID;
                 if (subject.getEncryptedID() != null) {
                     Assert.notNull(context.getLocalDecrypter(), "Can't decrypt NameID, no decrypter is set in the context");
@@ -147,6 +146,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
                 }
                 context.setSubjectNameIdentifier(nameID);
                 return;
+
             }
 
         }
@@ -167,8 +167,8 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
     protected String getUserAgentBase64Certificate(SAMLMessageContext context) throws SAMLException {
 
         if (context.getPeerSSLCredential() == null) {
-            log.debug("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential not set in the context");
-            throw new SAMLException("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential not set in the context");
+            log.debug("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential is not set in the context");
+            throw new SAMLException("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential is not set in the context");
         }
 
 

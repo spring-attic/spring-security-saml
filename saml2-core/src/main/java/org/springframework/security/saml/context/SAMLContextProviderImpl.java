@@ -24,13 +24,13 @@ import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.security.ServletRequestX509CredentialAdapter;
+import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
 import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
 import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
-import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
@@ -47,12 +47,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
-import org.springframework.security.saml.websso.WebSSOProfileImpl;
 import org.springframework.util.Assert;
 
 import javax.servlet.ServletException;
@@ -98,8 +98,30 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
 
         SAMLMessageContext context = new SAMLMessageContext();
-        populateEntityId(context, request.getContextPath());
-        populateContext(request, response, context);
+        populateGenericContext(request, response, context);
+        populateLocalEntityId(context, request.getContextPath());
+        populateLocalContext(context);
+        return context;
+
+    }
+
+    /**
+     * Creates a SAMLContext with local entity and peer values filled. Also request and response must be stored in the context
+     * as message transports. Should be used when both local entity and peer entity can be determined from the request.
+     *
+     * @param request request
+     * @param response response
+     * @return context
+     * @throws MetadataProviderException in case of metadata problems
+     */
+    public SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
+
+        SAMLMessageContext context = new SAMLMessageContext();
+        populateGenericContext(request, response, context);
+        populateLocalEntityId(context, request.getContextPath());
+        populateLocalContext(context);
+        populatePeerEntityId(context);
+        populatePeerContext(context);
         return context;
 
     }
@@ -117,13 +139,75 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response, SAMLCredential credential) throws MetadataProviderException {
 
         SAMLMessageContext context = new SAMLMessageContext();
-        populateEntityId(context, credential);
-        populateContext(request, response, context);
+        populateLocalEntityId(context, credential);
+        populateGenericContext(request, response, context);
+        populateLocalContext(context);
         return context;
 
     }
 
-    private void populateContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+    /**
+     * Loads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
+     * IDP in our circle of trust. Processing fails when IDP is not valid. IDP is set as PeerEntityId in the context.
+     * <p/>
+     * If request parameter is null the default IDP is returned.
+     *
+     * @param context context to populate ID for
+     * @throws MetadataProviderException in case provided IDP value is invalid
+     */
+    protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
+
+        String idp = ((HTTPInTransport) context.getInboundMessageTransport()).getParameterValue(SAMLEntryPoint.IDP_PARAMETER);
+        if (idp != null) {
+            if (!metadata.isIDPValid(idp)) {
+                logger.debug("User specified IDP {} is invalid", idp);
+                throw new MetadataProviderException("Specified IDP is not valid: " + idp);
+            } else {
+                logger.debug("Using user specified IDP {}", idp);
+                context.setPeerUserSelected(true);
+            }
+        } else {
+            idp = metadata.getDefaultIDP();
+            logger.debug("No IDP specified, using default {}", idp);
+            context.setPeerUserSelected(false);
+        }
+
+        context.setPeerEntityId(idp);
+        context.setPeerEntityRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+
+    }
+
+    /**
+     * Populates additional information about the peer based on the previously loaded peerEntityId.
+     *
+     * @param samlContext to populate
+     * @throws MetadataProviderException in case metadata problem is encountered
+     */
+    private void populatePeerContext(SAMLMessageContext samlContext) throws MetadataProviderException {
+
+        String peerEntityId = samlContext.getPeerEntityId();
+        QName peerEntityRole = samlContext.getPeerEntityRole();
+
+        if (peerEntityId == null) {
+            throw new MetadataProviderException("Peer entity ID wasn't specified, but is requested");
+        }
+
+        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId);
+        RoleDescriptor roleDescriptor = metadata.getRole(peerEntityId, peerEntityRole, SAMLConstants.SAML20P_NS);
+        ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(peerEntityId);
+
+        if (entityDescriptor == null || roleDescriptor == null) {
+            throw new MetadataProviderException("Metadata for entity " + peerEntityId + " and role " + peerEntityRole + " wasn't found");
+        }
+
+        samlContext.setPeerEntityMetadata(entityDescriptor);
+        samlContext.setPeerEntityRoleMetadata(roleDescriptor);
+        samlContext.setPeerExtendedMetadata(extendedMetadata);
+
+
+    }
+
+    private void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
 
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
         HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
@@ -131,6 +215,10 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         context.setMetadataProvider(metadata);
         context.setInboundMessageTransport(inTransport);
         context.setOutboundMessageTransport(outTransport);
+
+    }
+
+    private void populateLocalContext(SAMLMessageContext context) throws MetadataProviderException {
 
         populateLocalEntity(context);
         populateDecrypter(context);
@@ -148,7 +236,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param credential credential
      * @throws MetadataProviderException in case entity id can' be populated
      */
-    protected void populateEntityId(SAMLMessageContext context, SAMLCredential credential) throws MetadataProviderException {
+    protected void populateLocalEntityId(SAMLMessageContext context, SAMLCredential credential) throws MetadataProviderException {
 
         String entityID = credential.getLocalEntityID();
         context.setLocalEntityId(entityID);
@@ -167,7 +255,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param contextPath context path to parse entityId and entityRole from
      * @throws MetadataProviderException in case entityId can't be populated
      */
-    private void populateEntityId(SAMLMessageContext context, String contextPath) throws MetadataProviderException {
+    protected void populateLocalEntityId(SAMLMessageContext context, String contextPath) throws MetadataProviderException {
 
         if (contextPath == null) {
             contextPath = "";
@@ -276,7 +364,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param samlContext context to populate
      */
     protected void populatePeerSSLCredential(SAMLMessageContext samlContext) {
-/*
+
         X509Certificate[] chain = (X509Certificate[]) samlContext.getInboundMessageTransport().getAttribute(ServletRequestX509CredentialAdapter.X509_CERT_REQUEST_ATTRIBUTE);
 
         if (chain != null && chain.length > 0) {
@@ -288,7 +376,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             samlContext.setPeerSSLCredential(credential);
 
         }
-*/
+
     }
 
     /**

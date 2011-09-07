@@ -17,7 +17,10 @@ package org.springframework.security.saml.websso;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
@@ -48,6 +51,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
     ApplicationContext context;
     WebSSOProfile profile;
     SAMLMessageStorage storage;
+    MetadataManager metadata;
 
     WebSSOProfileOptions options;
     SAMLContextProvider contextProvider;
@@ -62,8 +66,8 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         String resName = "/" + getClass().getName().replace('.', '/') + ".xml";
         context = new ClassPathXmlApplicationContext(resName);
         profile = context.getBean("webSSOprofile", WebSSOProfile.class);
-
-        options = new WebSSOProfileOptions("http://localhost:8080/opensso", null);
+        metadata = context.getBean("metadata", MetadataManager.class);
+        options = new WebSSOProfileOptions(null);
 
         request = createNiceMock(HttpServletRequest.class);
         response = createNiceMock(HttpServletResponse.class);
@@ -79,7 +83,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         expect(request.getContextPath()).andReturn("/");
         replyMock();
 
-        samlContext = contextProvider.getLocalEntity(request, response);
+        samlContext = contextProvider.getLocalAndPeerEntity(request, response);
         samlContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
         samlContext.setOutboundMessageTransport(new HttpServletResponseAdapter(response, false));
 
@@ -94,25 +98,12 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
      *
      * @throws Exception error
      */
-    @Test(expected = SAMLException.class)
+    @Test(expected = SAMLRuntimeException.class)
     public void testNoSPNameSet() throws Exception {
         samlContext.setLocalEntityId(null);
         samlContext.setLocalEntityMetadata(null);
         samlContext.setLocalEntityRole(null);
         samlContext.setLocalEntityRoleMetadata(null);
-        replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
-        verifyMock();
-    }
-
-    /**
-     * Verifies that the processing fails if there are no SP hosted metadata configured.
-     *
-     * @throws Exception error
-     */
-    @Test(expected = MetadataProviderException.class)
-    public void testInvalidIDPNameSet() throws Exception {
-        options.setIdp("testNonExistent");
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
@@ -130,20 +121,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
             manager.removeMetadataProvider(manager.getProviders().iterator().next());
             manager.refreshMetadata();
         }
-        replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
-        verifyMock();
-    }
-
-    /**
-     * Verifies that default IDP is used if none is specified
-     *
-     * @throws Exception error
-     */
-    @Test
-    public void testDefaultIDP() throws Exception {
-        options.setIdp(null);
-        storage.storeMessage((String) notNull(), (XMLObject) notNull());
+        samlContext = contextProvider.getLocalAndPeerEntity(request, response);
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();
@@ -156,7 +134,6 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
      */
     @Test
     public void testPOSTSigned() throws Exception {
-        options.setIdp(null);
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
@@ -244,7 +221,11 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
      */
     @Test(expected = MetadataProviderException.class)
     public void testBindingUnsupportedByIDP() throws Exception {
-        options.setIdp("http://localhost:8080/noBinding");
+        String idpId = "http://localhost:8080/noBinding";
+        samlContext.setPeerEntityId(idpId);
+        samlContext.setPeerExtendedMetadata(metadata.getExtendedMetadata(idpId));
+        samlContext.setPeerEntityMetadata(metadata.getEntityDescriptor(idpId));
+        samlContext.setPeerEntityRoleMetadata(metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
@@ -258,7 +239,11 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
      */
     @Test(expected = MetadataProviderException.class)
     public void testNoAvailableBinding() throws Exception {
-        options.setIdp("http://localhost:8080/nonoBinding");
+        String idpId = "http://localhost:8080/noBinding";
+        samlContext.setPeerEntityId(idpId);
+        samlContext.setPeerExtendedMetadata(metadata.getExtendedMetadata(idpId));
+        samlContext.setPeerEntityMetadata(metadata.getEntityDescriptor(idpId));
+        samlContext.setPeerEntityRoleMetadata(metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options, storage);
         verifyMock();

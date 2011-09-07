@@ -16,11 +16,8 @@
 package org.springframework.security.saml.parser;
 
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallingException;
 import org.opensaml.xml.parse.ParserPool;
@@ -71,35 +68,6 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
      */
     public U getObject() {
         return object;
-    }
-
-    /**
-     * Helper method that marshalls the given message.
-     *
-     * @param message message the marshall and serialize
-     *
-     * @return marshalled message
-     *
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
-     *          thrown if the give message can not be marshalled into its DOM representation
-     */
-    protected Element marshallMessage(T message) throws MessageEncodingException {
-        log.debug("Marshalling message");
-        try {
-            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
-            if (marshaller == null) {
-                throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "
-                                                   + message.getElementQName());
-            }
-            Element messageElem = marshaller.marshall(message);
-            if (log.isTraceEnabled()) {
-                log.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
-            }
-            return messageElem;
-        } catch (MarshallingException e) {
-            log.error("Encountered error marshalling message to its DOM representation", e);
-            throw new MessageEncodingException("Encountered error marshalling message into its DOM representation", e);
-        }
     }
 
     /**

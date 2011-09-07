@@ -97,7 +97,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         samlMessageContext.setInboundSAMLMessage(message);
         samlMessageContext.setInboundMessageTransport(inTransport);
         samlMessageContext.setOutboundMessageTransport(outTransport);
-        samlMessageContext.setCommunicationProfileId(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+        samlMessageContext.setInboundSAMLBinding(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
 
         populateMessageContext(samlMessageContext);
         

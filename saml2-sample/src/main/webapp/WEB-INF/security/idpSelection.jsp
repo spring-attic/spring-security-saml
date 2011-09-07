@@ -21,15 +21,13 @@
 %>
 
 <p>
-<form action="saml/login" method="GET">
-    <%-- We send this attribute to tell the processing filter that we want to initialize login --%>
-    <input type="hidden" name="login" value="true"/>
+<form action="<c:url value="${requestScope.idpDiscoReturnURL}"/>" method="GET">
     <table>
         <tr>
             <td><b>Select IDP: </b></td>
             <td>
                 <c:forEach var="idpItem" items="${idp}">
-                    <input type="radio" name="idp" id="idp_<c:out value="${idpItem}"/>" value="<c:out value="${idpItem}"/>"/>
+                    <input type="radio" name="${requestScope.idpDiscoReturnParam}" id="idp_<c:out value="${idpItem}"/>" value="<c:out value="${idpItem}"/>"/>
                     <label for="idp_<c:out value="${idpItem}"/>"><c:out value="${idpItem}"/></label>
                     <br/>
                 </c:forEach>

@@ -18,14 +18,12 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.util.XMLHelper;
+import org.springframework.security.saml.util.SAMLUtil;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * SAMLObject is a wrapper around XMLObject instances of OpenSAML library As some XMLObjects are stored
@@ -63,7 +61,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
     private void writeObject(ObjectOutputStream out) throws IOException {
         try {
             if (serializedObject == null) {
-                serializedObject = XMLHelper.nodeToString(marshallMessage(getObject()));
+                serializedObject = XMLHelper.nodeToString(SAMLUtil.marshallMessage(getObject()));
             }
             out.writeUTF((String) serializedObject);
         } catch (MessageEncodingException e) {

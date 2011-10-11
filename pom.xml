@@ -131,6 +131,13 @@
     </pluginRepositories>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>org.springframework.build.aws</groupId>
+                <artifactId>org.springframework.build.aws.maven</artifactId>
+                <version>3.0.0.RELEASE</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -180,8 +187,8 @@
     </build>
 
     <properties>
-        <spring.version>3.0.5.RELEASE</spring.version>
-        <spring.security.version>3.0.5.RELEASE</spring.security.version>
+        <spring.version>3.0.6.RELEASE</spring.version>
+        <spring.security.version>3.0.7.RELEASE</spring.security.version>
     </properties>
 
 </project>

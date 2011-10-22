@@ -21,6 +21,9 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Validator for metadata from.
  */
@@ -48,6 +51,18 @@ public class MetadataValidator implements Validator {
             errors.rejectValue("securityProfile", null, "Security profile must be specified");
         } else if (!"pkix".equalsIgnoreCase(metadata.getSecurityProfile()) && !"metaiop".equals(metadata.getSecurityProfile())) {
             errors.rejectValue("securityProfile", null, "Selected value is not supported");
+        }
+
+        if (metadata.getCustomDiscoveryURL() != null) {
+            try {
+                new URL(metadata.getCustomDiscoveryURL());
+            } catch (MalformedURLException e) {
+                errors.rejectValue("customDiscoveryURL", null, "Value is not a valid URL");
+            }
+        }
+
+        if (metadata.getNameID() == null || metadata.getNameID().length == 0) {
+            errors.rejectValue("nameID", null, "At least one NameID must be selected");
         }
 
         try {

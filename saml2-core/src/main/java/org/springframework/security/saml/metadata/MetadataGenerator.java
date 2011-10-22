@@ -75,16 +75,17 @@ public class MetadataGenerator {
     private String encryptionKey = null;
     private String tlsKey = null;
 
-    private Collection<String> nameID = null;
-
     private int assertionConsumerIndex = 0;
+
     private Collection<String> bindingsSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_PAOS_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
     private Collection<String> bindingsHoKSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
     private Collection<String> bindingsSLO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
     private boolean includeDiscovery = true;
+    private String customDiscoveryURL;
 
-    private static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
+    private Collection<String> nameID = null;
+    public static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
             NameIDType.PERSISTENT,
             NameIDType.UNSPECIFIED,
@@ -330,7 +331,11 @@ public class MetadataGenerator {
         discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
         Map<String, String> params = new HashMap<String, String>();
         params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
-        discovery.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params));
+        if (customDiscoveryURL != null && customDiscoveryURL.length() > 0) {
+            discovery.setLocation(customDiscoveryURL);
+        } else {
+            discovery.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params));
+        }
         return discovery;
     }
 
@@ -604,5 +609,11 @@ public class MetadataGenerator {
         this.assertionConsumerIndex = assertionConsumerIndex;
     }
 
+    public String getCustomDiscoveryURL() {
+        return customDiscoveryURL;
+    }
 
+    public void setCustomDiscoveryURL(String customDiscoveryURL) {
+        this.customDiscoveryURL = customDiscoveryURL;
+    }
 }

@@ -1,4 +1,3 @@
-<%@ page import="org.opensaml.common.xml.SAMLConstants" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -15,9 +14,7 @@
     <a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a>
 </p>
 
-<p>
-    Generates a new metadata for service provider. Output can be used to configure your securityContext.xml descriptor.
-</p>
+Generates new metadata for service provider. Output can be used to configure your securityContext.xml descriptor.
 
 <form:form commandName="metadata" action="create">
     <table>
@@ -236,7 +233,7 @@
             <td>Single sign-on bindings:</td>
             <td>
                 <table>
-                    <tr><th>Default</th><th>Name</th></tr>
+                    <tr><th>Default</th><th>Included</th><th>Name</th></tr>
                     <tr><td><form:radiobutton path="assertionConsumerIndex" value="0" id="sso_0"/></td><td><label for="sso_0">SSO Artifact</label></td></tr>
                     <tr><td><form:radiobutton path="assertionConsumerIndex" value="1" id="sso_1"/></td><td><label for="sso_1">SSO HTTP-POST</label></td></tr>
                     <tr><td><form:radiobutton path="assertionConsumerIndex" value="2" id="sso_2"/></td><td><label for="sso_2">SSO PAOS</label></td></tr>
@@ -252,25 +249,23 @@
         </tr>
 
         <tr>
-            <td>Include WebSSO profile:</td>
+            <td>Supported NameIDs:</td>
             <td>
-                <form:select path="includeSSO" multiple="false">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
+                <table>
+                    <tr><td><form:checkbox path="nameID" value="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" id="nameid_0"/></td><td><label for="nameid_0">E-Mail</label></td></tr>
+                    <tr><td><form:checkbox path="nameID" value="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" id="nameid_1"/></td><td><label for="nameid_1">Transient</label></td></tr>
+                    <tr><td><form:checkbox path="nameID" value="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" id="nameid_2"/></td><td><label for="nameid_2">Persistent</label></td></tr>
+                    <tr><td><form:checkbox path="nameID" value="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" id="nameid_3"/></td><td><label for="nameid_3">Unspecified</label></td></tr>
+                    <tr><td><form:checkbox path="nameID" value="urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName" id="nameid_4"/></td><td><label for="nameid_4">X509 Subject</label></td></tr>
+                </table>
             </td>
-            <td class="error"><form:errors path="includeHokSSO"/></td>
+            <td class="error"><form:errors path="nameID"/></td>
         </tr>
+
         <tr>
-            <td>Include Holder-of-Key WebSSO profile:</td>
-            <td>
-                <form:select path="includeHokSSO" multiple="false">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-            <td class="error"><form:errors path="includeHokSSO"/></td>
+            <td>&nbsp;</td>
         </tr>
+
         <tr>
             <td>Include IDP Discovery profile:</td>
             <td>
@@ -280,6 +275,20 @@
                 </form:select>
             </td>
             <td class="error"><form:errors path="includeDiscovery"/></td>
+        </tr>
+
+        <tr>
+            <td>Custom URL for IDP Discovery:</td>
+                    <td>
+                <form:input path="customDiscoveryURL"/>
+            </td>
+            <td class="error"><form:errors path="customDiscoveryURL"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>When not set local IDP discovery URL is automatically generated when IDP discovery is enabled.</small>
+            </td>
         </tr>
 
         <tr>

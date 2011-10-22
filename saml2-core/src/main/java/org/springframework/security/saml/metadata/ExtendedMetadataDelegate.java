@@ -246,4 +246,9 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
         this.trustFiltersInitialized = trustFiltersInitialized;
     }
 
+    @Override
+    public String toString() {
+        return getDelegate().toString();
+    }
+
 }

@@ -27,6 +27,7 @@ public class MetadataForm {
     private boolean signMetadata = true;
     private String serializedMetadata;
     private String configuration;
+    private String[] nameID;
 
     private String signingKey;
     private String encryptionKey;
@@ -39,6 +40,7 @@ public class MetadataForm {
     private boolean includeSSO = true;
     private boolean includeHokSSO = false;
     private boolean includeDiscovery = false;
+    private String customDiscoveryURL;
 
     private boolean requestSigned = true;
     private boolean wantAssertionSigned;
@@ -49,7 +51,7 @@ public class MetadataForm {
     public MetadataForm() {
     }
 
-    // TODO nameID, bindings, discovery URL
+    // TODO bindings, discovery URL
 
     public String getEntityId() {
         return entityId;
@@ -217,6 +219,22 @@ public class MetadataForm {
 
     public void setIncludeSSO(boolean includeSSO) {
         this.includeSSO = includeSSO;
+    }
+
+    public String[] getNameID() {
+        return nameID;
+    }
+
+    public void setNameID(String[] nameID) {
+        this.nameID = nameID;
+    }
+
+    public String getCustomDiscoveryURL() {
+        return customDiscoveryURL;
+    }
+
+    public void setCustomDiscoveryURL(String customDiscoveryURL) {
+        this.customDiscoveryURL = customDiscoveryURL;
     }
 
 }

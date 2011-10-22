@@ -39,9 +39,7 @@ import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class allows manipulation of metadata from web UI.
@@ -110,6 +108,7 @@ public class MetadataController {
         defaultForm.setBaseURL(getBaseURL(request));
         defaultForm.setEntityId(getEntityId(request));
         defaultForm.setAlias(getEntityId(request));
+        defaultForm.setNameID(MetadataGenerator.defaultNameID.toArray(new String[MetadataGenerator.defaultNameID.size()])); // TODO array vs collection
 
         model.addObject("metadata", defaultForm);
         return model;
@@ -142,17 +141,16 @@ public class MetadataController {
         generator.setAssertionConsumerIndex(metadata.getAssertionConsumerIndex());
 
         if (!metadata.isIncludeSSO()) {
-            generator.setBindingsSSO(null);
+            generator.setBindingsSSO(null);         // TODO
         }
 
         if (!metadata.isIncludeHokSSO()) {
-            generator.setBindingsHoKSSO(null);
+            generator.setBindingsHoKSSO(null);      // TODO
         }
 
         generator.setIncludeDiscovery(metadata.isIncludeDiscovery());
-
-        // TODO other fields
-        //generator.setNameID();
+        generator.setCustomDiscoveryURL(metadata.getCustomDiscoveryURL());
+        generator.setNameID(Arrays.asList(metadata.getNameID()));
 
         EntityDescriptor descriptor = generator.generateMetadata();
         ExtendedMetadata extendedMetadata = new ExtendedMetadata();
@@ -218,7 +216,7 @@ public class MetadataController {
         metadata.setSigningKey(extendedMetadata.getSigningKey());
         metadata.setTlsKey(extendedMetadata.getTlsKey());
 
-        // TODO other fields
+        // TODO other fields discovery, nameIDs
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
         model.addObject("metadata", metadata);

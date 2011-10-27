@@ -54,7 +54,7 @@ import java.util.List;
 public class SAMLAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
     private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
-
+    private boolean forcePrincipalAsString = false;
     protected WebSSOProfileConsumer consumer;
     protected WebSSOProfileConsumer hokConsumer;
     protected SAMLLogger samlLogger;
@@ -152,7 +152,11 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      * @return principal to store inside Authentication object
      */
     protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
-        return credential.getNameID().getValue();
+        if (isForcePrincipalAsString()) {
+            return credential.getNameID().getValue();
+        } else {
+            return userDetail;
+        }
     }
 
     /**
@@ -257,6 +261,14 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     @Qualifier("hokWebSSOprofileConsumer")
     public void setHokConsumer(WebSSOProfileConsumer hokConsumer) {
         this.hokConsumer = hokConsumer;
+    }
+
+    public boolean isForcePrincipalAsString() {
+        return forcePrincipalAsString;
+    }
+
+    public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
+        this.forcePrincipalAsString = forcePrincipalAsString;
     }
 
     /**

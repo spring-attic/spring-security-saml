@@ -24,7 +24,6 @@ import org.opensaml.saml2.core.NameID;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
@@ -56,6 +55,7 @@ public class SAMLAuthenticationProviderTest {
         consumer = createMock(WebSSOProfileConsumer.class);
         provider = new SAMLAuthenticationProvider();
         provider.setConsumer(consumer);
+        provider.setForcePrincipalAsString(true);
         provider.setSamlLogger(new SAMLEmptyLogger());
         messageStorage = createMock(SAMLMessageStorage.class);
         nameID = createMock(NameID.class);
@@ -125,14 +125,17 @@ public class SAMLAuthenticationProviderTest {
         SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP", "localSP");
 
         expect(consumer.processAuthenticationResponse(context, store)).andReturn(result);
-        expect(nameID.getValue()).andReturn("Name");
         expect(assertion.getAuthnStatements()).andReturn(new LinkedList<AuthnStatement>());
-        expect(details.loadUserBySAML(result)).andReturn(new User("test", "test", true, true, true, true, new GrantedAuthority[]{new GrantedAuthorityImpl("role1"), new GrantedAuthorityImpl("role2")}));
+        User user = new User("test", "test", true, true, true, true, Arrays.asList(new GrantedAuthorityImpl("role1"), new GrantedAuthorityImpl("role2")));
+        expect(details.loadUserBySAML(result)).andReturn(user);
+
+        provider.setForcePrincipalAsString(false);
 
         replayMock();
         replay(details);
         Authentication authentication = provider.authenticate(token);
-        assertEquals("Name", authentication.getName());
+        assertEquals(user, authentication.getPrincipal());
+        assertEquals(user.getUsername(), authentication.getName());
         assertNotNull(authentication.getDetails());
         assertEquals(2, authentication.getAuthorities().size());
         assertTrue(authentication.getAuthorities().contains(new GrantedAuthorityImpl("role1")));

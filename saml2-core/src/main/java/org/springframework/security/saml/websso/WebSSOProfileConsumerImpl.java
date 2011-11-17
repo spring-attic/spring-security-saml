@@ -136,28 +136,30 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         verifyEndpoint(context.getLocalEntityEndpoint(), response.getDestination());
 
         // Verify endpoint requested in the original request
-        AssertionConsumerService assertionConsumerService = (AssertionConsumerService) context.getLocalEntityEndpoint();
-        if (request.getAssertionConsumerServiceIndex() != null) {
-            if (!request.getAssertionConsumerServiceIndex().equals(assertionConsumerService.getIndex())) {
-                log.info("SAML response was received at a different endpoint index than was requested");
-            }
-        } else {
-            String requestedResponseURL = request.getAssertionConsumerServiceURL();
-            String requestedBinding = request.getProtocolBinding();
-            if (requestedResponseURL != null) {
-                String responseLocation;
-                if (assertionConsumerService.getResponseLocation() != null) {
-                    responseLocation = assertionConsumerService.getResponseLocation();
-                } else {
-                    responseLocation = assertionConsumerService.getLocation();
+        if (request != null) {
+            AssertionConsumerService assertionConsumerService = (AssertionConsumerService) context.getLocalEntityEndpoint();
+            if (request.getAssertionConsumerServiceIndex() != null) {
+                if (!request.getAssertionConsumerServiceIndex().equals(assertionConsumerService.getIndex())) {
+                    log.info("SAML response was received at a different endpoint index than was requested");
                 }
-                if (!requestedResponseURL.equals(responseLocation)) {
-                    log.info("SAML response was received at a different endpoint URL {} than was requested {}", responseLocation, requestedResponseURL);
+            } else {
+                String requestedResponseURL = request.getAssertionConsumerServiceURL();
+                String requestedBinding = request.getProtocolBinding();
+                if (requestedResponseURL != null) {
+                    String responseLocation;
+                    if (assertionConsumerService.getResponseLocation() != null) {
+                        responseLocation = assertionConsumerService.getResponseLocation();
+                    } else {
+                        responseLocation = assertionConsumerService.getLocation();
+                    }
+                    if (!requestedResponseURL.equals(responseLocation)) {
+                        log.info("SAML response was received at a different endpoint URL {} than was requested {}", responseLocation, requestedResponseURL);
+                    }
                 }
-            }
-            if (requestedBinding != null) {
-                if (!requestedBinding.equals(context.getInboundSAMLBinding())) {
-                    log.info("SAML response was received using a different binding {} than was requested {}", context.getInboundSAMLBinding(), requestedBinding);
+                if (requestedBinding != null) {
+                    if (!requestedBinding.equals(context.getInboundSAMLBinding())) {
+                        log.info("SAML response was received using a different binding {} than was requested {}", context.getInboundSAMLBinding(), requestedBinding);
+                    }
                 }
             }
         }

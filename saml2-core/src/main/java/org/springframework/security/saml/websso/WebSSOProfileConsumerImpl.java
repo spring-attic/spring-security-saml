@@ -38,6 +38,7 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.util.Assert;
 
+import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -414,47 +415,74 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (conditions.getNotBefore() != null) {
             if (conditions.getNotBefore().isAfterNow()) {
                 log.debug("Assertion is not yet valid, invalidated by condition notBefore", conditions.getNotBefore());
-                throw new SAMLException("SAML response is not valid");
+                throw new SAMLException("SAML response is not yet valid");
             }
         }
         if (conditions.getNotOnOrAfter() != null) {
             if (conditions.getNotOnOrAfter().isBeforeNow()) {
                 log.debug("Assertion is no longer valid, invalidated by condition notOnOrAfter", conditions.getNotOnOrAfter());
-                throw new SAMLException("SAML response is not valid");
+                throw new SAMLException("SAML response is no longer valid");
             }
         }
 
         if (audienceRequired && conditions.getAudienceRestrictions().size() == 0) {
-            log.debug("Assertion invalidated by missing audience restriction");
-            throw new SAMLException("SAML response is not valid");
+            log.debug("Assertion invalidated by missing Audience Restriction");
+            throw new SAMLException("SAML response does not define Audience");
         }
 
-        audience:
-        for (AudienceRestriction rest : conditions.getAudienceRestrictions()) {
-            if (rest.getAudiences().size() == 0) {
-                log.debug("No audit audience specified for the assertion");
-                throw new SAMLException("SAML response is invalid");
-            }
-            for (Audience aud : rest.getAudiences()) {
-                if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
-                    continue audience;
+        List<Condition> notUnderstoodConditions = new LinkedList<Condition>();
+
+        for (Condition condition : conditions.getConditions()) {
+
+            QName conditionQName = condition.getElementQName();
+
+            if (conditionQName.equals(AudienceRestriction.DEFAULT_ELEMENT_NAME)) {
+
+                audience:
+                for (AudienceRestriction rest : conditions.getAudienceRestrictions()) {
+                    if (rest.getAudiences().size() == 0) {
+                        log.debug("No audit audience specified for the assertion");
+                        throw new SAMLException("SAML response does not define Audience in AudienceRestriction");
+                    }
+                    for (Audience aud : rest.getAudiences()) {
+                        if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
+                            continue audience;
+                        }
+                    }
+                    log.debug("Our entity is not the intended audience of the assertion");
+                    throw new SAMLException("SAML response is not intended for this Audience");
                 }
+
+            } else if (conditionQName.equals(OneTimeUse.DEFAULT_ELEMENT_NAME)) {
+
+                log.debug("System cannot honor OneTimeUse condition of the SAML Assertion for WebSSO");
+                throw new SAMLException("System cannot honor OneTimeUse condition of the SAML Assertion for WebSSO");
+
+            } else if (conditionQName.equals(ProxyRestriction.DEFAULT_ELEMENT_NAME)) {
+
+                ProxyRestriction restriction = (ProxyRestriction) condition;
+                log.debug("Honoring ProxyRestriction with count {}, system does not issue assertions to 3rd parties", restriction.getProxyCount());
+
+            } else {
+
+                log.debug("Condition {} is not understood", condition);
+                notUnderstoodConditions.add(condition);
+
             }
-            log.debug("Our entity is not the intended audience of the assertion");
-            throw new SAMLException("SAML response is not intended for this entity");
+
         }
 
-        // Check conditions
-        verifyConditions(context, conditions.getConditions());
+        // Check not understood conditions
+        verifyConditions(context, notUnderstoodConditions);
 
     }
 
     /**
-     * Verifies conditions of the assertions. By default system doesn't understand any conditions and processing
-     * fails when some are present.
+     * Verifies conditions of the assertion which were are not understood. By default system fails in case any
+     * non-understood condition is present.
      *
      * @param context    message context
-     * @param conditions conditions
+     * @param conditions conditions which were not understood
      * @throws SAMLException in case conditions are not empty
      */
     protected void verifyConditions(SAMLMessageContext context, List<Condition> conditions) throws SAMLException {

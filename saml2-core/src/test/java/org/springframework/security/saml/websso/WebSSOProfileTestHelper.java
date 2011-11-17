@@ -72,4 +72,16 @@ public class WebSSOProfileTestHelper {
 
     }
 
+    protected AudienceRestriction getAudienceRestriction(String... audienceURI) {
+        SAMLObjectBuilder<AudienceRestriction> audienceRestrictionBuilder = (SAMLObjectBuilder<AudienceRestriction>) builderFactory.getBuilder(AudienceRestriction.DEFAULT_ELEMENT_NAME);
+        AudienceRestriction audienceRestriction = audienceRestrictionBuilder.buildObject();
+        SAMLObjectBuilder<Audience> audienceBuilder = (SAMLObjectBuilder<Audience>) builderFactory.getBuilder(Audience.DEFAULT_ELEMENT_NAME);
+        for (String uri : audienceURI) {
+            Audience audience = audienceBuilder.buildObject();
+            audience.setAudienceURI(uri);
+            audienceRestriction.getAudiences().add(audience);
+        }
+        return audienceRestriction;
+    }
+
 }

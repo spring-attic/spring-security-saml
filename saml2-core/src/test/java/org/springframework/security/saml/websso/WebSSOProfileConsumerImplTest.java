@@ -38,6 +38,7 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import static org.easymock.EasyMock.*;
 
@@ -152,6 +153,65 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         RequestedAuthnContext requestedAuthnContext = helper.getRequestedAuthnContext(AuthnContextComparisonTypeEnumeration.EXACT, Arrays.asList("test", "test2"));
         AuthnContext authnContext = helper.getAuthnContext(helper.getClassRef("test5"), null);
         profile.verifyAuthnContext(requestedAuthnContext, authnContext, null);
+    }
+
+    /**
+     * Verifies that no-conditions when no audience is required pass.
+     * @throws Exception error
+     */
+    @Test
+    public void testCondition_empty() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        profile.verifyAssertionConditions(conditions, messageContext, false);
+    }
+
+    /**
+     * Verifies that no-conditions when audience is required fail.
+     * @throws Exception error
+     */
+    @Test(expected = SAMLException.class)
+    public void testCondition_empty_audienceRequired() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        profile.verifyAssertionConditions(conditions, messageContext, true);
+    }
+
+    /**
+     * Verifies that audience restriction passes when localEntityId matches.
+     * @throws Exception error
+     */
+    @Test
+    public void testCondition_Audience_pass() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        conditions.getConditions().add(helper.getAudienceRestriction(messageContext.getLocalEntityId()));
+        profile.verifyAssertionConditions(conditions, messageContext, true);
+    }
+
+    /**
+     * Verifies that audience restriction fails when uri doesn't match
+     * @throws Exception error
+     */
+    @Test(expected = SAMLException.class)
+    public void testCondition_Audience_fail() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        conditions.getConditions().add(helper.getAudienceRestriction("wrong"));
+        profile.verifyAssertionConditions(conditions, messageContext, true);
+    }
+
+    /**
+     * Verifies that OneTimeUse condition will make the assertion rejected.
+     * @throws Exception error
+     */
+    @Test(expected = SAMLException.class)
+    public void testCondition_OneTimeUse() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        conditions.getConditions().add(helper.getAudienceRestriction(messageContext.getLocalEntityId()));
+        conditions.getConditions().add(((SAMLObjectBuilder<OneTimeUse>) builderFactory.getBuilder(OneTimeUse.DEFAULT_ELEMENT_NAME)).buildObject());
+        profile.verifyAssertionConditions(conditions, messageContext, true);
     }
 
     private void verifyMock() {

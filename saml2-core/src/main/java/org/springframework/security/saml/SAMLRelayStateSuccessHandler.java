@@ -38,8 +38,9 @@ public class SAMLRelayStateSuccessHandler extends SavedRequestAwareAuthenticatio
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
 
-        if (authentication instanceof SAMLCredential) {
-            SAMLCredential samlCredential = (SAMLCredential) authentication;
+        Object credentials = authentication.getCredentials();
+        if (credentials instanceof SAMLCredential) {
+            SAMLCredential samlCredential = (SAMLCredential) credentials;
             String relayStateURL = getTargetURL(samlCredential.getRelayState());
             if (relayStateURL != null) {
                 logger.debug("Redirecting to RelayState Url: " + relayStateURL);

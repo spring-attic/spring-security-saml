@@ -407,6 +407,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     protected void verifyAssertionConditions(Conditions conditions, SAMLMessageContext context, boolean audienceRequired) throws SAMLException {
 
+        // Verify that audience is present when required
+        if (audienceRequired && (conditions == null || conditions.getAudienceRestrictions().size() == 0)) {
+            log.debug("Assertion invalidated by missing Audience Restriction");
+            throw new SAMLException("SAML response does not define Audience");
+        }
+
         // If no conditions are implied, storage is deemed valid
         if (conditions == null) {
             return;
@@ -423,11 +429,6 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 log.debug("Assertion is no longer valid, invalidated by condition notOnOrAfter", conditions.getNotOnOrAfter());
                 throw new SAMLException("SAML response is no longer valid");
             }
-        }
-
-        if (audienceRequired && conditions.getAudienceRestrictions().size() == 0) {
-            log.debug("Assertion invalidated by missing Audience Restriction");
-            throw new SAMLException("SAML response does not define Audience");
         }
 
         List<Condition> notUnderstoodConditions = new LinkedList<Condition>();

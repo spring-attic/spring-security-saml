@@ -75,8 +75,10 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
             logger.debug("Attempting SAML2 authentication using profile {}", getProfileName());
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
-            context.setCommunicationProfileId(getProfileName());
             processor.retrieveMessage(context);
+
+            // Override set values
+            context.setCommunicationProfileId(getProfileName());
             context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
 
             HttpSessionStorage storage = new HttpSessionStorage(request);

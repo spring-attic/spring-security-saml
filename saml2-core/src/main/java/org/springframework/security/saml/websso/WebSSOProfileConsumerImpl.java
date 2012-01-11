@@ -319,15 +319,21 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 log.debug("Processing Bearer subject confirmation");
                 SubjectConfirmationData data = confirmation.getSubjectConfirmationData();
 
-                // Bearer must have confirmation 554
+                // Bearer must have confirmation saml-profiles-2.0-os 554
                 if (data == null) {
                     log.debug("Bearer SubjectConfirmation invalidated by missing confirmation data");
                     continue;
                 }
 
-                // Not before forbidden by core 558
+                // Not before forbidden by saml-profiles-2.0-os 558
                 if (data.getNotBefore() != null) {
                     log.debug("Bearer SubjectConfirmation invalidated by not before which is forbidden");
+                    continue;
+                }
+
+                // Required by saml-profiles-2.0-os 556
+                if (data.getNotOnOrAfter() == null) {
+                    log.debug("Bearer SubjectConfirmation invalidated by missing notOnOrAfter");
                     continue;
                 }
 

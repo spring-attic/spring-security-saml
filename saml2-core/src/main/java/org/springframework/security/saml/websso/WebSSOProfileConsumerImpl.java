@@ -338,7 +338,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 }
 
                 // Validate not on or after
-                if (data.getNotOnOrAfter().isBeforeNow()) {
+                if (data.getNotOnOrAfter().plusSeconds(getResponseSkew()).isBeforeNow()) {
                     log.debug("Bearer SubjectConfirmation invalidated by notOnOrAfter");
                     continue;
                 }
@@ -425,13 +425,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         if (conditions.getNotBefore() != null) {
-            if (conditions.getNotBefore().isAfterNow()) {
+            if (conditions.getNotBefore().minusSeconds(getResponseSkew()).isAfterNow()) {
                 log.debug("Assertion is not yet valid, invalidated by condition notBefore", conditions.getNotBefore());
                 throw new SAMLException("SAML response is not yet valid");
             }
         }
         if (conditions.getNotOnOrAfter() != null) {
-            if (conditions.getNotOnOrAfter().isBeforeNow()) {
+            if (conditions.getNotOnOrAfter().plusSeconds(getResponseSkew()).isBeforeNow()) {
                 log.debug("Assertion is no longer valid, invalidated by condition notOnOrAfter", conditions.getNotOnOrAfter());
                 throw new SAMLException("SAML response is no longer valid");
             }
@@ -516,7 +516,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Validate users session is still valid
-        if (auth.getSessionNotOnOrAfter() != null && !(new DateTime()).isBefore(auth.getSessionNotOnOrAfter())) {
+            if (auth.getSessionNotOnOrAfter() != null && auth.getSessionNotOnOrAfter().isBeforeNow()) {
             log.debug("Authentication session is not valid anymore", auth.getSessionNotOnOrAfter());
             throw new CredentialsExpiredException("Users authentication is expired");
         }

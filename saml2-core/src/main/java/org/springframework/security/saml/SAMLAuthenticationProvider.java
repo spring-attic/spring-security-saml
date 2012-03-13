@@ -144,8 +144,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
 
     /**
      * Method determines what will be stored as principal of the created Authentication object. By default
-     * string representation of the NameID returned from SAML message is used, other implementations can
-     * be created by overriding the method.
+     * (when forcePrincipalAsString is true) string representation of the NameID returned from SAML message is used.
+     * Otherwise userDetail object is used, when set, when not NameID object from the credential is returned.
+     * Other implementations can be created by overriding the method.
      *
      * @param credential credential used to authenticate user
      * @param userDetail loaded user details, can be null
@@ -154,8 +155,10 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     protected Object getPrincipal(SAMLCredential credential, Object userDetail) {
         if (isForcePrincipalAsString()) {
             return credential.getNameID().getValue();
-        } else {
+        } else if (userDetail != null) {
             return userDetail;
+        } else {
+            return credential.getNameID();
         }
     }
 

@@ -203,6 +203,13 @@ public class SAMLDiscovery extends GenericFilterBean {
             String passiveIDP = getPassiveIDP(request);
             sendPassiveResponse(request, response, returnURL, returnParam, passiveIDP);
 
+        } else if (getIdpSelectionPath() == null) {
+
+            // Send a passive response as no IDP selection is available
+            logger.debug("No IDP selection path configured, sending passive response");
+            String passiveIDP = getPassiveIDP(request);
+            sendPassiveResponse(request, response, returnURL, returnParam, passiveIDP);
+
         } else {
 
             // Initialize IDP selection
@@ -337,7 +344,7 @@ public class SAMLDiscovery extends GenericFilterBean {
     }
 
     /**
-     * Path used to forward request in order to enable target IDP selecton/
+     * Path used to forward request in order to enable target IDP selection
      *
      * @return path for forward
      */

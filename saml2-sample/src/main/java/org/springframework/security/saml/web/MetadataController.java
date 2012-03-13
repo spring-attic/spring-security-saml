@@ -148,8 +148,16 @@ public class MetadataController {
             generator.setBindingsHoKSSO(null);      // TODO
         }
 
-        generator.setIncludeDiscovery(metadata.isIncludeDiscovery());
-        generator.setCustomDiscoveryURL(metadata.getCustomDiscoveryURL());
+        // Discovery
+        if (metadata.isIncludeDiscovery()) {
+            generator.setIncludeDiscovery(true);
+            if (metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
+                generator.setCustomDiscoveryURL(metadata.getCustomDiscoveryURL());
+            }
+        } else {
+            generator.setIncludeDiscovery(false);
+        }
+
         generator.setNameID(Arrays.asList(metadata.getNameID()));
 
         EntityDescriptor descriptor = generator.generateMetadata();

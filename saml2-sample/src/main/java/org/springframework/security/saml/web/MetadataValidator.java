@@ -53,7 +53,7 @@ public class MetadataValidator implements Validator {
             errors.rejectValue("securityProfile", null, "Selected value is not supported");
         }
 
-        if (metadata.getCustomDiscoveryURL() != null) {
+        if (metadata.isIncludeDiscovery() && metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
             try {
                 new URL(metadata.getCustomDiscoveryURL());
             } catch (MalformedURLException e) {

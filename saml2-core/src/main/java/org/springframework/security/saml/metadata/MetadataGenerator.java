@@ -128,7 +128,7 @@ public class MetadataGenerator {
 
     public void generateExtendedMetadata(ExtendedMetadata metadata) {
         metadata.setEcpEnabled(false);
-        metadata.setIdpDiscoveryEnabled(true);
+        metadata.setIdpDiscoveryEnabled(isIncludeDiscovery());
         metadata.setEncryptionKey(encryptionKey);
         metadata.setSigningKey(signingKey);
         metadata.setAlias(entityAlias);
@@ -331,8 +331,8 @@ public class MetadataGenerator {
         discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
         Map<String, String> params = new HashMap<String, String>();
         params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
-        if (customDiscoveryURL != null && customDiscoveryURL.length() > 0) {
-            discovery.setLocation(customDiscoveryURL);
+        if (getCustomDiscoveryURL() != null && getCustomDiscoveryURL().length() > 0) {
+            discovery.setLocation(getCustomDiscoveryURL());
         } else {
             discovery.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params));
         }

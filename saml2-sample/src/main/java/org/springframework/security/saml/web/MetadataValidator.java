@@ -48,32 +48,51 @@ public class MetadataValidator implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "baseURL", "required", "Base URL is required.");
 
         if (metadata.getSecurityProfile() == null) {
-            errors.rejectValue("securityProfile", null, "Security profile must be specified");
+            errors.rejectValue("securityProfile", null, "Security profile must be specified.");
         } else if (!"pkix".equalsIgnoreCase(metadata.getSecurityProfile()) && !"metaiop".equals(metadata.getSecurityProfile())) {
-            errors.rejectValue("securityProfile", null, "Selected value is not supported");
+            errors.rejectValue("securityProfile", null, "Selected value is not supported.");
         }
 
         if (metadata.isIncludeDiscovery() && metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
             try {
                 new URL(metadata.getCustomDiscoveryURL());
             } catch (MalformedURLException e) {
-                errors.rejectValue("customDiscoveryURL", null, "Value is not a valid URL");
+                errors.rejectValue("customDiscoveryURL", null, "Value is not a valid URL.");
+            }
+        }
+
+        // Bindings
+        if (metadata.getSsoBindings() == null || metadata.getSsoBindings().length == 0) {
+            errors.rejectValue("ssoBindings", null, "At least one binding must be specified.");
+        }
+
+        // Default binding
+        if (metadata.getSsoDefaultBinding() != null && metadata.getSsoBindings() != null) {
+            boolean found = false;
+            for (String binding : metadata.getSsoBindings()) {
+                if (binding.equals(metadata.getSsoDefaultBinding())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                errors.rejectValue("ssoDefaultBinding", null, "Default binding must be selected as included.");
             }
         }
 
         if (metadata.getNameID() == null || metadata.getNameID().length == 0) {
-            errors.rejectValue("nameID", null, "At least one NameID must be selected");
+            errors.rejectValue("nameID", null, "At least one NameID must be selected.");
         }
 
         try {
             if (!errors.hasErrors() && metadata.isStore()) {
                 EntityDescriptor entityDescriptor = manager.getEntityDescriptor(metadata.getEntityId());
                 if (entityDescriptor != null) {
-                    errors.rejectValue("entityId", null, "Selected entity ID is already used");
+                    errors.rejectValue("entityId", null, "Selected entity ID is already used.");
                 }
                 String idForAlias = manager.getEntityIdForAlias(metadata.getAlias());
                 if (idForAlias != null) {
-                    errors.rejectValue("alias", null, "Selected alias is already used");
+                    errors.rejectValue("alias", null, "Selected alias is already used.");
                 }
             }
         } catch (MetadataProviderException e) {

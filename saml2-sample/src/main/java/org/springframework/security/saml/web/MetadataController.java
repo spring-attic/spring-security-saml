@@ -15,6 +15,7 @@
 package org.springframework.security.saml.web;
 
 import org.opensaml.Configuration;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -49,6 +50,10 @@ import java.util.*;
 public class MetadataController {
 
     private final Logger log = LoggerFactory.getLogger(MetadataController.class);
+
+    public static enum AllowedSSOBindings {
+        SSO_POST, SSO_PAOS, SSO_ARTIFACT, HOKSSO_POST, HOKSSO_ARTIFACT
+    }
 
     @Autowired
     MetadataManager metadataManager;
@@ -138,15 +143,39 @@ public class MetadataController {
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
         generator.setTlsKey(metadata.getTlsKey());
-        generator.setAssertionConsumerIndex(metadata.getAssertionConsumerIndex());
 
-        if (!metadata.isIncludeSSO()) {
-            generator.setBindingsSSO(null);         // TODO
+        Collection<String> bindingsSSO = new LinkedList<String>();
+        Collection<String> bindingsHoKSSO = new LinkedList<String>();
+        String defaultBinding = metadata.getSsoDefaultBinding();
+
+        int assertionConsumerIndex = 0;
+
+        for (String binding : metadata.getSsoBindings()) {
+
+            // Set default binding
+            if (binding.equalsIgnoreCase(defaultBinding)) {
+                assertionConsumerIndex = bindingsSSO.size() + bindingsHoKSSO.size();
+            }
+
+            // Set included bindings
+            if (AllowedSSOBindings.SSO_POST.toString().equalsIgnoreCase(binding)) {
+                bindingsSSO.add(SAMLConstants.SAML2_POST_BINDING_URI);
+            } else if (AllowedSSOBindings.SSO_ARTIFACT.toString().equalsIgnoreCase(binding)) {
+                bindingsSSO.add(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+            } else if (AllowedSSOBindings.SSO_PAOS.toString().equalsIgnoreCase(binding)) {
+                bindingsSSO.add(SAMLConstants.SAML2_PAOS_BINDING_URI);
+            } else if (AllowedSSOBindings.HOKSSO_POST.toString().equalsIgnoreCase(binding)) {
+                bindingsHoKSSO.add(SAMLConstants.SAML2_POST_BINDING_URI);
+            } else if (AllowedSSOBindings.HOKSSO_ARTIFACT.toString().equalsIgnoreCase(binding)) {
+                bindingsHoKSSO.add(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+            }
+
         }
 
-        if (!metadata.isIncludeHokSSO()) {
-            generator.setBindingsHoKSSO(null);      // TODO
-        }
+        // Set bindings
+        generator.setBindingsSSO(bindingsSSO);
+        generator.setBindingsHoKSSO(bindingsHoKSSO);
+        generator.setAssertionConsumerIndex(assertionConsumerIndex);
 
         // Discovery
         if (metadata.isIncludeDiscovery()) {

@@ -1,3 +1,4 @@
+<%@ page import="org.springframework.security.saml.web.MetadataController" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -5,6 +6,11 @@
 <head>
     <title>Spring Security SAML Extension - Metadata</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+        .error {
+            color : red;
+        }
+    </style>
 </head>
 <body>
 
@@ -234,14 +240,37 @@ Generates new metadata for service provider. Output can be used to configure you
             <td>
                 <table>
                     <tr><th>Default</th><th>Included</th><th>Name</th></tr>
-                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="0" id="sso_0"/></td><td><label for="sso_0">SSO Artifact</label></td></tr>
-                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="1" id="sso_1"/></td><td><label for="sso_1">SSO HTTP-POST</label></td></tr>
-                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="2" id="sso_2"/></td><td><label for="sso_2">SSO PAOS</label></td></tr>
-                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="3" id="sso_3"/></td><td><label for="sso_3">HoK SSO Artifact</label></td></tr>
-                    <tr><td><form:radiobutton path="assertionConsumerIndex" value="4" id="sso_4"/></td><td><label for="sso_4">HoK SSO HTTP-POST</label></td></tr>
+                    <tr>
+                        <td><form:radiobutton path="ssoDefaultBinding" value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>" /></td>
+                        <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>" id="sso_0"/></td>
+                        <td><label for="sso_0">SSO Artifact</label></td>
+                    </tr>
+                    <tr>
+                        <td><form:radiobutton path="ssoDefaultBinding" value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>" /></td>
+                        <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>" id="sso_1"/></td>
+                        <td><label for="sso_1">SSO HTTP-POST</label></td>
+                    </tr>
+                    <tr>
+                        <td><form:radiobutton path="ssoDefaultBinding" value="<%= MetadataController.AllowedSSOBindings.SSO_PAOS %>" /></td>
+                        <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_PAOS %>" id="sso_2"/></td>
+                        <td><label for="sso_2">SSO PAOS</label></td>
+                    </tr>
+                    <tr>
+                        <td><form:radiobutton path="ssoDefaultBinding" value="<%= MetadataController.AllowedSSOBindings.HOKSSO_ARTIFACT %>" /></td>
+                        <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.HOKSSO_ARTIFACT %>" id="sso_3"/></td>
+                        <td><label for="sso_3">HoK SSO Artifact</label></td>
+                    </tr>
+                    <tr>
+                        <td><form:radiobutton path="ssoDefaultBinding" value="<%= MetadataController.AllowedSSOBindings.HOKSSO_POST %>" /></td>
+                        <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.HOKSSO_POST %>" id="sso_4"/></td>
+                        <td><label for="sso_4">HoK SSO HTTP-POST</label></td>
+                    </tr>
                 </table>
             </td>
-            <td class="error"><form:errors path="assertionConsumerIndex"/></td>
+            <td class="error">
+                <form:errors path="ssoBindings"/>
+                <form:errors path="ssoDefaultBinding"/>
+            </td>
         </tr>
 
         <tr>

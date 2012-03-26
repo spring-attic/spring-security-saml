@@ -28,6 +28,15 @@ public class MetadataForm {
     private String serializedMetadata;
     private String configuration;
     private String[] nameID;
+    
+    private String[] ssoBindings = new String[] {
+            MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString(),
+            MetadataController.AllowedSSOBindings.SSO_POST.toString(),
+            MetadataController.AllowedSSOBindings.SSO_PAOS.toString(),
+            MetadataController.AllowedSSOBindings.HOKSSO_ARTIFACT.toString(),
+            MetadataController.AllowedSSOBindings.HOKSSO_POST.toString(),
+    };
+    private String ssoDefaultBinding = MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString();
 
     private String signingKey;
     private String encryptionKey;
@@ -35,11 +44,10 @@ public class MetadataForm {
 
     private boolean local;
 
-    private int assertionConsumerIndex = 0;
-
     private boolean includeSSO = true;
     private boolean includeHokSSO = false;
     private boolean includeDiscovery = false;
+
     private String customDiscoveryURL;
 
     private boolean requestSigned = true;
@@ -50,8 +58,6 @@ public class MetadataForm {
 
     public MetadataForm() {
     }
-
-    // TODO bindings, discovery URL
 
     public String getEntityId() {
         return entityId;
@@ -189,14 +195,6 @@ public class MetadataForm {
         this.tlsKey = tlsKey;
     }
 
-    public int getAssertionConsumerIndex() {
-        return assertionConsumerIndex;
-    }
-
-    public void setAssertionConsumerIndex(int assertionConsumerIndex) {
-        this.assertionConsumerIndex = assertionConsumerIndex;
-    }
-
     public boolean isIncludeDiscovery() {
         return includeDiscovery;
     }
@@ -235,6 +233,22 @@ public class MetadataForm {
 
     public void setCustomDiscoveryURL(String customDiscoveryURL) {
         this.customDiscoveryURL = customDiscoveryURL;
+    }
+
+    public String[] getSsoBindings() {
+        return ssoBindings;
+    }
+
+    public void setSsoBindings(String[] ssoBindings) {
+        this.ssoBindings = ssoBindings;
+    }
+
+    public String getSsoDefaultBinding() {
+        return ssoDefaultBinding;
+    }
+
+    public void setSsoDefaultBinding(String ssoDefaultBinding) {
+        this.ssoDefaultBinding = ssoDefaultBinding;
     }
 
 }

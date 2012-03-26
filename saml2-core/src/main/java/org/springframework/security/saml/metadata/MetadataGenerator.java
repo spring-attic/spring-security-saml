@@ -203,6 +203,7 @@ public class MetadataGenerator {
         if (bindingsSSO.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
             spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
         }
+
         if (bindingsHoKSSO.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
             spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
         }

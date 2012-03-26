@@ -90,7 +90,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify type
         if (!(message instanceof Response)) {
             log.debug("Received response is not of a Response object type");
-            throw new SAMLException("Error validating SAML response");
+            throw new SAMLException("Received response is not of a Response object type");
         }
         Response response = (Response) message;
 
@@ -103,11 +103,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 logMessage[1] = message1.getMessage();
             }
             log.debug("Received response has invalid status code", logMessage);
-            throw new SAMLException("SAML status is not success code");
+            throw new SAMLException("Received response has invalid status code");
         }
 
         // Verify signature of the response if present
         if (response.getSignature() != null) {
+            log.debug("Verifying message signature");
             verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
             context.setInboundSAMLMessageAuthenticated(true);
         }
@@ -115,8 +116,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify issue time
         DateTime time = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            log.debug("Response issue time is either too old or with date in the future, skew {}, time {}.", getResponseSkew(), time);
-            throw new SAMLException("Error validating SAML response");
+            log.debug("Response issue time is either too old or with date in the future, skew {}, time {}", getResponseSkew(), time);
+            throw new SAMLException("Response issue time is either too old or with date in the future");
         }
 
         // Verify response to field if present, set request if correct
@@ -124,12 +125,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
-                throw new SAMLException("Error validating SAML response");
+                throw new SAMLException("InResponseToField doesn't correspond to sent message");
             } else if (xmlObject instanceof AuthnRequest) {
                 request = (AuthnRequest) xmlObject;
             } else {
-                log.debug("Sent request was of different type then received response", response.getInResponseTo());
-                throw new SAMLException("Error validating SAML response");
+                log.debug("Sent request was of different type than received response", response.getInResponseTo());
+                throw new SAMLException("Sent request was of different type than received response");
             }
         }
 
@@ -167,6 +168,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify issuer
         if (response.getIssuer() != null) {
+            log.debug("Verifying issuer of the message");
             Issuer issuer = response.getIssuer();
             verifyIssuer(issuer, context);
         }
@@ -180,6 +182,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         for (EncryptedAssertion ea : encryptedAssertionList) {
             try {
                 Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
+                log.debug("Decrypting assertion");
                 Assertion decryptedAssertion = context.getLocalDecrypter().decrypt(ea);
                 assertionList.add(decryptedAssertion);
             } catch (DecryptionException e) {
@@ -241,6 +244,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         NameID nameId = (NameID) context.getSubjectNameIdentifier();
         if (nameId == null) {
+            log.debug("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
             throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
         }
 
@@ -282,7 +286,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (assertion.getSubject() != null) {
             verifySubject(assertion.getSubject(), request, context);
         } else {
-            throw new SAMLException("Assertion without subject is discarded");
+            log.debug("Assertion does not contain subject and is discarded");
+            throw new SAMLException("Assertion does not contain subject and is discarded");
         }
 
         // Assertion with authentication statement must contain audience restriction
@@ -385,7 +390,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         log.debug("Assertion invalidated by subject confirmation - can't be confirmed by the bearer method");
-        throw new SAMLException("SAML Assertion is invalid");
+        throw new SAMLException("Assertion invalidated by subject confirmation - can't be confirmed by the bearer method");
 
     }
 
@@ -407,7 +412,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned) {
             log.debug("Assertion must be signed, but is not");
-            throw new SAMLException("SAML Assertion is invalid");
+            throw new SAMLException("Assertion must be signed");
         }
     }
 
@@ -416,7 +421,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify that audience is present when required
         if (audienceRequired && (conditions == null || conditions.getAudienceRestrictions().size() == 0)) {
             log.debug("Assertion invalidated by missing Audience Restriction");
-            throw new SAMLException("SAML response does not define Audience");
+            throw new SAMLException("Assertion invalidated by missing Audience Restriction");
         }
 
         // If no conditions are implied, storage is deemed valid
@@ -426,14 +431,14 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         if (conditions.getNotBefore() != null) {
             if (conditions.getNotBefore().minusSeconds(getResponseSkew()).isAfterNow()) {
-                log.debug("Assertion is not yet valid, invalidated by condition notBefore", conditions.getNotBefore());
-                throw new SAMLException("SAML response is not yet valid");
+                log.debug("Assertion is not yet valid, invalidated by condition notBefore {}", conditions.getNotBefore());
+                throw new SAMLException("Assertion is not yet valid, invalidated by condition notBefore");
             }
         }
         if (conditions.getNotOnOrAfter() != null) {
             if (conditions.getNotOnOrAfter().plusSeconds(getResponseSkew()).isBeforeNow()) {
-                log.debug("Assertion is no longer valid, invalidated by condition notOnOrAfter", conditions.getNotOnOrAfter());
-                throw new SAMLException("SAML response is no longer valid");
+                log.debug("Assertion is no longer valid, invalidated by condition notOnOrAfter {}", conditions.getNotOnOrAfter());
+                throw new SAMLException("Assertion is no longer valid, invalidated by condition notOnOrAfter");
             }
         }
 
@@ -449,7 +454,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 for (AudienceRestriction rest : conditions.getAudienceRestrictions()) {
                     if (rest.getAudiences().size() == 0) {
                         log.debug("No audit audience specified for the assertion");
-                        throw new SAMLException("SAML response does not define Audience in AudienceRestriction");
+                        throw new SAMLException("No audit audience specified for the assertion");
                     }
                     for (Audience aud : rest.getAudiences()) {
                         if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
@@ -457,7 +462,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                         }
                     }
                     log.debug("Our entity is not the intended audience of the assertion");
-                    throw new SAMLException("SAML response is not intended for this Audience");
+                    throw new SAMLException("Our entity is not the intended audience of the assertion");
                 }
 
             } else if (conditionQName.equals(OneTimeUse.DEFAULT_ELEMENT_NAME)) {
@@ -495,7 +500,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     protected void verifyConditions(SAMLMessageContext context, List<Condition> conditions) throws SAMLException {
         if (conditions != null && conditions.size() > 0) {
             log.debug("Assertion contain not understood conditions");
-            throw new SAMLException("SAML response is not valid");
+            throw new SAMLException("Assertion contain not understood conditions");
         }
     }
 
@@ -511,14 +516,14 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Validate that user wasn't authenticated too long time ago
         if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
-            log.debug("Authentication statement is too old to be used", auth.getAuthnInstant());
-            throw new CredentialsExpiredException("Users authentication data is too old");
+            log.debug("Authentication statement is too old to be used with value {}", auth.getAuthnInstant());
+            throw new CredentialsExpiredException("Authentication statement is too old to be used");
         }
 
         // Validate users session is still valid
             if (auth.getSessionNotOnOrAfter() != null && auth.getSessionNotOnOrAfter().isBeforeNow()) {
-            log.debug("Authentication session is not valid anymore", auth.getSessionNotOnOrAfter());
-            throw new CredentialsExpiredException("Users authentication is expired");
+            log.debug("Authentication session is not valid on or after {}", auth.getSessionNotOnOrAfter());
+            throw new CredentialsExpiredException("Authentication session is not valid anymore");
         }
 
         // Verify context
@@ -545,6 +550,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      */
     protected void verifyAuthnContext(RequestedAuthnContext requestedAuthnContext, AuthnContext receivedContext, SAMLMessageContext context) throws InsufficientAuthenticationException {
 
+        log.debug("Verifying received AuthnContext {} against requested {}", receivedContext, requestedAuthnContext);
+
         if (requestedAuthnContext != null && AuthnContextComparisonTypeEnumeration.EXACT.equals(requestedAuthnContext.getComparison())) {
 
             String classRef = null, declRef = null;
@@ -556,6 +563,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             if (requestedAuthnContext.getAuthnContextClassRefs() != null) {
                 for (AuthnContextClassRef classRefRequested : requestedAuthnContext.getAuthnContextClassRefs()) {
                     if (classRefRequested.getAuthnContextClassRef().equals(classRef)) {
+                        log.debug("AuthContext matched");
                         return;
                     }
                 }
@@ -568,6 +576,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             if (requestedAuthnContext.getAuthnContextDeclRefs() != null) {
                 for (AuthnContextDeclRef declRefRequested : requestedAuthnContext.getAuthnContextDeclRefs()) {
                     if (declRefRequested.getAuthnContextDeclRef().equals(declRef)) {
+                        log.debug("AuthContext matched");
                         return;
                     }
                 }

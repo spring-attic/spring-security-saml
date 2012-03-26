@@ -223,13 +223,13 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected void verifyIssuer(Issuer issuer, SAMLMessageContext context) throws SAMLException {
         // Validate format of issuer
         if (issuer.getFormat() != null && !issuer.getFormat().equals(NameIDType.ENTITY)) {
-            log.debug("Assertion invalidated by issuer type", issuer.getFormat());
-            throw new SAMLException("SAML Assertion is invalid");
+            log.debug("Assertion invalidated by issuer type {}", issuer.getFormat());
+            throw new SAMLException("Assertion invalidated by issuer type");
         }
         // Validate that issuer is expected peer entity
         if (!context.getPeerEntityMetadata().getEntityID().equals(issuer.getValue())) {
-            log.debug("Assertion invalidated by unexpected issuer value", issuer.getValue());
-            throw new SAMLException("SAML Assertion is invalid");
+            log.debug("Assertion invalidated by unexpected issuer value {}", issuer.getValue());
+            throw new SAMLException("Assertion invalidated by unexpected issuer value");
         }
     }
 
@@ -248,6 +248,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
             if (destination.equals(endpoint.getLocation())) {
             } else if (destination.equals(endpoint.getResponseLocation())) {
             } else {
+                log.debug("Intended destination " + destination + " doesn't match any of the endpoint URLs");
                 throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs");
             }
         }

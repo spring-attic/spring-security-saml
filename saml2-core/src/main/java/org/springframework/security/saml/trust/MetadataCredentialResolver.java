@@ -26,7 +26,6 @@ import org.springframework.security.saml.metadata.MetadataManager;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -107,13 +106,16 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
                 }
             }
 
-            log.debug("No customized signature or encryption keys configured for entityID {}, using metadata", entityID);
-            credentials.addAll(super.retrieveFromMetadata(entityID, role, protocol, usage));
+            Collection<Credential> metadataCredentials = super.retrieveFromMetadata(entityID, role, protocol, usage);
+            credentials.addAll(metadataCredentials);
+            log.debug("Added {} credentials resolved from metadata of entity {}", metadataCredentials.size(), entityID);
 
             return credentials;
 
         } catch (MetadataProviderException e) {
+
             throw new SecurityException("Error loading metadata information", e);
+
         }
 
     }

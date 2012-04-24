@@ -95,8 +95,9 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
             int responseCode = httpClient.executeMethod(hc, postMethod);
             if (responseCode != 200) {
-                log.debug("Problem communicating with Artifact Resolution service, received response {}.", responseCode);
-                throw new MessageDecodingException("Problem communicating with Artifact Resolution service, received response " + responseCode);
+                String responseBody = postMethod.getResponseBodyAsString();
+                log.debug("Problem communicating with Artifact Resolution service, received response {}, body {}.", responseCode, responseBody);
+                throw new MessageDecodingException("Problem communicating with Artifact Resolution service, received response " + responseCode + ", body " + responseBody);
             }
 
             // Decode artifact response message.

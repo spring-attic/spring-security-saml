@@ -24,6 +24,7 @@ import org.opensaml.xml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.Principal;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -66,7 +67,8 @@ public class X509TrustManager implements javax.net.ssl.X509TrustManager {
         }
 
         BasicX509Credential credential = new BasicX509Credential();
-        credential.setEntityCertificate(x509Certificates[0]);
+        X509Certificate x509Certificate = x509Certificates[0];
+        credential.setEntityCertificate(x509Certificate);
         credential.setEntityCertificateChain(Arrays.asList(x509Certificates));
         credential.setUsageType(UsageType.UNSPECIFIED);
         credential.setEntityId(criteriaSet.get(EntityIDCriteria.class).getEntityID());
@@ -76,9 +78,14 @@ public class X509TrustManager implements javax.net.ssl.X509TrustManager {
             if (trustEngine.validate(credential, criteriaSet)) {
                 log.debug("Server certificate trust verified");
             } else {
-                throw new CertificateException("Peer SSL/TLS certificate is not trusted, add the certificate to your trust store and update tlsKey in extended metadata with the certificate alias");
+                Principal issuerDN = x509Certificate.getIssuerDN();
+                Principal subjectDN = x509Certificate.getSubjectDN();
+                StringBuilder sb = new StringBuilder(120);
+                sb.append("Peer SSL/TLS certificate '").append(subjectDN).append("' ");
+                sb.append("issued by '").append(issuerDN).append("' ");
+                sb.append("is not trusted, add the certificate or it's CA to your trust store and optionally update tlsKey in extended metadata with the certificate's alias");
+                throw new UntrustedCertificateException(sb.toString(), x509Certificates);
             }
-            log.debug("Server not trusted");
         } catch (org.opensaml.xml.security.SecurityException e) {
             throw new CertificateException("Error validating certificate", e);
         }

@@ -117,6 +117,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * <br/>
      * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
      * configured as trusted anchors.
+     * <p/>
+     * This setting is only relevant for local entities.
      *
      * @param securityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
      */
@@ -125,7 +127,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
-     * Security profile used for SSL/TLS connections.
+     * Security profile used for SSL/TLS connections of the local entity.
      *
      * @return profile
      */
@@ -145,6 +147,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * <br/>
      * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
      * or revocation of certificates is done in this mode. All keys must be known in advance.
+     * <p/>
+     * This setting is only relevant for local entities.
      *
      * @param sslSecurityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
      */
@@ -309,6 +313,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * remote entities and used when local entity has the PKIX profile enabled.
      * <p/>
      * When no trusted keys are specified all keys in the keyManager are treated as trusted.
+     * <p/>
+     * This setting is only relevant for remote entities.
      *
      * @param trustedKeys keys
      */

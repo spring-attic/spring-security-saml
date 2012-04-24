@@ -59,6 +59,11 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String securityProfile;
 
     /**
+     * Profile used for SSL/TLS trust verification, PKIX by default. Only relevant for local entities.
+     */
+    private String sslSecurityProfile = "pkix";
+
+    /**
      * Key (stored in the local keystore) used for signing/verifying signature of messages sent/coming from this
      * entity. For local entities private key must be available, for remote entities only public key is required.
      */
@@ -101,7 +106,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
-     * Sets profile used for verification of signatures, encryption and TLS. The following profiles are available:
+     * Sets profile used for verification of signatures and encryption. The following profiles are available:
      * <p/>
      * MetaIOP profile (by default):
      * <br/>
@@ -111,12 +116,40 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * PKIX profile:
      * <br/>
      * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
-     * configured as trusted anchors. Same set of trusted keys is used for server verification in TLS connections.
+     * configured as trusted anchors.
      *
      * @param securityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
      */
     public void setSecurityProfile(String securityProfile) {
         this.securityProfile = securityProfile;
+    }
+
+    /**
+     * Security profile used for SSL/TLS connections.
+     *
+     * @return profile
+     */
+    public String getSslSecurityProfile() {
+        return sslSecurityProfile;
+    }
+
+    /**
+     * Sets profile used for verification of SSL/TLS connections. The following profiles are available:
+     * <p/>
+     * PKIX profile (by default):
+     * <br/>
+     * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
+     * configured as trusted anchors.
+     * <p/>
+     * MetaIOP profile:
+     * <br/>
+     * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
+     * or revocation of certificates is done in this mode. All keys must be known in advance.
+     *
+     * @param sslSecurityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
+     */
+    public void setSslSecurityProfile(String sslSecurityProfile) {
+        this.sslSecurityProfile = sslSecurityProfile;
     }
 
     /**
@@ -241,7 +274,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
-     * Key used to authenticate instance against remote servers.
+     * Key used to authenticate instance against remote peers when specified on local entity. When specified on
+     * remote entity the key is added as a trust anchor during communication with the entity using SSL/TLS.
      *
      * @return tls key
      */
@@ -250,9 +284,9 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
-     * Alias of the key used to authenticate this instance against peer servers using SSL/TLS connections. When
-     * not set default credential will be used. Alias must be associated with a key containing a private key and being
-     * of X509 type.
+     * For local entities denotes alias of the key used to authenticate this instance against peer servers using SSL/TLS connections. When
+     * not set no key will be available for client authentication. Alias must be associated with a key containing a private key and being
+     * of X509 type. For remote entities denotes key to be used as a trust anchor for SSL/TLS connections.
      *
      * @param tlsKey tls key
      */
@@ -262,6 +296,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * Trusted keys usable for signature and server SSL/TLS verification for entities with PKIX verification enabled.
+     * Value is ignored when PKIX security is not enabled.
      *
      * @return trusted keys
      */

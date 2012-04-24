@@ -350,7 +350,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         if (samlContext.getLocalExtendedMetadata().getTlsKey() != null) {
             tlsCredential = (X509Credential) keyManager.getCredential(samlContext.getLocalExtendedMetadata().getTlsKey());
         } else {
-            tlsCredential = (X509Credential) keyManager.getDefaultCredential();
+            tlsCredential = null;
         }
 
         samlContext.setLocalSSLCredential(tlsCredential);
@@ -431,9 +431,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      *
      * @param samlContext context to populate
      */
-    protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {
+    protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {    
         TrustEngine<X509Credential> engine;
-        if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
+        if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslSecurityProfile())) {
             engine = new PKIXX509CredentialTrustEngine(pkixResolver);
         } else {
             engine = new ExplicitX509CertificateTrustEngine(metadataResolver);

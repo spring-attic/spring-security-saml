@@ -15,54 +15,60 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.x509.X509Credential;
 
 import java.net.Socket;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 
 /**
- * Class can be used to initialize new SSL/TLS connections with client authentication. Uses a static credential
+ * Class can be used to initialize new SSL/TLS connections with client/server authentication. Uses a static credential
  * for determining private key and certificate chain.
  */
 public class X509KeyManager implements javax.net.ssl.X509KeyManager {
 
-    /**
-     * Alias name.
-     */
     private static final String ALIAS_NAME = "constantAlias";
     private static final String[] ALIAS = new String[] { ALIAS_NAME };
 
+    private String[] aliases;
+    private String alias;
     private PrivateKey privateKey;
     private X509Certificate[] chain;
 
     /**
      * Credential used for authentication of the server/client.
      *
-     * @param credential credential
+     * @param credential credential or null for manager returning always empty values
      */
     public X509KeyManager(X509Credential credential) {
-        this.privateKey = credential.getPrivateKey();
-        this.chain = credential.getEntityCertificateChain().toArray(new X509Certificate[credential.getEntityCertificateChain().size()]);
+        if (credential != null) {
+            this.privateKey = credential.getPrivateKey();
+            this.chain = credential.getEntityCertificateChain().toArray(new X509Certificate[credential.getEntityCertificateChain().size()]);
+            this.alias = ALIAS_NAME;
+            this.aliases = ALIAS;
+        } else {
+            this.privateKey = null;
+            this.chain = null;
+            this.alias = null;
+            this.aliases = null;
+        }
     }
 
     public String[] getClientAliases(String s, Principal[] principals) {
-        return ALIAS;
+        return aliases;
     }
 
     public String chooseClientAlias(String[] strings, Principal[] principals, Socket socket) {
-        return ALIAS_NAME;
+        return alias;
     }
 
     public String[] getServerAliases(String s, Principal[] principals) {
-        return ALIAS;
+        return aliases;
     }
 
     public String chooseServerAlias(String s, Principal[] principals, Socket socket) {
-        return ALIAS_NAME;
+        return alias;
     }
 
     public X509Certificate[] getCertificateChain(String s) {

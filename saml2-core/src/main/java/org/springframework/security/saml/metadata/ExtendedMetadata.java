@@ -45,6 +45,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * URL of the IDP Discovery service user should be redirected to upon request to determine which IDP to use.
+     * Value can override setting in the metadata.
      */
     private String idpDiscoveryURL;
 

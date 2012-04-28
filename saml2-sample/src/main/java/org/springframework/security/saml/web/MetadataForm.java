@@ -22,6 +22,7 @@ public class MetadataForm {
     private boolean store;
     private String entityId;
     private String securityProfile;
+    private String sslSecurityProfile;
     private String baseURL;
     private String alias;
     private boolean signMetadata = true;
@@ -32,9 +33,6 @@ public class MetadataForm {
     private String[] ssoBindings = new String[] {
             MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString(),
             MetadataController.AllowedSSOBindings.SSO_POST.toString(),
-            MetadataController.AllowedSSOBindings.SSO_PAOS.toString(),
-            MetadataController.AllowedSSOBindings.HOKSSO_ARTIFACT.toString(),
-            MetadataController.AllowedSSOBindings.HOKSSO_POST.toString(),
     };
     private String ssoDefaultBinding = MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString();
 
@@ -185,6 +183,14 @@ public class MetadataForm {
 
     public void setSecurityProfile(String securityProfile) {
         this.securityProfile = securityProfile;
+    }
+
+    public String getSslSecurityProfile() {
+        return sslSecurityProfile;
+    }
+
+    public void setSslSecurityProfile(String sslSecurityProfile) {
+        this.sslSecurityProfile = sslSecurityProfile;
     }
 
     public String getTlsKey() {

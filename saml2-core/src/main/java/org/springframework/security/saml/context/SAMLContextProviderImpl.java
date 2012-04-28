@@ -410,7 +410,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     /**
      * Based on the settings in the extended metadata either creates a PKIX trust engine with trusted keys specified
      * in the extended metadata as anchors or (by default) an explicit trust engine using data from the metadata or
-     * from the values overriden in the ExtendedMetadata.
+     * from the values overridden in the ExtendedMetadata.
      *
      * @param samlContext context to populate
      */
@@ -427,7 +427,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     /**
      * Based on the settings in the extended metadata either creates a PKIX trust engine with trusted keys specified
      * in the extended metadata as anchors or (by default) an explicit trust engine using data from the metadata or
-     * from the values overriden in the ExtendedMetadata. The trust engine is used to verify SSL connections.
+     * from the values overridden in the ExtendedMetadata. The trust engine is used to verify SSL connections.
      *
      * @param samlContext context to populate
      */

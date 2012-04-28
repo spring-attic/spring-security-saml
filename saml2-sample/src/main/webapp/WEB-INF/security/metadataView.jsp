@@ -47,6 +47,16 @@
             </td>
         </tr>
         <tr>
+            <td>SSL Security profile:</td>
+            <td>
+                <form:select path="sslSecurityProfile" multiple="false" disabled="true">
+                    <form:option value="pkix">PKIX</form:option>
+                    <form:option value="metaiop">MetaIOP</form:option>
+                </form:select>
+            </td>
+        </tr>
+
+        <tr>
             <td>Signing key:</td>
             <td><form:input readonly="true" path="signingKey"/></td>
         </tr>

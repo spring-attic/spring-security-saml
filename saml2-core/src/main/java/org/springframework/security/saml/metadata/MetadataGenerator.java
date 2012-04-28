@@ -145,7 +145,7 @@ public class MetadataGenerator {
             encryptionKey = keyManager.getDefaultCredentialName();
         }
         if (tlsKey == null) {
-            tlsKey = keyManager.getDefaultCredentialName();
+            tlsKey = null;
         }
 
         boolean requestSigned = isRequestSigned();

@@ -109,17 +109,21 @@ Generates new metadata for service provider. Output can be used to configure you
             <td></td>
             <td colspan="2">
                 <small>
-                    <p>Security profile determines how is trust of signature, encryption and SSL/TLS credentials handled. In
-                    MetaIOP mode credential is deemed valid when it's declared in the metadata document of the peer entity. No
-                    validation of the credentials is made. The value is recommended as a default.
-                    <p>PKIX profile verifies credentials against a set of trust anchors. By default certificates present in the
-                    metadata are treated as trust anchors together with the additional selected trusted keys.
+                    Security profile determines how is trust of digital signatures handled:
+                    <ul>
+                    <li>
+                        In <a href="http://wiki.oasis-open.org/security/SAML2MetadataIOP">MetaIOP</a> mode certificate is deemed
+                        valid when it's declared in the metadata or extended metadata of the peer entity. No validation of the certificate is
+                        performed (e.g. revocation) and no certificate chains are evaluated. The value is recommended as a default.
+                    </li>
+                    <li>
+                        PKIX profile verifies credentials against a set of trust anchors. Certificates present in the
+                        metadata or extended metadata of the peer entity are treated as trust anchors, together with all keys in
+                        the keystore. Certificate chains are verified in this mode.
+                    </li>
+                    </ul>
                 </small>
             </td>
-        </tr>
-
-        <tr>
-            <td>&nbsp;</td>
         </tr>
 
         <tr>
@@ -130,7 +134,7 @@ Generates new metadata for service provider. Output can be used to configure you
         <tr>
             <td></td>
             <td colspan="2">
-                <small>Key used for digital signatures of SAML messages.</small>
+                <small>Key used for digital signatures of SAML messages. Public key will be included in the metadata.</small>
             </td>
         </tr>
 
@@ -142,13 +146,52 @@ Generates new metadata for service provider. Output can be used to configure you
         <tr>
             <td></td>
             <td colspan="2">
-                <small>Key used for digital encryption of SAML messages.</small>
+                <small>Key used for digital encryption of SAML messages. Public key will be included in the metadata.</small>
             </td>
         </tr>
 
         <tr>
-            <td>SSL/TLS key:</td>
-            <td><form:select path="tlsKey" items="${availableKeys}"/></td>
+            <td>&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>SSL/TLS Security profile:</td>
+            <td>
+                <form:select path="sslSecurityProfile" multiple="false">
+                    <form:option value="pkix">PKIX</form:option>
+                    <form:option value="metaiop">MetaIOP</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="sslSecurityProfile"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>
+                    SSL/TLS Security profile determines how is trust of peer's SSL/TLS certificate (e.g. during Artifact resolution) handled:
+                    <ul>
+                    <li>
+                    PKIX profile verifies peer's certificate against a set of trust anchors. All certificates defined in metadata,
+                    extended metadata or present in the keystore are considered as trusted anchors (certification authorities)
+                    for PKIX validation.
+                    </li>
+                    <li>
+                    In MetaIOP mode server's SSL/TLS certificate is trusted when it's explicitly declared in metadata or extended metadata of
+                    the peer.
+                    </li>
+                    </ul>
+                </small>
+            </td>
+        </tr>
+
+        <tr>
+            <td>SSL/TLS Client authentication:</td>
+            <td>
+                <form:select path="tlsKey">
+                    <form:option value="">None</form:option>
+                    <form:options items="${availableKeys}"/>
+                </form:select>
+            </td>
             <td class="error"><form:errors path="tlsKey"/></td>
         </tr>
         <tr>
@@ -156,6 +199,10 @@ Generates new metadata for service provider. Output can be used to configure you
             <td colspan="2">
                 <small>Key used to authenticate this instance for SSL/TLS connections.</small>
             </td>
+        </tr>
+
+        <tr>
+            <td>&nbsp;</td>
         </tr>
 
         <tr>
@@ -304,6 +351,17 @@ Generates new metadata for service provider. Output can be used to configure you
                 </form:select>
             </td>
             <td class="error"><form:errors path="includeDiscovery"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>
+                    <a href="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Discovery
+                    profile</a> enables service provider to determine which identity provider should be used
+                    for a particular user. Spring Security SAML contains it's own discovery service which presents
+                    user with an IDP list to select from.
+                </small>
+            </td>
         </tr>
 
         <tr>

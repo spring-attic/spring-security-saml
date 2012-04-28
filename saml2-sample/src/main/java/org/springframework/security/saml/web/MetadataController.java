@@ -142,7 +142,10 @@ public class MetadataController {
         generator.setWantAssertionSigned(metadata.isWantAssertionSigned());
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
-        generator.setTlsKey(metadata.getTlsKey());
+
+        if (metadata.getTlsKey() != null && metadata.getTlsKey().length() > 0) {
+            generator.setTlsKey(metadata.getTlsKey());
+        }
 
         Collection<String> bindingsSSO = new LinkedList<String>();
         Collection<String> bindingsHoKSSO = new LinkedList<String>();
@@ -193,6 +196,7 @@ public class MetadataController {
         ExtendedMetadata extendedMetadata = new ExtendedMetadata();
         generator.generateExtendedMetadata(extendedMetadata);
         extendedMetadata.setSecurityProfile(metadata.getSecurityProfile());
+        extendedMetadata.setSslSecurityProfile(metadata.getSslSecurityProfile());
         extendedMetadata.setRequireLogoutRequestSigned(metadata.isRequireLogoutRequestSigned());
         extendedMetadata.setRequireLogoutResponseSigned(metadata.isRequireLogoutResponseSigned());
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
@@ -242,6 +246,7 @@ public class MetadataController {
 
         metadata.setLocal(extendedMetadata.isLocal());
         metadata.setSecurityProfile(extendedMetadata.getSecurityProfile());
+        metadata.setSslSecurityProfile(extendedMetadata.getSslSecurityProfile());
         metadata.setSerializedMetadata(getMetadataAsString(entityDescriptor));
         metadata.setConfiguration(getConfiguration(fileName, extendedMetadata));
         metadata.setEntityId(entityDescriptor.getEntityID());
@@ -338,10 +343,13 @@ public class MetadataController {
                 "           <property name=\"local\" value=\"true\"/>\n" +
                 "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
                 "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
+                "           <property name=\"sslSecurityProfile\" value=\"").append(metadata.getSslSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"signingKey\" value=\"").append(metadata.getSigningKey()).append("\"/>\n" +
-                "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n" +
-                "           <property name=\"tlsKey\" value=\"").append(metadata.getTlsKey()).append("\"/>\n" +
-                "           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
+                "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n");
+      if (metadata.getTlsKey() != null) {
+      sb.append("           <property name=\"tlsKey\" value=\"").append(metadata.getTlsKey()).append("\"/>\n");
+      }
+      sb.append("           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n" +
                 "        </bean>\n" +

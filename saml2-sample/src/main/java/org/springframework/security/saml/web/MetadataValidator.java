@@ -53,6 +53,12 @@ public class MetadataValidator implements Validator {
             errors.rejectValue("securityProfile", null, "Selected value is not supported.");
         }
 
+        if (metadata.getSslSecurityProfile() == null) {
+            errors.rejectValue("sslSecurityProfile", null, "SSL/TLS Security profile must be specified.");
+        } else if (!"pkix".equalsIgnoreCase(metadata.getSslSecurityProfile()) && !"metaiop".equals(metadata.getSslSecurityProfile())) {
+            errors.rejectValue("sslSecurityProfile", null, "Selected value is not supported.");
+        }
+
         if (metadata.isIncludeDiscovery() && metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
             try {
                 new URL(metadata.getCustomDiscoveryURL());

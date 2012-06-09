@@ -255,7 +255,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         logoutResponse.setIssuer(getIssuer(context.getLocalEntityId()));
         logoutResponse.setVersion(SAMLVersion.VERSION_20);
         logoutResponse.setIssueInstant(new DateTime());
-        logoutResponse.setInResponseTo(context.getOutboundSAMLMessageId());
+        logoutResponse.setInResponseTo(context.getInboundSAMLMessageId());
         logoutResponse.setDestination(logoutService.getLocation());
         logoutResponse.setStatus(status);
 

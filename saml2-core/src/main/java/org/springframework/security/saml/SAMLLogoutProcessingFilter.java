@@ -115,7 +115,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
             try {
 
-                logger.debug("Processing SAML2 logout message");
+                log.debug("Processing SAML2 logout message");
                 context = contextProvider.getLocalEntity(request, response);
                 context.setCommunicationProfileId(getProfileName());
                 processor.retrieveMessage(context);

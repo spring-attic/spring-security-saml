@@ -14,6 +14,8 @@
  */
 package org.springframework.security.saml;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
@@ -31,6 +33,11 @@ import java.io.IOException;
 public class SAMLRelayStateSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     /**
+     * Class logger.
+     */
+    protected final static Logger log = LoggerFactory.getLogger(SAMLRelayStateSuccessHandler.class);
+
+    /**
      * Implementation tries to load RelayString from the SAMLCredential authentication object and in case the state
      * is present uses it as the target URL. In case the state is missing behaviour is the same as of the
      * SavedRequestAwareAuthenticationSuccessHandler.
@@ -43,7 +50,7 @@ public class SAMLRelayStateSuccessHandler extends SavedRequestAwareAuthenticatio
             SAMLCredential samlCredential = (SAMLCredential) credentials;
             String relayStateURL = getTargetURL(samlCredential.getRelayState());
             if (relayStateURL != null) {
-                logger.debug("Redirecting to RelayState Url: " + relayStateURL);
+                log.debug("Redirecting to RelayState Url: " + relayStateURL);
                 getRedirectStrategy().sendRedirect(request, response, relayStateURL);
                 return;
             }

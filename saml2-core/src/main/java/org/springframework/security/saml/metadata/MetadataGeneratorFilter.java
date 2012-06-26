@@ -14,11 +14,11 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
@@ -39,7 +39,10 @@ import java.io.IOException;
  */
 public class MetadataGeneratorFilter extends GenericFilterBean {
 
-    private final Log logger = LogFactory.getLog(this.getClass());
+    /**
+     * Class logger.
+     */
+    protected final static Logger log = LoggerFactory.getLogger(MetadataGeneratorFilter.class);
 
     /**
      * Class storing all SAML metadata documents
@@ -88,7 +91,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
                     try {
 
-                        logger.info("No default metadata configured, generating with default values, please pre-configure metadata for production use");
+                        log.info("No default metadata configured, generating with default values, please pre-configure metadata for production use");
 
                         String alias = DEFAULT_ALIAS;
 
@@ -113,7 +116,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
                         ExtendedMetadata extendedMetadata = new ExtendedMetadata();
                         generator.generateExtendedMetadata(extendedMetadata);
 
-                        logger.info("Created default metadata for system with entityID: " + descriptor.getEntityID());
+                        log.info("Created default metadata for system with entityID: " + descriptor.getEntityID());
                         MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
                         memoryProvider.initialize();
                         MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
@@ -123,7 +126,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
                         manager.refreshMetadata();
 
                     } catch (MetadataProviderException e) {
-                        logger.error("Error generating system metadata", e);
+                        log.error("Error generating system metadata", e);
                         throw new ServletException("Error generating system metadata", e);
                     }
 

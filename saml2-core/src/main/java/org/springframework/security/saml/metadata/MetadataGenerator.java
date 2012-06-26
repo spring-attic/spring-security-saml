@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
@@ -44,6 +42,8 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
@@ -95,7 +95,10 @@ public class MetadataGenerator {
 
     protected KeyManager keyManager;
 
-    private final Log logger = LogFactory.getLog(MetadataGenerator.class);
+    /**
+     * Class logger.
+     */
+    protected final static Logger log = LoggerFactory.getLogger(MetadataGenerator.class);
 
     /**
      * Default constructor.
@@ -121,7 +124,7 @@ public class MetadataGenerator {
             KeyInfoGeneratorFactory factory = manager.getDefaultManager().getFactory(credential);
             return factory.newInstance().generate(credential);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
+            log.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
         }
     }
@@ -457,10 +460,10 @@ public class MetadataGenerator {
 
                 Signer.signObject(signature);
             } catch (MarshallingException e) {
-                logger.error("Unable to marshall protocol message in preparation for signing", e);
+                log.error("Unable to marshall protocol message in preparation for signing", e);
                 throw new MessageEncodingException("Unable to marshall protocol message in preparation for signing", e);
             } catch (SignatureException e) {
-                logger.error("Unable to sign protocol message", e);
+                log.error("Unable to sign protocol message", e);
                 throw new MessageEncodingException("Unable to sign protocol message", e);
             }
         }

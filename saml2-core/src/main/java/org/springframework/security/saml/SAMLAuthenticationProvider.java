@@ -108,7 +108,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
 
         Object userDetails = getUserDetails(credential);
         Object principal = getPrincipal(credential, userDetails);
-        Collection<GrantedAuthority> entitlements = getEntitlements(credential, userDetails);
+        Collection<? extends GrantedAuthority> entitlements = getEntitlements(credential, userDetails);
 
         Date expiration = getExpirationDate(credential);
         ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, credential, entitlements);
@@ -170,7 +170,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      * @param userDetail user detail object returned from getUserDetails call
      * @return collection of users entitlements, mustn't be null
      */
-    protected Collection<GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
+    protected Collection<? extends GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
         if (userDetail instanceof UserDetails) {
             List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
             authorities.addAll(((UserDetails) userDetail).getAuthorities());

@@ -50,7 +50,7 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
      * @param credentials     credentials
      * @param authorities     authorities
      */
-    public ExpiringUsernameAuthenticationToken(Date tokenExpiration, Object principal, Object credentials, Collection<GrantedAuthority> authorities) {
+    public ExpiringUsernameAuthenticationToken(Date tokenExpiration, Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(principal, credentials, authorities);
         this.tokenExpiration = tokenExpiration;
     }

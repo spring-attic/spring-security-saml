@@ -3,25 +3,27 @@
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-    <!-- Enable autowiring -->
+    <!-- Enable auto-wiring -->
     <context:annotation-config/>
     <context:component-scan base-package="org.springframework.security.saml"/>
 
+    <!-- Unsecured pages -->
+    <security:http security="none" pattern="/saml/web/**"/>
+    <security:http security="none" pattern="/logout.jsp"/>
+    <security:http security="none" pattern="/favicon.ico"/>
+
+    <!-- Secured pages -->
     <security:http entry-point-ref="samlEntryPoint">
         <security:intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
-        <security:intercept-url pattern="/saml/web/**" filters="none"/>
-        <security:intercept-url pattern="/logout.jsp" filters="none"/>
-        <security:intercept-url pattern="/login.jsp" filters="none"/>
-        <security:intercept-url pattern="/favicon.ico" filters="none"/>
         <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
     </security:http>
 
     <bean id="samlFilter" class="org.springframework.security.web.FilterChainProxy">
-        <security:filter-chain-map path-type="ant">
+        <security:filter-chain-map request-matcher="ant">
             <security:filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
             <security:filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
             <security:filter-chain pattern="/saml/metadata/**" filters="metadataDisplayFilter"/>

@@ -14,8 +14,6 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -23,6 +21,8 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.util.XMLHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -50,7 +50,10 @@ import java.io.PrintWriter;
  */
 public class MetadataDisplayFilter extends GenericFilterBean {
 
-    private final Log logger = LogFactory.getLog(this.getClass());
+    /**
+     * Class logger.
+     */
+    protected final static Logger log = LoggerFactory.getLogger(MetadataDisplayFilter.class);
 
     /**
      * Class storing all SAML metadata documents
@@ -130,10 +133,10 @@ public class MetadataDisplayFilter extends GenericFilterBean {
                 writer.print(XMLHelper.nodeToString(element));
             }
         } catch (MarshallingException e) {
-            logger.error("Error marshalling entity descriptor", e);
+            log.error("Error marshalling entity descriptor", e);
             throw new ServletException(e);
         } catch (MetadataProviderException e) {
-            logger.error("Error retrieving metadata", e);
+            log.error("Error retrieving metadata", e);
             throw new ServletException("Error retrieving metadata", e);
         }
     }

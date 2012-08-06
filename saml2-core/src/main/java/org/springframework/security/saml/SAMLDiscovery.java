@@ -232,15 +232,16 @@ public class SAMLDiscovery extends GenericFilterBean {
      */
     protected void sendPassiveResponse(HttpServletRequest request, HttpServletResponse response, String responseURL, String returnParam, String entityID) throws IOException, ServletException {
 
+        String finalResponseURL = responseURL;
         if (entityID != null) {
             URLBuilder urlBuilder = new URLBuilder(responseURL);
             List<Pair<String, String>> queryParams = urlBuilder.getQueryParams();
             queryParams.add(new Pair<String, String>(returnParam, entityID));
-            responseURL = urlBuilder.toString();
+            finalResponseURL = urlBuilder.buildURL();
         }
 
-        logger.debug("Responding to a passive IDP Discovery request with URL {}", responseURL);
-        response.sendRedirect(responseURL);
+        logger.debug("Responding to a passive IDP Discovery request with URL {}", finalResponseURL);
+        response.sendRedirect(finalResponseURL);
 
     }
 

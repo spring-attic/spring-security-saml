@@ -55,6 +55,11 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
     protected MetadataGenerator generator;
 
     /**
+     * Metadata display filter.
+     */
+    protected MetadataDisplayFilter displayFilter;
+
+    /**
      * Default alias for generated entities.
      */
     private static final String DEFAULT_ALIAS = "defaultAlias";
@@ -143,9 +148,13 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
     }
 
     protected String getDefaultEntityID(String entityBaseUrl, String alias) {
+        String displayFilterUrl = MetadataDisplayFilter.FILTER_URL;
+        if (displayFilter != null) {
+            displayFilterUrl = displayFilter.getFilterProcessesUrl();
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(entityBaseUrl);
-        sb.append(MetadataDisplayFilter.FILTER_URL);
+        sb.append(displayFilterUrl);
         sb.append("/alias/");
         sb.append(alias);
         return sb.toString();
@@ -156,6 +165,11 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
         sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
         sb.append(request.getContextPath());
         return sb.toString();
+    }
+
+    @Autowired(required = false)
+    public void setDisplayFilter(MetadataDisplayFilter displayFilter) {
+        this.displayFilter = displayFilter;
     }
 
     @Autowired

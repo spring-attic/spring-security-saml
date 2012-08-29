@@ -66,6 +66,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     protected SAMLContextProvider contextProvider;
 
     /**
+     * Url this filter should get activated on.
+     */
+    protected String filterProcessesUrl = FILTER_URL;
+
+    /**
      * Default name of path suffix which will invoke this filter.
      */
     public static final String FILTER_URL = "/saml/metadata";
@@ -90,7 +95,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
-        return SAMLUtil.processFilter(FILTER_URL, request);
+        return SAMLUtil.processFilter(filterProcessesUrl, request);
     }
 
     /**
@@ -149,6 +154,22 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         this.contextProvider = contextProvider;
+    }
+
+    /**
+     * @return filter URL
+     */
+    public String getFilterProcessesUrl() {
+        return filterProcessesUrl;
+    }
+
+    /**
+     * Custom filter URL which overrides the default. Filter url determines URL where filter starts processing.
+     *
+     * @param filterProcessesUrl filter URL
+     */
+    public void setFilterProcessesUrl(String filterProcessesUrl) {
+        this.filterProcessesUrl = filterProcessesUrl;
     }
 
     /**

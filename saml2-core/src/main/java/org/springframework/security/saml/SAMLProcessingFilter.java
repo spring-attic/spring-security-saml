@@ -54,7 +54,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     public static final String FILTER_URL = "/saml/SSO";
 
     public SAMLProcessingFilter() {
-        super(FILTER_URL);
+        this(FILTER_URL);
     }
 
     protected SAMLProcessingFilter(String defaultFilterProcessesUrl) {

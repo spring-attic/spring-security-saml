@@ -103,6 +103,16 @@ public class SAMLDiscovery extends GenericFilterBean {
     protected MetadataManager metadata;
 
     /**
+     * Entry point dependency for loading of correct URL.
+     */
+    protected SAMLEntryPoint samlEntryPoint;
+
+    /**
+     * Url this filter should get activated on.
+     */
+    protected String filterProcessesUrl = FILTER_URL;
+
+    /**
      * Default name of path suffix which will invoke this filter.
      */
     public static final String FILTER_URL = "/saml/discovery";
@@ -132,7 +142,7 @@ public class SAMLDiscovery extends GenericFilterBean {
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
-        return SAMLUtil.processFilter(FILTER_URL, request);
+        return SAMLUtil.processFilter(filterProcessesUrl, request);
     }
 
     /**
@@ -293,9 +303,13 @@ public class SAMLDiscovery extends GenericFilterBean {
 
         // Generation for local entities at known URL
         if (extendedMetadata.isLocal()) {
+            String filterUrl = SAMLEntryPoint.FILTER_URL;
+            if (samlEntryPoint != null) {
+                filterUrl = samlEntryPoint.getFilterProcessesUrl();
+            }
             StringBuilder sb = new StringBuilder(50);
             sb.append(getServletContext().getContextPath());
-            sb.append(SAMLEntryPoint.FILTER_URL + "/alias/");
+            sb.append(filterUrl + "/alias/");
             sb.append(extendedMetadata.getAlias());
             sb.append("?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true");
             String responseURL = sb.toString();
@@ -371,6 +385,31 @@ public class SAMLDiscovery extends GenericFilterBean {
     public void setMetadata(MetadataManager metadata) {
         Assert.notNull(metadata, "MetadataManager can't be null");
         this.metadata = metadata;
+    }
+
+    /**
+     * Dependency for loading of entry point URL
+     * @param samlEntryPoint
+     */
+    @Autowired(required = false)
+    public void setSamlEntryPoint(SAMLEntryPoint samlEntryPoint) {
+        this.samlEntryPoint = samlEntryPoint;
+    }
+
+    /**
+     * @return filter URL
+     */
+    public String getFilterProcessesUrl() {
+        return filterProcessesUrl;
+    }
+
+    /**
+     * Custom filter URL which overrides the default. Filter url determines URL where filter starts processing.
+     *
+     * @param filterProcessesUrl filter URL
+     */
+    public void setFilterProcessesUrl(String filterProcessesUrl) {
+        this.filterProcessesUrl = filterProcessesUrl;
     }
 
     /**

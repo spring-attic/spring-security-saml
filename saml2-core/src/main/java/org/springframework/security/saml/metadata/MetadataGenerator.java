@@ -45,10 +45,8 @@ import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.SAMLEntryPoint;
-import org.springframework.security.saml.SAMLLogoutProcessingFilter;
-import org.springframework.security.saml.SAMLProcessingFilter;
-import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.saml.*;
 import org.springframework.security.saml.key.KeyManager;
 
 import javax.xml.namespace.QName;
@@ -94,6 +92,14 @@ public class MetadataGenerator {
     protected XMLObjectBuilderFactory builderFactory;
 
     protected KeyManager keyManager;
+
+    /**
+     * Filters for loading of paths.
+     */
+    protected SAMLProcessingFilter samlWebSSOFilter;
+    protected SAMLWebSSOHoKProcessingFilter samlWebSSOHoKFilter;
+    protected SAMLLogoutProcessingFilter samlLogoutProcessingFilter;
+    protected SAMLEntryPoint samlEntryPoint;
 
     /**
      * Class logger.
@@ -408,19 +414,57 @@ public class MetadataGenerator {
     }
 
     private String getSAMLWebSSOProcessingFilterPath() {
-        return SAMLProcessingFilter.FILTER_URL;
+        if (samlWebSSOFilter != null) {
+            return samlWebSSOFilter.getFilterProcessesUrl();
+        } else {
+            return SAMLProcessingFilter.FILTER_URL;
+        }
     }
 
     private String getSAMLWebSSOHoKProcessingFilterPath() {
-        return SAMLWebSSOHoKProcessingFilter.WEBSSO_HOK_URL;
+        if (samlWebSSOHoKFilter != null) {
+            return samlWebSSOHoKFilter.getFilterProcessesUrl();
+        } else {
+            return SAMLWebSSOHoKProcessingFilter.WEBSSO_HOK_URL;
+        }
     }
 
     private String getSAMLEntryPointPath() {
-        return SAMLEntryPoint.FILTER_URL;
+        if (samlEntryPoint != null) {
+            return samlEntryPoint.getFilterProcessesUrl();
+        } else {
+            return SAMLEntryPoint.FILTER_URL;
+        }
     }
 
     private String getSAMLLogoutFilterPath() {
-        return SAMLLogoutProcessingFilter.FILTER_URL;
+        if (samlLogoutProcessingFilter != null) {
+            return samlLogoutProcessingFilter.getFilterProcessesUrl();
+        } else {
+            return SAMLLogoutProcessingFilter.FILTER_URL;
+        }
+    }
+
+    @Autowired(required = false)
+    @Qualifier("samlWebSSOProcessingFilter")
+    public void setSamlWebSSOFilter(SAMLProcessingFilter samlWebSSOFilter) {
+        this.samlWebSSOFilter = samlWebSSOFilter;
+    }
+
+    @Autowired(required = false)
+    @Qualifier("samlWebSSOHoKProcessingFilter")
+    public void setSamlWebSSOHoKFilter(SAMLWebSSOHoKProcessingFilter samlWebSSOHoKFilter) {
+        this.samlWebSSOHoKFilter = samlWebSSOHoKFilter;
+    }
+
+    @Autowired(required = false)
+    public void setSamlLogoutProcessingFilter(SAMLLogoutProcessingFilter samlLogoutProcessingFilter) {
+        this.samlLogoutProcessingFilter = samlLogoutProcessingFilter;
+    }
+
+    @Autowired(required = false)
+    public void setSamlEntryPoint(SAMLEntryPoint samlEntryPoint) {
+        this.samlEntryPoint = samlEntryPoint;
     }
 
     /**

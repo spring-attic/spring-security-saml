@@ -73,6 +73,12 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected MetadataManager metadata;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
+    protected SAMLDiscovery samlDiscovery;
+
+    /**
+     * Url this filter should get activated on.
+     */
+    protected String filterProcessesUrl = FILTER_URL;
 
     /**
      * Default name of path suffix which will invoke this filter.
@@ -110,7 +116,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @return true if this filter should be used
      */
     protected boolean processFilter(HttpServletRequest request) {
-        return SAMLUtil.processFilter(FILTER_URL, request);
+        return SAMLUtil.processFilter(filterProcessesUrl, request);
     }
 
     /**
@@ -244,8 +250,12 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             queryParams.add(new Pair<String, String>(SAMLDiscovery.RETURN_ID_PARAM, IDP_PARAMETER));
             discoveryURL = urlBuilder.buildURL();
         } else {
-            logger.debug("Using default local discovery URL {}", SAMLDiscovery.FILTER_URL);
-            discoveryURL = getServletContext().getContextPath() + SAMLDiscovery.FILTER_URL + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
+            String discoveryUrl = SAMLDiscovery.FILTER_URL;
+            if (samlDiscovery != null) {
+                discoveryUrl = samlDiscovery.getFilterProcessesUrl();
+            }
+            logger.debug("Using default local discovery URL {}", discoveryUrl);
+            discoveryURL = getServletContext().getContextPath() + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
         }
 
         logger.debug("Redirecting to discovery URL {}", discoveryURL);
@@ -374,6 +384,15 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
+     * Dependency for loading of discovery URL
+     * @param samlDiscovery
+     */
+    @Autowired(required = false)
+    public void setSamlDiscovery(SAMLDiscovery samlDiscovery) {
+        this.samlDiscovery = samlDiscovery;
+    }
+
+    /**
      * Sets entity responsible for populating local entity context data.
      *
      * @param contextProvider provider implementation
@@ -393,6 +412,22 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     public void setMetadata(MetadataManager metadata) {
         Assert.notNull(metadata, "MetadataManager can't be null");
         this.metadata = metadata;
+    }
+
+    /**
+     * @return filter URL
+     */
+    public String getFilterProcessesUrl() {
+        return filterProcessesUrl;
+    }
+
+    /**
+     * Custom filter URL which overrides the default. Filter url determines URL where filter starts processing.
+     *
+     * @param filterProcessesUrl filter URL
+     */
+    public void setFilterProcessesUrl(String filterProcessesUrl) {
+        this.filterProcessesUrl = filterProcessesUrl;
     }
 
     /**

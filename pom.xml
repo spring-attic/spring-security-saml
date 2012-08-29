@@ -32,7 +32,8 @@
 
     <scm>
         <connection>scm:svn:https://src.springframework.org/svn/se-security/trunk/</connection>
-        <developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-saml</developerConnection>
+        <developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-saml
+        </developerConnection>
         <url>https://src.springframework.org/svn/se-security/trunk/spring-security-saml</url>
     </scm>
 
@@ -148,8 +149,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -160,34 +161,49 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <version>2.1.2</version>
                 <executions>
-                  <execution>
-                    <goals>
-                       <goal>jar</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
-<plugin>  
- <groupId>com.agilejava.docbkx</groupId>  
- <artifactId>docbkx-maven-plugin</artifactId>  
- <dependencies>  
-  <dependency>  
-   <groupId>org.docbook</groupId>  
-   <artifactId>docbook-xml</artifactId>  
-   <version>4.4</version>  
-   <scope>runtime</scope>  
-  </dependency>  
- </dependencies>
- <executions>  
-  <execution>  
-   <phase>pre-site</phase>  
-   <goals>  
-    <goal>generate-html</goal>
-    <goal>generate-pdf</goal>  
-   </goals>  
-  </execution>  
- </executions>  
-  </plugin>              
+            <plugin>
+                <groupId>com.agilejava.docbkx</groupId>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <version>2.0.7</version>
+                <executions>
+                    <execution>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>generate-html</goal>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                    </execution>
+                </executions>                
+                <dependencies>
+                    <dependency>
+                        <groupId>org.docbook</groupId>
+                        <artifactId>docbook-xml</artifactId>
+                        <version>4.4</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                   <includes>manual.xml</includes>
+                    <chunkedOutput>true</chunkedOutput>
+                    <htmlStylesheet>css/html.css</htmlStylesheet>
+                    <xincludeSupported>true</xincludeSupported>
+                    <htmlCustomization>src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
+                    <foCustomization>src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+                    <entities>
+                        <entity>
+                            <name>version</name>
+                            <value>${project.version}</value>
+                        </entity>
+                    </entities>                                       
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

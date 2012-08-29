@@ -1,5 +1,995 @@
-<?xml version="1.0" encoding="utf-8"?>  
- <article xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">  
-  <title>Hello, World</title>  
-  <para>My first documentation with Docbook</para>  
- </article>
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xml:id="spring-security-reference-guide" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude">>
+
+    <title>Spring Security SAML SP</title>
+    <info>
+        <title>Spring Security Extensions</title>
+        <subtitle>SAML 2.0 SP Reference Documentation</subtitle>
+        <copyright>
+            <year>2009-2012</year>
+            <holder>Vladimír Schäfer</holder>
+            <!-- TODO mail to copyright -->
+        </copyright>
+        <releaseinfo>3.1.0</releaseinfo>
+    </info>
+    <toc/>
+
+    <!--
+    1. Introduction
+    OK - What is covered
+    OK - When to use
+    - Requirements
+    - Supported environments
+    - Jira, Support forum
+    -->
+
+    <chapter id="chapter-introduction">
+        <title>Introduction</title>
+
+        <section id="section-what-this-manual-covers">
+            <title>What this manual covers</title>
+
+            <para>This manual describes Spring Security SAML SP component, it's uses, installation, configuration,
+                design and tested environments.
+            </para>
+        </section>
+
+        <section id="section-when-to-use">
+            <title>When to use Spring Security SAML SP</title>
+
+            <para>Component enables both new and existing applications to act as a Service Provider in federations based on
+                SAML 2.0 protocol. The key use-case beind the project is enabling web single sign-on. All products
+                supporting SAML 2.0 in Identity Provider mode such as ADFS 2.0, OpenAM (OpenSSO), RM5 IdM or Ping
+                Federate can be used to connect with Spring Security SAML SP.
+            </para>
+            <para>Spring Security SAML SP can be either embedded inside application and work along other authentication
+                or single sign-on mechanisms or it can be deployed separately and convey authentication information to
+                applications using a custom mechanism.
+            </para>
+            <para>Open-source alternatives to this component are e.g. native SAML service providers integrating with IIS
+                or Apache from Shibboleth, where SAML processing is done on the web server and not on the application
+                level. OpenAM Fedlet is another mean to enable SAML SP capabilities in an application.
+            </para>
+        </section>
+
+        <section id="section-features-and-profiles">
+            <title>Features and supported profiles</title>
+
+            <para>Current implementation should be conformant to SAML SP Lite and SAML eGovernment profile. The
+                following profiles, bindings and features are supported as part of the product:
+                <itemizedlist spacing="compact">
+                    <listitem>
+                        <para>Web single sign-on profile</para>
+                    </listitem>
+                    <listitem>
+                        <para>Web single sign-on holder-of-key profile</para>
+                    </listitem>
+                    <listitem>
+                        <para>IDP and SP initialized single sign-on</para>
+                    </listitem>
+                    <listitem>
+                        <para>Single logout profile</para>
+                    </listitem>
+                    <listitem>
+                        <para>Enhanced client/proxy profile</para>
+                    </listitem>
+                    <listitem>
+                        <para>Identity provider discovery profile and IDP selection</para>
+                    </listitem>
+                    <listitem>
+                        <para>Metadata interoperability and PKIX trust management</para>
+                    </listitem>
+                    <listitem>
+                        <para>Automatic service provider metadata generation</para>
+                    </listitem>
+                    <listitem>
+                        <para>Metadata loading from files, URLs, file-backed URLs</para>
+                    </listitem>
+                    <listitem>
+                        <para>Processing and automatic reloading of metadata with many identity providers</para>
+                    </listitem>
+                    <listitem>
+                        <para>Support for authentication contexts</para>
+                    </listitem>
+                    <listitem>
+                        <para>Logging for authentication events</para>
+                    </listitem>
+                    <listitem>
+                        <para>Customization of both SP and IDP metadata</para>
+                    </listitem>
+                    <listitem>
+                        <para>Processing of SAML attributes and user data using UserDetails interface</para>
+                    </listitem>
+                    <listitem>
+                        <para>Support for HTTP-POST, HTTP-Redirect, SOAP, PAOS and Artifact bindings</para>
+                    </listitem>
+                    <listitem>
+                        <para>Easy integration with applications using Spring Security</para>
+                    </listitem>
+                    <listitem>
+                        <para>Sample application</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                Internal processing of SAML messages, marshalling and unmarshalling is handled by OpenSAML TODO link.
+            </para>
+
+            <para>You can use the following supported standards as a reference:
+                <itemizedlist spacing="compact">
+                    <title>SAML 2.0 basic profiles</title>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-profiles-2.0-os.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/v2.0/saml-conformance-2.0-os.pdf</para>
+                    </listitem>
+                </itemizedlist>
+
+                <itemizedlist spacing="compact">
+                    <title>SAML 2.0 additional profiles</title>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso.pdf
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml2-holder-of-key.pdf</para>
+                    </listitem>
+                    <listitem>
+                        <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf</para>
+                    </listitem>
+                </itemizedlist>
+
+                <itemizedlist spacing="compact">
+                    <title>eGovernment profile</title>
+                    <listitem>
+                        <para>
+                            http://kantarainitiative.org/confluence/download/attachments/42139782/kantara-egov-saml2-profile-2.0.pdf
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+
+        <section id="section-requirements">
+            <title>Requirements</title>
+
+            <para>Spring Security SAML SP requires as minimum Java 1.6.</para>
+            <para>TODO Apache Tomcat, Jetty, Oracle Weblogic, ....</para>
+        </section>
+
+        <section id="section-source">
+            <title>Source code</title>
+
+            <para>Source code for the project is maintained on Github.</para>
+        </section>
+
+        <section id="section-license">
+            <title>License</title>
+
+            <para>Source code of the module is licensed under the Apache License, Version 2.0. You may obtain copy
+            of the license at <ulink url="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</ulink>.</para>
+        </section>
+
+        <section id="section-support">
+            <title>Support</title>
+
+            <para>Issue tracking for the module can be found at TODO Spring Security Extensions Jira. Feel free to submit bugs, patches and feature requests.</para>
+            <para>For community support please use TODO Spring Security forum. You can also contact me at vladimir.schafer at gmail.com.</para>
+        </section>
+
+    </chapter>
+
+    <!--
+    2. Glossary
+    - SAML
+    - IDP Discovery
+    - SP
+    - IDP
+    - Metadata
+    - Single Logout
+    - SAML profiles
+    - SAML bindings
+    - SAML HoK profile
+    -->
+
+    <chapter id="glossary">
+        <title>Glossary</title>
+        <para>
+            Glossary contains overview of terms used in the manual. TODO
+        </para>
+    </chapter>
+
+    <!--
+    3. Quick start guide
+    OK - Pre-requisites
+    OK - Compilation of the module
+    OK - Configuration of IDP metadata
+    OK - Deployment
+    - Configuration of SP metadata
+    - Testing single sign-on and single logout
+    -->
+
+    <chapter id="chapter-quick-start">
+        <title>Quick start guide</title>
+        <para>
+            This chapter will guide you through steps required to easily integrate Spring Security SAML SP with SSO
+            Circle IDP service using SAML 2.0 protocol.
+            When done you will have a working example of Web SSO against a single Identity Provider. The steps will
+            guide you through deployment of the module,
+            configuration of IDP metadata (XML document describing how to connect to the IDP server using SAML 2.0
+            protocol) and SP metadata (XML document describing
+            your own service) and testing of web single sign-on and single logout.
+        </para>
+
+        <section id="quick-start-prerequisites">
+            <title>Pre-requisites</title>
+
+            <para>Please make sure the following items are available before starting the installation:
+                <itemizedlist>
+                    <listitem>
+                        <para>Supported application server or container</para>
+                        <para>Spring Security SAML SP</para>
+                        <para>Java 1.6+ SDK</para>
+                        <para>Maven</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>TODO endorsed libraries</para>
+        </section>
+
+        <section id="quick-start-steps">
+            <title>Installation steps</title>
+
+            <section id="quick-start-compilation">
+                <title>Compilation of the module</title>
+                <para>
+                    After downloading the Spring Security SAML SP module and unziping compile the whole project using:
+                    <programlisting>mvn package</programlisting>
+                </para>
+                <para>
+                    Command will create file <emphasis>spring-security-saml2-sample.war</emphasis> in directory
+                    <emphasis>saml2-sample/target</emphasis>. We will be customizing content of the application
+                    in the following steps.
+                </para>
+            </section>
+
+            <section id="quick-start-idp-metadata">
+                <title>Configuration of IDP metadata</title>
+                <para>Modify file
+                    <emphasis>WEB-INF/classes/security/securityContext.xml</emphasis>
+                    inside the war archive and replace bean with id
+                    <emphasis>metadata</emphasis>
+                    as follows:
+                    <programlisting><![CDATA[<bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <constructor-arg>
+        <list>
+            <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
+                <constructor-arg>
+                    <value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
+                </constructor-arg>
+                <constructor-arg>
+                    <value type="int">5000</value>
+                </constructor-arg>
+                <property name="parserPool" ref="parserPool"/>
+            </bean>
+        </list>
+    </constructor-arg>
+</bean>]]></programlisting>
+                </para>
+                <para>The settings tell system to download IDP metadata from the given URL with timeout of 5
+                    seconds. In production system metadata should be either stored as a local file or be downloaded
+                    from a source using SSL/TLS with configured trust or which provides digitally signed metadata.
+                </para>
+            </section>
+
+            <section id="quick-start-deploy">
+                <title>Deployment</title>
+                <para>Deploy the updated war archive to your application server or container. After deployment the
+                    SP module will be available at e.g.
+                    <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis>
+                </para>
+            </section>
+
+            <section id="quick-start-sp-metadata">
+                <title>Configuration of SP metadata</title>
+                <itemizedlist>
+                    <listitem>
+                        <para>Open web browser at the URL of the deployed application.</para>
+                        <para>Select<emphasis>Metadata information</emphasis>.
+                        </para>
+                        <para>Select first item from category<emphasis>Service providers</emphasis>, e.g.
+                            <emphasis>
+                                http://localhost:8080/spring-security-saml2-sample/saml/metadata/alias/defaultAlias
+                            </emphasis>
+                            .
+                        </para>
+                        <para>Copy content of the Metadata textarea to your clipboard.</para>
+                        <para>Register yourself at www.ssocircle.com</para>
+                        <para>TODO import metadata</para>
+                    </listitem>
+                </itemizedlist>
+            </section>
+
+            <section id="quick-start-sso">
+                <title>Testing single sign-on and single logout</title>
+                <para>TODO</para>
+            </section>
+        </section>
+    </chapter>
+
+    <chapter id="chapter-configuration">
+        <title>Configuration and integration</title>
+        <para>This chapter will discuss aspects of configuring and using the library in target applications.</para>
+
+        <section id="configuration-overview">
+            <title>Overview</title>
+            <para>Spring Security SAML 2.0 library comprises three modules:
+                <itemizedlist spacing="compact">
+                    <listitem>
+                        <para>
+                            <emphasis>saml2-core</emphasis>
+                            contains implementation of the WebSSO profiles of the SAML 2.0 protocol and is required for
+                            integration to target systems.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <emphasis>saml2-sample</emphasis>
+                            contains example of Spring configuration used for integration to target systems. It also
+                            contains user interface for generation and management of metadata.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <emphasis>saml2-doc</emphasis>
+                            contains this documentation.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Configuration of library is done using Spring context XML. An example of configuration can be found
+                under<emphasis>saml2-sample/src/main/resources/security/securityContext.xml</emphasis>.
+                Setting up of the library typically involves these steps:
+                <itemizedlist spacing="compact">
+                    <listitem>
+                        <para>integration to application using Spring XML configuration</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of signature, encryption and trust keys</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of security profiles</para>
+                    </listitem>
+                    <listitem>
+                        <para>import, generation and customization of SP and IDP metadata</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of IDP selection</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of single sign-on process</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of logout process</para>
+                    </listitem>
+                    <listitem>
+                        <para>configuration of authentication object</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Additional steps such as configuration of authentication logging, customization of SAML 2.0 bindings,
+                configuration of artifact resolution or configuration of time skews might be needed.
+            </para>
+        </section>
+
+        <section id="configuration-integration">
+            <title>Integration to applications</title>
+            <para>SAML module can be directly embedded into new of existing Spring applications. In
+                this case application itself includes the SAML library in WEB-INF/lib directory of the war archive and
+                processes all SAML interactions. The other option of using the SAML library is deploying it as a
+                stand-alone module
+                which transfers information about the authenticated user to the target application using a custom
+                mechanism. This chapter only discusses the first option.
+            </para>
+            <section id="configuration-integration-maven">
+                <title>Maven dependency</title>
+                <para>
+                    In order to include the library and all it's dependencies add the following dependency to your
+                    pom.xml file:
+                    <programlisting><![CDATA[<dependency>
+    <groupId>org.springframework.security.extensions</groupId>
+    <artifactId>spring-security-saml2-core</artifactId>
+    <version>3.1</version>
+</dependency>]]></programlisting>
+                </para>
+                <!-- TODO more about dependencies -->
+            </section>
+            <section id="configuration-integration-bean-definitions">
+                <title>Bean definitions</title>
+                <para>Configuration of the SAML library requires beans definitions included in the
+                    <emphasis>saml2-sample/src/main/resources/security/securityContext.xml</emphasis>
+                    configuration file. Include copy of the file in your own Spring application, either directly or with
+                    an inclusion. Configuration steps in the following chapters will be customizing beans included in
+                    the default context.
+                </para>
+                <para>Beans of the SAML library are using auto-wiring and annotation-based configuration by default.
+                    Make sure that your Spring configuration
+                    contains e.g. the following settings in order to enable support for these features:
+                    <programlisting><![CDATA[<context:annotation-config/>
+<context:component-scan base-package="org.springframework.security.saml"/>
+]]></programlisting>
+                </para>
+            </section>
+            <section id="configuration-integration-spring-security">
+                <title>Spring Security integration</title>
+                <para>Filters of the SAML module need to be enabled as part of the Spring Security settings. In case
+                    SAML authentication should be the default authentication mechanism of the application set bean
+                    <emphasis>samlEntryPoint</emphasis>
+                    as the default entry point. Make sure that filter
+                    <emphasis>samlFilter</emphasis>
+                    is included as one of the custom filters. In case SP metadata should be
+                    generated automatically during first request to the application include also filter<emphasis>
+                        metadataGeneratorFilter</emphasis>.
+                    The configuration directive may for example look as follows:
+                    <programlisting><![CDATA[<security:http entry-point-ref="samlEntryPoint">
+    <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
+    <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
+</security:http>]]></programlisting>
+                </para>
+            </section>
+        </section>
+
+        <section id="configuration-metadata">
+            <title>Metadata configuration</title>
+            <para>
+                SAML metadata is an XML document which contains information necessary for interaction with SAML-enabled identity
+                or service providers. Document contains e.g. URLs of endpoints, information about supported bindings, identifiers and
+                public keys. Typically one metadata document will be generated for your own service provider and sent to all identity providers
+                you want to enable single sign-on with. Similarly, each identity provider will make it's own metadata available for you to import
+                into your service provider application.
+            </para>
+            <para>
+                Each metadata document can contain definition for one or many identity or service providers and optionally can be digitally signed.
+                Metadata can be customized either by direct modifications to the XML document, or using extended metadata. Extended metadata is added
+                directly to the Spring configuration file and can contain additional options which are unavailable in the basic metadata document.
+            </para>
+
+            <section id="configuration-metadata-sp">
+                <title>Service provider metadata</title>
+                <para>Service provider metadata contains keys, services and URLs defining SAML endpoints of your application. Metadata can be either
+                generated automatically upon first request to the service, or it can be pre-created (see <xref linkend="chapter-administration-ui"/>).
+                Once created metadata needs to be provided to the identity providers with whom we want to establish trust.</para>
+
+                <section id="configuration-metadata-sp-generation">
+                    <title>Automatic metadata generation</title>
+                    <para>
+                        Automatic metadata generation is enabled by including the following filter in the Spring Security configuration:
+                        <programlisting><![CDATA[<security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>]]></programlisting>
+                    </para>
+                    <para>
+                        Filter is automatically invoked as part of the first request to a URL processed by Spring Security. In case there
+                        is no service provider metadata already specified (meaning property <emphasis>hostedSPName</emphasis> of the
+                        <emphasis>metadata</emphasis> bean is empty) filter will generate a new one.
+                    </para>
+                    <para>
+                        By default metadata will be generated with the following values which can be customized by setting properties of the <emphasis>metadataGeneratorFilter</emphasis> bean:
+                        <table id="configuration-metadata-sp-generation-default-values">
+                            <title>Metadata generator settings</title>
+                            <tgroup cols="3">
+                                <colspec colname="_1" colwidth="0.6*" align="left"/>
+                                <colspec colname="_2" colwidth="0.8*" align="left"/>
+                                <colspec colname="_2" colwidth="0.8*" align="left"/>
+                                <thead>
+                                    <row>
+                                        <entry>Property</entry>
+                                        <entry>Description</entry>
+                                        <entry>Default value</entry>
+                                    </row>
+                                </thead>
+                                <tbody>
+                                    <row>
+                                        <entry><literal>entityBaseURL</literal></entry>
+                                        <entry>Base URL to construct SAML endpoints from, needs to be a URL with protocol, server, port and context path.</entry>
+                                        <entry>Values from the request in format: <emphasis>scheme://server:port/contextPath</emphasis></entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>entityAlias</literal></entry>
+                                        <entry>Local alias for the entityId which can be part of a simple URL path and contains only alphanum characters. See <xref linkend="configuration-entity-alias"/>.</entry>
+                                        <entry><emphasis>defaultAlias</emphasis></entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>entityId</literal></entry>
+                                        <entry>Unique identifier of the service provider.</entry>
+                                        <entry>&lt;entityBaseUrl&gt;/saml/ metadata/alias/&lt;entityAlias&gt;</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>requestSigned</literal></entry>
+                                        <entry>Flag indicating whether this service signs authentication requests.</entry>
+                                        <entry>true</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>wantAssertionSigned</literal></entry>
+                                        <entry>Flag indicating whether this service requires signed assertions.</entry>
+                                        <entry>true</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>signingKey</literal></entry>
+                                        <entry>Key to include with usage "signing" in the metadata. Value will be set in ExtendedMetadata as <literal>signingKey</literal>.</entry>
+                                        <entry>Default private key from the KeyManager</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>encryptionKey</literal></entry>
+                                        <entry>Key to include with usage "encryption" in the metadata. Value will be set in ExtendedMetadata as <literal>encryptionKey</literal>.</entry>
+                                        <entry>Default private key from the KeyManager</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>tlsKey</literal></entry>
+                                        <entry>Key to include with usage "unspecified" in the metadata. Value will be set in ExtendedMetadata as <literal>tlsKey</literal>.</entry>
+                                        <entry>By default not included. Key is only included in metadata when it's different from signing and encryption keys.</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>signMetadata</literal></entry>
+                                        <entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>.</entry>
+                                        <entry>true</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>bindingsSSO</literal></entry>
+                                        <entry>Bindings to be included in the metadata for WebSSO profile.</entry>
+                                        <entry>POST, PAOS, HTTP-Artifact</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>bindingsHoKSSO</literal></entry>
+                                        <entry>Bindings to be included in the metadata for WebSSO Holder-of-Key profile.</entry>
+                                        <entry>POST, HTTP-Artifact</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>bindingsSLO</literal></entry>
+                                        <entry>Bindings to be included in the metadata for Single Logout profile.</entry>
+                                        <entry>POST, HTTP-Redirect, SOAP</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>assertionConsumerIndex</literal></entry>
+                                        <entry>Index of assertion consumer point to be marked as default.</entry>
+                                        <entry>0</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>includeDiscovery</literal></entry>
+                                        <entry>When true metadata will contain extension indicating that it's able to consume response from IDP Discovery service.</entry>
+                                        <entry>true</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>customDiscoveryURL</literal></entry>
+                                        <entry>When <literal>includeDiscovery</literal> is enabled value overrides default discovery response URL.</entry>
+                                        <entry>empty</entry>
+                                    </row>
+                                    <row>
+                                        <entry><literal>nameID</literal></entry>
+                                        <entry>Supported name identifiers to be included in the metadata.</entry>
+                                        <entry>EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED, X509_SUBJECT</entry>
+                                    </row>
+                                </tbody>
+                            </tgroup>
+                        </table>
+                    </para>
+                    <para>
+                        By default generated metadata will be digitally signed using the default credential specified in KeyManager
+                        (see <xref linkend="configuration-key-management"/> for details). Digital signature can be disabled using property
+                        <literal>signMetadata</literal> of the <emphasis>metadataGeneratorFilter</emphasis> bean.
+                    </para>
+                    <para>
+                        In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
+                        from the URL seen by client at least property <literal>entityBaseURL</literal> should be set to a value e.g. https://www.server.com
+                    </para>
+                </section>
+
+                <section id="configuration-metadata-sp-import">
+                    <title>Pre-configured metadata</title>
+                    <para>TODO</para>
+                </section>
+
+                <section id="configuration-metadata-sp-display">
+                    <title>Downloading metadata</title>
+                    <para>TODO</para>
+                </section>
+            </section>
+
+            <section id="configuration-metadata-idp">
+                <title>Identity provider metadata</title>
+                <para>TODO</para>
+
+                <section id="configuration-metadata-idp-file">
+                    <title>File-based metadata provider</title>
+                    <para>TODO</para>
+                </section>
+
+                <section id="configuration-metadata-idp-http">
+                    <title>HTTP-based metadata provider</title>
+                    <para>TODO</para>
+                </section>
+
+                <section id="configuration-metadata-idp-signature">
+                    <title>Signature verification</title>
+                    <para>TODO</para>
+                </section>
+            </section>
+
+            <section id="configuration-metadata-extended">
+                <title>Exteneded metadata</title>
+                <para>TODO</para>
+            </section>
+        </section>
+
+        <section id="configuration-entity-alias">
+            <title>Entity alias</title>
+            <para>TODO</para>
+        </section>
+
+        <section id="configuration-key-management">
+            <title>Key management</title>
+            <para>
+                SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
+                done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. Default implementation relies
+                on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
+                which should be marked as default by using the alias of the private key as part of the KeyManager constructor.
+            </para>
+            <para>
+                Make sure that your configuration of SAML module contains bean keyManager with your custom key store and passwords.
+            </para>
+
+            <section id="configuration-key-management-sample">
+                <title>Sample keystore</title>
+                <para>Sample application contains a default key store with a sample private certificate usable for test purposes. The key store
+                    is defined as:<programlisting><![CDATA[<bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+    <constructor-arg value="classpath:security/samlKeystore.jks"/>
+    <constructor-arg type="java.lang.String" value="nalle123"/>
+    <constructor-arg>
+        <map>
+            <entry key="apollo" value="nalle123"/>
+        </map>
+    </constructor-arg>
+    <constructor-arg type="java.lang.String" value="apollo"/>
+</bean>]]></programlisting>
+                    First argument points to the used key store file, second contains password for the keystore, third then map with
+                    passwords for private keys with alias-password value pairs. Alias of the default certificate is the last parameter.
+                </para>
+            </section>
+
+            <section id="configuration-key-management-private-keys">
+                <title>Generating and importing private keys</title>
+                <para>TODO</para>
+            </section>
+
+            <section id="configuration-key-management-public-keys">
+                <title>Importing public keys</title>
+                <para>TODO</para>
+            </section>
+
+            <section id="configuration-key-management-ssl-keys">
+                <title>Loading SSL/TLS certificates</title>
+                <para>TODO</para>
+            </section>
+
+        </section>
+
+        <section id="configuration-security-profiles">
+            <title>Security profiles</title>
+            <para>Exchanges of messages between identity providers and service providers with SAML protocol
+                involves usage of digital signatures. Signatures are typically constructed using means of asymetric
+                cryptography and public key infrastructure with public and private keys signed by trusted certification
+                authorities. Signatures are either applied directly to parts of XML representation of SAML messages
+                using XML Signature or are part of the transport layer used to deliver the message like SSL/TLS.
+            </para>
+            <para>Verification of signatures is executed in two phases. Signature is first checked for validity by
+                comparing digital hash included as part of the signature with value calculated from the content.
+                Subsequently it is verified whether party who created the signature is trusted by the recipient. Module
+                provides two mechanisms for defining which signatures should be accepted - metadata interoperability
+                mode and PKIX mode.
+            </para>
+            <para>
+                Security profiles are defined in Extended Metadata of your local SP. Profile can be defined separately
+                for XML Signatures using property <emphasis>securityProfile</emphasis> and for SSL/TLS Signatures using
+                property<emphasis>sslSecurityProfile</emphasis>. Value of both properties can be either <emphasis>metaiop</emphasis>
+                or <emphasis>pkix</emphasis>. For details about using Extended Metadata see <xref linkend="configuration-metadata"/>,
+                for reference of allowed values see <xref linkend="reference-extended-metadata"/>.
+            </para>
+
+            <section id="configuration-security-profiles-metaiop">
+                <title>Metadata interoperability profile (MetaIOP)</title>
+                <para>With MetaIOP mode certificates are not checked for expiration or revocation and certificate paths
+                    are not
+                    verified. This means that it does not matter which certification authority issued the certificate,
+                    as the fact whether the certificate is trusted or not is conveyed using other mechanisms (e.g. by
+                    secure metadata exchange or digital signature of metadata itself).
+                </para>
+                <para>Signature is deemed trusted when the certificate used to create it is included in one
+                    of the following places:
+                    <itemizedlist spacing="compact">
+                        <listitem>
+                            <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
+                        </listitem>
+                        <listitem>
+                            <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>
+                    MetaIOP is the default profile for verification of XML signatures. For details about this profile
+                    see <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf">the specification</ulink>.
+                </para>
+            </section>
+
+            <section id="configuration-security-profiles-pkix">
+                <title>PKIX profile</title>
+                <para>
+                    With PKIX profile trust of signature certificates is verified based on a certificate path
+                    between trusted CA certificates and the certificate in question. Certificate is trusted when it's
+                    possible to construct path from a trusted certificate to the validated one. With this profile
+                    certificate expiration and revocation can be checked.
+                </para>
+                <para>Trusted keys (anchors) for PKIX verification of signatures are combined from the following places:
+                    <itemizedlist spacing="compact">
+                        <listitem>
+                            <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
+                        </listitem>
+                        <listitem>
+                            <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
+                        </listitem>
+                        <listitem>
+                            <para>All keys specified in <emphasis>trustedKeys</emphasis> set of extended metadata of a remote entity</para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+            <section id="configuration-security-profiles-customization">
+                <title>Custom profile</title>
+                <para>
+                    Engine used to verify trust of signatures for given combination of SP/IDP is created in methods
+                    <emphasis>populateTrustEngine</emphasis> and <emphasis>populateSSLTrustEngine</emphasis> of interface
+                    <emphasis>org.springframework.security.saml.context.SAMLContextProvider</emphasis> and can be overriden
+                    with custom implementation. See <xref linkend="configuration-context-provider"/> for details on context customization.
+                </para>
+            </section>
+        </section>
+
+        <section id="configuration-discovery">
+            <title>IDP selection</title>
+            <para>TODO</para>
+            <!--
+            - configuring IDP discovery
+            -->
+        </section>
+
+        <section id="configuration-sso">
+            <title>Single sign-on process</title>
+            <para>TODO</para>
+            <!--
+            - name ID, authncontext, consumer index, ...
+            -->
+        </section>
+
+        <section id="configuration-logout">
+            <title>Logout process</title>
+            <para>TODO</para>
+            <!--
+        - local logout
+        - single logout
+        - configuring both local and IDP login + logout
+            -->
+        </section>
+
+        <section id="configuration-authentication-object">
+            <title>Authentication object</title>
+            <para>TODO</para>
+            <!--
+        - parsing SAML attributes
+        - forcePrincipalAsString
+        - configuring userDetailService
+        - granted authorities
+        - authentication expiration
+            -->
+        </section>
+
+        <section id="configuration-authentication-log">
+            <title>Authentication log</title>
+            <para>TODO</para>
+            <!--
+        - default SAMLDefaultLogger, SAMLEmptyLogger
+            -->
+        </section>
+
+        <section id="configuration-context-provider">
+            <title>Context provider</title>
+            <para>TODO</para>
+            <!--
+        - default SAMLDefaultLogger, SAMLEmptyLogger
+            -->
+        </section>
+
+        <!--
+        IDP integration
+        - integration with Shibboleth
+        - integration with ADFS
+        - integration with OpenAM
+
+        Message storage
+
+        Bindings configuration
+        - artifact resolution
+        - custom URLs
+        Time skew configuration
+        Using a reverse proxy
+
+        Service URLs
+
+        Using the HoK profile
+        Using the ECP profile
+        -->
+
+    </chapter>
+
+    <chapter id="chapter-administration-ui">
+        <title>Administration user interface</title>
+        <para>TODO</para>
+    </chapter>
+
+    <chapter id="chapter-configuration-reference">
+        <title>Configuration reference</title>
+        <para>This chapter provides reference for settings available in configuration beans of the SAML module.</para>
+
+        <section id="reference-extended-metadata">
+            <title>Extended metadata</title>
+            <para>Extended metadata provides additional settings for customization of IDP and SP behavior. Bean can be
+                found in package<emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
+                details
+                on setting up metadata please consult<xref linkend="configuration-metadata"/>.
+                <table id="reference-extended-metadata-settings">
+                    <title>Extended metadata settings</title>
+                    <tgroup cols="4">
+                        <colspec colname="_1" colwidth="1.2*" align="left"/>
+                        <colspec colname="_2" colwidth="0.4*" align="left"/>
+                        <colspec colname="_3" colwidth="0.4*" align="left"/>
+                        <colspec colname="_4" colwidth="1.9*" align="left"/>
+                        <thead>
+                            <row>
+                                <entry>Property</entry>
+                                <entry>Default</entry>
+                                <entry>Entities</entry>
+                                <entry>Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry>local</entry>
+                                <entry>false</entry>
+                                <entry>both</entry>
+                                <entry>Value determines whether</entry>
+                            </row>
+                            <row>
+                                <entry>alias</entry>
+                                <entry></entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>idpDiscoveryEnabled</entry>
+                                <entry>false</entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>ecpEnabled</entry>
+                                <entry>false</entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>securityProfile</entry>
+                                <entry>metaiop</entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>sslSecurityProfile</entry>
+                                <entry>pkix</entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>signingKey</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>encryptionKey</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>tlsKey</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>trustedKeys</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>requireLogoutRequestSigned</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>requireLogoutResponseSigned</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>requireArtifactResolveSigned</entry>
+                                <entry></entry>
+                                <entry>both</entry>
+                                <entry></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+            </para>
+        </section>
+
+        <section id="reference-web-sso">
+            <title>WebSSO profile options</title>
+            <para>Configuration bean can be found in
+                <emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis>
+                and provides means to customize authentication request sent to the IDP. For details on setting the login
+                process please see<xref linkend="configuration-sso"/>.
+            </para>
+            <!-- TODO -->
+        </section>
+    </chapter>
+
+    <chapter id="chapter-troubleshooting-guide">
+        <title>Troubleshooting guide</title>
+        <para>TODO</para>
+        <!--
+        - enabling debugging, slf4j
+        - common problems
+        - XML parsing libraries and endorsing
+        - time skew problems
+        -->
+    </chapter>
+
+    <!--
+    Acknowledgements
+    SEPARATE CHAPTER? - sample flow
+    8. Known issues
+    multi-tenancy
+    deployment to application servers
+    -->
+
+</book>

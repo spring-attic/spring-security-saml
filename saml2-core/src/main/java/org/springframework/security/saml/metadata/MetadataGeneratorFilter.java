@@ -93,7 +93,9 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
                         log.info("No default metadata configured, generating with default values, please pre-configure metadata for production use");
 
+                        // Defaults
                         String alias = DEFAULT_ALIAS;
+                        String baseURL = getDefaultBaseURL(request);
 
                         // Use default entityAlias if not set
                         if (generator.getEntityAlias() == null) {
@@ -104,12 +106,14 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
                         // Use default baseURL if not set
                         if (generator.getEntityBaseURL() == null) {
-                            generator.setEntityBaseURL(getDefaultBaseURL(request));
+                            generator.setEntityBaseURL(baseURL);
+                        } else {
+                            baseURL = generator.getEntityBaseURL();
                         }
 
                         // Use default entityID if not set
                         if (generator.getEntityId() == null) {
-                            generator.setEntityId(getDefaultEntityID(request, alias));
+                            generator.setEntityId(getDefaultEntityID(baseURL, alias));
                         }
 
                         EntityDescriptor descriptor = generator.generateMetadata();
@@ -138,11 +142,11 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
     }
 
-    protected String getDefaultEntityID(HttpServletRequest request, String alias) {
+    protected String getDefaultEntityID(String entityBaseUrl, String alias) {
         StringBuilder sb = new StringBuilder();
-        sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
-        sb.append(request.getContextPath());
-        sb.append(MetadataDisplayFilter.FILTER_URL + "/alias/");
+        sb.append(entityBaseUrl);
+        sb.append(MetadataDisplayFilter.FILTER_URL);
+        sb.append("/alias/");
         sb.append(alias);
         return sb.toString();
     }

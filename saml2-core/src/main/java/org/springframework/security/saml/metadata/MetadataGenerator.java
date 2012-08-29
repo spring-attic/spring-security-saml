@@ -243,14 +243,14 @@ public class MetadataGenerator {
 
     }
 
-    protected Extensions buildExtensions(String entityBaseURL, String entityURL) {
+    protected Extensions buildExtensions(String entityBaseURL, String entityAlias) {
 
         boolean include = false;
         Extensions extensions = new ExtensionsBuilder().buildObject();
 
         // Add discovery
         if (isIncludeDiscovery()) {
-            DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityURL);
+            DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityAlias);
             extensions.getUnknownXMLObjects().add(discoveryService);
             include = true;
         }

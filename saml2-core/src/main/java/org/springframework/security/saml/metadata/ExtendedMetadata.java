@@ -39,18 +39,19 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String alias;
 
     /**
-     * When true IDP discovery will be invoked before SSO.
+     * When true IDP discovery will be invoked before SSO. Only valid for local entities.
      */
     private boolean idpDiscoveryEnabled = false;
 
     /**
      * URL of the IDP Discovery service user should be redirected to upon request to determine which IDP to use.
-     * Value can override setting in the metadata.
+     * Value can override settings in the local SP metadata. Only valid for local entities.
      */
     private String idpDiscoveryURL;
 
     /**
-     * Indicates whether Enhanced Client/Proxy profile should be used for requests which support it.
+     * Indicates whether Enhanced Client/Proxy profile should be used for requests which support it. Only valid for
+     * local entities.
      */
     private boolean ecpEnabled = false;
 

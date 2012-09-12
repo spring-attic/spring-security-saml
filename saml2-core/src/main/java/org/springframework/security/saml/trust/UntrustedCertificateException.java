@@ -15,8 +15,8 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.springframework.security.core.codec.Base64;
-import org.springframework.security.core.codec.Hex;
+import org.springframework.security.crypto.codec.Base64;
+import org.springframework.security.crypto.codec.Hex;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

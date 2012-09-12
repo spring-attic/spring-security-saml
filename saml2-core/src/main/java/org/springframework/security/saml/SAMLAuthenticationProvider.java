@@ -40,10 +40,7 @@ import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.util.Assert;
 
 import javax.servlet.ServletException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
@@ -175,7 +172,9 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      */
     protected Collection<GrantedAuthority> getEntitlements(SAMLCredential credential, Object userDetail) {
         if (userDetail instanceof UserDetails) {
-            return ((UserDetails) userDetail).getAuthorities();
+            List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+            authorities.addAll(((UserDetails) userDetail).getAuthorities());
+            return authorities;
         } else {
             return Collections.emptyList();
         }

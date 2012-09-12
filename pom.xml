@@ -82,11 +82,17 @@
 
     <repositories>
         <repository>
-            <id>sibboleth</id>
-            <name>Sibboleth</name>
-            <url>https://shibboleth.net/nexus/content/groups/public/</url>
+            <id>shibboleth</id>
+            <name>Shibboleth</name>
+            <url>https://build.shibboleth.net/nexus/content/groups/public/</url>
             <layout>default</layout>
-        </repository>        
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <releases>
                 <enabled>false</enabled>

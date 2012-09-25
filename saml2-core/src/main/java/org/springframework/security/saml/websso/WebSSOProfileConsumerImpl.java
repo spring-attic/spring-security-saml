@@ -54,6 +54,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
     private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerImpl.class);
 
+    private boolean validateResponseAgainstRequest = true;
+
     public WebSSOProfileConsumerImpl() {
     }
 
@@ -121,7 +123,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Verify response to field if present, set request if correct
-        if (response.getInResponseTo() != null) {
+        if (validateResponseAgainstRequest && response.getInResponseTo() != null) {
             XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
@@ -586,6 +588,24 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         }
 
+    }
+
+    /**
+     * Whether or not to validate the response 'in-response-to' data against the original request. Defaults to true.
+     * If true, session state will be used to store the original requset data. If false, session state can be avoided,
+     * but replay attacks and DoS attacks should be taken into consideration.
+     */
+    public boolean getValidateResponseAgainstRequest() {
+        return validateResponseAgainstRequest;
+    }
+
+    /**
+     * Sets whether or not to validate the response 'in-response-to' data against the original request. Defaults to true.
+     * If true, session state will be used to store the original requset data. If false, session state can be avoided,
+     * but replay attacks and DoS attacks should be taken into consideration.
+     */
+    public void setValidateResponseAgainstRequest(boolean validate) {
+        this.validateResponseAgainstRequest = validate;
     }
 
     /**

@@ -198,7 +198,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected void initializeSSO(SAMLMessageContext context, AuthenticationException e) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
         HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
-        SAMLMessageStorage storage = new HttpSessionStorage(request);
+        SAMLMessageStorage storage = newHttpSessionStorage(request);
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         // Determine the assertionConsumerService to be used
@@ -221,6 +221,13 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         webSSOprofile.sendAuthenticationRequest(context, options, storage);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
 
+    }
+
+    /**
+     * Create a new HttpSessionStorage object, or <code>null<code> if no HTTP session should be used.
+     */
+    protected HttpSessionStorage newHttpSessionStorage(HttpServletRequest request) {
+        return new HttpSessionStorage(request);
     }
 
     /**

@@ -51,6 +51,8 @@ import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.storage.HttpSessionStorageFactory;
+import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
 import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.util.Assert;
@@ -85,6 +87,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected MetadataManager metadata;
     protected MetadataCredentialResolver metadataResolver;
     protected PKIXInformationResolver pkixResolver;
+    protected SAMLMessageStorageFactory storageFactory = new HttpSessionStorageFactory();
 
     /**
      * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
@@ -215,6 +218,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         context.setMetadataProvider(metadata);
         context.setInboundMessageTransport(inTransport);
         context.setOutboundMessageTransport(outTransport);
+
+        context.setMessageStorage(storageFactory.getMessageStorage(request));
 
     }
 
@@ -452,6 +457,17 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
+     * Implementation of the SAML message storage factory providing custom mechanism for storage
+     * of SAML messages such as http session, cookies or no storage at all.
+     *
+     * @param storageFactory storage factory
+     */
+    @Autowired(required = false)
+    public void setStorageFactory(SAMLMessageStorageFactory storageFactory) {
+        this.storageFactory = storageFactory;
+    }
+
+    /**
      * Verifies that required entities were autowired or set and initializes resolvers used to construct trust engines.
      *
      * @throws javax.servlet.ServletException
@@ -460,6 +476,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         Assert.notNull(keyManager, "Key manager must be set");
         Assert.notNull(metadata, "Metadata must be set");
+        Assert.notNull(storageFactory, "MessageStorageFactory must be set");
 
         metadataResolver = new MetadataCredentialResolver(metadata, keyManager);
         metadataResolver.setMeetAllCriteria(false);

@@ -33,8 +33,6 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.metadata.MetadataManager;
-import org.springframework.security.saml.storage.HttpSessionStorage;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -178,11 +176,10 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected void initializeECP(SAMLMessageContext context, AuthenticationException e) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
         HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
-        SAMLMessageStorage storage = new HttpSessionStorage(request);
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         logger.debug("Processing SSO using ECP profile");
-        webSSOprofileECP.sendAuthenticationRequest(context, options, storage);
+        webSSOprofileECP.sendAuthenticationRequest(context, options);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
 
     }
@@ -204,7 +201,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     protected void initializeSSO(SAMLMessageContext context, AuthenticationException e) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
         HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
-        SAMLMessageStorage storage = new HttpSessionStorage(request);
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         // Determine the assertionConsumerService to be used
@@ -216,7 +212,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                 logger.warn("WebSSO HoK profile was specified to be used, but profile is not configured in the EntryPoint, HoK will be skipped");
             } else {
                 logger.debug("Processing SSO using WebSSO HolderOfKey profile");
-                webSSOprofileHoK.sendAuthenticationRequest(context, options, storage);
+                webSSOprofileHoK.sendAuthenticationRequest(context, options);
                 samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
                 return;
             }
@@ -224,7 +220,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
         // Ordinary WebSSO
         logger.debug("Processing SSO using WebSSO profile");
-        webSSOprofile.sendAuthenticationRequest(context, options, storage);
+        webSSOprofile.sendAuthenticationRequest(context, options);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
 
     }

@@ -24,7 +24,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
-import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.FilterInvocation;
@@ -135,8 +134,7 @@ public class SAMLLogoutFilter extends LogoutFilter {
                     // Notify session participants using SAML Single Logout profile
                     SAMLMessageContext context = contextProvider.getLocalEntity(request, response, (SAMLCredential) auth.getCredentials());
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
-                    HttpSessionStorage storage = new HttpSessionStorage(request);
-                    profile.sendLogoutRequest(context, credential, storage);
+                    profile.sendLogoutRequest(context, credential);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
                 } else {

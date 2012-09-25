@@ -35,15 +35,14 @@ public interface SingleLogoutProfile {
      * Call to the method must ensure that LogoutRequest SAML message is sent to the IDP requesting global
      * logout of all known sessions.
      *
+     *
      * @param context processing context
      * @param credential     credential of the currently logged user
-     * @param messageStorage storage of sent message
-     *
      * @throws SAMLException             in case logout request can't be created
      * @throws MetadataProviderException in case idp metadata can't be resolved
      * @throws MessageEncodingException  in case message can't be sent using given binding
      */
-    void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
     /**
      * Implementer must ensure that the incoming LogoutRequest stored in the context is verified and return true if
@@ -65,14 +64,13 @@ public interface SingleLogoutProfile {
      * message is invalid exception should be raised, although this doesn't mean any problem to the processing,
      * as logout has already been executed.
      *
-     * @param context        context containing processed SAML message
-     * @param messageStorage cached previously sent messages
      *
+     * @param context        context containing processed SAML message
      * @throws SAMLException       in case the received SAML message is malformed or invalid
      * @throws org.opensaml.xml.security.SecurityException
      *                             in case the signature of the message is not trusted
      * @throws ValidationException in case the signature of the message is invalid
      */
-    void processLogoutResponse(SAMLMessageContext context, SAMLMessageStorage messageStorage) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;
+    void processLogoutResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;
 
 }

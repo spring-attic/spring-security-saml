@@ -29,7 +29,6 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
-import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -136,8 +135,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
             if (context.getInboundSAMLMessage() instanceof LogoutResponse) {
 
                 try {
-                    HttpSessionStorage storage = new HttpSessionStorage(request);
-                    logoutProfile.processLogoutResponse(context, storage);
+                    logoutProfile.processLogoutResponse(context);
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
                 } catch (Exception e) {
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.FAILURE, context);

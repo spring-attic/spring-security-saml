@@ -78,11 +78,11 @@ public class HttpSessionStorage implements SAMLMessageStorage {
      * Stores a request message into the repository. RequestAbstractType must have an ID
      * set. Any previous message with the same ID will be overwritten.
      *
-     * @param id      ID of message
+     * @param messageId      ID of message
      * @param message message to be stored
      */
-    public void storeMessage(String id, XMLObject message) {
-        messages.put(id, new SAMLObject<XMLObject>(message));
+    public void storeMessage(String messageId, XMLObject message) {
+        messages.put(messageId, new SAMLObject<XMLObject>(message));
     }
 
     /**

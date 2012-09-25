@@ -21,7 +21,6 @@ import org.opensaml.Configuration;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.core.impl.AuthnContextClassRefImpl;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.springframework.context.ApplicationContext;
@@ -35,12 +34,10 @@ import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.util.SAMLUtil;
 
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 
 import static org.easymock.EasyMock.*;
 
@@ -98,7 +95,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
     @Test(expected = SAMLException.class)
     public void testMissingResponse() throws Exception {
         messageContext.setInboundMessage(null);
-        profile.processAuthenticationResponse(messageContext, storage);
+        profile.processAuthenticationResponse(messageContext);
     }
 
     /**
@@ -111,7 +108,7 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         SAMLObjectBuilder<AuthnRequest> builder = (SAMLObjectBuilder<AuthnRequest>) builderFactory.getBuilder(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest authnRequest = builder.buildObject();
         messageContext.setInboundMessage(authnRequest);
-        profile.processAuthenticationResponse(messageContext, storage);
+        profile.processAuthenticationResponse(messageContext);
     }
 
     /**

@@ -103,6 +103,9 @@
     <!-- Provider of default SAML Context -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
+    <!-- Factory which disables message storage capabilities -->
+    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+
     <bean id="samlAuthenticationProvider" class="org.springframework.security.saml.SAMLAuthenticationProvider">
     </bean>
 

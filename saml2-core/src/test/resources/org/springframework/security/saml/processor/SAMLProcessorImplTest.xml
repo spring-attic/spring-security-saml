@@ -81,6 +81,9 @@
     <!-- Provider of default SAML Context -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
 
+    <!-- Factory which disables message storage capabilities -->
+    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+
     <!-- XML parser pool needed for OpenSAML parsing -->
     <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
 

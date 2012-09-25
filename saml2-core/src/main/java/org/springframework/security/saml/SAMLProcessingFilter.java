@@ -26,7 +26,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.processor.SAMLProcessor;
-import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -81,8 +80,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             context.setCommunicationProfileId(getProfileName());
             context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
 
-            HttpSessionStorage storage = new HttpSessionStorage(request);
-            SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
+            SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {

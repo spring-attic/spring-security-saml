@@ -75,6 +75,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * The input context object must have set the properties related to the returned Response, which is validated
      * and in case no errors are found the SAMLCredential is returned.
      *
+     *
      * @param context context including response object
      * @return SAMLCredential with information about user
      * @throws SAMLException       in case the response is invalid
@@ -82,7 +83,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *                             in the signature on response can't be verified
      * @throws ValidationException in case the response structure is not conforming to the standard
      */
-    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
 
         AuthnRequest request = null;
         SAMLObject message = context.getInboundSAMLMessage();
@@ -121,8 +122,9 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Verify response to field if present, set request if correct
-        if (response.getInResponseTo() != null) {
-            XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
+        SAMLMessageStorage messageStorage = context.getMessageStorage();
+        if (messageStorage != null && response.getInResponseTo() != null) {
+            XMLObject xmlObject = messageStorage.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
                 throw new SAMLException("InResponseToField doesn't correspond to sent message");

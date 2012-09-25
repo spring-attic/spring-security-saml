@@ -25,7 +25,6 @@ import org.opensaml.xml.parse.XMLParserException;
 import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.storage.HttpSessionStorage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -39,7 +38,7 @@ import java.io.Serializable;
  */
 public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
 
-    protected final static Logger log = LoggerFactory.getLogger(HttpSessionStorage.class);
+    protected final static Logger log = LoggerFactory.getLogger(SAMLBase.class);
 
     /**
      * Version of the value stored within object transferable during serialization.

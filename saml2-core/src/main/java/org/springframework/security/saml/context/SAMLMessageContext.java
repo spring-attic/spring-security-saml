@@ -23,6 +23,7 @@ import org.opensaml.xml.security.trust.TrustEngine;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
  * Message context with Spring Extension SAML module specific values.
@@ -42,6 +43,7 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private ExtendedMetadata peerExtendedMetadata;
     private boolean peerUserSelected;
     private String inboundSAMLBinding;
+    private SAMLMessageStorage messageStorage;
 
     /**
      * Extended metadata of the local entity
@@ -192,4 +194,23 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     public void setPeerUserSelected(boolean peerUserSelected) {
         this.peerUserSelected = peerUserSelected;
     }
+
+    /**
+     * Storage messages sent during processing of this context.
+     *
+     * @return message storage, null if sent messages cannot be stored
+     */
+    public SAMLMessageStorage getMessageStorage() {
+        return messageStorage;
+    }
+
+    /**
+     * Sets message storage for this context.
+     *
+     * @param messageStorage message storage or null if storing of messages isn't supported
+     */
+    public void setMessageStorage(SAMLMessageStorage messageStorage) {
+        this.messageStorage = messageStorage;
+    }
+
 }

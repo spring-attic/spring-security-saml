@@ -112,6 +112,9 @@
     <!-- Context provider -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
+    <!-- Factory which disables message storage capabilities -->
+    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+
     <!-- Class loading incoming SAML messages from httpRequest stream -->
     <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
         <constructor-arg ref="bindings"/>

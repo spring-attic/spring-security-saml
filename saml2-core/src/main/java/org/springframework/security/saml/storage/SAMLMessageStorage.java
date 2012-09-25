@@ -16,8 +16,6 @@ package org.springframework.security.saml.storage;
 
 import org.opensaml.xml.XMLObject;
 
-import java.util.Set;
-
 /**
  * Implementations serve as data stores for sent/received SAML messages. Potential implementations could
  * be using for example central repository common for all users within the application or HttpSession.
@@ -31,24 +29,17 @@ public interface SAMLMessageStorage {
     /**
      * Stores given message in the data store. Request must have the ID filled.
      *
-     * @param id      key under which will the message be stored
-     * @param message message to store
+     * @param messageId key under which will the message be stored
+     * @param message   message to store
      */
-    void storeMessage(String id, XMLObject message);
+    void storeMessage(String messageId, XMLObject message);
 
     /**
      * Retrieves message stored under given ID.
      *
      * @param messageID message ID to look up
-     *
      * @return request or null if not found
      */
     XMLObject retrieveMessage(String messageID);
 
-    /**
-     * Returns set of all stored messageIDs
-     *
-     * @return set of message ids
-     */
-    Set<String> getAllMessages();
 }

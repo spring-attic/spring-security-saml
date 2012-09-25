@@ -24,7 +24,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -129,6 +128,10 @@ public class SAMLEntryPointTest {
     @Test
     public void testIDPSelection_defaultURL() throws Exception {
 
+        expect(request.getSession(true)).andReturn(session);
+        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
+        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
+        session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getContextPath()).andReturn("/app");
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn(null);
@@ -295,7 +298,7 @@ public class SAMLEntryPointTest {
         expect(request.getHeader("Accept")).andReturn("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
 
-        ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull(), (SAMLMessageStorage) notNull());
+        ssoProfile.sendAuthenticationRequest((SAMLMessageContext) notNull(), (WebSSOProfileOptions) notNull());
 
         replayMock();
         entryPoint.commence(request, response, null);

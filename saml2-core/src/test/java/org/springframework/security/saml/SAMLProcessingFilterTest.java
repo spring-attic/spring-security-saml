@@ -146,8 +146,6 @@ public class
             }
         });
         expect(manager.authenticate((Authentication) notNull())).andReturn(token);
-        expect(request.getSession(true)).andReturn(session);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(new Hashtable());
 
         replay(manager);
         replayMock();

@@ -36,14 +36,13 @@ public class SAMLAuthenticationTokenTest {
     public void initialize() {
         context = new SAMLMessageContext();
         storage = createMock(SAMLMessageStorage.class);
-        token = new SAMLAuthenticationToken(context, storage);
+        token = new SAMLAuthenticationToken(context);
     }
 
     @Test
     public void testInitial() {
         assertEquals(context, token.getCredentials());
         assertNull(token.getPrincipal());
-        assertEquals(storage, token.getMessageStore());
     }
 
     /**
@@ -59,14 +58,6 @@ public class SAMLAuthenticationTokenTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testCreateWithoutContext() {
-        token = new SAMLAuthenticationToken(null, createMock(SAMLMessageStorage.class));
-    }
-
-    /**
-     * Verifies that the token can't be created without context.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateWithoutStorage() {
-        token = new SAMLAuthenticationToken(new SAMLMessageContext(), null);
+        token = new SAMLAuthenticationToken(null);
     }
 }

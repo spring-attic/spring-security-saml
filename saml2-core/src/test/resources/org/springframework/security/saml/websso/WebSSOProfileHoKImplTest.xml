@@ -25,6 +25,9 @@
 
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
 
+    <!-- Factory which disables message storage capabilities -->
+    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+
     <!-- Entry point to initialize authentication -->
     <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileHoKImpl" depends-on="bootstrap">
     </bean>

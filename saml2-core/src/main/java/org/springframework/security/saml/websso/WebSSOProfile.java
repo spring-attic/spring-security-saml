@@ -25,6 +25,6 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
  */
 public interface WebSSOProfile {
 
-    void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
 }

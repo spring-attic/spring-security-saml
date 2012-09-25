@@ -61,14 +61,14 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * Initializes SSO by creating AuthnRequest assertion and sending it to the IDP using the default binding.
      * Default IDP is used to send the request.
      *
+     *
      * @param options        values specified by caller to customize format of sent request
-     * @param messageStorage object capable of storing and retreiving SAML messages
      * @throws SAMLException             error initializing SSO
      * @throws SAMLRuntimeException in case context doesn't contain required entities or contains invalid data
      * @throws MetadataProviderException error retrieving needed metadata
      * @throws MessageEncodingException  error forming SAML message
      */
-    public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         // Verify we deal with a local SP
         if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
@@ -100,7 +100,11 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
         sendMessage(context, sign);
-        messageStorage.storeMessage(authRequest.getID(), authRequest);
+
+        SAMLMessageStorage messageStorage = context.getMessageStorage();
+        if (messageStorage != null) {
+            messageStorage.storeMessage(authRequest.getID(), authRequest);
+        }
 
     }
 

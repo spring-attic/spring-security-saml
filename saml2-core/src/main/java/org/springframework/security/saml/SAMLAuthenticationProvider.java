@@ -34,7 +34,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.util.Assert;
@@ -74,15 +73,14 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
         }
 
         SAMLAuthenticationToken token = (SAMLAuthenticationToken) authentication;
-        SAMLMessageStorage store = token.getMessageStore();
         SAMLMessageContext context = token.getCredentials();
         SAMLCredential credential;
 
         try {
             if (SAMLConstants.SAML2_WEBSSO_PROFILE_URI.equals(context.getCommunicationProfileId())) {
-                credential = consumer.processAuthenticationResponse(context, store);
+                credential = consumer.processAuthenticationResponse(context);
             } else if (SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(context.getCommunicationProfileId())) {
-                credential = hokConsumer.processAuthenticationResponse(context, store);
+                credential = hokConsumer.processAuthenticationResponse(context);
             } else {
                 throw new SAMLException("Unsupported profile encountered in the context " + context.getCommunicationProfileId());
             }

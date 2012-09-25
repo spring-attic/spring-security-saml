@@ -16,7 +16,6 @@ package org.springframework.security.saml.websso;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
@@ -29,9 +28,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.security.saml.storage.TestStorageFactory;
 import org.springframework.security.saml.util.SAMLUtil;
 
 import javax.servlet.ServletOutputStream;
@@ -77,8 +78,8 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         };
 
         storage = createMock(SAMLMessageStorage.class);
-
-        contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
+        contextProvider = context.getBean("contextProvider", SAMLContextProviderImpl.class);
+        ((SAMLContextProviderImpl) contextProvider).setStorageFactory(new TestStorageFactory(storage));
 
         expect(request.getContextPath()).andReturn("/");
         replyMock();
@@ -105,7 +106,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         samlContext.setLocalEntityRole(null);
         samlContext.setLocalEntityRoleMetadata(null);
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -123,7 +124,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         }
         samlContext = contextProvider.getLocalAndPeerEntity(request, response);
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -137,7 +138,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -155,7 +156,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
 
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
 
         AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         assertNotNull(authnRequest.getID());
@@ -181,7 +182,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setBinding("invalid");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -196,7 +197,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setAssertionConsumerIndex(0);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -210,7 +211,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setAssertionConsumerIndex(20);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -228,7 +229,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         samlContext.setPeerEntityRoleMetadata(metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         options.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -245,7 +246,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         samlContext.setPeerEntityMetadata(metadata.getEntityDescriptor(idpId));
         samlContext.setPeerEntityRoleMetadata(metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }
 
@@ -259,7 +260,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setPassive(true);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(false, authnRequest.isForceAuthn());
@@ -277,7 +278,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setForceAuthN(true);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(true, authnRequest.isForceAuthn());
@@ -295,7 +296,7 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         options.setProxyCount(null);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
-        profile.sendAuthenticationRequest(samlContext, options, storage);
+        profile.sendAuthenticationRequest(samlContext, options);
         AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
         verifyMock();
         assertEquals(false, authnRequest.isForceAuthn());

@@ -59,7 +59,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         return SAMLConstants.SAML2_SLO_PROFILE_URI;
     }
 
-    public void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential, SAMLMessageStorage messageStorage) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         // If no user is logged in we do not initialize the protocol.
         if (credential == null) {
@@ -84,7 +84,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
         sendMessage(context, signMessage);
-        messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
+
+        SAMLMessageStorage messageStorage = context.getMessageStorage();
+        if (messageStorage != null) {
+            messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
+        }
 
     }
 
@@ -300,7 +304,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         return id;
     }
 
-    public void processLogoutResponse(SAMLMessageContext context, SAMLMessageStorage protocolCache) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+    public void processLogoutResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
 
         SAMLObject message = context.getInboundSAMLMessage();
 
@@ -326,8 +330,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify response to field if present, set request if correct
         // The inResponseTo field is optional, SAML 2.0 Core, 1542
-        if (response.getInResponseTo() != null) {
-            XMLObject xmlObject = protocolCache.retrieveMessage(response.getInResponseTo());
+        SAMLMessageStorage messageStorage = context.getMessageStorage();
+        if (messageStorage != null && response.getInResponseTo() != null) {
+            XMLObject xmlObject = messageStorage.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
                 log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
                 throw new SAMLException("Error validating SAML response");

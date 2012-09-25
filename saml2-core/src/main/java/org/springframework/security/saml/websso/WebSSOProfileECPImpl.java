@@ -47,7 +47,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
     }
 
     @Override
-    public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options, SAMLMessageStorage messageStorage)
+    public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options)
             throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
@@ -65,7 +65,11 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
 
         sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
-        messageStorage.storeMessage(authRequest.getID(), authRequest);
+
+        SAMLMessageStorage messageStorage = context.getMessageStorage();
+        if (messageStorage != null) {
+            messageStorage.storeMessage(authRequest.getID(), authRequest);
+        }
 
     }
 

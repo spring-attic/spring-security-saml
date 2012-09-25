@@ -16,7 +16,7 @@ package org.springframework.security.saml;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.util.Assert;
 
 /**
  * SAML Token is used to pass SAMLContext object through to the SAML Authentication provider.
@@ -27,8 +27,6 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = 1L;
 
-    private SAMLMessageStorage messageStore;
-
     /**
      * SAML context with content to verify
      */
@@ -38,18 +36,16 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      * Default constructor initializing the context
      *
      * @param credentials  SAML context object created after decoding
-     * @param messageStore SAML message storage to be used during token evaluation
      */
-    public SAMLAuthenticationToken(SAMLMessageContext credentials, SAMLMessageStorage messageStore) {
+    public SAMLAuthenticationToken(SAMLMessageContext credentials) {
 
         super(null);
 
-        if (credentials == null || messageStore == null) {
-            throw new IllegalArgumentException("SAMLAuthenticationToken requires both credentials and messageStore parameters to be set");
-        }
+        Assert.notNull(credentials, "SAMLAuthenticationToken requires the credentials parameter to be set");
+        Assert.notNull(credentials, "SAMLAuthenticationToken requires the message storage parameter to be set");
 
         this.credentials = credentials;
-        this.messageStore = messageStore;
+
         setAuthenticated(false);
 
     }
@@ -61,13 +57,6 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
      */
     public SAMLMessageContext getCredentials() {
         return this.credentials;
-    }
-
-    /**
-     * @return store used to retrieve previously sent SAML request (if any was sent)
-     */
-    public SAMLMessageStorage getMessageStore() {
-        return messageStore;
     }
 
     /**

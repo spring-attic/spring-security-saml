@@ -50,6 +50,12 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String idpDiscoveryURL;
 
     /**
+     * URL where should the discovery service send back response to our discovery request. Only valid for local
+     * entities.
+     */
+    private String idpDiscoveryResponseURL;
+
+    /**
      * Indicates whether Enhanced Client/Proxy profile should be used for requests which support it. Only valid for
      * local entities.
      */
@@ -342,10 +348,33 @@ public class ExtendedMetadata implements Serializable, Cloneable {
         return idpDiscoveryURL;
     }
 
+    /**
+     * URL to invoke while initializing IDP Discovery protocol for the local SP.
+     *
+     * @param idpDiscoveryURL IDP discovery URL
+     */
     public void setIdpDiscoveryURL(String idpDiscoveryURL) {
         this.idpDiscoveryURL = idpDiscoveryURL;
     }
 
+    public String getIdpDiscoveryResponseURL() {
+        return idpDiscoveryResponseURL;
+    }
+
+    /**
+     * When set our local IDP Discovery implementation will send response back to Service Provider on this address.
+     * Value should be set in situations when public address of the SP differs from values seen by the application sever.
+     *
+     * @param idpDiscoveryResponseURL discovery response URL
+     */
+    public void setIdpDiscoveryResponseURL(String idpDiscoveryResponseURL) {
+        this.idpDiscoveryResponseURL = idpDiscoveryResponseURL;
+    }
+
+    /**
+     * When true IDP discovery will be invoked before initializing WebSSO, unless IDP is already specified inside
+     * SAMLContext.
+     */
     public boolean isIdpDiscoveryEnabled() {
         return idpDiscoveryEnabled;
     }

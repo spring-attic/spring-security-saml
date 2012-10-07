@@ -193,8 +193,7 @@ public class MetadataController {
         generator.setNameID(Arrays.asList(metadata.getNameID()));
 
         EntityDescriptor descriptor = generator.generateMetadata();
-        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
-        generator.generateExtendedMetadata(extendedMetadata);
+        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
         extendedMetadata.setSecurityProfile(metadata.getSecurityProfile());
         extendedMetadata.setSslSecurityProfile(metadata.getSslSecurityProfile());
         extendedMetadata.setRequireLogoutRequestSigned(metadata.isRequireLogoutRequestSigned());
@@ -351,8 +350,12 @@ public class MetadataController {
       }
       sb.append("           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
-                "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n" +
-                "        </bean>\n" +
+                "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n");
+        if (metadata.isIdpDiscoveryEnabled()) {
+                sb.append("           <property name=\"idpDiscoveryURL\" value=\"").append(metadata.getIdpDiscoveryURL()).append("\"/>\n" +
+                "           <property name=\"idpDiscoveryResponseURL\" value=\"").append(metadata.getIdpDiscoveryResponseURL()).append("\"/>\n");
+        }
+                sb.append("        </bean>\n" +
                 "    </constructor-arg>\n" +
                 "</bean>");
         return sb.toString();

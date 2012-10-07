@@ -290,6 +290,11 @@ public class SAMLDiscovery extends GenericFilterBean {
      */
     protected String getDefaultReturnURL(RoleDescriptor descriptor, ExtendedMetadata extendedMetadata) {
 
+        // Response address from extended metadata
+        if (extendedMetadata.isLocal() && extendedMetadata.getIdpDiscoveryResponseURL() != null) {
+            return extendedMetadata.getIdpDiscoveryResponseURL();
+        }
+
         // Load from metadata extensions
         if (descriptor.getExtensions() != null) {
             List<XMLObject> discoveryResponseElements = descriptor.getExtensions().getUnknownXMLObjects(DiscoveryResponse.DEFAULT_ELEMENT_NAME);

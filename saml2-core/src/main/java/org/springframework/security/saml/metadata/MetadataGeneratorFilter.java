@@ -122,8 +122,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
                         }
 
                         EntityDescriptor descriptor = generator.generateMetadata();
-                        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
-                        generator.generateExtendedMetadata(extendedMetadata);
+                        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
 
                         log.info("Created default metadata for system with entityID: " + descriptor.getEntityID());
                         MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);

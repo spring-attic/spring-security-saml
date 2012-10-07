@@ -200,7 +200,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     protected void initializeSSO(SAMLMessageContext context, AuthenticationException e) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
-        HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
+        // Generate options for the current SSO request
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         // Determine the assertionConsumerService to be used

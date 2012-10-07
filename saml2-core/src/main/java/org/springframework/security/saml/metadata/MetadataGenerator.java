@@ -82,6 +82,8 @@ public class MetadataGenerator {
     private boolean includeDiscovery = true;
     private String customDiscoveryURL;
 
+    private ExtendedMetadata extendedMetadata;
+
     private Collection<String> nameID = null;
     public static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
             NameIDType.TRANSIENT,
@@ -100,6 +102,7 @@ public class MetadataGenerator {
     protected SAMLWebSSOHoKProcessingFilter samlWebSSOHoKFilter;
     protected SAMLLogoutProcessingFilter samlLogoutProcessingFilter;
     protected SAMLEntryPoint samlEntryPoint;
+    protected SAMLDiscovery samlDiscovery;
 
     /**
      * Class logger.
@@ -111,38 +114,6 @@ public class MetadataGenerator {
      */
     public MetadataGenerator() {
         this.builderFactory = Configuration.getBuilderFactory();
-    }
-
-    protected KeyInfo getServerKeyInfo(String alias) {
-        Credential serverCredential = keyManager.getCredential(alias);
-        if (serverCredential == null) {
-            throw new RuntimeException("Key for alias " + alias + " not found");
-        } else if (serverCredential.getPrivateKey() == null) {
-            throw new RuntimeException("Key with alias " + alias + " doesn't have a private key");
-        }
-        return generateKeyInfoForCredential(serverCredential);
-    }
-
-    protected KeyInfo generateKeyInfoForCredential(Credential credential) {
-        try {
-            NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            SecurityHelper.getKeyInfoGenerator(credential, null, getKeyInfoGeneratorName());
-            KeyInfoGeneratorFactory factory = manager.getDefaultManager().getFactory(credential);
-            return factory.newInstance().generate(credential);
-        } catch (org.opensaml.xml.security.SecurityException e) {
-            log.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
-            throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
-        }
-    }
-
-    public void generateExtendedMetadata(ExtendedMetadata metadata) {
-        metadata.setEcpEnabled(false);
-        metadata.setIdpDiscoveryEnabled(isIncludeDiscovery());
-        metadata.setEncryptionKey(encryptionKey);
-        metadata.setSigningKey(signingKey);
-        metadata.setAlias(entityAlias);
-        metadata.setTlsKey(tlsKey);
-        metadata.setLocal(true);
     }
 
     public EntityDescriptor generateMetadata() {
@@ -186,6 +157,73 @@ public class MetadataGenerator {
 
         return descriptor;
 
+    }
+
+    protected KeyInfo getServerKeyInfo(String alias) {
+        Credential serverCredential = keyManager.getCredential(alias);
+        if (serverCredential == null) {
+            throw new RuntimeException("Key for alias " + alias + " not found");
+        } else if (serverCredential.getPrivateKey() == null) {
+            throw new RuntimeException("Key with alias " + alias + " doesn't have a private key");
+        }
+        return generateKeyInfoForCredential(serverCredential);
+    }
+
+    /**
+     * Generates extended metadata. Default extendedMetadata object is cloned if present and used for defaults.
+     * The following properties are always overriden from the properties of this bean: signingKey, encryptionKey, entityAlias and tlsKey.
+     * Property local of the generated metadata is always set to true.
+     *
+     * @return generated extended metadata
+     */
+    public ExtendedMetadata generateExtendedMetadata() {
+
+        ExtendedMetadata metadata;
+
+        if (extendedMetadata != null) {
+            metadata = extendedMetadata.clone();
+        } else {
+            metadata = new ExtendedMetadata();
+        }
+
+        metadata.setIdpDiscoveryEnabled(isIncludeDiscovery());
+
+        if (isIncludeDiscovery()) {
+            if (metadata.getIdpDiscoveryURL() == null) {
+                metadata.setIdpDiscoveryURL(getServerURL(entityBaseURL, entityAlias, getSAMLDiscoveryPath()));
+            }
+            if (metadata.getIdpDiscoveryResponseURL() == null) {
+                if (customDiscoveryURL != null) {
+                    metadata.setIdpDiscoveryURL(customDiscoveryURL);
+                } else {
+                    metadata.setIdpDiscoveryResponseURL(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath()) + "?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true");
+                }
+            }
+        } else {
+            metadata.setIdpDiscoveryURL(null);
+            metadata.setIdpDiscoveryResponseURL(null);
+        }
+
+        metadata.setEncryptionKey(encryptionKey);
+        metadata.setSigningKey(signingKey);
+        metadata.setAlias(entityAlias);
+        metadata.setTlsKey(tlsKey);
+        metadata.setLocal(true);
+
+        return metadata;
+
+    }
+
+    protected KeyInfo generateKeyInfoForCredential(Credential credential) {
+        try {
+            NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
+            SecurityHelper.getKeyInfoGenerator(credential, null, getKeyInfoGeneratorName());
+            KeyInfoGeneratorFactory factory = manager.getDefaultManager().getFactory(credential);
+            return factory.newInstance().generate(credential);
+        } catch (org.opensaml.xml.security.SecurityException e) {
+            log.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
+            throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
+        }
     }
 
     protected SPSSODescriptor buildSPSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedNameID) {
@@ -441,6 +479,14 @@ public class MetadataGenerator {
         }
     }
 
+    private String getSAMLDiscoveryPath() {
+        if (samlDiscovery != null) {
+            return samlDiscovery.getFilterProcessesUrl();
+        } else {
+            return SAMLDiscovery.FILTER_URL;
+        }
+    }
+
     private String getSAMLLogoutFilterPath() {
         if (samlLogoutProcessingFilter != null) {
             return samlLogoutProcessingFilter.getFilterProcessesUrl();
@@ -645,9 +691,11 @@ public class MetadataGenerator {
     }
 
     /**
-     * When true discovery profile metadata pointing to the default SAMLEntryPoint will be generated.
+     * When true discovery profile metadata pointing to the default SAMLEntryPoint will be generated. System
+     * will also automatically generate discoveryRequest and discoveryResponse addresses in extended metadata unless
+     * these are already set.
      *
-     * @param includeDiscovery discovery
+     * @param includeDiscovery flag indicating whether IDP discovery should be enabled
      */
     public void setIncludeDiscovery(boolean includeDiscovery) {
         this.includeDiscovery = includeDiscovery;
@@ -657,6 +705,11 @@ public class MetadataGenerator {
         return assertionConsumerIndex;
     }
 
+    /**
+     * Generated assertion consumer service with the index equaling set value will be marked as default.
+     *
+     * @param assertionConsumerIndex assertion consumer index of service to mark as default
+     */
     public void setAssertionConsumerIndex(int assertionConsumerIndex) {
         this.assertionConsumerIndex = assertionConsumerIndex;
     }
@@ -665,7 +718,27 @@ public class MetadataGenerator {
         return customDiscoveryURL;
     }
 
+    /**
+     * Custom value of IDP Discovery response URL to be included in the SP metadata as extension.
+     *
+     * @param customDiscoveryURL custom discovery URL
+     */
     public void setCustomDiscoveryURL(String customDiscoveryURL) {
         this.customDiscoveryURL = customDiscoveryURL;
     }
+
+    public ExtendedMetadata getExtendedMetadata() {
+        return extendedMetadata;
+    }
+
+    /**
+     * Default value for generation of extended metadata. Value is cloned upon each request to generate
+     * new ExtendedMetadata object.
+     *
+     * @param extendedMetadata default extended metadata or null
+     */
+    public void setExtendedMetadata(ExtendedMetadata extendedMetadata) {
+        this.extendedMetadata = extendedMetadata;
+    }
+
 }

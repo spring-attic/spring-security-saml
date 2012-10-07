@@ -44,8 +44,8 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
 
         super(null);
 
-        if (credentials == null || messageStore == null) {
-            throw new IllegalArgumentException("SAMLAuthenticationToken requires both credentials and messageStore parameters to be set");
+        if (credentials == null) {
+            throw new IllegalArgumentException("SAMLAuthenticationToken requires the credentials parameter to be set");
         }
 
         this.credentials = credentials;

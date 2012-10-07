@@ -63,9 +63,9 @@ public class SAMLAuthenticationTokenTest {
     }
 
     /**
-     * Verifies that the token can't be created without context.
+     * Verifies that the token can be created without context.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateWithoutStorage() {
         token = new SAMLAuthenticationToken(new SAMLMessageContext(), null);
     }

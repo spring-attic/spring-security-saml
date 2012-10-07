@@ -100,7 +100,9 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
         sendMessage(context, sign);
-        messageStorage.storeMessage(authRequest.getID(), authRequest);
+        
+        if (messageStorage != null)
+            messageStorage.storeMessage(authRequest.getID(), authRequest);
 
     }
 

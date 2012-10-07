@@ -81,7 +81,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             context.setCommunicationProfileId(getProfileName());
             context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
 
-            HttpSessionStorage storage = new HttpSessionStorage(request);
+            HttpSessionStorage storage = newHttpSessionStorage(request);
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context, storage);
             return getAuthenticationManager().authenticate(token);
 
@@ -95,6 +95,13 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
         }
 
+    }
+
+    /**
+     * Create a new HttpSessionStorage object, or <code>null<code> if no HTTP session should be used.
+     */
+    protected HttpSessionStorage newHttpSessionStorage(HttpServletRequest request) {
+        return new HttpSessionStorage(request);
     }
 
     /**

@@ -80,7 +80,7 @@ public class MetadataGeneratorTest {
         assertTrue(extendedMetadata.isLocal());
         assertTrue(extendedMetadata.isIdpDiscoveryEnabled());
         assertEquals("http://localhost:8080/saml/discovery/alias/testAlias", extendedMetadata.getIdpDiscoveryURL());
-        assertEquals("http://localhost:8080/saml/login/alias/testAlias", extendedMetadata.getIdpDiscoveryResponseURL());
+        assertEquals("http://localhost:8080/saml/login/alias/testAlias?disco=true", extendedMetadata.getIdpDiscoveryResponseURL());
 
         // Disabled discovery
         generator.setIncludeDiscovery(false);

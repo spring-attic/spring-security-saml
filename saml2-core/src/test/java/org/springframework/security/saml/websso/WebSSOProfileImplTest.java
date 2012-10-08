@@ -32,7 +32,7 @@ import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-import org.springframework.security.saml.storage.TestStorageFactory;
+import org.springframework.security.saml.storage.StorageFactoryTestImpl;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +79,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         storage = createMock(SAMLMessageStorage.class);
 
         contextProvider = context.getBean("contextProvider", SAMLContextProviderImpl.class);
-        ((SAMLContextProviderImpl) contextProvider).setStorageFactory(new TestStorageFactory(storage));
+        ((SAMLContextProviderImpl) contextProvider).setStorageFactory(new StorageFactoryTestImpl(storage));
 
         expect(request.getContextPath()).andReturn("/");
         replyMock();

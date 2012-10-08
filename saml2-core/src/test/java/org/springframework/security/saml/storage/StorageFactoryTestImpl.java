@@ -19,11 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Storage factory used for testing.
  */
-public class TestStorageFactory implements SAMLMessageStorageFactory {
+public class StorageFactoryTestImpl implements SAMLMessageStorageFactory {
 
     SAMLMessageStorage storage;
 
-    public TestStorageFactory(SAMLMessageStorage storage) {
+    public StorageFactoryTestImpl(SAMLMessageStorage storage) {
         this.storage = storage;
     }
 

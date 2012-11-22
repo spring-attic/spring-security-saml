@@ -71,7 +71,7 @@ public class SAMLDefaultLogger implements SAMLLogger {
                     sb.append(";").append(messageStr);
                 }
                 if (context.getOutboundSAMLMessage() != null) {
-                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getOutboundSAMLMessage()));
                     sb.append(";").append(messageStr);
                 }
             } catch (MessageEncodingException e1) {

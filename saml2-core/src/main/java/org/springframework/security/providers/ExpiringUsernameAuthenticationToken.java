@@ -74,5 +74,12 @@ public class ExpiringUsernameAuthenticationToken extends UsernamePasswordAuthent
     public Date getTokenExpiration() {
         return tokenExpiration;
     }
-}
 
+    /**
+     * SAML credentials can be kept without clearing.
+     */
+    @Override
+    public void eraseCredentials() {
+    }
+
+}

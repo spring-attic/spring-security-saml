@@ -193,7 +193,8 @@
         <section id="section-source">
             <title>Source code</title>
 
-            <para>Source code for the project is maintained on Github.</para>
+            <para>Source code for the project is maintained on <link
+                    xlink:href="https://github.com/SpringSource/spring-security-saml">Github</link>.</para>
         </section>
 
         <section id="section-license">
@@ -206,8 +207,12 @@
         <section id="section-support">
             <title>Support</title>
 
-            <para>Issue tracking for the module can be found at TODO Spring Security Extensions Jira. Feel free to submit bugs, patches and feature requests.</para>
-            <para>For community support please use TODO Spring Security forum. You can also contact me at vladimir.schafer at gmail.com.</para>
+            <para>Issue tracking for the module can be found at <link
+                    xlink:href="https://jira.springsource.org/browse/SES/component/10711">Spring Security Extensions Jira</link>. Feel free to
+                submit bugs, patches and feature requests.</para>
+            <para>For community support please use <link
+                    xlink:href="http://forum.springsource.org/forumdisplay.php?86-SAML">Spring Security forum</link>.
+                For additional support you can reach me at vladimir.schafer at gmail.com.</para>
         </section>
 
     </chapter>
@@ -228,7 +233,71 @@
     <chapter id="glossary">
         <title>Glossary</title>
         <para>
-            Glossary contains overview of terms used in the manual. TODO
+            <table id="glossary-table">
+                <title>Definitions of terms used within this manual.</title>
+                <tgroup cols="2">
+                    <colspec colname="_1" colwidth="0.4*" align="left"/>
+                    <colspec colname="_2" colwidth="1.0*" align="left"/>
+                    <thead>
+                        <row>
+                            <entry>Term</entry>
+                            <entry>Definition</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>Assertion</entry>
+                            <entry>A part of SAML message (an XML document) which provides facts about subject of the assertion
+                                (typically about the authenticated user). Assertions can contain information about authentication,
+                                associated attributes or authorization decisions.</entry>
+                        </row>
+                        <row>
+                            <entry>Artifact</entry>
+                            <entry>Identifier which can be used to retrieve a complete SAML message from identity or service provider
+                                using a back-channel binding.</entry>
+                        </row>
+                        <row>
+                            <entry>Binding</entry>
+                            <entry>Mechanism used to deliver SAML message. Bindings are divided to front-channel bindings which
+                                use web-browser of the user for message delivery (e.g. HTTP-POST or HTTP-Redirect) and back-channel bindings
+                                where identity provider and service provider communicate directly (e.g. using SOAP calls in Artifact binding).</entry>
+                        </row>
+                        <row>
+                            <entry>Discovery</entry>
+                            <entry>Mechanism used to determine which identity provider should be used to authenticate user currently
+                                interacting with the service provider.</entry>
+                        </row>
+                        <row>
+                            <entry>Metadata</entry>
+                            <entry>Document describing one or multiple identity and service providers. Metadata typically includes
+                                entity identifier, public keys, endopoint URLs, supported bindings and profiles, and other
+                                capabilities or requirements. Exchange of metadata between identity and service providers is
+                                typically the first step for establishment of federation.</entry>
+                        </row>
+                        <row>
+                            <entry>Profile</entry>
+                            <entry>Standardized combination of protocols, assertions, bindings and processing instructions used to
+                                achieve a particular use-case such as single sign-on, single logout, discovery, artifact resolution.</entry>
+                        </row>
+                        <row>
+                            <entry>Protocol</entry>
+                            <entry>Definition of format (schema) for SAML messages used to achieve particular functionality such as
+                                requesting authentication from IDP, performing single logout or requesting attributes from IDP.</entry>
+                        </row>
+                        <row>
+                            <entry>Identity provider (IDP)</entry>
+                            <entry>Entity which knows how to authenticate users and provides information
+                            about their identity to service providers/relaying parties using federation protocols.</entry>
+                        </row>
+                        <row>
+                            <entry>Service provider (SP)</entry>
+                            <entry>Your application which communicates with identity provider in order to obtain information
+                                about the user it interacts with. User information is provided in form of security assertions.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+
         </para>
     </chapter>
 
@@ -258,11 +327,17 @@
             <title>Pre-requisites</title>
 
             <para>Please make sure the following items are available before starting the installation:
-                <itemizedlist>
+                <itemizedlist spacing="compact">
                     <listitem>
                         <para>Supported application server or container</para>
+                    </listitem>
+                    <listitem>
                         <para>Spring Security SAML SP</para>
+                    </listitem>
+                    <listitem>
                         <para>Java 1.6+ SDK</para>
+                    </listitem>
+                    <listitem>
                         <para>Maven</para>
                     </listitem>
                 </itemizedlist>
@@ -288,11 +363,9 @@
 
             <section id="quick-start-idp-metadata">
                 <title>Configuration of IDP metadata</title>
-                <para>Modify file
+                <para>Modify file 
                     <emphasis>WEB-INF/classes/security/securityContext.xml</emphasis>
-                    inside the war archive and replace bean with id
-                    <emphasis>metadata</emphasis>
-                    as follows:
+                    inside the war archive and replace <emphasis>metadata</emphasis> bean as follows:
                     <programlisting><![CDATA[<bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
     <constructor-arg>
         <list>
@@ -314,39 +387,82 @@
                     from a source using SSL/TLS with configured trust or which provides digitally signed metadata.
                 </para>
             </section>
+            
+            <section id="quick-start-sp-metadata">
+                <title>Generation of SP metadata</title>
+                <para>Modify file
+                    <emphasis>WEB-INF/classes/security/securityContext.xml</emphasis>
+                    inside the war archive and replace <emphasis>metadataGeneratorFilter</emphasis> bean as follows and make sure to replace
+                    the entityId value with a string which is unique within the SSO Circle service (e.g. urn:test:yourname:yourcity):
+                    <programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+        <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+           <property name="entityId" value="replaceWithUniqueIdentifier"/>
+           <property name="signMetadata" value="false"/>
+        </bean>
+    </constructor-arg>
+</bean>]]></programlisting>
+                </para>
+            </section>            
 
             <section id="quick-start-deploy">
                 <title>Deployment</title>
                 <para>Deploy the updated war archive to your application server or container. After deployment the
-                    SP module will be available at e.g.
-                    <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis>
+                    SP module will be available at e.g. <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis>
                 </para>
             </section>
 
-            <section id="quick-start-sp-metadata">
-                <title>Configuration of SP metadata</title>
-                <itemizedlist>
+            <section id="quick-start-sp-metadata-to-idp">
+                <title>Uploading of SP metadata to the IDP</title>
+                <para>Download current SP metadata: <itemizedlist spacing="compact">
                     <listitem>
                         <para>Open web browser at the URL of the deployed application.</para>
-                        <para>Select<emphasis>Metadata information</emphasis>.
-                        </para>
-                        <para>Select first item from category<emphasis>Service providers</emphasis>, e.g.
+                    </listitem>
+                    <listitem>
+                        <para>Select <emphasis>Metadata information</emphasis>.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Select first item from category <emphasis>Service providers</emphasis>, e.g.
                             <emphasis>
                                 http://localhost:8080/spring-security-saml2-sample/saml/metadata/alias/defaultAlias
                             </emphasis>
-                            .
                         </para>
-                        <para>Copy content of the Metadata textarea to your clipboard.</para>
-                        <para>Register yourself at www.ssocircle.com</para>
-                        <para>TODO import metadata</para>
                     </listitem>
-                </itemizedlist>
+                    <listitem>
+                        <para>Copy content of the Metadata textarea to your clipboard.</para>
+                    </listitem>
+                </itemizedlist></para>
+                <para>Upload SP metadata to the IDP: <itemizedlist spacing="compact">
+                    <listitem>
+                        <para>Register yourself at www.ssocircle.com and login to the service.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Select Metadata manager and click Add new Service Provider.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Enter <emphasis>entityId</emphasis> configured in <xref linkend="quick-start-sp-metadata"/> to the FQDN field.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Paste content of clipboard to the metadata information textarea.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Store metadata by pressing the Submit button.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Logout from the SSOCircle service.</para>
+                    </listitem>
+                </itemizedlist></para>
             </section>
+        </section>
 
-            <section id="quick-start-sso">
-                <title>Testing single sign-on and single logout</title>
-                <para>TODO</para>
-            </section>
+        <section id="quick-start-testing">
+            <title>Testing single sign-on and single logout</title>
+            <para>Open the front page of your SP application, select <emphasis>http://idp.ssocircle.com</emphasis> IDP and press login. System
+            will generate new authentication request using SAML 2.0 protocol, digitally sign it and send it to the IDP. After authentication at IDP
+            with your account you will be redirected back to your application and automatically signed-in.</para>
+            <para>Pressing local logout will destroy local session and logout the user. Session is still active at the IDP and an attempt to reauthenticate
+            will proceed without need to enter credentials.</para>
+            <para>Pressing global logout will destroy both local session and session at IDP.</para> 
         </section>
     </chapter>
 
@@ -594,17 +710,27 @@
                                         <entry><literal>assertionConsumerIndex</literal></entry>
                                         <entry>Index of assertion consumer point to be marked as default.</entry>
                                         <entry>0</entry>
-                                    </row>
+                                    </row>                                    
                                     <row>
-                                        <entry><literal>includeDiscovery</literal></entry>
-                                        <entry>When true metadata will contain extension indicating that it's able to consume response from IDP Discovery service.</entry>
+                                        <entry><literal>enableDiscovery</literal></entry>
+                                        <entry>When true system will initialze discovery process during attempt to initialize single sign-on without pre-selected IDP.</entry>
                                         <entry>true</entry>
                                     </row>
                                     <row>
                                         <entry><literal>customDiscoveryURL</literal></entry>
-                                        <entry>When <literal>includeDiscovery</literal> is enabled value overrides default discovery response URL.</entry>
-                                        <entry>empty</entry>
+                                        <entry>When <literal>enableDiscovery</literal> is true value overrides default discovery request URL.</entry>
+                                        <entry>generated value for internal discovery service</entry>
                                     </row>
+                                    <row>
+                                        <entry><literal>customDiscoveryResponseURL</literal></entry>
+                                        <entry>When <literal>includeDiscoveryExtension</literal> is true value overrides default discovery response URL.</entry>
+                                        <entry>generated value for entry point response URL</entry>
+                                    </row>                                    
+                                    <row>
+                                        <entry><literal>includeDiscoveryExtension</literal></entry>
+                                        <entry>When true generated metadata will contain extension indicating that it's able to consume response from an IDP Discovery service.</entry>
+                                        <entry>false</entry>
+                                    </row>                                    
                                     <row>
                                         <entry><literal>nameID</literal></entry>
                                         <entry>Supported name identifiers to be included in the metadata.</entry>
@@ -930,7 +1056,7 @@
                                 <entry>local</entry>
                                 <entry>false</entry>
                                 <entry>both</entry>
-                                <entry>Value determines whether</entry>
+                                <entry></entry>
                             </row>
                             <row>
                                 <entry>alias</entry>
@@ -941,6 +1067,18 @@
                             <row>
                                 <entry>idpDiscoveryEnabled</entry>
                                 <entry>false</entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>idpDiscoveryURL</entry>
+                                <entry></entry>
+                                <entry>local</entry>
+                                <entry></entry>
+                            </row>
+                            <row>
+                                <entry>idpDiscoveryResponseURL</entry>
+                                <entry></entry>
                                 <entry>local</entry>
                                 <entry></entry>
                             </row>
@@ -1015,7 +1153,7 @@
             <para>Configuration bean can be found in
                 <emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis>
                 and provides means to customize authentication request sent to the IDP. For details on setting the login
-                process please see<xref linkend="configuration-sso"/>.
+                process please see <xref linkend="configuration-sso"/>.
             </para>
             <!-- TODO -->
         </section>

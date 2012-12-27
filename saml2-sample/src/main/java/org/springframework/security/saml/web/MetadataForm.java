@@ -44,9 +44,12 @@ public class MetadataForm {
 
     private boolean includeSSO = true;
     private boolean includeHokSSO = false;
-    private boolean includeDiscovery = false;
+
+    private boolean includeDiscovery = true;
+    private boolean includeDiscoveryExtension = false;
 
     private String customDiscoveryURL;
+    private String customDiscoveryResponseURL;
 
     private boolean requestSigned = true;
     private boolean wantAssertionSigned;
@@ -209,6 +212,14 @@ public class MetadataForm {
         this.includeDiscovery = includeDiscovery;
     }
 
+    public boolean isIncludeDiscoveryExtension() {
+        return includeDiscoveryExtension;
+    }
+
+    public void setIncludeDiscoveryExtension(boolean includeDiscoveryExtension) {
+        this.includeDiscoveryExtension = includeDiscoveryExtension;
+    }
+
     public boolean isIncludeHokSSO() {
         return includeHokSSO;
     }
@@ -239,6 +250,14 @@ public class MetadataForm {
 
     public void setCustomDiscoveryURL(String customDiscoveryURL) {
         this.customDiscoveryURL = customDiscoveryURL;
+    }
+
+    public String getCustomDiscoveryResponseURL() {
+        return customDiscoveryResponseURL;
+    }
+
+    public void setCustomDiscoveryResponseURL(String customDiscoveryResponseURL) {
+        this.customDiscoveryResponseURL = customDiscoveryResponseURL;
     }
 
     public String[] getSsoBindings() {

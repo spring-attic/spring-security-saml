@@ -343,7 +343,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>Include IDP Discovery profile:</td>
+            <td>Enable IDP Discovery profile:</td>
             <td>
                 <form:select path="includeDiscovery" multiple="false">
                     <form:option value="true">Yes</form:option>
@@ -376,6 +376,17 @@ Generates new metadata for service provider. Output can be used to configure you
             <td colspan="2">
                 <small>When not set local IDP discovery URL is automatically generated when IDP discovery is enabled.</small>
             </td>
+        </tr>
+
+        <tr>
+            <td>Include IDP Discovery extension in metadata:</td>
+            <td>
+                <form:select path="includeDiscoveryExtension" multiple="false">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="includeDiscoveryExtension"/></td>
         </tr>
 
         <tr>

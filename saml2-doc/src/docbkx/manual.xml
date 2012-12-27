@@ -712,13 +712,13 @@
                                         <entry>0</entry>
                                     </row>                                    
                                     <row>
-                                        <entry><literal>enableDiscovery</literal></entry>
-                                        <entry>When true system will initialze discovery process during attempt to initialize single sign-on without pre-selected IDP.</entry>
+                                        <entry><literal>includeDiscovery</literal></entry>
+                                        <entry>When true system will initialize discovery process during attempt to initialize single sign-on without pre-selected IDP.</entry>
                                         <entry>true</entry>
                                     </row>
                                     <row>
                                         <entry><literal>customDiscoveryURL</literal></entry>
-                                        <entry>When <literal>enableDiscovery</literal> is true value overrides default discovery request URL.</entry>
+                                        <entry>When <literal>includeDiscovery</literal> is true value overrides default discovery request URL.</entry>
                                         <entry>generated value for internal discovery service</entry>
                                     </row>
                                     <row>

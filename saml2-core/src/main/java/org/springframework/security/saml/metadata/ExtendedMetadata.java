@@ -64,7 +64,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Profile used for trust verification, MetaIOP by default. Only relevant for local entities.
      */
-    private String securityProfile;
+    private String securityProfile = "metaiop";
 
     /**
      * Profile used for SSL/TLS trust verification, PKIX by default. Only relevant for local entities.

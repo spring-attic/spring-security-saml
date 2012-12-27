@@ -81,6 +81,8 @@ public class MetadataGenerator {
 
     private boolean includeDiscovery = true;
     private String customDiscoveryURL;
+    private String customDiscoveryResponseURL;
+    private boolean includeDiscoveryExtension;
 
     private ExtendedMetadata extendedMetadata;
 
@@ -171,7 +173,8 @@ public class MetadataGenerator {
 
     /**
      * Generates extended metadata. Default extendedMetadata object is cloned if present and used for defaults.
-     * The following properties are always overriden from the properties of this bean: signingKey, encryptionKey, entityAlias and tlsKey.
+     * The following properties are always overriden from the properties of this bean:
+     * discoveryUrl, discoveryResponseUrl, signingKey, encryptionKey, entityAlias and tlsKey.
      * Property local of the generated metadata is always set to true.
      *
      * @return generated extended metadata
@@ -186,19 +189,14 @@ public class MetadataGenerator {
             metadata = new ExtendedMetadata();
         }
 
+        String entityBaseURL = getEntityBaseURL();
+        String entityAlias = getEntityAlias();
+
         metadata.setIdpDiscoveryEnabled(isIncludeDiscovery());
 
         if (isIncludeDiscovery()) {
-            if (metadata.getIdpDiscoveryURL() == null) {
-                metadata.setIdpDiscoveryURL(getServerURL(entityBaseURL, entityAlias, getSAMLDiscoveryPath()));
-            }
-            if (metadata.getIdpDiscoveryResponseURL() == null) {
-                if (customDiscoveryURL != null) {
-                    metadata.setIdpDiscoveryURL(customDiscoveryURL);
-                } else {
-                    metadata.setIdpDiscoveryResponseURL(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath()) + "?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true");
-                }
-            }
+            metadata.setIdpDiscoveryURL(getDiscoveryURL(entityBaseURL, entityAlias));
+            metadata.setIdpDiscoveryResponseURL(getDiscoveryResponseURL(entityBaseURL, entityAlias));
         } else {
             metadata.setIdpDiscoveryURL(null);
             metadata.setIdpDiscoveryResponseURL(null);
@@ -297,7 +295,7 @@ public class MetadataGenerator {
         Extensions extensions = new ExtensionsBuilder().buildObject();
 
         // Add discovery
-        if (isIncludeDiscovery()) {
+        if (isIncludeDiscoveryExtension()) {
             DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityAlias);
             extensions.getUnknownXMLObjects().add(discoveryService);
             include = true;
@@ -381,13 +379,7 @@ public class MetadataGenerator {
         SAMLObjectBuilder<DiscoveryResponse> builder = (SAMLObjectBuilder<DiscoveryResponse>) builderFactory.getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         DiscoveryResponse discovery = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
-        if (getCustomDiscoveryURL() != null && getCustomDiscoveryURL().length() > 0) {
-            discovery.setLocation(getCustomDiscoveryURL());
-        } else {
-            discovery.setLocation(getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params));
-        }
+        discovery.setLocation(getDiscoveryResponseURL(entityBaseURL, entityAlias));
         return discovery;
     }
 
@@ -686,19 +678,32 @@ public class MetadataGenerator {
         }
     }
 
-    public boolean isIncludeDiscovery() {
-        return includeDiscovery;
+    public boolean isIncludeDiscoveryExtension() {
+        return includeDiscoveryExtension;
     }
 
     /**
-     * When true discovery profile metadata pointing to the default SAMLEntryPoint will be generated. System
-     * will also automatically generate discoveryRequest and discoveryResponse addresses in extended metadata unless
-     * these are already set.
+     * When true discovery profile extension metadata pointing to the default SAMLEntryPoint will be generated and stored
+     * in the generated metadata document.
      *
-     * @param includeDiscovery flag indicating whether IDP discovery should be enabled
+     * @param includeDiscoveryExtension flag indicating whether IDP discovery should be enabled
+     */
+    public void setIncludeDiscoveryExtension(boolean includeDiscoveryExtension) {
+        this.includeDiscoveryExtension = includeDiscoveryExtension;
+    }
+
+    /**
+     * When true system will also automatically generate discoveryRequest and discoveryResponse addresses or
+     * use values provided as customDiscoveryUrl and customDiscoveryResponseUrl and store them to the extended metadata.
+     *
+     * @param includeDiscovery true when user should be redirected to discovery service during SSO initialization
      */
     public void setIncludeDiscovery(boolean includeDiscovery) {
         this.includeDiscovery = includeDiscovery;
+    }
+
+    public boolean isIncludeDiscovery() {
+        return includeDiscovery;
     }
 
     public int getAssertionConsumerIndex() {
@@ -714,17 +719,60 @@ public class MetadataGenerator {
         this.assertionConsumerIndex = assertionConsumerIndex;
     }
 
+    /**
+     * Custom value of IDP Discovery request URL to be included in the extended metadata. Only used when
+     * includeDiscovery is set to true.
+     *
+     * @param customDiscoveryURL custom discovery request URL
+     */
+    public void setCustomDiscoveryURL(String customDiscoveryURL) {
+        this.customDiscoveryURL = customDiscoveryURL;
+    }
+
     public String getCustomDiscoveryURL() {
         return customDiscoveryURL;
     }
 
     /**
-     * Custom value of IDP Discovery response URL to be included in the SP metadata as extension.
+     * Custom value of IDP Discovery response URL to be included in the SP metadata as extension and in extended
+     * metadata. Only used when includeDiscovery is set to true.
      *
-     * @param customDiscoveryURL custom discovery URL
+     * @param customDiscoveryResponseURL custom discovery response URL
      */
-    public void setCustomDiscoveryURL(String customDiscoveryURL) {
-        this.customDiscoveryURL = customDiscoveryURL;
+    public void setCustomDiscoveryResponseURL(String customDiscoveryResponseURL) {
+        this.customDiscoveryResponseURL = customDiscoveryResponseURL;
+    }
+
+    public String getCustomDiscoveryResponseURL() {
+        return customDiscoveryResponseURL;
+    }
+
+    /**
+     * Provides set discovery request url or generates a default when none was provided.
+     *
+     * @return URL to use for IDP discovery request
+     */
+    private String getDiscoveryURL(String entityBaseURL, String entityAlias) {
+        if (customDiscoveryURL != null && customDiscoveryURL.length() > 0) {
+            return customDiscoveryURL;
+        } else {
+            return getServerURL(entityBaseURL, entityAlias, getSAMLDiscoveryPath());
+        }
+    }
+
+    /**
+     * Provides set discovery response url or generates a default when none was provided.
+     *
+     * @return URL to use for IDP discovery response
+     */
+    private String getDiscoveryResponseURL(String entityBaseURL, String entityAlias) {
+        if (customDiscoveryResponseURL != null && customDiscoveryResponseURL.length() > 0) {
+            return customDiscoveryResponseURL;
+        } else {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER, "true");
+            return getServerURL(entityBaseURL, entityAlias, getSAMLEntryPointPath(), params);
+        }
     }
 
     public ExtendedMetadata getExtendedMetadata() {

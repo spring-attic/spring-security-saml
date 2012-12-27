@@ -183,11 +183,16 @@ public class MetadataController {
         // Discovery
         if (metadata.isIncludeDiscovery()) {
             generator.setIncludeDiscovery(true);
+            generator.setIncludeDiscoveryExtension(metadata.isIncludeDiscoveryExtension());
             if (metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
                 generator.setCustomDiscoveryURL(metadata.getCustomDiscoveryURL());
             }
+            if (metadata.getCustomDiscoveryResponseURL() != null && metadata.getCustomDiscoveryResponseURL().length() > 0) {
+                generator.setCustomDiscoveryResponseURL(metadata.getCustomDiscoveryResponseURL());
+            }
         } else {
             generator.setIncludeDiscovery(false);
+            generator.setIncludeDiscoveryExtension(false);
         }
 
         generator.setNameID(Arrays.asList(metadata.getNameID()));
@@ -351,14 +356,15 @@ public class MetadataController {
       sb.append("           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n");
-        if (metadata.isIdpDiscoveryEnabled()) {
-                sb.append("           <property name=\"idpDiscoveryURL\" value=\"").append(metadata.getIdpDiscoveryURL()).append("\"/>\n" +
+      sb.append("           <property name=\"idpDiscoveryEnabled\" value=\"").append(metadata.isIdpDiscoveryEnabled()).append("\"/>\n");
+      if (metadata.isIdpDiscoveryEnabled()) {
+      sb.append("           <property name=\"idpDiscoveryURL\" value=\"").append(metadata.getIdpDiscoveryURL()).append("\"/>\n" +
                 "           <property name=\"idpDiscoveryResponseURL\" value=\"").append(metadata.getIdpDiscoveryResponseURL()).append("\"/>\n");
-        }
-                sb.append("        </bean>\n" +
+      }
+      sb.append("        </bean>\n" +
                 "    </constructor-arg>\n" +
                 "</bean>");
-        return sb.toString();
+      return sb.toString();
     }
 
 }

@@ -49,7 +49,7 @@ public class MetadataGeneratorTest {
 
         generator.setEntityBaseURL("http://localhost");
         generator.setEntityId("my_entity");
-        generator.setIncludeDiscovery(true);
+        generator.setIncludeDiscoveryExtension(true);
         EntityDescriptor metadata = generator.generateMetadata();
 
         assertEquals("my_entity", metadata.getEntityID());
@@ -84,6 +84,7 @@ public class MetadataGeneratorTest {
 
         // Disabled discovery
         generator.setIncludeDiscovery(false);
+        generator.setIncludeDiscoveryExtension(false);
         extendedMetadata = generator.generateExtendedMetadata();
         assertFalse(extendedMetadata.isIdpDiscoveryEnabled());
         assertNull(extendedMetadata.getIdpDiscoveryURL());
@@ -91,11 +92,11 @@ public class MetadataGeneratorTest {
 
         // Default extended metadata
         ExtendedMetadata defaultMetadata = new ExtendedMetadata();
-        defaultMetadata.setIdpDiscoveryEnabled(false);
-        defaultMetadata.setIdpDiscoveryResponseURL("http://testDisco.com/response");
         defaultMetadata.setRequireLogoutResponseSigned(true);
         generator.setExtendedMetadata(defaultMetadata);
         generator.setIncludeDiscovery(true);
+        generator.setIncludeDiscoveryExtension(true);
+        generator.setCustomDiscoveryResponseURL("http://testDisco.com/response");
         extendedMetadata = generator.generateExtendedMetadata();
         assertTrue(extendedMetadata.isIdpDiscoveryEnabled());
         assertEquals("http://localhost:8080/saml/discovery/alias/testAlias", extendedMetadata.getIdpDiscoveryURL());

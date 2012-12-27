@@ -67,6 +67,14 @@ public class MetadataValidator implements Validator {
             }
         }
 
+        if (metadata.isIncludeDiscovery() && metadata.getCustomDiscoveryResponseURL() != null && metadata.getCustomDiscoveryResponseURL().length() > 0) {
+            try {
+                new URL(metadata.getCustomDiscoveryResponseURL());
+            } catch (MalformedURLException e) {
+                errors.rejectValue("customDiscoveryResponseURL", null, "Value is not a valid URL.");
+            }
+        }
+
         // Bindings
         if (metadata.getSsoBindings() == null || metadata.getSsoBindings().length == 0) {
             errors.rejectValue("ssoBindings", null, "At least one binding must be specified.");

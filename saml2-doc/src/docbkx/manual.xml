@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <book version="5.0" xml:id="spring-security-reference-guide" xmlns="http://docbook.org/ns/docbook"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:xi="http://www.w3.org/2001/XInclude">>
+    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-    <title>Spring Security SAML SP</title>
     <info>
-        <title>Spring Security Extensions</title>
-        <subtitle>SAML 2.0 SP Reference Documentation</subtitle>
+        <title>Spring Security SAML Extension</title>
+        <subtitle>Reference Documentation</subtitle>
+        <authorgroup>
+            <author>
+                <personname>Vladimír Schäfer</personname>
+            </author>
+        </authorgroup>
+        <productname>Spring Security SAML Extension</productname>
         <copyright>
             <year>2009-2012</year>
-            <holder>Vladimír Schäfer</holder>
-            <!-- TODO mail to copyright -->
+            <holder><link xlink:href="mailto:vladimir.schafer@gmail.com">Vladimír Schäfer</link></holder>
         </copyright>
-        <releaseinfo>3.1.0</releaseinfo>
+        <releaseinfo>3.0-RC2</releaseinfo>
     </info>
     <toc/>
 
@@ -24,6 +27,15 @@
     - Supported environments
     - Jira, Support forum
     -->
+
+    <part xml:id="getting-started">
+        <title>Getting Started</title>
+        <partintro>
+            <para>This chapter provides essential information needed to enable your application to act as
+            a service provider and interact with identity providers using SAML 2.0 protocol. Later in this
+            guide you can find information about detailed configuration options and additional use-cases
+            enabled by this component.</para>
+        </partintro>
 
     <chapter id="chapter-introduction">
         <title>Introduction</title>
@@ -115,12 +127,14 @@
             </para>
 
             <para>
-                Internal processing of SAML messages, marshalling and unmarshalling is handled by OpenSAML TODO link.
+                Internal processing of SAML messages, marshalling and unmarshalling is handled by <link
+                    xlink:href="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home">OpenSAML</link>.
             </para>
 
-            <para>You can use the following supported standards as a reference:
+            <para>You can use the following supported standards as a reference:</para>
+
+                <para>SAML 2.0 basic profiles
                 <itemizedlist spacing="compact">
-                    <title>SAML 2.0 basic profiles</title>
                     <listitem>
                         <para>http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</para>
                     </listitem>
@@ -139,10 +153,10 @@
                     <listitem>
                         <para>http://docs.oasis-open.org/security/saml/v2.0/saml-conformance-2.0-os.pdf</para>
                     </listitem>
-                </itemizedlist>
+                </itemizedlist></para>
 
+                <para>SAML 2.0 additional profiles
                 <itemizedlist spacing="compact">
-                    <title>SAML 2.0 additional profiles</title>
                     <listitem>
                         <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso.pdf
                         </para>
@@ -156,17 +170,17 @@
                     <listitem>
                         <para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf</para>
                     </listitem>
-                </itemizedlist>
+                </itemizedlist></para>
 
+                <para>eGovernment profile
                 <itemizedlist spacing="compact">
-                    <title>eGovernment profile</title>
                     <listitem>
                         <para>
                             http://kantarainitiative.org/confluence/download/attachments/42139782/kantara-egov-saml2-profile-2.0.pdf
                         </para>
                     </listitem>
-                </itemizedlist>
-            </para>
+                </itemizedlist></para>
+
         </section>
 
         <section id="section-requirements">
@@ -335,6 +349,16 @@
             </section>
         </section>
     </chapter>
+
+    </part>
+
+    <part xml:id="integration">
+        <title>Single sign-on with SAML</title>
+        <partintro>
+            <para>This chapter provides information about configuration and customization options of the SAML extension.
+            It will guide you throught typical scenarios including problems you migth encounter during integration with
+            identity providers.</para>
+        </partintro>
 
     <chapter id="chapter-configuration">
         <title>Configuration and integration</title>
@@ -852,8 +876,32 @@
         <para>TODO</para>
     </chapter>
 
-    <chapter id="chapter-configuration-reference">
-        <title>Configuration reference</title>
+    <chapter id="chapter-troubleshooting">
+        <info>
+            <title>Troubleshooting</title>
+        </info>
+        <!--
+        - enabling debugging, slf4j
+        - common problems
+        - XML parsing libraries and endorsing
+        - time skew problems
+        -->
+    </chapter>
+
+    <!--
+    Acknowledgements
+    SEPARATE CHAPTER? - sample flow
+    8. Known issues
+    multi-tenancy
+    deployment to application servers
+    -->
+
+    </part>
+
+    <appendix id="chapter-configuration-reference">
+        <info>
+          <title>Configuration reference</title>
+        </info>
         <para>This chapter provides reference for settings available in configuration beans of the SAML module.</para>
 
         <section id="reference-extended-metadata">
@@ -971,25 +1019,6 @@
             </para>
             <!-- TODO -->
         </section>
-    </chapter>
-
-    <chapter id="chapter-troubleshooting-guide">
-        <title>Troubleshooting guide</title>
-        <para>TODO</para>
-        <!--
-        - enabling debugging, slf4j
-        - common problems
-        - XML parsing libraries and endorsing
-        - time skew problems
-        -->
-    </chapter>
-
-    <!--
-    Acknowledgements
-    SEPARATE CHAPTER? - sample flow
-    8. Known issues
-    multi-tenancy
-    deployment to application servers
-    -->
+    </appendix>
 
 </book>

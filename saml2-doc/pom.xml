@@ -15,5 +15,45 @@
 
     <dependencies>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.agilejava.docbkx</groupId>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <version>2.0.14</version>
+                <executions>
+                    <execution>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>generate-html</goal>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                    </execution>
+                </executions>                
+                <dependencies>
+                    <dependency>
+                        <groupId>org.docbook</groupId>
+                        <artifactId>docbook-xml</artifactId>
+                        <version>4.4</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <includes>manual.xml</includes>
+                    <htmlStylesheet>css/manual.css</htmlStylesheet>
+                    <xincludeSupported>true</xincludeSupported>
+                    <htmlCustomization>${project.basedir}/src/docbkx/resources/xsl/html-single-custom.xsl</htmlCustomization>
+                    <foCustomization>${project.basedir}/src/docbkx/resources/xsl/pdf-custom.xsl</foCustomization>
+                    <entities>
+                        <entity>
+                            <name>version</name>
+                            <value>${project.version}</value>
+                        </entity>
+                    </entities>                                       
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>    
 
 </project>

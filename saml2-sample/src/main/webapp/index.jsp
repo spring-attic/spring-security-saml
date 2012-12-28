@@ -53,7 +53,12 @@
             <td>
                 <c:forEach var="attributeValue"
                            items="${attribute.attributeValues}">
-                    <c:out value="${attributeValue.value}"/>&nbsp;
+                    <c:catch var ="catchException">
+                        <c:out value="${attributeValue.value}"/>&nbsp;
+                    </c:catch>
+                    <c:if test="${not empty catchException}">
+                        <c:out value="${attributeValue}"/>&nbsp;
+                    </c:if>
                 </c:forEach>
             </td>
         </tr>

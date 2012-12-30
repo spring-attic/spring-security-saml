@@ -102,7 +102,10 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     private boolean requireLogoutResponseSigned;
 
-    private boolean requireArtifactResolveSigned;
+    /**
+     * If true received artifactResolve messages will require a signature, sent artifactResolve will be signed.
+     */
+    private boolean requireArtifactResolveSigned = true;
 
     /**
      * Security profile to use for this local entity - MetaIOP (default) or PKIX.

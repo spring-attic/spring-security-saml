@@ -62,7 +62,7 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
         if (transport instanceof HttpServletRequestAdapter) {
             HttpServletRequestAdapter t = (HttpServletRequestAdapter) transport;
             HttpServletRequest request = t.getWrappedRequest();
-            return "POST".equalsIgnoreCase(t.getHTTPMethod()) && request.getContentType().startsWith("text/xml");
+            return "POST".equalsIgnoreCase(t.getHTTPMethod()) && request.getContentType() != null && request.getContentType().startsWith("text/xml");
         } else {
             return false;
         }

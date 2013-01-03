@@ -218,19 +218,6 @@
 
     </chapter>
 
-    <!--
-    2. Glossary
-    - SAML
-    - IDP Discovery
-    - SP
-    - IDP
-    - Metadata
-    - Single Logout
-    - SAML profiles
-    - SAML bindings
-    - SAML HoK profile
-    -->
-
     <chapter id="glossary">
         <title>Glossary</title>
         <para>
@@ -292,25 +279,28 @@
                         </row>
                         <row>
                             <entry>Service provider (SP)</entry>
-                            <entry>Your application which communicates with identity provider in order to obtain information
-                                about the user it interacts with. User information is provided in form of security assertions.</entry>
+                            <entry>Your application which communicates with the identity provider in order to obtain information
+                                about the user it interacts with. User information such as authentication state and user attributes 
+                                is provided in form of security assertions.</entry>
                         </row>
+                        <row>
+                            <entry>Single Sign-On (SSO) (only web-SSO)</entry>
+                            <entry>Process enabling access to multiple web sites without need to repeatedly present credentials necessary
+                            for authentication. Various federation protocols such as SAML, WS-Federation, OpenID or OAuth can be used to achieve
+                            SSO use-cases. Information such as means of authentication, user attributes, authorization decisions or security tokens are
+                            typically provided to the service provider as part of single sign-on.</entry>
+                        </row>
+                        <row>
+                            <entry>Single Logout (SLO) (only web-SLO)</entry>
+                            <entry>Process terminating authenticated sessions at all resources which were accessed using single sign-on. Techniques
+                            such as redirecting user to each of the SSO participants or sending a logout SOAP messages are typically used.</entry>
+                        </row>                                                
                     </tbody>
                 </tgroup>
             </table>
 
         </para>
     </chapter>
-
-    <!--
-    3. Quick start guide
-    OK - Pre-requisites
-    OK - Compilation of the module
-    OK - Configuration of IDP metadata
-    OK - Deployment
-    - Configuration of SP metadata
-    - Testing single sign-on and single logout
-    -->
 
     <chapter id="chapter-quick-start">
         <title>Quick start guide</title>

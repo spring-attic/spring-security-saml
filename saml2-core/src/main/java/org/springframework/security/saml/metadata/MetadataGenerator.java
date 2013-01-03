@@ -146,6 +146,7 @@ public class MetadataGenerator {
 
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
+        descriptor.setID(entityId);
         descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
 
@@ -512,16 +513,16 @@ public class MetadataGenerator {
     /**
      * Signs the given SAML message if it a {@link org.opensaml.common.SignableSAMLObject} and this encoder has signing credentials.
      *
-     * @param outboundSAML      message to sign
+     * @param signableObject      object to sign
      * @param signingCredential credential to sign with
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the outbound message
      */
     @SuppressWarnings("unchecked")
-    protected void signSAMLObject(SAMLObject outboundSAML, Credential signingCredential) throws MessageEncodingException {
+    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential) throws MessageEncodingException {
 
-        if (outboundSAML instanceof SignableSAMLObject && signingCredential != null) {
-            SignableSAMLObject signableMessage = (SignableSAMLObject) outboundSAML;
+        if (signableObject instanceof SignableSAMLObject && signingCredential != null) {
+            SignableSAMLObject signableMessage = (SignableSAMLObject) signableObject;
 
             XMLObjectBuilder<Signature> signatureBuilder = Configuration.getBuilderFactory().getBuilder(
                     Signature.DEFAULT_ELEMENT_NAME);

@@ -188,7 +188,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param samlContext to populate
      * @throws MetadataProviderException in case metadata problem is encountered
      */
-    private void populatePeerContext(SAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void populatePeerContext(SAMLMessageContext samlContext) throws MetadataProviderException {
 
         String peerEntityId = samlContext.getPeerEntityId();
         QName peerEntityRole = samlContext.getPeerEntityRole();
@@ -212,7 +212,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
-    private void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
 
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
         HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
@@ -225,7 +225,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
-    private void populateLocalContext(SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateLocalContext(SAMLMessageContext context) throws MetadataProviderException {
 
         populateLocalEntity(context);
         populateDecrypter(context);
@@ -316,7 +316,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
      *          in case metadata do not contain expected entities or localAlias is specified but not found
      */
-    private void populateLocalEntity(SAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void populateLocalEntity(SAMLMessageContext samlContext) throws MetadataProviderException {
 
         String localEntityId = samlContext.getLocalEntityId();
         QName localEntityRole = samlContext.getLocalEntityRole();

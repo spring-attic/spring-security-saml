@@ -37,6 +37,7 @@ import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
 import org.opensaml.xml.security.trust.TrustEngine;
 import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.security.x509.BasicX509CredentialNameEvaluator;
 import org.opensaml.xml.security.x509.PKIXX509CredentialTrustEngine;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.SignatureTrustEngine;
@@ -53,6 +54,7 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorageFactory;
 import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
+import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
 import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.util.Assert;
@@ -422,7 +424,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateTrustEngine(SAMLMessageContext samlContext) {
         SignatureTrustEngine engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
-            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), new CertPathPKIXTrustEvaluator(), new BasicX509CredentialNameEvaluator());
         } else {
             engine = new ExplicitKeySignatureTrustEngine(metadataResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
         }
@@ -439,7 +441,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {    
         TrustEngine<X509Credential> engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslSecurityProfile())) {
-            engine = new PKIXX509CredentialTrustEngine(pkixResolver);
+            engine = new PKIXX509CredentialTrustEngine(pkixResolver, new CertPathPKIXTrustEvaluator(), new BasicX509CredentialNameEvaluator());
         } else {
             engine = new ExplicitX509CertificateTrustEngine(metadataResolver);
         }

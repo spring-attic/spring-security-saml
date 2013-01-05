@@ -537,7 +537,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             return new PKIXSignatureTrustEngine(
                     getPKIXResolver(provider, trustedKeys, null),
                     Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(),
-                    new CertPathPKIXTrustEvaluator(pkixOptions),
+                    new org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator(pkixOptions),
                     new BasicX509CredentialNameEvaluator());
 
         } else {

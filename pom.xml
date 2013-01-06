@@ -6,7 +6,7 @@
     <groupId>org.springframework.security.extensions</groupId>
     <artifactId>spring-security-saml2-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-RC1-SNAPSHOT</version>
+    <version>1.0.0-RC2-SNAPSHOT</version>
     <name>Spring Security SAML v2</name>
 
     <description>Spring Security Extensions SAML v2</description>

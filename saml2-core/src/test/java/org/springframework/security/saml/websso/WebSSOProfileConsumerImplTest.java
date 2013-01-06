@@ -71,6 +71,8 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         builderFactory = Configuration.getBuilderFactory();
 
         HttpServletRequest request = createMock(HttpServletRequest.class);
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getContextPath()).andReturn("/").anyTimes();
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null).anyTimes();
         replay(request);

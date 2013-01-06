@@ -68,6 +68,16 @@ public class SAMLConstants {
     public static final String PAOS_HTTP_HEADER = "PAOS";
 
     /**
+     * Used inside HttpServletRequest to indicate required local entity id to the context provider.
+     */
+    public static final String LOCAL_ENTITY_ID = "localEntityId";
+
+    /**
+     * Used to store context path inside InTransport
+     */
+    public static final String LOCAL_CONTEXT_PATH = "localContextPath";
+
+    /**
      * Qualified name of the attribute used to convey binding information in the Holder of Key metadata endpoint.
      */
     public static final QName WEBSSO_HOK_METADATA_ATT_NAME = new QName(org.springframework.security.saml.SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI, AuthnRequest.PROTOCOL_BINDING_ATTRIB_NAME);

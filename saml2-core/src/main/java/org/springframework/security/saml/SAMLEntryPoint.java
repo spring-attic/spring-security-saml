@@ -236,22 +236,30 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     protected void initializeDiscovery(SAMLMessageContext context) throws ServletException, IOException, MetadataProviderException {
 
-        logger.debug("Initializing IDP discovery profile");
         String discoveryURL = context.getLocalExtendedMetadata().getIdpDiscoveryURL();
+
         if (discoveryURL != null) {
-            logger.debug("Using discovery URL {}", discoveryURL);
+
             URLBuilder urlBuilder = new URLBuilder(discoveryURL);
             List<Pair<String, String>> queryParams = urlBuilder.getQueryParams();
             queryParams.add(new Pair<String, String>(SAMLDiscovery.ENTITY_ID_PARAM, context.getLocalEntityId()));
             queryParams.add(new Pair<String, String>(SAMLDiscovery.RETURN_ID_PARAM, IDP_PARAMETER));
             discoveryURL = urlBuilder.buildURL();
+
+            logger.debug("Using discovery URL from extended metadata");
+
         } else {
+
             String discoveryUrl = SAMLDiscovery.FILTER_URL;
             if (samlDiscovery != null) {
                 discoveryUrl = samlDiscovery.getFilterProcessesUrl();
             }
-            logger.debug("Using default local discovery URL {}", discoveryUrl);
-            discoveryURL = getServletContext().getContextPath() + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
+
+            String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_ENTITY_ID);
+            discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
+
+            logger.debug("Using local discovery URL");
+
         }
 
         logger.debug("Redirecting to discovery URL {}", discoveryURL);

@@ -24,6 +24,7 @@ import org.opensaml.xml.security.SecurityException;
 import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
@@ -51,6 +52,8 @@ public class SAMLProcessorImplTest {
         processor = context.getBean("processor", SAMLProcessorImpl.class);
 
         request = createMock(HttpServletRequest.class);
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(request.getContextPath()).andReturn("/").anyTimes();
 
@@ -149,6 +152,8 @@ public class SAMLProcessorImplTest {
         expect(request.getRequestURI()).andReturn(urlP.getPath()).anyTimes();
         expect(request.getRequestURL()).andReturn(new StringBuffer(url)).anyTimes();
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null).anyTimes();
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
     }
 
     private void replayMock() {

@@ -16,7 +16,6 @@ package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.samlext.idpdisco.DiscoveryResponse;
 import org.opensaml.util.URLBuilder;
@@ -25,6 +24,8 @@ import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -103,6 +104,11 @@ public class SAMLDiscovery extends GenericFilterBean {
     protected MetadataManager metadata;
 
     /**
+     * Context provider.
+     */
+    protected SAMLContextProvider contextProvider;
+
+    /**
      * Entry point dependency for loading of correct URL.
      */
     protected SAMLEntryPoint samlEntryPoint;
@@ -168,27 +174,23 @@ public class SAMLDiscovery extends GenericFilterBean {
         }
 
         // Load entity metadata (IDP Disco, 318)
-        RoleDescriptor roleDescriptor;
-        ExtendedMetadata extendedMetadata;
+        SAMLMessageContext messageContext;
 
         try {
-            roleDescriptor = metadata.getRole(entityId, SPSSODescriptor.DEFAULT_ELEMENT_NAME, org.opensaml.common.xml.SAMLConstants.SAML20P_NS);
-            extendedMetadata = metadata.getExtendedMetadata(entityId);
+
+            request.setAttribute(SAMLConstants.LOCAL_ENTITY_ID, entityId);
+            messageContext = contextProvider.getLocalEntity(request, response);
+
         } catch (MetadataProviderException e) {
             logger.debug("Error loading metadata", e);
             throw new SAMLRuntimeException("Error loading metadata");
         }
 
-        if (roleDescriptor == null) {
-            logger.debug("Received IDP Discovery request with unrecognized entityId {}", entityId);
-            throw new SAMLRuntimeException("Entity ID in the request is not valid");
-        }
-
         // URL to return the selected IDP to, use default when not present
         String returnURL = request.getParameter(RETURN_URL_PARAM);
         if (returnURL == null) {
-            returnURL = getDefaultReturnURL(roleDescriptor, extendedMetadata);
-        } else if (!isResponseURLValid(returnURL, roleDescriptor, extendedMetadata)) {
+            returnURL = getDefaultReturnURL(messageContext);
+        } else if (!isResponseURLValid(returnURL, messageContext)) {
             logger.debug("Return URL {} designated in IDP Discovery request for entity {} is not valid", returnURL, entityId);
             throw new SAMLRuntimeException("Return URL designated in IDP Discovery request for entity is not valid");
         }
@@ -283,12 +285,14 @@ public class SAMLDiscovery extends GenericFilterBean {
      * Provides default return URL based on metadata in case none was supplied in the request. URL is automatically generated
      * for local entities which do not contain discovery URL in metadata.
      *
-     * @param descriptor       descriptor of the requesting entity
-     * @param extendedMetadata extended metadata of the requesting entity
+     * @param messageContext context for the local SP
      * @return URL to return the selected IDP to
      * @throws SAMLRuntimeException in case entity is remote and doesn't contain URL in metadata
      */
-    protected String getDefaultReturnURL(RoleDescriptor descriptor, ExtendedMetadata extendedMetadata) {
+    protected String getDefaultReturnURL(SAMLMessageContext messageContext) {
+
+        RoleDescriptor descriptor = messageContext.getLocalEntityRoleMetadata();
+        ExtendedMetadata extendedMetadata = messageContext.getLocalExtendedMetadata();
 
         // Response address from extended metadata
         if (extendedMetadata.isLocal() && extendedMetadata.getIdpDiscoveryResponseURL() != null) {
@@ -309,18 +313,23 @@ public class SAMLDiscovery extends GenericFilterBean {
 
         // Generation for local entities at known URL
         if (extendedMetadata.isLocal()) {
+
             String filterUrl = SAMLEntryPoint.FILTER_URL;
             if (samlEntryPoint != null) {
                 filterUrl = samlEntryPoint.getFilterProcessesUrl();
             }
+
+            String contextPath = (String) messageContext.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             StringBuilder sb = new StringBuilder(50);
-            sb.append(getServletContext().getContextPath());
+            sb.append(contextPath);
             sb.append(filterUrl + "/alias/");
             sb.append(extendedMetadata.getAlias());
             sb.append("?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true");
             String responseURL = sb.toString();
+
             logger.debug("Using IDP Discovery response URL calculated for local entity {}", responseURL);
             return responseURL;
+
         }
 
         throw new SAMLRuntimeException("Can't determine IDP Discovery return URL for entity " + descriptor.getID());
@@ -332,14 +341,13 @@ public class SAMLDiscovery extends GenericFilterBean {
      * supplied URL is the same as the host part of the default response location in metadata (IDP Disco, 320)
      *
      * @param returnURL        URL from the request
-     * @param roleDescriptor   descriptor of the requesting entity
-     * @param extendedMetadata extended metadata of the requesting entity
+     * @param messageContext message context for current SP
      * @return true if the request is valid, false otherwise
      */
-    protected boolean isResponseURLValid(String returnURL, RoleDescriptor roleDescriptor, ExtendedMetadata extendedMetadata) {
+    protected boolean isResponseURLValid(String returnURL, SAMLMessageContext messageContext) {
 
         URLBuilder foundURL = new URLBuilder(returnURL);
-        URLBuilder defaultURL = new URLBuilder(getDefaultReturnURL(roleDescriptor, extendedMetadata));
+        URLBuilder defaultURL = new URLBuilder(getDefaultReturnURL(messageContext));
 
         if (!defaultURL.getHost().equals(foundURL.getHost())) {
             return false;
@@ -395,11 +403,23 @@ public class SAMLDiscovery extends GenericFilterBean {
 
     /**
      * Dependency for loading of entry point URL
+     *
      * @param samlEntryPoint
      */
     @Autowired(required = false)
     public void setSamlEntryPoint(SAMLEntryPoint samlEntryPoint) {
         this.samlEntryPoint = samlEntryPoint;
+    }
+
+    /**
+     * Sets entity responsible for populating local entity context data.
+     *
+     * @param contextProvider provider implementation
+     */
+    @Autowired
+    public void setContextProvider(SAMLContextProvider contextProvider) {
+        Assert.notNull(contextProvider, "Context provider can't be null");
+        this.contextProvider = contextProvider;
     }
 
     /**
@@ -427,6 +447,7 @@ public class SAMLDiscovery extends GenericFilterBean {
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();
         Assert.notNull(metadata, "Metadata must be set");
+        Assert.notNull(contextProvider, "Context provider must be set");
     }
 
 }

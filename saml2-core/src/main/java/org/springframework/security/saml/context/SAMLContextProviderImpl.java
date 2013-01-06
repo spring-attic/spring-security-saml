@@ -47,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
@@ -104,7 +103,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
-        populateLocalEntityId(context, request.getContextPath());
+        populateLocalEntityId(context, request.getRequestURI());
         populateLocalContext(context);
         return context;
 
@@ -114,7 +113,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * Creates a SAMLContext with local entity and peer values filled. Also request and response must be stored in the context
      * as message transports. Should be used when both local entity and peer entity can be determined from the request.
      *
-     * @param request request
+     * @param request  request
      * @param response response
      * @return context
      * @throws MetadataProviderException in case of metadata problems
@@ -123,7 +122,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
-        populateLocalEntityId(context, request.getContextPath());
+        populateLocalEntityId(context, request.getRequestURI());
         populateLocalContext(context);
         populatePeerEntityId(context);
         populatePeerContext(context);
@@ -132,27 +131,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
-     * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
-     * as message transports. Local entity is populated based on the SAMLCredential.
-     *
-     * @param request    request
-     * @param response   response
-     * @param credential credential to load entity for
-     * @return context
-     * @throws MetadataProviderException in case of metadata problems
-     */
-    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response, SAMLCredential credential) throws MetadataProviderException {
-
-        SAMLMessageContext context = new SAMLMessageContext();
-        populateLocalEntityId(context, credential);
-        populateGenericContext(request, response, context);
-        populateLocalContext(context);
-        return context;
-
-    }
-
-    /**
-     * Loads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
+     * First tries to find pre-configured IDP from the request attribute. If not found
+     * foads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
      * IDP in our circle of trust. Processing fails when IDP is not valid. IDP is set as PeerEntityId in the context.
      * <p/>
      * If request parameter is null the default IDP is returned.
@@ -162,22 +142,25 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
 
-        String idp = ((HTTPInTransport) context.getInboundMessageTransport()).getParameterValue(SAMLEntryPoint.IDP_PARAMETER);
-        if (idp != null) {
-            if (!metadata.isIDPValid(idp)) {
-                logger.debug("User specified IDP {} is invalid", idp);
-                throw new MetadataProviderException("Specified IDP is not valid: " + idp);
-            } else {
-                logger.debug("Using user specified IDP {}", idp);
-                context.setPeerUserSelected(true);
-            }
+        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
+        String entityId;
+
+        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
+        if (entityId != null) { // Pre-configured entity Id
+            logger.debug("Using protocol specified IDP {}", entityId);
         } else {
-            idp = metadata.getDefaultIDP();
-            logger.debug("No IDP specified, using default {}", idp);
-            context.setPeerUserSelected(false);
+            entityId = inTransport.getParameterValue(SAMLEntryPoint.IDP_PARAMETER);
+            if (entityId != null) { // IDP from request
+                logger.debug("Using user specified IDP {} from request", entityId);
+                context.setPeerUserSelected(true);
+            } else { // Default IDP
+                entityId = metadata.getDefaultIDP();
+                logger.debug("No IDP specified, using default {}", entityId);
+                context.setPeerUserSelected(false);
+            }
         }
 
-        context.setPeerEntityId(idp);
+        context.setPeerEntityId(entityId);
         context.setPeerEntityRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
     }
@@ -215,7 +198,10 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
 
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, false);
+        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, request.isSecure());
+
+        // Store attribute which cannot be located from InTransport directly
+        request.setAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_CONTEXT_PATH, request.getContextPath());
 
         context.setMetadataProvider(metadata);
         context.setInboundMessageTransport(inTransport);
@@ -237,21 +223,6 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
-     * Populates localEntityId and localEntityRole based on the SAMLCredential.
-     *
-     * @param context    context to populate
-     * @param credential credential
-     * @throws MetadataProviderException in case entity id can' be populated
-     */
-    protected void populateLocalEntityId(SAMLMessageContext context, SAMLCredential credential) throws MetadataProviderException {
-
-        String entityID = credential.getLocalEntityID();
-        context.setLocalEntityId(entityID);
-        context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-    }
-
-    /**
      * Method tries to load localEntityAlias and localEntityRole from the request path. Path is supposed to be in format:
      * https(s)://server:port/application/saml/filterName/alias/aliasName/idp|sp?query. In case alias is missing from
      * the path defaults are used. Otherwise localEntityId and sp or idp localEntityRole is entered into the context.
@@ -259,19 +230,31 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * In case alias entity id isn't found an exception is raised.
      *
      * @param context     context to populate fields localEntityId and localEntityRole for
-     * @param contextPath context path to parse entityId and entityRole from
+     * @param requestURI context path to parse entityId and entityRole from
      * @throws MetadataProviderException in case entityId can't be populated
      */
-    protected void populateLocalEntityId(SAMLMessageContext context, String contextPath) throws MetadataProviderException {
+    protected void populateLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
 
-        if (contextPath == null) {
-            contextPath = "";
+        String entityId;
+        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
+
+        // Pre-configured entity Id
+        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
+        if (entityId != null) {
+            logger.debug("Using protocol specified SP {}", entityId);
+            context.setLocalEntityId(entityId);
+            context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            return;
         }
 
-        int filterIndex = contextPath.indexOf("/alias/");
-        if (filterIndex != -1) { // Alias entityId
+        if (requestURI == null) {
+            requestURI = "";
+        }
 
-            String localAlias = contextPath.substring(filterIndex + 7);
+        int filterIndex = requestURI.indexOf("/alias/");
+        if (filterIndex != -1) { // EntityId from URL alias
+
+            String localAlias = requestURI.substring(filterIndex + 7);
             QName localEntityRole;
 
             int entityTypePosition = localAlias.lastIndexOf('/');
@@ -289,13 +272,15 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
 
             // Populate entityId
-            String localEntityId = metadata.getEntityIdForAlias(localAlias);
+            entityId = metadata.getEntityIdForAlias(localAlias);
 
-            if (localEntityId == null) {
+            if (entityId == null) {
                 throw new MetadataProviderException("No local entity found for alias " + localAlias + ", verify your configuration.");
+            } else {
+                logger.debug("Using SP {} specified in request with alias {}", entityId, localAlias);
             }
 
-            context.setLocalEntityId(localEntityId);
+            context.setLocalEntityId(entityId);
             context.setLocalEntityRole(localEntityRole);
 
         } else { // Defaults
@@ -438,7 +423,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      *
      * @param samlContext context to populate
      */
-    protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {    
+    protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {
         TrustEngine<X509Credential> engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslSecurityProfile())) {
             engine = new PKIXX509CredentialTrustEngine(pkixResolver, new CertPathPKIXTrustEvaluator(), new BasicX509CredentialNameEvaluator());

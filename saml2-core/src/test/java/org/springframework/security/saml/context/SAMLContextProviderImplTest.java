@@ -25,6 +25,7 @@ import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.metadata.MetadataManager;
@@ -83,6 +84,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityNullPath() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -94,6 +97,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityNoAlias() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -105,6 +110,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityAliasNoRole() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -116,6 +123,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityAliasSPRole() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/sp");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -127,6 +136,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityAliasDefaultRole() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/invalid");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -138,6 +149,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test(expected = MetadataProviderException.class)
     public void testPopulateLocalEntityAliasInvalidRole() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO/alias/myAlias/idp");
         replayMock();
         contextProvider.getLocalEntity(request, response);
@@ -145,6 +158,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateLocalEntityAliasIDPRole() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/SSO/alias/myIdpAlias/iDp");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
@@ -156,6 +171,8 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test(expected = MetadataProviderException.class)
     public void testPopulateLocalEntityComplexAliasIDPRole_missingRole_SP() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         expect(request.getContextPath()).andReturn("/saml/SSO/test/alias/myIdpAlias/test");
         replayMock();
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
@@ -166,10 +183,12 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test
     public void testPopulateCredentialLocalEntity() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getContextPath()).andReturn("/");
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn("testSP2");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
-        SAMLCredential credential = getCredential("testSP2");
-        SAMLMessageContext context = contextProvider.getLocalEntity(request, response, credential);
+        SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("testSP2", context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
         verifyMock();
@@ -177,9 +196,13 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
 
     @Test(expected = MetadataProviderException.class)
     public void testPopulateCredentialLocalEntity_invalidName() throws Exception {
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getContextPath()).andReturn("/");
+        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn("ABC");
+        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         replayMock();
-        SAMLCredential credential = getCredential(null);
-        contextProvider.getLocalEntity(request, response, credential);
+        contextProvider.getLocalEntity(request, response);
+        verifyMock();
     }
 
 }

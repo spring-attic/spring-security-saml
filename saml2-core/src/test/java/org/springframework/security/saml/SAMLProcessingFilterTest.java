@@ -81,6 +81,8 @@ public class
      */
     @Test(expected = SAMLRuntimeException.class)
     public void testErrorDuringProcessing() throws Exception {
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getContextPath()).andReturn("/saml");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(processor.retrieveMessage((SAMLMessageContext) notNull())).andThrow(new SAMLException("Processing error"));
@@ -105,6 +107,8 @@ public class
         AuthenticationManager manager = createMock(AuthenticationManager.class);
         processingFiler.setAuthenticationManager(manager);
 
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getContextPath()).andReturn("/saml");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
@@ -136,6 +140,8 @@ public class
         AuthenticationManager manager = createMock(AuthenticationManager.class);
         processingFiler.setAuthenticationManager(manager);
 
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getContextPath()).andReturn("/saml");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();

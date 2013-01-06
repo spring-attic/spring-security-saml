@@ -81,6 +81,8 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
         contextProvider = context.getBean("contextProvider", SAMLContextProviderImpl.class);
         ((SAMLContextProviderImpl) contextProvider).setStorageFactory(new StorageFactoryTestImpl(storage));
 
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getContextPath()).andReturn("/");
         replyMock();
 
@@ -122,8 +124,10 @@ public class WebSSOProfileHoKImplTest extends SAMLTestBase {
             manager.removeMetadataProvider(manager.getProviders().iterator().next());
             manager.refreshMetadata();
         }
-        samlContext = contextProvider.getLocalAndPeerEntity(request, response);
+        expect(request.isSecure()).andReturn(false);
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
         replyMock();
+        samlContext = contextProvider.getLocalAndPeerEntity(request, response);
         profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
     }

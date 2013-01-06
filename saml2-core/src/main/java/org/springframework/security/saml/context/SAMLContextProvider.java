@@ -31,7 +31,7 @@ public interface SAMLContextProvider {
 
     /**
      * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
-     * as message transports. Should be used when local entity (SP or IDP) can be determined from the request object.
+     * as message transports. Local entity ID is populated from data in the request object.
      *
      * @param request request
      * @param response response
@@ -42,7 +42,7 @@ public interface SAMLContextProvider {
 
     /**
      * Creates a SAMLContext with local entity and peer values filled. Also request and response must be stored in the context
-     * as message transports. Should be used when both local entity and peer entity can be determined from the request.
+     * as message transports. Local and peer entity IDs are populated from data in the request object.
      *
      * @param request request
      * @param response response
@@ -50,17 +50,5 @@ public interface SAMLContextProvider {
      * @throws MetadataProviderException in case of metadata problems
      */
     SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException;
-
-    /**
-     * Creates a SAMLContext with local entity values filled. Also request and response must be stored in the context
-     * as message transports. Local entity is populated based on the SAMLCredential.
-     *
-     * @param request  request
-     * @param response response
-     * @param credential credential to load entity for
-     * @return context
-     * @throws MetadataProviderException in case of metadata problems
-     */
-    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response, SAMLCredential credential) throws MetadataProviderException;
 
 }

@@ -135,6 +135,8 @@ public class SAMLEntryPointTest {
         expect(request.getContextPath()).andReturn("/app");
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn(null);
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(servletContext.getContextPath()).andReturn("/samlApp");
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         response.sendRedirect("/samlApp/saml/discovery?returnIDParam=idp&entityID=http://localhost:8081/spring-security-saml2-webapp");
@@ -270,6 +272,8 @@ public class SAMLEntryPointTest {
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("testIDP").times(2);
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(request.getHeader("Accept")).andReturn(
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -292,6 +296,8 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
+        expect(request.isSecure()).andReturn(false).anyTimes();
+        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
         expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn("http://localhost:8080/opensso");
 

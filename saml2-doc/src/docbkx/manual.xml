@@ -961,11 +961,47 @@
         <section id="configuration-context-provider">
             <title>Context provider</title>
             <para>TODO</para>
-            <!--
-        - default SAMLDefaultLogger, SAMLEmptyLogger
-            -->
         </section>
-
+        
+        <section id="load-balancing">
+            <title>Load balancing</title>
+            <para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
+            SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
+            to confugure SAML Extension for deployment behing a load balancer or a reverse-proxy please follow these steps:
+            
+            <itemizedlist>
+                    <listitem>
+                        <para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
+                        within user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
+                        Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContex.xml</emphasis> 
+                        to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+    <property name="scheme" value="https"/>
+    <property name="serverName" value="www.myserver.com"/>
+    <property name="serverPort" value="443"/>
+    <property name="includeServerPortInRequestURL" value="false"/>
+    <property name="contextPath" value="/spring-security-saml2-sample"/>
+</bean>]]></programlisting></para>
+                      <para>This setting enables extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
+                    </listitem>
+                    <listitem>
+                        <para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseUrl</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
+                        bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter" 
+        class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <constructor-arg>
+        <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+            <property name="entityBaseURL" value="https://www.myserver.com/spring-security-saml2-sample"/>
+        </bean>
+    </constructor-arg>
+</bean>]]></programlisting></para>
+                    </listitem>
+                </itemizedlist>    
+                                
+            </para>
+        </section>        
+        
         <!--
         IDP integration
         - integration with Shibboleth

@@ -940,22 +940,100 @@
 
         <section id="configuration-authentication-object">
             <title>Authentication object</title>
-            <para>TODO</para>
-            <!--
-        - parsing SAML attributes
-        - forcePrincipalAsString
-        - configuring userDetailService
-        - granted authorities
-        - authentication expiration
-            -->
+            <para>Successful authentication using SAML token results in creation of an <emphasis>Authentication</emphasis> object by 
+            the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis> 
+            is created. Content of the resulting object can be customized by setting properties of the <emphasis>samlAuthenticationProvider</emphasis> bean in the <emphasis>securityContext.xml</emphasis>.
+            Instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application specific information about the 
+            authenticated user. Property <emphasis>forcePrincipalAsString</emphasis> can be used to force String value of the <emphasis>principal</emphasis> property. The Authentication object
+            is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
+            
+            <table id="authentication-object-table">
+                <title>ExpiringUsernameAuthenticationToken values.</title>
+                <tgroup cols="2">
+                    <colspec colname="_1" colwidth="0.2*" align="left"/>
+                    <colspec colname="_2" colwidth="1.0*" align="left"/>
+                    <thead>
+                        <row>
+                            <entry>Property</entry>
+                            <entry>Value</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = false AND userDetail = null (default) - <emphasis>NameID</emphasis> object included in the SAML Assertion (<emphasis>credential.getNameID()</emphasis> of type <emphasis>org.opensaml.saml2.core.NameID</emphasis>)</entry>
+                        </row>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = true - <emphasis>String</emphasis> value of <emphasis>NameID</emphasis> included in the SAML Assertion (<emphasis>credential.getNameID().getValue()</emphasis> of type java.lang.String)</entry>
+                        </row>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = false AND userDetail != null - <emphasis>UserDetail</emphasis> object returned from the <emphasis>SAMLUserDetailsService</emphasis></entry>
+                        </row>
+                        <row>
+                            <entry>Credentials</entry>
+                            <entry>SAML authentication object including entity ID of local and remote entity, name ID, assertion and relay state (<emphasis>org.springframework.security.saml.SAMLCredential</emphasis>)</entry>
+                        </row>
+                        <row>
+                            <entry>Authorities</entry>
+                            <entry>Result of <emphasis>getAuthorities()</emphasis> call on the <emphasis>UserDetails</emphasis> object returned from <emphasis>SAMLUserDetailsService</emphasis>, empty list when there's no <emphasis>UserDetail</emphasis> object available.</entry>
+                        </row>
+                        <row>
+                            <entry>Expiration</entry>
+                            <entry>Value of <emphasis>SessionNotOnOrAfter</emphasis> in the SAML Assertion when avaialble, null otherwise. <emphasis>Authentication</emphasis> object will start returning false on the <emphasis>isAuthenticated()</emphasis> after the expiration time.</entry>
+                        </row>                                                                                                                        
+                    </tbody>
+                </tgroup>
+            </table></para>
+            
+            <para>Custom implementation of the <emphasis>SAMLUserDetailsService</emphasis> can be provided as property <emphasis>userDetails</emphasis> of the <emphasis>SAMLAuthenticationProvider</emphasis>.
+            Implementation can perform operation such as parsing of attributes present in the SAML Assertion, e.g.: 
+            <programlisting><![CDATA[package fi.schafer.test.saml;
+
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.xml.XMLObject;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
+
+public class TestUserDetails implements SAMLUserDetailsService {
+
+    @Override
+    public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
+        Attribute accountID = credential.getAttributeByName("accountID");
+        if (accountID == null || accountID.getAttributeValues() == null
+                     || accountID.getAttributeValues().size() == 0) {
+            return null;
+        }
+        XMLObject attributeValue = accountID.getAttributeValues().iterator().next();
+        return attributeValue.getDOM().getTextContent();
+    }
+
+}]]></programlisting></para>
+            
+            <para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods 
+            in the <emphasis>SAMLAuthenticationProvider</emphasis>.</para>
+
         </section>
 
         <section id="configuration-authentication-log">
             <title>Authentication log</title>
-            <para>TODO</para>
-            <!--
-        - default SAMLDefaultLogger, SAMLEmptyLogger
-            -->
+            <para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
+            A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including it's bean
+            in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
+            <para>Two basic implementations are provided by default:          
+            <itemizedlist>
+              <listitem>
+                  <para>org.springframework.security.saml.log.SAMLEmptyLogger</para>
+                  <para>Doesn't perform any logging, simply ignores all events.</para>
+              </listitem>
+              <listitem>
+                  <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
+                  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="chapter-troubleshooting-logging"/>. Setting
+                  property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log.</para>
+              </listitem>              
+            </itemizedlist></para> 
         </section>
 
         <section id="configuration-context-provider">
@@ -1181,9 +1259,23 @@
         <info>
             <title>Troubleshooting</title>
         </info>
+        
+        <section id="chapter-troubleshooting-logging">
+          <title>Logging</title>
+          <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML 
+          library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
+          <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding: 
+            <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
+log4j.logger.org.opensaml=DEBUG</programlisting></para>            
+          <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
+        </section>
+        
+        <section id="chapter-troubleshooting-common-issues">
+          <title>Common problems</title>
+          <para></para>
+        </section>
+                
         <!--
-        - enabling debugging, slf4j
-        - common problems
         - XML parsing libraries and endorsing
         - time skew problems
         -->

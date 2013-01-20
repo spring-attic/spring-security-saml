@@ -960,7 +960,45 @@
 
         <section id="configuration-context-provider">
             <title>Context provider</title>
-            <para>TODO</para>
+            <para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credetials
+            and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
+            in processing of the incoming or outgoing SAML messages. ContextProvider can customized to alter behavior of the SAML Extension. The default 
+            implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the extendedMetadata and 
+            performs the followign steps for creation of the context:
+            
+            <itemizedlist>
+                    <listitem>
+                        <para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and match 
+                        it with property <emphasis>alias</emphasis> specified in the extendedMetadata. In case URL doesn't contain any alias part the default service provider 
+                        configured with property <emphasis>hostedSPName</emphasis> on the <emphasis>metadata</emphasis> bean is used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate credential used to decrypt data sent to this service provider. In case extendedMetadata specifies property <emphasis>encryptionKey</emphasis>
+                        it will be used as an alias to lookup a private key from the <emphasis>keyManager</emphasis> bean. Otherwise defaultKey of the <emphasis>keyManager</emphasis> bean will be used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate credential used for SSL/TLS client authentication. In case extendedMetadata specifies property <emphasis>tlsKey</emphasis> it will be used
+                        as an alias to lookup key from <emphasis>keyManager</emphasis> bean. Otherwise no credential will be provided for client authentication.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate trust engine for verification of signatures. Depending on <emphasis>securityProfile</emphasis> setting in the extendedMetadata trust engine 
+                        based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate trust engine for verification of SSL/TLS connections. Depending on <emphasis>sslSecurityProfile</emphasis> setting in the extendedMetadata 
+                        trust engine based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
+                    </listitem>                                                            
+            </itemizedlist></para>
+            
+            <para>During initialization of SSO ContextProvider is also requested to provide metadata of the peer IDP. System performs these steps to locate peer IDP to use:
+            
+            <itemizedlist>
+                    <listitem>
+                        <para>Load parameter <emphasis>idp</emphasis> of the HttpRequest object and try to locate peer IDP by the entityId. When there's no <emphasis>idp</emphasis> 
+                        parameter provided system will either start IDP discovery process (when enabled in the extendedMetadata of the local SP) or use the default IDP specified in the 
+                        <emphasis>metadata</emphasis> bean.</para>
+                    </listitem>
+            </itemizedlist></para>                                   
         </section>
         
         <section id="load-balancing">

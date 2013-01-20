@@ -21,8 +21,6 @@
 
     <!--
     1. Introduction
-    OK - What is covered
-    OK - When to use
     - Requirements
     - Supported environments
     - Jira, Support forum
@@ -43,28 +41,27 @@
         <section id="section-what-this-manual-covers">
             <title>What this manual covers</title>
 
-            <para>This manual describes Spring Security SAML SP component, it's uses, installation, configuration,
+            <para>This manual describes Spring Security SAML Extension component, it's uses, installation, configuration,
                 design and tested environments.
             </para>
         </section>
 
         <section id="section-when-to-use">
-            <title>When to use Spring Security SAML SP</title>
+            <title>When to use Spring Security SAML Extension</title>
 
             <para>Component enables both new and existing applications to act as a Service Provider in federations based on
-                SAML 2.0 protocol. Spring Security Extension also allows seamless combination with other authentication and federation 
-                mechanisms together with SAML 2.0 in a single application. The key use-case beind the project is enabling web single 
-                sign-on. All products supporting SAML 2.0 in Identity Provider mode such as ADFS 2.0, OpenAM (OpenSSO), RM5 IdM or Ping
-                Federate can be used to connect with Spring Security SAML SP.
-            </para>
-            <para>Spring Security SAML SP can be either embedded inside application and work along other authentication
+                SAML 2.0 protocol and enable Web Single Sign-On. Spring Security Extension allows seamless combination of SAML 2.0 and other authentication and federation 
+                mechanisms in a single application. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, RM5 IdM or Ping
+                Federate) can be used to connect with Spring Security SAML Extension.</para>
+            <para>Extension be used in applications which are not primarily secured using Spring Security. It can be adapted 
+                for both single and multi-tenant environments. </para>
+            <para>Spring Security SAML Extension can be either embedded inside application and work along other authentication 
                 or single sign-on mechanisms or it can be deployed separately and convey authentication information to
-                applications using a custom mechanism.
-            </para>
-            <para>Open-source alternatives to this component are e.g. native SAML service providers integrating with IIS
-                or Apache from Shibboleth, where SAML processing is done on the web server and not on the application
-                level. OpenAM Fedlet is another mean to enable SAML SP capabilities in an application.
-            </para>
+                applications using a custom mechanism.</para>
+            <para>Spring Security Extension is probably the most complete open-source SAML 2.0 SP implementation with the widest 
+                feature-set and configuration possibilities. Other Java open-source alternatives are e.g. native SAML service providers 
+                integrating with IIS or Apache from Shibboleth (SAML processing is done on the web server and not on the application
+                level) or OpenAM Fedlet.</para>
         </section>
 
         <section id="section-features-and-profiles">
@@ -122,7 +119,7 @@
                         <para>Easy integration with applications using Spring Security</para>
                     </listitem>
                     <listitem>
-                        <para>Sample application</para>
+                        <para>Sample application with an user interface for quick configuration</para>
                     </listitem>
                 </itemizedlist>
             </para>
@@ -187,7 +184,7 @@
         <section id="section-requirements">
             <title>Requirements</title>
 
-            <para>Spring Security SAML SP requires as minimum Java 1.6.</para>
+            <para>Spring Security SAML Extension requires as minimum Java 1.6.</para>
             <para>TODO Apache Tomcat, Jetty, Oracle Weblogic, ....</para>
         </section>
 
@@ -284,14 +281,14 @@
                                 is provided in form of security assertions.</entry>
                         </row>
                         <row>
-                            <entry>Single Sign-On (SSO) (only web-SSO)</entry>
+                            <entry>Single Sign-On (SSO)</entry>
                             <entry>Process enabling access to multiple web sites without need to repeatedly present credentials necessary
                             for authentication. Various federation protocols such as SAML, WS-Federation, OpenID or OAuth can be used to achieve
                             SSO use-cases. Information such as means of authentication, user attributes, authorization decisions or security tokens are
                             typically provided to the service provider as part of single sign-on.</entry>
                         </row>
                         <row>
-                            <entry>Single Logout (SLO) (only web-SLO)</entry>
+                            <entry>Single Logout (SLO)</entry>
                             <entry>Process terminating authenticated sessions at all resources which were accessed using single sign-on. Techniques
                             such as redirecting user to each of the SSO participants or sending a logout SOAP messages are typically used.</entry>
                         </row>                                                
@@ -305,7 +302,7 @@
     <chapter id="chapter-quick-start">
         <title>Quick start guide</title>
         <para>
-            This chapter will guide you through steps required to easily integrate Spring Security SAML SP with SSO
+            This chapter will guide you through steps required to easily integrate Spring Security SAML Extension with SSO
             Circle IDP service using SAML 2.0 protocol.
             When done you will have a working example of Web SSO against a single Identity Provider. The steps will
             guide you through deployment of the module,
@@ -323,7 +320,7 @@
                         <para>Supported application server or container</para>
                     </listitem>
                     <listitem>
-                        <para>Spring Security SAML SP</para>
+                        <para>Spring Security SAML Extension</para>
                     </listitem>
                     <listitem>
                         <para>Java 1.6+ SDK</para>
@@ -342,7 +339,7 @@
             <section id="quick-start-compilation">
                 <title>Compilation of the module</title>
                 <para>
-                    After downloading the Spring Security SAML SP module and unziping compile the whole project using:
+                    After downloading the Spring Security SAML Extension module and unziping compile the whole project using:
                     <programlisting>mvn package</programlisting>
                 </para>
                 <para>
@@ -912,21 +909,60 @@
             </section>
         </section>
 
+        <section id="configuration-sso">
+            <title>Single sign-on process</title>
+            <para>SP initialized SSO process can be started in two ways:
+            <itemizedlist spacing="compact">
+                <listitem>
+                    <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
+                </listitem>
+                <listitem>
+                    <para>User is redirected to the SSO page at e.g. https://www.server.com/saml/login/alias/defaultAlias</para>                    
+                </listitem>                
+            </itemizedlist>
+            </para>            
+            <para>After identification of IDP to use (for details see <xref linkend="configuration-discovery"/>) SAML Extension creates an AuthnRequest SAML message
+            and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
+            object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>. 
+            Default implementation returns value specified in property <emphasis>defaultOptions</emphasis>. Method can be overriden to provide custom logic for SSO initialization.</para>
+            <para>The following SSO parameters can be customized using the <emphasis>WebSSOProfileOptions</emphasis> object:        
+            <table id="configuration-sso-webssoprofile-table">
+                <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
+                <tgroup cols="2">
+                    <colspec colname="_1" colwidth="0.2*" align="left"/>
+                    <colspec colname="_2" colwidth="1.0*" align="left"/>
+                    <thead>
+                        <row>
+                            <entry>Property</entry>
+                            <entry>Value</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry></entry>
+                            <entry></entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table></para>
+            <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
+            <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
+    <property name="defaultProfileOptions">
+        <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+            <property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+            <property name="includeScoping" value="false"/>
+        </bean>
+    </property>
+</bean>]]></programlisting></para>
+        </section>
+        
         <section id="configuration-discovery">
             <title>IDP selection</title>
             <para>TODO</para>
             <!--
             - configuring IDP discovery
             -->
-        </section>
-
-        <section id="configuration-sso">
-            <title>Single sign-on process</title>
-            <para>TODO</para>
-            <!--
-            - name ID, authncontext, consumer index, ...
-            -->
-        </section>
+        </section>        
 
         <section id="configuration-logout">
             <title>Logout process</title>
@@ -1285,7 +1321,6 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
     Acknowledgements
     SEPARATE CHAPTER? - sample flow
     8. Known issues
-    multi-tenancy
     deployment to application servers
     -->
 
@@ -1413,16 +1448,6 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
                     </tgroup>
                 </table>
             </para>
-        </section>
-
-        <section id="reference-web-sso">
-            <title>WebSSO profile options</title>
-            <para>Configuration bean can be found in
-                <emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis>
-                and provides means to customize authentication request sent to the IDP. For details on setting the login
-                process please see <xref linkend="configuration-sso"/>.
-            </para>
-            <!-- TODO -->
         </section>
     </appendix>
 

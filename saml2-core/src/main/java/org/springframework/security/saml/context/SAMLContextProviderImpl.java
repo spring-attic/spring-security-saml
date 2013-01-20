@@ -132,7 +132,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     /**
      * First tries to find pre-configured IDP from the request attribute. If not found
-     * foads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
+     * loads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
      * IDP in our circle of trust. Processing fails when IDP is not valid. IDP is set as PeerEntityId in the context.
      * <p/>
      * If request parameter is null the default IDP is returned.
@@ -145,7 +145,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
         String entityId;
 
-        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
+        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);
         if (entityId != null) { // Pre-configured entity Id
             logger.debug("Using protocol specified IDP {}", entityId);
         } else {

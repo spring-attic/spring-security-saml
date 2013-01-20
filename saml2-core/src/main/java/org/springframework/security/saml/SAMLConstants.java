@@ -68,9 +68,14 @@ public class SAMLConstants {
     public static final String PAOS_HTTP_HEADER = "PAOS";
 
     /**
-     * Used inside HttpServletRequest to indicate required local entity id to the context provider.
+     * Used as attribute inside HttpServletRequest to indicate required local entity id to the context provider.
      */
     public static final String LOCAL_ENTITY_ID = "localEntityId";
+
+    /**
+     * Used as attribute inside HttpServletRequest to indicate required peer entity id to the context provider.
+     */
+    public static final String PEER_ENTITY_ID = "peerEntityId";
 
     /**
      * Used to store context path inside InTransport

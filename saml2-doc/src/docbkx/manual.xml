@@ -742,7 +742,7 @@
                     </para>
                     <para>
                         In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
-                        from the URL seen by client at least property <literal>entityBaseURL</literal> should be set to a value e.g. https://www.server.com
+                        from the URL seen by client at least property <literal>entityBaseURL</literal> should be set to a value e.g. https://www.server.com:8080
                     </para>
                 </section>
 
@@ -787,9 +787,9 @@
            <property name="requireLogoutResponseSigned" value="false"/>
            <property name="idpDiscoveryEnabled" value="true"/>
            <property name="idpDiscoveryURL" 
-              value="http://www.test.com:8080/samlApp/saml/discovery/alias/default"/>
+              value="https://www.server.com:8080/context/saml/discovery/alias/default"/>
            <property name="idpDiscoveryResponseURL" 
-              value="http://www.test.com:8080/samlApp/saml/login/alias/default?disco=true"/>
+              value="https://www.server.com:8080/context/saml/login/alias/default?disco=true"/>
         </bean>
     </constructor-arg>
 </bean>]]></programlisting></para>
@@ -803,7 +803,11 @@
 
                 <section id="configuration-metadata-sp-display">
                     <title>Downloading metadata</title>
-                    <para>TODO</para>
+                    <para>Metadata describing the default local application can be downloaded from URL: <programlisting>https://www.server.com:8080/context/saml/metadata</programlisting></para>
+                    <para>In case application is configured to contain multiple service providers metadata for each can be loaded by 
+                    adding the unique alias: <programlisting>https://www.server.com:8080/context/saml/login/alias/defaultAlias</programlisting></para>
+                    <para>URL for metadata download can be disabled by removing filter <emphasis>metadataDisplayFilter</emphasis> from the <emphasis>securityContext.xml</emphasis>.</para> 
+                    <para>Metadata is also available in the sample application's administration UI under <emphasis>Metadata information -&gt; selected SP</emphasis>.</para>
                 </section>
             </section>
 
@@ -828,7 +832,7 @@
             </section>
 
             <section id="configuration-metadata-extended">
-                <title>Exteneded metadata</title>
+                <title>Extended metadata</title>
                 <para>TODO</para>
             </section>
         </section>
@@ -974,7 +978,7 @@
                     <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
                 </listitem>
                 <listitem>
-                    <para>User is redirected to the SSO page at e.g. https://www.server.com/saml/login/alias/defaultAlias</para>                    
+                    <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>                    
                 </listitem>                
             </itemizedlist>
             </para>            

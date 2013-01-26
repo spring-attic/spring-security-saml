@@ -383,10 +383,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         for (String key : stringSet) {
 
-            RoleDescriptor roleDescriptor;
-            roleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+            RoleDescriptor idpRoleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
 
-            if (roleDescriptor != null) {
+            if (idpRoleDescriptor != null) {
                 if (idpName.contains(key)) {
                     log.warn("Provider {} contains entity {} with IDP which was already contained in another metadata provider and will be ignored", provider, key);
                 } else {
@@ -394,8 +393,8 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
                 }
             }
 
-            roleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
-            if (roleDescriptor != null) {
+            RoleDescriptor spRoleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+            if (spRoleDescriptor != null) {
                 if (spName.contains(key)) {
                     log.warn("Provider {} contains entity {} which was already included in another metadata provider and will be ignored", provider, key);
                 } else {
@@ -410,6 +409,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                 if (extendedMetadata.isLocal()) {
 
+                    // Parse alias
                     String alias = extendedMetadata.getAlias();
                     if (alias != null) {
 
@@ -432,6 +432,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                         log.debug("Local entity {} doesn't have an alias", key);
 
+                    }
+
+                    // Set default local SP
+                    if (spRoleDescriptor != null && getHostedSPName() == null) {
+                        setHostedSPName(key);
                     }
 
                 } else {

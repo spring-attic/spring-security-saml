@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.SAMLTestBase;
@@ -71,15 +72,12 @@ public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
         builderFactory = Configuration.getBuilderFactory();
 
         HttpServletRequest request = createMock(HttpServletRequest.class);
-        expect(request.isSecure()).andReturn(false).anyTimes();
-        expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
-        expect(request.getContextPath()).andReturn("/").anyTimes();
-        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null).anyTimes();
-        replay(request);
+        SAMLTestHelper.setLocalContextParameters(request, "/", null);
 
         AssertionConsumerService assertionConsumerService = ((SAMLObjectBuilder<AssertionConsumerService>) builderFactory.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME)).buildObject();
         assertionConsumerService.setLocation("testLocation");
 
+        replay(request);
         messageContext = contextProvider.getLocalEntity(request, null);
         messageContext.setLocalEntityEndpoint(assertionConsumerService);
         verify(request);

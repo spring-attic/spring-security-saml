@@ -255,7 +255,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                 discoveryUrl = samlDiscovery.getFilterProcessesUrl();
             }
 
-            String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_ENTITY_ID);
+            String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
 
             logger.debug("Using local discovery URL");

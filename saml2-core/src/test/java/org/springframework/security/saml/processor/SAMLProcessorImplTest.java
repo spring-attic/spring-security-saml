@@ -25,6 +25,8 @@ import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.SAMLConstants;
+import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
@@ -52,10 +54,8 @@ public class SAMLProcessorImplTest {
         processor = context.getBean("processor", SAMLProcessorImpl.class);
 
         request = createMock(HttpServletRequest.class);
-        expect(request.isSecure()).andReturn(false).anyTimes();
-        expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null);
-        expect(request.getAttribute("javax.servlet.request.X509Certificate")).andReturn(null);
-        expect(request.getContextPath()).andReturn("/").anyTimes();
+
+        SAMLTestHelper.setLocalContextParameters(request, "/", null);
 
         replayMock();
         SAMLContextProvider contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);

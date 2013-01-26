@@ -12,7 +12,7 @@
         </authorgroup>
         <productname>Spring Security SAML Extension</productname>
         <copyright>
-            <year>2009-2012</year>
+            <year>2009-2013</year>
             <holder><link xlink:href="mailto:vladimir.schafer@gmail.com">Vladimír Schäfer</link></holder>
         </copyright>
         <releaseinfo>3.0-RC2</releaseinfo>
@@ -330,7 +330,11 @@
                     </listitem>
                 </itemizedlist>
             </para>
-            <para>TODO endorsed libraries</para>
+            <para>SAML Extension relies on XML processing capabilities of JAXP. Some older versions of JRE might require updating of the embedded
+            JAXP libraries. In case you encounter XML processing exceptions please create folder <emphasis>jdk/jre/lib/endorsed</emphasis> in your
+            JDK installation and include files in <emphasis>lib/endorsed</emphasis> from the latest OpenSAML archive available at 
+            <ulink url="http://shibboleth.net/downloads/java-opensaml/">http://shibboleth.net/downloads/java-opensaml/</ulink>. The location of the
+            endorsed folder may differ based on your application server or container.</para>
         </section>
 
         <section id="quick-start-steps">
@@ -549,7 +553,8 @@
     <version>3.1</version>
 </dependency>]]></programlisting>
                 </para>
-                <!-- TODO more about dependencies -->
+                <para>The current version of SAML Extension has been tested to work with Spring 3.1.2, Spring Security 3.1.2 and OpenSAML 2.5.3.
+                Later versions of these libraries are likely to be compatible without modifications.</para>
             </section>
             <section id="configuration-integration-bean-definitions">
                 <title>Bean definitions</title>
@@ -585,6 +590,8 @@
                 </para>
             </section>
         </section>
+        
+        <!-- TODO Combining other authentication methods -->
 
         <section id="configuration-metadata">
             <title>Metadata configuration</title>
@@ -741,7 +748,57 @@
 
                 <section id="configuration-metadata-sp-import">
                     <title>Pre-configured metadata</title>
-                    <para>TODO</para>
+                    <para>In some situations it is beneficial to provide static version of the metadata document instead of the automatic generation. Need
+                    for manual changes in the metadata or fixing of production settings are some of those. Custom metadata document describing local SP application
+                    can be added by updating the <emphasis>metadata</emphasis> bean with correct <emphasis>extendedMetadata</emphasis>. Please follow these steps
+                    in order to do so: <itemizedlist>
+                      <listitem>
+                          <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <xref linkend="configuration-metadata-sp-generation">automatic metadata generator</xref>.</para>                        
+                      </listitem>                    
+                      <listitem>
+                          <para>Store the metadata file as part of your project classpath, e.g. in <emphasis>WEB-INF/classes/security/localhost_sp.xml</emphasis>.</para>                        
+                      </listitem>                    
+                      <listitem>
+                          <para>Disable the automatic metadata generator by removing the following custom filter from the <emphasis>securityContext.xml</emphasis>: <programlisting><![CDATA[<security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>]]></programlisting></para>
+                      </listitem>
+                      <listitem>
+                          <para>Include the SP metadata in the <emphasis>metadata</emphasis> bean and mark the entity as <emphasis>local</emphasis> in the extended metadata. Make sure to specify the <emphasis>alias</emphasis>
+                          property in case it was used during metadata generation.</para>                        
+                          <para>It is recommended to use the administration UI which also generates all the Spring declarations ready for inclusion in your <emphasis>securityContext.xml</emphasis>.</para>
+                          <para><programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+    <constructor-arg>
+        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+            <constructor-arg>
+                <value type="java.io.File">classpath:security/localhost_sp.xml</value>
+            </constructor-arg>
+            <property name="parserPool" ref="parserPool"/>
+        </bean>
+    </constructor-arg>
+    <constructor-arg>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+           <property name="local" value="true"/>
+           <property name="alias" value="default"/>
+           <property name="securityProfile" value="metaiop"/>
+           <property name="sslSecurityProfile" value="pkix"/>
+           <property name="signingKey" value="apollo"/>
+           <property name="encryptionKey" value="apollo"/>
+           <property name="requireArtifactResolveSigned" value="false"/>
+           <property name="requireLogoutRequestSigned" value="false"/>
+           <property name="requireLogoutResponseSigned" value="false"/>
+           <property name="idpDiscoveryEnabled" value="true"/>
+           <property name="idpDiscoveryURL" 
+              value="http://www.test.com:8080/samlApp/saml/discovery/alias/default"/>
+           <property name="idpDiscoveryResponseURL" 
+              value="http://www.test.com:8080/samlApp/saml/login/alias/default?disco=true"/>
+        </bean>
+    </constructor-arg>
+</bean>]]></programlisting></para>
+                      </listitem>
+                    </itemizedlist></para>                    
+                    <para>Same instance of your application can include multiple statically declared local service providers each differentiated with it's own unique 
+                    alias and entity ID. Each service provider can e.g. process a different domain or have different key settings. This feature makes it possible to create multi-tenant applications with 
+                    individual SAML settings for each of the tenants. In case multiple local SPs are declared, property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis> 
+                    bean should be set to the entity ID of the default one.</para>
                 </section>
 
                 <section id="configuration-metadata-sp-display">

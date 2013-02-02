@@ -181,12 +181,14 @@ public class MetadataGenerator {
         descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
 
-        if (signMetadata) {
-            try {
+        try {
+            if (signMetadata) {
                 signSAMLObject(descriptor, keyManager.getCredential(signingKey));
-            } catch (MessageEncodingException e) {
-                throw new RuntimeException(e);
+            } else {
+                marshallSAMLObject(descriptor);
             }
+        } catch (MessageEncodingException e) {
+            throw new RuntimeException(e);
         }
 
         return descriptor;
@@ -606,23 +608,29 @@ public class MetadataGenerator {
             }
 
             signableMessage.setSignature(signature);
+            marshallSAMLObject(signableMessage);
 
             try {
-                Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(signableMessage);
-                if (marshaller == null) {
-                    throw new MessageEncodingException("No marshaller registered for "
-                            + signableMessage.getElementQName() + ", unable to marshall in preperation for signing");
-                }
-                marshaller.marshall(signableMessage);
-
                 Signer.signObject(signature);
-            } catch (MarshallingException e) {
-                log.error("Unable to marshall protocol message in preparation for signing", e);
-                throw new MessageEncodingException("Unable to marshall protocol message in preparation for signing", e);
             } catch (SignatureException e) {
                 log.error("Unable to sign protocol message", e);
                 throw new MessageEncodingException("Unable to sign protocol message", e);
             }
+
+        }
+    }
+
+    private void marshallSAMLObject(SAMLObject samlObject) throws MessageEncodingException {
+        try {
+            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(samlObject);
+            if (marshaller == null) {
+                throw new MessageEncodingException("No marshaller registered for "
+                        + samlObject.getElementQName() + ", unable to marshall in preperation for signing");
+            }
+            marshaller.marshall(samlObject);
+        } catch (MarshallingException e) {
+            log.error("Unable to marshall protocol message in preparation for signing", e);
+            throw new MessageEncodingException("Unable to marshall protocol message in preparation for signing", e);
         }
     }
 

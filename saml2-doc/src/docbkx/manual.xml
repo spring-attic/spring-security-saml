@@ -688,18 +688,18 @@
                                     </row>
                                     <row>
                                         <entry><literal>bindingsSSO</literal></entry>
-                                        <entry>Bindings to be included in the metadata for WebSSO profile.</entry>
-                                        <entry>POST, PAOS, HTTP-Artifact</entry>
+                                        <entry>Bindings to be included in the metadata for WebSSO profile. Supported values are: POST, Artifact and PAOS. Order of bindings in the property determines order of endpoints in the generated metadata.</entry>
+                                        <entry>Artifact, POST, PAOS</entry>
                                     </row>
                                     <row>
                                         <entry><literal>bindingsHoKSSO</literal></entry>
-                                        <entry>Bindings to be included in the metadata for WebSSO Holder-of-Key profile.</entry>
-                                        <entry>POST, HTTP-Artifact</entry>
+                                        <entry>Bindings to be included in the metadata for WebSSO Holder-of-Key profile. Supported values are: POST and Artifact. Order of bindings in the property determines order of endpoints in the generated metadata.</entry>
+                                        <entry>Artifact, POST</entry>
                                     </row>
                                     <row>
                                         <entry><literal>bindingsSLO</literal></entry>
-                                        <entry>Bindings to be included in the metadata for Single Logout profile.</entry>
-                                        <entry>POST, HTTP-Redirect, SOAP</entry>
+                                        <entry>Bindings to be included in the metadata for Single Logout profile. Supported values are: POST and Redirect. Order of bindings in the property determines order of endpoints in the generated metadata.</entry>
+                                        <entry>POST, Redirect</entry>
                                     </row>
                                     <row>
                                         <entry><literal>assertionConsumerIndex</literal></entry>
@@ -728,7 +728,7 @@
                                     </row>                                    
                                     <row>
                                         <entry><literal>nameID</literal></entry>
-                                        <entry>Supported name identifiers to be included in the metadata.</entry>
+                                        <entry>Name identifiers to be included in the metadata. Supported values are: EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED and X509_SUBJECT. Order of NameIDs in the property determines order of NameIDs in the generated metadata.</entry>
                                         <entry>EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED, X509_SUBJECT</entry>
                                     </row>
                                 </tbody>
@@ -1396,7 +1396,7 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
         <section id="reference-extended-metadata">
             <title>Extended metadata</title>
             <para>Extended metadata provides additional settings for customization of IDP and SP behavior. Bean can be
-                found in package<emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
+                found in package <emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
                 details
                 on setting up metadata please consult<xref linkend="configuration-metadata"/>.
                 <table id="reference-extended-metadata-settings">

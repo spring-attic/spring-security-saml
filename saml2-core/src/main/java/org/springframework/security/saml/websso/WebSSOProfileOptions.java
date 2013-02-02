@@ -164,6 +164,13 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     /**
      * When set determines which NameIDPolicy will be requested as part of the AuthnRequest sent to the IDP.
      *
+     * @see org.opensaml.saml2.core.NameIDType#EMAIL
+     * @see org.opensaml.saml2.core.NameIDType#TRANSIENT
+     * @see org.opensaml.saml2.core.NameIDType#PERSISTENT
+     * @see org.opensaml.saml2.core.NameIDType#X509_SUBJECT
+     * @see org.opensaml.saml2.core.NameIDType#KERBEROS
+     * @see org.opensaml.saml2.core.NameIDType#UNSPECIFIED
+     *
      * @param nameID name ID
      */
     public void setNameID(String nameID) {
@@ -174,6 +181,11 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         return allowCreate;
     }
 
+    /**
+     * Flag indicating whether IDP can create new user based on the current authentication request.
+     *
+     * @param allowCreate allow create
+     */
     public void setAllowCreate(boolean allowCreate) {
         this.allowCreate = allowCreate;
     }

@@ -75,9 +75,37 @@ public class MetadataGenerator {
 
     private int assertionConsumerIndex = 0;
 
-    private Collection<String> bindingsSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_PAOS_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
-    private Collection<String> bindingsHoKSSO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
-    private Collection<String> bindingsSLO = Arrays.asList(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLConstants.SAML2_SOAP11_BINDING_URI);
+    // List of case-insensitive alias terms
+    private static TreeMap<String, String> aliases = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+    static {
+        aliases.put(SAMLConstants.SAML2_POST_BINDING_URI, SAMLConstants.SAML2_POST_BINDING_URI);
+        aliases.put("post", SAMLConstants.SAML2_POST_BINDING_URI);
+        aliases.put("http-post", SAMLConstants.SAML2_POST_BINDING_URI);
+        aliases.put(SAMLConstants.SAML2_PAOS_BINDING_URI, SAMLConstants.SAML2_PAOS_BINDING_URI);
+        aliases.put("paos", SAMLConstants.SAML2_PAOS_BINDING_URI);
+        aliases.put(SAMLConstants.SAML2_ARTIFACT_BINDING_URI, SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+        aliases.put("artifact", SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+        aliases.put("http-artifact", SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
+        aliases.put(SAMLConstants.SAML2_REDIRECT_BINDING_URI, SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+        aliases.put("redirect", SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+        aliases.put("http-redirect", SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+        aliases.put(SAMLConstants.SAML2_SOAP11_BINDING_URI, SAMLConstants.SAML2_SOAP11_BINDING_URI);
+        aliases.put("soap", SAMLConstants.SAML2_SOAP11_BINDING_URI);
+        aliases.put(NameIDType.EMAIL, NameIDType.EMAIL);
+        aliases.put("email", NameIDType.EMAIL);
+        aliases.put(NameIDType.TRANSIENT, NameIDType.TRANSIENT);
+        aliases.put("transient", NameIDType.TRANSIENT);
+        aliases.put(NameIDType.PERSISTENT, NameIDType.PERSISTENT);
+        aliases.put("persistent", NameIDType.PERSISTENT);
+        aliases.put(NameIDType.UNSPECIFIED, NameIDType.UNSPECIFIED);
+        aliases.put("unspecified", NameIDType.UNSPECIFIED);
+        aliases.put(NameIDType.X509_SUBJECT, NameIDType.X509_SUBJECT);
+        aliases.put("x509_subject", NameIDType.X509_SUBJECT);
+    }
+
+    private Collection<String> bindingsSSO = Arrays.asList("artifact", "post", "paos");
+    private Collection<String> bindingsHoKSSO = Arrays.asList("artifact", "post");
+    private Collection<String> bindingsSLO = Arrays.asList("post", "redirect");
 
     private boolean includeDiscovery = true;
     private String customDiscoveryURL;
@@ -87,11 +115,14 @@ public class MetadataGenerator {
     private ExtendedMetadata extendedMetadata;
 
     private Collection<String> nameID = null;
-    public static final Collection<String> defaultNameID = Arrays.asList(NameIDType.EMAIL,
+
+    public static final Collection<String> defaultNameID = Arrays.asList(
+            NameIDType.EMAIL,
             NameIDType.TRANSIENT,
             NameIDType.PERSISTENT,
             NameIDType.UNSPECIFIED,
-            NameIDType.X509_SUBJECT);
+            NameIDType.X509_SUBJECT
+    );
 
     protected XMLObjectBuilderFactory builderFactory;
 
@@ -239,32 +270,43 @@ public class MetadataGenerator {
         // Populate endpoints
         int index = 0;
 
+        // Resolve alases
+        Collection<String> bindingsSSO = mapAliases(getBindingsSSO());
+        Collection<String> bindingsSLO = mapAliases(getBindingsSLO());
+        Collection<String> bindingsHoKSSO = mapAliases(getBindingsHoKSSO());
+
         // Assertion consumer MUST NOT be used with HTTP Redirect, Profiles 424, same applies to HoK profile
-        if (bindingsSSO.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
-        }
-        if (bindingsSSO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
-        }
-        if (bindingsSSO.contains(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
-        }
-
-        if (bindingsHoKSSO.contains(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
-        }
-        if (bindingsHoKSSO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+        for (String binding : bindingsSSO) {
+            if (binding.equals(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
+                spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            }
+            if (binding.equals(SAMLConstants.SAML2_POST_BINDING_URI)) {
+                spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+            }
+            if (binding.equals(SAMLConstants.SAML2_PAOS_BINDING_URI)) {
+                spDescriptor.getAssertionConsumerServices().add(getAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOProcessingFilterPath(), SAMLConstants.SAML2_PAOS_BINDING_URI));
+            }
         }
 
-        if (bindingsSLO.contains(SAMLConstants.SAML2_POST_BINDING_URI)) {
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_POST_BINDING_URI));
+        for (String binding : bindingsHoKSSO) {
+            if (binding.equals(SAMLConstants.SAML2_ARTIFACT_BINDING_URI)) {
+                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_ARTIFACT_BINDING_URI));
+            }
+            if (binding.equals(SAMLConstants.SAML2_POST_BINDING_URI)) {
+                spDescriptor.getAssertionConsumerServices().add(getHoKAssertionConsumerService(entityBaseURL, entityAlias, assertionConsumerIndex == index, index++, getSAMLWebSSOHoKProcessingFilterPath(), SAMLConstants.SAML2_POST_BINDING_URI));
+            }
         }
-        if (bindingsSLO.contains(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
-        }
-        if (bindingsSLO.contains(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
-            spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_SOAP11_BINDING_URI));
+
+        for (String binding : bindingsSLO) {
+            if (binding.equals(SAMLConstants.SAML2_POST_BINDING_URI)) {
+                spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_POST_BINDING_URI));
+            }
+            if (binding.equals(SAMLConstants.SAML2_REDIRECT_BINDING_URI)) {
+                spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_REDIRECT_BINDING_URI));
+            }
+            if (binding.equals(SAMLConstants.SAML2_SOAP11_BINDING_URI)) {
+                spDescriptor.getSingleLogoutServices().add(getSingleLogoutService(entityBaseURL, entityAlias, SAMLConstants.SAML2_SOAP11_BINDING_URI));
+            }
         }
 
         // Build extensions
@@ -288,6 +330,27 @@ public class MetadataGenerator {
 
         return spDescriptor;
 
+    }
+
+    /**
+     * Method iterates all values in the input, for each tries to resolve correct alias. When alias value is found,
+     * it is entered into the return collection, otherwise warning is logged. Values are returned in order of input
+     * with all duplicities removed.
+     *
+     * @param values input collection
+     * @return result with resolved aliases
+     */
+    protected Collection<String> mapAliases(Collection<String> values) {
+        LinkedHashSet<String> result = new LinkedHashSet<String>();
+        for (String value : values) {
+            String alias = aliases.get(value);
+            if (alias != null) {
+                result.add(alias);
+            } else {
+                log.warn("Unsupported value " + value + " found");
+            }
+        }
+        return result;
     }
 
     protected Extensions buildExtensions(String entityBaseURL, String entityAlias) {
@@ -319,42 +382,49 @@ public class MetadataGenerator {
     }
 
     protected Collection<NameIDFormat> getNameIDFormat(Collection<String> includedNameID) {
+
+        // Resolve alases
+        includedNameID = mapAliases(includedNameID);
         Collection<NameIDFormat> formats = new LinkedList<NameIDFormat>();
-
         SAMLObjectBuilder<NameIDFormat> builder = (SAMLObjectBuilder<NameIDFormat>) builderFactory.getBuilder(NameIDFormat.DEFAULT_ELEMENT_NAME);
-        NameIDFormat nameID;
 
-        if (includedNameID.contains(NameIDType.EMAIL)) {
-            nameID = builder.buildObject();
-            nameID.setFormat(NameIDType.EMAIL);
-            formats.add(nameID);
-        }
+        // Populate nameIDs
+        for (String nameIDValue : includedNameID) {
 
-        if (includedNameID.contains(NameIDType.TRANSIENT)) {
-            nameID = builder.buildObject();
-            nameID.setFormat(NameIDType.TRANSIENT);
-            formats.add(nameID);
-        }
+            if (nameIDValue.equals(NameIDType.EMAIL)) {
+                NameIDFormat nameID = builder.buildObject();
+                nameID.setFormat(NameIDType.EMAIL);
+                formats.add(nameID);
+            }
 
-        if (includedNameID.contains(NameIDType.PERSISTENT)) {
-            nameID = builder.buildObject();
-            nameID.setFormat(NameIDType.PERSISTENT);
-            formats.add(nameID);
-        }
+            if (nameIDValue.equals(NameIDType.TRANSIENT)) {
+                NameIDFormat nameID = builder.buildObject();
+                nameID.setFormat(NameIDType.TRANSIENT);
+                formats.add(nameID);
+            }
 
-        if (includedNameID.contains(NameIDType.UNSPECIFIED)) {
-            nameID = builder.buildObject();
-            nameID.setFormat(NameIDType.UNSPECIFIED);
-            formats.add(nameID);
-        }
+            if (nameIDValue.equals(NameIDType.PERSISTENT)) {
+                NameIDFormat nameID = builder.buildObject();
+                nameID.setFormat(NameIDType.PERSISTENT);
+                formats.add(nameID);
+            }
 
-        if (includedNameID.contains(NameIDType.X509_SUBJECT)) {
-            nameID = builder.buildObject();
-            nameID.setFormat(NameIDType.X509_SUBJECT);
-            formats.add(nameID);
+            if (nameIDValue.equals(NameIDType.UNSPECIFIED)) {
+                NameIDFormat nameID = builder.buildObject();
+                nameID.setFormat(NameIDType.UNSPECIFIED);
+                formats.add(nameID);
+            }
+
+            if (nameIDValue.equals(NameIDType.X509_SUBJECT)) {
+                NameIDFormat nameID = builder.buildObject();
+                nameID.setFormat(NameIDType.X509_SUBJECT);
+                formats.add(nameID);
+            }
+
         }
 
         return formats;
+
     }
 
     protected AssertionConsumerService getAssertionConsumerService(String entityBaseURL, String entityAlias, boolean isDefault, int index, String filterURL, String binding) {
@@ -513,7 +583,7 @@ public class MetadataGenerator {
     /**
      * Signs the given SAML message if it a {@link org.opensaml.common.SignableSAMLObject} and this encoder has signing credentials.
      *
-     * @param signableObject      object to sign
+     * @param signableObject    object to sign
      * @param signingCredential credential to sign with
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the outbound message
@@ -649,7 +719,7 @@ public class MetadataGenerator {
 
     public void setBindingsSSO(Collection<String> bindingsSSO) {
         if (bindingsSSO == null) {
-            this.bindingsSSO = Collections.emptySet();
+            this.bindingsSSO = Collections.emptyList();
         } else {
             this.bindingsSSO = bindingsSSO;
         }
@@ -661,7 +731,7 @@ public class MetadataGenerator {
 
     public void setBindingsSLO(Collection<String> bindingsSLO) {
         if (bindingsSLO == null) {
-            this.bindingsSLO = Collections.emptySet();
+            this.bindingsSLO = Collections.emptyList();
         } else {
             this.bindingsSLO = bindingsSLO;
         }
@@ -673,7 +743,7 @@ public class MetadataGenerator {
 
     public void setBindingsHoKSSO(Collection<String> bindingsHoKSSO) {
         if (bindingsHoKSSO == null) {
-            this.bindingsHoKSSO = Collections.emptySet();
+            this.bindingsHoKSSO = Collections.emptyList();
         } else {
             this.bindingsHoKSSO = bindingsHoKSSO;
         }

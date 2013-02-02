@@ -17,12 +17,16 @@ package org.springframework.security.saml.metadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.metadata.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * Test for metadata generator.
@@ -60,6 +64,34 @@ public class MetadataGeneratorTest {
         assertNotNull(spssoDescriptor.getExtensions());
         assertNotNull(spssoDescriptor.getExtensions().getUnknownXMLObjects());
         assertTrue(spssoDescriptor.getExtensions().getUnknownXMLObjects().size() == 1);
+
+        assertEquals(5, spssoDescriptor.getAssertionConsumerServices().size());
+        assertEquals(2, spssoDescriptor.getSingleLogoutServices().size());
+
+        // Custom bindings
+        generator.setBindingsSSO(Arrays.asList("paos", "POst", "POST"));
+        generator.setBindingsSLO(Arrays.asList("soap"));
+        generator.setBindingsHoKSSO(null);
+        generator.setNameID(Arrays.asList("transient", "email", "TRANSIENT"));
+        generator.setAssertionConsumerIndex(1);
+
+        metadata = generator.generateMetadata();
+        spssoDescriptor = metadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+
+        List<AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
+        assertEquals(2, assertionConsumerServices.size());
+        assertEquals(SAMLConstants.SAML2_PAOS_BINDING_URI, assertionConsumerServices.get(0).getBinding());
+        assertEquals(SAMLConstants.SAML2_POST_BINDING_URI, assertionConsumerServices.get(1).getBinding());
+        assertEquals(Boolean.TRUE, assertionConsumerServices.get(1).isDefault());
+
+        List<SingleLogoutService> logoutServices = spssoDescriptor.getSingleLogoutServices();
+        assertEquals(1, logoutServices.size());
+        assertEquals(SAMLConstants.SAML2_SOAP11_BINDING_URI, logoutServices.get(0).getBinding());
+
+        List<NameIDFormat> nameID = spssoDescriptor.getNameIDFormats();
+        assertEquals(2, nameID.size());
+        assertEquals(NameIDType.TRANSIENT, nameID.get(0).getFormat());
+        assertEquals(NameIDType.EMAIL, nameID.get(1).getFormat());
 
     }
 

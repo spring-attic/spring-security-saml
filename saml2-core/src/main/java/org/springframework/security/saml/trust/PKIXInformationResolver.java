@@ -39,6 +39,7 @@ import org.springframework.security.saml.metadata.MetadataManager;
 
 import javax.xml.namespace.QName;
 import java.lang.ref.SoftReference;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -145,13 +146,26 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         Collection<PKIXValidationInformation> credentials = retrieveFromCache(cacheKey);
 
         if (credentials == null) {
-            credentials = new LinkedList<PKIXValidationInformation>();
-            populateMetadataAnchors(criteriaSet, credentials);
-            populateTrustedKeysAnchors(criteriaSet, credentials);
+            credentials = populateCredentials(criteriaSet);
             cacheCredentials(cacheKey, credentials);
         }
 
         return credentials;
+    }
+
+    /**
+     * Method responsible for loading of PKIX information.
+     *
+     * @param criteriaSet criteria for selection of data to include
+     * @return PKIX information
+     */
+    protected Collection<PKIXValidationInformation> populateCredentials(CriteriaSet criteriaSet) throws SecurityException {
+        Collection<X509Certificate> anchors = new ArrayList<X509Certificate>();
+        Collection<X509CRL> crls = new ArrayList<X509CRL>();
+        populateMetadataAnchors(criteriaSet, anchors, crls);
+        populateTrustedKeysAnchors(criteriaSet, anchors, crls);
+        PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, crls, getPKIXDepth());
+        return new ArrayList<PKIXValidationInformation>(Arrays.asList(info));
     }
 
     /**
@@ -208,16 +222,16 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * Method loads credentials satisfying the criteriaSet from the metadata of the related entity.
      *
      * @param criteriaSet     criteria set
-     * @param pkixInformation pkix data to collect
+     * @param anchors pkix anchors
+     * @param crls CRLs for the anchors
      * @throws SecurityException thrown if the key, certificate, or CRL information is represented in an unsupported format
      */
-    protected void populateMetadataAnchors(CriteriaSet criteriaSet, Collection<PKIXValidationInformation> pkixInformation) throws SecurityException {
+    protected void populateMetadataAnchors(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls) throws SecurityException {
 
         String entityID = criteriaSet.get(EntityIDCriteria.class).getEntityID();
         log.debug("Attempting to retrieve PKIX trust anchors from metadata configuration for entity: {}", entityID);
         Iterable<Credential> metadataCredentials = metadataResolver.resolve(criteriaSet);
 
-        Collection<X509Certificate> anchors = new LinkedList<X509Certificate>();
         for (Credential key : metadataCredentials) {
             if (key instanceof X509Credential) {
                 X509Credential cred = (X509Credential) key;
@@ -228,22 +242,20 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
             }
         }
 
-        PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, null, getPKIXDepth());
-        pkixInformation.add(info);
-
     }
 
     /**
-     * Method creates a single PKIXValidationInformation instance which includes all trusted certificates configuration
+     * Method add trusted anchors which include all trusted certificates configuration
      * in the ExtendedMetadata. In case no trusted certificates were configured all certificates in the KeyManager
-     * are considered as trusted.
+     * are considered as trusted and added to the anchor list.
      *
      * @param criteriaSet     criteria set
-     * @param pkixInformation collected pkix data
+     * @param anchors pkix anchors
+     * @param crls CRLs for the anchors
      * @throws SecurityException thrown if the key, certificate, or CRL information is represented in an unsupported
      *                           format
      */
-    protected void populateTrustedKeysAnchors(CriteriaSet criteriaSet, Collection<PKIXValidationInformation> pkixInformation)
+    protected void populateTrustedKeysAnchors(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
             throws SecurityException {
 
         try {
@@ -260,13 +272,9 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
                 trustedKeys = keyManager.getAvailableCredentials();
             }
 
-            Collection<X509Certificate> anchors = new LinkedList<X509Certificate>();
             for (String key : trustedKeys) {
                 anchors.add(keyManager.getCertificate(key));
             }
-
-            PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, null, getPKIXDepth());
-            pkixInformation.add(info);
 
         } catch (MetadataProviderException e) {
             throw new SecurityException("Error loading extended metadata", e);

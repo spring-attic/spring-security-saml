@@ -7,9 +7,8 @@
     <artifactId>spring-security-saml2-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-RC2-SNAPSHOT</version>
-    <name>Spring Security SAML v2</name>
-
-    <description>Spring Security Extensions SAML v2</description>
+    <name>Spring Security SAML Extension</name>
+    <description>Extension to Spring Security enabling web single sign-on using SAML 2.0 protocol.</description>
     <organization>
         <name>SpringSource, Inc</name>
         <url>http://www.springsource.com/</url>
@@ -31,10 +30,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:https://src.springframework.org/svn/se-security/trunk/</connection>
-        <developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-saml
-        </developerConnection>
-        <url>https://src.springframework.org/svn/se-security/trunk/spring-security-saml</url>
+        <connection>scm:git:git://github.com/SpringSource/spring-security-saml.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-security-saml.git</developerConnection>
+        <url>https://github.com/SpringSource/spring-security-saml</url>
     </scm>
 
     <developers>
@@ -62,6 +60,18 @@
         <system>jira</system>
         <url>http://jira.springsource.org/browse/SES</url>
     </issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>Spring Security SAML Forum</name>
+            <post>
+                http://forum.springsource.org/forumdisplay.php?86-SAML
+            </post>
+            <archive>
+                http://forum.springsource.org/forumdisplay.php?86-SAML
+            </archive>
+        </mailingList>
+    </mailingLists>
 
     <distributionManagement>
         <repository>

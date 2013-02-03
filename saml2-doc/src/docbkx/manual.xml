@@ -736,6 +736,14 @@
                         </table>
                     </para>
                     <para>
+                        Providing an empty collection or null value to properties <emphasis>bindingsSSO</emphasis>, <emphasis>bindingsHoKSSO</emphasis> and <emphasis>bindingsSLO</emphasis>
+                        will disable and remove the given profile. For example the following setting removes the holder-of-key profile from the generated metadata, 
+                        forces artifact binding for single sign-on and redirect binding for single logout: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+    <property name="bindingsSSO"><list><value>artifact</value></list></property>
+    <property name="bindingsSLO"><list><value>redirect</value></list></property>
+    <property name="bindingsHoKSSO"><list/></property>
+</bean>]]></programlisting></para>
+                    <para>
                         By default generated metadata will be digitally signed using the default credential specified in KeyManager
                         (see <xref linkend="configuration-key-management"/> for details). Digital signature can be disabled using property
                         <literal>signMetadata</literal> of the <emphasis>metadataGeneratorFilter</emphasis> bean.
@@ -743,6 +751,7 @@
                     <para>
                         In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
                         from the URL seen by client at least property <literal>entityBaseURL</literal> should be set to a value e.g. https://www.server.com:8080
+                        For details about load balancing see <xref linkend="load-balancing"/>.
                     </para>
                 </section>
 

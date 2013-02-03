@@ -20,10 +20,9 @@
     <toc/>
 
     <!--
-    1. Introduction
+    TODO
     - Requirements
     - Supported environments
-    - Jira, Support forum
     -->
 
     <part xml:id="getting-started">
@@ -759,7 +758,7 @@
                     <title>Pre-configured metadata</title>
                     <para>In some situations it is beneficial to provide static version of the metadata document instead of the automatic generation. Need
                     for manual changes in the metadata or fixing of production settings are some of those. Custom metadata document describing local SP application
-                    can be added by updating the <emphasis>metadata</emphasis> bean with correct <emphasis>extendedMetadata</emphasis>. Please follow these steps
+                    can be added by updating the <emphasis>metadata</emphasis> bean with correct <emphasis>ExtendedMetadata</emphasis>. Please follow these steps
                     in order to do so: <itemizedlist>
                       <listitem>
                           <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <xref linkend="configuration-metadata-sp-generation">automatic metadata generator</xref>.</para>                        
@@ -805,16 +804,17 @@
                       </listitem>
                     </itemizedlist></para>                    
                     <para>Same instance of your application can include multiple statically declared local service providers each differentiated with it's own unique 
-                    alias and entity ID. Each service provider can e.g. process a different domain or have different key settings. This feature makes it possible to create multi-tenant applications with 
+                    alias and entity ID. Each service provider can e.g. process a different domain or have different security key settings. This feature makes it possible to create multi-tenant applications with 
                     individual SAML settings for each of the tenants. In case multiple local SPs are declared, property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis> 
                     bean should be set to the entity ID of the default one.</para>
+                    <para>For details about available settings of the ExtendedMetadata see <xref linkend="reference-extended-metadata"/>.</para>
                 </section>
 
                 <section id="configuration-metadata-sp-display">
                     <title>Downloading metadata</title>
                     <para>Metadata describing the default local application can be downloaded from URL: <programlisting>https://www.server.com:8080/context/saml/metadata</programlisting></para>
                     <para>In case application is configured to contain multiple service providers metadata for each can be loaded by 
-                    adding the unique alias: <programlisting>https://www.server.com:8080/context/saml/login/alias/defaultAlias</programlisting></para>
+                    adding the alias: <programlisting>https://www.server.com:8080/context/saml/login/alias/defaultAlias</programlisting></para>
                     <para>URL for metadata download can be disabled by removing filter <emphasis>metadataDisplayFilter</emphasis> from the <emphasis>securityContext.xml</emphasis>.</para> 
                     <para>Metadata is also available in the sample application's administration UI under <emphasis>Metadata information -&gt; selected SP</emphasis>.</para>
                 </section>
@@ -822,27 +822,85 @@
 
             <section id="configuration-metadata-idp">
                 <title>Identity provider metadata</title>
-                <para>TODO</para>
+                <para>Metadata for identity providers is imported to the <emphasis>metadataManager</emphasis> in a similar way as pre-configured
+                SP metadata. Metadata containing one or many identity providers can be added by providing an URL or a file. Processing of metadata and
+                processing of SAML messages can be customized using properties of <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtendedMetadata</emphasis>.</para>
 
                 <section id="configuration-metadata-idp-file">
                     <title>File-based metadata provider</title>
-                    <para>TODO</para>
+                    <para>File-based provider loads metadata from a file available in the filesystem or classpath.<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+    <constructor-arg>
+        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+            <constructor-arg>
+                <value type="java.io.File">classpath:security/idp.xml</value>
+            </constructor-arg>
+            <property name="parserPool" ref="parserPool"/>
+        </bean>
+    </constructor-arg>
+    <constructor-arg>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
+    </constructor-arg>
+</bean>]]></programlisting></para>
+                  <para>Metadata is automatically refreshed in intervals specified by properties <emphasis>minRefreshDelay</emphasis> and <emphasis>maxRefreshDelay</emphasis> of the <emphasis>MetadataProvider</emphasis> bean.</para>
                 </section>
 
                 <section id="configuration-metadata-idp-http">
                     <title>HTTP-based metadata provider</title>
-                    <para>TODO</para>
+                    <para>HTTP-based provider loads metadata from an URL.<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+    <constructor-arg>
+        <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
+            <constructor-arg>
+                <value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
+            </constructor-arg>
+            <constructor-arg>
+                <!-- Timeout for metadata loading in ms -->
+                <value type="int">5000</value>
+            </constructor-arg>
+            <property name="parserPool" ref="parserPool"/>
+        </bean>
+    </constructor-arg>
+    <constructor-arg>
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
+    </constructor-arg>
+</bean>]]></programlisting></para>
+                    <para>Metadata is automatically refreshed in intervals specified by properties <emphasis>minRefreshDelay</emphasis> and <emphasis>maxRefreshDelay</emphasis> of the <emphasis>MetadataProvider</emphasis> bean.</para>
+                    <para>Alternatively class <emphasis>org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider</emphasis> can be used to provide a backup in case URL is temporarily unavailable. File
+                    to use as backup is specified as third argument in the <emphasis>MetadataProvider</emphasis> bean constructor.</para>
                 </section>
 
                 <section id="configuration-metadata-idp-signature">
                     <title>Signature verification</title>
-                    <para>TODO</para>
+                    <para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
+                    When present, signature is verifies using PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trusted anchors. Make sure to include root CA 
+                    certificate and intermediary CA certificates of the signature in your <emphasis>keyStore</emphasis>. For details see <xref linkend="configuration-key-management-public-keys"/>.</para>
+                    <para>You can limit certificates used to peform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the <emphasis>ExtendedMetadataDelegate</emphasis> bean. The provided
+                    collection should contain aliases of keys to be used as trust anchors.</para>
+                    <para>Signature verification can be disabled by setting property <emphasis>metadataTrustCheck</emphasis> to false in the <emphasis>ExtendedMetadataDelegate</emphasis> bean.
+                    Setting <emphasis>metadataRequireSignature</emphasis> to true will reject metadata unless it's digitally signed.</para>
                 </section>
             </section>
 
             <section id="configuration-metadata-extended">
                 <title>Extended metadata</title>
-                <para>TODO</para>
+                <para>Additional processing instructions related to SAML exchanges with the IDP can be defined in ExtendedMetadata bean. In case your metadata document contains
+                multiple identity providers (in multiple EntityDescriptor elements) extended metadata can be set separately for each of them using a map with entity ids as keys, e.g.: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+    <constructor-arg>
+        metadata provider bean
+    </constructor-arg>
+    <constructor-arg>
+        <!-- Default extended metadata for entities not specified in the map -->
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
+    </constructor-arg>
+    <constructor-arg>
+        <!-- Extended metadata for specific IDPs -->
+        <map>
+            <entry key="http://idp.ssocircle.com">
+                <bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
+            </entry>
+        </map>
+    </constructor-arg>
+</bean>]]></programlisting></para>                                
+                <para>For details about available settings of the ExtendedMetadata see <xref linkend="reference-extended-metadata"/>.</para>
             </section>
         </section>
 
@@ -1007,6 +1065,7 @@
                             <entry>Value</entry>
                         </row>
                     </thead>
+                    <!-- TODO provide values -->
                     <tbody>
                         <row>
                             <entry></entry>
@@ -1029,7 +1088,7 @@
         <section id="configuration-discovery">
             <title>IDP selection</title>
             <para>TODO</para>
-            <!--
+            <!-- TODO
             - configuring IDP discovery
             -->
         </section>        
@@ -1037,7 +1096,7 @@
         <section id="configuration-logout">
             <title>Logout process</title>
             <para>TODO</para>
-            <!--
+            <!-- TODO
         - local logout
         - single logout
         - configuring both local and IDP login + logout
@@ -1147,29 +1206,29 @@ public class TestUserDetails implements SAMLUserDetailsService {
             <para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credetials
             and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
             in processing of the incoming or outgoing SAML messages. ContextProvider can customized to alter behavior of the SAML Extension. The default 
-            implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the extendedMetadata and 
+            implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the ExtendedMetadata and 
             performs the followign steps for creation of the context:
             
             <itemizedlist>
                     <listitem>
                         <para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and match 
-                        it with property <emphasis>alias</emphasis> specified in the extendedMetadata. In case URL doesn't contain any alias part the default service provider 
+                        it with property <emphasis>alias</emphasis> specified in the ExtendedMetadata. In case URL doesn't contain any alias part the default service provider 
                         configured with property <emphasis>hostedSPName</emphasis> on the <emphasis>metadata</emphasis> bean is used.</para>
                     </listitem>
                     <listitem>
-                        <para>Populate credential used to decrypt data sent to this service provider. In case extendedMetadata specifies property <emphasis>encryptionKey</emphasis>
+                        <para>Populate credential used to decrypt data sent to this service provider. In case ExtendedMetadata specifies property <emphasis>encryptionKey</emphasis>
                         it will be used as an alias to lookup a private key from the <emphasis>keyManager</emphasis> bean. Otherwise defaultKey of the <emphasis>keyManager</emphasis> bean will be used.</para>
                     </listitem>
                     <listitem>
-                        <para>Populate credential used for SSL/TLS client authentication. In case extendedMetadata specifies property <emphasis>tlsKey</emphasis> it will be used
+                        <para>Populate credential used for SSL/TLS client authentication. In case ExtendedMetadata specifies property <emphasis>tlsKey</emphasis> it will be used
                         as an alias to lookup key from <emphasis>keyManager</emphasis> bean. Otherwise no credential will be provided for client authentication.</para>
                     </listitem>
                     <listitem>
-                        <para>Populate trust engine for verification of signatures. Depending on <emphasis>securityProfile</emphasis> setting in the extendedMetadata trust engine 
+                        <para>Populate trust engine for verification of signatures. Depending on <emphasis>securityProfile</emphasis> setting in the ExtendedMetadata trust engine 
                         based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
                     </listitem>
                     <listitem>
-                        <para>Populate trust engine for verification of SSL/TLS connections. Depending on <emphasis>sslSecurityProfile</emphasis> setting in the extendedMetadata 
+                        <para>Populate trust engine for verification of SSL/TLS connections. Depending on <emphasis>sslSecurityProfile</emphasis> setting in the ExtendedMetadata 
                         trust engine based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
                     </listitem>                                                            
             </itemizedlist></para>
@@ -1179,7 +1238,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
             <itemizedlist>
                     <listitem>
                         <para>Load parameter <emphasis>idp</emphasis> of the HttpRequest object and try to locate peer IDP by the entityId. When there's no <emphasis>idp</emphasis> 
-                        parameter provided system will either start IDP discovery process (when enabled in the extendedMetadata of the local SP) or use the default IDP specified in the 
+                        parameter provided system will either start IDP discovery process (when enabled in the ExtendedMetadata of the local SP) or use the default IDP specified in the 
                         <emphasis>metadata</emphasis> bean.</para>
                     </listitem>
             </itemizedlist></para>                                   
@@ -1224,10 +1283,11 @@ public class TestUserDetails implements SAMLUserDetailsService {
             </para>
         </section>        
         
-        <!--
+        <!-- TODO
         IDP integration
         - integration with Shibboleth
         - integration with OpenAM
+        - integration with VMWare Horizon
 
         Message storage
 
@@ -1382,16 +1442,16 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
         </section>
                 
         <!--
+        TODO
         - XML parsing libraries and endorsing
         - time skew problems
+        -- deployment to application servers
         -->
     </chapter>
 
     <!--
-    Acknowledgements
-    SEPARATE CHAPTER? - sample flow
-    8. Known issues
-    deployment to application servers
+    TODO
+    Acknowledgements   
     -->
 
     </part>       

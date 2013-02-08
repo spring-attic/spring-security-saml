@@ -413,8 +413,10 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (signature != null) {
             verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned) {
-            log.debug("Assertion must be signed, but is not");
-            throw new SAMLException("Assertion must be signed");
+            if (!context.isInboundSAMLMessageAuthenticated()) {
+                log.debug("Metadata includes wantAssertionSigned, but neither SAML message nor Assertion is signed");
+                throw new SAMLException("Assertion or SAML message must be signed");
+            }
         }
     }
 

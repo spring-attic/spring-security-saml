@@ -871,7 +871,7 @@
                 <section id="configuration-metadata-idp-signature">
                     <title>Signature verification</title>
                     <para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
-                    When present, signature is verifies using PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trusted anchors. Make sure to include root CA 
+                    When present, signature is verified with PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trust anchors. Make sure to include root CA 
                     certificate and intermediary CA certificates of the signature in your <emphasis>keyStore</emphasis>. For details see <xref linkend="configuration-key-management-public-keys"/>.</para>
                     <para>You can limit certificates used to peform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the <emphasis>ExtendedMetadataDelegate</emphasis> bean. The provided
                     collection should contain aliases of keys to be used as trust anchors.</para>
@@ -933,25 +933,42 @@
         </map>
     </constructor-arg>
     <constructor-arg type="java.lang.String" value="apollo"/>
-</bean>]]></programlisting>
-                    First argument points to the used key store file, second contains password for the keystore, third then map with
-                    passwords for private keys with alias-password value pairs. Alias of the default certificate is the last parameter.
-                </para>
+</bean>]]></programlisting></para>
+                <para>The first argument points to the used key store file, second contains password for the keystore, third then map with
+                passwords for private keys with alias-password value pairs. Alias of the default certificate is the last parameter.</para>
             </section>
 
             <section id="configuration-key-management-private-keys">
                 <title>Generating and importing private keys</title>
-                <para>TODO</para>
+                <para>Private keys (with either self-signed or CA signed certificates) are used to digitally sign SAML messages, 
+                encrypt their content and in some cases for SSL/TLS Client authentication of your service provider application.
+                SAML Extension ships with a default private key in the <emphasis>samlKeystore.jks</emphasis> with alias <emphasis>apollo</emphasis>
+                which can be used for initial testing, but for security reason should be replaced with your own key in early development stages.</para>
+                <para>In case your IDP doesn't require keys signed by a specific certification authority you can generate your own self-signed key using the 
+                Java utility <emphasis>keytool</emphasis>, e.g. with: <programlisting>keytool -genkeypair -alias some-alias -keypass changeit -keystore samlKeystore.jks</programlisting></para>
+                <para>The keystore will now contain additional PrivateKeyEntry with alias mykey which can be imported to the <emphasis>keyManager</emphasis> in your <emphasis>securityContext.xml</emphasis>.</para>
+                <para>Keys signed by certification authorities are typically provided in .p12/.pfx format (or can be converted to such using OpenSSL) and imported to Java keystore with, e.g.:
+                <programlisting>keytool -importkeystore -srckeystore key.p12 -srcstoretype PKCS12 -srcstorepass password \
+   -alias some-alias -destkeystore samlKeystore.jks -destalias some-alias -destkeypass changeit</programlisting></para>
+   <para>The following command can be used to determine available alias in the p12 file: <programlisting>keytool -list -keystore key.p12 -storetype pkcs12</programlisting></para>
             </section>
 
             <section id="configuration-key-management-public-keys">
                 <title>Importing public keys</title>
-                <para>TODO</para>
+                <para>Cryptographic material used to decrypt incoming data and verify trust of signatures in SAML messages and metadata is stored either 
+                in metadata of remote entities or in the <emphasis>keyManager</emphasis>. In order to import additional trusted key to the keystore 
+                run, e.g.: <programlisting>keytool -importcert -alias some-alias -file key.cer -keystore samlKeystore.jks</programlisting></para>
+                <para>Imported keys can be referenced in <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtenedMetadata</emphasis> beans,
+                for details see <xref linkend="configuration-metadata-idp-signature"/> and <xref linkend="configuration-security-profiles"/>.</para>
             </section>
 
             <section id="configuration-key-management-ssl-keys">
                 <title>Loading SSL/TLS certificates</title>
-                <para>TODO</para>
+                <para>Direct SSL/TLS connections (used with HTTP-Artifact binding) require verification of the public key presented by the server.
+                The <ulink url="https://github.com/vschafer/ssl-extractor">SSL Extractor utility</ulink> can be used to extract certificates presented by an SSL/TLS
+                endpoint, e.g. with: <programlisting>java -jar sslextractor-0.9.jar www.google.com 443</programlisting></para>
+                <para>The certificates are stored as .cer files and can be imported to the keystore as a usual public key. For details about 
+                configuring of trust for SSL/TLS connections see <xref linkend="configuration-security-profiles"/>.</para>
             </section>
 
         </section>
@@ -1445,7 +1462,7 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
         TODO
         - XML parsing libraries and endorsing
         - time skew problems
-        -- deployment to application servers
+        - deployment to application servers
         -->
     </chapter>
 

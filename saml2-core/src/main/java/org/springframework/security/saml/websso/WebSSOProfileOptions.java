@@ -35,11 +35,10 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
 
     // Name ID policy
     private String nameID;
-    private boolean allowCreate;
-
-    private boolean passive = false;
-    private boolean forceAuthn = false;
-    private boolean includeScoping = true;
+    private Boolean allowCreate;
+    private Boolean passive = false;
+    private Boolean forceAuthn = false;
+    private Boolean includeScoping = true;
     private Integer proxyCount = 2;
 
     private Collection<String> authnContexts;
@@ -73,23 +72,23 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      * Sets whether the IdP should refrain from interacting with the user during the authentication process. Boolean
      * values will be marshalled to either "true" or "false".
      *
-     * @return true if passive authentication is allowed, false otherwise
+     * @return true if passive authentication is allowed, false otherwise, null will omit the passive parameter from request
      */
-    public boolean getPassive() {
+    public Boolean getPassive() {
         return passive;
     }
 
     /**
      * Sets whether the IdP should refrain from interacting with the user during the authentication process. Boolean
-     * values will be marshalled to either "true" or "false".
+     * values will be marshalled to either "true" or "false", value will be omitted from request when null..
      *
-     * @param passive true if passive authentication is allowed, false otherwise
+     * @param passive true if passive authentication is allowed, false otherwise, null to omit the field
      */
     public void setPassive(Boolean passive) {
         this.passive = passive;
     }
 
-    public boolean getForceAuthN() {
+    public Boolean getForceAuthN() {
         return forceAuthn;
     }
 
@@ -100,13 +99,13 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     /**
      * True if scoping element should be included in the requests sent to IDP.
      *
-     * @return true if scoping should be included
+     * @return true if scoping should be included, scoping won't be included when null or false
      */
-    public boolean isIncludeScoping() {
+    public Boolean isIncludeScoping() {
         return includeScoping;
     }
 
-    public void setIncludeScoping(boolean includeScoping) {
+    public void setIncludeScoping(Boolean includeScoping) {
         this.includeScoping = includeScoping;
     }
 
@@ -177,16 +176,17 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         this.nameID = nameID;
     }
 
-    public boolean isAllowCreate() {
+    public Boolean isAllowCreate() {
         return allowCreate;
     }
 
     /**
-     * Flag indicating whether IDP can create new user based on the current authentication request.
+     * Flag indicating whether IDP can create new user based on the current authentication request. Null value will
+     * omit field from the request.
      *
      * @param allowCreate allow create
      */
-    public void setAllowCreate(boolean allowCreate) {
+    public void setAllowCreate(Boolean allowCreate) {
         this.allowCreate = allowCreate;
     }
 

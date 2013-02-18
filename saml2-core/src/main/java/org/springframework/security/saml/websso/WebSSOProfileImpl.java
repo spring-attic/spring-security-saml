@@ -355,7 +355,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      */
     protected void buildScoping(AuthnRequest request, SingleSignOnService serviceURI, WebSSOProfileOptions options) {
 
-        if (options.isIncludeScoping()) {
+        if (options.isIncludeScoping() != null && options.isIncludeScoping()) {
 
             Set<String> idpEntityNames = options.getAllowedIDPs();
             IDPList idpList = buildIDPList(idpEntityNames, serviceURI);

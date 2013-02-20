@@ -1075,18 +1075,21 @@
                 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
                 <tgroup cols="2">
                     <colspec colname="_1" colwidth="0.2*" align="left"/>
-                    <colspec colname="_2" colwidth="1.0*" align="left"/>
+                    <colspec colname="_2" colwidth="0.2*" align="left"/>
+                    <colspec colname="_3" colwidth="1.0*" align="left"/>
                     <thead>
                         <row>
                             <entry>Property</entry>
                             <entry>Value</entry>
+                            <entry>Description</entry>
                         </row>
                     </thead>
                     <!-- TODO provide values -->
                     <tbody>
                         <row>
+                            <entry>relayState</entry>
                             <entry></entry>
-                            <entry></entry>
+                            <entry>Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
                         </row>
                     </tbody>
                 </tgroup>

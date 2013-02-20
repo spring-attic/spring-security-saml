@@ -41,6 +41,7 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     private Boolean includeScoping = true;
     private Integer proxyCount = 2;
 
+    private String relayState;
     private Collection<String> authnContexts;
     private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.EXACT;
 
@@ -255,6 +256,20 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      */
     public void setAssertionConsumerIndex(Integer assertionConsumerIndex) {
         this.assertionConsumerIndex = assertionConsumerIndex;
+    }
+
+    public String getRelayState() {
+        return relayState;
+    }
+
+    /**
+     * Relay state sent to the IDP as part of the authentication request. Value will be returned by IDP and made available
+     * in the SAMLCredential after successful authentication.
+     *
+     * @param relayState relay state
+     */
+    public void setRelayState(String relayState) {
+        this.relayState = relayState;
     }
 
 }

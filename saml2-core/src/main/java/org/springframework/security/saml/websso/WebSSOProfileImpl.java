@@ -98,6 +98,10 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         context.setPeerEntityRoleMetadata(idpssoDescriptor);
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
+        if (options.getRelayState() != null) {
+            context.setRelayState(options.getRelayState());
+        }
+
         boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();
         sendMessage(context, sign);
 

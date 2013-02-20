@@ -310,7 +310,7 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
     }
 
     /**
-     * Verfies that forceAuthN option is correctly set on outgoing SAML message, if set in options.
+     * Verifies that forceAuthN option is correctly set on outgoing SAML message, if set in options.
      *
      * @throws Exception error
      */
@@ -325,6 +325,21 @@ public class WebSSOProfileImplTest extends SAMLTestBase {
         assertEquals(true, authnRequest.isForceAuthn());
         assertEquals(false, authnRequest.isPassive());
         assertTrue(authnRequest.getScoping().getProxyCount() > 0);
+    }
+
+    /**
+     * Verifies that relay state is set when specified on webSSOProfileOptions.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testSendRelayState() throws Exception {
+        options.setRelayState("myRelayState");
+        storage.storeMessage((String) notNull(), (XMLObject) notNull());
+        replyMock();
+        profile.sendAuthenticationRequest(samlContext, options);
+        verifyMock();
+        assertEquals("myRelayState", samlContext.getRelayState());
     }
 
     /**

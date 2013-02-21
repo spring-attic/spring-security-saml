@@ -143,12 +143,41 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     }
 
     /**
-     * Stops and removes the timer in case it was started.
+     * Stops and removes the timer in case it was started. Cleans all metadata objects.
      */
     public void destroy() {
-        if (timer != null) {
-            timer.cancel();
+
+        try {
+
+            refreshLock.writeLock().lock();
+            lock.writeLock().lock();
+
+            for (MetadataProvider provider : getProviders()) {
+                if (provider instanceof ExtendedMetadataDelegate) {
+                    ((ExtendedMetadataDelegate) provider).destroy();
+                }
+            }
+
+            super.destroy();
+
+            if (timer != null) {
+                timer.cancel();
+                timer.purge();
+                timer = null;
+            }
+
+            // Workaround for Tomcat detection of terminated threads
+            try {Thread.sleep( 1000 );} catch ( InterruptedException ie ) { }
+
+            setRefreshRequired(false);
+
+        } finally {
+
+            lock.writeLock().unlock();
+            refreshLock.writeLock().unlock();
+
         }
+
     }
 
     @Override

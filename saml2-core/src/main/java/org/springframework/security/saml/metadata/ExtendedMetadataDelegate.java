@@ -171,6 +171,19 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
     }
 
     /**
+     * Method destroys the metadata delegate.
+     */
+    public void destroy() {
+        if (getDelegate() instanceof AbstractMetadataProvider) {
+            log.debug("Destroying delegate");
+            AbstractMetadataProvider provider = (AbstractMetadataProvider) getDelegate();
+            provider.destroy();
+        } else {
+            log.debug("Cannot destroy delegate, doesn't extend AbstractMetadataProvider");
+        }
+    }
+
+    /**
      * If set returns set of keys which can be used to verify whether signature of the metadata is trusted. When
      * not set any of the keys in the configured KeyManager can be used to verify trust.
      * <p/>

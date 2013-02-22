@@ -17,36 +17,30 @@ package org.springframework.security.saml.context;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.metadata.MetadataManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.springframework.security.saml.SAMLTestHelper.setLocalContextParameters;
 import static junit.framework.Assert.assertEquals;
 import static org.easymock.EasyMock.*;
+import static org.springframework.security.saml.SAMLTestHelper.setLocalContextParameters;
 
 /**
  * Test for the SAMLUtil class.
  *
  * @author Vladimir Schaefer
  */
-public class SAMLContextProviderImplTest extends SAMLTestBase {
+public class SAMLContextProviderImplTest {
 
     HttpServletRequest request;
     HttpServletResponse response;
 
-    SAMLCredential credential;
     ApplicationContext context;
     SAMLContextProviderImpl contextProvider;
     MetadataManager metadata;
@@ -61,15 +55,6 @@ public class SAMLContextProviderImplTest extends SAMLTestBase {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
 
-    }
-
-    protected SAMLCredential getCredential(String localEntityID) {
-        NameID nameID = ((SAMLObjectBuilder<NameID>) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME)).buildObject();
-        Assertion assertion = ((SAMLObjectBuilder<Assertion>) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
-        nameID.setValue("testName");
-        assertion.setID("testID");
-        credential = new SAMLCredential(nameID, assertion, "testIDP", localEntityID);
-        return credential;
     }
 
     protected void replayMock() {

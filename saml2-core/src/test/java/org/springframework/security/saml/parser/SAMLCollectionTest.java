@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.saml2.core.Attribute;
-import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.SAMLTestHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,16 +34,16 @@ import static junit.framework.Assert.assertEquals;
 /**
  * @author Vladimir Schafer
  */
-public class SAMLCollectionTest extends SAMLTestBase {
+public class SAMLCollectionTest {
 
     SAMLCollection<Attribute> attributesObject;
     List<Attribute> attributes;
 
     @Before
     public void initializeValues() {
-        Attribute attribute1 = ((SAMLObjectBuilder<Attribute>) SAMLTestBase.builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
+        Attribute attribute1 = ((SAMLObjectBuilder<Attribute>) SAMLTestHelper.getBuilderFactory().getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
         attribute1.setName("name1");
-        Attribute attribute2 = ((SAMLObjectBuilder<Attribute>) SAMLTestBase.builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
+        Attribute attribute2 = ((SAMLObjectBuilder<Attribute>) SAMLTestHelper.getBuilderFactory().getBuilder(Attribute.DEFAULT_ELEMENT_NAME)).buildObject();
         attribute2.setName("name2");
 
         attributes = new LinkedList<Attribute>(Arrays.asList(attribute1, attribute2));

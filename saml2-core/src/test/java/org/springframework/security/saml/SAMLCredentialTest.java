@@ -31,7 +31,7 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author Vladimir Sch�fer
  */
-public class SAMLCredentialTest extends SAMLTestBase {
+public class SAMLCredentialTest {
 
     SAMLCredential credential;
     NameID nameID;
@@ -39,8 +39,8 @@ public class SAMLCredentialTest extends SAMLTestBase {
 
     @Before
     public void initializeValues() {
-        nameID = ((SAMLObjectBuilder<NameID>) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME)).buildObject();
-        assertion = ((SAMLObjectBuilder<Assertion>) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
+        nameID = ((SAMLObjectBuilder<NameID>) SAMLTestHelper.getBuilderFactory().getBuilder(NameID.DEFAULT_ELEMENT_NAME)).buildObject();
+        assertion = ((SAMLObjectBuilder<Assertion>) SAMLTestHelper.getBuilderFactory().getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
         nameID.setValue("testName");
         assertion.setID("testID");
         credential = new SAMLCredential(nameID, assertion, "testIDP", "testSP");

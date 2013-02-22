@@ -26,7 +26,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallingException;
 import org.opensaml.xml.parse.ParserPool;
-import org.springframework.security.saml.SAMLTestBase;
+import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.w3c.dom.Element;
 
@@ -38,14 +38,14 @@ import static org.easymock.EasyMock.*;
 /**
  * @author Vladimir Schaefer
  */
-public class SAMLObjectTest extends SAMLTestBase {
+public class SAMLObjectTest {
 
     SAMLObject<Assertion> assertionObject;
     Assertion assertion;
 
     @Before
     public void initializeValues() {
-        assertion = ((SAMLObjectBuilder<Assertion>) SAMLTestBase.builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
+        assertion = ((SAMLObjectBuilder<Assertion>) SAMLTestHelper.getBuilderFactory().getBuilder(Assertion.DEFAULT_ELEMENT_NAME)).buildObject();
         assertion.setID("testID");
 
         assertionObject = new SAMLObject<Assertion>(assertion);

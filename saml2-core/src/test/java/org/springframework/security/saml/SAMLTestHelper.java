@@ -14,6 +14,11 @@
  */
 package org.springframework.security.saml;
 
+import org.opensaml.Configuration;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.XMLObjectBuilderFactory;
+
 import javax.servlet.http.HttpServletRequest;
 
 import static org.easymock.EasyMock.expect;
@@ -22,6 +27,8 @@ import static org.easymock.EasyMock.expect;
  * Helper for SAML tests.
  */
 public class SAMLTestHelper {
+
+    private static XMLObjectBuilderFactory builderFactory;
 
     /**
      * Helper method for setting of request parameters for local context population.
@@ -49,6 +56,24 @@ public class SAMLTestHelper {
     public static void setPeerContextParameters(HttpServletRequest request, String idpParameter, String peerEntityId) {
         expect(request.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID)).andReturn(peerEntityId);
         expect(request.getParameter(SAMLEntryPoint.IDP_PARAMETER)).andReturn(idpParameter);
+    }
+
+    /**
+     * Helper method providing factory for construction of SAML messages.
+     *
+     * @return builder factory
+     * @throws Exception
+     */
+    public static XMLObjectBuilderFactory getBuilderFactory() {
+        if (builderFactory == null) {
+            try {
+                DefaultBootstrap.bootstrap();
+            } catch (ConfigurationException e) {
+                throw new RuntimeException("Error creating builder factory");
+            }
+            builderFactory = Configuration.getBuilderFactory();
+        }
+        return builderFactory;
     }
 
 }

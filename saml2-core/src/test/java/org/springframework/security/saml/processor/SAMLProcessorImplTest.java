@@ -25,7 +25,6 @@ import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.SAMLConstants;
-import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;

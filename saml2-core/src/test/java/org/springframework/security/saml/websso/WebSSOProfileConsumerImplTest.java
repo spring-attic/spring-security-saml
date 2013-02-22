@@ -30,7 +30,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
@@ -45,7 +44,7 @@ import static org.easymock.EasyMock.*;
 /**
  * @author Vladimir Schäfer
  */
-public class WebSSOProfileConsumerImplTest extends SAMLTestBase {
+public class WebSSOProfileConsumerImplTest {
 
     ApplicationContext context;
     WebSSOProfileConsumerImpl profile;

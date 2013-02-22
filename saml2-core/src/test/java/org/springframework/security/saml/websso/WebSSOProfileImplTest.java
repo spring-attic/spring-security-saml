@@ -26,7 +26,6 @@ import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.XMLObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.security.saml.SAMLTestBase;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -46,7 +45,7 @@ import static org.junit.Assert.*;
 /**
  * @author Vladimir Schafer
  */
-public class WebSSOProfileImplTest extends SAMLTestBase {
+public class WebSSOProfileImplTest {
 
     ApplicationContext context;
     WebSSOProfile profile;

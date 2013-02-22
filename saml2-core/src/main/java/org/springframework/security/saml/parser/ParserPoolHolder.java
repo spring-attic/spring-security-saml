@@ -14,7 +14,9 @@
  */
 package org.springframework.security.saml.parser;
 
+import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Class is initialized from the Spring context and allows retrieval of the ParserPool for code
@@ -35,14 +37,24 @@ public class ParserPoolHolder {
      *
      * @param pool pool to initialize the static property wih
      */
-    public ParserPoolHolder(ParserPool pool) {
+    @Autowired
+    public void setParserPool(ParserPool pool) {
+        if (pool != null) {
+            setPool(pool);
+        }
+    }
+
+    private synchronized static void setPool(ParserPool pool) {
         ParserPoolHolder.pool = pool;
     }
 
     /**
-     * @return parserPool or null if pool wasn't initialized
+     * @return parserPool or create a default one if none was provided
      */
-    public static ParserPool getPool() {
+    public synchronized static ParserPool getPool() {
+        if (pool == null) {
+            setPool(new BasicParserPool());
+        }
         return pool;
     }
 

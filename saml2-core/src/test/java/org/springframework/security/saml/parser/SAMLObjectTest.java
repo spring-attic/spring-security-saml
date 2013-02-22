@@ -68,13 +68,13 @@ public class SAMLObjectTest {
     }
 
     /**
-     * Verifies that deserializaion fails is parserPool isn't set.
+     * Verifies that deserializaion succeeds even without explicit parserPool initialization.
      *
      * @throws Exception error
      */
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testMarshalWithoutPoolSet() throws Exception {
-        new ParserPoolHolder(null);
+
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         ObjectOutputStream stream = new ObjectOutputStream(outStream);
         stream.writeObject(assertionObject);
@@ -95,7 +95,6 @@ public class SAMLObjectTest {
     public void testMarshalWithLazyPoolSet() throws Exception {
 
         ParserPool pool = ParserPoolHolder.getPool();
-        new ParserPoolHolder(null);
 
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         ObjectOutputStream stream = new ObjectOutputStream(outStream);
@@ -105,7 +104,6 @@ public class SAMLObjectTest {
         ObjectInputStream input = new ObjectInputStream(inputStream);
         SAMLBase o = (SAMLBase) input.readObject();
 
-        new ParserPoolHolder(pool);
 
         o.getObject();
 

@@ -112,11 +112,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
     }
 
     private ParserPool getPool() throws MessageDecodingException {
-        ParserPool pool = ParserPoolHolder.getPool();
-        if (pool == null) {
-            throw new MessageDecodingException("Parser pool holder wasn't initialized");
-        }
-        return pool;
+        return ParserPoolHolder.getPool();
     }
 
     @Override

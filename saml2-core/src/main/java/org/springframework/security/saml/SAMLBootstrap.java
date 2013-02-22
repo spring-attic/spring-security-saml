@@ -17,15 +17,12 @@ package org.springframework.security.saml;
 import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
 import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.security.saml.parser.ParserPoolHolder;
 
 /**
  * Initialization for SAML library. Is automatically called as part of Spring initialization.
@@ -35,7 +32,7 @@ import org.springframework.security.saml.parser.ParserPoolHolder;
 public class SAMLBootstrap implements BeanFactoryPostProcessor {
 
     /**
-     * Automatically called to initialize whole module. Localizes parserPool from the factory and stores it.
+     * Automatically called to initialize the whole module.
      *
      * @param beanFactory bean factory
      * @throws BeansException errors
@@ -43,11 +40,9 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         try {
             PaosBootstrap.bootstrap();
-            ParserPool pool = beanFactory.getBean(ParserPool.class);
-            new ParserPoolHolder(pool);
             setMetadataKeyInfoGenerator();
         } catch (ConfigurationException e) {
-            throw new BootstrapException("Error invoking OpenSAML bootrap", e);
+            throw new BootstrapException("Error invoking OpenSAML bootstrap", e);
         }
     }
 

@@ -625,7 +625,7 @@
                         <emphasis>metadata</emphasis> bean is empty) filter will generate a new one.
                     </para>
                     <para>
-                        By default metadata will be generated with the following values which can be customized by setting properties of the <emphasis>metadataGeneratorFilter</emphasis> bean:
+                        By default metadata will be generated with the following values which can be customized by setting properties of the <emphasis>metadataGenerator</emphasis> bean:
                         <table id="configuration-metadata-sp-generation-default-values">
                             <title>Metadata generator settings</title>
                             <tgroup cols="3">
@@ -733,6 +733,11 @@
                                 </tbody>
                             </tgroup>
                         </table>
+                    </para>
+                    <para>
+                        Property <literal>entityBaseUrl</literal> is automatically generated based on values in the first HTTP request, unless explictly specified in the MetadataGenerator.
+                        Generated value can be normalized to exclude standard 80/443 ports for http/https schemes by setting property <literal>normalizeBaseUrl</literal> of the MetadataGeneratorFilter
+                        to <literal>true</literal>.
                     </para>
                     <para>
                         Providing an empty collection or null value to properties <emphasis>bindingsSSO</emphasis>, <emphasis>bindingsHoKSSO</emphasis> and <emphasis>bindingsSLO</emphasis>
@@ -1073,7 +1078,7 @@
             <para>The following SSO parameters can be customized using the <emphasis>WebSSOProfileOptions</emphasis> object:        
             <table id="configuration-sso-webssoprofile-table">
                 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
-                <tgroup cols="2">
+                <tgroup cols="3">
                     <colspec colname="_1" colwidth="0.2*" align="left"/>
                     <colspec colname="_2" colwidth="0.2*" align="left"/>
                     <colspec colname="_3" colwidth="1.0*" align="left"/>

@@ -17,6 +17,7 @@ package org.springframework.security.saml.metadata;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.util.SimpleURLCanonicalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,13 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
      * Metadata display filter.
      */
     protected MetadataDisplayFilter displayFilter;
+
+    /**
+     * Flag indicates that in case generated base url is used (when value is not provided in the MetadataGenerator)
+     * it should be normalized. Normalization includes lower-casing of scheme and server name and removing standar
+     * ports of 80 for http and 443 for https schemes.
+     */
+    protected boolean normalizeBaseUrl;
 
     /**
      * Default alias for generated entities.
@@ -163,7 +171,12 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
         StringBuilder sb = new StringBuilder();
         sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
         sb.append(request.getContextPath());
-        return sb.toString();
+        String url = sb.toString();
+        if (isNormalizeBaseUrl()) {
+            return SimpleURLCanonicalizer.canonicalize(url);
+        } else {
+            return url;
+        }
     }
 
     @Autowired(required = false)
@@ -174,6 +187,21 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
     @Autowired
     public void setManager(MetadataManager manager) {
         this.manager = manager;
+    }
+
+    public boolean isNormalizeBaseUrl() {
+        return normalizeBaseUrl;
+    }
+
+    /**
+     * When true flag indicates that in case generated base url is used (when value is not provided in the MetadataGenerator)
+     * it should be normalized. Normalization includes lower-casing of scheme and server name and removing standar
+     * ports of 80 for http and 443 for https schemes.
+     *
+     * @param normalizeBaseUrl flag
+     */
+    public void setNormalizeBaseUrl(boolean normalizeBaseUrl) {
+        this.normalizeBaseUrl = normalizeBaseUrl;
     }
 
     /**

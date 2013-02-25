@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xml:id="spring-security-reference-guide" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+	<info>
+		<title>Spring Security SAML Extension</title>
+		<subtitle>Reference Documentation</subtitle>
+		<authorgroup>
+			<author>
+				<personname>Vladimír Schäfer</personname>
+			</author>
+		</authorgroup>
+		<productname>Spring Security SAML Extension</productname>
+		<copyright>
+			<year>2009-2013</year>
+			<holder><link xlink:href="mailto:vladimir.schafer@gmail.com">Vladimír Schäfer</link></holder>
+		</copyright>
+		<releaseinfo>${version}</releaseinfo>
+	</info>
+	<toc/>
+
+	<!--
+	TODO
+	- Requirements
+	- Supported environments
+	-->
+
+	<part xml:id="getting-started">
+		<title>Getting Started</title>
+		<partintro>
+			<para>This chapter provides essential information needed to enable your application to act as
+			a service provider and interact with identity providers using SAML 2.0 protocol. Later in this
+			guide you can find information about detailed configuration options and additional use-cases
+			enabled by this component.</para>
+		</partintro>
+
+		<xi:include href="introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+		<xi:include href="glossary.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+		<xi:include href="quick-start.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	</part>
+
+	<part xml:id="integration">
+		<title>Configuring SSO with SAML</title>
+		<partintro>
+			<para>This chapter provides information about configuration and customization options of the SAML extension.
+			It will guide you throught typical scenarios including problems you migth encounter during integration with
+			identity providers.</para>
+		</partintro>
+
+		<xi:include href="configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+		<xi:include href="administration-ui.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+		<xi:include href="idp-guide.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+		<xi:include href="troubleshooting.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+	<!--
+	TODO
+	Acknowledgements
+	-->
+
+	</part>
+
+	<xi:include href="appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+</book>

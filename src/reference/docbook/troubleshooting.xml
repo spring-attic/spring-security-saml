@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="chapter-troubleshooting"
+	xmlns="http://docbook.org/ns/docbook" version="5.0"
+	xmlns:xl="http://www.w3.org/1999/xlink"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xsi:schemaLocation="
+		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+	<info>
+		<title>Troubleshooting</title>
+	</info>
+
+	<section id="chapter-troubleshooting-logging">
+	  <title>Logging</title>
+	  <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
+	  library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
+	  <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
+			<programlisting>log4j.logger.org.springframework.security.saml=DEBUG
+log4j.logger.org.opensaml=DEBUG</programlisting></para>
+	  <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
+	</section>
+
+	<section id="chapter-troubleshooting-common-issues">
+	  <title>Common problems</title>
+	  <para></para>
+	</section>
+
+	<!--
+	TODO
+	- XML parsing libraries and endorsing
+	- time skew problems
+	- deployment to application servers
+	-->
+</chapter>

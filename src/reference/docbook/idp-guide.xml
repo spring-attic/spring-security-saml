@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="chapter-idp-guide"
+	xmlns="http://docbook.org/ns/docbook" version="5.0"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:xl="http://www.w3.org/1999/xlink"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+		<title>IDP integration guide</title>
+		<para>This chapter provides step-by-step guides for basic configuration of SAML Extension with specific
+		IDP products. Integration can be further configured with settings discussed in previous chapters.</para>
+
+		<section id="chapter-idp-guide-adfs">
+			<title>Active Directory Federation Services 2.0 (ADFS)</title>
+
+			<para>ADFS 2.0 supports SAML 2.0 in IDP mode and can be easily integrated with SAML Extension for both SSO and SLO.
+			Before starting with the configuration make sure that the following pre-requisites are satisfied:</para>
+			<para><itemizedlist spacing="compact">
+					<listitem>
+						<para>Install AD FS 2.0 (http://www.microsoft.com/en-us/download/details.aspx?id=10909)</para>
+					</listitem>
+					<listitem>
+						<para>Run AD FS 2.0 Federation Server Configuration Wizard in the AD FS 2.0 Management Console</para>
+					</listitem>
+					<listitem>
+						<para>Make sure that DNS name of your Windows Server is available at your SP and vice-versa</para>
+					</listitem>
+					<listitem>
+						<para>Install a Java container (e.g. Tomcat) for deployment of the SAML 2 Extension</para>
+					</listitem>
+					<listitem>
+						<para>Configure your container to use HTTPS, this is required by AD FS (<ulink url="http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</ulink>)</para>
+					</listitem>
+				</itemizedlist></para>
+
+			<section id="chapter-idp-guide-adfs-idp">
+			<title>Initialize IDP metadata</title>
+			<para><itemizedlist spacing="compact">
+					<listitem>
+						<para>Download AD FS 2.0 metadata from <emphasis>https://server/FederationMetadata/2007-06/FederationMetadata.xml</emphasis></para>
+					</listitem>
+					<listitem>
+						<para>Store the downloaded content to saml2-sample/WEB-INF/src/main/resources/security/FederationMetadata.xml</para>
+					</listitem>
+					<listitem>
+						<para>Modify bean <emphasis>metadata</emphasis> in <emphasis>securityContext.xml</emphasis> and replace <emphasis>classpath:security/idp.xml</emphasis> with <emphasis>classpath:security/FederationMetadata.xml</emphasis> and add property <emphasis>metadataTrustCheck</emphasis> to <emphasis>false</emphasis> to skip signature validation:
+<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+	<constructor-arg>
+		<bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+			<constructor-arg>
+				<value type="java.io.File">classpath:security/FederationMetadata.xml</value>
+			</constructor-arg>
+			<property name="parserPool" ref="parserPool"/>
+		</bean>
+	</constructor-arg>
+	<constructor-arg>
+		<bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
+	</constructor-arg>
+	<property name="metadataTrustCheck" value="false"/>
+</bean>]]></programlisting>
+					</para>
+				</listitem>
+			</itemizedlist></para>
+		</section>
+
+		<section id="chapter-idp-guide-adfs-sp">
+		<title>Initialize SP metadata</title>
+		<para><itemizedlist spacing="compact">
+				<listitem>
+					<para>Deploy SAML 2 Extension war archive from <emphasis>saml2-sample/target/spring-security-saml2-sample.war</emphasis></para>
+				</listitem>
+				<listitem>
+					<para>Open browser at e.g. https://server:port/spring-security-saml2-sample, make sure to use HTTPS protocol, system will automatically generate metadata document</para>
+				</listitem>
+				<listitem>
+					<para>Click Metadata information, select item with your server name in the Service providers list</para>
+				</listitem>
+				<listitem>
+					<para>Store content of the Metadata field to a document metadata.xml and upload it to the AD FS server</para>
+				</listitem>
+				<listitem>
+					<para>In AD FS 2.0 Management Console select "Add Relying Party Trust"</para>
+				</listitem>
+				<listitem>
+					<para>Select "Import data about the relying party from a file" and select file created earlier, select Next</para>
+				</listitem>
+				<listitem>
+					<para>System may complain that some content of metadata is not supported, you can safely ignore this warning</para>
+				</listitem>
+				<listitem>
+					<para>Continue with the wizard, on the "Ready to Add Trust" make sure that tab endpoints contains multiple endpoing values, if not verify that your metadata was generated with https protocol in their URLs</para>
+				</listitem>
+				<listitem>
+					<para>Leave "Open the Edit Claim Rules dialog" checkbox checked and finish the wizard</para>
+				</listitem>
+				<listitem>
+					<para>Select "Add Rule", choose "Send LDAP Attributes as Claims" and press Next</para>
+				</listitem>
+				<listitem>
+					<para>Add NameID as "Claim rule name", choose "Active Directory" as Attribute store, choose "SAM-Account-Name" as LDAP Attribute and "Name ID" as "Outgoing claim type", finish the wizard and confirm the claim rules window</para>
+				</listitem>
+				<listitem>
+					<para>Open the provider by double-clicking it, select tab Advanced and change "Secure hash algorithm" to SHA-1</para>
+				</listitem>
+			</itemizedlist></para>
+		</section>
+
+		<section id="chapter-idp-guide-adfs-test">
+		<title>Test SSO</title>
+		<para>Open SAML Extension at https://localhost:8443/spring-security-saml2-sample, select your AD FS server and press login. In case Artifact binding
+		is used and SSL/TLS certificate of your AD FS is not already trusted you have to import it to your samlKeystore.jks by following instructions in the
+		error report.</para>
+		</section>
+
+	</section>
+
+</chapter>

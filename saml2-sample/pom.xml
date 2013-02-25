@@ -1,74 +1,107 @@
-<?xml version="1.0"?>
-<project>
-
-    <parent>
-        <artifactId>spring-security-saml2-parent</artifactId>
-        <groupId>org.springframework.security.extensions</groupId>
-        <version>1.0.0-RC2-SNAPSHOT</version>
-    </parent>
-
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>spring-security-saml2-sample</artifactId>
-    <packaging>war</packaging>
-    <name>Spring Security SAML v2 sample webapp</name>
-    <url>http://maven.apache.org</url>
-
-    <build>
-        <finalName>spring-security-saml2-sample</finalName>
-    </build>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.security.extensions</groupId>
-            <artifactId>spring-security-saml2-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>        
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jsp-api</artifactId>
-            <version>2.0</version>
-            <scope>provided</scope>
-        </dependency>
-        
-       <dependency>
-           <groupId>javax.servlet</groupId>
-           <artifactId>jstl</artifactId>
-           <version>1.2</version>
-       </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.4</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework.security.extensions</groupId>
+  <artifactId>spring-security-saml2-sample</artifactId>
+  <version>1.0.0-RC2-SNAPSHOT</version>
+  <name>Spring Security SAML v2 sample webapp</name>
+  <description>Spring Security SAML v2 sample webapp</description>
+  <url>https://github.com/SpringSource/spring-security-saml</url>
+  <organization>
+    <name>SpringSource</name>
+    <url>http://springsource.org/spring-security-saml</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <mailingLists>
+    <mailingList>
+      <name>Spring Security SAML Forum</name>
+      <post>http://forum.springsource.org/forumdisplay.php?86-SAML</post>
+      <archive>http://forum.springsource.org/forumdisplay.php?86-SAML</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>vschafer</id>
+      <name>Vladimir Schafer</name>
+      <email>vladimir.schafer at gmail.com</email>
+      <timezone>+2</timezone>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>Mandus Elfvingr</name>
+    </contributor>
+    <contributor>
+      <name>Rob Moore</name>
+    </contributor>
+    <contributor>
+      <name>Jonathan Tellier</name>
+    </contributor>
+  </contributors>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.springsource.org/browse/SES</url>
+  </issueManagement>
+  <scm>
+    <connection>scm:git:git://github.com/SpringSource/spring-security-saml</connection>
+    <developerConnection>scm:git:git://github.com/SpringSource/spring-security-saml</developerConnection>
+    <url>https://github.com/SpringSource/spring-security-saml</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security.extensions</groupId>
+      <artifactId>spring-security-saml2-core</artifactId>
+      <version>1.0.0-RC2-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+      <version>3.1.2.RELEASE</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>3.1.2.RELEASE</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>3.1.2.RELEASE</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

@@ -1,0 +1,91 @@
+apply plugin: "propdeps-maven"
+
+install {
+	repositories.mavenInstaller {
+		customizePom(pom, project)
+	}
+}
+
+task generatePom {
+	group = 'Build'
+	description = 'Generates a Maven pom.xml'
+
+	ext.generatedPomFileName = "pom.xml"
+	onlyIf { install.enabled }
+
+	inputs.files(fileTree(project.rootProject.rootDir).include("**/*.gradle").files)
+	inputs.files(new File(project.rootProject.rootDir, Project.GRADLE_PROPERTIES))
+	outputs.files(generatedPomFileName)
+
+	doLast() {
+		def p = pom {}
+		customizePom(p, project)
+		p.writeTo(generatedPomFileName)
+	}
+}
+
+build.dependsOn generatePom
+
+def customizePom(pom, gradleProject) {
+	pom.whenConfigured { generatedPom ->
+
+		// sort to make pom dependencies order consistent to ease comparison of older poms
+		generatedPom.dependencies = generatedPom.dependencies.sort { dep ->
+			"$dep.scope:$dep.groupId:$dep.artifactId"
+		}
+
+		// add all items necessary for maven central publication
+		generatedPom.project {
+			name = gradleProject.description
+			description = gradleProject.description
+			url = "https://github.com/SpringSource/spring-security-saml"
+			organization {
+				name = "SpringSource"
+				url = "http://springsource.org/spring-security-saml"
+			}
+			licenses {
+				license {
+					name "The Apache Software License, Version 2.0"
+					url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+					distribution "repo"
+				}
+			}
+			scm {
+				url = "https://github.com/SpringSource/spring-security-saml"
+				connection = "scm:git:git://github.com/SpringSource/spring-security-saml"
+				developerConnection = "scm:git:git://github.com/SpringSource/spring-security-saml"
+			}
+			developers {
+				developer {
+					id = "vschafer"
+					name = "Vladimir Schafer"
+					email = "vladimir.schafer at gmail.com"
+					timezone = "+2"
+				}
+			}
+			contributors {
+				contributor {
+					name = "Mandus Elfvingr"
+				}
+				contributor {
+					name = "Rob Moore"
+				}
+				contributor {
+					name = "Jonathan Tellier"
+				}
+			}
+			issueManagement {
+				system = "jira"
+				url = "http://jira.springsource.org/browse/SES"
+			}
+			mailingLists {
+				mailingList {
+					name = "Spring Security SAML Forum"
+					post = "http://forum.springsource.org/forumdisplay.php?86-SAML"
+					archive = "http://forum.springsource.org/forumdisplay.php?86-SAML"
+				}
+			}
+		}
+	}
+}
+

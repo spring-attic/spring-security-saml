@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix id="chapter-configuration-reference"
+	xmlns="http://docbook.org/ns/docbook" version="5.0"
+	xmlns:xl="http://www.w3.org/1999/xlink"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+	<info>
+	  <title>Configuration reference</title>
+	</info>
+	<para>This chapter provides reference for settings available in configuration beans of the SAML module.</para>
+
+	<section id="reference-extended-metadata">
+		<title>Extended metadata</title>
+		<para>Extended metadata provides additional settings for customization of IDP and SP behavior. Bean can be
+			found in package <emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
+			details
+			on setting up metadata please consult<xref linkend="configuration-metadata"/>.
+			<table id="reference-extended-metadata-settings">
+				<title>Extended metadata settings</title>
+				<tgroup cols="4">
+					<colspec colname="_1" colwidth="1.2*" align="left"/>
+					<colspec colname="_2" colwidth="0.4*" align="left"/>
+					<colspec colname="_3" colwidth="0.4*" align="left"/>
+					<colspec colname="_4" colwidth="1.9*" align="left"/>
+					<thead>
+						<row>
+							<entry>Property</entry>
+							<entry>Default</entry>
+							<entry>Entities</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>local</entry>
+							<entry>false</entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>alias</entry>
+							<entry></entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>idpDiscoveryEnabled</entry>
+							<entry>false</entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>idpDiscoveryURL</entry>
+							<entry></entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>idpDiscoveryResponseURL</entry>
+							<entry></entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>ecpEnabled</entry>
+							<entry>false</entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>securityProfile</entry>
+							<entry>metaiop</entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>sslSecurityProfile</entry>
+							<entry>pkix</entry>
+							<entry>local</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>signingKey</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>encryptionKey</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>tlsKey</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>trustedKeys</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>requireLogoutRequestSigned</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>requireLogoutResponseSigned</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>requireArtifactResolveSigned</entry>
+							<entry></entry>
+							<entry>both</entry>
+							<entry></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</para>
+	</section>
+</appendix>

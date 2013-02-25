@@ -1,0 +1,243 @@
+buildscript {
+	repositories {
+		maven { url "http://repo.springsource.org/plugins-release" }
+	}
+	dependencies {
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.3")
+		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.4")
+	}
+}
+
+def coreProjects = subprojects.findAll { !it.name.contains("sample") }
+
+configure(allprojects) { project ->
+	group = "org.springframework.security.extensions"
+
+	ext.slf4jVersion  = "1.6.3"
+	ext.springVersion  = "3.1.2.RELEASE"
+	ext.springSecurityVersion = "3.1.2.RELEASE"
+	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
+
+
+	apply plugin: "propdeps"
+	apply plugin: "java"
+	apply from: "${gradleScriptDir}/ide.gradle"
+
+	compileJava {
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+	compileTestJava {
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
+	test {
+		systemProperty("java.awt.headless", "true")
+	}
+
+	repositories {
+		mavenCentral()
+		maven { url "https://build.shibboleth.net/nexus/content/groups/public/" }
+	}
+
+	ext.javadocLinks = [
+		"http://docs.oracle.com/javase/6/docs/api",
+		"http://docs.oracle.com/javaee/6/api",
+	] as String[]
+}
+
+configure(subprojects) { subproject ->
+	apply from: "${gradleScriptDir}/publish-maven.gradle"
+}
+
+configure(coreProjects) { p ->
+	jar {
+		manifest.attributes["Created-By"] =
+			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+		manifest.attributes["Implementation-Title"] = p.name
+		manifest.attributes["Implementation-Version"] = p.version
+
+		from("${rootProject.projectDir}/src/dist") {
+			include "license.txt"
+			into "META-INF"
+			expand(copyright: new Date().format("yyyy"), version: project.version)
+		}
+	}
+
+	javadoc {
+		description = "Generates project-level javadoc for use in -javadoc jar"
+
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = project.name
+		options.links(project.ext.javadocLinks)
+
+		// suppress warnings due to cross-module @see and @link references;
+		// note that global 'api' task does display all warnings.
+		logging.captureStandardError LogLevel.INFO
+		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+	}
+
+	task sourcesJar(type: Jar, dependsOn:classes) {
+		classifier = "sources"
+		from sourceSets.main.allJava.srcDirs
+		include "**/*.java", "**/*.aj"
+	}
+
+	task javadocJar(type: Jar) {
+		classifier = "javadoc"
+		from javadoc
+	}
+
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
+}
+
+configure(rootProject) {
+	description = "Spring Security SAML"
+
+	apply plugin: "docbook-reference"
+
+	reference {
+		sourceDir = file("src/reference/docbook")
+		pdfFilename = "spring-security-saml-reference.pdf"
+	}
+
+	// don't publish the default jar for the root project
+	configurations.archives.artifacts.clear()
+
+	task api(type: Javadoc) {
+		group = "Documentation"
+		description = "Generates aggregated Javadoc API documentation."
+		title = "${rootProject.description} ${version} API"
+
+		dependsOn {
+			coreProjects.collect {
+				it.tasks.getByName("jar")
+			}
+		}
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = rootProject.description
+		options.splitIndex = true
+		options.links(project.ext.javadocLinks)
+
+		source coreProjects.collect { project ->
+			project.sourceSets.main.allJava
+		}
+
+		maxMemory = "1024m"
+		destinationDir = new File(buildDir, "api")
+
+		doFirst {
+			classpath += files(coreProjects.collect { it.sourceSets.main.compileClasspath })
+		}
+	}
+
+	task docsZip(type: Zip) {
+		group = "Distribution"
+		baseName = "spring-security-saml"
+		classifier = "docs"
+		description = "Builds -${classifier} archive containing api and reference " +
+			"for deployment at http://static.springframework.org/spring-security-saml/docs."
+
+		from (api) {
+			into "api"
+		}
+
+		from (reference) {
+			into "reference"
+		}
+	}
+
+	task distZip(type: Zip, dependsOn: [docsZip]) {
+		group = "Distribution"
+		baseName = "spring-security-saml"
+		classifier = "dist"
+		description = "Builds -${classifier} archive, containing all jars and docs, " +
+					"suitable for community download page."
+
+		ext.baseDir = "${baseName}-${project.version}";
+
+		from("src/dist") {
+			include "readme.txt"
+			include "license.txt"
+			include "notice.txt"
+			into "${baseDir}"
+			expand(copyright: new Date().format("yyyy"), version: project.version)
+		}
+
+		from(zipTree(docsZip.archivePath)) {
+			into "${baseDir}/docs"
+		}
+
+		coreProjects.each { subproject ->
+			into ("${baseDir}/libs") {
+				from subproject.jar
+				if (subproject.tasks.findByPath("sourcesJar")) {
+					from subproject.sourcesJar
+				}
+				if (subproject.tasks.findByPath("javadocJar")) {
+					from subproject.javadocJar
+				}
+			}
+		}
+	}
+
+	// Create an distribution that contains all dependencies (required and optional).
+	// Not published by default; only for use when building from source.
+	task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
+		group = "Distribution"
+		baseName = "spring-security-saml"
+		classifier = "dist-with-deps"
+		description = "Builds -${classifier} archive, containing everything " +
+			"in the -${distZip.classifier} archive plus all runtime dependencies."
+
+		from zipTree(distZip.archivePath)
+
+		gradle.taskGraph.whenReady { taskGraph ->
+			if (taskGraph.hasTask(":${zipTask.name}")) {
+				def projectNames = rootProject.subprojects*.name
+				def artifacts = new HashSet()
+				coreProjects.each { subproject ->
+					(subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts +
+					subproject.configurations.optional.resolvedConfiguration.resolvedArtifacts).each { artifact ->
+						def dependency = artifact.moduleVersion.id
+						if (!projectNames.contains(dependency.name)) {
+							artifacts << artifact.file
+						}
+					}
+				}
+
+				zipTask.from(artifacts) {
+					into "${distZip.baseDir}/deps"
+				}
+			}
+		}
+	}
+
+	artifacts {
+		archives docsZip
+		archives distZip
+	}
+
+	task wrapper(type: Wrapper) {
+		description = "Generates gradlew[.bat] scripts"
+		gradleVersion = "1.4"
+
+		doLast() {
+			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
+			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
+			File wrapperFile = file("gradlew")
+			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
+				"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
+			File wrapperBatFile = file("gradlew.bat")
+			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
+				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+		}
+	}
+
+}

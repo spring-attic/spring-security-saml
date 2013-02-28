@@ -4,6 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.extensions</groupId>
   <artifactId>spring-security-saml2-sample</artifactId>
+  <packaging>war</packaging>
   <version>1.0.0-RC2-SNAPSHOT</version>
   <name>Spring Security SAML v2 sample webapp</name>
   <description>Spring Security SAML v2 sample webapp</description>

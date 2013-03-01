@@ -51,6 +51,11 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
     protected transient U object;
 
     /**
+     * Hash of the object.
+     */
+    private int hashCode;
+
+    /**
      * Default constructor.
      *
      * @param object object to be stored within object and made serializable
@@ -60,6 +65,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             throw new IllegalArgumentException("SAMLBase object can't be created with null object argument");
         }
         this.object = object;
+        this.hashCode = object.hashCode();
     }
 
     /**
@@ -132,12 +138,14 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             return serializedObject.equals(that.serializedObject);
         } else {
             // Otherwise let's compare the live values
-            return object.equals(that.object);
+            return object != null && object.equals(that.object);
         }
+
     }
 
     @Override
     public int hashCode() {
-        return object.hashCode();
+        return hashCode;
     }
+
 }

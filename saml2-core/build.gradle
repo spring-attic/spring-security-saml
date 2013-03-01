@@ -8,10 +8,10 @@ dependencies {
 	compile	("org.opensaml:opensaml:2.5.3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.slf4j", module: "log4j-over-slf4j"
+      exclude group : "xalan", module: "serializer"
+      exclude group : "xml-apis", module: "xml-apis"
 	}
-
 	provided "javax.servlet:servlet-api:2.5"
-
 	testCompile "org.slf4j:slf4j-log4j12:1.6.3",
 				"org.easymock:easymock:2.4",
 				"junit:junit:4.4",

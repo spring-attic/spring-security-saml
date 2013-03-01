@@ -18,7 +18,6 @@ configure(allprojects) { project ->
 	ext.springSecurityVersion = "3.1.2.RELEASE"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
-
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply from: "${gradleScriptDir}/ide.gradle"

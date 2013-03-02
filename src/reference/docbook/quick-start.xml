@@ -47,13 +47,19 @@
 		<section id="quick-start-compilation">
 			<title>Compilation of the module</title>
 			<para>
-				After downloading the Spring Security SAML Extension module and unziping compile the whole project using:
+				When building from <link xlink:href="https://github.com/SpringSource/spring-security-saml">sources</link> compile whole project using: 
 				<programlisting>gradlew build</programlisting>
 			</para>
 			<para>
 				Command will create file <emphasis>spring-security-saml2-sample.war</emphasis> in directory
-				<emphasis>saml2-sample/build/libs/</emphasis>. We will be customizing content of the application
-				in the following steps.
+				<emphasis>saml2-sample/build/libs/</emphasis>.
+			</para>
+			<para>
+				When using the release zip compile the sample application available in the <emphasis>sample</emphasis> directory using:
+				<programlisting>mvn package</programlisting>
+			</para>
+			<para>
+				We will be customizing content of the application in the following steps.
 			</para>
 		</section>
 

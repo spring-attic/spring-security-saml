@@ -164,7 +164,15 @@
 		<title>Source code</title>
 
 		<para>Source code for the project is maintained on <link
-				xlink:href="https://github.com/SpringSource/spring-security-saml">Github</link>.</para>
+				xlink:href="https://github.com/SpringSource/spring-security-saml">Github</link>.</para> 
+	</section>
+  
+	<section id="section-build">
+		<title>Builds</title>
+
+    <para>Snapshot builds of the project are available in the 
+    <link xlink:href="http://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link></para>
+     
 	</section>
 
 	<section id="section-license">

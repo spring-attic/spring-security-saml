@@ -42,6 +42,8 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
+
 /**
  * Implementation of the SAML 2.0 Single Logout profile.
  *

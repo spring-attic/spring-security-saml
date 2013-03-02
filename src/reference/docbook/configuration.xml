@@ -809,6 +809,18 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		</itemizedlist></para>
 	</section>
 
+	<section id="time-interval">
+		<title>Validity intervals</title>
+		<para>For security reasons system limits the time window enabling processing of SAML messages and assertions. The time window parameters can be customized with the following settings.</para> 
+		<para>Validity of assertions processed during the signle sign-on process is limited to 3000 seconds. Value can be customized with property <emphasis>maxAssertionTime</emphasis>
+		of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
+		<para>System allows users to single sign-on for up to 7200 seconds since their initial authentication with the IDP (based on value AuthInstance of the Authentication statement).
+		Some IDPs allow users to stay authenticated for longer periods than this and you might need to change the default value by setting <emphasis>maxAuthenticationAge</emphasis> 
+		of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
+		<para>As clocks between IDP and SP machines may not be perfectly synchronized a tolerance of 60 seconds is applied for time comparisons. The tolerance value (time skew) can be customized
+		by settings property <emphasis>responseSkew</emphasis> in beans <emphasis>WebSSOProfileConsumerImpl</emphasis> and <emphasis>SingleLogoutProfileImpl</emphasis>.</para>
+	</section>
+
 	<section id="load-balancing">
 		<title>Load balancing</title>
 		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
@@ -859,8 +871,6 @@ public class TestUserDetails implements SAMLUserDetailsService {
 	Bindings configuration
 	- artifact resolution
 	- custom URLs
-	Time skew configuration
-	Using a reverse proxy
 
 	Service URLs
 

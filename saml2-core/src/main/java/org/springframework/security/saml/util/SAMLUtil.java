@@ -15,6 +15,7 @@
  */
 package org.springframework.security.saml.util;
 
+import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.xml.SAMLConstants;
@@ -398,6 +399,31 @@ public class SAMLUtil {
             logger.error("Encountered error marshalling message to its DOM representation", e);
             throw new MessageEncodingException("Encountered error marshalling message into its DOM representation", e);
         }
+    }
+
+    /**
+     * Verifies that the current time is within skewInSec interval from the time value.
+     *
+     * @param skewInSec skew interval in seconds
+     * @param time time the current time must fit into with the given skew
+     * @return true if time matches, false otherwise
+     */
+    public static boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
+        return isDateTimeSkewValid(skewInSec, 0, time);
+    }
+
+    /**
+     * Verifies that the current time fits into interval defined by time minus backwardInterval minus skew and time plus forward interval plus skew.
+     *
+     *
+     * @param skewInSec skew interval in seconds
+     * @param forwardInterval forward interval in sec
+     * @param time time the current time must fit into with the given skew
+     * @return true if time matches, false otherwise
+     */
+    public static boolean isDateTimeSkewValid(int skewInSec, int forwardInterval, DateTime time) {
+        long reference = System.currentTimeMillis();
+        return time.isBefore(reference + (skewInSec * 1000)) && time.isAfter(reference - ((skewInSec + forwardInterval) * 1000));
     }
 
 }

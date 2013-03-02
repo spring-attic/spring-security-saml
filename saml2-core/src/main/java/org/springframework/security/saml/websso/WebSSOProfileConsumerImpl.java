@@ -43,6 +43,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
+
 /**
  * Class is able to process Response objects returned from the IDP after SP initialized SSO or unsolicited
  * response from IDP. In case the response is correctly validated and no errors are found the SAMLCredential
@@ -274,7 +276,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
 
         // Verify storage time skew
-        if (!isDateTimeSkewValid(getMaxAssertionTime(), assertion.getIssueInstant())) {
+        if (!isDateTimeSkewValid(getResponseSkew(), getMaxAssertionTime(), assertion.getIssueInstant())) {
             log.debug("Assertion is too old to be used, value can be customized by setting maxAssertionTime value", assertion.getIssueInstant());
             throw new CredentialsExpiredException("Users authentication credential is too old to be used");
         }
@@ -519,7 +521,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     protected void verifyAuthenticationStatement(AuthnStatement auth, RequestedAuthnContext requestedAuthnContext, SAMLMessageContext context) throws AuthenticationException {
 
         // Validate that user wasn't authenticated too long time ago
-        if (!isDateTimeSkewValid(getMaxAuthenticationAge(), auth.getAuthnInstant())) {
+        if (!isDateTimeSkewValid(getResponseSkew(), getMaxAuthenticationAge(), auth.getAuthnInstant())) {
             log.debug("Authentication statement is too old to be used with value {}", auth.getAuthnInstant());
             throw new CredentialsExpiredException("Authentication statement is too old to be used");
         }

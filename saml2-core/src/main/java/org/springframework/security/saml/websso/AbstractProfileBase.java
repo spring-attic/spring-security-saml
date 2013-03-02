@@ -115,7 +115,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
     }
 
     /**
-     * Maximum time between assertion creation and current time when the assertion is usable
+     * Maximum time between assertion creation and current time when the assertion is usable in seconds.
      *
      * @return max assertion time
      */
@@ -299,11 +299,6 @@ public abstract class AbstractProfileBase implements InitializingBean {
      */
     protected boolean isEndpointMatching(Endpoint endpoint, String binding) {
         return binding.equals(getEndpointBinding(endpoint));
-    }
-
-    protected boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
-        long current = new Date().getTime();
-        return time.isAfter(current - skewInSec * 1000) && time.isBefore(current + skewInSec * 1000);
     }
 
     @Autowired

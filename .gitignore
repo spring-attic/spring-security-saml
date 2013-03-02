@@ -4,6 +4,7 @@
 /**/target
 build
 bin
+out
 .settings
 .classpath
 .project

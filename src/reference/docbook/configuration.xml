@@ -760,7 +760,8 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		  <listitem>
 			  <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
 			  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="chapter-troubleshooting-logging"/>. Setting
-			  property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log.</para>
+			  property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log. Logging of exceptions
+        can be disalbed by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
 		  </listitem>
 		</itemizedlist></para>
 	</section>

@@ -118,7 +118,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         DateTime time = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
             log.debug("Response issue time is either too old or with date in the future, skew {}, time {}", getResponseSkew(), time);
-            throw new SAMLException("Response issue time is either too old or with date in the future");
+            throw new CredentialsExpiredException("Response issue time is either too old or with date in the future");
         }
 
         // Verify response to field if present, set request if correct
@@ -240,7 +240,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Make sure that at least one storage contains authentication statement and subject with bearer confirmation
         if (subjectAssertion == null) {
-            log.debug("Response doesn't any valid assertion which would pass subject validation");
+            log.debug("Response doesn't have any valid assertion which would pass subject validation");
             throw new SAMLException("Error validating SAML response");
         }
 

@@ -153,11 +153,11 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             }
 
         } catch (SAMLException e1) {
-            throw new ServletException("Error sending assertion", e1);
+            throw new ServletException(e1);
         } catch (MetadataProviderException e1) {
-            throw new ServletException("Error processing metadata", e1);
+            throw new ServletException(e1);
         } catch (MessageEncodingException e1) {
-            throw new ServletException("Error encoding outgoing message", e1);
+            throw new ServletException(e1);
         }
 
     }
@@ -180,7 +180,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
         logger.debug("Processing SSO using ECP profile");
         webSSOprofileECP.sendAuthenticationRequest(context, options);
-        samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
+        samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
 
     }
 
@@ -213,7 +213,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             } else {
                 logger.debug("Processing SSO using WebSSO HolderOfKey profile");
                 webSSOprofileHoK.sendAuthenticationRequest(context, options);
-                samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
+                samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
                 return;
             }
         }
@@ -221,7 +221,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         // Ordinary WebSSO
         logger.debug("Processing SSO using WebSSO profile");
         webSSOprofile.sendAuthenticationRequest(context, options);
-        samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context, e);
+        samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
 
     }
 
@@ -389,7 +389,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     /**
      * Dependency for loading of discovery URL
-     * @param samlDiscovery
+     * @param samlDiscovery saml discovery endpoint
      */
     @Autowired(required = false)
     public void setSamlDiscovery(SAMLDiscovery samlDiscovery) {

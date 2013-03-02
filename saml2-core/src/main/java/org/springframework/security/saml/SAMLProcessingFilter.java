@@ -15,12 +15,12 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
@@ -84,13 +84,13 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
-            throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
+            throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
-            throw new SAMLRuntimeException("Error determining metadata contracts", e);
+            throw new AuthenticationServiceException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
-            throw new SAMLRuntimeException("Error decoding incoming SAML message", e);
+            throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            throw new SAMLRuntimeException("Incoming SAML message is invalid", e);
+            throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         }
 
     }

@@ -138,7 +138,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                     logoutProfile.processLogoutResponse(context);
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
                 } catch (Exception e) {
-                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.FAILURE, context);
+                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.FAILURE, context, e);
                     log.warn("Received global logout response is invalid", e);
                 }
 
@@ -155,7 +155,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                     doLogout = logoutProfile.processLogoutRequest(context, credential);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
                 } catch (Exception e) {
-                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.FAILURE, context);
+                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.FAILURE, context, e);
                     log.warn("Received global logout request is invalid", e);
                 }
 

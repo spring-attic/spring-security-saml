@@ -25,6 +25,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Default Logger implementation sending message logs into standard Log4J logger.
  *
@@ -35,6 +38,7 @@ public class SAMLDefaultLogger implements SAMLLogger {
     private final static Logger log = LoggerFactory.getLogger(SAMLDefaultLogger.class);
 
     private boolean logMessages = false;
+    private boolean logErrors = true;
 
     public void log(String operation, String result, SAMLMessageContext context) {
         log(operation, result, context, SecurityContextHolder.getContext().getAuthentication(), null);
@@ -79,15 +83,30 @@ public class SAMLDefaultLogger implements SAMLLogger {
             }
         }
 
+        if (logErrors && e != null) {
+
+            StringWriter errorWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(errorWriter));
+            sb.append(errorWriter.getBuffer());
+
+        }
+
         log.info(sb.toString());
 
     }
 
     /**
-     * @param logMessages when true whole SAML message will get logged
+     * @param logMessages when true whole message will get logged
      */
     public void setLogMessages(boolean logMessages) {
         this.logMessages = logMessages;
+    }
+
+    /**
+     * @param logErrors when true exceptions will be logged
+     */
+    public void setLogErrors(boolean logErrors) {
+        this.logErrors = logErrors;
     }
 
 }

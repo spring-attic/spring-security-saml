@@ -19,11 +19,11 @@ import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -77,7 +77,7 @@ public class
      *
      * @throws Exception error
      */
-    @Test(expected = SAMLRuntimeException.class)
+    @Test(expected = AuthenticationServiceException.class)
     public void testErrorDuringProcessing() throws Exception {
         SAMLTestHelper.setLocalContextParameters(request, "/saml", null);
         expect(processor.retrieveMessage((SAMLMessageContext) notNull())).andThrow(new SAMLException("Processing error"));
@@ -96,7 +96,7 @@ public class
      *
      * @throws Exception error
      */
-    @Test(expected = SAMLRuntimeException.class)
+    @Test(expected = AuthenticationServiceException.class)
     public void testInvalidBinding() throws Exception {
 
         AuthenticationManager manager = createMock(AuthenticationManager.class);

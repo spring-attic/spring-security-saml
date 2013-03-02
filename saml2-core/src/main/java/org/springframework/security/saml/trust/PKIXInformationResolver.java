@@ -115,9 +115,6 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         return rwlock;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected Iterable<PKIXValidationInformation> resolveFromSource(CriteriaSet criteriaSet) throws SecurityException {
 
         checkCriteriaRequirements(criteriaSet);

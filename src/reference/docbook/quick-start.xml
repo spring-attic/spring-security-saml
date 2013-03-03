@@ -40,6 +40,9 @@
 		JDK installation and include files in <emphasis>lib/endorsed</emphasis> from the latest OpenSAML archive available at
 		<ulink url="http://shibboleth.net/downloads/java-opensaml/">http://shibboleth.net/downloads/java-opensaml/</ulink>. The location of the
 		endorsed folder may differ based on your application server or container.</para>
+		<para>Due to US export limitations Java JDK comes with a limited set of cryptography capabilities. Usage of the SAML Extension might require 
+		installation of the <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Unlimited Strength Jurisdiction 
+		Policy Files</ulink> which removes these limitations.</para>
 	</section>
 
 	<section id="quick-start-steps">

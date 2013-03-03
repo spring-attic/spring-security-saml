@@ -24,13 +24,19 @@ log4j.logger.org.opensaml=DEBUG</programlisting></para>
 
 	<section id="chapter-troubleshooting-common-issues">
 	  <title>Common problems</title>
-	  <para></para>
+	  
+    <simplesect>
+      <title>Time synchronization</title>
+      <para>Processing of SAML messages and assertions is often limited to a specific time window which e.g. prevents possibilities of replay attacks.
+      Validation of messages can fail when internal clocks of the IDP and SP machines are not synchronized. Make sure to use a       
+      <ulink url="http://www.freebsd.org/doc/handbook/network-ntp.html">time synchronization service</ulink> on all systems in the federation.</para>
+    </simplesect>
+    
 	</section>
 
 	<!--
 	TODO
 	- XML parsing libraries and endorsing
-	- time skew problems
 	- deployment to application servers
 	-->
 </chapter>

@@ -17,8 +17,8 @@ package org.springframework.security.saml.processor;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
 import org.opensaml.saml2.binding.security.SAML2HTTPPostSimpleSignRule;
 import org.opensaml.ws.message.decoder.MessageDecoder;
 import org.opensaml.ws.message.encoder.MessageEncoder;
@@ -42,23 +42,30 @@ import java.util.List;
 public class HTTPPostBinding extends SAMLBindingImpl {
 
     /**
+     * Pool for message deserializers.
+     */
+    protected ParserPool parserPool;
+
+    /**
      * Creates default implementation of the binding.
      *
      * @param parserPool     parserPool for message deserialization
      * @param velocityEngine engine for message formatting
      */
     public HTTPPostBinding(ParserPool parserPool, VelocityEngine velocityEngine) {
-        this(new HTTPPostDecoder(parserPool), new HTTPPostEncoder(velocityEngine, "/templates/saml2-post-binding.vm"));
+        this(parserPool, new HTTPPostDecoder(parserPool), new HTTPPostEncoder(velocityEngine, "/templates/saml2-post-binding.vm"));
     }
 
     /**
      * Implementation of the binding with custom encoder and decoder.
      *
+     * @param parserPool     parserPool for message deserialization
      * @param decoder custom decoder implementation
      * @param encoder custom encoder implementation
      */
-    public HTTPPostBinding(MessageDecoder decoder, MessageEncoder encoder) {
+    public HTTPPostBinding(ParserPool parserPool, MessageDecoder decoder, MessageEncoder encoder) {
         super(decoder, encoder);
+        this.parserPool = parserPool;
     }
 
     public boolean supports(InTransport transport) {

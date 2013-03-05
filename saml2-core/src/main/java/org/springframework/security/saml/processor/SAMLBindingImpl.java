@@ -33,14 +33,8 @@ import java.util.List;
  */
 public abstract class SAMLBindingImpl implements SAMLBinding {
 
-    @Autowired
-    MetadataManager metadata;
-
-    @Autowired
-    ParserPool parserPool;
-
-    MessageDecoder decoder;
-    MessageEncoder encoder;
+    private MessageDecoder decoder;
+    private MessageEncoder encoder;
 
     protected SAMLBindingImpl(MessageDecoder decoder, MessageEncoder encoder) {
         this.decoder = decoder;

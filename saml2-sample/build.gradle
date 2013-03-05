@@ -3,6 +3,11 @@ apply plugin: 'war'
 // Do not generate POM for this module
 install.enabled = false
 
+// Disable publishing to repository for the sample project
+if (tasks.findByPath('artifactoryPublish')) {
+    artifactoryPublish.enabled = false
+}
+
 war.archiveName = "${project.name}.war"
 
 description = "Spring Security SAML v2 sample webapp"

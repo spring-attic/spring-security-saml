@@ -2,21 +2,24 @@ description = "Spring Security SAML v2 library"
 
 dependencies {
 	compile "org.springframework.security:spring-security-core:$springSecurityVersion",
-			"org.springframework.security:spring-security-config:$springSecurityVersion",
-			"org.springframework.security:spring-security-web:$springSecurityVersion",
-			"org.slf4j:slf4j-api:$slf4jVersion"
-	compile	("org.opensaml:opensaml:2.5.3") {
-			exclude group: "org.slf4j", module: "jcl-over-slf4j"
-			exclude group: "org.slf4j", module: "log4j-over-slf4j"
-      exclude group : "xalan", module: "serializer"
-      exclude group : "xml-apis", module: "xml-apis"
+		"org.springframework.security:spring-security-config:$springSecurityVersion",
+		"org.slf4j:slf4j-api:$slf4jVersion"	
+	compile ("org.springframework.security:spring-security-web:$springSecurityVersion") {
+		exclude group: "org.springframework", module: "spring-jdbc"
+		exclude group: "org.springframework", module: "spring-tx"
+	}
+	compile ("org.opensaml:opensaml:2.5.3") {
+		exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		exclude group: "org.slf4j", module: "log4j-over-slf4j"
+		exclude group: "xalan", module: "serializer"
+		exclude group: "xml-apis", module: "xml-apis"
 	}
 	provided "javax.servlet:servlet-api:2.5"
 	testCompile "org.slf4j:slf4j-log4j12:1.6.3",
-				"org.easymock:easymock:2.4",
-				"junit:junit:4.4",
-				"commons-logging:commons-logging:1.1.1",
-				"xmlunit:xmlunit:1.0"
+		"org.easymock:easymock:2.4",
+		"junit:junit:4.4",
+		"commons-logging:commons-logging:1.1.1",
+		"xmlunit:xmlunit:1.0"
 	testCompile	("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

@@ -638,7 +638,8 @@ public class MetadataGenerator {
      * Name of the KeyInfoGenerator registered at default KeyInfoGeneratorManager.
      *
      * @return key info generator name
-     * @see Configuration#getGlobalSecurityConfiguration().getKeyInfoGeneratorManager()
+     * @see Configuration#getGlobalSecurityConfiguration()
+     * @see org.opensaml.xml.security.SecurityConfiguration#getKeyInfoGeneratorManager()
      */
     protected String getKeyInfoGeneratorName() {
         return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;

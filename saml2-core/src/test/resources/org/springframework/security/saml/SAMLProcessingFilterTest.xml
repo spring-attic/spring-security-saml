@@ -75,6 +75,7 @@
     <!-- Bindings, encoders and decoders used for creating and parsing messages -->
     <util:list id="bindings">
         <bean class="org.springframework.security.saml.processor.HTTPPostBinding">
+            <constructor-arg ref="parserPool"/>
             <constructor-arg>
                 <bean class="org.opensaml.saml2.binding.decoding.HTTPPostDecoder">
                     <constructor-arg ref="parserPool"/>

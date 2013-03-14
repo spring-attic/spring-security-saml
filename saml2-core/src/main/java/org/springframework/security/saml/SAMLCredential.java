@@ -176,5 +176,14 @@ public class SAMLCredential implements Serializable {
     public String getLocalEntityID() {
         return localEntityID;
     }
+    
+    /**
+     * Custom data created by profile customization
+     *
+     * @return custom data
+     */
+    public Serializable getAdditionalData() {
+        return additionalData;
+    }
 
 }

@@ -16,8 +16,8 @@
 		<title>Extended metadata</title>
 		<para>Extended metadata provides additional settings for customization of IDP and SP behavior. Bean can be
 			found in package <emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
-			details
-			on setting up metadata please consult<xref linkend="configuration-metadata"/>.
+			details on setting up metadata please consult <xref linkend="configuration-metadata"/>. The same class is used for both local service providers 
+			and remote identity providers; each value contains information about the entities it's valid for.
 			<table id="reference-extended-metadata-settings">
 				<title>Extended metadata settings</title>
 				<tgroup cols="4">
@@ -37,92 +37,92 @@
 						<row>
 							<entry>local</entry>
 							<entry>false</entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>local and remote</entry>
+							<entry>True for metadata of a local service provider. False for remote identity providers.</entry>
 						</row>
 						<row>
 							<entry>alias</entry>
-							<entry></entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>defaultAlias</entry>
+							<entry>local only</entry>
+							<entry>Unique alias used to identify the selected local service provider based on used URL. See <xref linkend="configuration-entity-alias"/>.</entry>
 						</row>
 						<row>
 							<entry>idpDiscoveryEnabled</entry>
 							<entry>false</entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>local only</entry>
+							<entry>When true system will initialize IDP discovery when no IDP is selected during SSO initialization. See <xref linkend="configuration-discovery"/>.</entry>
 						</row>
 						<row>
 							<entry>idpDiscoveryURL</entry>
-							<entry></entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>internal discovery URL</entry>
+							<entry>local only</entry>
+							<entry>URL of the IDP discovery service. Only used when discovery is enabled.</entry>
 						</row>
 						<row>
 							<entry>idpDiscoveryResponseURL</entry>
-							<entry></entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>internal discovery URL</entry>
+							<entry>local only</entry>
+							<entry>URL expecting response from the IDP discovery service. Only used when discovery is enabled.</entry>
 						</row>
 						<row>
 							<entry>ecpEnabled</entry>
 							<entry>false</entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>local only</entry>
+							<entry>Property enables support for the SAML 2.0 ECP profile. See <xref linkend="enhanced-client"/>.</entry>
 						</row>
 						<row>
 							<entry>securityProfile</entry>
 							<entry>metaiop</entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>local only</entry>
+							<entry>Security profile for verification of message signatures. See <xref linkend="configuration-security-profiles"/>.</entry>
 						</row>
 						<row>
 							<entry>sslSecurityProfile</entry>
 							<entry>pkix</entry>
-							<entry>local</entry>
-							<entry></entry>
+							<entry>local only</entry>
+							<entry>Security profile for vericiation of SSL/TLS endpoint trust. See <xref linkend="configuration-security-profiles"/>.</entry>
 						</row>
 						<row>
 							<entry>signingKey</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>-</entry>
+							<entry>local and remote</entry>
+							<entry>For local entities alias of private key used to create signatures. The default private key is used when no value is provided. For remote identity providers defines an additional public key used to verify signatures.</entry>
 						</row>
 						<row>
 							<entry>encryptionKey</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>-</entry>
+							<entry>local and remote</entry>
+							<entry>For local entities alias of private key used to encrypt data. The default private key is used when no value is provided. For remote identity providers defines an additional public key used to decrypt data.</entry>
 						</row>
 						<row>
 							<entry>tlsKey</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>-</entry>
+							<entry>local and remote</entry>
+							<entry>For local entities alias of private key used for SSL/TLS client authentication. No client authentication is used when value is not specified. For remote identity providers defines an additional public key used for trust resolution.</entry>
 						</row>
 						<row>
 							<entry>trustedKeys</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>-</entry>
+							<entry>remote</entry>
+							<entry>Keys included as trusted anchors during PKIX evaluation. All keys in the keyStore are used as trust anchors with null value. Keys are only used with PKIX security profile.</entry>
 						</row>
 						<row>
 							<entry>requireLogoutRequestSigned</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>true</entry>
+							<entry>local and remote</entry>
+							<entry>For local entities enables requirement of signed logout requests. For remote entities enables signing of requests sent to the IDP.</entry>
 						</row>
 						<row>
 							<entry>requireLogoutResponseSigned</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>false</entry>
+							<entry>local and remote</entry>
+							<entry>For local entities enables requirement of signed logout responses. For remote entities enables signing of responses sent to the IDP.</entry>
 						</row>
 						<row>
 							<entry>requireArtifactResolveSigned</entry>
-							<entry></entry>
-							<entry>both</entry>
-							<entry></entry>
+							<entry>true</entry>
+							<entry>remote only</entry>
+							<entry>Enables signing of artifact resolution requests sent to the remote identity providers.</entry>
 						</row>
 					</tbody>
 				</tgroup>

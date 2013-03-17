@@ -144,10 +144,10 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
             SAMLMessageContext context = contextProvider.getLocalAndPeerEntity(request, response);
 
-            if (isDiscovery(context)) {
-                initializeDiscovery(context);
-            } else if (isECP(context)) {
+            if (isECP(context)) {
                 initializeECP(context, e);
+            } else if (isDiscovery(context)) {
+                initializeDiscovery(context);
             } else {
                 initializeSSO(context, e);
             }

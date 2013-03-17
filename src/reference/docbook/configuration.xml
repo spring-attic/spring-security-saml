@@ -859,6 +859,20 @@ public class TestUserDetails implements SAMLUserDetailsService {
 
 		</para>
 	</section>
+	
+	<section id="enhanced-client">
+		<title>Enhanced client/proxy</title>
+		<para>Support for enhanced client/proxy can be configured using property <emphasis>ecpEnabled</emphasis> of the service provider's extended metadata. Once enabled, ECP profile is automatically activated with requests containing HTTP headers
+		<emphasis>Accept: application/vnd.paos+xml</emphasis> and <emphasis>PAOS: ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'</emphasis>. Binding used to server ECP profile is always automatically set to PAOS.</para>
+		<para>ECP can be enabled in combination with the automatic metadata generation using the following settings: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+    <property name="extendedMetadata">
+        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+            <property name="ecpEnabled" value="true"/>
+        </bean>
+    </property>
+</bean>]]></programlisting>
+		</para>
+	</section>
 
 	<!-- TODO
 	IDP integration
@@ -871,11 +885,8 @@ public class TestUserDetails implements SAMLUserDetailsService {
 	Bindings configuration
 	- artifact resolution
 	- custom URLs
-
 	Service URLs
-
 	Using the HoK profile
-	Using the ECP profile
 	-->
 
 </chapter>

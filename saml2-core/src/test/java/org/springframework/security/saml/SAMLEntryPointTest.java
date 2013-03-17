@@ -132,6 +132,8 @@ public class SAMLEntryPointTest {
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
         session.setAttribute(eq("_springSamlStorageKey"), notNull());
+        expect(request.getHeader("Accept")).andReturn("text/html");
+        expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
         SAMLTestHelper.setLocalContextParameters(request, "/samlApp", null);
         SAMLTestHelper.setPeerContextParameters(request, null, null);

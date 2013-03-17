@@ -61,11 +61,11 @@ public class ExpiringUsernameAuthenticationTokenTest {
      */
     @Test
     public void testExpirationFutureChange() throws Exception {
-        Date future = new DateTime().plusMillis(300).toDate();
+        Date future = new DateTime().plusMillis(1000).toDate();
         ExpiringUsernameAuthenticationToken t = new ExpiringUsernameAuthenticationToken(future, null, null, new LinkedList<GrantedAuthority>());
         assertTrue(t.isAuthenticated());
         synchronized (this) {
-            wait(600);
+            wait(1000);
         }
         assertFalse(t.isAuthenticated());
     }

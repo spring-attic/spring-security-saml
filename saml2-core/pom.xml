@@ -62,16 +62,16 @@
       <scope>compile</scope>
       <exclusions>
         <exclusion>
-          <artifactId>serializer</artifactId>
-          <groupId>xalan</groupId>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
         </exclusion>
         <exclusion>
           <artifactId>jcl-over-slf4j</artifactId>
           <groupId>org.slf4j</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>xml-apis</artifactId>
-          <groupId>xml-apis</groupId>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
         </exclusion>
         <exclusion>
           <artifactId>log4j-over-slf4j</artifactId>

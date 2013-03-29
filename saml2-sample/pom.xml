@@ -5,7 +5,7 @@
   <groupId>org.springframework.security.extensions</groupId>
   <artifactId>spring-security-saml2-sample</artifactId>
   <packaging>war</packaging>
-  <version>1.0.0-RC2-SNAPSHOT</version>
+  <version>1.0.0.RC3-SNAPSHOT</version>
   <name>Spring Security SAML v2 sample webapp</name>
   <description>Spring Security SAML v2 sample webapp</description>
   <url>https://github.com/SpringSource/spring-security-saml</url>
@@ -56,18 +56,6 @@
     <url>https://github.com/SpringSource/spring-security-saml</url>
   </scm>
   <repositories>
-    <repository>
-      <id>shibboleth</id>
-      <name>Shibboleth</name>
-      <url>https://build.shibboleth.net/nexus/content/groups/public/</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
     <repository>
       <releases>
         <enabled>false</enabled>
@@ -120,7 +108,7 @@
     <dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
-      <version>1.0.0-RC2-SNAPSHOT</version>
+      <version>1.0.0.RC3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

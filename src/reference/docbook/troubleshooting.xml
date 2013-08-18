@@ -53,6 +53,11 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
       e.g. http://server:port/yourapp or use <link linkend="configuration-metadata-sp-import">pre-generated metadata</link>.</para>      
     </simplesect>        
     
+    <simplesect>
+      <title>Single logout not working as expected</title>
+      <para>Make sure the &lt;security:logout.../&gt; element is not specified within the &lt;security:http&gt; element.</para>      
+    </simplesect>    
+    
 	</section>
 
 	<!--

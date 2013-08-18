@@ -129,4 +129,80 @@
 			</table>
 		</para>
 	</section>
+
+	<section id="reference-websso-options">
+		<title>Web SSO profile options</title>
+		<para>Web SSO profile options customize creation of the authentication request sent to the IDP. For details on using the profile consult <xref linkend="configuration-sso"/>.
+      The following SSO parameters can be customized using the <emphasis>WebSSOProfileOptions</emphasis> object:
+			<table id="configuration-sso-webssoprofile-table">
+			 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
+			 <tgroup cols="2">
+				 <colspec colname="_1" colwidth="0.4*" align="left"/>
+				 <colspec colname="_2" colwidth="1.0*" align="left"/>
+				 <thead>
+					 <row>
+						 <entry>Property</entry>
+						 <entry>Description</entry>
+					 </row>
+				 </thead>
+				<tbody>
+					<row>
+						<entry>binding</entry>
+						<entry>Default: binding of the first declared SingleSignOnService in IDP metadata. Binding used to send message to IDP. Supported values depend on the SP configuration, typically "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            "urn:oasis:names:tc:SAML:2.0:bindings:PAOS" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser".</entry>
+					</row>
+					<row>
+						<entry>providerName</entry>
+						<entry>Default: empty. Human readable name of the local SP sent with the authentication request.</entry>
+					</row>
+					<row>
+						<entry>assertionConsumerIndex</entry>
+						<entry>Default: empty. When set determines where should IDP send response and which binding to use. Otherwise system uses the default assertion consumer service marked as default, or first applicable. Available indexes can be found in metadata of this service provider.</entry>
+					</row>
+					<row>
+						<entry>nameID</entry>
+						<entry>Default: empty. Name ID to request from IDP in the NameIDPolicy. No NameIDPolicy is sent when not specified. Typical values are "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted".</entry>
+					</row>                    
+					<row>
+						<entry>allowCreate</entry>
+						<entry>Default: empty. Only applicable when nameID is specified, when true instructs IDP that it is allowed to create new user based on the authentication request.</entry>
+					</row>          
+					<row>
+						<entry>passive</entry>
+						<entry>Default: false. Sets whether the IdP should refrain from interacting with the user during the authentication process.</entry>
+					</row>
+					<row>
+						<entry>forceAuthn</entry>
+						<entry>Default: false. When true IDP is required to re-authenticate user and not rely on previous authentication events.</entry>
+					</row>
+					<row>
+						<entry>includeScoping</entry>
+						<entry>Default: true. When true request will include Scoping element.</entry>
+					</row>                              
+					<row>
+						<entry>allowedIDPs</entry>
+						<entry>Default: empty. Values to be included in the Scoping element on top of the IDP message is sent to. Only applicable when includeScoping is set to true.</entry>
+					</row>
+					<row>
+						<entry>proxyCount</entry>
+						<entry>Default: 2. Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. Use zero to disable proxying or value >0 to specify how many hops are allowed. Only applicable when includeScoping is set to true.</entry>
+					</row>
+					<row>
+						<entry>authnContexts</entry>
+						<entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+					</row>
+					<row>
+						<entry>authnContextComparison</entry>
+						<entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+					</row>                                                
+					<row>
+						<entry>relayState</entry>
+						<entry>Default: empty. Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+		</para>
+	</section>
+  
 </appendix>

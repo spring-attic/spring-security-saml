@@ -649,8 +649,8 @@
 
 	<section id="configuration-discovery">
 		<title>IDP selection and discovery</title>
-		<para>SAML Extension supports the <link linkend="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
-Protocol and Profile</link>.</para>
+		<para>SAML Extension supports the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
+Protocol and Profile</ulink>.</para>
     
     <para>
       IDP discovery can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the 
@@ -721,32 +721,9 @@ Protocol and Profile</link>.</para>
 		 and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
 		 object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
 		 Default implementation returns value specified in property <emphasis>defaultOptions</emphasis>. Method can be overriden to provide custom logic for SSO initialization.</para>
-		 <para>The following SSO parameters can be customized using the <emphasis>WebSSOProfileOptions</emphasis> object:
-		 <table id="configuration-sso-webssoprofile-table">
-			 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
-			 <tgroup cols="3">
-				 <colspec colname="_1" colwidth="0.2*" align="left"/>
-				 <colspec colname="_2" colwidth="0.2*" align="left"/>
-				 <colspec colname="_3" colwidth="1.0*" align="left"/>
-				 <thead>
-					 <row>
-						 <entry>Property</entry>
-						 <entry>Value</entry>
-						 <entry>Description</entry>
-					 </row>
-				 </thead>
-				 <!-- TODO provide values -->
-				<tbody>
-					<row>
-						<entry>relayState</entry>
-						<entry></entry>
-						<entry>Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
-					</row>
-				</tbody>
-			</tgroup>
-		</table></para>
-		<para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
-		<programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
+     <para>For details about available settings of the WebSSOProfileOptions see <xref linkend="reference-websso-options"/>.</para>
+		 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
+		 <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
 	<property name="defaultProfileOptions">
 		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
 			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>

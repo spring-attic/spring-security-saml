@@ -16,8 +16,8 @@
 		<title>Extended metadata</title>
 		<para>Extended metadata provides additional settings for customization of IDP and SP behavior. Bean can be
 			found in package <emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis>. For
-			details on setting up metadata please consult <xref linkend="configuration-metadata"/>. The same class is used for both local service providers 
-			and remote identity providers; each value contains information about the entities it's valid for.
+			details on setting up extended metadata please consult <xref linkend="configuration-metadata-sp"/> for local SP, and <xref linkend="configuration-metadata-idp"/> for remote IDPs.
+      The same class is used for both local service providers and remote identity providers; each value contains information about the entities it's valid for.
 			<table id="reference-extended-metadata-settings">
 				<title>Extended metadata settings</title>
 				<tgroup cols="4">

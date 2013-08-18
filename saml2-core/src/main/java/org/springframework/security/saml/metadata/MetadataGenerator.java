@@ -107,9 +107,15 @@ public class MetadataGenerator {
     private Collection<String> bindingsHoKSSO = Arrays.asList("artifact", "post");
     private Collection<String> bindingsSLO = Arrays.asList("post", "redirect");
 
+    @Deprecated
     private boolean includeDiscovery = true;
+
+    @Deprecated
     private String customDiscoveryURL;
+
+    @Deprecated
     private String customDiscoveryResponseURL;
+
     private boolean includeDiscoveryExtension;
 
     private ExtendedMetadata extendedMetadata;
@@ -782,8 +788,14 @@ public class MetadataGenerator {
         this.includeDiscovery = includeDiscovery;
     }
 
+    /**
+     * True when IDP discovery is enabled either on local property includeDiscovery or property idpDiscoveryEnabled
+     * in the extended metadata.
+     *
+     * @return true when discovery is enabled
+     */
     public boolean isIncludeDiscovery() {
-        return includeDiscovery;
+        return includeDiscovery || (extendedMetadata != null && extendedMetadata.isIdpDiscoveryEnabled());
     }
 
     public int getAssertionConsumerIndex() {
@@ -828,12 +840,15 @@ public class MetadataGenerator {
     }
 
     /**
-     * Provides set discovery request url or generates a default when none was provided.
+     * Provides set discovery request url or generates a default when none was provided. Primarily value set on extenedMetadata property
+     *  idpDiscoveryURL is used, when empty local property customDiscoveryURL is used, when empty URL is automatically generated.
      *
      * @return URL to use for IDP discovery request
      */
     private String getDiscoveryURL(String entityBaseURL, String entityAlias) {
-        if (customDiscoveryURL != null && customDiscoveryURL.length() > 0) {
+        if (extendedMetadata != null && extendedMetadata.getIdpDiscoveryURL() != null && extendedMetadata.getIdpDiscoveryURL().length() > 0) {
+            return extendedMetadata.getIdpDiscoveryURL();
+        } else if (customDiscoveryURL != null && customDiscoveryURL.length() > 0) {
             return customDiscoveryURL;
         } else {
             return getServerURL(entityBaseURL, entityAlias, getSAMLDiscoveryPath());
@@ -841,12 +856,15 @@ public class MetadataGenerator {
     }
 
     /**
-     * Provides set discovery response url or generates a default when none was provided.
+     * Provides set discovery response url or generates a default when none was provided. Primarily value set on extenedMetadata property
+     *  idpDiscoveryResponseURL is used, when empty local property customDiscoveryResponseURL is used, when empty URL is automatically generated.
      *
      * @return URL to use for IDP discovery response
      */
     private String getDiscoveryResponseURL(String entityBaseURL, String entityAlias) {
-        if (customDiscoveryResponseURL != null && customDiscoveryResponseURL.length() > 0) {
+        if (extendedMetadata != null && extendedMetadata.getIdpDiscoveryResponseURL() != null && extendedMetadata.getIdpDiscoveryResponseURL().length() > 0) {
+            return extendedMetadata.getIdpDiscoveryResponseURL();
+        } else if (customDiscoveryResponseURL != null && customDiscoveryResponseURL.length() > 0) {
             return customDiscoveryResponseURL;
         } else {
             Map<String, String> params = new HashMap<String, String>();

@@ -41,33 +41,39 @@
 			Setting up of the library typically involves these steps:
 			<itemizedlist spacing="compact">
 				<listitem>
-					<para>integration to application using Spring XML configuration</para>
+					<para><link linkend="configuration-integration">integration to application using Spring XML configuration</link></para>
 				</listitem>
 				<listitem>
-					<para>configuration of signature, encryption and trust keys</para>
+					<para><link linkend="configuration-metadata">import, generation and customization of SP and IDP metadata</link></para>
+				</listitem>                
+				<listitem>
+					<para><link linkend="configuration-key-management">configuration of signature, encryption and trust keys</link></para>
 				</listitem>
 				<listitem>
-					<para>configuration of security profiles</para>
+					<para><link linkend="configuration-security-profiles">configuration of security profiles</link></para>
 				</listitem>
 				<listitem>
-					<para>import, generation and customization of SP and IDP metadata</para>
+					<para><link linkend="configuration-load-balancing">configuration of reverse proxy or load balancer</link></para>
 				</listitem>
 				<listitem>
-					<para>configuration of IDP selection</para>
+					<para><link linkend="configuration-discovery">configuration of IDP selection or discovery</link></para>
+				</listitem>                
+				<listitem>
+					<para><link linkend="configuration-sso">configuration of single sign-on process</link></para>
 				</listitem>
 				<listitem>
-					<para>configuration of single sign-on process</para>
+					<para><link linkend="configuration-logout">configuration of logout process</link></para>
+				</listitem>        
+				<listitem>
+					<para><link linkend="configuration-authentication-object">configuration of authentication object</link></para>
 				</listitem>
 				<listitem>
-					<para>configuration of logout process</para>
-				</listitem>
-				<listitem>
-					<para>configuration of authentication object</para>
-				</listitem>
+					<para><link linkend="configuration-authentication-log">configuration of authentiction log</link></para>
+				</listitem>        
 			</itemizedlist>
 		</para>
-		<para>Additional steps such as configuration of authentication logging, customization of SAML 2.0 bindings,
-			configuration of artifact resolution or configuration of time skews might be needed.
+		<para>Additional steps such as customization of SAML 2.0 bindings, configuration of artifact resolution 
+    or configuration of time skews might be needed.
 		</para>
 	</section>
 
@@ -247,17 +253,17 @@
 								<row>
 									<entry><literal>includeDiscovery</literal></entry>
 									<entry>When true system will initialize discovery process during attempt to initialize single sign-on without pre-selected IDP.</entry>
-									<entry>true</entry>
+									<entry>true, deprecated, use property idpDiscoveryEnabled in extendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>customDiscoveryURL</literal></entry>
 									<entry>When <literal>includeDiscovery</literal> is true value overrides default discovery request URL.</entry>
-									<entry>generated value for internal discovery service</entry>
+									<entry>generated value for internal discovery service, deprecated, use property idpDiscoveryURL in extendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>customDiscoveryResponseURL</literal></entry>
 									<entry>When <literal>includeDiscoveryExtension</literal> is true value overrides default discovery response URL.</entry>
-									<entry>generated value for entry point response URL</entry>
+									<entry>generated value for entry point response URL, deprecated, use property idpDiscoveryResponseURL in extendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>includeDiscoveryExtension</literal></entry>
@@ -269,6 +275,10 @@
 									<entry>Name identifiers to be included in the metadata. Supported values are: EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED and X509_SUBJECT. Order of NameIDs in the property determines order of NameIDs in the generated metadata.</entry>
 									<entry>EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED, X509_SUBJECT</entry>
 								</row>
+								<row>
+									<entry><literal>extendedMetadata</literal></entry>
+									<entry>Additional settings such as IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="reference-extended-metadata"/> for details.</entry>
+								</row>                
 							</tbody>
 						</tgroup>
 					</table>
@@ -294,7 +304,7 @@
 				<para>
 					In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
 					from the URL seen by client at least property <literal>entityBaseURL</literal> should be set to a value e.g. https://www.server.com:8080
-					For details about load balancing see <xref linkend="load-balancing"/>.
+					For details about load balancing see <xref linkend="configuration-load-balancing"/>.
 				</para>
 			</section>
 
@@ -597,8 +607,105 @@
 			 </para>
 		 </section>
 	 </section>
+   
+	<section id="configuration-load-balancing">
+		<title>Reverse proxies and load balancers</title>
+		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
+		SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
+		to confugure SAML Extension for deployment behing a load balancer or a reverse-proxy please follow these steps:
 
-	 <section id="configuration-sso">
+		<itemizedlist>
+				<listitem>
+					<para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
+					within user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
+					Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
+				</listitem>
+				<listitem>
+					<para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContex.xml</emphasis>
+					to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+	<property name="scheme" value="https"/>
+	<property name="serverName" value="www.myserver.com"/>
+	<property name="serverPort" value="443"/>
+	<property name="includeServerPortInRequestURL" value="false"/>
+	<property name="contextPath" value="/spring-security-saml2-sample"/>
+</bean>]]></programlisting></para>
+				  <para>This setting enables extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
+				</listitem>
+				<listitem>
+					<para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseUrl</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
+					bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter"
+		class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+	<constructor-arg>
+		<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+			<property name="entityBaseURL" value="https://www.myserver.com/spring-security-saml2-sample"/>
+		</bean>
+	</constructor-arg>
+</bean>]]></programlisting></para>
+				</listitem>
+			</itemizedlist>
+
+		</para>
+	</section>   
+
+	<section id="configuration-discovery">
+		<title>IDP selection and discovery</title>
+		<para>SAML Extension supports the <link linkend="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
+Protocol and Profile</link>.</para>
+    
+    <para>
+      IDP discovery can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the 
+      entityId of the required IDP, e.g. http://host:port/app/saml/login?idp=mySelectedIDP.
+    </para>
+    
+    <para>
+      The URL where local SP expects discovery response can be included in the SP metadata as one of the extensions. The feature can be enabled by setting property <emphasis>includeDiscoveryExtension</emphasis>
+      to true on bean <emphasis>MetadataGenerator</emphasis> inside <emphasis>MetadataGeneratorFilter</emphasis>, e.g.:
+<programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+  <constructor-arg>
+    <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+      <property name="includeDiscoveryExtension" value="true"/>
+    </bean>
+  </constructor-arg>
+</bean>]]></programlisting>
+    </para>
+    
+    <para>It is possible to configure the following IDP discovery modes:
+
+          <simplesect>
+            <title>Local discovery service</title>
+            <para>SAML Extension includes a local IDP discovery service which presents user with an IDP selection page. The selection page can be customized using property
+            <emphasis>idpSelectionPath</emphasis> on bean samlIDPDiscovery. System forwards to this page during discovery request and includes the following request attributes:
+              <itemizedlist>
+                    <listitem>
+                        <para><emphasis>idpDiscoReturnURL</emphasis> - URL to send the IDP selection result to using GET action</para>
+                    </listitem>
+                    <listitem>
+                        <para><emphasis>idpDiscoReturnParam</emphasis> - name of the GET parameter to include the entity ID of the selected IDP</para>
+                    </listitem>
+              </itemizedlist>
+            </para>
+            <para>See the default implementation in <emphasis>saml2-sample/src/main/webapp/WEB-INF/security/idpSelection.jsp</emphasis> for an example.</para>
+          </simplesect>
+
+          <simplesect>
+            <title>Remote discovery service</title>
+            <para>In order to enable external IDP discovery service configure property <emphasis>idpDiscoveryURL</emphasis> in your <link linkend="reference-extended-metadata">local
+            SP extended metadata</link> to the external discovery URL. Make sure property <emphasis>idpDiscoveryEnabled</emphasis> is set to true. For details on configuring local extended metadata
+            see <xref linkend="configuration-metadata-sp"/>.</para>
+          </simplesect>
+
+          <simplesect>
+            <title>Default IDP without discovery</title>
+            <para>In this mode system automatically selects the default IDP and doesn't perform discovery. Mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
+            <link linkend="reference-extended-metadata">local SP extended metadata</link> to false. For details on configuring local extended metadata see <xref linkend="configuration-metadata-sp"/>.</para>
+            <para>The default IDP can be configured using propery <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
+          </simplesect>
+      
+    </para>        
+      
+	</section>
+  
+	<section id="configuration-sso">
 		 <title>Single sign-on process</title>
 		 <para>SP initialized SSO process can be started in two ways:
 		 <itemizedlist spacing="compact">
@@ -647,14 +754,6 @@
 		</bean>
 	</property>
 </bean>]]></programlisting></para>
-	</section>
-
-	<section id="configuration-discovery">
-		<title>IDP selection</title>
-		<para>TODO</para>
-		<!-- TODO
-		- configuring IDP discovery
-		-->
 	</section>
 
 	<section id="configuration-logout">
@@ -821,45 +920,6 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		by settings property <emphasis>responseSkew</emphasis> in beans <emphasis>WebSSOProfileConsumerImpl</emphasis> and <emphasis>SingleLogoutProfileImpl</emphasis>.</para>
 	</section>
 
-	<section id="load-balancing">
-		<title>Load balancing</title>
-		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
-		SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
-		to confugure SAML Extension for deployment behing a load balancer or a reverse-proxy please follow these steps:
-
-		<itemizedlist>
-				<listitem>
-					<para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
-					within user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
-					Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
-				</listitem>
-				<listitem>
-					<para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContex.xml</emphasis>
-					to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
-	<property name="scheme" value="https"/>
-	<property name="serverName" value="www.myserver.com"/>
-	<property name="serverPort" value="443"/>
-	<property name="includeServerPortInRequestURL" value="false"/>
-	<property name="contextPath" value="/spring-security-saml2-sample"/>
-</bean>]]></programlisting></para>
-				  <para>This setting enables extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
-				</listitem>
-				<listitem>
-					<para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseUrl</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
-					bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter"
-		class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
-	<constructor-arg>
-		<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
-			<property name="entityBaseURL" value="https://www.myserver.com/spring-security-saml2-sample"/>
-		</bean>
-	</constructor-arg>
-</bean>]]></programlisting></para>
-				</listitem>
-			</itemizedlist>
-
-		</para>
-	</section>
-	
 	<section id="enhanced-client">
 		<title>Enhanced client/proxy</title>
 		<para>Support for enhanced client/proxy can be configured using property <emphasis>ecpEnabled</emphasis> of the service provider's extended metadata. Once enabled, ECP profile is automatically activated with requests containing HTTP headers

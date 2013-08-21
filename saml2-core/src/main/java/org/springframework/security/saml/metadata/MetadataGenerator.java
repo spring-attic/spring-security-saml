@@ -61,6 +61,7 @@ import java.util.*;
  */
 public class MetadataGenerator {
 
+    private String id;
     private String entityId;
     private String entityBaseURL;
     private String entityAlias;
@@ -183,7 +184,11 @@ public class MetadataGenerator {
 
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         EntityDescriptor descriptor = builder.buildObject();
-        descriptor.setID(entityId);
+        if (id != null) {
+            descriptor.setID(id);
+        } else {
+            descriptor.setID(entityId);
+        }
         descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
 
@@ -710,6 +715,14 @@ public class MetadataGenerator {
 
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public void setEntityId(String entityId) {

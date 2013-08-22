@@ -56,6 +56,7 @@ public class MetadataGeneratorTest {
         generator.setIncludeDiscoveryExtension(true);
         EntityDescriptor metadata = generator.generateMetadata();
 
+        assertEquals("my_entity", metadata.getID());
         assertEquals("my_entity", metadata.getEntityID());
         SPSSODescriptor spssoDescriptor = metadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         assertNotNull(spssoDescriptor);
@@ -92,6 +93,22 @@ public class MetadataGeneratorTest {
         assertEquals(2, nameID.size());
         assertEquals(NameIDType.TRANSIENT, nameID.get(0).getFormat());
         assertEquals(NameIDType.EMAIL, nameID.get(1).getFormat());
+
+    }
+
+    /**
+     * Test verifies that metadata ID and EntityId can be set independently.
+     */
+    @Test
+    public void testSettingIdAndEntityIdIndependently() {
+
+        generator.setEntityBaseURL("http://localhost");
+        generator.setId("my_id");
+        generator.setEntityId("my_entity");
+        EntityDescriptor metadata = generator.generateMetadata();
+
+        assertEquals("my_id", metadata.getID());
+        assertEquals("my_entity", metadata.getEntityID());
 
     }
 

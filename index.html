@@ -1,0 +1,81 @@
+---
+# The name of your project
+title: Spring Security SAML
+
+badges:
+
+  # Specify your project's twitter handle, if any. Delete if none.
+  twitter: SpringSecurity
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/spring-projects/spring-security-saml
+      icon: github
+
+    - name: Issues (JIRA)
+      url:  http://jira.springsource.org/browse/SES
+      icon: tracking
+
+    - name: CI (Bamboo)
+      url:  https://build.springsource.org/browse/SES
+      icon: ci
+
+    - name: Forum
+      url:  http://forum.stage.springsource.org/forum/spring-projects/security/saml
+      icon: forum
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring-security
+      icon: stackoverflow
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+<!-- Specify the parent of this project (or delete if none) to influence the rendering of the breadcrumb -->
+{% capture parent_link %}
+[Spring Security]({{site.projects_site_url}}/spring-security)
+{% endcapture %}
+
+
+{% capture billboard_description %}
+
+Spring Security Extension allows seamless combination of SAML 2.0 and other authentication and federation mechanisms in a single application.
+
+{% endcapture %}
+
+{% capture main_content %}
+
+Spring Security Extension allows seamless combination of SAML 2.0 and other authentication and federation mechanisms in a single application. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, RM5 IdM or Ping Federate) can be used to connect with Spring Security SAML Extension.
+
+## Features
+
+* Support multiple SAML profiles (Web single sign-on, Web single sign-on holder-of-key, Single logout, Enhanced client/proxy, etc)
+* IDP and SP initialized single sign-on
+* Identity provider discovery profile and IDP selection
+* Metadata interoperability and PKIX trust management
+* Automatic service provider metadata generation
+* Metadata loading from files, URLs, file-backed URLs
+* Processing and automatic reloading of metadata with many identity providers
+* Much more...
+
+<span id="quick-start"></span>
+## Quick Start
+
+{% include download_widget.md %}
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+### Resources
+
+* [Quick Start](http://docs.spring.io/spring-security-saml/docs/1.0.x/reference/html/chapter-quick-start.html)
+* [Spring Security]({{site.projects_site_url}}/spring-security)
+
+{% endcapture %}
+
+
+{% include project_page.html %}
+</html>

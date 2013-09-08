@@ -1,0 +1,3 @@
+dependencies {
+    compile '{@= groupId @}:spring-security-saml2-core:{@= version @}'
+}

@@ -223,7 +223,11 @@
         <constructor-arg>
             <bean class="org.springframework.security.saml.websso.ArtifactResolutionProfileImpl">
                 <constructor-arg>
-                    <bean class="org.apache.commons.httpclient.HttpClient"/>
+                    <bean class="org.apache.commons.httpclient.HttpClient">
+                        <constructor-arg>
+                            <bean class="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager"/>
+                        </constructor-arg>
+                    </bean>
                 </constructor-arg>
                 <property name="processor">
                     <bean id="soapProcessor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">

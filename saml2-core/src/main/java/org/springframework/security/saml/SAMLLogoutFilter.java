@@ -134,7 +134,8 @@ public class SAMLLogoutFilter extends LogoutFilter {
                     // Notify session participants using SAML Single Logout profile
                     SAMLCredential credential = (SAMLCredential) auth.getCredentials();
                     request.setAttribute(SAMLConstants.LOCAL_ENTITY_ID, credential.getLocalEntityID());
-                    SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
+                    request.setAttribute(SAMLConstants.PEER_ENTITY_ID, credential.getRemoteEntityID());
+                    SAMLMessageContext context = contextProvider.getLocalAndPeerEntity(request, response);
                     profile.sendLogoutRequest(context, credential);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 

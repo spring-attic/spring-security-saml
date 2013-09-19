@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
@@ -68,8 +67,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return;
         }
 
-        IDPSSODescriptor idpDescriptor = SAMLUtil.getIDPDescriptor(metadata, credential.getRemoteEntityID());
-        ExtendedMetadata idpExtendedMetadata = context.getLocalExtendedMetadata();
+        IDPSSODescriptor idpDescriptor = (IDPSSODescriptor) context.getPeerEntityMetadata();
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
 
@@ -80,9 +78,6 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setOutboundMessage(logoutRequest);
         context.setOutboundSAMLMessage(logoutRequest);
         context.setPeerEntityEndpoint(logoutServiceIDP);
-        context.setPeerEntityId(idpDescriptor.getID());
-        context.setPeerEntityRoleMetadata(idpDescriptor);
-        context.setPeerExtendedMetadata(idpExtendedMetadata);
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
         sendMessage(context, signMessage);
@@ -269,6 +264,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setOutboundMessage(logoutResponse);
         context.setOutboundSAMLMessage(logoutResponse);
         context.setPeerEntityEndpoint(logoutService);
+
         context.setPeerEntityId(idpDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpDescriptor);
 

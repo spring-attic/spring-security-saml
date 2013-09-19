@@ -56,7 +56,6 @@ public class MetadataGeneratorTest {
         generator.setIncludeDiscoveryExtension(true);
         EntityDescriptor metadata = generator.generateMetadata();
 
-        assertEquals("my_entity", metadata.getID());
         assertEquals("my_entity", metadata.getEntityID());
         SPSSODescriptor spssoDescriptor = metadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         assertNotNull(spssoDescriptor);

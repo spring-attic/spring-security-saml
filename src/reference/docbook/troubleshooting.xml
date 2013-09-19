@@ -56,7 +56,12 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
     <simplesect>
       <title>Single logout not working as expected</title>
       <para>Make sure the &lt;security:logout.../&gt; element is not specified within the &lt;security:http&gt; element.</para>      
-    </simplesect>    
+    </simplesect>
+    
+    <simplesect>
+      <title>System fails during decryption or encryption of fields, e.g. with 'Failed to decrypt EncryptedData'</title>
+      <para>Make sure the <emphasis>Unlimited Strength Jurisdiction Policy Files</emphasis> are correctly installed in your JDK. See <xref linkend="quick-start-prerequisites"/> for details.</para>      
+    </simplesect>        
     
 	</section>
 

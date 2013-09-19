@@ -186,8 +186,6 @@ public class MetadataGenerator {
         EntityDescriptor descriptor = builder.buildObject();
         if (id != null) {
             descriptor.setID(id);
-        } else {
-            descriptor.setID(entityId);
         }
         descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));

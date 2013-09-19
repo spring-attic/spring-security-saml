@@ -17,6 +17,7 @@ package org.springframework.security.saml.context;
 
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +97,7 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
             if (includeServerPortInRequestURL) sb.append(":").append(serverPort);
             sb.append(contextPath);
             sb.append(getServletPath());
+            if (getPathInfo() != null) sb.append(getPathInfo());
             return sb;
         }
 
@@ -163,8 +165,10 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
 
         Assert.hasText(scheme, "Scheme must be set");
         Assert.hasText(serverName, "Server name must be set");
-        Assert.hasText(contextPath, "Context path must be set");
-        Assert.isTrue(contextPath.startsWith("/"), "Context path must must start with a forward slash");
+        Assert.notNull(contextPath, "Context path must be set");
+        if (StringUtils.hasLength(contextPath)) {
+            Assert.isTrue(contextPath.startsWith("/"), "Context path must must start with a forward slash");
+        }
 
     }
 

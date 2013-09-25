@@ -67,7 +67,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return;
         }
 
-        IDPSSODescriptor idpDescriptor = (IDPSSODescriptor) context.getPeerEntityMetadata();
+        IDPSSODescriptor idpDescriptor = (IDPSSODescriptor) context.getPeerEntityRoleMetadata();
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
 

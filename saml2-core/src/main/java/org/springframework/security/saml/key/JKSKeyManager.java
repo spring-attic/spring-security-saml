@@ -71,7 +71,7 @@ public class JKSKeyManager implements KeyManager {
      * calculated automatically.
      *
      * @param storeFile file pointing to the JKS keystore
-     * @param storePass password to access the keystore
+     * @param storePass password to access the keystore, or null for no password
      * @param passwords passwords used to access private keys
      * @param defaultKey default key
      */
@@ -105,7 +105,7 @@ public class JKSKeyManager implements KeyManager {
      * Initializes the keystore using given properties.
      *
      * @param storeFile file pointing to the JKS keystore
-     * @param storePass password to open the keystore
+     * @param storePass password to open the keystore, or null for no password
      * @param storeType type of keystore
      * @return initialized key store
      */
@@ -114,7 +114,7 @@ public class JKSKeyManager implements KeyManager {
         try {
             inputStream = storeFile.getInputStream();
             KeyStore ks = KeyStore.getInstance(storeType);
-            ks.load(inputStream, storePass.toCharArray());
+            ks.load(inputStream, storePass == null ? null : storePass.toCharArray());
             return ks;
         } catch (Exception e) {
             log.error("Error initializing key store", e);

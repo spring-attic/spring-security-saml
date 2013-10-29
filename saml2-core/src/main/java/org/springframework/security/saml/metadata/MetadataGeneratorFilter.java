@@ -119,7 +119,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
                         // Use default baseURL if not set
                         if (generator.getEntityBaseURL() == null) {
-                            log.warn("Generated default entity base URL {} based on values in the first server request. Please set property entityBaseUrl on MetadataGenerator bean to fixate the value.", baseURL);
+                            log.warn("Generated default entity base URL {} based on values in the first server request. Please set property entityBaseURL on MetadataGenerator bean to fixate the value.", baseURL);
                             generator.setEntityBaseURL(baseURL);
                         } else {
                             baseURL = generator.getEntityBaseURL();

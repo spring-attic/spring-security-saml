@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Filter implements Identity Provider Discovery Service as defined in initializes IDP Discovery Profile as defined in
+ * Filter implements Identity Provider Discovery Service and Profile as defined in
  * http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf.
  *
  * @author Vladimir Schaefer

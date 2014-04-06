@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Object is a storage for entities parsed from SAML2 response during it's authentication. The object is stored
+ * Object is a storage for entities parsed from SAML2 response during its authentication. The object is stored
  * as credential object inside the Authentication returned after the authentication success.
  * <p/>
  * The SAML entities (NameID, Assertion) are internally stored in SAMLObject to permit their serialization.

@@ -67,7 +67,7 @@ import java.util.Arrays;
 
 /**
  * Class is responsible for parsing HttpRequest/Response and determining which local entity (IDP/SP) is responsible
- * for it's handling.
+ * for its handling.
  *
  * @author Vladimir Schaefer
  */

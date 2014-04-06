@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * Class contains additional information describing a SAML entity. Metadata can be used both for local entities
- * (= the ones accessible as part of the deployed application using the SAML Extension) and remove entities (= the ones
+ * (= the ones accessible as part of the deployed application using the SAML Extension) and remote entities (= the ones
  * user can interact with like IDPs).
  *
  * @author Vladimir Schaefer
@@ -50,7 +50,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String idpDiscoveryURL;
 
     /**
-     * URL where should the discovery service send back response to our discovery request. Only valid for local
+     * URL where the discovery service should send back response to our discovery request. Only valid for local
      * entities.
      */
     private String idpDiscoveryResponseURL;
@@ -338,7 +338,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     }
 
     /**
-     * When set to true entity is treated as locally deployed and will be able to accepte messages on endpoints determined
+     * When set to true entity is treated as locally deployed and will be able to accept messages on endpoints determined
      * by the selected alias.
      *
      * @param local true when entity is deployed locally

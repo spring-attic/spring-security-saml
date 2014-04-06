@@ -825,7 +825,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 	<section id="configuration-authentication-log">
 		<title>Authentication log</title>
 		<para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
-		A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including it's bean
+		A custom logger can be created by implementing interface <emphasis>org. springframework. security. saml. log. SAMLLogger</emphasis> and including its bean
 		in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
 		<para>Two basic implementations are provided by default:
 		<itemizedlist>
@@ -840,6 +840,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
         can be disalbed by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
 		  </listitem>
 		</itemizedlist></para>
+    <para>The logger is only called for messages which can be correctly received and parsed. For errors which occure before correct parsing see <xref linkend="error-handling"/>.</para> 
 	</section>
 
 	<section id="configuration-context-provider">
@@ -883,6 +884,18 @@ public class TestUserDetails implements SAMLUserDetailsService {
 					<emphasis>metadata</emphasis> bean.</para>
 				</listitem>
 		</itemizedlist></para>
+	</section>
+
+	<section id="error-handling">
+		<title>Error handling</title>
+		<para>Critical errors raised during processing of SAML messages are generally propagated as ServletExceptions to the Java container. In order to configure a custom error handling update your web.xml
+		and provide a general handler for ServletExceptions:<programlisting><![CDATA[<error-page> 
+    <exception-type>javax.servlet.ServletException</exception-type> 
+    <location>/error.jsp</location> 
+</error-page>]]></programlisting></para>
+		<para>ServletException contains original reason for the failure as a cause. It is recommended that content of the exceptions is not displayed to end users, both for security and user experience reasons.</para> 
+		<para>Errors produced during processing of the SAML AuthenticationResponse can be handled by plugging a custom implementation of 
+		the <emphasis>org. springframework. security. web. authentication. AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
 	</section>
 
 	<section id="time-interval">

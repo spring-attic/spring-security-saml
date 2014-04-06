@@ -85,9 +85,11 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
                 throw new SAMLException("Unsupported profile encountered in the context " + context.getCommunicationProfileId());
             }
         } catch (SAMLRuntimeException e) {
+            log.debug("Error validating SAML message", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message", e);
         } catch (SAMLException e) {
+            log.debug("Error validating SAML message", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message", e);
         } catch (ValidationException e) {

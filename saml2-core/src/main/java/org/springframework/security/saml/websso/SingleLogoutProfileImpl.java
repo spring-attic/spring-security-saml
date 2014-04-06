@@ -308,22 +308,19 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify type
         if (!(message instanceof LogoutResponse)) {
-            log.debug("Received response is not of a Response object type");
-            throw new SAMLException("Error validating SAML response");
+            throw new SAMLException("Received SAML message is not of the expected LogoutResponse type");
         }
         LogoutResponse response = (LogoutResponse) message;
 
         // Make sure request was authenticated if required, authentication is done as part of the binding processing
         if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutResponseSigned()) {
-            log.debug("Logout Response object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
-            throw new SAMLException("Logout Response object is required to be signed");
+            throw new SAMLException("Logout Response object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
         }
 
         // Verify issue time
         DateTime time = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            log.debug("Response issue time is either too old or with date in the future");
-            throw new SAMLException("Error validating SAML response");
+            throw new SAMLException("Response issue time in LogoutResponse is either too old or with date in the future");
         }
 
         // Verify response to field if present, set request if correct
@@ -332,13 +329,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         if (messageStorage != null && response.getInResponseTo() != null) {
             XMLObject xmlObject = messageStorage.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
-                log.debug("InResponseToField doesn't correspond to sent message", response.getInResponseTo());
-                throw new SAMLException("Error validating SAML response");
+                throw new SAMLException("InResponseToField in LogoutResponse doesn't correspond to sent message " + response.getInResponseTo());
             } else if (xmlObject instanceof LogoutRequest) {
                 // Expected
             } else {
-                log.debug("Sent request was of different type then received response", response.getInResponseTo());
-                throw new SAMLException("Error validating SAML response");
+                throw new SAMLException("Sent request was of different type than the expected LogoutRequest " + response.getInResponseTo());
             }
         }
 
@@ -357,8 +352,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
                 }
             }
             if (!found) {
-                log.debug("Destination of the response was not the expected value", response.getDestination());
-                throw new SAMLException("Error validating SAML response");
+                throw new SAMLException("Destination in the LogoutResponse was not the expected value " + response.getDestination());
             }
         }
 
@@ -371,9 +365,9 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         // Verify status
         String statusCode = response.getStatus().getStatusCode().getValue();
         if (StatusCode.SUCCESS_URI.equals(statusCode)) {
-            log.trace("Single Logout was successful");
+            log.debug("Single Logout was successful");
         } else if (StatusCode.PARTIAL_LOGOUT_URI.equals(statusCode)) {
-            log.trace("Single Logout was partially successful");
+            log.debug("Single Logout was partially successful");
         } else {
             String[] logMessage = new String[2];
             logMessage[0] = response.getStatus().getStatusCode().getValue();

@@ -151,8 +151,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
 
         }
 
-        log.debug("Assertion invalidated by subject confirmation - can't be confirmed by holder-of-key method");
-        throw new SAMLException("SAML Assertion is invalid");
+        throw new SAMLException("Assertion invalidated by subject confirmation - can't be confirmed by holder-of-key method");
 
     }
 
@@ -167,10 +166,8 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
     protected String getUserAgentBase64Certificate(SAMLMessageContext context) throws SAMLException {
 
         if (context.getPeerSSLCredential() == null) {
-            log.debug("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential is not set in the context");
             throw new SAMLException("Cannot verify Holder-of-Key Assertion, peer SSL/TLS credential is not set in the context");
         }
-
 
         try {
             return Base64.encodeBytes(context.getPeerSSLCredential().getEntityCertificate().getEncoded());

@@ -15,6 +15,7 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -153,10 +154,13 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             }
 
         } catch (SAMLException e1) {
+            logger.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         } catch (MetadataProviderException e1) {
+            logger.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         } catch (MessageEncodingException e1) {
+            logger.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         }
 
@@ -175,7 +179,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      */
     protected void initializeECP(SAMLMessageContext context, AuthenticationException e) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
-        HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         logger.debug("Processing SSO using ECP profile");

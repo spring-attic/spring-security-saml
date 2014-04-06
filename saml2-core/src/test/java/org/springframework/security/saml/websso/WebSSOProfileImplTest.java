@@ -16,7 +16,7 @@ package org.springframework.security.saml.websso;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -101,7 +101,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = SAMLRuntimeException.class)
+    @Test(expected = SAMLException.class)
     public void testNoSPNameSet() throws Exception {
         samlContext.setLocalEntityId(null);
         samlContext.setLocalEntityMetadata(null);

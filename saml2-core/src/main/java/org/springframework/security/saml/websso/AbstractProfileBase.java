@@ -25,7 +25,6 @@ import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 import org.opensaml.security.SAMLSignatureProfileValidator;
@@ -48,8 +47,6 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -223,13 +220,11 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected void verifyIssuer(Issuer issuer, SAMLMessageContext context) throws SAMLException {
         // Validate format of issuer
         if (issuer.getFormat() != null && !issuer.getFormat().equals(NameIDType.ENTITY)) {
-            log.debug("Assertion invalidated by issuer type {}", issuer.getFormat());
-            throw new SAMLException("Assertion invalidated by issuer type");
+            throw new SAMLException("Assertion invalidated by issuer type " + issuer.getFormat());
         }
         // Validate that issuer is expected peer entity
         if (!context.getPeerEntityMetadata().getEntityID().equals(issuer.getValue())) {
-            log.debug("Assertion invalidated by unexpected issuer value {}", issuer.getValue());
-            throw new SAMLException("Assertion invalidated by unexpected issuer value");
+            throw new SAMLException("Assertion invalidated by unexpected issuer value " + issuer.getValue());
         }
     }
 
@@ -246,9 +241,10 @@ public abstract class AbstractProfileBase implements InitializingBean {
         // Verify that destination in the response matches one of the available endpoints
         if (destination != null) {
             if (destination.equals(endpoint.getLocation())) {
+                // Expected
             } else if (destination.equals(endpoint.getResponseLocation())) {
+                // Expected
             } else {
-                log.debug("Intended destination " + destination + " doesn't match any of the endpoint URLs");
                 throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs");
             }
         }

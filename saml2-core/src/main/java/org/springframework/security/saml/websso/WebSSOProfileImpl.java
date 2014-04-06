@@ -72,7 +72,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         // Verify we deal with a local SP
         if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
-            throw new SAMLRuntimeException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
+            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
         }
 
         // Load the entities from the context
@@ -81,7 +81,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         ExtendedMetadata idpExtendedMetadata = context.getPeerExtendedMetadata();
 
         if (spDescriptor == null || idpssoDescriptor == null || idpExtendedMetadata == null) {
-            throw new SAMLRuntimeException("SPSSODescriptor, IDPSSODescriptor or IDPExtendedMetadata are not present in the SAMLContext");
+            throw new SAMLException("SPSSODescriptor, IDPSSODescriptor or IDPExtendedMetadata are not present in the SAMLContext");
         }
 
         SingleSignOnService ssoService = getSingleSignOnService(options, idpssoDescriptor, spDescriptor);
@@ -133,7 +133,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             if (isEndpointSupported(service)) {
                 if (userBinding != null) {
                     if (isEndpointMatching(service, userBinding)) {
-                        log.debug("Found user specified binding");
+                        log.debug("Found user specified binding {}", userBinding);
                         return service;
                     }
                 } else {
@@ -145,11 +145,9 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
 
         // No value found
         if (userBinding != null) {
-            log.debug("User specified binding {} not found for IDP", userBinding);
-            throw new MetadataProviderException("User specified binding is not supported by the Identity Provider using profile " + getProfileIdentifier());
+            throw new MetadataProviderException("User specified binding " + userBinding + " is not supported by the IDP using profile " + getProfileIdentifier());
         } else {
-            log.debug("No binding found for IDP " + userBinding);
-            throw new MetadataProviderException("No supported binding was found for profile " + getProfileIdentifier());
+            throw new MetadataProviderException("No supported binding " + userBinding + " was found for profile " + getProfileIdentifier());
         }
 
     }
@@ -205,8 +203,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             }
         }
 
-        log.debug("No supported assertion consumer service found for SP");
-        throw new MetadataProviderException("Service provider has no assertion consumer services available for the selected profile" + spDescriptor);
+        throw new MetadataProviderException("Service provider has no assertion consumer service available for the selected profile " + spDescriptor);
 
     }
 

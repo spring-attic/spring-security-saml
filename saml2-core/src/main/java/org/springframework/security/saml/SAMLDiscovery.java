@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml;
 
+import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -170,7 +171,7 @@ public class SAMLDiscovery extends GenericFilterBean {
 
         if (entityId == null) {
             logger.debug("Received IDP Discovery request without entityId");
-            throw new SAMLRuntimeException("Entity ID parameter must be specified");
+            throw new ServletException(new SAMLException("Entity ID parameter must be specified"));
         }
 
         // Load entity metadata (IDP Disco, 318)
@@ -183,7 +184,7 @@ public class SAMLDiscovery extends GenericFilterBean {
 
         } catch (MetadataProviderException e) {
             logger.debug("Error loading metadata", e);
-            throw new SAMLRuntimeException("Error loading metadata");
+            throw new ServletException(new SAMLException("Error loading metadata", e));
         }
 
         // URL to return the selected IDP to, use default when not present
@@ -192,14 +193,19 @@ public class SAMLDiscovery extends GenericFilterBean {
             returnURL = getDefaultReturnURL(messageContext);
         } else if (!isResponseURLValid(returnURL, messageContext)) {
             logger.debug("Return URL {} designated in IDP Discovery request for entity {} is not valid", returnURL, entityId);
-            throw new SAMLRuntimeException("Return URL designated in IDP Discovery request for entity is not valid");
+            throw new ServletException(new SAMLException("Return URL designated in IDP Discovery request for entity is not valid"));
+        }
+
+        // Cannot determine the return URL
+        if (returnURL == null) {
+            throw new ServletException(new SAMLException("Can't determine IDP Discovery return URL for entity " + messageContext.getLocalEntityRoleMetadata().getID()));
         }
 
         // Policy to be used, MAY be present, only default "single" policy is supported
         String policy = request.getParameter(POLICY_PARAM);
         if (policy != null && !policy.equals(IDP_DISCO_PROTOCOL_SINGLE)) {
             logger.debug("Received IDP Discovery with unsupported policy {}", policy);
-            throw new SAMLRuntimeException("Unsupported IDP discovery profile was requested");
+            throw new ServletException(new SAMLException("Unsupported IDP discovery profile was requested"));
         }
 
         // Return ID parameter name
@@ -286,7 +292,7 @@ public class SAMLDiscovery extends GenericFilterBean {
      * for local entities which do not contain discovery URL in metadata.
      *
      * @param messageContext context for the local SP
-     * @return URL to return the selected IDP to
+     * @return URL to return the selected IDP to or null when URL cannot be determined
      * @throws SAMLRuntimeException in case entity is remote and doesn't contain URL in metadata
      */
     protected String getDefaultReturnURL(SAMLMessageContext messageContext) {
@@ -320,19 +326,14 @@ public class SAMLDiscovery extends GenericFilterBean {
             }
 
             String contextPath = (String) messageContext.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
-            StringBuilder sb = new StringBuilder(50);
-            sb.append(contextPath);
-            sb.append(filterUrl + "/alias/");
-            sb.append(extendedMetadata.getAlias());
-            sb.append("?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true");
-            String responseURL = sb.toString();
+            String responseURL = contextPath + filterUrl + "/alias/" + extendedMetadata.getAlias() + "?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true";
 
             logger.debug("Using IDP Discovery response URL calculated for local entity {}", responseURL);
             return responseURL;
 
         }
 
-        throw new SAMLRuntimeException("Can't determine IDP Discovery return URL for entity " + descriptor.getID());
+        return null;
 
     }
 

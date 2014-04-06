@@ -1008,7 +1008,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             try {
 
-                log.debug("Executing metadata refresh task");
+                log.trace("Executing metadata refresh task");
 
                 // Invoking getMetadata performs a refresh in case it's needed
                 // Potentially expensive operation, but other threads can still load existing cached data

@@ -100,33 +100,26 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             ArtifactResponse artifactResponse = (ArtifactResponse) context.getInboundSAMLMessage();
 
             if (artifactResponse == null) {
-                log.debug("Did not receive an artifact response message.");
                 throw new MessageDecodingException("Did not receive an artifact response message.");
             }
 
             SAMLObject message = artifactResponse.getMessage();
             if (message == null) {
-                log.debug("No inbound message in artifact response message.");
                 throw new MessageDecodingException("No inbound message in artifact response message.");
             }
 
             return message;
 
-        } catch (MetadataProviderException mee) {
-            log.debug("Error processing meatadata.", mee);
-            throw new MessageDecodingException("Error processing metadata.", mee);
-        } catch (MessageEncodingException mee) {
-            log.debug("Could not encode artifact resolve message.", mee);
-            throw new MessageDecodingException("Could not encode artifact resolve message.", mee);
+        } catch (MetadataProviderException e) {
+            throw new MessageDecodingException("Error processing metadata", e);
+        } catch (MessageEncodingException e) {
+            throw new MessageDecodingException("Could not encode artifact resolve message", e);
         } catch (MessageDecodingException e) {
-            log.debug("Could not decode artifact response message.", e);
-            throw new MessageDecodingException("Could not decode artifact response message.", e);
+            throw new MessageDecodingException("Could not decode artifact response message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            log.debug("Security error when decoding artifact response message.", e);
-            throw new MessageDecodingException("Security error when decoding artifact response message.", e);
+            throw new MessageDecodingException("Security error when decoding artifact response message", e);
         } catch (SAMLException e) {
-            log.debug("Error during message processing.", e);
-            throw new MessageDecodingException("Error during message processing.", e);
+            throw new MessageDecodingException("Error during message processing", e);
         }
 
     }

@@ -84,12 +84,16 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
+            logger.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
+            logger.debug("Error determining metadata contracts", e);
             throw new AuthenticationServiceException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
+            logger.debug("Error decoding incoming SAML message", e);
             throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
+            logger.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         }
 

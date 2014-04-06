@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
 
@@ -66,6 +67,23 @@ public class SAMLDefaultLogger implements SAMLLogger {
         if (context.getInboundMessageTransport() != null) {
             HTTPInTransport transport = (HTTPInTransport) context.getInboundMessageTransport();
             sb.append(transport.getPeerAddress());
+        }
+
+        // Log NameID or principal when available
+        if (a != null) {
+            if (a.getCredentials() != null && a.getCredentials() instanceof SAMLCredential) {
+                SAMLCredential credential = (SAMLCredential) a.getCredentials();
+                if (credential.getNameID() != null) {
+                    sb.append(";");
+                    sb.append(credential.getNameID().getValue());
+                } else {
+                    sb.append(";");
+                    sb.append(a.getPrincipal());
+                }
+            } else {
+                sb.append(";");
+                sb.append(a.getPrincipal());
+            }
         }
 
         if (logMessages) {

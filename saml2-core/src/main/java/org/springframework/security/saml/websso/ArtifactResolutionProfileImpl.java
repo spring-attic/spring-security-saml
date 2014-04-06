@@ -128,6 +128,9 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * including specified trust anchors are trusted and verified using PKIX).
      * <p/>
      * Used trust engine can be customized as part of the SAMLContextProvider used to process this request.
+     * <p/>
+     * Default values for the HostConfiguration are cloned from the HTTPClient set in this instance, when there are
+     * no defaults available a new object is created.
      *
      * @param uri uri the request should be sent to
      * @param context context including the peer address
@@ -138,7 +141,15 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
         try {
 
-            HostConfiguration hc = new HostConfiguration();
+            HostConfiguration hc = httpClient.getHostConfiguration();
+
+            if (hc != null) {
+                // Clone configuration from the HTTP Client object
+                hc = new HostConfiguration(hc);
+            } else {
+                // Create brand new configuration when there are no defaults
+                hc = new HostConfiguration();
+            }
 
             if (uri.getScheme().equalsIgnoreCase("http")) {
 

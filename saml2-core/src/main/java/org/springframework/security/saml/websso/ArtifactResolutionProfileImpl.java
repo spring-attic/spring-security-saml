@@ -81,7 +81,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             postMethod = new PostMethod();
             postMethod.setPath(uri.getPath());
 
-            HostConfiguration hc = getHostConfiguration(uri, context);
+            HostConfiguration hc = getHostConfiguration(uri, context, httpClient.getHostConfiguration());
 
             HttpClientOutTransport clientOutTransport = new HttpClientOutTransport(postMethod);
             HttpClientInTransport clientInTransport = new HttpClientInTransport(postMethod, endpointURI);
@@ -134,10 +134,11 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      *
      * @param uri uri the request should be sent to
      * @param context context including the peer address
+     * @param hostConfiguration A host configuration that may also contain a proxy server configuration.
      * @return host configuration
      * @throws MessageEncodingException in case peer URI can't be parsed
      */
-    protected HostConfiguration getHostConfiguration(URI uri, SAMLMessageContext context) throws MessageEncodingException {
+    protected HostConfiguration getHostConfiguration(URI uri, SAMLMessageContext context, HostConfiguration hostConfiguration) throws MessageEncodingException {
 
         try {
 
@@ -169,6 +170,12 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());
                 Protocol protocol = new Protocol("https", (ProtocolSocketFactory) new TLSProtocolSocketFactory(manager, trustManager), 443);
                 hc.setHost(uri.getHost(), uri.getPort(), protocol);
+
+                /*
+                 * Use the proxy server from the host configuration, if configured.
+                */
+                if (hostConfiguration.getProxyHost() != null)
+                    hc.setProxy(hostConfiguration.getProxyHost(), hostConfiguration.getProxyPort());
 
             }
 

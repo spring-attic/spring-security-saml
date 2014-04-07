@@ -36,7 +36,7 @@
 				</listitem>
 			</itemizedlist>
 		</para>
-		<para>Configuration of library is done using Spring context XML. An example of configuration can be found
+		<para>Configuration of the library is done using Spring context XML. An example of configuration can be found
 			under<emphasis>saml2-sample/src/main/resources/security/securityContext.xml</emphasis>.
 			Setting up of the library typically involves these steps:
 			<itemizedlist spacing="compact">
@@ -68,7 +68,7 @@
 					<para><link linkend="configuration-authentication-object">configuration of authentication object</link></para>
 				</listitem>
 				<listitem>
-					<para><link linkend="configuration-authentication-log">configuration of authentiction log</link></para>
+					<para><link linkend="configuration-authentication-log">configuration of authentication log</link></para>
 				</listitem>        
 			</itemizedlist>
 		</para>
@@ -79,7 +79,7 @@
 
 	<section id="configuration-integration">
 		<title>Integration to applications</title>
-		<para>SAML module can be directly embedded into new of existing Spring applications. In
+		<para>SAML module can be directly embedded into new or existing Spring applications. In
 			this case application itself includes the SAML library in WEB-INF/lib directory of the war archive and
 			processes all SAML interactions. The other option of using the SAML library is deploying it as a
 			stand-alone module
@@ -89,7 +89,7 @@
 		<section id="configuration-integration-maven">
 			<title>Maven dependency</title>
 			<para>
-				In order to include the library and all it's dependencies add the following dependency to your
+				In order to include the library and all its dependencies add the following dependency to your
 				pom.xml file:
 				<programlisting><![CDATA[<dependency>
 	<groupId>org.springframework.security.extensions</groupId>
@@ -141,9 +141,9 @@
 		<title>Metadata configuration</title>
 		<para>
 			SAML metadata is an XML document which contains information necessary for interaction with SAML-enabled identity
-			or service providers. Document contains e.g. URLs of endpoints, information about supported bindings, identifiers and
+			or service providers. The document contains e.g. URLs of endpoints, information about supported bindings, identifiers and
 			public keys. Typically one metadata document will be generated for your own service provider and sent to all identity providers
-			you want to enable single sign-on with. Similarly, each identity provider will make it's own metadata available for you to import
+			you want to enable single sign-on with. Similarly, each identity provider will make its own metadata available for you to import
 			into your service provider application.
 		</para>
 		<para>
@@ -165,7 +165,7 @@
 					<programlisting><![CDATA[<security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>]]></programlisting>
 				</para>
 				<para>
-					Filter is automatically invoked as part of the first request to a URL processed by Spring Security. In case there
+					This filter is automatically invoked as part of the first request to a URL processed by Spring Security. In case there
 					is no service provider metadata already specified (meaning property <emphasis>hostedSPName</emphasis> of the
 					<emphasis>metadata</emphasis> bean is empty) filter will generate a new one.
 				</para>
@@ -223,7 +223,7 @@
 								<row>
 									<entry><literal>tlsKey</literal></entry>
 									<entry>Key to include with usage "unspecified" in the metadata. Value will be set in ExtendedMetadata as <literal>tlsKey</literal>.</entry>
-									<entry>By default not included. Key is only included in metadata when it's different from signing and encryption keys.</entry>
+									<entry>By default not included. The key is only included in metadata when it's different from signing and encryption keys.</entry>
 								</row>
 								<row>
 									<entry><literal>signMetadata</literal></entry>
@@ -284,7 +284,7 @@
 					</table>
 				</para>
 				<para>
-					Property <literal>entityBaseUrl</literal> is automatically generated based on values in the first HTTP request, unless explictly specified in the MetadataGenerator.
+					Property <literal>entityBaseURL</literal> is automatically generated based on values in the first HTTP request, unless explictly specified in the MetadataGenerator.
 					Generated value can be normalized to exclude standard 80/443 ports for http/https schemes by setting property <literal>normalizeBaseUrl</literal> of the MetadataGeneratorFilter
 					to <literal>true</literal>.
 				</para>
@@ -311,7 +311,7 @@
 			<section id="configuration-metadata-sp-import">
 				<title>Pre-configured metadata</title>
 				<para>In some situations it is beneficial to provide static version of the metadata document instead of the automatic generation. Need
-				for manual changes in the metadata or fixing of production settings are some of those. Custom metadata document describing local SP application
+				for manual changes in the metadata or fixing of production settings are some of those. A custom metadata document describing local SP application
 				can be added by updating the <emphasis>metadata</emphasis> bean with correct <emphasis>ExtendedMetadata</emphasis>. Please follow these steps
 				in order to do so: <itemizedlist>
 				  <listitem>
@@ -357,7 +357,7 @@
 </bean>]]></programlisting></para>
 				  </listitem>
 				</itemizedlist></para>
-				<para>Same instance of your application can include multiple statically declared local service providers each differentiated with it's own unique
+				<para>Same instance of your application can include multiple statically declared local service providers each differentiated by its own unique
 				alias and entity ID. Each service provider can e.g. process a different domain or have different security key settings. This feature makes it possible to create multi-tenant applications with
 				individual SAML settings for each of the tenants. In case multiple local SPs are declared, property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis>
 				bean should be set to the entity ID of the default one.</para>
@@ -367,7 +367,7 @@
 			<section id="configuration-metadata-sp-display">
 				<title>Downloading metadata</title>
 				<para>Metadata describing the default local application can be downloaded from URL: <programlisting>https://www.server.com:8080/context/saml/metadata</programlisting></para>
-				<para>In case application is configured to contain multiple service providers metadata for each can be loaded by
+				<para>In case the application is configured to contain multiple service providers metadata for each can be loaded by
 				adding the alias: <programlisting>https://www.server.com:8080/context/saml/login/alias/defaultAlias</programlisting></para>
 				<para>URL for metadata download can be disabled by removing filter <emphasis>metadataDisplayFilter</emphasis> from the <emphasis>securityContext.xml</emphasis>.</para>
 				<para>Metadata is also available in the sample application's administration UI under <emphasis>Metadata information -&gt; selected SP</emphasis>.</para>
@@ -437,7 +437,7 @@
 		<section id="configuration-metadata-extended">
 			<title>Extended metadata</title>
 			<para>Additional processing instructions related to SAML exchanges with the IDP can be defined in ExtendedMetadata bean. In case your metadata document contains
-			multiple identity providers (in multiple EntityDescriptor elements) extended metadata can be set separately for each of them using a map with entity ids as keys, e.g.: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+			multiple identity providers (in multiple EntityDescriptor elements) extended metadata can be set separately for each of them using a map with entity IDs as keys, e.g.: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
 		metadata provider bean
 	</constructor-arg>
@@ -467,8 +467,8 @@
 		<title>Key management</title>
 		<para>
 			SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
-			done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. Default implementation relies
-			on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
+			done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. The default implementation
+			relies on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
 			which should be marked as default by using the alias of the private key as part of the KeyManager constructor.
 		</para>
 		<para>
@@ -537,7 +537,7 @@
 		 </para>
 		 <para>Verification of signatures is executed in two phases. Signature is first checked for validity by
 			 comparing digital hash included as part of the signature with value calculated from the content.
-			 Subsequently it is verified whether party who created the signature is trusted by the recipient. Module
+			 Subsequently it is verified whether party who created the signature is trusted by the recipient. Spring Security SAML
 			 provides two mechanisms for defining which signatures should be accepted - metadata interoperability
 			 mode and PKIX mode.
 		 </para>
@@ -612,16 +612,16 @@
 		<title>Reverse proxies and load balancers</title>
 		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
 		SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
-		to confugure SAML Extension for deployment behing a load balancer or a reverse-proxy please follow these steps:
+		to configure SAML Extension for deployment behind a load balancer or a reverse-proxy please follow these steps:
 
 		<itemizedlist>
 				<listitem>
 					<para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
-					within user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
+					within a user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
 					Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
 				</listitem>
 				<listitem>
-					<para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContex.xml</emphasis>
+					<para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContext.xml</emphasis>
 					to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
 	<property name="scheme" value="https"/>
 	<property name="serverName" value="www.myserver.com"/>
@@ -629,10 +629,10 @@
 	<property name="includeServerPortInRequestURL" value="false"/>
 	<property name="contextPath" value="/spring-security-saml2-sample"/>
 </bean>]]></programlisting></para>
-				  <para>This setting enables extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
+				  <para>This setting enables the extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
 				</listitem>
 				<listitem>
-					<para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseUrl</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
+					<para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseURL</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
 					bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter"
 		class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
 	<constructor-arg>
@@ -696,9 +696,9 @@ Protocol and Profile</ulink>.</para>
 
           <simplesect>
             <title>Default IDP without discovery</title>
-            <para>In this mode system automatically selects the default IDP and doesn't perform discovery. Mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
+            <para>In this mode the system automatically selects the default IDP and doesn't perform discovery. This mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
             <link linkend="reference-extended-metadata">local SP extended metadata</link> to false. For details on configuring local extended metadata see <xref linkend="configuration-metadata-sp"/>.</para>
-            <para>The default IDP can be configured using propery <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
+            <para>The default IDP can be configured using property <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
           </simplesect>
       
     </para>        
@@ -720,7 +720,7 @@ Protocol and Profile</ulink>.</para>
 		 <para>After identification of IDP to use (for details see <xref linkend="configuration-discovery"/>) SAML Extension creates an AuthnRequest SAML message
 		 and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
 		 object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
-		 Default implementation returns value specified in property <emphasis>defaultOptions</emphasis>. Method can be overriden to provide custom logic for SSO initialization.</para>
+		 The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
      <para>For details about available settings of the WebSSOProfileOptions see <xref linkend="reference-websso-options"/>.</para>
 		 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
 		 <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
@@ -748,7 +748,7 @@ Protocol and Profile</ulink>.</para>
 		<para>Successful authentication using SAML token results in creation of an <emphasis>Authentication</emphasis> object by
 		the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis>
 		is created. Content of the resulting object can be customized by setting properties of the <emphasis>samlAuthenticationProvider</emphasis> bean in the <emphasis>securityContext.xml</emphasis>.
-		Instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application specific information about the
+		An instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application-specific information about the
 		authenticated user. Property <emphasis>forcePrincipalAsString</emphasis> can be used to force String value of the <emphasis>principal</emphasis> property. The Authentication object
 		is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
 
@@ -825,7 +825,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 	<section id="configuration-authentication-log">
 		<title>Authentication log</title>
 		<para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
-		A custom logger can be created by implementing interface <emphasis>org. springframework. security. saml. log. SAMLLogger</emphasis> and including its bean
+		A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including its bean
 		in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
 		<para>Two basic implementations are provided by default:
 		<itemizedlist>
@@ -840,21 +840,21 @@ public class TestUserDetails implements SAMLUserDetailsService {
         can be disalbed by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
 		  </listitem>
 		</itemizedlist></para>
-    <para>The logger is only called for messages which can be correctly received and parsed. For errors which occure before correct parsing see <xref linkend="error-handling"/>.</para> 
+    <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para> 
 	</section>
 
 	<section id="configuration-context-provider">
 		<title>Context provider</title>
-		<para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credetials
+		<para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credentials
 		and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
 		in processing of the incoming or outgoing SAML messages. ContextProvider can customized to alter behavior of the SAML Extension. The default
 		implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the ExtendedMetadata and
-		performs the followign steps for creation of the context:
+		performs the following steps for creation of the context:
 
 		<itemizedlist>
 				<listitem>
-					<para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and match
-					it with property <emphasis>alias</emphasis> specified in the ExtendedMetadata. In case URL doesn't contain any alias part the default service provider
+					<para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and matching
+					it with property <emphasis>alias</emphasis> specified in the ExtendedMetadata. In case the URL doesn't contain any alias part the default service provider
 					configured with property <emphasis>hostedSPName</emphasis> on the <emphasis>metadata</emphasis> bean is used.</para>
 				</listitem>
 				<listitem>
@@ -895,7 +895,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 </error-page>]]></programlisting></para>
 		<para>ServletException contains original reason for the failure as a cause. It is recommended that content of the exceptions is not displayed to end users, both for security and user experience reasons.</para> 
 		<para>Errors produced during processing of the SAML AuthenticationResponse can be handled by plugging a custom implementation of 
-		the <emphasis>org. springframework. security. web. authentication. AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
+		the <emphasis>org.springframework.security.web.authentication.AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
 	</section>
 
 	<section id="time-interval">

@@ -13,7 +13,7 @@
 	<section id="section-what-this-manual-covers">
 		<title>What this manual covers</title>
 
-		<para>This manual describes Spring Security SAML Extension component, it's uses, installation, configuration,
+		<para>This manual describes Spring Security SAML Extension component, its uses, installation, configuration,
 			design and tested environments.
 		</para>
 	</section>

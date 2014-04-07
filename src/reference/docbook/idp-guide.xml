@@ -13,9 +13,9 @@
 		IDP products. Integration can be further configured with settings discussed in previous chapters.</para>
 
 		<section id="chapter-idp-guide-adfs">
-			<title>Active Directory Federation Services 2.0 (ADFS)</title>
+			<title>Active Directory Federation Services 2.0 (AD FS)</title>
 
-			<para>ADFS 2.0 supports SAML 2.0 in IDP mode and can be easily integrated with SAML Extension for both SSO and SLO.
+			<para>AD FS 2.0 supports SAML 2.0 in IDP mode and can be easily integrated with SAML Extension for both SSO and SLO.
 			Before starting with the configuration make sure that the following pre-requisites are satisfied:</para>
 			<para><itemizedlist spacing="compact">
 					<listitem>
@@ -25,7 +25,7 @@
 						<para>Run AD FS 2.0 Federation Server Configuration Wizard in the AD FS 2.0 Management Console</para>
 					</listitem>
 					<listitem>
-						<para>Make sure that DNS name of your Windows Server is available at your SP and vice-versa</para>
+						<para>Make sure that DNS name of your Windows Server is available at your SP and vice versa</para>
 					</listitem>
 					<listitem>
 						<para>Install a Java container (e.g. Tomcat) for deployment of the SAML 2 Extension</para>
@@ -39,7 +39,7 @@
 			<title>Initialize IDP metadata</title>
 			<para><itemizedlist spacing="compact">
 					<listitem>
-						<para>Download AD FS 2.0 metadata from <emphasis>https://server/FederationMetadata/2007-06/FederationMetadata.xml</emphasis></para>
+						<para>Download AD FS 2.0 metadata from e.g. <emphasis>https://adfsserver/FederationMetadata/2007-06/FederationMetadata.xml</emphasis></para>
 					</listitem>
 					<listitem>
 						<para>Store the downloaded content to saml2-sample/WEB-INF/src/main/resources/security/FederationMetadata.xml</para>
@@ -72,7 +72,7 @@
 					<para>Deploy SAML 2 Extension war archive from <emphasis>saml2-sample/target/spring-security-saml2-sample.war</emphasis></para>
 				</listitem>
 				<listitem>
-					<para>Open browser at e.g. https://server:port/spring-security-saml2-sample, make sure to use HTTPS protocol, system will automatically generate metadata document</para>
+					<para>Open browser to e.g. https://localhost:8443/spring-security-saml2-sample, making sure to use HTTPS protocol</para>
 				</listitem>
 				<listitem>
 					<para>Click Metadata information, select item with your server name in the Service providers list</para>
@@ -84,13 +84,13 @@
 					<para>In AD FS 2.0 Management Console select "Add Relying Party Trust"</para>
 				</listitem>
 				<listitem>
-					<para>Select "Import data about the relying party from a file" and select file created earlier, select Next</para>
+					<para>Select "Import data about the relying party from a file" and select the metadata.xml file created earlier. Select Next</para>
 				</listitem>
 				<listitem>
-					<para>System may complain that some content of metadata is not supported, you can safely ignore this warning</para>
+					<para>The wizard may complain that some content of metadata is not supported. You can safely ignore this warning</para>
 				</listitem>
 				<listitem>
-					<para>Continue with the wizard, on the "Ready to Add Trust" make sure that tab endpoints contains multiple endpoing values, if not verify that your metadata was generated with https protocol in their URLs</para>
+					<para>Continue with the wizard. On the "Ready to Add Trust" make sure that tab endpoints contains multiple endpoint values. If not, verify that your metadata was generated with HTTPS protocol URLs</para>
 				</listitem>
 				<listitem>
 					<para>Leave "Open the Edit Claim Rules dialog" checkbox checked and finish the wizard</para>
@@ -109,8 +109,8 @@
 
 		<section id="chapter-idp-guide-adfs-test">
 		<title>Test SSO</title>
-		<para>Open SAML Extension at https://localhost:8443/spring-security-saml2-sample, select your AD FS server and press login. In case Artifact binding
-		is used and SSL/TLS certificate of your AD FS is not already trusted you have to import it to your samlKeystore.jks by following instructions in the
+		<para>Open the sample at e.g. https://localhost:8443/spring-security-saml2-sample, select your AD FS server and press login. In case Artifact binding
+		is used and SSL/TLS certificate of your AD FS is not already trusted, import it to your samlKeystore.jks by following instructions in the
 		error report.</para>
 		</section>
 

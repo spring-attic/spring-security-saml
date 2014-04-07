@@ -12,7 +12,7 @@
 		</authorgroup>
 		<productname>Spring Security SAML Extension</productname>
 		<copyright>
-			<year>2009-2013</year>
+			<year>2009-2014</year>
 			<holder><link xlink:href="mailto:vladimir.schafer@gmail.com">Vladimír Schäfer</link></holder>
 		</copyright>
 		<releaseinfo>${version}</releaseinfo>
@@ -45,7 +45,7 @@
 		<title>Configuring SSO with SAML</title>
 		<partintro>
 			<para>This chapter provides information about configuration and customization options of the SAML extension.
-			It will guide you throught typical scenarios including problems you migth encounter during integration with
+			It will guide you through typical scenarios including problems you might encounter during integration with
 			identity providers.</para>
 		</partintro>
 

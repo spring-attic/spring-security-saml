@@ -10,8 +10,8 @@
 		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 	<title>Quick start guide</title>
 	<para>
-		This chapter will guide you through steps required to easily integrate Spring Security SAML Extension with SSO
-		Circle IDP service using SAML 2.0 protocol.
+		This chapter will guide you through steps required to easily integrate Spring Security SAML Extension with
+		ssocircle.com's IDP service using SAML 2.0 protocol.
 		When done you will have a working example of Web SSO against a single Identity Provider. The steps will
 		guide you through deployment of the module,
 		configuration of IDP metadata (XML document describing how to connect to the IDP server using SAML 2.0
@@ -122,7 +122,7 @@
 			<title>Uploading of SP metadata to the IDP</title>
 			<para>Download current SP metadata: <itemizedlist spacing="compact">
 				<listitem>
-					<para>Open web browser at the URL of the deployed application.</para>
+					<para>Open web browser to the URL of the deployed application.</para>
 				</listitem>
 				<listitem>
 					<para>Select <emphasis>Metadata information</emphasis>.</para>
@@ -146,10 +146,10 @@
 					<para>Select Metadata manager and click Add new Service Provider.</para>
 				</listitem>
 				<listitem>
-					<para>Enter <emphasis>entityId</emphasis> configured in <xref linkend="quick-start-sp-metadata"/> to the FQDN field.</para>
+					<para>Enter <emphasis>entityId</emphasis> configured in <xref linkend="quick-start-sp-metadata"/> in the FQDN field.</para>
 				</listitem>
 				<listitem>
-					<para>Paste content of clipboard to the metadata information textarea.</para>
+					<para>Paste content of clipboard into the metadata information textarea.</para>
 				</listitem>
 				<listitem>
 					<para>Store metadata by pressing the Submit button.</para>
@@ -163,11 +163,11 @@
 
 	<section id="quick-start-testing">
 		<title>Testing single sign-on and single logout</title>
-		<para>Open the front page of your SP application, select <emphasis>http://idp.ssocircle.com</emphasis> IDP and press login. System
-		will generate new authentication request using SAML 2.0 protocol, digitally sign it and send it to the IDP. After authentication at IDP
+		<para>Open the front page of your SP application, select <emphasis>http://idp.ssocircle.com</emphasis> IDP and press login. The system
+		will generate a new authentication request using SAML 2.0 protocol, digitally sign it and send it to the IDP. After authentication at IDP
 		with your account you will be redirected back to your application and automatically signed-in.</para>
-		<para>Pressing local logout will destroy local session and logout the user. Session is still active at the IDP and an attempt to reauthenticate
+		<para>Pressing local logout will destroy local session and logout the user. While a session is still active at the IDP an attempt to reauthenticate
 		will proceed without need to enter credentials.</para>
-		<para>Pressing global logout will destroy both local session and session at IDP.</para>
+		<para>Pressing global logout will destroy both local session and the session at IDP.</para>
 	</section>
 </chapter>

@@ -46,7 +46,7 @@
 					<row>
 						<entry>Metadata</entry>
 						<entry>Document describing one or multiple identity and service providers. Metadata typically includes
-							entity identifier, public keys, endopoint URLs, supported bindings and profiles, and other
+							entity identifier, public keys, endpoint URLs, supported bindings and profiles, and other
 							capabilities or requirements. Exchange of metadata between identity and service providers is
 							typically the first step for establishment of federation.</entry>
 					</row>

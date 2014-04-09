@@ -48,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.saml.*;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.util.SAMLUtil;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -180,6 +181,11 @@ public class MetadataGenerator {
 
         if (entityId == null || entityBaseURL == null) {
             throw new RuntimeException("Required attributes weren't set");
+        }
+
+        if (id == null) {
+            // Use entityID cleaned as NCName for ID in case no value is provided
+            id = SAMLUtil.getNCNameString(entityId);
         }
 
         SAMLObjectBuilder<EntityDescriptor> builder = (SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor.DEFAULT_ELEMENT_NAME);

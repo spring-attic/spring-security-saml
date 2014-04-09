@@ -426,4 +426,22 @@ public class SAMLUtil {
         return time.isBefore(reference + (skewInSec * 1000)) && time.isAfter(reference - ((skewInSec + forwardInterval) * 1000));
     }
 
+    /**
+     * Method replaces all characters which are not allowed in xsd:NCName type with underscores. It also makes sure
+     * that value doesn't start with a hyphen by replacing it with underscore.
+     *
+     * @param value value to clean
+     * @return null for null input, otherwise cleaned value
+     */
+    public static String getNCNameString(String value) {
+        if (value == null) {
+            return null;
+        }
+        String cleanValue = value.replaceAll("[^a-zA-Z0-9-_.]", "_");
+        if (cleanValue.startsWith("-")) {
+            cleanValue = "_" + cleanValue.substring(1);
+        }
+        return cleanValue;
+    }
+
 }

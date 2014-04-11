@@ -121,7 +121,7 @@
                     </constructor-arg>
                     <!-- Timeout for metadata loading in ms -->
                     <constructor-arg>
-                        <value type="int">5000</value>
+                        <value type="int">15000</value>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>

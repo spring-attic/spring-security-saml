@@ -230,7 +230,7 @@
                     </bean>
                 </constructor-arg>
                 <property name="processor">
-                    <bean id="soapProcessor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
+                    <bean class="org.springframework.security.saml.processor.SAMLProcessorImpl">
                         <constructor-arg ref="soapBinding"/>
                     </bean>
                 </property>
@@ -253,7 +253,7 @@
     <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine"/>
 
     <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" scope="singleton" init-method="initialize"/>
-    <bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder" scope="singleton"/>
+    <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize"/>
+    <bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder"/>
 
 </beans>

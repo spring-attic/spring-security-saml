@@ -164,16 +164,16 @@
 
     <!-- Override default logout processing filter with the one processing SAML messages -->
     <bean id="samlLogoutFilter" class="org.springframework.security.saml.SAMLLogoutFilter">
-        <constructor-arg ref="successLogoutHandler"/>
-        <constructor-arg ref="logoutHandler"/>
-        <constructor-arg ref="logoutHandler"/>
+        <constructor-arg index="0" ref="successLogoutHandler"/>
+        <constructor-arg index="1" ref="logoutHandler"/>
+        <constructor-arg index="2" ref="logoutHandler"/>
     </bean>
 
     <!-- Filter processing incoming logout messages -->
     <!-- First argument determines URL user will be redirected to after successful global logout -->
     <bean id="samlLogoutProcessingFilter" class="org.springframework.security.saml.SAMLLogoutProcessingFilter">
-        <constructor-arg ref="successLogoutHandler"/>
-        <constructor-arg ref="logoutHandler"/>
+        <constructor-arg index="0" ref="successLogoutHandler"/>
+        <constructor-arg index="1" ref="logoutHandler"/>
     </bean>
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->

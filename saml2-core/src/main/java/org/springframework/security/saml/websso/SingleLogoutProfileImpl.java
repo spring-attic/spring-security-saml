@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLStatusException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -130,63 +131,48 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
     }
 
-    public boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException {
 
         SAMLObject message = context.getInboundSAMLMessage();
 
         // Verify type
         if (message == null || !(message instanceof LogoutRequest)) {
-            log.warn("Received request is not of a LogoutRequest object type");
-            throw new SAMLException("Error validating SAML request");
+            throw new SAMLException("Received request is not of a LogoutRequest object type");
         }
 
         LogoutRequest logoutRequest = (LogoutRequest) message;
 
         // Make sure request was authenticated if required, authentication is done as part of the binding processing
         if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutRequestSigned()) {
-            log.warn("Logout Request object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
-            Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Message signature is required");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "LogoutRequest is required to be signed by the entity policy");
         }
 
+        // Verify destination
         try {
-            // Verify destination
             verifyEndpoint(context.getLocalEntityEndpoint(), logoutRequest.getDestination());
         } catch (SAMLException e) {
-            log.warn("Destination of the request {} does not match any singleLogout endpoint", logoutRequest.getDestination());
-            Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Destination URL of the request is invalid");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Destination of the logout request does not match any of the single logout endpoints");
         }
 
         // Verify issuer
-        if (logoutRequest.getIssuer() != null) {
-            try {
+        try {
+            if (logoutRequest.getIssuer() != null) {
                 Issuer issuer = logoutRequest.getIssuer();
                 verifyIssuer(issuer, context);
-            } catch (SAMLException e) {
-                log.warn("Response issue time is either too old or with date in the future, id {}", context.getInboundSAMLMessageId());
-                Status status = getStatus(StatusCode.REQUEST_DENIED_URI, "Issuer of the message is unknown");
-                sendLogoutResponse(status, context);
-                return false;
             }
+        } catch (SAMLException e) {
+            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Issuer of the message is unknown");
         }
 
         // Verify issue time
         DateTime time = logoutRequest.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            log.warn("Response issue time is either too old or with date in the future, id {}.", context.getInboundSAMLMessageId());
-            Status status = getStatus(StatusCode.REQUESTER_URI, "Message has been issued too long time ago");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "Logout request issue instant is either too old or with date in the future");
         }
 
         // Check whether any user is logged in
         if (credential == null) {
-            Status status = getStatus(StatusCode.UNKNOWN_PRINCIPAL_URI, "No user is logged in");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.UNKNOWN_PRINCIPAL_URI, "No user is logged in");
         }
 
         // Find index for which the logout is requested
@@ -210,13 +196,11 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         if (!indexFound) {
 
             // Check logout request still valid and store request
-            if (logoutRequest.getNotOnOrAfter() != null) {
-                // TODO store request for assertions possibly arriving later
-            }
+            //if (logoutRequest.getNotOnOrAfter() != null) {
+            // TODO store request for assertions possibly arriving later
+            //}
 
-            Status status = getStatus(StatusCode.REQUESTER_URI, "The requested SessionIndex was not found");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "The requested SessionIndex was not found");
 
         }
 
@@ -224,25 +208,17 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             // Fail if NameId doesn't correspond to the currently logged user
             NameID nameID = getNameID(context, logoutRequest);
             if (nameID == null || !equalsNameID(credential.getNameID(), nameID)) {
-                Status status = getStatus(StatusCode.UNKNOWN_PRINCIPAL_URI, "The requested NameID is invalid");
-                sendLogoutResponse(status, context);
-                return false;
+                throw new SAMLStatusException(StatusCode.UNKNOWN_PRINCIPAL_URI, "The requested NameID is invalid");
             }
         } catch (DecryptionException e) {
-            Status status = getStatus(StatusCode.RESPONDER_URI, "The NameID can't be decrypted");
-            sendLogoutResponse(status, context);
-            return false;
+            throw new SAMLStatusException(StatusCode.RESPONDER_URI, "The NameID can't be decrypted", e);
         }
-
-        // Message is valid, let's logout
-        Status status = getStatus(StatusCode.SUCCESS_URI, null);
-        sendLogoutResponse(status, context);
 
         return true;
 
     }
 
-    protected void sendLogoutResponse(Status status, SAMLMessageContext context) throws MetadataProviderException, SAMLException, MessageEncodingException {
+    public void sendLogoutResponse(SAMLMessageContext context, String statusCode, String statusMessage) throws MetadataProviderException, SAMLException, MessageEncodingException {
 
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
@@ -258,6 +234,8 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         logoutResponse.setIssueInstant(new DateTime());
         logoutResponse.setInResponseTo(context.getInboundSAMLMessageId());
         logoutResponse.setDestination(logoutService.getLocation());
+
+        Status status = getStatus(statusCode, statusMessage);
         logoutResponse.setStatus(status);
 
         context.setCommunicationProfileId(getProfileIdentifier());

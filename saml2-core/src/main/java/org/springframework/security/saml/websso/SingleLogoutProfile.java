@@ -21,7 +21,6 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.validation.ValidationException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
  * Implementing class must contain SAML Single Logout functionality according to SAML 2.0 Profiles
@@ -35,7 +34,6 @@ public interface SingleLogoutProfile {
      * Call to the method must ensure that LogoutRequest SAML message is sent to the IDP requesting global
      * logout of all known sessions.
      *
-     *
      * @param context processing context
      * @param credential     credential of the currently logged user
      * @throws SAMLException             in case logout request can't be created
@@ -45,19 +43,29 @@ public interface SingleLogoutProfile {
     void sendLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException;
 
     /**
+     * Method sends logout response message constructed with the given status code to the peer entity.
+     *
+     * @param context processing context
+     * @param statusCode status code to respond with
+     * @param statusMessage status message to respond with
+     * @throws SAMLException             in case logout request can't be created
+     * @throws MetadataProviderException in case idp metadata can't be resolved
+     * @throws MessageEncodingException  in case message can't be sent using given binding
+     */
+    void sendLogoutResponse(SAMLMessageContext context, String statusCode, String statusMessage) throws MetadataProviderException, SAMLException, MessageEncodingException;
+
+    /**
      * Implementer must ensure that the incoming LogoutRequest stored in the context is verified and return true if
-     * local logout should be executed. Method must send LogoutResponse message to the sender in any case.
+     * local logout should be executed. Method either returns true, in case local logout should be performed or false
+     * when local logout should be skipped. In both cases system should respond with successful logout response. In
+     * case an exception is raised system should reply with logout response with an error status code.
      *
      * @param context    context containing SAML message being processed
-     *
-     * @param credential credential of the currently logged user
-     * @return true if local logout should be performed
-     *
-     * @throws SAMLException             in case message is invalid and response can't be sent back
-     * @throws MetadataProviderException in case there are problems with determining idp metadata
-     * @throws MessageEncodingException  in case message can't be sent
+     * @param credential credential of the currently authenticated user
+     * @return true if local logout should be performed, false if it should be skipped
+     * @throws SAMLException             in case message is invalid
      */
-    boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException;
 
     /**
      * Implementer is responsible for processing of LogoutResponse message present in the context. In case the
@@ -67,8 +75,7 @@ public interface SingleLogoutProfile {
      *
      * @param context        context containing processed SAML message
      * @throws SAMLException       in case the received SAML message is malformed or invalid
-     * @throws org.opensaml.xml.security.SecurityException
-     *                             in case the signature of the message is not trusted
+     * @throws org.opensaml.xml.security.SecurityException in case the signature of the message is not trusted
      * @throws ValidationException in case the signature of the message is invalid
      */
     void processLogoutResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;

@@ -115,7 +115,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * @throws IOException      error
      * @throws ServletException error
      */
-     public void processLogout(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void processLogout(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         if (requiresLogout(request, response)) {
 
@@ -148,10 +148,11 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 try {
 
                     logoutProfile.processLogoutResponse(context);
-                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
 
                     log.debug("Performing local logout after receiving logout response from {}", context.getPeerEntityId());
                     super.doFilter(request, response, chain);
+
+                    samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
 
                 } catch (Exception e) {
                     log.debug("Received logout response is invalid", e);
@@ -168,7 +169,18 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
                 try {
 
-                    boolean doLogout = logoutProfile.processLogoutRequest(context, credential);
+                    boolean doLogout;
+
+                    try {
+
+                        doLogout = logoutProfile.processLogoutRequest(context, credential);
+
+                    } catch (SAMLStatusException e) {
+                        log.debug("Received logout request is invalid, responding with error", e);
+                        logoutProfile.sendLogoutResponse(context, e.getStatusCode(), e.getStatusMessage());
+                        samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.FAILURE, context, e);
+                        return;
+                    }
 
                     if (doLogout) {
                         log.debug("Performing local logout after receiving logout request from {}", context.getPeerEntityId());
@@ -177,16 +189,8 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                         }
                     }
 
-                    try {
-
-                        samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
-                        logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS_URI, null);
-
-                    } catch (SAMLStatusException e) {
-                        log.debug("Received logout request is invalid, responding with error", e);
-                        samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.FAILURE, context, e);
-                        logoutProfile.sendLogoutResponse(context, e.getStatusCode(), e.getStatusMessage());
-                    }
+                    logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS_URI, null);
+                    samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
                 } catch (Exception e) {
                     log.debug("Error processing logout request", e);

@@ -708,7 +708,7 @@ Protocol and Profile</ulink>.</para>
 	<section id="configuration-sso">
 		 <title>Single sign-on process</title>
 		 <para>SP initialized SSO process can be started in two ways:
-		 <itemizedlist spacing="compact">
+		 <itemizedlist>
 			 <listitem>
 				 <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
 			 </listitem>
@@ -735,12 +735,48 @@ Protocol and Profile</ulink>.</para>
 
 	<section id="configuration-logout">
 		<title>Logout process</title>
-		<para>TODO</para>
-		<!-- TODO
-	- local logout
-	- single logout
-	- configuring both local and IDP login + logout
-		-->
+		<para>Spring SAML Extension supports both Local Logout and Single Logout mechanisms.</para>
+		 
+     <section id="configuration-logout-local">
+			 <title>Local logout</title>
+			 <para>
+				 Local logout terminates only the local session and doesn't affect neither session at IDP, nor sessions at other SPs where user logged in using single sign-on. Local logout
+         can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout?local=true</emphasis>. Call is intercepted by bean <emphasis>samlLogoutFilter</emphasis> which can be configured with
+         the following settings:
+       <itemizedlist>
+			 <listitem>
+				 <para>Instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0) which determines operation to perform after successful logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
+			 </listitem>
+			 <listitem>
+				 <para>Instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1) which are responsible for destruction of user's session. The default handler <emphasis>org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler</emphasis> logs the user out by removing the Authentication object, but leaves the HTTP session opened.</para>
+			 </listitem>
+		   </itemizedlist></para>
+      <para>It is also possible to configure local logout using standard Spring Security element <emphasis>&lt;security:logout&gt;</emphasis> inside <emphasis>&lt;security:http&gt;</emphasis> block. For example:
+		  <programlisting><![CDATA[<security:http>
+  <security:logout logout-url="/j_logout" logout-success-url="/logout.jsp"/>
+</security:http>]]></programlisting></para>
+     </section>
+     
+     <section id="configuration-logout-global">
+			 <title>Global logout</title>
+			 <para>Global logout implements the SAML 2.0 Single Logout profile which terminates both session at the current SP, the IDP session and sessions at other SPs connected to the same IDP session. Single Logout
+         can be initialized from any of the participaing SPs or from the IDP.</para>
+         <para>Single Logout is currently supported with HTTP-Redirect and HTTP-POST bindings. SOAP binding is not available.</para>
+         <para>Global logout can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout</emphasis>. System automatically determines which IDP to send the request to based on the currently authenticated user. Single logout can be configured using beans <emphasis>samlLogoutFilter</emphasis> and <emphasis>samlLogoutProcessingFilter</emphasis> with the following options:
+         <itemizedlist>
+  			 <listitem>
+  				 <para>Bean <emphasis>samlLogoutFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 3). The handlers are called before sending SAML 2.0 LogoutRequest to the IDP when initializing Single Logout from the current SP.</para>
+  			 </listitem>
+  			 <listitem>
+  				 <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0). Handler is called after successful finalization of Single Logout process (reception of LogoutResponse from IDP) and determines operation to perform after logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
+  			 </listitem>
+  			 <listitem>
+  				 <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1). The handlers are called after successful reception of SAML 2.0 LogoutRequest or LogoutResponse from the IDP.</para>
+  			 </listitem>
+  		   </itemizedlist></para>
+         <para>Spring SAML correctly handles SAML 2.0 LogoutRequest messages sent from the IDP and performs logout in case the message is valid. In case of invalid data (missing signature, invalid issuer, invalid issue time, invalid destination, invalid session index, invalid name ID, no user logged in) system responds with SAML 2.0 LogoutResponse with an error Status code.</para>
+     </section>
+
 	</section>
 
 	<section id="configuration-authentication-object">

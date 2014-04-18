@@ -137,7 +137,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify type
         if (message == null || !(message instanceof LogoutRequest)) {
-            throw new SAMLException("Received request is not of a LogoutRequest object type");
+            throw new SAMLException("Message is not of a LogoutRequest object type");
         }
 
         LogoutRequest logoutRequest = (LogoutRequest) message;
@@ -151,7 +151,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         try {
             verifyEndpoint(context.getLocalEntityEndpoint(), logoutRequest.getDestination());
         } catch (SAMLException e) {
-            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Destination of the logout request does not match any of the single logout endpoints");
+            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Destination of the LogoutRequest does not match any of the single logout endpoints");
         }
 
         // Verify issuer
@@ -161,13 +161,13 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
                 verifyIssuer(issuer, context);
             }
         } catch (SAMLException e) {
-            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Issuer of the message is unknown");
+            throw new SAMLStatusException(StatusCode.REQUEST_DENIED_URI, "Issuer of the LogoutRequest is unknown");
         }
 
         // Verify issue time
         DateTime time = logoutRequest.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "Logout request issue instant is either too old or with date in the future");
+            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "LogoutRequest issue instant is either too old or with date in the future");
         }
 
         // Check whether any user is logged in
@@ -200,7 +200,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             // TODO store request for assertions possibly arriving later
             //}
 
-            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "The requested SessionIndex was not found");
+            throw new SAMLStatusException(StatusCode.REQUESTER_URI, "The SessionIndex was not found");
 
         }
 
@@ -286,7 +286,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify type
         if (!(message instanceof LogoutResponse)) {
-            throw new SAMLException("Received SAML message is not of the expected LogoutResponse type");
+            throw new SAMLException("Message is not of a LogoutResponse object type");
         }
         LogoutResponse response = (LogoutResponse) message;
 

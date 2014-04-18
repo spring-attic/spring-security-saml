@@ -91,7 +91,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify type
         if (!(message instanceof Response)) {
-            throw new SAMLException("Received response is not of a Response object type");
+            throw new SAMLException("Message is not of a Response object type");
         }
         Response response = (Response) message;
 
@@ -103,12 +103,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             if (statusMessage != null) {
                 statusMessageText = statusMessage.getMessage();
             }
-            throw new SAMLException("Received response has invalid status code " + statusCode + ", status message is " + statusMessageText);
+            throw new SAMLException("Response has invalid status code " + statusCode + ", status message is " + statusMessageText);
         }
 
         // Verify signature of the response if present
         if (response.getSignature() != null) {
-            log.debug("Verifying message signature");
+            log.debug("Verifying Response signature");
             verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
             context.setInboundSAMLMessageAuthenticated(true);
         }
@@ -124,11 +124,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         if (messageStorage != null && response.getInResponseTo() != null) {
             XMLObject xmlObject = messageStorage.retrieveMessage(response.getInResponseTo());
             if (xmlObject == null) {
-                throw new SAMLException("InResponseToField doesn't correspond to sent message " + response.getInResponseTo());
+                throw new SAMLException("InResponseToField of the Response doesn't correspond to sent message " + response.getInResponseTo());
             } else if (xmlObject instanceof AuthnRequest) {
                 request = (AuthnRequest) xmlObject;
             } else {
-                throw new SAMLException("Sent request was of different type than received response " + response.getInResponseTo());
+                throw new SAMLException("Sent request was of different type than the expected AuthnRequest " + response.getInResponseTo());
             }
         }
 
@@ -140,7 +140,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             AssertionConsumerService assertionConsumerService = (AssertionConsumerService) context.getLocalEntityEndpoint();
             if (request.getAssertionConsumerServiceIndex() != null) {
                 if (!request.getAssertionConsumerServiceIndex().equals(assertionConsumerService.getIndex())) {
-                    log.info("SAML response was received at a different endpoint index than was requested");
+                    log.info("Response was received at a different endpoint index than was requested");
                 }
             } else {
                 String requestedResponseURL = request.getAssertionConsumerServiceURL();
@@ -153,12 +153,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                         responseLocation = assertionConsumerService.getLocation();
                     }
                     if (!requestedResponseURL.equals(responseLocation)) {
-                        log.info("SAML response was received at a different endpoint URL {} than was requested {}", responseLocation, requestedResponseURL);
+                        log.info("Response was received at a different endpoint URL {} than was requested {}", responseLocation, requestedResponseURL);
                     }
                 }
                 if (requestedBinding != null) {
                     if (!requestedBinding.equals(context.getInboundSAMLBinding())) {
-                        log.info("SAML response was received using a different binding {} than was requested {}", context.getInboundSAMLBinding(), requestedBinding);
+                        log.info("Response was received using a different binding {} than was requested {}", context.getInboundSAMLBinding(), requestedBinding);
                     }
                 }
             }
@@ -166,7 +166,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify issuer
         if (response.getIssuer() != null) {
-            log.debug("Verifying issuer of the message");
+            log.debug("Verifying issuer of the Response");
             Issuer issuer = response.getIssuer();
             verifyIssuer(issuer, context);
         }
@@ -395,7 +395,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned) {
             if (!context.isInboundSAMLMessageAuthenticated()) {
-                throw new SAMLException("Metadata includes wantAssertionSigned, but neither SAML message nor Assertion is signed");
+                throw new SAMLException("Metadata includes wantAssertionSigned, but neither Response nor included Assertion is signed");
             }
         }
     }
@@ -446,7 +446,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
             } else if (conditionQName.equals(OneTimeUse.DEFAULT_ELEMENT_NAME)) {
 
-                throw new SAMLException("System cannot honor OneTimeUse condition of the SAML Assertion for WebSSO");
+                throw new SAMLException("System cannot honor OneTimeUse condition of the Assertion for WebSSO");
 
             } else if (conditionQName.equals(ProxyRestriction.DEFAULT_ELEMENT_NAME)) {
 

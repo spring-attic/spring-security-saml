@@ -944,6 +944,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
 		<para>As clocks between IDP and SP machines may not be perfectly synchronized a tolerance of 60 seconds is applied for time comparisons. The tolerance value (time skew) can be customized
 		by settings property <emphasis>responseSkew</emphasis> in beans <emphasis>WebSSOProfileConsumerImpl</emphasis> and <emphasis>SingleLogoutProfileImpl</emphasis>.</para>
+		<para>For details on all performed time checks see <xref linkend="reference-timechecks"/>.</para>
 	</section>
 
 	<section id="enhanced-client">

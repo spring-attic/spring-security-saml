@@ -205,4 +205,243 @@
 		</para>
 	</section>
   
+  	<section id="reference-timechecks">
+		<title>Time check reference</title>
+		<para>Summary of checks for time validity during processing of incoming messages. Response skew refers to property <emphasis>responseSkew</emphasis> set on profile beans. Past indicates that validity window for
+    checking of the value will be extended by <emphasis>responseSkew</emphasis> seconds to the past and correspondingly with the future value. Nullable values can be missing from the incoming messages. 
+    For details on time checks see <xref linkend="time-interval"/>.
+        
+        <table id="time-skew-overview-authnrespose">
+						<title>Time checks during processing of incoming SAML Response in WebSSO and WebSSO HoK profiles</title>
+						<tgroup cols="2">
+							<colspec colname="_1" colwidth="0.5*" align="left"/>
+							<colspec colname="_2" colwidth="0.5*" align="left"/>
+							<tbody>
+								<row>
+									<entry namest="_1" nameend="_2"><emphasis role="strong">response.issueInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws CredentialsExpiredException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when SAML response message was created.</entry>
+								</row>                
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.issueInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future) + maxAssertionTime (future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws CredentialsExpiredException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when SAML assertion was created, allows validity extension as assertion might be re-used by the caller.</entry>
+								</row>                
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.subject.subjectConfirmation.notOnOrAfter</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws SAMLException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when subject can no longer be confirmed.</entry>
+								</row>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.authnStatement.authnInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future) + maxAuthenticationAge (future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws CredentialsExpiredException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when user authenticated to IDP, typically differs from time or response or assertion creation time.</entry>
+								</row>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.authnStatement.sessionNotOnOfAfter</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>no skew</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>Yes</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws CredentialsExpiredException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when user's session expires and requires re-authentication, sessions are typically valid for longer period and therefore do not suffer from time synchronization problems.</entry>
+								</row>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.condition.notBefore</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>Yes</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws SAMLException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time limit on validity of assertion.</entry>
+								</row>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.assertion.condition.notOnOrAfter</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>Yes</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws SAMLException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time limit on validity of assertion.</entry>
+								</row>
+            </tbody>
+          </tgroup>
+        </table>
+                
+        <table id="time-skew-overview-logoutrequest">
+						<title>Time checks during processing of incoming SAML LogoutRequest in Single Logout profile</title>
+						<tgroup cols="2">
+							<colspec colname="_1" colwidth="0.5*" align="left"/>
+							<colspec colname="_2" colwidth="0.5*" align="left"/>
+							<tbody>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.issueInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Sends LogoutResponse with error Status "urn:oasis:names:tc:SAML:2.0:status:Requester"</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when SAML LogoutRequest message was created.</entry>
+								</row>                                                                                                                                                                                                                                                                                          
+            </tbody>
+          </tgroup>
+        </table>
+        
+        <table id="time-skew-overview-logoutresponse">
+						<title>Time checks during processing of incoming SAML LogoutResponse in Single Logout profile</title>
+						<tgroup cols="2">
+							<colspec colname="_1" colwidth="0.5*" align="left"/>
+							<colspec colname="_2" colwidth="0.5*" align="left"/>
+							<tbody>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.issueInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws SAMLException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when SAML LogoutResponse message was created.</entry>
+								</row>                                                                                                                                                                                                                                                                                          
+            </tbody>
+          </tgroup>
+        </table>        
+        
+        <table id="time-skew-overview-artifacteresponse">
+						<title>Time checks during processing of incoming SAML ArtifactResponse in Artifact Resolution profile</title>
+						<tgroup cols="2">
+							<colspec colname="_1" colwidth="0.5*" align="left"/>
+							<colspec colname="_2" colwidth="0.5*" align="left"/>
+							<tbody>
+								<row>
+                                    <entry namest="_1" nameend="_2"><emphasis role="strong">response.issueInstant</emphasis></entry>
+								</row>
+								<row>
+									<entry>Applied skew:</entry>
+									<entry>responseSkew (past + future)</entry>
+								</row>
+								<row>
+									<entry>Nullable:</entry>
+									<entry>No</entry>
+								</row>
+								<row>
+									<entry>Fails with:</entry>
+									<entry>Throws SAMLException</entry>
+								</row>
+								<row>
+									<entry>Description:</entry>
+									<entry>Time when SAML LogoutResponse message was created.</entry>
+								</row>                                                                                                                                                                                                                                                                                          
+            </tbody>
+          </tgroup>
+        </table>
+        
+        </para>
+        </section>  
+  
 </appendix>

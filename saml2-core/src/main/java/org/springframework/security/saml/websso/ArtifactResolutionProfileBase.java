@@ -15,6 +15,7 @@
  */
 package org.springframework.security.saml.websso;
 
+import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
@@ -33,9 +34,12 @@ import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.util.Base64;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.util.SAMLUtil;
+
+import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
 /**
  * Base implementation of the artifactResolution profile. Subclasses need to implement sending of ArtifactRequest
@@ -101,6 +105,11 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
 
             if (artifactResponse == null) {
                 throw new MessageDecodingException("Did not receive an artifact response message.");
+            }
+
+            DateTime issueInstant = artifactResponse.getIssueInstant();
+            if (!isDateTimeSkewValid(getResponseSkew(), issueInstant)) {
+                throw new CredentialsExpiredException("ArtifactResponse issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + issueInstant);
             }
 
             SAMLObject message = artifactResponse.getMessage();

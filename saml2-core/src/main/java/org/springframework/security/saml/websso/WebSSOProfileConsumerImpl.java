@@ -116,7 +116,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         // Verify issue time
         DateTime time = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkew(), time)) {
-            throw new CredentialsExpiredException("Response issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + time);
+            throw new SAMLException("Response issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + time);
         }
 
         // Verify response to field if present, set request if correct
@@ -259,7 +259,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify storage time skew
         if (!isDateTimeSkewValid(getResponseSkew(), getMaxAssertionTime(), assertion.getIssueInstant())) {
-            throw new CredentialsExpiredException("Assertion is too old to be used, value can be customized by setting maxAssertionTime value " + assertion.getIssueInstant());
+            throw new SAMLException("Assertion is too old to be used, value can be customized by setting maxAssertionTime value " + assertion.getIssueInstant());
         }
 
         // Verify validity of storage

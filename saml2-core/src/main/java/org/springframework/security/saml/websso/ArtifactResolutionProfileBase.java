@@ -109,7 +109,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
 
             DateTime issueInstant = artifactResponse.getIssueInstant();
             if (!isDateTimeSkewValid(getResponseSkew(), issueInstant)) {
-                throw new CredentialsExpiredException("ArtifactResponse issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + issueInstant);
+                throw new MessageDecodingException("ArtifactResponse issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + issueInstant);
             }
 
             SAMLObject message = artifactResponse.getMessage();

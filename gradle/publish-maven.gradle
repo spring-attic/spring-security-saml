@@ -73,6 +73,9 @@ def customizePom(pom, gradleProject) {
 				contributor {
 					name = "Jonathan Tellier"
 				}
+				contributor {
+					name = "Wade Dorrell"
+				}
 			}
 			issueManagement {
 				system = "jira"

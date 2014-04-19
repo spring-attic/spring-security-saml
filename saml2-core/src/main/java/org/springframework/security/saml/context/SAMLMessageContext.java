@@ -25,6 +25,8 @@ import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
+import javax.net.ssl.HostnameVerifier;
+
 /**
  * Message context with Spring Extension SAML module specific values.
  *
@@ -38,6 +40,7 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private SignatureTrustEngine localTrustEngine;
     private TrustEngine<X509Credential> localSSLTrustEngine;
     private X509Credential localSSLCredential;
+    private HostnameVerifier localSSLHostnameVerifier;
     private Endpoint localEntityEndpoint;
     private X509Credential peerSSLCredential;
     private ExtendedMetadata peerExtendedMetadata;
@@ -134,6 +137,20 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
 
     public void setLocalSSLCredential(X509Credential localSSLCredential) {
         this.localSSLCredential = localSSLCredential;
+    }
+
+    /**
+     * Verifier used to verify hostname when making connections using HTTPS (e.g. during Artifact
+     * resolution.
+     *
+     * @return hostname verifier, or null to skip hostname verification
+     */
+    public HostnameVerifier getLocalSSLHostnameVerifier() {
+        return localSSLHostnameVerifier;
+    }
+
+    public void setGetLocalSSLHostnameVerifier(HostnameVerifier verifier) {
+        this.localSSLHostnameVerifier = verifier;
     }
 
     /**

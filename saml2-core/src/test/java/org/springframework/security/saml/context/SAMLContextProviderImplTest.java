@@ -15,6 +15,7 @@
  */
 package org.springframework.security.saml.context;
 
+import org.apache.commons.ssl.HostnameVerifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static org.easymock.EasyMock.*;
 import static org.springframework.security.saml.SAMLTestHelper.setLocalContextParameters;
 
@@ -74,6 +77,7 @@ public class SAMLContextProviderImplTest {
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        assertEquals(context.getLocalSSLHostnameVerifier(), HostnameVerifier.DEFAULT);
         verifyMock();
     }
 
@@ -94,6 +98,7 @@ public class SAMLContextProviderImplTest {
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals("testSP2", context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
+        assertEquals(context.getLocalSSLHostnameVerifier(), HostnameVerifier.STRICT);
         verifyMock();
     }
 

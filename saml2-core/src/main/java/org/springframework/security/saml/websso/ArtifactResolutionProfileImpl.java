@@ -40,6 +40,7 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
 
+import javax.net.ssl.HostnameVerifier;
 import java.io.IOException;
 
 /**
@@ -166,7 +167,16 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
                 X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
                 X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());
-                Protocol protocol = new Protocol("https", (ProtocolSocketFactory) new TLSProtocolSocketFactory(manager, trustManager), 443);
+                HostnameVerifier hostnameVerifier = context.getLocalSSLHostnameVerifier();
+
+                ProtocolSocketFactory socketFactory;
+                if (isHostnameVerificationSupported()) {
+                    socketFactory = new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
+                } else {
+                    socketFactory = new TLSProtocolSocketFactory(manager, trustManager);
+                }
+
+                Protocol protocol = new Protocol("https", socketFactory, 443);
                 hc.setHost(uri.getHost(), uri.getPort(), protocol);
 
             }
@@ -177,6 +187,20 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             throw new MessageEncodingException("Error parsing remote location URI", e);
         }
 
+    }
+
+    /**
+     * Check for the latest OpenSAML library. Support for HostnameVerification was added in openws-1.5.1 and
+     * customers might use previous versions of OpenSAML.
+     */
+    protected boolean isHostnameVerificationSupported() {
+        try {
+            TLSProtocolSocketFactory.class.getConstructor(javax.net.ssl.X509KeyManager.class, javax.net.ssl.X509TrustManager.class, javax.net.ssl.HostnameVerifier.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            log.warn("HostnameVerification is not supported, update your OpenSAML libraries");
+            return false;
+        }
     }
 
 }

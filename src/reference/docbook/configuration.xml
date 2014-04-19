@@ -423,7 +423,7 @@
 			</section>
 
 			<section id="configuration-metadata-idp-signature">
-				<title>Signature verification</title>
+				<title>Metadata signature verification</title>
 				<para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
 				When present, signature is verified with PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trust anchors. Make sure to include root CA
 				certificate and intermediary CA certificates of the signature in your <emphasis>keyStore</emphasis>. For details see <xref linkend="configuration-key-management-public-keys"/>.</para>
@@ -606,7 +606,24 @@
 				 with custom implementation. See <xref linkend="configuration-context-provider"/> for details on context customization.
 			 </para>
 		 </section>
+
 	 </section>
+
+    <section id="configuration-security-profiles-hostnames">
+        <title>Hostname verification for HTTPS connections</title>
+        <para>
+            Connections to HTTPS services (e.g. during Artifact resolution) require verification that the connected hostname
+            corresponds with the hostname defined in the service's public certificate. Hostname verification is enabled
+            by default.
+        </para>
+        <para>
+            Verification can be disabled by setting ExtendedMetadata property <emphasis>sslHostnameVerification</emphasis>
+            of the local SP entity to <emphasis>allowAll</emphasis>. For details on using the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.
+        </para>
+        <para>
+            All supported values can be found in the ExtendedMetadata reference <xref linkend="reference-extended-metadata-settings"/>.
+        </para>
+    </section>
    
 	<section id="configuration-load-balancing">
 		<title>Reverse proxies and load balancers</title>

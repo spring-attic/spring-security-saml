@@ -23,6 +23,7 @@ public class MetadataForm {
     private String entityId;
     private String securityProfile;
     private String sslSecurityProfile;
+    private String sslHostnameVerification;
     private String baseURL;
     private String alias;
     private boolean signMetadata = true;
@@ -274,6 +275,14 @@ public class MetadataForm {
 
     public void setSsoDefaultBinding(String ssoDefaultBinding) {
         this.ssoDefaultBinding = ssoDefaultBinding;
+    }
+
+    public String getSslHostnameVerification() {
+        return sslHostnameVerification;
+    }
+
+    public void setSslHostnameVerification(String sslHostnameVerification) {
+        this.sslHostnameVerification = sslHostnameVerification;
     }
 
 }

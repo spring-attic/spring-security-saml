@@ -70,6 +70,18 @@
         </tr>
 
         <tr>
+            <td>SSL/TLS Hostname Verification:</td>
+            <td>
+                <form:select path="sslHostnameVerification" multiple="false" disabled="true">
+                    <form:option value="default">Standard hostname verifier</form:option>
+                    <form:option value="defaultAndLocalhost">Standard hostname verifier (skips verification for localhost)</form:option>
+                    <form:option value="strict">Strict hostname verifier</form:option>
+                    <form:option value="allowAll">Disable hostname verification (allow all)</form:option>
+                </form:select>
+            </td>
+        </tr>
+
+        <tr>
             <td>Require signed LogoutRequest:</td>
             <td>
                 <form:select path="requireLogoutRequestSigned" multiple="false" disabled="true">

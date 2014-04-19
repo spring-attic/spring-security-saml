@@ -58,6 +58,8 @@ import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.util.Assert;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -219,6 +221,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         populatePeerSSLCredential(context);
         populateTrustEngine(context);
         populateSSLTrustEngine(context);
+        populateSSLHostnameVerifier(context);
 
     }
 
@@ -346,6 +349,30 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         }
 
         samlContext.setLocalSSLCredential(tlsCredential);
+
+    }
+
+    /**
+     * Populates hostname verifier using value configured in the context provider..
+     *
+     * @param samlContext context to populate
+     */
+    protected void populateSSLHostnameVerifier(SAMLMessageContext samlContext) {
+
+        HostnameVerifier hostnameVerifier;
+        if ("default".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+        } else if ("defaultAndLocalhost".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST;
+        } else if ("strict".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.STRICT;
+        } else if ("allowAll".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL;
+        } else {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+        }
+
+        samlContext.setGetLocalSSLHostnameVerifier(hostnameVerifier);
 
     }
 

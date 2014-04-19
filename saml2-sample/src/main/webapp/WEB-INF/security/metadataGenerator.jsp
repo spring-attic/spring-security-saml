@@ -185,6 +185,25 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
+            <td>SSL/TLS Hostname Verification:</td>
+            <td>
+                <form:select path="sslHostnameVerification" multiple="false">
+                    <form:option value="default">Standard hostname verifier</form:option>
+                    <form:option value="defaultAndLocalhost">Standard hostname verifier (skips verification for localhost)</form:option>
+                    <form:option value="strict">Strict hostname verifier</form:option>
+                    <form:option value="allowAll">Disable hostname verification (allow all)</form:option>
+                </form:select>
+            </td>
+            <td class="error"><form:errors path="sslHostnameVerification"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>Algorithm for verification of match between hostname in URL and hostname in the presented certificate.</small>
+            </td>
+        </tr>
+
+        <tr>
             <td>SSL/TLS Client authentication:</td>
             <td>
                 <form:select path="tlsKey">

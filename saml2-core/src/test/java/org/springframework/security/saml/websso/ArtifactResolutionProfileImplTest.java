@@ -19,8 +19,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.URI;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Vladimir Schäfer
@@ -69,6 +68,16 @@ public class ArtifactResolutionProfileImplTest {
         assertEquals("testProxy", hostConfiguration.getProxyHost());
         assertEquals(8000, hostConfiguration.getProxyPort());
 
+    }
+
+    /**
+     * Verifies that hostname verification is supported with the supplied libraries.
+     */
+    @Test
+    public void testHostnameVerificationSupported() {
+        HttpClient client = new HttpClient();
+        ArtifactResolutionProfileImpl artifactResolutionProfile = new ArtifactResolutionProfileImpl(client);
+        assertTrue(artifactResolutionProfile.isHostnameVerificationSupported());
     }
 
 }

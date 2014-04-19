@@ -72,6 +72,11 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String sslSecurityProfile = "pkix";
 
     /**
+     * Hostname verifier to use for verification of SSL connections, e.g. for ArtifactResolution.
+     */
+    private String sslHostnameVerification = "default";
+
+    /**
      * Key (stored in the local keystore) used for signing/verifying signature of messages sent/coming from this
      * entity. For local entities private key must be available, for remote entities only public key is required.
      */
@@ -149,15 +154,17 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Sets profile used for verification of SSL/TLS connections. The following profiles are available:
      * <p/>
-     * PKIX profile (by default):
+     * PKIX profile (by default), value "pkix":
      * <br/>
      * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
      * configured as trusted anchors.
      * <p/>
-     * MetaIOP profile:
+     * MetaIOP profile, any other value:
      * <br/>
      * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
      * or revocation of certificates is done in this mode. All keys must be known in advance.
+     * <p/>
+     * Logic is enforced in SAMLContextProviderImpl#populateSSLTrustEngine. Values are case insensitive.
      * <p/>
      * This setting is only relevant for local entities.
      *
@@ -165,6 +172,35 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     public void setSslSecurityProfile(String sslSecurityProfile) {
         this.sslSecurityProfile = sslSecurityProfile;
+    }
+
+    /**
+     * Hostname verifier for SSL connections.
+     *
+     * @return hostname verifier
+     */
+    public String getSslHostnameVerification() {
+        return sslHostnameVerification;
+    }
+
+    /**
+     * Sets hostname verifier to use for verification of SSL connections. The following values are available:
+     * <p/>
+     * default: org.apache.commons.ssl.HostnameVerifier.DEFAULT
+     * <br/>
+     * defaultAndLocalhost: org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST
+     * <br/>
+     * strict: org.apache.commons.ssl.HostnameVerifier.STRICT
+     * <br/>
+     * allowAll: org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL, doesn't perform any validation
+     * <p/>
+     * Logic is enforced in SAMLContextProviderImpl#populateSSLHostnameVerifier. Values are case insensitive.
+     * Unrecognized value revert to default setting.
+     * <p/>
+     * This setting is only relevant for local entities.
+     */
+    public void setSslHostnameVerification(String sslHostnameVerification) {
+        this.sslHostnameVerification = sslHostnameVerification;
     }
 
     /**

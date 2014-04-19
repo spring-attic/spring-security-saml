@@ -83,6 +83,12 @@
 							<entry>Security profile for vericiation of SSL/TLS endpoint trust. See <xref linkend="configuration-security-profiles"/>.</entry>
 						</row>
 						<row>
+							<entry>sslHostnameVerification</entry>
+							<entry>default</entry>
+							<entry>local only</entry>
+							<entry>Verification of hostnames for HTTPS calls (e.g. in Artifact resolution). Allowed values are <emphasis>default</emphasis>, <emphasis>defaultAndLocalhost</emphasis>, <emphasis>strict</emphasis> and <emphasis>allowAll</emphasis>. Value <emphasis>allowAll</emphasis> effectively disables hostname verification. All values are case-insensitive. For more details on the supported hostname verifications see <link linkend="http://juliusdavies.ca/commons-ssl/javadocs/org/apache/commons/ssl/HostnameVerifier.html">Commons-SSL JavaDoc</link>.</entry>
+						</row>
+						<row>
 							<entry>signingKey</entry>
 							<entry>-</entry>
 							<entry>local and remote</entry>

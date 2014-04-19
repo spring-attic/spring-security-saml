@@ -204,6 +204,7 @@ public class MetadataController {
         extendedMetadata.setRequireLogoutRequestSigned(metadata.isRequireLogoutRequestSigned());
         extendedMetadata.setRequireLogoutResponseSigned(metadata.isRequireLogoutResponseSigned());
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
+        extendedMetadata.setSslHostnameVerification(metadata.getSslHostnameVerification());
 
         if (metadata.isStore()) {
 
@@ -261,6 +262,7 @@ public class MetadataController {
         metadata.setEncryptionKey(extendedMetadata.getEncryptionKey());
         metadata.setSigningKey(extendedMetadata.getSigningKey());
         metadata.setTlsKey(extendedMetadata.getTlsKey());
+        metadata.setSslHostnameVerification(extendedMetadata.getSslHostnameVerification());
 
         // TODO other fields discovery, nameIDs
 
@@ -348,6 +350,7 @@ public class MetadataController {
                 "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
                 "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"sslSecurityProfile\" value=\"").append(metadata.getSslSecurityProfile()).append("\"/>\n" +
+                "           <property name=\"sslHostnameVerification\" value=\"").append(metadata.getSslHostnameVerification()).append("\"/>\n" +
                 "           <property name=\"signingKey\" value=\"").append(metadata.getSigningKey()).append("\"/>\n" +
                 "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n");
       if (metadata.getTlsKey() != null) {

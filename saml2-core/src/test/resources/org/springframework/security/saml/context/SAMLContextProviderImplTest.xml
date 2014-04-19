@@ -74,6 +74,7 @@
                         <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
                             <property name="alias" value="myAlias"/>
                             <property name="local" value="true"/>
+                            <property name="sslHostnameVerification" value="strict"/>
                         </bean>
                     </constructor-arg>
                 </bean>

@@ -8,13 +8,14 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-jdbc"
 		exclude group: "org.springframework", module: "spring-tx"
 	}
-	compile ("org.opensaml:opensaml:2.5.3") {
+	compile ("org.opensaml:opensaml:2.6.1") {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		exclude group: "org.slf4j", module: "log4j-over-slf4j"
 		exclude group: "org.apache.xerces", module: "xml-apis"
 		exclude group: "org.apache.xerces", module: "serializer"
 	}
 	provided "javax.servlet:servlet-api:2.5"
+	runtime	"xml-apis:xml-apis:1.4.01"
 	testCompile "org.slf4j:slf4j-log4j12:1.6.3",
 		"org.easymock:easymock:2.4",
 		"junit:junit:4.4",

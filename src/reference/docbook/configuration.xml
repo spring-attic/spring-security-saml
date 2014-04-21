@@ -595,6 +595,19 @@
 					 </listitem>
 				 </itemizedlist>
 			 </para>
+               <para>PKIX verification supports checking of CRLs (certificate revocation lists) using the default underlaying Java Security Provider
+               (e.g. Sun JCE, BouncyCastle JCE).
+               </para>
+               <para>The default Sun JCE provider supports automatic revocation checking based on the certificate's CRL Distribution Points Extension
+                   (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
+                   Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
+                   and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
+                   For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">JAVA PKI Programmer's Guide</ulink>.
+               </para>
+               <para>You can also manually populate CRLs by extending class <emphasis>org.springframework.security.saml.trust.PKIXInformationResolver</emphasis> and overriding method <emphasis>populateCRLs</emphasis>
+               with your own CRL population logic. Populated CRLs are automatically added to the PKIX verification mechanism. The customized class needs to be set to property <emphasis>pkixResolver</emphasis>
+               in the <emphasis>contextProvider</emphasis> bean.
+                </para>
 		 </section>
 
 		 <section id="configuration-security-profiles-customization">

@@ -23,6 +23,7 @@ import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.opensaml.ws.security.ServletRequestX509CredentialAdapter;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
@@ -36,10 +37,7 @@ import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
 import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.security.x509.BasicX509CredentialNameEvaluator;
-import org.opensaml.xml.security.x509.PKIXX509CredentialTrustEngine;
-import org.opensaml.xml.security.x509.X509Credential;
+import org.opensaml.xml.security.x509.*;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
@@ -54,12 +52,10 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.storage.HttpSessionStorageFactory;
 import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
 import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
-import org.springframework.security.saml.trust.MetadataCredentialResolver;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.util.Assert;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,7 +85,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected KeyManager keyManager;
     protected MetadataManager metadata;
     protected MetadataCredentialResolver metadataResolver;
-    protected PKIXInformationResolver pkixResolver;
+    protected PKIXValidationInformationResolver pkixResolver;
     protected SAMLMessageStorageFactory storageFactory = new HttpSessionStorageFactory();
 
     /**
@@ -471,6 +467,26 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     }
 
     /**
+     * Sets resolver used to populate data for PKIX trust engine. System uses default configuration when property
+     * is not set.
+     *
+     * @param pkixResolver pkix resolver
+     */
+    public void setPkixResolver(PKIXValidationInformationResolver pkixResolver) {
+        this.pkixResolver = pkixResolver;
+    }
+
+    /**
+     * Sets resolver used to populate trusted credentials for MetaIOP trust engine. System uses default configuration when property
+     * is not set.
+     *
+     * @param metadataResolver metaiop resolver
+     */
+    public void setMetaIopResolver(MetadataCredentialResolver metadataResolver) {
+        this.metadataResolver = metadataResolver;
+    }
+
+    /**
      * Implementation of the SAML message storage factory providing custom mechanism for storage
      * of SAML messages such as http session, cookies or no storage at all.
      *
@@ -492,10 +508,16 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         Assert.notNull(metadata, "Metadata must be set");
         Assert.notNull(storageFactory, "MessageStorageFactory must be set");
 
-        metadataResolver = new MetadataCredentialResolver(metadata, keyManager);
-        metadataResolver.setMeetAllCriteria(false);
-        metadataResolver.setUnevaluableSatisfies(true);
-        pkixResolver = new PKIXInformationResolver(metadataResolver, metadata, keyManager);
+        if (metadataResolver == null) {
+            MetadataCredentialResolver resolver = new org.springframework.security.saml.trust.MetadataCredentialResolver(metadata, keyManager);
+            resolver.setMeetAllCriteria(false);
+            resolver.setUnevaluableSatisfies(true);
+            this.metadataResolver = resolver;
+        }
+
+        if (pkixResolver == null) {
+            pkixResolver = new PKIXInformationResolver(metadataResolver, metadata, keyManager);
+        }
 
     }
 

@@ -31,6 +31,7 @@ import org.opensaml.xml.security.x509.PKIXValidationInformation;
 import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.security.MetadataCredentialResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
@@ -161,6 +162,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         Collection<X509CRL> crls = new ArrayList<X509CRL>();
         populateMetadataAnchors(criteriaSet, anchors, crls);
         populateTrustedKeysAnchors(criteriaSet, anchors, crls);
+        populateCRLs(criteriaSet, anchors, crls);
         PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, crls, getPKIXDepth());
         return new ArrayList<PKIXValidationInformation>(Arrays.asList(info));
     }
@@ -277,6 +279,17 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
             throw new SecurityException("Error loading extended metadata", e);
         }
 
+    }
+
+    /**
+     * Extension points for loading of certificate revocation lists.
+     *
+     * @param criteriaSet     criteria set
+     * @param anchors pkix anchors
+     * @param crls crls to be populated
+     */
+    protected void populateCRLs(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
+            throws SecurityException {
     }
 
     /**

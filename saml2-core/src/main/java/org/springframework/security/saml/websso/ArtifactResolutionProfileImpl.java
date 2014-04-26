@@ -22,6 +22,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
@@ -169,13 +170,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());
                 HostnameVerifier hostnameVerifier = context.getLocalSSLHostnameVerifier();
 
-                ProtocolSocketFactory socketFactory;
-                if (isHostnameVerificationSupported()) {
-                    socketFactory = new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
-                } else {
-                    socketFactory = new TLSProtocolSocketFactory(manager, trustManager);
-                }
-
+                ProtocolSocketFactory socketFactory = getSSLSocketFactory(manager, trustManager, hostnameVerifier);
                 Protocol protocol = new Protocol("https", socketFactory, 443);
                 hc.setHost(uri.getHost(), uri.getPort(), protocol);
 
@@ -187,6 +182,23 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             throw new MessageEncodingException("Error parsing remote location URI", e);
         }
 
+    }
+
+    /**
+     * Method returns SecureProtocolSocketFactory used to connect to create SSL connections for artifact resolution.
+     * By default we create instance of org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory.
+     *
+     * @param manager keys used for client authentication
+     * @param trustManager trust manager for server verification
+     * @param hostnameVerifier verifier for server hostname, or null
+     * @return socket factory
+     */
+    protected SecureProtocolSocketFactory getSSLSocketFactory(X509KeyManager manager, X509TrustManager trustManager, HostnameVerifier hostnameVerifier) {
+        if (isHostnameVerificationSupported()) {
+            return new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
+        } else {
+            return new TLSProtocolSocketFactory(manager, trustManager);
+        }
     }
 
     /**

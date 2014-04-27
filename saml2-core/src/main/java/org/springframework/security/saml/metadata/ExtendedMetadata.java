@@ -95,7 +95,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private String tlsKey;
 
     /**
-     * Keys used as anchors for trust verification when PKIX mode is enabled for the local entity. In case no keys are specified
+     * Keys used as anchors for trust verification when PKIX mode is enabled for the local entity. In case value is null
      * all keys in the keyStore will be treated as trusted.
      */
     private Set<String> trustedKeys;
@@ -347,7 +347,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * Trusted keys usable for signature and server SSL/TLS verification for entities with PKIX verification enabled.
-     * Value is ignored when PKIX security is not enabled.
+     * Value is ignored when PKIX security is not enabled. In case value is null all keys in the keyStore will be
+     * treated as trusted.
      *
      * @return trusted keys
      */

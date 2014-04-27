@@ -591,24 +591,62 @@
 						 <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
 					 </listitem>
 					 <listitem>
-						 <para>All keys specified in <emphasis>trustedKeys</emphasis> set of extended metadata of a remote entity</para>
+						 <para>All keys specified in <emphasis>trustedKeys</emphasis> set of extended metadata of a remote entity,
+                             or all keys available in the key store when the property is null (default value)</para>
 					 </listitem>
 				 </itemizedlist>
 			 </para>
-               <para>PKIX verification supports checking of CRLs (certificate revocation lists) using the default underlaying Java Security Provider
-               (e.g. Sun JCE, BouncyCastle JCE).
-               </para>
-               <para>The default Sun JCE provider supports automatic revocation checking based on the certificate's CRL Distribution Points Extension
-                   (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
-                   Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
-                   and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
-                   For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">JAVA PKI Programmer's Guide</ulink>.
-               </para>
-               <para>You can also manually populate CRLs by extending class <emphasis>org.springframework.security.saml.trust.PKIXInformationResolver</emphasis> and overriding method <emphasis>populateCRLs</emphasis>
-               with your own CRL population logic. Populated CRLs are automatically added to the PKIX verification mechanism. The customized class needs to be set to property <emphasis>pkixResolver</emphasis>
-               in the <emphasis>contextProvider</emphasis> bean.
-                </para>
-		 </section>
+       <para>Please note that trust anchors are treated as automatically trusted and are not necessarily subject to all checks as leaf certificates are (depending
+       on your security provider implementation). You should preferably use only your CA and intermediary CA certificates as trust anchors. In case you want to ignore
+       certificates available in your XML metadata and only use settings from your manually set ExtendedMetadata, set property <emphasis>useXmlMetadata</emphasis>
+       of your <emphasis>metadataResolver</emphasis> to false:
+           <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+    <property name="metadataResolver">
+        <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+            <constructor-arg index="0" ref="metadata"/>
+            <constructor-arg index="1" ref="keyManager"/>
+            <property name="useXmlMetadata" value="false"/>
+        </bean>
+    </property>
+</bean>]]></programlisting>
+       </para>
+       <para>PKIX verification supports checking of CRLs (certificate revocation lists) using the default underlaying Java Security Provider
+       (e.g. Sun JCE, BouncyCastle JCE).
+       </para>
+       <para>The PKIX algorithm needs to be advised that the revocation checking is enabled. You can do so by customizing the <emphasis>pkixTrustEvaluator</emphasis> inside <emphasis>SAMLContextProvider</emphasis>, see an example with properties <emphasis>forceRevocationEnabled</emphasis> and <emphasis>revocationEnabled</emphasis> bellow.</para>
+       <para>By default the validation algorithm only uses the <emphasis>CertPathBuilder</emphasis>. Some Java security implementations do not support full feature set of revocation checking in this class and only
+        implement them in the <emphasis>CertPathValidator</emphasis> (e.g. Sun provider only supports OCSP in CertPathBuilder since Java 1.8). You can instruct system to use both 
+        <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis> by setting property <emphasis>validateCertPath</emphasis> to <emphasis>true</emphasis> on bean
+        <emphasis>CertPathPKIXTrustEvaluator</emphasis>.</para>
+        <para>The security provider used for loading of PKIX verification factories can be customized using property <emphasis>securityProvider</emphasis>.</para>
+        <para><programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+    <property name="pkixTrustEvaluator">
+        <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+            <property name="PKIXValidationOptions">
+                <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+                    <property name="forceRevocationEnabled" value="true"/>
+                    <property name="revocationEnabled" value="true"/>
+                </bean>
+            </property>
+            <property name="validateCertPath" value="true"/>
+            <property name="securityProvider" value="SUN"/>
+        </bean>
+    </property>
+</bean>]]></programlisting>
+       </para>
+     <para>Spring SAML uses standard CertPath verification API. The default Sun JCE provider supports automatic revocation checking based on the certificate's CRL Distribution Points Extension
+         (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
+         Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
+         and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
+         For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">Java PKI Programmer's Guide</ulink>.
+         In case you are using another security provider, please consult its manual for functionality related to <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis>
+         with the <emphasis>PKIX</emphasis> algorithm.
+     </para>
+       <para>You can also manually populate CRLs by extending class <emphasis>org.springframework.security.saml.trust.PKIXInformationResolver</emphasis> and overriding method <emphasis>populateCRLs</emphasis>
+       with your own CRL population logic. Populated CRLs are automatically added to the PKIX verification mechanism. The customized class needs to be set to property <emphasis>pkixResolver</emphasis>
+       in the <emphasis>contextProvider</emphasis> bean.
+       </para>
+     </section>
 
 		 <section id="configuration-security-profiles-customization">
 			 <title>Custom profile</title>

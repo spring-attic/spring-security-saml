@@ -86,6 +86,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected MetadataManager metadata;
     protected MetadataCredentialResolver metadataResolver;
     protected PKIXValidationInformationResolver pkixResolver;
+    protected PKIXTrustEvaluator pkixTrustEvaluator;
     protected SAMLMessageStorageFactory storageFactory = new HttpSessionStorageFactory();
 
     /**
@@ -432,7 +433,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateTrustEngine(SAMLMessageContext samlContext) {
         SignatureTrustEngine engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
-            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), new CertPathPKIXTrustEvaluator(), new BasicX509CredentialNameEvaluator());
+            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
         } else {
             engine = new ExplicitKeySignatureTrustEngine(metadataResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
         }
@@ -449,40 +450,85 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateSSLTrustEngine(SAMLMessageContext samlContext) {
         TrustEngine<X509Credential> engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslSecurityProfile())) {
-            engine = new PKIXX509CredentialTrustEngine(pkixResolver, new CertPathPKIXTrustEvaluator(), new BasicX509CredentialNameEvaluator());
+            engine = new PKIXX509CredentialTrustEngine(pkixResolver, pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
         } else {
             engine = new ExplicitX509CertificateTrustEngine(metadataResolver);
         }
         samlContext.setLocalSSLTrustEngine(engine);
     }
 
+    /**
+     * Metadata manager provides information about all available IDP and SP entities.
+     *
+     * @param metadata metadata mangaer
+     */
     @Autowired
     public void setMetadata(MetadataManager metadata) {
         this.metadata = metadata;
     }
 
+    /**
+     * Key manager provides information about private certificate and trusted keys provide in addition to
+     * cryptographic material present in entity metadata documents.
+     *
+     * @param keyManager key manager
+     */
     @Autowired
     public void setKeyManager(KeyManager keyManager) {
         this.keyManager = keyManager;
     }
 
     /**
-     * Sets resolver used to populate data for PKIX trust engine. System uses default configuration when property
-     * is not set.
+     * Sets resolver used to populate data for PKIX trust engine. Trust anchors are internally cached. They get populated
+     * using configured MetadataResolver and enhanced with trustedKeys from the ExtendedMetadata.
+     *
+     * System uses default configuration when property is not set.
+     *
+     * Default implementation (org.springframework.security.saml.trust.PKIXInformationResolver) loads trust anchors
+     * from both metadata and extended metadata of the peer entity. In case ExtendedMetadata doesn't define any
+     * trustedKeys (property trustedKeys is null which is the default), system will use all certificates available
+     * in the configured keyStore as trust anchors.
      *
      * @param pkixResolver pkix resolver
+     * @see org.springframework.security.saml.trust.PKIXInformationResolver
      */
     public void setPkixResolver(PKIXValidationInformationResolver pkixResolver) {
         this.pkixResolver = pkixResolver;
     }
 
     /**
-     * Sets resolver used to populate trusted credentials for MetaIOP trust engine. System uses default configuration when property
-     * is not set.
+     * Trust evaluator is responsible for verifying whether to trust certificate based on PKIX verification.
+     *
+     * System uses default configuration when property is not set.
+     *
+     * Default implementation (org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator) uses Java CertPath API
+     * to perform the verification. The default implementation can be constructed with an instance of
+     * org.opensaml.xml.security.x509.CertPathPKIXValidationOptions which further customizes the PKIX process, e.g. in
+     * regard to certificate expiration checking. It is also possible to customize the security provider to use for
+     * loading of the CertPath API factories.
+     *
+     * @param pkixTrustEvaluator pkix trust evaluator
+     * @see org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator
+     */
+    public void setPkixTrustEvaluator(PKIXTrustEvaluator pkixTrustEvaluator) {
+        this.pkixTrustEvaluator = pkixTrustEvaluator;
+    }
+
+    /**
+     * Sets resolver used to populate trusted credentials from XML and Extended metadata. Metadata resolver
+     * is used as the only resolver for MetaIOP security profile. It is also used for loading of trusted anchors in
+     * the PKIX profile.
+     *
+     * System uses default configuration when property is not set.
+     *
+     * Default implementation (org.springframework.security.saml.trust.MetadataCredentialResolver) populates
+     * trusted certificates from both peer metadata and peer extended metadata (properties signingKey, encryptionKey
+     * and tlsKey).
      *
      * @param metadataResolver metaiop resolver
+     * @see org.springframework.security.saml.trust.MetadataCredentialResolver
      */
-    public void setMetaIopResolver(MetadataCredentialResolver metadataResolver) {
+    public void setMetadataResolver(MetadataCredentialResolver metadataResolver) {
         this.metadataResolver = metadataResolver;
     }
 
@@ -517,6 +563,10 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         if (pkixResolver == null) {
             pkixResolver = new PKIXInformationResolver(metadataResolver, metadata, keyManager);
+        }
+
+        if (pkixTrustEvaluator == null) {
+            pkixTrustEvaluator = new CertPathPKIXTrustEvaluator();
         }
 
     }

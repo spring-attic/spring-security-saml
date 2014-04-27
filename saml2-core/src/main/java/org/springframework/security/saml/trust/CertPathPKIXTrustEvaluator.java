@@ -26,8 +26,14 @@ import java.security.GeneralSecurityException;
 import java.security.cert.*;
 
 /**
- * Customized PKIX trust evaluator which runs a CertPath verification after obtaining it. This enables e.g. usage
- * of OSCP revocation mechanism in Java 7.
+ * PKIX trust evaluator based on Java CertPath API. Class first constructs PKIXBuilderParameters using call to
+ * getPKIXBuilderParameters. Parameters consult the options property for defaults of isForceRevocationEnabled,
+ * forcedRevocation, policyMappingInhibited, anyPolicyInhibited and initialPolicies settings. System then constructs
+ * CertPathBuilder with PKIX algorithm and selected securityProvider and builds the certificate path.
+ *
+ * If path building succeeds system also optionally verifies the resulting certificate chain using CertPathValidator.
+ * In earlier Java versions the builder implementation doesn't support e.g. OCSP checking. Running a separate path
+ * validation makes it possible to use these features..
  */
 public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.CertPathPKIXTrustEvaluator {
 
@@ -35,6 +41,16 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
      * Class logger.
      */
     private final Logger log = LoggerFactory.getLogger(MetadataCredentialResolver.class);
+
+    /**
+     * Security provider for loading of PKIX classes.
+     */
+    private String securityProvider = null;
+
+    /**
+     * Flag indicating whether additional validation of the cert path is required.
+     */
+    private boolean validateCertPath = true;
 
     public CertPathPKIXTrustEvaluator() {
     }
@@ -53,12 +69,19 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
         }
 
         try {
+
             PKIXBuilderParameters params = getPKIXBuilderParameters(validationInfo, untrustedCredential);
 
-            log.trace("Building certificate validation path");
+            // Construct certificate path
+            CertPathBuilder builder;
+            if (securityProvider == null) {
+                builder = CertPathBuilder.getInstance("PKIX");
+                log.trace("Building certificate path using default security provider");
+            } else {
+                builder = CertPathBuilder.getInstance("PKIX", securityProvider);
+                log.trace("Building certificate path using security provider {}", securityProvider);
+            }
 
-            // Construct chain
-            CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
             PKIXCertPathBuilderResult buildResult = (PKIXCertPathBuilderResult) builder.build(params);
             if (log.isDebugEnabled()) {
                 logCertPathDebug(buildResult, untrustedCredential.getEntityCertificate());
@@ -66,10 +89,17 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
                         X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
             }
 
-            // Validate the chain
-            log.trace("Validating certificate path");
-            CertPathValidator validator = CertPathValidator.getInstance("PKIX");
-            validator.validate(buildResult.getCertPath(), params);
+            if (validateCertPath) {
+                log.trace("Validating certificate path");
+                // Validate the certificate path
+                CertPathValidator validator;
+                if (securityProvider == null) {
+                    validator = CertPathValidator.getInstance("PKIX");
+                } else {
+                    validator = CertPathValidator.getInstance("PKIX", securityProvider);
+                }
+                validator.validate(buildResult.getCertPath(), params);
+            }
 
             return true;
 
@@ -109,6 +139,33 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
         } else {
             log.debug("TrustAnchor: {}", ta.getCAName());
         }
+    }
+
+    /**
+     * Sets security provider used to instantiate CertPathBuilder and CertPathValidator instances from the
+     * CertPathBuilder and CertPathValidator factories. When no value is specified system will use the default
+     * security provider.
+     *
+     * Default value is null.
+     *
+     * @param provider name of the security provider (e.g. BC for BouncyCastle)
+     */
+    public void setSecurityProvider(String provider) {
+        this.securityProvider = provider;
+    }
+
+    /**
+     * Flag indicating whether to execute additional certificate path validation using the java.security.cert.CertPathValidator
+     * factory. The CertPathBuilder typically performs most PKIX verifications already, but in some cases (e.g.
+     * for OCSP support and CRLDP support in certain Java versions) it is necessary to run additional checkins in the
+     * validator.
+     *
+     * Default value is false.
+     *
+     * @param validateCertPath flag indicating usage of the CertPathValidator.
+     */
+    public void setValidateCertPath(boolean validateCertPath) {
+        this.validateCertPath = validateCertPath;
     }
 
 }

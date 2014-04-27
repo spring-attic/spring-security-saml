@@ -15,7 +15,6 @@
 package org.springframework.security.saml.websso;
 
 import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
-import org.springframework.security.saml.SAMLConstants;
 
 import java.io.Serializable;
 import java.util.Collection;

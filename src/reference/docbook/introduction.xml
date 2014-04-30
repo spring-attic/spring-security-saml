@@ -171,8 +171,9 @@
 		<title>Builds</title>
 
     <para>Snapshot builds of the project are available in the 
-    <link xlink:href="http://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link></para>
-     
+    <link xlink:href="http://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link>.
+    We use <link xlink:href="https://build.springsource.org/browse/SES">Bamboo</link> for continuous integration. 
+    </para>     
 	</section>
 
 	<section id="section-license">
@@ -182,15 +183,25 @@
 		of the license at <ulink url="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</ulink>.</para>
 	</section>
 
-	<section id="section-support">
-		<title>Support</title>
+	<section id="section-issue-tracking">
+		<title>Issue tracking</title>
 
-		<para>Issue tracking for the module can be found at <link
-				xlink:href="https://jira.springsource.org/browse/SES/component/10711">Spring Security Extensions Jira</link>. Feel free to
-			submit bugs, patches and feature requests.</para>
-		<para>For community support please use <link
-				xlink:href="http://forum.springsource.org/forumdisplay.php?86-SAML">Spring Security forum</link>.
-			For additional support you can reach me at vladimir.schafer at gmail.com.</para>
+		<para>Please use <link xlink:href="https://jira.springsource.org/browse/SES/component/10711">Spring Security Extensions Jira</link> for
+			submitting of bugs and feature requests. Patches can be sent directly to GitHub as pull requests, but preferably open a Jira issue as well.</para>
 	</section>
+  
+	<section id="section-support">
+		<title>Community support</title>
+
+		<para>For community support please use <link
+				xlink:href="http://forum.springsource.org/forumdisplay.php?86-SAML">Spring Security forum</link> or 
+        <link xlink:href="http://stackoverflow.com/questions/tagged/spring-security">Stack Overflow</link>.</para>
+	</section>
+  
+	<section id="section-commercial-support">
+		<title>Commercial support</title>
+	  
+    <para>For commercial support and consulting services please contact <link xlink:href="sales@v7security.com">sales@v7security.com</link></para>
+	</section>  
 
 </chapter>

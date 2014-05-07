@@ -179,9 +179,7 @@ public class MetadataGenerator {
         String entityBaseURL = getEntityBaseURL();
         String entityAlias = getEntityAlias();
 
-        if (entityId == null || entityBaseURL == null) {
-            throw new RuntimeException("Required attributes weren't set");
-        }
+        validateRequiredAttributes();
 
         if (id == null) {
             // Use entityID cleaned as NCName for ID in case no value is provided
@@ -209,6 +207,12 @@ public class MetadataGenerator {
         return descriptor;
 
     }
+
+	protected void validateRequiredAttributes() {
+		if (entityId == null || entityBaseURL == null) {
+            throw new RuntimeException("Required attributes weren't set");
+        }
+	}
 
     protected KeyInfo getServerKeyInfo(String alias) {
         Credential serverCredential = keyManager.getCredential(alias);
@@ -346,7 +350,6 @@ public class MetadataGenerator {
         }
 
         return spDescriptor;
-
     }
 
     /**

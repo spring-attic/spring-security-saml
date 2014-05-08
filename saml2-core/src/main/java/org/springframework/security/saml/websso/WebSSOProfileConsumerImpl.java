@@ -106,8 +106,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("Response has invalid status code " + statusCode + ", status message is " + statusMessageText);
         }
 
-        // Verify signature of the response if present
-        if (response.getSignature() != null) {
+        // Verify signature of the response if present, unless already verified in binding
+        if (response.getSignature() != null && !context.isInboundSAMLMessageAuthenticated()) {
             log.debug("Verifying Response signature");
             verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
             context.setInboundSAMLMessageAuthenticated(true);

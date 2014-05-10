@@ -41,16 +41,8 @@
 		<xi:include href="quick-start.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 	</part>
 
-	<part xml:id="configuration">
-		<title>Configuring single sign-on with SAML</title>
-		<partintro>
-			<para>This chapter provides information about configuration and customization options of the SAML extension.
-			It will guide you through typical scenarios including problems you might encounter during integration with
-			identity providers.</para>
-		</partintro>
-
-		<xi:include href="configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-	</part>
+	<xi:include href="configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		  
 	<part xml:id="administration-ui">
 		<title>Administration user interface</title>
 		<partintro>
@@ -60,7 +52,8 @@
 
 		<xi:include href="administration-ui.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 		
-	</part>  
+	</part>  		
+  
 	<part xml:id="integration">
 		<title>IDP integration guide</title>
 		<partintro>

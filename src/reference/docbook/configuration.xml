@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="chapter-configuration"
+<part id="configuration"
 	xmlns="http://docbook.org/ns/docbook" version="5.0"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
 	xmlns:xl="http://www.w3.org/1999/xlink"
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
 		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-	<title>Configuration and integration</title>
-	<para>This chapter will discuss aspects of configuring and using the library in target applications.</para>
-
-	<section id="configuration-overview">
+		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">	
+  
+		<title>Configuring single sign-on with SAML</title>
+		<partintro>
+			<para>This chapter provides information about configuration and customization options of the SAML extension.
+			It will guide you through typical scenarios including problems you might encounter during integration with
+			identity providers.</para>
+		</partintro>
+    
+	<chapter id="configuration-overview">
 		<title>Overview</title>
 		<para>Spring Security SAML 2.0 library comprises three modules:
 			<itemizedlist spacing="compact">
@@ -75,9 +81,9 @@
 		<para>Additional steps such as customization of SAML 2.0 bindings, configuration of artifact resolution 
     or configuration of time skews might be needed.
 		</para>
-	</section>
+	</chapter>
 
-	<section id="configuration-integration">
+	<chapter id="configuration-integration">
 		<title>Integration to applications</title>
 		<para>SAML module can be directly embedded into new or existing Spring applications. In
 			this case application itself includes the SAML library in WEB-INF/lib directory of the war archive and
@@ -133,11 +139,11 @@
 </security:http>]]></programlisting>
 			</para>
 		</section>
-	</section>
+	</chapter>
 
 	<!-- TODO Combining other authentication methods -->
 
-	<section id="configuration-metadata">
+	<chapter id="configuration-metadata">
 		<title>Metadata configuration</title>
 		<para>
 			SAML metadata is an XML document which contains information necessary for interaction with SAML-enabled identity
@@ -631,14 +637,14 @@
             </para>
     
         </section>
-    </section>
+    </chapter>
 
-	<section id="configuration-entity-alias">
+	<chapter id="configuration-entity-alias">
 		<title>Entity alias</title>
 		<para>TODO</para>
-	</section>
+	</chapter>
 
-	<section id="configuration-key-management">
+	<chapter id="configuration-key-management">
 		<title>Key management</title>
 		<para>
 			SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
@@ -700,9 +706,9 @@
 			 configuring of trust for SSL/TLS connections see <xref linkend="configuration-security-profiles"/>.</para>
 		 </section>
 
-	 </section>
+	 </chapter>
 
-	 <section id="configuration-security-profiles">
+	 <chapter id="configuration-security-profiles">
 		 <title>Security profiles</title>
 		 <para>Exchanges of messages between identity providers and service providers with SAML protocol
 			 involves usage of digital signatures. Signatures are typically constructed using means of asymetric
@@ -833,9 +839,9 @@
 			 </para>
 		 </section>
 
-	 </section>
+	 </chapter>
 
-    <section id="configuration-security-profiles-hostnames">
+    <chapter id="configuration-security-profiles-hostnames">
         <title>Hostname verification for HTTPS connections</title>
         <para>
             Connections to HTTPS services (e.g. during Artifact resolution) require verification that the connected hostname
@@ -849,9 +855,9 @@
         <para>
             All supported values can be found in the ExtendedMetadata reference <xref linkend="configuration-metadata-extended"/>.
         </para>
-    </section>
+    </chapter>
    
-	<section id="configuration-load-balancing">
+	<chapter id="configuration-load-balancing">
 		<title>Reverse proxies and load balancers</title>
 		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
 		SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
@@ -888,9 +894,9 @@
 			</itemizedlist>
 
 		</para>
-	</section>   
+	</chapter>   
 
-	<section id="configuration-discovery">
+	<chapter id="configuration-discovery">
 		<title>IDP selection and discovery</title>
 		<para>SAML Extension supports the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
 Protocol and Profile</ulink>.</para>
@@ -946,9 +952,9 @@ Protocol and Profile</ulink>.</para>
       
     </para>        
       
-	</section>
+	</chapter>
   
-	<section id="configuration-sso">
+	<chapter id="configuration-sso">
 		 <title>Single sign-on process</title>
 		 <para>SP initialized SSO process can be started in two ways:
 		 <itemizedlist>
@@ -1045,9 +1051,9 @@ Protocol and Profile</ulink>.</para>
 		</table>
 		</para>     
      
-	</section>
+	</chapter>
 
-	<section id="configuration-logout">
+	<chapter id="configuration-logout">
 		<title>Logout process</title>
 		<para>Spring SAML Extension supports both Local Logout and Single Logout mechanisms.</para>
 		 
@@ -1091,9 +1097,9 @@ Protocol and Profile</ulink>.</para>
          <para>Spring SAML correctly handles SAML 2.0 LogoutRequest messages sent from the IDP and performs logout in case the message is valid. In case of invalid data (missing signature, invalid issuer, invalid issue time, invalid destination, invalid session index, invalid name ID, no user logged in) system responds with SAML 2.0 LogoutResponse with an error Status code.</para>
      </section>
 
-	</section>
+	</chapter>
 
-	<section id="configuration-authentication-object">
+	<chapter id="configuration-authentication-object">
 		<title>Authentication object</title>
 		<para>Successful authentication using SAML token results in creation of an <emphasis>Authentication</emphasis> object by
 		the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis>
@@ -1170,9 +1176,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		<para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods
 		in the <emphasis>SAMLAuthenticationProvider</emphasis>.</para>
 
-	</section>
+	</chapter>
 
-	<section id="configuration-authentication-log">
+	<chapter id="configuration-authentication-log">
 		<title>Authentication log</title>
 		<para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
 		A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including its bean
@@ -1191,9 +1197,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		  </listitem>
 		</itemizedlist></para>
     <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para> 
-	</section>
+	</chapter>
 
-	<section id="configuration-context-provider">
+	<chapter id="configuration-context-provider">
 		<title>Context provider</title>
 		<para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credentials
 		and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
@@ -1234,9 +1240,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
 					<emphasis>metadata</emphasis> bean.</para>
 				</listitem>
 		</itemizedlist></para>
-	</section>
+	</chapter>
 
-	<section id="error-handling">
+	<chapter id="error-handling">
 		<title>Error handling</title>
 		<para>Critical errors raised during processing of SAML messages are generally propagated as ServletExceptions to the Java container. In order to configure a custom error handling update your web.xml
 		and provide a general handler for ServletExceptions:<programlisting><![CDATA[<error-page> 
@@ -1246,9 +1252,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
 		<para>ServletException contains original reason for the failure as a cause. It is recommended that content of the exceptions is not displayed to end users, both for security and user experience reasons.</para> 
 		<para>Errors produced during processing of the SAML AuthenticationResponse can be handled by plugging a custom implementation of 
 		the <emphasis>org.springframework.security.web.authentication.AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
-	</section>
+	</chapter>
 
-	<section id="time-interval">
+	<chapter id="time-interval">
 		<title>Validity intervals</title>
 		<para>For security reasons system limits the time window enabling processing of SAML messages and assertions. The time window parameters can be customized with the following settings.</para> 
 		<para>Validity of assertions processed during the signle sign-on process is limited to 3000 seconds. Value can be customized with property <emphasis>maxAssertionTime</emphasis>
@@ -1525,9 +1531,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
 
         </para>
 
-	</section>
+	</chapter>
 
-	<section id="enhanced-client">
+	<chapter id="enhanced-client">
 		<title>Enhanced client/proxy</title>
 		<para>Support for enhanced client/proxy can be configured using property <emphasis>ecpEnabled</emphasis> of the service provider's extended metadata. Once enabled, ECP profile is automatically activated with requests containing HTTP headers
 		<emphasis>Accept: application/vnd.paos+xml</emphasis> and <emphasis>PAOS: ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'</emphasis>. Binding used to server ECP profile is always automatically set to PAOS.</para>
@@ -1539,9 +1545,9 @@ public class TestUserDetails implements SAMLUserDetailsService {
     </property>
 </bean>]]></programlisting>
 		</para>
-	</section>
+	</chapter>
   
-	<section id="logging">
+	<chapter id="logging">
 	  <title>Logging</title>
 	  <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
 	  library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
@@ -1550,7 +1556,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 log4j.logger.org.opensaml=DEBUG
 log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	  <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
-	</section>  
+	</chapter>  
 
 	<!-- TODO
 	Message storage
@@ -1561,5 +1567,5 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	Service URLs
 	Using the HoK profile
 	-->
-
-</chapter>
+  
+</part>

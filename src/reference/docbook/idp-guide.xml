@@ -8,12 +8,7 @@
 	xsi:schemaLocation="
 		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
 		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-		<title>IDP integration guide</title>
-		<para>This chapter provides step-by-step guides for basic configuration of SAML Extension with specific
-		IDP products. Integration can be further configured with settings discussed in previous chapters.</para>
-
-		<section id="chapter-idp-guide-adfs">
-			<title>Active Directory Federation Services 2.0 (AD FS)</title>
+		<title>Active Directory Federation Services 2.0 (AD FS)</title>
 
 			<para>AD FS 2.0 supports SAML 2.0 in IDP mode and can be easily integrated with SAML Extension for both SSO and SLO.
 			Before starting with the configuration make sure that the following pre-requisites are satisfied:</para>
@@ -113,7 +108,5 @@
 		is used and SSL/TLS certificate of your AD FS is not already trusted, import it to your samlKeystore.jks by following instructions in the
 		error report.</para>
 		</section>
-
-	</section>
 
 </chapter>

@@ -1540,13 +1540,19 @@ public class TestUserDetails implements SAMLUserDetailsService {
 </bean>]]></programlisting>
 		</para>
 	</section>
+  
+	<section id="logging">
+	  <title>Logging</title>
+	  <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
+	  library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
+	  <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
+			<programlisting>log4j.logger.org.springframework.security.saml=DEBUG
+log4j.logger.org.opensaml=DEBUG
+log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
+	  <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
+	</section>  
 
 	<!-- TODO
-	IDP integration
-	- integration with Shibboleth
-	- integration with OpenAM
-	- integration with VMWare Horizon
-
 	Message storage
 
 	Bindings configuration

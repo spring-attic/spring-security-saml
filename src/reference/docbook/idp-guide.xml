@@ -108,5 +108,13 @@
 		is used and SSL/TLS certificate of your AD FS is not already trusted, import it to your samlKeystore.jks by following instructions in the
 		error report.</para>
 		</section>
+    
+    <!-- TODO
+	IDP integration
+	- integration with Shibboleth
+	- integration with OpenAM
+  - integration with Ping
+	- integration with VMWare Horizon
+      -->
 
 </chapter>

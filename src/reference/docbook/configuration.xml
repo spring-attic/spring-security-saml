@@ -9,7 +9,7 @@
 		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
 		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">	
   
-		<title>Configuring single sign-on with SAML</title>
+		<title>Configuring SAML Extension</title>
 		<partintro>
 			<para>This chapter provides information about configuration and customization options of the SAML extension.
 			It will guide you through typical scenarios including problems you might encounter during integration with
@@ -51,7 +51,7 @@
 				</listitem>
 				<listitem>
 					<para><link linkend="configuration-metadata">import, generation and customization of SP and IDP metadata</link></para>
-				</listitem>                
+				</listitem>
 				<listitem>
 					<para><link linkend="configuration-key-management">configuration of signature, encryption and trust keys</link></para>
 				</listitem>
@@ -63,23 +63,23 @@
 				</listitem>
 				<listitem>
 					<para><link linkend="configuration-discovery">configuration of IDP selection or discovery</link></para>
-				</listitem>                
+				</listitem>
 				<listitem>
 					<para><link linkend="configuration-sso">configuration of single sign-on process</link></para>
 				</listitem>
 				<listitem>
 					<para><link linkend="configuration-logout">configuration of logout process</link></para>
-				</listitem>        
+				</listitem>
 				<listitem>
 					<para><link linkend="configuration-authentication-object">configuration of authentication object</link></para>
 				</listitem>
 				<listitem>
 					<para><link linkend="configuration-authentication-log">configuration of authentication log</link></para>
-				</listitem>        
+				</listitem>
 			</itemizedlist>
 		</para>
 		<para>Additional steps such as customization of SAML 2.0 bindings, configuration of artifact resolution 
-    or configuration of time skews might be needed.
+ or configuration of time skews might be needed.
 		</para>
 	</chapter>
 
@@ -139,6 +139,27 @@
 </security:http>]]></programlisting>
 			</para>
 		</section>
+        <section id="error-handling">
+            <title>Error handling</title>
+            <para>Critical errors raised during processing of SAML messages are generally propagated as ServletExceptions to the Java container. In order to configure a custom error handling update your web.xml
+                and provide a general handler for ServletExceptions:<programlisting><![CDATA[<error-page>
+	<exception-type>javax.servlet.ServletException</exception-type>
+	<location>/error.jsp</location>
+</error-page>]]></programlisting></para>
+            <para>ServletException contains original reason for the failure as a cause. It is recommended that content of the exceptions is not displayed to end users, both for security and user experience reasons.</para>
+            <para>Errors produced during processing of the SAML AuthenticationResponse can be handled by plugging a custom implementation of
+                the <emphasis>org.springframework.security.web.authentication.AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
+        </section>
+        <section id="logging">
+            <title>Logging</title>
+            <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
+                library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
+            <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
+                <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
+log4j.logger.org.opensaml=DEBUG
+log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
+            <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
+        </section>
 	</chapter>
 
 	<!-- TODO Combining other authentication methods -->
@@ -157,13 +178,11 @@
 			Metadata can be customized either by direct modifications to the XML document, or using extended metadata. Extended metadata is added
 			directly to the Spring configuration file and can contain additional options which are unavailable in the basic metadata document.
 		</para>
-
 		<section id="configuration-metadata-sp">
 			<title>Service provider metadata</title>
 			<para>Service provider metadata contains keys, services and URLs defining SAML endpoints of your application. Metadata can be either
 			generated automatically upon first request to the service, or it can be pre-created (see <xref linkend="chapter-administration-ui"/>).
 			Once created metadata needs to be provided to the identity providers with whom we want to establish trust.</para>
-
 			<section id="configuration-metadata-sp-generation">
 				<title>Automatic metadata generation</title>
 				<para>
@@ -284,7 +303,7 @@
 								<row>
 									<entry><literal>extendedMetadata</literal></entry>
 									<entry>Additional settings such as IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="configuration-metadata-extended"/> for details.</entry>
-								</row>                
+								</row>
 							</tbody>
 						</tgroup>
 					</table>
@@ -313,7 +332,6 @@
 					For details about load balancing see <xref linkend="configuration-load-balancing"/>.
 				</para>
 			</section>
-
 			<section id="configuration-metadata-sp-import">
 				<title>Pre-configured metadata</title>
 				<para>In some situations it is beneficial to provide static version of the metadata document instead of the automatic generation. Need
@@ -369,7 +387,6 @@
 				bean should be set to the entity ID of the default one.</para>
 				<para>For details about available settings of the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.</para>
 			</section>
-
 			<section id="configuration-metadata-sp-display">
 				<title>Downloading metadata</title>
 				<para>Metadata describing the default local application can be downloaded from URL: <programlisting>https://www.server.com:8080/context/saml/metadata</programlisting></para>
@@ -379,13 +396,11 @@
 				<para>Metadata is also available in the sample application's administration UI under <emphasis>Metadata information -&gt; selected SP</emphasis>.</para>
 			</section>
 		</section>
-
 		<section id="configuration-metadata-idp">
 			<title>Identity provider metadata</title>
 			<para>Metadata for identity providers is imported to the <emphasis>metadataManager</emphasis> in a similar way as pre-configured
 			SP metadata. Metadata containing one or many identity providers can be added by providing an URL or a file. Processing of metadata and
 			processing of SAML messages can be customized using properties of <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtendedMetadata</emphasis>.</para>
-
 			<section id="configuration-metadata-idp-file">
 				<title>File-based metadata provider</title>
 				<para>File-based provider loads metadata from a file available in the filesystem or classpath.<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
@@ -403,7 +418,6 @@
 </bean>]]></programlisting></para>
 			  <para>Metadata is automatically refreshed in intervals specified by properties <emphasis>minRefreshDelay</emphasis> and <emphasis>maxRefreshDelay</emphasis> of the <emphasis>MetadataProvider</emphasis> bean.</para>
 			</section>
-
 			<section id="configuration-metadata-idp-http">
 				<title>HTTP-based metadata provider</title>
 				<para>HTTP-based provider loads metadata from an URL.<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
@@ -427,7 +441,6 @@
 				<para>Alternatively class <emphasis>org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider</emphasis> can be used to provide a backup in case URL is temporarily unavailable. File
 				to use as backup is specified as third argument in the <emphasis>MetadataProvider</emphasis> bean constructor.</para>
 			</section>
-
 			<section id="configuration-metadata-idp-signature">
 				<title>Metadata signature verification</title>
 				<para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
@@ -439,14 +452,13 @@
 				Setting <emphasis>metadataRequireSignature</emphasis> to true will reject metadata unless it's digitally signed.</para>
 			</section>
 		</section>
-
 		<section id="configuration-metadata-extended">
 			<title>Extended metadata</title>
-			<para>Extended metadata provides additional settings for customization of SAML exchanges between SP and IDP which are not supported in the standard SAML 2.0 metadata documents. 
+			<para>Extended metadata provides additional settings for customization of SAML exchanges between SP and IDP which are not supported in the standard SAML 2.0 metadata documents.
       Examples of such settings are requirements for message signing, IDP discovery and security profiles.</para>
             <para>Extended metadata is defined using
       <emphasis>org.springframework.security.saml.metadata.ExtendedMetadata</emphasis> beans embedded inside ExtendedMetadataDelegate for each SP or IDP metadata definition.
-      In case a single metadata document contains multiple identity providers (in multiple EntityDescriptor elements), extended metadata can be set separately for each of them using a map with 
+      In case a single metadata document contains multiple identity providers (in multiple EntityDescriptor elements), extended metadata can be set separately for each of them using a map with
       entity IDs as keys, e.g.: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
 		metadata provider bean
@@ -464,7 +476,6 @@
 		</map>
 	</constructor-arg>
 </bean>]]></programlisting></para>
-
             <para>The following table summarizes settings available in the extended metadata. The same class is
                 used for both local service providers and remote identity providers; each value contains information
                 about the entities it's valid for.
@@ -628,350 +639,297 @@
                     </tgroup>
                 </table>
             </para>
-            
             <para>For additional examples on setting up metadata and extended metadata see
-                <xref linkend="configuration-metadata-sp"/>
-                for local SP, and
-                <xref linkend="configuration-metadata-idp"/>
+                <xref linkend="configuration-metadata-sp"/> for local SP, and <xref linkend="configuration-metadata-idp"/>
                 for remote IDPs.
             </para>
-    
+        </section>
+        <section id="configuration-entity-alias">
+            <title>Multi-tenancy and Entity alias</title>
+            <para>TODO</para>
         </section>
     </chapter>
 
-	<chapter id="configuration-entity-alias">
-		<title>Entity alias</title>
-		<para>TODO</para>
-	</chapter>
-
-	<chapter id="configuration-key-management">
-		<title>Key management</title>
-		<para>
-			SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
-			done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. The default implementation
-			relies on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
-			which should be marked as default by using the alias of the private key as part of the KeyManager constructor.
-		</para>
-		<para>
-			Make sure that your configuration of SAML module contains bean keyManager with your custom key store and passwords.
-		</para>
-
-		<section id="configuration-key-management-sample">
-			<title>Sample keystore</title>
-			<para>Sample application contains a default key store with a sample private certificate usable for test purposes. The key store
-				is defined as:<programlisting><![CDATA[<bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+    <chapter id="security">
+        <title>Security configuration</title>
+        <para>
+            SAML Extension requires configuration of security settings which include cryptographic
+            material used for digital signatures and encryption, security profiles for configuration of trusted
+            cryptographic material provided by remote entities and verifications of HTTPS connections.
+        </para>
+        <section id="configuration-key-management">
+            <title>Key management</title>
+            <para>
+                SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
+                done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. The default implementation
+                relies on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
+                which should be marked as default by using the alias of the private key as part of the KeyManager constructor.
+            </para>
+            <para>
+                Make sure that your configuration of SAML module contains bean keyManager with your custom key store and passwords.
+            </para>
+            <section id="configuration-key-management-sample">
+                <title>Sample keystore</title>
+                <para>Sample application contains a default key store with a sample private certificate usable for test purposes. The key store
+                    is defined as:<programlisting><![CDATA[<bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
 	<constructor-arg value="classpath:security/samlKeystore.jks"/>
 	<constructor-arg type="java.lang.String" value="nalle123"/>
 	<constructor-arg>
-		<map>
-			<entry key="apollo" value="nalle123"/>
-		</map>
+	<map>
+		<entry key="apollo" value="nalle123"/>
+	</map>
 	</constructor-arg>
 	<constructor-arg type="java.lang.String" value="apollo"/>
 </bean>]]></programlisting></para>
-			 <para>The first argument points to the used key store file, second contains password for the keystore, third then map with
-			 passwords for private keys with alias-password value pairs. Alias of the default certificate is the last parameter.</para>
-		 </section>
-
-		 <section id="configuration-key-management-private-keys">
-			 <title>Generating and importing private keys</title>
-			 <para>Private keys (with either self-signed or CA signed certificates) are used to digitally sign SAML messages,
-			 encrypt their content and in some cases for SSL/TLS Client authentication of your service provider application.
-			 SAML Extension ships with a default private key in the <emphasis>samlKeystore.jks</emphasis> with alias <emphasis>apollo</emphasis>
-			 which can be used for initial testing, but for security reason should be replaced with your own key in early development stages.</para>
-			 <para>In case your IDP doesn't require keys signed by a specific certification authority you can generate your own self-signed key using the
-			 Java utility <emphasis>keytool</emphasis>, e.g. with: <programlisting>keytool -genkeypair -alias some-alias -keypass changeit -keystore samlKeystore.jks</programlisting></para>
-			 <para>The keystore will now contain additional PrivateKeyEntry with alias mykey which can be imported to the <emphasis>keyManager</emphasis> in your <emphasis>securityContext.xml</emphasis>.</para>
-			 <para>Keys signed by certification authorities are typically provided in .p12/.pfx format (or can be converted to such using OpenSSL) and imported to Java keystore with, e.g.:
-			 <programlisting>keytool -importkeystore -srckeystore key.p12 -srcstoretype PKCS12 -srcstorepass password \
--alias some-alias -destkeystore samlKeystore.jks -destalias some-alias -destkeypass changeit</programlisting></para>
-<para>The following command can be used to determine available alias in the p12 file: <programlisting>keytool -list -keystore key.p12 -storetype pkcs12</programlisting></para>
-		 </section>
-
-		 <section id="configuration-key-management-public-keys">
-			 <title>Importing public keys</title>
-			 <para>Cryptographic material used to decrypt incoming data and verify trust of signatures in SAML messages and metadata is stored either
-			 in metadata of remote entities or in the <emphasis>keyManager</emphasis>. In order to import additional trusted key to the keystore
-			 run, e.g.: <programlisting>keytool -importcert -alias some-alias -file key.cer -keystore samlKeystore.jks</programlisting></para>
-			 <para>Imported keys can be referenced in <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtenedMetadata</emphasis> beans,
-			 for details see <xref linkend="configuration-metadata-idp-signature"/> and <xref linkend="configuration-security-profiles"/>.</para>
-		 </section>
-
-		 <section id="configuration-key-management-ssl-keys">
-			 <title>Loading SSL/TLS certificates</title>
-			 <para>Direct SSL/TLS connections (used with HTTP-Artifact binding) require verification of the public key presented by the server.
-			 The <ulink url="https://github.com/vschafer/ssl-extractor">SSL Extractor utility</ulink> can be used to extract certificates presented by an SSL/TLS
-			 endpoint, e.g. with: <programlisting>java -jar sslextractor-0.9.jar www.google.com 443</programlisting></para>
-			 <para>The certificates are stored as .cer files and can be imported to the keystore as a usual public key. For details about
-			 configuring of trust for SSL/TLS connections see <xref linkend="configuration-security-profiles"/>.</para>
-		 </section>
-
-	 </chapter>
-
-	 <chapter id="configuration-security-profiles">
-		 <title>Security profiles</title>
-		 <para>Exchanges of messages between identity providers and service providers with SAML protocol
-			 involves usage of digital signatures. Signatures are typically constructed using means of asymetric
-			 cryptography and public key infrastructure with public and private keys signed by trusted certification
-			 authorities. Signatures are either applied directly to parts of XML representation of SAML messages
-			 using XML Signature or are part of the transport layer used to deliver the message like SSL/TLS.
-		 </para>
-		 <para>Verification of signatures is executed in two phases. Signature is first checked for validity by
-			 comparing digital hash included as part of the signature with value calculated from the content.
-			 Subsequently it is verified whether party who created the signature is trusted by the recipient. Spring Security SAML
-			 provides two mechanisms for defining which signatures should be accepted - metadata interoperability
-			 mode and PKIX mode.
-		 </para>
-		 <para>
-			 Security profiles are defined in Extended Metadata of your local SP. Profile can be defined separately
-			 for XML Signatures using property <emphasis>securityProfile</emphasis> and for SSL/TLS Signatures using
-			 property<emphasis>sslSecurityProfile</emphasis>. Value of both properties can be either <emphasis>metaiop</emphasis>
-			 or <emphasis>pkix</emphasis>. For details about using Extended Metadata see <xref linkend="configuration-metadata"/>,
-			 for reference of allowed values see <xref linkend="configuration-metadata-extended"/>.
-		 </para>
-
-		 <section id="configuration-security-profiles-metaiop">
-			 <title>Metadata interoperability profile (MetaIOP)</title>
-			 <para>With MetaIOP mode certificates are not checked for expiration or revocation and certificate paths
-				 are not
-				 verified. This means that it does not matter which certification authority issued the certificate,
-				 as the fact whether the certificate is trusted or not is conveyed using other mechanisms (e.g. by
-				 secure metadata exchange or digital signature of metadata itself).
-			 </para>
-			 <para>Signature is deemed trusted when the certificate used to create it is included in one
-				 of the following places:
-				 <itemizedlist spacing="compact">
-					 <listitem>
-						 <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
-					 </listitem>
-					 <listitem>
-						 <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
-					 </listitem>
-				 </itemizedlist>
-			 </para>
-			 <para>
-				 MetaIOP is the default profile for verification of XML signatures. For details about this profile
-				 see <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf">the specification</ulink>.
-			 </para>
-		 </section>
-
-		 <section id="configuration-security-profiles-pkix">
-			 <title>PKIX profile</title>
-			 <para>
-				 With PKIX profile trust of signature certificates is verified based on a certificate path
-				 between trusted CA certificates and the certificate in question. Certificate is trusted when it's
-				 possible to construct path from a trusted certificate to the validated one. With this profile
-				 certificate expiration and revocation can be checked.
-			 </para>
-			 <para>Trusted keys (anchors) for PKIX verification of signatures are combined from the following places:
-				 <itemizedlist spacing="compact">
-					 <listitem>
-						 <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
-					 </listitem>
-					 <listitem>
-						 <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
-					 </listitem>
-					 <listitem>
-						 <para>All keys specified in <emphasis>trustedKeys</emphasis> set of extended metadata of a remote entity,
-                             or all keys available in the key store when the property is null (default value)</para>
-					 </listitem>
-				 </itemizedlist>
-			 </para>
-       <para>Please note that trust anchors are treated as automatically trusted and are not necessarily subject to all checks as leaf certificates are (depending
-       on your security provider implementation). You should preferably use only your CA and intermediary CA certificates as trust anchors. In case you want to ignore
-       certificates available in your XML metadata and only use settings from your manually set ExtendedMetadata, set property <emphasis>useXmlMetadata</emphasis>
-       of your <emphasis>metadataResolver</emphasis> to false:
-           <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
-    <property name="metadataResolver">
-        <bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
-            <constructor-arg index="0" ref="metadata"/>
-            <constructor-arg index="1" ref="keyManager"/>
-            <property name="useXmlMetadata" value="false"/>
-        </bean>
-    </property>
+                 <para>The first argument points to the used key store file, second contains password for the keystore, third then map with
+                 passwords for private keys with alias-password value pairs. Alias of the default certificate is the last parameter.</para>
+             </section>
+             <section id="configuration-key-management-private-keys">
+                 <title>Generating and importing private keys</title>
+                 <para>Private keys (with either self-signed or CA signed certificates) are used to digitally sign SAML messages,
+                 encrypt their content and in some cases for SSL/TLS Client authentication of your service provider application.
+                 SAML Extension ships with a default private key in the <emphasis>samlKeystore.jks</emphasis> with alias <emphasis>apollo</emphasis>
+                 which can be used for initial testing, but for security reason should be replaced with your own key in early development stages.</para>
+                 <para>In case your IDP doesn't require keys signed by a specific certification authority you can generate your own self-signed key using the
+                 Java utility <emphasis>keytool</emphasis>, e.g. with: <programlisting>keytool -genkeypair -alias some-alias -keypass changeit -keystore samlKeystore.jks</programlisting></para>
+                 <para>The keystore will now contain additional PrivateKeyEntry with alias mykey which can be imported to the <emphasis>keyManager</emphasis> in your <emphasis>securityContext.xml</emphasis>.</para>
+                 <para>Keys signed by certification authorities are typically provided in .p12/.pfx format (or can be converted to such using OpenSSL) and imported to Java keystore with, e.g.:
+                 <programlisting>keytool -importkeystore -srckeystore key.p12 -srcstoretype PKCS12 -srcstorepass password \
+	-alias some-alias -destkeystore samlKeystore.jks -destalias some-alias \
+	-destkeypass changeit</programlisting></para>
+    <para>The following command can be used to determine available alias in the p12 file: <programlisting>keytool -list -keystore key.p12 -storetype pkcs12</programlisting></para>
+             </section>
+             <section id="configuration-key-management-public-keys">
+                 <title>Importing public keys</title>
+                 <para>Cryptographic material used to decrypt incoming data and verify trust of signatures in SAML messages and metadata is stored either
+                 in metadata of remote entities or in the <emphasis>keyManager</emphasis>. In order to import additional trusted key to the keystore
+                 run, e.g.: <programlisting>keytool -importcert -alias some-alias -file key.cer -keystore samlKeystore.jks</programlisting></para>
+                 <para>Imported keys can be referenced in <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtenedMetadata</emphasis> beans,
+                 for details see <xref linkend="configuration-metadata-idp-signature"/> and <xref linkend="configuration-security-profiles"/>.</para>
+             </section>
+             <section id="configuration-key-management-ssl-keys">
+                 <title>Loading SSL/TLS certificates</title>
+                 <para>Direct SSL/TLS connections (used with HTTP-Artifact binding) require verification of the public key presented by the server.
+                 The <ulink url="https://github.com/vschafer/ssl-extractor">SSL Extractor utility</ulink> can be used to extract certificates presented by an SSL/TLS
+                 endpoint, e.g. with: <programlisting>java -jar sslextractor-0.9.jar www.google.com 443</programlisting></para>
+                 <para>The certificates are stored as .cer files and can be imported to the keystore as a usual public key. For details about
+                 configuring of trust for SSL/TLS connections see <xref linkend="configuration-security-profiles"/>.</para>
+             </section>
+         </section>
+         <section id="configuration-security-profiles">
+             <title>Security profiles</title>
+             <para>Exchanges of messages between identity providers and service providers with SAML protocol
+                 involves usage of digital signatures. Signatures are typically constructed using means of asymetric
+                 cryptography and public key infrastructure with public and private keys signed by trusted certification
+                 authorities. Signatures are either applied directly to parts of XML representation of SAML messages
+                 using XML Signature or are part of the transport layer used to deliver the message like SSL/TLS.
+             </para>
+             <para>Verification of signatures is executed in two phases. Signature is first checked for validity by
+                 comparing digital hash included as part of the signature with value calculated from the content.
+                 Subsequently it is verified whether party who created the signature is trusted by the recipient. Spring Security SAML
+                 provides two mechanisms for defining which signatures should be accepted - metadata interoperability
+                 mode and PKIX mode.
+             </para>
+             <para>
+                 Security profiles are defined in Extended Metadata of your local SP. Profile can be defined separately
+                 for XML Signatures using property <emphasis>securityProfile</emphasis> and for SSL/TLS Signatures using
+                 property<emphasis>sslSecurityProfile</emphasis>. Value of both properties can be either <emphasis>metaiop</emphasis>
+                 or <emphasis>pkix</emphasis>. For details about using Extended Metadata see <xref linkend="configuration-metadata"/>,
+                 for reference of allowed values see <xref linkend="configuration-metadata-extended"/>.
+             </para>
+             <section id="configuration-security-profiles-metaiop">
+                 <title>Metadata interoperability profile (MetaIOP)</title>
+                 <para>With MetaIOP mode certificates are not checked for expiration or revocation and certificate paths
+                     are not
+                     verified. This means that it does not matter which certification authority issued the certificate,
+                     as the fact whether the certificate is trusted or not is conveyed using other mechanisms (e.g. by
+                     secure metadata exchange or digital signature of metadata itself).
+                 </para>
+                 <para>Signature is deemed trusted when the certificate used to create it is included in one
+                     of the following places:
+                     <itemizedlist spacing="compact">
+                         <listitem>
+                             <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
+                         </listitem>
+                         <listitem>
+                             <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
+                         </listitem>
+                     </itemizedlist>
+                 </para>
+                 <para>
+                     MetaIOP is the default profile for verification of XML signatures. For details about this profile
+                     see <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf">the specification</ulink>.
+                 </para>
+             </section>
+             <section id="configuration-security-profiles-pkix">
+                 <title>PKIX profile</title>
+                 <para>
+                     With PKIX profile trust of signature certificates is verified based on a certificate path
+                     between trusted CA certificates and the certificate in question. Certificate is trusted when it's
+                     possible to construct path from a trusted certificate to the validated one. With this profile
+                     certificate expiration and revocation can be checked.
+                 </para>
+                 <para>Trusted keys (anchors) for PKIX verification of signatures are combined from the following places:
+                     <itemizedlist spacing="compact">
+                         <listitem>
+                             <para>Key with usage of signing or unspecified in entity metadata of a remote entity</para>
+                         </listitem>
+                         <listitem>
+                             <para>Signing key specified in property <emphasis>signingKey</emphasis> of extended metadata of a remote entity</para>
+                         </listitem>
+                         <listitem>
+                             <para>All keys specified in <emphasis>trustedKeys</emphasis> set of extended metadata of a remote entity,
+                                 or all keys available in the key store when the property is null (default value)</para>
+                         </listitem>
+                     </itemizedlist>
+                 </para>
+           <para>Please note that trust anchors are treated as automatically trusted and are not necessarily subject to all checks as leaf certificates are (depending
+           on your security provider implementation). You should preferably use only your CA and intermediary CA certificates as trust anchors. In case you want to ignore
+           certificates available in your XML metadata and only use settings from your manually set ExtendedMetadata, set property <emphasis>useXmlMetadata</emphasis>
+           of your <emphasis>metadataResolver</emphasis> to false:
+               <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+	<property name="metadataResolver">
+		<bean class="org.springframework.security.saml.trust.MetadataCredentialResolver">
+			<constructor-arg index="0" ref="metadata"/>
+			<constructor-arg index="1" ref="keyManager"/>
+			<property name="useXmlMetadata" value="false"/>
+		</bean>
+	</property>
 </bean>]]></programlisting>
-       </para>
-       <para>PKIX verification supports checking of CRLs (certificate revocation lists) using the default underlaying Java Security Provider
-       (e.g. Sun JCE, BouncyCastle JCE).
-       </para>
-       <para>The PKIX algorithm needs to be advised that the revocation checking is enabled. You can do so by customizing the <emphasis>pkixTrustEvaluator</emphasis> inside <emphasis>SAMLContextProvider</emphasis>, see an example with properties <emphasis>forceRevocationEnabled</emphasis> and <emphasis>revocationEnabled</emphasis> bellow.</para>
-       <para>By default the validation algorithm only uses the <emphasis>CertPathBuilder</emphasis>. Some Java security implementations do not support full feature set of revocation checking in this class and only
-        implement them in the <emphasis>CertPathValidator</emphasis> (e.g. Sun provider only supports OCSP in CertPathBuilder since Java 1.8). You can instruct system to use both 
-        <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis> by setting property <emphasis>validateCertPath</emphasis> to <emphasis>true</emphasis> on bean
-        <emphasis>CertPathPKIXTrustEvaluator</emphasis>.</para>
-        <para>The security provider used for loading of PKIX verification factories can be customized using property <emphasis>securityProvider</emphasis>.</para>
-        <para><programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
-    <property name="pkixTrustEvaluator">
-        <bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
-            <property name="PKIXValidationOptions">
-                <bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
-                    <property name="forceRevocationEnabled" value="true"/>
-                    <property name="revocationEnabled" value="true"/>
-                </bean>
-            </property>
-            <property name="validateCertPath" value="true"/>
-            <property name="securityProvider" value="SUN"/>
-        </bean>
-    </property>
+           </para>
+           <para>PKIX verification supports checking of CRLs (certificate revocation lists) using the default underlaying Java Security Provider
+           (e.g. Sun JCE, BouncyCastle JCE).
+           </para>
+           <para>The PKIX algorithm needs to be advised that the revocation checking is enabled. You can do so by customizing the <emphasis>pkixTrustEvaluator</emphasis> inside <emphasis>SAMLContextProvider</emphasis>, see an example with properties <emphasis>forceRevocationEnabled</emphasis> and <emphasis>revocationEnabled</emphasis> bellow.</para>
+           <para>By default the validation algorithm only uses the <emphasis>CertPathBuilder</emphasis>. Some Java security implementations do not support full feature set of revocation checking in this class and only
+            implement them in the <emphasis>CertPathValidator</emphasis> (e.g. Sun provider only supports OCSP in CertPathBuilder since Java 1.8). You can instruct system to use both
+            <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis> by setting property <emphasis>validateCertPath</emphasis> to <emphasis>true</emphasis> on bean
+            <emphasis>CertPathPKIXTrustEvaluator</emphasis>.</para>
+            <para>The security provider used for loading of PKIX verification factories can be customized using property <emphasis>securityProvider</emphasis>.</para>
+            <para><programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+	<property name="pkixTrustEvaluator">
+		<bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+			<property name="PKIXValidationOptions">
+				<bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+					<property name="forceRevocationEnabled" value="true"/>
+					<property name="revocationEnabled" value="true"/>
+				</bean>
+			</property>
+			<property name="validateCertPath" value="true"/>
+			<property name="securityProvider" value="SUN"/>
+		</bean>
+	</property>
 </bean>]]></programlisting>
-       </para>
-     <para>Spring SAML uses standard CertPath verification API. The default Sun JCE provider supports automatic revocation checking based on the certificate's CRL Distribution Points Extension
-         (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
-         Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
-         and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
-         For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">Java PKI Programmer's Guide</ulink>.
-         In case you are using another security provider, please consult its manual for functionality related to <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis>
-         with the <emphasis>PKIX</emphasis> algorithm.
-     </para>
-       <para>You can also manually populate CRLs by extending class <emphasis>org.springframework.security.saml.trust.PKIXInformationResolver</emphasis> and overriding method <emphasis>populateCRLs</emphasis>
-       with your own CRL population logic. Populated CRLs are automatically added to the PKIX verification mechanism. The customized class needs to be set to property <emphasis>pkixResolver</emphasis>
-       in the <emphasis>contextProvider</emphasis> bean.
-       </para>
-     </section>
-
-		 <section id="configuration-security-profiles-customization">
-			 <title>Custom profile</title>
-			 <para>
-				 Engine used to verify trust of signatures for given combination of SP/IDP is created in methods
-				 <emphasis>populateTrustEngine</emphasis> and <emphasis>populateSSLTrustEngine</emphasis> of interface
-				 <emphasis>org.springframework.security.saml.context.SAMLContextProvider</emphasis> and can be overriden
-				 with custom implementation. See <xref linkend="configuration-context-provider"/> for details on context customization.
-			 </para>
-		 </section>
-
-	 </chapter>
-
-    <chapter id="configuration-security-profiles-hostnames">
-        <title>Hostname verification for HTTPS connections</title>
-        <para>
-            Connections to HTTPS services (e.g. during Artifact resolution) require verification that the connected hostname
-            corresponds with the hostname defined in the service's public certificate. Hostname verification is enabled
-            by default.
-        </para>
-        <para>
-            Verification can be disabled by setting ExtendedMetadata property <emphasis>sslHostnameVerification</emphasis>
-            of the local SP entity to <emphasis>allowAll</emphasis>. For details on using the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.
-        </para>
-        <para>
-            All supported values can be found in the ExtendedMetadata reference <xref linkend="configuration-metadata-extended"/>.
-        </para>
+             </para>
+             <para>Spring SAML uses standard CertPath verification API. The default Sun JCE provider supports automatic revocation checking based on the certificate's CRL Distribution Points Extension
+                 (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
+                 Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
+                 and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
+                 For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">Java PKI Programmer's Guide</ulink>.
+                 In case you are using another security provider, please consult its manual for functionality related to <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis>
+                 with the <emphasis>PKIX</emphasis> algorithm.
+             </para>
+               <para>You can also manually populate CRLs by extending class <emphasis>org.springframework.security.saml.trust.PKIXInformationResolver</emphasis> and overriding method <emphasis>populateCRLs</emphasis>
+               with your own CRL population logic. Populated CRLs are automatically added to the PKIX verification mechanism. The customized class needs to be set to property <emphasis>pkixResolver</emphasis>
+               in the <emphasis>contextProvider</emphasis> bean.
+               </para>
+             </section>
+             <section id="configuration-security-profiles-customization">
+                     <title>Custom profile</title>
+                     <para>
+                         Engine used to verify trust of signatures for given combination of SP/IDP is created in methods
+                         <emphasis>populateTrustEngine</emphasis> and <emphasis>populateSSLTrustEngine</emphasis> of interface
+                         <emphasis>org.springframework.security.saml.context.SAMLContextProvider</emphasis> and can be overriden
+                         with custom implementation. See <xref linkend="configuration-context-provider"/> for details on context customization.
+                     </para>
+             </section>
+        </section>
+        <section id="configuration-security-profiles-hostnames">
+            <title>Hostname verification for HTTPS connections</title>
+            <para>
+                Connections to HTTPS services (e.g. during Artifact resolution) require verification that the connected hostname
+                corresponds with the hostname defined in the service's public certificate. Hostname verification is enabled
+                by default.
+            </para>
+            <para>
+                Verification can be disabled by setting ExtendedMetadata property <emphasis>sslHostnameVerification</emphasis>
+                of the local SP entity to <emphasis>allowAll</emphasis>. For details on using the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.
+            </para>
+            <para>
+                All supported values can be found in the ExtendedMetadata reference <xref linkend="configuration-metadata-extended"/>.
+            </para>
+        </section>
     </chapter>
-   
-	<chapter id="configuration-load-balancing">
-		<title>Reverse proxies and load balancers</title>
-		<para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
-		SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
-		to configure SAML Extension for deployment behind a load balancer or a reverse-proxy please follow these steps:
 
-		<itemizedlist>
-				<listitem>
-					<para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
-					within a user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
-					Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
-				</listitem>
-				<listitem>
-					<para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContext.xml</emphasis>
-					to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
-	<property name="scheme" value="https"/>
-	<property name="serverName" value="www.myserver.com"/>
-	<property name="serverPort" value="443"/>
-	<property name="includeServerPortInRequestURL" value="false"/>
-	<property name="contextPath" value="/spring-security-saml2-sample"/>
-</bean>]]></programlisting></para>
-				  <para>This setting enables the extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
-				</listitem>
-				<listitem>
-					<para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseURL</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
-					bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter"
-		class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+    <chapter id="configuration-sso">
+        <title>Single sign-on configuration</title>
+        <section id="configuration-discovery">
+            <title>IDP selection and discovery</title>
+            <para>SAML Extension supports the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
+    Protocol and Profile</ulink>.</para>
+            <para>
+              IDP discovery can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the
+              entityId of the required IDP, e.g. http://host:port/app/saml/login?idp=mySelectedIDP.
+            </para>
+            <para>
+              The URL where local SP expects discovery response can be included in the SP metadata as one of the extensions. The feature can be enabled by setting property <emphasis>includeDiscoveryExtension</emphasis>
+              to true on bean <emphasis>MetadataGenerator</emphasis> inside <emphasis>MetadataGeneratorFilter</emphasis>, e.g.:
+        <programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
 	<constructor-arg>
 		<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
-			<property name="entityBaseURL" value="https://www.myserver.com/spring-security-saml2-sample"/>
+			<property name="includeDiscoveryExtension" value="true"/>
 		</bean>
 	</constructor-arg>
-</bean>]]></programlisting></para>
-				</listitem>
-			</itemizedlist>
-
-		</para>
-	</chapter>   
-
-	<chapter id="configuration-discovery">
-		<title>IDP selection and discovery</title>
-		<para>SAML Extension supports the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
-Protocol and Profile</ulink>.</para>
-    
-    <para>
-      IDP discovery can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the 
-      entityId of the required IDP, e.g. http://host:port/app/saml/login?idp=mySelectedIDP.
-    </para>
-    
-    <para>
-      The URL where local SP expects discovery response can be included in the SP metadata as one of the extensions. The feature can be enabled by setting property <emphasis>includeDiscoveryExtension</emphasis>
-      to true on bean <emphasis>MetadataGenerator</emphasis> inside <emphasis>MetadataGeneratorFilter</emphasis>, e.g.:
-<programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
-  <constructor-arg>
-    <bean class="org.springframework.security.saml.metadata.MetadataGenerator">
-      <property name="includeDiscoveryExtension" value="true"/>
-    </bean>
-  </constructor-arg>
 </bean>]]></programlisting>
-    </para>
-    
-    <para>It is possible to configure the following IDP discovery modes:
-
-          <simplesect>
-            <title>Local discovery service</title>
-            <para>SAML Extension includes a local IDP discovery service which presents user with an IDP selection page. The selection page can be customized using property
-            <emphasis>idpSelectionPath</emphasis> on bean samlIDPDiscovery. System forwards to this page during discovery request and includes the following request attributes:
-              <itemizedlist>
-                    <listitem>
-                        <para><emphasis>idpDiscoReturnURL</emphasis> - URL to send the IDP selection result to using GET action</para>
-                    </listitem>
-                    <listitem>
-                        <para><emphasis>idpDiscoReturnParam</emphasis> - name of the GET parameter to include the entity ID of the selected IDP</para>
-                    </listitem>
-              </itemizedlist>
             </para>
-            <para>See the default implementation in <emphasis>saml2-sample/src/main/webapp/WEB-INF/security/idpSelection.jsp</emphasis> for an example.</para>
-          </simplesect>
-
-          <simplesect>
-            <title>Remote discovery service</title>
-            <para>In order to enable external IDP discovery service configure property <emphasis>idpDiscoveryURL</emphasis> in your <link linkend="configuration-metadata-extended">local
-            SP extended metadata</link> to the external discovery URL. Make sure property <emphasis>idpDiscoveryEnabled</emphasis> is set to true. For details on configuring local extended metadata
-            see <xref linkend="configuration-metadata-sp"/>.</para>
-          </simplesect>
-
-          <simplesect>
-            <title>Default IDP without discovery</title>
-            <para>In this mode the system automatically selects the default IDP and doesn't perform discovery. This mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
-            <link linkend="configuration-metadata-extended">local SP extended metadata</link> to false. For details on configuring local extended metadata see <xref linkend="configuration-metadata-sp"/>.</para>
-            <para>The default IDP can be configured using property <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
-          </simplesect>
-      
-    </para>        
-      
-	</chapter>
-  
-	<chapter id="configuration-sso">
-		 <title>Single sign-on process</title>
-		 <para>SP initialized SSO process can be started in two ways:
-		 <itemizedlist>
-			 <listitem>
-				 <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
-			 </listitem>
-			 <listitem>
-				 <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>
-			 </listitem>
-		 </itemizedlist>
-		 </para>
-		 <para>After identification of IDP to use for authentication (for details see <xref linkend="configuration-discovery"/>), SAML Extension creates an AuthnRequest SAML message
-		 and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
-		 object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
-		 The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
-		 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
-		 <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
+            <para>It is possible to configure the following IDP discovery modes:
+              <simplesect>
+                <title>Local discovery service</title>
+                <para>SAML Extension includes a local IDP discovery service which presents user with an IDP selection page. The selection page can be customized using property
+                <emphasis>idpSelectionPath</emphasis> on bean samlIDPDiscovery. System forwards to this page during discovery request and includes the following request attributes:
+                  <itemizedlist>
+                        <listitem>
+                            <para><emphasis>idpDiscoReturnURL</emphasis> - URL to send the IDP selection result to using GET action</para>
+                        </listitem>
+                        <listitem>
+                            <para><emphasis>idpDiscoReturnParam</emphasis> - name of the GET parameter to include the entity ID of the selected IDP</para>
+                        </listitem>
+                  </itemizedlist>
+                </para>
+                <para>See the default implementation in <emphasis>saml2-sample/src/main/webapp/WEB-INF/security/idpSelection.jsp</emphasis> for an example.</para>
+              </simplesect>
+              <simplesect>
+                <title>Remote discovery service</title>
+                <para>In order to enable external IDP discovery service configure property <emphasis>idpDiscoveryURL</emphasis> in your <link linkend="configuration-metadata-extended">local
+                SP extended metadata</link> to the external discovery URL. Make sure property <emphasis>idpDiscoveryEnabled</emphasis> is set to true. For details on configuring local extended metadata
+                see <xref linkend="configuration-metadata-sp"/>.</para>
+              </simplesect>
+              <simplesect>
+                <title>Default IDP without discovery</title>
+                <para>In this mode the system automatically selects the default IDP and doesn't perform discovery. This mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
+                <link linkend="configuration-metadata-extended">local SP extended metadata</link> to false. For details on configuring local extended metadata see <xref linkend="configuration-metadata-sp"/>.</para>
+                <para>The default IDP can be configured using property <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
+              </simplesect>
+            </para>
+        </section>
+        <section id="configuration-sso-process">
+             <title>Single sign-on process</title>
+             <para>SP initialized SSO process can be started in two ways:
+             <itemizedlist>
+                 <listitem>
+                     <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
+                 </listitem>
+                 <listitem>
+                     <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>
+                 </listitem>
+             </itemizedlist>
+             </para>
+             <para>After identification of IDP to use for authentication (for details see <xref linkend="configuration-discovery"/>), SAML Extension creates an AuthnRequest SAML message
+             and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
+             object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
+             The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
+             <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
+             <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
 	<property name="defaultProfileOptions">
 		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
 			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
@@ -979,178 +937,169 @@ Protocol and Profile</ulink>.</para>
 		</bean>
 	</property>
 </bean>]]></programlisting></para>
-     
-		<para>WebSSOProfileOptions supports the following settings:
-			<table id="configuration-sso-webssoprofile-table">
-			 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
-			 <tgroup cols="2">
-				 <colspec colname="_1" colwidth="0.4*" align="left"/>
-				 <colspec colname="_2" colwidth="1.0*" align="left"/>
-				 <thead>
-					 <row>
-						 <entry>Property</entry>
-						 <entry>Description</entry>
-					 </row>
-				 </thead>
-				<tbody>
-					<row>
-						<entry>binding</entry>
-						<entry>Default: binding of the first declared SingleSignOnService in IDP metadata. Binding used to send message to IDP. Supported values depend on the SP configuration, typically "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-            "urn:oasis:names:tc:SAML:2.0:bindings:PAOS" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser".</entry>
-					</row>
-					<row>
-						<entry>providerName</entry>
-						<entry>Default: empty. Human readable name of the local SP sent with the authentication request.</entry>
-					</row>
-					<row>
-						<entry>assertionConsumerIndex</entry>
-						<entry>Default: empty. When set determines where should IDP send response and which binding to use. Otherwise system uses the default assertion consumer service marked as default, or first applicable. Available indexes can be found in metadata of this service provider.</entry>
-					</row>
-					<row>
-						<entry>nameID</entry>
-						<entry>Default: empty. Name ID to request from IDP in the NameIDPolicy. No NameIDPolicy is sent when not specified. Typical values are "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted".</entry>
-					</row>                    
-					<row>
-						<entry>allowCreate</entry>
-						<entry>Default: empty. Only applicable when nameID is specified, when true instructs IDP that it is allowed to create new user based on the authentication request.</entry>
-					</row>          
-					<row>
-						<entry>passive</entry>
-						<entry>Default: false. Sets whether the IdP should refrain from interacting with the user during the authentication process.</entry>
-					</row>
-					<row>
-						<entry>forceAuthn</entry>
-						<entry>Default: false. When true IDP is required to re-authenticate user and not rely on previous authentication events.</entry>
-					</row>
-					<row>
-						<entry>includeScoping</entry>
-						<entry>Default: true. When true request will include Scoping element.</entry>
-					</row>                              
-					<row>
-						<entry>allowedIDPs</entry>
-						<entry>Default: empty. Values to be included in the Scoping element on top of the IDP message is sent to. Only applicable when includeScoping is set to true.</entry>
-					</row>
-					<row>
-						<entry>proxyCount</entry>
-						<entry>Default: 2. Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. Use zero to disable proxying or value >0 to specify how many hops are allowed. Only applicable when includeScoping is set to true.</entry>
-					</row>
-					<row>
-						<entry>authnContexts</entry>
-						<entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
-					</row>
-					<row>
-						<entry>authnContextComparison</entry>
-						<entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
-					</row>                                                
-					<row>
-						<entry>relayState</entry>
-						<entry>Default: empty. Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
-					</row>
-				</tbody>
-			</tgroup>
-		</table>
-		</para>     
-     
-	</chapter>
-
-	<chapter id="configuration-logout">
-		<title>Logout process</title>
-		<para>Spring SAML Extension supports both Local Logout and Single Logout mechanisms.</para>
-		 
-     <section id="configuration-logout-local">
-			 <title>Local logout</title>
-			 <para>
-				 Local logout terminates only the local session and doesn't affect neither session at IDP, nor sessions at other SPs where user logged in using single sign-on. Local logout
-         can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout?local=true</emphasis>. Call is intercepted by bean <emphasis>samlLogoutFilter</emphasis> which can be configured with
-         the following settings:
-       <itemizedlist>
-			 <listitem>
-				 <para>Instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0) which determines operation to perform after successful logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
-			 </listitem>
-			 <listitem>
-				 <para>Instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1) which are responsible for destruction of user's session. The default handler <emphasis>org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler</emphasis> logs the user out by removing the Authentication object, but leaves the HTTP session opened.</para>
-			 </listitem>
-		   </itemizedlist></para>
-      <para>It is also possible to configure local logout using standard Spring Security element <emphasis>&lt;security:logout&gt;</emphasis> inside <emphasis>&lt;security:http&gt;</emphasis> block. For example:
-		  <programlisting><![CDATA[<security:http>
-  <security:logout logout-url="/j_logout" logout-success-url="/logout.jsp"/>
+            <para>WebSSOProfileOptions supports the following settings:
+                <table id="configuration-sso-webssoprofile-table">
+                 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
+                 <tgroup cols="2">
+                     <colspec colname="_1" colwidth="0.4*" align="left"/>
+                     <colspec colname="_2" colwidth="1.0*" align="left"/>
+                     <thead>
+                         <row>
+                             <entry>Property</entry>
+                             <entry>Description</entry>
+                         </row>
+                     </thead>
+                    <tbody>
+                        <row>
+                            <entry>binding</entry>
+                            <entry>Default: binding of the first declared SingleSignOnService in IDP metadata. Binding used to send message to IDP. Supported values depend on the SP configuration, typically "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                "urn:oasis:names:tc:SAML:2.0:bindings:PAOS" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser".</entry>
+                        </row>
+                        <row>
+                            <entry>providerName</entry>
+                            <entry>Default: empty. Human readable name of the local SP sent with the authentication request.</entry>
+                        </row>
+                        <row>
+                            <entry>assertionConsumerIndex</entry>
+                            <entry>Default: empty. When set determines where should IDP send response and which binding to use. Otherwise system uses the default assertion consumer service marked as default, or first applicable. Available indexes can be found in metadata of this service provider.</entry>
+                        </row>
+                        <row>
+                            <entry>nameID</entry>
+                            <entry>Default: empty. Name ID to request from IDP in the NameIDPolicy. No NameIDPolicy is sent when not specified. Typical values are "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted".</entry>
+                        </row>
+                        <row>
+                            <entry>allowCreate</entry>
+                            <entry>Default: empty. Only applicable when nameID is specified, when true instructs IDP that it is allowed to create new user based on the authentication request.</entry>
+                        </row>
+                        <row>
+                            <entry>passive</entry>
+                            <entry>Default: false. Sets whether the IdP should refrain from interacting with the user during the authentication process.</entry>
+                        </row>
+                        <row>
+                            <entry>forceAuthn</entry>
+                            <entry>Default: false. When true IDP is required to re-authenticate user and not rely on previous authentication events.</entry>
+                        </row>
+                        <row>
+                            <entry>includeScoping</entry>
+                            <entry>Default: true. When true request will include Scoping element.</entry>
+                        </row>
+                        <row>
+                            <entry>allowedIDPs</entry>
+                            <entry>Default: empty. Values to be included in the Scoping element on top of the IDP message is sent to. Only applicable when includeScoping is set to true.</entry>
+                        </row>
+                        <row>
+                            <entry>proxyCount</entry>
+                            <entry>Default: 2. Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. Use zero to disable proxying or value >0 to specify how many hops are allowed. Only applicable when includeScoping is set to true.</entry>
+                        </row>
+                        <row>
+                            <entry>authnContexts</entry>
+                            <entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                        </row>
+                        <row>
+                            <entry>authnContextComparison</entry>
+                            <entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                        </row>
+                        <row>
+                            <entry>relayState</entry>
+                            <entry>Default: empty. Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            </para>
+        </section>
+        <section id="configuration-logout">
+            <title>Logout process</title>
+            <para>Spring SAML Extension supports both Local Logout and Single Logout mechanisms.</para>
+             <section id="configuration-logout-local">
+                     <title>Local logout</title>
+                     <para>
+                         Local logout terminates only the local session and doesn't affect neither session at IDP, nor sessions at other SPs where user logged in using single sign-on. Local logout
+                 can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout?local=true</emphasis>. Call is intercepted by bean <emphasis>samlLogoutFilter</emphasis> which can be configured with
+                 the following settings:
+               <itemizedlist>
+                     <listitem>
+                         <para>Instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0) which determines operation to perform after successful logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
+                     </listitem>
+                     <listitem>
+                         <para>Instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1) which are responsible for destruction of user's session. The default handler <emphasis>org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler</emphasis> logs the user out by removing the Authentication object, but leaves the HTTP session opened.</para>
+                     </listitem>
+                   </itemizedlist></para>
+              <para>It is also possible to configure local logout using standard Spring Security element <emphasis>&lt;security:logout&gt;</emphasis> inside <emphasis>&lt;security:http&gt;</emphasis> block. For example:
+                  <programlisting><![CDATA[<security:http>
+	<security:logout logout-url="/j_logout" logout-success-url="/logout.jsp"/>
 </security:http>]]></programlisting></para>
-     </section>
-     
-     <section id="configuration-logout-global">
-			 <title>Global logout</title>
-			 <para>Global logout implements the SAML 2.0 Single Logout profile which terminates both session at the current SP, the IDP session and sessions at other SPs connected to the same IDP session. Single Logout
-         can be initialized from any of the participaing SPs or from the IDP.</para>
-         <para>Single Logout is currently supported with HTTP-Redirect and HTTP-POST bindings. SOAP binding is not available.</para>
-         <para>Global logout can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout</emphasis>. System automatically determines which IDP to send the request to based on the currently authenticated user. Single logout can be configured using beans <emphasis>samlLogoutFilter</emphasis> and <emphasis>samlLogoutProcessingFilter</emphasis> with the following options:
-         <itemizedlist>
-  			 <listitem>
-  				 <para>Bean <emphasis>samlLogoutFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 3). The handlers are called before sending SAML 2.0 LogoutRequest to the IDP when initializing Single Logout from the current SP.</para>
-  			 </listitem>
-  			 <listitem>
-  				 <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0). Handler is called after successful finalization of Single Logout process (reception of LogoutResponse from IDP) and determines operation to perform after logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
-  			 </listitem>
-  			 <listitem>
-  				 <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1). The handlers are called after successful reception of SAML 2.0 LogoutRequest or LogoutResponse from the IDP.</para>
-  			 </listitem>
-  		   </itemizedlist></para>
-         <para>Spring SAML correctly handles SAML 2.0 LogoutRequest messages sent from the IDP and performs logout in case the message is valid. In case of invalid data (missing signature, invalid issuer, invalid issue time, invalid destination, invalid session index, invalid name ID, no user logged in) system responds with SAML 2.0 LogoutResponse with an error Status code.</para>
-     </section>
-
-	</chapter>
-
-	<chapter id="configuration-authentication-object">
-		<title>Authentication object</title>
-		<para>Successful authentication using SAML token results in creation of an <emphasis>Authentication</emphasis> object by
-		the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis>
-		is created. Content of the resulting object can be customized by setting properties of the <emphasis>samlAuthenticationProvider</emphasis> bean in the <emphasis>securityContext.xml</emphasis>.
-		An instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application-specific information about the
-		authenticated user. Property <emphasis>forcePrincipalAsString</emphasis> can be used to force String value of the <emphasis>principal</emphasis> property. The Authentication object
-		is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
-
-		<table id="authentication-object-table">
-			<title>ExpiringUsernameAuthenticationToken values.</title>
-			<tgroup cols="2">
-				<colspec colname="_1" colwidth="0.2*" align="left"/>
-				<colspec colname="_2" colwidth="1.0*" align="left"/>
-				<thead>
-					<row>
-						<entry>Property</entry>
-						<entry>Value</entry>
-					</row>
-				</thead>
-				<tbody>
-					<row>
-						<entry>Principal</entry>
-						<entry>When forcePrincipalAsString = false AND userDetail = null (default) - <emphasis>NameID</emphasis> object included in the SAML Assertion (<emphasis>credential.getNameID()</emphasis> of type <emphasis>org.opensaml.saml2.core.NameID</emphasis>)</entry>
-					</row>
-					<row>
-						<entry>Principal</entry>
-						<entry>When forcePrincipalAsString = true - <emphasis>String</emphasis> value of <emphasis>NameID</emphasis> included in the SAML Assertion (<emphasis>credential.getNameID().getValue()</emphasis> of type java.lang.String)</entry>
-					</row>
-					<row>
-						<entry>Principal</entry>
-						<entry>When forcePrincipalAsString = false AND userDetail != null - <emphasis>UserDetail</emphasis> object returned from the <emphasis>SAMLUserDetailsService</emphasis></entry>
-					</row>
-					<row>
-						<entry>Credentials</entry>
-						<entry>SAML authentication object including entity ID of local and remote entity, name ID, assertion and relay state (<emphasis>org.springframework.security.saml.SAMLCredential</emphasis>)</entry>
-					</row>
-					<row>
-						<entry>Authorities</entry>
-						<entry>Result of <emphasis>getAuthorities()</emphasis> call on the <emphasis>UserDetails</emphasis> object returned from <emphasis>SAMLUserDetailsService</emphasis>, empty list when there's no <emphasis>UserDetail</emphasis> object available.</entry>
-					</row>
-					<row>
-						<entry>Expiration</entry>
-						<entry>Value of <emphasis>SessionNotOnOrAfter</emphasis> in the SAML Assertion when avaialble, null otherwise. <emphasis>Authentication</emphasis> object will start returning false on the <emphasis>isAuthenticated()</emphasis> after the expiration time.</entry>
-					</row>
-				</tbody>
-			</tgroup>
-		</table></para>
-
-		<para>Custom implementation of the <emphasis>SAMLUserDetailsService</emphasis> can be provided as property <emphasis>userDetails</emphasis> of the <emphasis>SAMLAuthenticationProvider</emphasis>.
-		Implementation can perform operation such as parsing of attributes present in the SAML Assertion, e.g.:
-		<programlisting><![CDATA[package fi.schafer.test.saml;
+             </section>
+             <section id="configuration-logout-global">
+                     <title>Global logout</title>
+                     <para>Global logout implements the SAML 2.0 Single Logout profile which terminates both session at the current SP, the IDP session and sessions at other SPs connected to the same IDP session. Single Logout
+                 can be initialized from any of the participaing SPs or from the IDP.</para>
+                 <para>Single Logout is currently supported with HTTP-Redirect and HTTP-POST bindings. SOAP binding is not available.</para>
+                 <para>Global logout can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout</emphasis>. System automatically determines which IDP to send the request to based on the currently authenticated user. Single logout can be configured using beans <emphasis>samlLogoutFilter</emphasis> and <emphasis>samlLogoutProcessingFilter</emphasis> with the following options:
+                 <itemizedlist>
+                     <listitem>
+                         <para>Bean <emphasis>samlLogoutFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 3). The handlers are called before sending SAML 2.0 LogoutRequest to the IDP when initializing Single Logout from the current SP.</para>
+                     </listitem>
+                     <listitem>
+                         <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instance of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutSuccessHandler</emphasis> (constructor index 0). Handler is called after successful finalization of Single Logout process (reception of LogoutResponse from IDP) and determines operation to perform after logout (e.g. redirect to a logout landing page). By default user gets redirected to page <emphasis>logout.jsp</emphasis>.</para>
+                     </listitem>
+                     <listitem>
+                         <para>Bean <emphasis>samlLogoutProcessingFilter</emphasis> can be provided with instances of interface <emphasis>org.springframework.security.web.authentication.logout.LogoutHandler</emphasis> (constructor index 1). The handlers are called after successful reception of SAML 2.0 LogoutRequest or LogoutResponse from the IDP.</para>
+                     </listitem>
+                   </itemizedlist></para>
+                 <para>Spring SAML correctly handles SAML 2.0 LogoutRequest messages sent from the IDP and performs logout in case the message is valid. In case of invalid data (missing signature, invalid issuer, invalid issue time, invalid destination, invalid session index, invalid name ID, no user logged in) system responds with SAML 2.0 LogoutResponse with an error Status code.</para>
+             </section>
+        </section>
+        <section id="configuration-authentication-object">
+            <title>Authentication object</title>
+            <para>Successful authentication using SAML token results in creation of an <emphasis>Authentication</emphasis> object by
+            the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis>
+            is created. Content of the resulting object can be customized by setting properties of the <emphasis>samlAuthenticationProvider</emphasis> bean in the <emphasis>securityContext.xml</emphasis>.
+            An instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application-specific information about the
+            authenticated user. Property <emphasis>forcePrincipalAsString</emphasis> can be used to force String value of the <emphasis>principal</emphasis> property. The Authentication object
+            is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
+            <table id="authentication-object-table">
+                <title>ExpiringUsernameAuthenticationToken values.</title>
+                <tgroup cols="2">
+                    <colspec colname="_1" colwidth="0.2*" align="left"/>
+                    <colspec colname="_2" colwidth="1.0*" align="left"/>
+                    <thead>
+                        <row>
+                            <entry>Property</entry>
+                            <entry>Value</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = false AND userDetail = null (default) - <emphasis>NameID</emphasis> object included in the SAML Assertion (<emphasis>credential.getNameID()</emphasis> of type <emphasis>org.opensaml.saml2.core.NameID</emphasis>)</entry>
+                        </row>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = true - <emphasis>String</emphasis> value of <emphasis>NameID</emphasis> included in the SAML Assertion (<emphasis>credential.getNameID().getValue()</emphasis> of type java.lang.String)</entry>
+                        </row>
+                        <row>
+                            <entry>Principal</entry>
+                            <entry>When forcePrincipalAsString = false AND userDetail != null - <emphasis>UserDetail</emphasis> object returned from the <emphasis>SAMLUserDetailsService</emphasis></entry>
+                        </row>
+                        <row>
+                            <entry>Credentials</entry>
+                            <entry>SAML authentication object including entity ID of local and remote entity, name ID, assertion and relay state (<emphasis>org.springframework.security.saml.SAMLCredential</emphasis>)</entry>
+                        </row>
+                        <row>
+                            <entry>Authorities</entry>
+                            <entry>Result of <emphasis>getAuthorities()</emphasis> call on the <emphasis>UserDetails</emphasis> object returned from <emphasis>SAMLUserDetailsService</emphasis>, empty list when there's no <emphasis>UserDetail</emphasis> object available.</entry>
+                        </row>
+                        <row>
+                            <entry>Expiration</entry>
+                            <entry>Value of <emphasis>SessionNotOnOrAfter</emphasis> in the SAML Assertion when avaialble, null otherwise. <emphasis>Authentication</emphasis> object will start returning false on the <emphasis>isAuthenticated()</emphasis> after the expiration time.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table></para>
+            <para>Custom implementation of the <emphasis>SAMLUserDetailsService</emphasis> can be provided as property <emphasis>userDetails</emphasis> of the <emphasis>SAMLAuthenticationProvider</emphasis>.
+            Implementation can perform operation such as parsing of attributes present in the SAML Assertion, e.g.:
+            <programlisting><![CDATA[package fi.schafer.test.saml;
 
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.XMLObject;
@@ -1159,407 +1108,411 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
 public class TestUserDetails implements SAMLUserDetailsService {
-
 	@Override
-	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
-		Attribute accountID = credential.getAttributeByName("accountID");
+	public Object loadUserBySAML(SAMLCredential cred) throws UsernameNotFoundException {
+		Attribute accountID = cred.getAttributeByName("accountID");
 		if (accountID == null || accountID.getAttributeValues() == null
-					 || accountID.getAttributeValues().size() == 0) {
+			|| accountID.getAttributeValues().size() == 0) {
 			return null;
 		}
 		XMLObject attributeValue = accountID.getAttributeValues().iterator().next();
 		return attributeValue.getDOM().getTextContent();
 	}
-
 }]]></programlisting></para>
+            <para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods
+            in the <emphasis>SAMLAuthenticationProvider</emphasis>.</para>
+        </section>
+        <section id="configuration-authentication-log">
+            <title>Authentication log</title>
+            <para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
+            A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including its bean
+            in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
+            <para>Two basic implementations are provided by default:
+            <itemizedlist>
+              <listitem>
+                  <para>org.springframework.security.saml.log.SAMLEmptyLogger</para>
+                  <para>Doesn't perform any logging, simply ignores all events.</para>
+              </listitem>
+              <listitem>
+                  <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
+                  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="chapter-troubleshooting-logging"/>. Setting
+                  property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log. Logging of exceptions
+            can be disabled by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
+              </listitem>
+            </itemizedlist></para>
+        <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para>
+        </section>
+    </chapter>
 
-		<para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods
-		in the <emphasis>SAMLAuthenticationProvider</emphasis>.</para>
-
-	</chapter>
-
-	<chapter id="configuration-authentication-log">
-		<title>Authentication log</title>
-		<para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
-		A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including its bean
-		in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
-		<para>Two basic implementations are provided by default:
-		<itemizedlist>
-		  <listitem>
-			  <para>org.springframework.security.saml.log.SAMLEmptyLogger</para>
-			  <para>Doesn't perform any logging, simply ignores all events.</para>
-		  </listitem>
-		  <listitem>
-			  <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
-			  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="chapter-troubleshooting-logging"/>. Setting
-			  property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log. Logging of exceptions
-        can be disalbed by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
-		  </listitem>
-		</itemizedlist></para>
-    <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para> 
-	</chapter>
-
-	<chapter id="configuration-context-provider">
-		<title>Context provider</title>
-		<para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credentials
-		and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
-		in processing of the incoming or outgoing SAML messages. ContextProvider can customized to alter behavior of the SAML Extension. The default
-		implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the ExtendedMetadata and
-		performs the following steps for creation of the context:
-
-		<itemizedlist>
-				<listitem>
-					<para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and matching
-					it with property <emphasis>alias</emphasis> specified in the ExtendedMetadata. In case the URL doesn't contain any alias part the default service provider
-					configured with property <emphasis>hostedSPName</emphasis> on the <emphasis>metadata</emphasis> bean is used.</para>
-				</listitem>
-				<listitem>
-					<para>Populate credential used to decrypt data sent to this service provider. In case ExtendedMetadata specifies property <emphasis>encryptionKey</emphasis>
-					it will be used as an alias to lookup a private key from the <emphasis>keyManager</emphasis> bean. Otherwise defaultKey of the <emphasis>keyManager</emphasis> bean will be used.</para>
-				</listitem>
-				<listitem>
-					<para>Populate credential used for SSL/TLS client authentication. In case ExtendedMetadata specifies property <emphasis>tlsKey</emphasis> it will be used
-					as an alias to lookup key from <emphasis>keyManager</emphasis> bean. Otherwise no credential will be provided for client authentication.</para>
-				</listitem>
-				<listitem>
-					<para>Populate trust engine for verification of signatures. Depending on <emphasis>securityProfile</emphasis> setting in the ExtendedMetadata trust engine
-					based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
-				</listitem>
-				<listitem>
-					<para>Populate trust engine for verification of SSL/TLS connections. Depending on <emphasis>sslSecurityProfile</emphasis> setting in the ExtendedMetadata
-					trust engine based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
-				</listitem>
-		</itemizedlist></para>
-
-		<para>During initialization of SSO ContextProvider is also requested to provide metadata of the peer IDP. System performs these steps to locate peer IDP to use:
-
-		<itemizedlist>
-				<listitem>
-					<para>Load parameter <emphasis>idp</emphasis> of the HttpRequest object and try to locate peer IDP by the entityId. When there's no <emphasis>idp</emphasis>
-					parameter provided system will either start IDP discovery process (when enabled in the ExtendedMetadata of the local SP) or use the default IDP specified in the
-					<emphasis>metadata</emphasis> bean.</para>
-				</listitem>
-		</itemizedlist></para>
-	</chapter>
-
-	<chapter id="error-handling">
-		<title>Error handling</title>
-		<para>Critical errors raised during processing of SAML messages are generally propagated as ServletExceptions to the Java container. In order to configure a custom error handling update your web.xml
-		and provide a general handler for ServletExceptions:<programlisting><![CDATA[<error-page> 
-    <exception-type>javax.servlet.ServletException</exception-type> 
-    <location>/error.jsp</location> 
-</error-page>]]></programlisting></para>
-		<para>ServletException contains original reason for the failure as a cause. It is recommended that content of the exceptions is not displayed to end users, both for security and user experience reasons.</para> 
-		<para>Errors produced during processing of the SAML AuthenticationResponse can be handled by plugging a custom implementation of 
-		the <emphasis>org.springframework.security.web.authentication.AuthenticationFailureHandler</emphasis> interface to the <emphasis>samlWebSSOProcessingFilter</emphasis> bean.</para>
-	</chapter>
-
-	<chapter id="time-interval">
-		<title>Validity intervals</title>
-		<para>For security reasons system limits the time window enabling processing of SAML messages and assertions. The time window parameters can be customized with the following settings.</para> 
-		<para>Validity of assertions processed during the signle sign-on process is limited to 3000 seconds. Value can be customized with property <emphasis>maxAssertionTime</emphasis>
-		of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
-		<para>System allows users to single sign-on for up to 7200 seconds since their initial authentication with the IDP (based on value AuthInstance of the Authentication statement).
-		Some IDPs allow users to stay authenticated for longer periods than this and you might need to change the default value by setting <emphasis>maxAuthenticationAge</emphasis> 
-		of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
-		<para>As clocks between IDP and SP machines may not be perfectly synchronized a tolerance of 60 seconds is applied for time comparisons. The tolerance value (time skew) can be customized
-		by settings property <emphasis>responseSkew</emphasis> in beans <emphasis>WebSSOProfileConsumerImpl</emphasis> and <emphasis>SingleLogoutProfileImpl</emphasis>.</para>
-   <para>The following tables summarize all checks for time validity during processing of incoming SAML messages. Response skew refers to property <emphasis>responseSkew</emphasis> 
-   set on profile beans. Past indicates that validity window for checking of the value will be extended by <emphasis>responseSkew</emphasis> seconds to the past and correspondingly 
-   with the future value. Nullable values can be missing from the incoming messages.
-   
-            <table id="time-skew-overview-authnrespose">
-                <title>Time checks during processing of incoming SAML Response in WebSSO and WebSSO HoK profiles</title>
-                <tgroup cols="2">
-                    <colspec colname="_1" colwidth="0.5*" align="left"/>
-                    <colspec colname="_2" colwidth="0.5*" align="left"/>
-                    <tbody>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.issueInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when SAML response message was created.</entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.issueInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future) + maxAssertionTime (future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when SAML assertion was created, allows validity extension as assertion might be
-                                re-used by the caller.
-                            </entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.subject.subjectConfirmation.notOnOrAfter
-                                </emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when subject can no longer be confirmed.</entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.authnStatement.authnInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future) + maxAuthenticationAge (future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws CredentialsExpiredException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when user authenticated to IDP, typically differs from time or response or
-                                assertion creation time.
-                            </entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.authnStatement.sessionNotOnOfAfter</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>no skew</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>Yes</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws CredentialsExpiredException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when user's session expires and requires re-authentication, sessions are
-                                typically valid for longer period and therefore do not suffer from time synchronization
-                                problems.
-                            </entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.condition.notBefore</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>Yes</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time limit on validity of assertion.</entry>
-                        </row>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.assertion.condition.notOnOrAfter</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>Yes</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time limit on validity of assertion.</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-
-            <table id="time-skew-overview-logoutrequest">
-                <title>Time checks during processing of incoming SAML LogoutRequest in Single Logout profile</title>
-                <tgroup cols="2">
-                    <colspec colname="_1" colwidth="0.5*" align="left"/>
-                    <colspec colname="_2" colwidth="0.5*" align="left"/>
-                    <tbody>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.issueInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Sends LogoutResponse with error Status
-                                "urn:oasis:names:tc:SAML:2.0:status:Requester"
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when SAML LogoutRequest message was created.</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-
-            <table id="time-skew-overview-logoutresponse">
-                <title>Time checks during processing of incoming SAML LogoutResponse in Single Logout profile</title>
-                <tgroup cols="2">
-                    <colspec colname="_1" colwidth="0.5*" align="left"/>
-                    <colspec colname="_2" colwidth="0.5*" align="left"/>
-                    <tbody>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.issueInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws SAMLException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when SAML LogoutResponse message was created.</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-
-            <table id="time-skew-overview-artifacteresponse">
-                <title>Time checks during processing of incoming SAML ArtifactResponse in Artifact Resolution profile
-                </title>
-                <tgroup cols="2">
-                    <colspec colname="_1" colwidth="0.5*" align="left"/>
-                    <colspec colname="_2" colwidth="0.5*" align="left"/>
-                    <tbody>
-                        <row>
-                            <entry namest="_1" nameend="_2">
-                                <emphasis role="strong">response.issueInstant</emphasis>
-                            </entry>
-                        </row>
-                        <row>
-                            <entry>Applied skew:</entry>
-                            <entry>responseSkew (past + future)</entry>
-                        </row>
-                        <row>
-                            <entry>Nullable:</entry>
-                            <entry>No</entry>
-                        </row>
-                        <row>
-                            <entry>Fails with:</entry>
-                            <entry>Throws MessageDecodingException</entry>
-                        </row>
-                        <row>
-                            <entry>Description:</entry>
-                            <entry>Time when SAML LogoutResponse message was created.</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-
-        </para>
-
-	</chapter>
-
-	<chapter id="enhanced-client">
-		<title>Enhanced client/proxy</title>
-		<para>Support for enhanced client/proxy can be configured using property <emphasis>ecpEnabled</emphasis> of the service provider's extended metadata. Once enabled, ECP profile is automatically activated with requests containing HTTP headers
-		<emphasis>Accept: application/vnd.paos+xml</emphasis> and <emphasis>PAOS: ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'</emphasis>. Binding used to server ECP profile is always automatically set to PAOS.</para>
-		<para>ECP can be enabled in combination with the automatic metadata generation using the following settings: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
-    <property name="extendedMetadata">
-        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
-            <property name="ecpEnabled" value="true"/>
-        </bean>
-    </property>
+    <chapter id="configuration-advanced">
+        <title>Advanced configuration</title>
+        <section id="configuration-load-balancing">
+            <title>Reverse proxies and load balancers</title>
+            <para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
+                SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
+                to configure SAML Extension for deployment behind a load balancer or a reverse-proxy please follow these steps:
+                <itemizedlist>
+                    <listitem>
+                        <para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
+                            within a user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
+                            Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContext.xml</emphasis>
+                            to class <emphasis>org.springframework.security.saml.context.SAMLContextProviderLB</emphasis>: <programlisting><![CDATA[<bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderLB">
+	<property name="scheme" value="https"/>
+	<property name="serverName" value="www.myserver.com"/>
+	<property name="serverPort" value="443"/>
+	<property name="includeServerPortInRequestURL" value="false"/>
+	<property name="contextPath" value="/spring-security-saml2-sample"/>
+</bean>]]></programlisting></para>
+                        <para>This setting enables the extension to correctly form all generated URLs and verify endpoints of the incoming SAML messages.</para>
+                    </listitem>
+                    <listitem>
+                        <para>In case you use automatically generated metadata make sure to configure <emphasis>entityBaseURL</emphasis> matching the front-end URL in your <emphasis>metadataGeneratorFilter</emphasis>
+                            bean: <programlisting><![CDATA[<bean id="metadataGeneratorFilter"
+		class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
+	<constructor-arg>
+		<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+			<property name="entityBaseURL"
+				value="https://www.myserver.com/spring-security-saml2-sample"/>
+		</bean>
+	</constructor-arg>
+</bean>]]></programlisting></para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section id="configuration-context-provider">
+            <title>Context provider</title>
+            <para>Context provider populates information about the local service provider (your application) such as entityId, role, metadata, security keys, SSL credentials
+            and trust engines for verification of signatures and SSL/TLS connections. Once populated context is made available to all components participating
+            in processing of the incoming or outgoing SAML messages. ContextProvider can customized to alter behavior of the SAML Extension. The default
+            implementation <emphasis>org.springframework.security.saml.context.SAMLContextProviderImpl</emphasis> relies on information available in the ExtendedMetadata and
+            performs the following steps for creation of the context:
+            <itemizedlist>
+                    <listitem>
+                        <para>Locate entityId of the local SP by parsing part of the URL after <emphasis>/alias/</emphasis> (e.g. myAlias in https://www.myserver.com/saml_extension/saml/sso/alias/myAlias?idp=myIdp) and matching
+                        it with property <emphasis>alias</emphasis> specified in the ExtendedMetadata. In case the URL doesn't contain any alias part the default service provider
+                        configured with property <emphasis>hostedSPName</emphasis> on the <emphasis>metadata</emphasis> bean is used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate credential used to decrypt data sent to this service provider. In case ExtendedMetadata specifies property <emphasis>encryptionKey</emphasis>
+                        it will be used as an alias to lookup a private key from the <emphasis>keyManager</emphasis> bean. Otherwise defaultKey of the <emphasis>keyManager</emphasis> bean will be used.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate credential used for SSL/TLS client authentication. In case ExtendedMetadata specifies property <emphasis>tlsKey</emphasis> it will be used
+                        as an alias to lookup key from <emphasis>keyManager</emphasis> bean. Otherwise no credential will be provided for client authentication.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate trust engine for verification of signatures. Depending on <emphasis>securityProfile</emphasis> setting in the ExtendedMetadata trust engine
+                        based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Populate trust engine for verification of SSL/TLS connections. Depending on <emphasis>sslSecurityProfile</emphasis> setting in the ExtendedMetadata
+                        trust engine based on either <xref linkend="configuration-security-profiles-metaiop"/> or <xref linkend="configuration-security-profiles-pkix"/> is created.</para>
+                    </listitem>
+            </itemizedlist></para>
+            <para>During initialization of SSO ContextProvider is also requested to provide metadata of the peer IDP. System performs these steps to locate peer IDP to use:
+            <itemizedlist>
+                    <listitem>
+                        <para>Load parameter <emphasis>idp</emphasis> of the HttpRequest object and try to locate peer IDP by the entityId. When there's no <emphasis>idp</emphasis>
+                        parameter provided system will either start IDP discovery process (when enabled in the ExtendedMetadata of the local SP) or use the default IDP specified in the
+                        <emphasis>metadata</emphasis> bean.</para>
+                    </listitem>
+            </itemizedlist></para>
+        </section>
+        <section id="time-interval">
+            <title>Validity intervals</title>
+            <para>For security reasons system limits the time window enabling processing of SAML messages and assertions. The time window parameters can be customized with the following settings.</para>
+            <para>Validity of assertions processed during the signle sign-on process is limited to 3000 seconds. Value can be customized with property <emphasis>maxAssertionTime</emphasis>
+            of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
+            <para>System allows users to single sign-on for up to 7200 seconds since their initial authentication with the IDP (based on value AuthInstance of the Authentication statement).
+            Some IDPs allow users to stay authenticated for longer periods than this and you might need to change the default value by setting <emphasis>maxAuthenticationAge</emphasis>
+            of the <emphasis>WebSSOProfileConsumerImpl</emphasis> bean.</para>
+            <para>As clocks between IDP and SP machines may not be perfectly synchronized a tolerance of 60 seconds is applied for time comparisons. The tolerance value (time skew) can be customized
+            by settings property <emphasis>responseSkew</emphasis> in beans <emphasis>WebSSOProfileConsumerImpl</emphasis> and <emphasis>SingleLogoutProfileImpl</emphasis>.</para>
+       <para>The following tables summarize all checks for time validity during processing of incoming SAML messages. Response skew refers to property <emphasis>responseSkew</emphasis>
+       set on profile beans. Past indicates that validity window for checking of the value will be extended by <emphasis>responseSkew</emphasis> seconds to the past and correspondingly
+       with the future value. Nullable values can be missing from the incoming messages.
+                <table id="time-skew-overview-authnrespose">
+                    <title>Time checks during processing of incoming SAML Response in WebSSO and WebSSO HoK profiles</title>
+                    <tgroup cols="2">
+                        <colspec colname="_1" colwidth="0.5*" align="left"/>
+                        <colspec colname="_2" colwidth="0.5*" align="left"/>
+                        <tbody>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.issueInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when SAML response message was created.</entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.issueInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future) + maxAssertionTime (future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when SAML assertion was created, allows validity extension as assertion might be
+                                    re-used by the caller.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.subject.subjectConfirmation.notOnOrAfter
+                                    </emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when subject can no longer be confirmed.</entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.authnStatement.authnInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future) + maxAuthenticationAge (future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws CredentialsExpiredException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when user authenticated to IDP, typically differs from time or response or
+                                    assertion creation time.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.authnStatement.sessionNotOnOfAfter</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>no skew</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>Yes</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws CredentialsExpiredException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when user's session expires and requires re-authentication, sessions are
+                                    typically valid for longer period and therefore do not suffer from time synchronization
+                                    problems.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.condition.notBefore</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>Yes</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time limit on validity of assertion.</entry>
+                            </row>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.assertion.condition.notOnOrAfter</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>Yes</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time limit on validity of assertion.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <table id="time-skew-overview-logoutrequest">
+                    <title>Time checks during processing of incoming SAML LogoutRequest in Single Logout profile</title>
+                    <tgroup cols="2">
+                        <colspec colname="_1" colwidth="0.5*" align="left"/>
+                        <colspec colname="_2" colwidth="0.5*" align="left"/>
+                        <tbody>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.issueInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Sends LogoutResponse with error Status
+                                    "urn:oasis:names:tc:SAML:2.0:status:Requester"
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when SAML LogoutRequest message was created.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <table id="time-skew-overview-logoutresponse">
+                    <title>Time checks during processing of incoming SAML LogoutResponse in Single Logout profile</title>
+                    <tgroup cols="2">
+                        <colspec colname="_1" colwidth="0.5*" align="left"/>
+                        <colspec colname="_2" colwidth="0.5*" align="left"/>
+                        <tbody>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.issueInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws SAMLException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when SAML LogoutResponse message was created.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <table id="time-skew-overview-artifacteresponse">
+                    <title>Time checks during processing of incoming SAML ArtifactResponse in Artifact Resolution profile
+                    </title>
+                    <tgroup cols="2">
+                        <colspec colname="_1" colwidth="0.5*" align="left"/>
+                        <colspec colname="_2" colwidth="0.5*" align="left"/>
+                        <tbody>
+                            <row>
+                                <entry namest="_1" nameend="_2">
+                                    <emphasis role="strong">response.issueInstant</emphasis>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>Applied skew:</entry>
+                                <entry>responseSkew (past + future)</entry>
+                            </row>
+                            <row>
+                                <entry>Nullable:</entry>
+                                <entry>No</entry>
+                            </row>
+                            <row>
+                                <entry>Fails with:</entry>
+                                <entry>Throws MessageDecodingException</entry>
+                            </row>
+                            <row>
+                                <entry>Description:</entry>
+                                <entry>Time when SAML LogoutResponse message was created.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+            </para>
+        </section>
+        <section id="enhanced-client">
+            <title>Enhanced client/proxy</title>
+            <para>Support for enhanced client/proxy can be configured using property <emphasis>ecpEnabled</emphasis> of the service provider's extended metadata. Once enabled, ECP profile is automatically activated with requests containing HTTP headers
+            <emphasis>Accept: application/vnd.paos+xml</emphasis> and <emphasis>PAOS: ver='urn:liberty:paos:2003-08'; 'urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp'</emphasis>. Binding used to server ECP profile is always automatically set to PAOS.</para>
+            <para>ECP can be enabled in combination with the automatic metadata generation using the following settings: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
+	<property name="extendedMetadata">
+		<bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+			<property name="ecpEnabled" value="true"/>
+		</bean>
+	</property>
 </bean>]]></programlisting>
-		</para>
-	</chapter>
-  
-	<chapter id="logging">
-	  <title>Logging</title>
-	  <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
-	  library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
-	  <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
-			<programlisting>log4j.logger.org.springframework.security.saml=DEBUG
-log4j.logger.org.opensaml=DEBUG
-log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
-	  <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
-	</chapter>  
+            </para>
+        </section>
+    </chapter>
 
 	<!-- TODO
 	Message storage
+  Java configuration
+  Sample application
 
 	Bindings configuration
 	- artifact resolution

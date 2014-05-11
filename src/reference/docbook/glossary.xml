@@ -10,7 +10,7 @@
 	<title>Glossary</title>
 	<para>
 		<table id="glossary-table">
-			<title>Definitions of terms used within this manual.</title>
+			<title>Definitions of terms used within this manual</title>
 			<tgroup cols="2">
 				<colspec colname="_1" colwidth="0.4*" align="left"/>
 				<colspec colname="_2" colwidth="1.0*" align="left"/>

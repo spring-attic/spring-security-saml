@@ -1135,9 +1135,20 @@ public class TestUserDetails implements SAMLUserDetailsService {
               </listitem>
               <listitem>
                   <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
-                  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="chapter-troubleshooting-logging"/>. Setting
+                  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="logging"/>. Setting
                   property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log. Logging of exceptions
-            can be disabled by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>.</para>
+            can be disabled by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>. Fields are semicolon separated with the following values:
+                      <itemizedlist>
+                          <listitem><para>type of SAML message (AuthNRequest, AuthNResponse, LogoutRequest or LogoutResponse)</para></listitem>
+                          <listitem><para>result of processing (SUCCESS or FAILURE)</para></listitem>
+                          <listitem><para>IP address of the peer who made the current request to SP</para></listitem>
+                          <listitem><para>entity ID of the local SP</para></listitem>
+                          <listitem><para>entity ID of the remote IDP</para></listitem>
+                          <listitem><para>identifier of the authenticated user</para></listitem>
+                          <listitem><para>SAML message (when logMessages is enabled)</para></listitem>
+                          <listitem><para>text of the error (only for failures, when logErrors is enabled)</para></listitem>
+                      </itemizedlist>
+                  </para>
               </listitem>
             </itemizedlist></para>
         <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para>

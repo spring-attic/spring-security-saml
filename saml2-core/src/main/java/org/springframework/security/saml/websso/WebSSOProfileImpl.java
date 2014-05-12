@@ -94,7 +94,6 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         context.setOutboundMessage(authRequest);
         context.setOutboundSAMLMessage(authRequest);
         context.setPeerEntityEndpoint(ssoService);
-        context.setPeerEntityId(idpssoDescriptor.getID());
         context.setPeerEntityRoleMetadata(idpssoDescriptor);
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 

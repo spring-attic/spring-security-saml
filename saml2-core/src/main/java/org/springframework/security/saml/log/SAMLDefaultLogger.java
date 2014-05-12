@@ -57,56 +57,71 @@ public class SAMLDefaultLogger implements SAMLLogger {
         if (result == null) result = "";
         if (context == null) context = new SAMLMessageContext();
 
+        // Log operation
         StringBuilder sb = new StringBuilder();
         sb.append(operation);
 
+        // Log result
         sb.append(";");
         sb.append(result);
 
+        // Log peer address
         sb.append(";");
         if (context.getInboundMessageTransport() != null) {
             HTTPInTransport transport = (HTTPInTransport) context.getInboundMessageTransport();
             sb.append(transport.getPeerAddress());
         }
 
+        // Log local entity ID
+        sb.append(";");
+        if (context.getLocalEntityId() != null) {
+            sb.append(context.getLocalEntityId());
+        }
+
+        // Log peer entity ID
+        sb.append(";");
+        if (context.getPeerEntityId() != null) {
+            sb.append(context.getPeerEntityId());
+        }
+
         // Log NameID or principal when available
+        sb.append(";");
         if (a != null) {
             if (a.getCredentials() != null && a.getCredentials() instanceof SAMLCredential) {
                 SAMLCredential credential = (SAMLCredential) a.getCredentials();
                 if (credential.getNameID() != null) {
-                    sb.append(";");
                     sb.append(credential.getNameID().getValue());
                 } else {
-                    sb.append(";");
                     sb.append(a.getPrincipal());
                 }
             } else {
-                sb.append(";");
                 sb.append(a.getPrincipal());
             }
         }
 
+        // Log SAML message
+        sb.append(";");
         if (logMessages) {
             try {
                 if (context.getInboundSAMLMessage() != null) {
                     String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
-                    sb.append(";").append(messageStr);
+                    sb.append(messageStr);
                 }
                 if (context.getOutboundSAMLMessage() != null) {
                     String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getOutboundSAMLMessage()));
-                    sb.append(";").append(messageStr);
+                    sb.append(messageStr);
                 }
             } catch (MessageEncodingException e1) {
                 log.warn("Error marshaling message during logging", e1);
             }
         }
 
+        // Log error
+        sb.append(";");
         if (logErrors && e != null) {
-
             StringWriter errorWriter = new StringWriter();
             e.printStackTrace(new PrintWriter(errorWriter));
             sb.append(errorWriter.getBuffer());
-
         }
 
         log.info(sb.toString());

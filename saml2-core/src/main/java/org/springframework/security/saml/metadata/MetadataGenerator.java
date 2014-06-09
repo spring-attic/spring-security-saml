@@ -37,10 +37,7 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +68,7 @@ public class MetadataGenerator {
     private boolean wantAssertionSigned = true;
     private boolean signMetadata = true;
 
+    private String signingAlgorithm = null;
     private String signingKey = null;
     private String encryptionKey = null;
     private String tlsKey = null;
@@ -198,7 +196,7 @@ public class MetadataGenerator {
 
         try {
             if (signMetadata) {
-                signSAMLObject(descriptor, keyManager.getCredential(signingKey));
+                signSAMLObject(descriptor, keyManager.getCredential(signingKey), signingAlgorithm);
             } else {
                 marshallSAMLObject(descriptor);
             }
@@ -606,7 +604,7 @@ public class MetadataGenerator {
      *          thrown if there is a problem marshalling or signing the outbound message
      */
     @SuppressWarnings("unchecked")
-    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential) throws MessageEncodingException {
+    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential, String signingAlgorithm) throws MessageEncodingException {
 
         if (signableObject instanceof SignableSAMLObject && signingCredential != null) {
             SignableSAMLObject signableMessage = (SignableSAMLObject) signableObject;
@@ -614,6 +612,10 @@ public class MetadataGenerator {
             XMLObjectBuilder<Signature> signatureBuilder = Configuration.getBuilderFactory().getBuilder(
                     Signature.DEFAULT_ELEMENT_NAME);
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+
+            if(signingAlgorithm != null) {
+                signature.setSignatureAlgorithm(signingAlgorithm);
+            }
 
             signature.setSigningCredential(signingCredential);
             try {
@@ -658,6 +660,14 @@ public class MetadataGenerator {
      */
     protected String getKeyInfoGeneratorName() {
         return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
+    }
+
+    public String getSigningAlgorithm() {
+        return signingAlgorithm;
+    }
+
+    public void setSigningAlgorithm(String signingAlgorithm) {
+        this.signingAlgorithm = signingAlgorithm;
     }
 
     public boolean isRequestSigned() {

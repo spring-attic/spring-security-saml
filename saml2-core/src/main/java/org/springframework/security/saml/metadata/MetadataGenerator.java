@@ -37,10 +37,7 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +68,7 @@ public class MetadataGenerator {
     private boolean wantAssertionSigned = true;
     private boolean signMetadata = true;
 
+    private String signingAlgorithm = null;
     private String signingKey = null;
     private String encryptionKey = null;
     private String tlsKey = null;
@@ -198,7 +196,7 @@ public class MetadataGenerator {
 
         try {
             if (signMetadata) {
-                signSAMLObject(descriptor, keyManager.getCredential(signingKey));
+                signSAMLObject(descriptor, keyManager.getCredential(signingKey), signingAlgorithm);
             } else {
                 marshallSAMLObject(descriptor);
             }
@@ -602,11 +600,12 @@ public class MetadataGenerator {
      *
      * @param signableObject    object to sign
      * @param signingCredential credential to sign with
+     * @param signingAlgorithm  signing algorithm to use (optional). Leave null to use credential's default algorithm
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the outbound message
      */
     @SuppressWarnings("unchecked")
-    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential) throws MessageEncodingException {
+    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential, String signingAlgorithm) throws MessageEncodingException {
 
         if (signableObject instanceof SignableSAMLObject && signingCredential != null) {
             SignableSAMLObject signableMessage = (SignableSAMLObject) signableObject;
@@ -614,6 +613,10 @@ public class MetadataGenerator {
             XMLObjectBuilder<Signature> signatureBuilder = Configuration.getBuilderFactory().getBuilder(
                     Signature.DEFAULT_ELEMENT_NAME);
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+
+            if (signingAlgorithm != null) {
+                signature.setSignatureAlgorithm(signingAlgorithm);
+            }
 
             signature.setSigningCredential(signingCredential);
             try {
@@ -658,6 +661,34 @@ public class MetadataGenerator {
      */
     protected String getKeyInfoGeneratorName() {
         return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
+    }
+
+    /**
+     * Gets the signing algorithm to use when signing the SAML messages.
+     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
+     *
+     * @return A signing algorithm URI, if set. Otherwise returns null.
+     * @see org.opensaml.xml.signature.SignatureConstants
+     */
+    public String getSigningAlgorithm() {
+        return signingAlgorithm;
+    }
+
+    /**
+     * Sets the signing algorithm to use when signing the SAML messages.
+     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
+     * If this property is null, then the {@link org.opensaml.xml.security.credential.Credential} default algorithm will be used instead.
+     *
+     * Typical values are:
+     * http://www.w3.org/2000/09/xmldsig#rsa-sha1
+     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
+     *
+     * @param signingAlgorithm The new signing algorithm to use
+     * @see org.opensaml.xml.signature.SignatureConstants
+     */
+    public void setSigningAlgorithm(String signingAlgorithm) {
+        this.signingAlgorithm = signingAlgorithm;
     }
 
     public boolean isRequestSigned() {

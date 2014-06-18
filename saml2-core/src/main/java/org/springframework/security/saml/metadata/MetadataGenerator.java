@@ -600,6 +600,7 @@ public class MetadataGenerator {
      *
      * @param signableObject    object to sign
      * @param signingCredential credential to sign with
+     * @param signingAlgorithm  signing algorithm to use (Optional). Leave null if use credential's default algorithm
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the outbound message
      */
@@ -662,10 +663,25 @@ public class MetadataGenerator {
         return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
     }
 
+    /**
+     * Gets the signing algorithm to use when signing the SAML messages.
+     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
+     *
+     * @return A signing algorithm URI, if set. Otherwise returns null.
+     * @see org.opensaml.xml.signature.SignatureConstants
+     */
     public String getSigningAlgorithm() {
         return signingAlgorithm;
     }
 
+    /**
+     * Sets the signing algorithm to use when signing the SAML messages.
+     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
+     * If this property is null, then the {@link org.opensaml.xml.security.credential.Credential} default algorithm will be used instead.
+     *
+     * @param signingAlgorithm The new signing algorithm to use
+     * @see org.opensaml.xml.signature.SignatureConstants
+     */
     public void setSigningAlgorithm(String signingAlgorithm) {
         this.signingAlgorithm = signingAlgorithm;
     }

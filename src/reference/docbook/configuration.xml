@@ -153,7 +153,13 @@
         <section id="logging">
             <title>Logging</title>
             <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
-                library. The sample application by default uses log4j version 1.2 binding for SLF4J.</para>
+                library. The sample application by default uses log4j version 1.2 binding for SLF4J, configured with the following dependency:<programlisting><![CDATA[<dependency>
+   <groupId>org.slf4j</groupId>
+   <artifactId>slf4j-log4j12</artifactId>
+   <version>1.6.3</version>
+   <scope>compile</scope>
+</dependency>]]></programlisting></para>
+            <para>In case you are using another logging library, make sure to change the dependency accordingly.</para>
             <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
                 <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
 log4j.logger.org.opensaml=DEBUG

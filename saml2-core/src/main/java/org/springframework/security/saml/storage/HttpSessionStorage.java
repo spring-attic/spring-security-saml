@@ -101,6 +101,7 @@ public class HttpSessionStorage implements SAMLMessageStorage {
         if (o == null) {
             return null;
         } else {
+            messages.clear();
             return o.getObject();
         }
     }

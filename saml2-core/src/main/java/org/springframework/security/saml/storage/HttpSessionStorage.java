@@ -91,6 +91,10 @@ public class HttpSessionStorage implements SAMLMessageStorage {
      * <p/>
      * Message is stored in String format and must be unmarshalled into XMLObject. Call to this
      * method may thus be expensive.
+     * <p/>
+     * Messages are automatically cleared upon successful reception, as we presume that there
+     * are never multiple ongoing SAML exchanges for the same session. This saves memory used by
+     * the session.
      *
      * @param messageID ID of message to retrieve
      *

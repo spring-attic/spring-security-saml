@@ -71,7 +71,11 @@ public class X509TrustManager implements javax.net.ssl.X509TrustManager {
         credential.setEntityCertificate(x509Certificate);
         credential.setEntityCertificateChain(Arrays.asList(x509Certificates));
         credential.setUsageType(UsageType.UNSPECIFIED);
-        credential.setEntityId(criteriaSet.get(EntityIDCriteria.class).getEntityID());
+
+        EntityIDCriteria entityIDCriteria = criteriaSet.get(EntityIDCriteria.class);
+        if (entityIDCriteria != null) {
+            credential.setEntityId(entityIDCriteria.getEntityID());
+        }
 
         try {
             log.debug("Checking server trust");

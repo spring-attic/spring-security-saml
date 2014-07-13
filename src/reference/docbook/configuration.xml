@@ -441,6 +441,28 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				<para>Alternatively class <emphasis>org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider</emphasis> can be used to provide a backup in case URL is temporarily unavailable. File
 				to use as backup is specified as third argument in the <emphasis>MetadataProvider</emphasis> bean constructor.</para>
 			</section>
+            <section id="configuration-metadata-https">
+                <title>HTTP-based metadata provider with SSL</title>
+                <para>By default loading of metadata using the HTTP-based provider over HTTPS performs trust verification configured in your JDK. In case you'd like to use certificates in your <emphasis>keyStore</emphasis>, add the following bean which changes the socketFactory used by the HTTP Client:
+                    <programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetClass" value="org.apache.commons.httpclient.protocol.Protocol"/>
+    <property name="targetMethod" value="registerProtocol"/>
+    <property name="arguments">
+        <list>
+            <value>https</value>
+            <bean class="org.apache.commons.httpclient.protocol.Protocol">
+                <constructor-arg value="https"/>
+                <constructor-arg>
+                    <bean class="org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory"/>
+                </constructor-arg>
+                <constructor-arg value="443"/>
+            </bean>
+        </list>
+    </property>
+</bean>]]></programlisting></para>
+                <para>The TLSProtocolSocketFactory uses all public certificates present in the <emphasis>keyStore</emphasis> as trust anchors for PKIX validation. The used keys can be constrained with property <emphasis>trustedKeys</emphasis>.</para>
+                <para>The socket factory configured in this fashion is used for all metadata providers. It is possible to customize metadata loading on a per-provider basis by adding a configured HttpClient instance to the HTTPMetadataProvider constructor.</para>
+            </section>
 			<section id="configuration-metadata-idp-signature">
 				<title>Metadata signature verification</title>
 				<para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.

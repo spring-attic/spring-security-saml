@@ -137,7 +137,7 @@ public class HttpSessionStorageTest {
 
     /**
      * Verifies that in case the session already includes the SAML storage and we store another element,
-     * it will be accessible.
+     * it will be accessible until another messages gets retrieved.
      */
     @Test
     public void testInsert() {
@@ -151,10 +151,14 @@ public class HttpSessionStorageTest {
         replay(session);
         cache = new HttpSessionStorage(session);
         cache.storeMessage("testKey2", assertionMock);
-        assertNotNull(cache.getAllMessages());
         assertEquals(2, cache.getAllMessages().size());
-        assertEquals(audienceMock, cache.retrieveMessage("testKey"));
+        assertNotNull(cache.getAllMessages());
+
         assertEquals(assertionMock, cache.retrieveMessage("testKey2"));
+        assertEquals(0, cache.getAllMessages().size());
+        assertNotNull(cache.getAllMessages());
+
+        assertNull(cache.retrieveMessage("testKey2"));
         verify(session);
     }
 

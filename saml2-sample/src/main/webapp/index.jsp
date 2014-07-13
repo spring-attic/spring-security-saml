@@ -1,5 +1,6 @@
 <%@ page import="org.springframework.security.saml.SAMLCredential" %>
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
+<%@ page import="org.springframework.security.core.Authentication" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -12,7 +13,9 @@
 <h1>User has been authenticated</h1>
 
 <%
-    SAMLCredential credential = (SAMLCredential) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+    pageContext.setAttribute("authentication", authentication);
     pageContext.setAttribute("credential", credential);
 %>
 
@@ -22,11 +25,15 @@
         <td colspan="2"><b>General information</b></td>
     </tr>
     <tr>
-        <td width="300">Username:</td>
+        <td width="300">Principal:</td>
+        <td><c:out value="${authentication.principal}"/></td>
+    </tr>
+    <tr>
+        <td width="300">Name ID:</td>
         <td><c:out value="${credential.nameID.value}"/></td>
     </tr>
     <tr>
-        <td>User format:</td>
+        <td>Name ID format:</td>
         <td><c:out value="${credential.nameID.format}"/></td>
     </tr>
     <tr>

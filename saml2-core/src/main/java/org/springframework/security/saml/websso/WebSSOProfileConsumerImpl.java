@@ -73,6 +73,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     private int maxAuthenticationAge = 7200;
 
     /**
+     * Flag indicating whether to include attributes from all assertions, false by default.
+     */
+    private boolean includeAllAttributes = false;
+
+    /**
      * The input context object must have set the properties related to the returned Response, which is validated
      * and in case no errors are found the SAMLCredential is returned.
      *
@@ -190,43 +195,45 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         Exception lastError = null;
 
-        // Find the assertion to be used for session creation, other assertions are ignored
-        for (Assertion a : assertionList) {
-
-            // We're only interested in assertions with AuthnStatement
-            if (a.getAuthnStatements().size() > 0) {
+        // Find the assertion to be used for session creation
+        for (Assertion assertion : assertionList) {
+            if (assertion.getAuthnStatements().size() > 0) {
                 try {
                     // Verify that the assertion is valid
-                    verifyAssertion(a, request, context);
+                    verifyAssertion(assertion, request, context);
+                    subjectAssertion = assertion;
+                    log.debug("Validation of authentication statement in assertion {} was successful", assertion.getID());
+                    break;
                 } catch (Exception e) {
+                    log.debug("Validation of authentication statement in assertion failed, skipping", e);
                     lastError = e;
-                    log.debug("Validation of received assertion failed, assertion will be skipped", e);
-                    continue;
                 }
             } else {
-                log.debug("Skipping assertion {} without any authentication statements", a);
+                log.debug("Assertion {} did not contain any authentication statements, skipping", assertion.getID());
             }
-
-            subjectAssertion = a;
-
-            // Process all attributes
-            for (AttributeStatement attStatement : a.getAttributeStatements()) {
-                for (Attribute att : attStatement.getAttributes()) {
-                    attributes.add(att);
-                }
-                for (EncryptedAttribute att : attStatement.getEncryptedAttributes()) {
-                    Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Attribute, no decrypter is set in the context");
-                    attributes.add(context.getLocalDecrypter().decrypt(att));
-                }
-            }
-
-            break;
-
         }
 
-        // Make sure that at least one storage contains authentication statement and subject with bearer confirmation
+        // Make sure that at least one assertion contains authentication statement and subject with bearer confirmation
         if (subjectAssertion == null) {
             throw new SAMLException("Response doesn't have any valid assertion which would pass subject validation", lastError);
+        }
+
+        // Process attributes from assertions
+        for (Assertion assertion : assertionList) {
+            if (assertion == subjectAssertion || isIncludeAllAttributes()) {
+                for (AttributeStatement attStatement : assertion.getAttributeStatements()) {
+                    for (Attribute att : attStatement.getAttributes()) {
+                        log.debug("Including attribute {} from assertion {}", att.getName(), assertion.getID());
+                        attributes.add(att);
+                    }
+                    for (EncryptedAttribute att : attStatement.getEncryptedAttributes()) {
+                        Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Attribute, no decrypter is set in the context");
+                        Attribute decryptedAttribute = context.getLocalDecrypter().decrypt(att);
+                        log.debug("Including decrypted attribute {} from assertion {}", decryptedAttribute.getName(), assertion.getID());
+                        attributes.add(decryptedAttribute);
+                    }
+                }
+            }
         }
 
         NameID nameId = (NameID) context.getSubjectNameIdentifier();
@@ -579,6 +586,23 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      */
     public void setMaxAuthenticationAge(int maxAuthenticationAge) {
         this.maxAuthenticationAge = maxAuthenticationAge;
+    }
+
+    /**
+     * @return true to include attributes from all assertions, false to only include those from the confirmed assertion
+     */
+    public boolean isIncludeAllAttributes() {
+        return includeAllAttributes;
+    }
+
+    /**
+     * Flag indicates whether to include attributes from all assertions (value true), or only from
+     * the assertion which was authentication using the Bearer SubjectConfirmation (value false, by default).
+     *
+     * @param includeAllAttributes true to include attributes from all assertions
+     */
+    public void setIncludeAllAttributes(boolean includeAllAttributes) {
+        this.includeAllAttributes = includeAllAttributes;
     }
 
 }

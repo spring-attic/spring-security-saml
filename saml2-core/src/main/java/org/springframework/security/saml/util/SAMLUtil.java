@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.w3c.dom.Element;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import java.security.MessageDigest;
@@ -442,6 +443,32 @@ public class SAMLUtil {
             cleanValue = "_" + cleanValue.substring(1);
         }
         return cleanValue;
+    }
+
+    /**
+     * Populates hostname verifier of the given type. Supported values are default, defaultAndLocalhost,
+     * strict and allowAll. Unsupported values will return default verifier.
+     *
+     * @param hostnameVerificationType type
+     * @return verifier
+     */
+    public static HostnameVerifier getHostnameVerifier(String hostnameVerificationType) {
+
+        HostnameVerifier hostnameVerifier;
+        if ("default".equalsIgnoreCase(hostnameVerificationType)) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+        } else if ("defaultAndLocalhost".equalsIgnoreCase(hostnameVerificationType)) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST;
+        } else if ("strict".equalsIgnoreCase(hostnameVerificationType)) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.STRICT;
+        } else if ("allowAll".equalsIgnoreCase(hostnameVerificationType)) {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL;
+        } else {
+            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+        }
+
+        return hostnameVerifier;
+
     }
 
 }

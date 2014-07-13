@@ -53,6 +53,7 @@ import org.springframework.security.saml.storage.HttpSessionStorageFactory;
 import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
 import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
 import javax.net.ssl.HostnameVerifier;
@@ -356,19 +357,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populateSSLHostnameVerifier(SAMLMessageContext samlContext) {
 
-        HostnameVerifier hostnameVerifier;
-        if ("default".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
-        } else if ("defaultAndLocalhost".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST;
-        } else if ("strict".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.STRICT;
-        } else if ("allowAll".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSslHostnameVerification())) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL;
-        } else {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
-        }
-
+        HostnameVerifier hostnameVerifier = SAMLUtil.getHostnameVerifier(samlContext.getLocalExtendedMetadata().getSslHostnameVerification());
         samlContext.setGetLocalSSLHostnameVerifier(hostnameVerifier);
 
     }

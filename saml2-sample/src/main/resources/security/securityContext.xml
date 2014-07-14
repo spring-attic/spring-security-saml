@@ -103,7 +103,6 @@
     <bean id="metadataDisplayFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter"/>
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
-    <!-- Do no forget to call iniitalize method on providers -->
     <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
         <constructor-arg>
             <list>

@@ -24,12 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Vladimir Schaefer
  */
-public class ParserPoolHolder {
+public final class ParserPoolHolder {
 
     /**
      * Pool instance.
      */
-    private static ParserPool pool;
+    private static volatile ParserPool pool;
 
     /**
      * Initializes the static parserPool property and makes it available for getPool calls.

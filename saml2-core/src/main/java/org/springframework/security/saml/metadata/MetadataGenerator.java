@@ -168,9 +168,7 @@ public class MetadataGenerator {
         String entityBaseURL = getEntityBaseURL();
         String entityAlias = getEntityAlias();
 
-        if (entityId == null || entityBaseURL == null) {
-            throw new RuntimeException("Required attributes weren't set");
-        }
+        validateRequiredAttributes();
 
         if (id == null) {
             // Use entityID cleaned as NCName for ID in case no value is provided
@@ -183,11 +181,17 @@ public class MetadataGenerator {
             descriptor.setID(id);
         }
         descriptor.setEntityID(entityId);
-        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
+        descriptor.getRoleDescriptors().add(buildSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID, SSODescriptor.class));
 
         return descriptor;
 
     }
+
+	protected void validateRequiredAttributes() {
+		if (entityId == null || entityBaseURL == null) {
+            throw new RuntimeException("Required attributes weren't set");
+        }
+	}
 
     protected KeyInfo getServerKeyInfo(String alias) {
         Credential serverCredential = keyManager.getCredential(alias);
@@ -255,7 +259,7 @@ public class MetadataGenerator {
         }
     }
 
-    protected SPSSODescriptor buildSPSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedNameID) {
+    protected <T extends SSODescriptor> T buildSSODescriptor(String entityBaseURL, String entityAlias, boolean requestSigned, boolean wantAssertionSigned, Collection<String> includedNameID, Class<T> type) {
 
         SAMLObjectBuilder<SPSSODescriptor> builder = (SAMLObjectBuilder<SPSSODescriptor>) builderFactory.getBuilder(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         SPSSODescriptor spDescriptor = builder.buildObject();
@@ -327,8 +331,7 @@ public class MetadataGenerator {
             spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.UNSPECIFIED, getServerKeyInfo(tlsKey)));
         }
 
-        return spDescriptor;
-
+        return type.cast(spDescriptor);
     }
 
     /**

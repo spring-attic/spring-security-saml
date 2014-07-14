@@ -258,7 +258,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 								</row>
 								<row>
 									<entry><literal>signMetadata</literal></entry>
-									<entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>.</entry>
+									<entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>. Value will be set in ExtendedMetadata as <literal>signMetadata</literal>.</entry>
 									<entry>true</entry>
 								</row>
 								<row>
@@ -308,7 +308,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 								</row>
 								<row>
 									<entry><literal>extendedMetadata</literal></entry>
-									<entry>Additional settings such as IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="configuration-metadata-extended"/> for details.</entry>
+									<entry>Additional settings such as metadata signing, IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="configuration-metadata-extended"/> for details.</entry>
 								</row>
 							</tbody>
 						</tgroup>
@@ -372,6 +372,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 		   <property name="alias" value="default"/>
 		   <property name="securityProfile" value="metaiop"/>
 		   <property name="sslSecurityProfile" value="pkix"/>
+		   <property name="signMetadata" value="true"/>
 		   <property name="signingKey" value="apollo"/>
 		   <property name="encryptionKey" value="apollo"/>
 		   <property name="requireArtifactResolveSigned" value="false"/>
@@ -391,6 +392,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				alias and entity ID. Each service provider can e.g. process a different domain or have different security key settings. This feature makes it possible to create multi-tenant applications with
 				individual SAML settings for each of the tenants. In case multiple local SPs are declared, property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis>
 				bean should be set to the entity ID of the default one.</para>
+				<para>The xml file doesn't need to include signaure. Metadata will be automatically signed when property <emphasis>signMetadata</emphasis> is set to <emphasis>true</emphasis>.</para>
 				<para>For details about available settings of the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.</para>
 			</section>
 			<section id="configuration-metadata-sp-display">
@@ -540,6 +542,12 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                                 </entry>
                             </row>
                             <row>
+                                <entry>signMetadata</entry>
+                                <entry>true</entry>
+                                <entry>local only</entry>
+                                <entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>.</entry>
+                            </row>
+                            <row>
                                 <entry>idpDiscoveryEnabled</entry>
                                 <entry>false</entry>
                                 <entry>local only</entry>
@@ -601,6 +609,13 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                                             linkend="http://juliusdavies.ca/commons-ssl/javadocs/org/apache/commons/ssl/HostnameVerifier.html">
                                         Commons-SSL JavaDoc</link>.
                                 </entry>
+                            </row>
+                            <row>
+                                <entry>signingAlgorithm</entry>
+                                <entry>-</entry>
+                                <entry>local only</entry>
+                                <entry>When set customized algorithm used to create digital signature on the metadata object. Typical values are <emphasis>http://www.w3.org/2000/09/xmldsig#rsa-sha1</emphasis>,
+                                  <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</emphasis> and <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</emphasis>.</entry>
                             </row>
                             <row>
                                 <entry>signingKey</entry>

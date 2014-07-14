@@ -112,30 +112,6 @@ public class MetadataGeneratorTest {
     }
 
     /**
-     * Verifies that metadata signature is created when requested so.
-     */
-    @Test
-    public void testGenerateMetadataSigning() {
-
-        // Required attributes
-        generator.setEntityBaseURL("http://localhost");
-        generator.setEntityId("my_entity");
-
-        // No signing
-        generator.setSignMetadata(false);
-        EntityDescriptor metadata = generator.generateMetadata();
-        assertNull(metadata.getSignature());
-        assertNotNull(metadata.getDOM());
-
-        // Signing
-        generator.setSignMetadata(true);
-        metadata = generator.generateMetadata();
-        assertNotNull(metadata.getSignature());
-        assertNotNull(metadata.getDOM());
-
-    }
-
-    /**
      * Test verifies that metadata can be generated.
      */
     @Test

@@ -14,21 +14,18 @@
  */
 package org.springframework.security.saml.web;
 
-import org.opensaml.Configuration;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.JKSKeyManager;
 import org.springframework.security.saml.metadata.*;
+import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -36,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceView;
-import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
@@ -113,7 +109,7 @@ public class MetadataController {
         defaultForm.setBaseURL(getBaseURL(request));
         defaultForm.setEntityId(getEntityId(request));
         defaultForm.setAlias(getEntityId(request));
-        defaultForm.setNameID(MetadataGenerator.defaultNameID.toArray(new String[MetadataGenerator.defaultNameID.size()])); // TODO array vs collection
+        defaultForm.setNameID(MetadataGenerator.defaultNameID.toArray(new String[MetadataGenerator.defaultNameID.size()]));
 
         model.addObject("metadata", defaultForm);
         return model;
@@ -205,6 +201,7 @@ public class MetadataController {
         extendedMetadata.setRequireLogoutResponseSigned(metadata.isRequireLogoutResponseSigned());
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
         extendedMetadata.setSslHostnameVerification(metadata.getSslHostnameVerification());
+        extendedMetadata.setSigningAlgorithm(metadata.getSigningAlgorithm());
 
         if (metadata.isStore()) {
 
@@ -252,7 +249,7 @@ public class MetadataController {
         metadata.setLocal(extendedMetadata.isLocal());
         metadata.setSecurityProfile(extendedMetadata.getSecurityProfile());
         metadata.setSslSecurityProfile(extendedMetadata.getSslSecurityProfile());
-        metadata.setSerializedMetadata(getMetadataAsString(entityDescriptor));
+        metadata.setSerializedMetadata(getMetadataAsString(entityDescriptor, extendedMetadata));
         metadata.setConfiguration(getConfiguration(fileName, extendedMetadata));
         metadata.setEntityId(entityDescriptor.getEntityID());
         metadata.setAlias(extendedMetadata.getAlias());
@@ -264,7 +261,14 @@ public class MetadataController {
         metadata.setTlsKey(extendedMetadata.getTlsKey());
         metadata.setSslHostnameVerification(extendedMetadata.getSslHostnameVerification());
 
-        // TODO other fields discovery, nameIDs
+        metadata.setSignMetadata(extendedMetadata.isSignMetadata());
+        metadata.setSigningAlgorithm(extendedMetadata.getSigningAlgorithm());
+
+        metadata.setIncludeDiscovery(extendedMetadata.isIdpDiscoveryEnabled());
+        metadata.setCustomDiscoveryURL(extendedMetadata.getIdpDiscoveryResponseURL());
+        metadata.setCustomDiscoveryResponseURL(extendedMetadata.getIdpDiscoveryURL());
+
+        // TODO other fields nameIDs
 
         ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/metadataView.jsp", true));
         model.addObject("metadata", metadata);
@@ -274,22 +278,13 @@ public class MetadataController {
 
     }
 
-    protected String getMetadataAsString(EntityDescriptor descriptor) throws MarshallingException {
-
-        MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
-        Marshaller marshaller = marshallerFactory.getMarshaller(descriptor);
-        Element element = marshaller.marshall(descriptor);
-        return XMLHelper.nodeToString(element);
-
+    protected String getMetadataAsString(EntityDescriptor descriptor, ExtendedMetadata extendedMetadata) throws MarshallingException {
+        return SAMLUtil.getMetadataAsString(metadataManager, keyManager, descriptor, extendedMetadata);
     }
 
     protected String getBaseURL(HttpServletRequest request) {
 
-        StringBuffer sb = new StringBuffer();
-        sb.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort());
-        sb.append(request.getContextPath());
-
-        String baseURL = sb.toString();
+        String baseURL = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
         log.debug("Base URL {}", baseURL);
         return baseURL;
 
@@ -351,23 +346,27 @@ public class MetadataController {
                 "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"sslSecurityProfile\" value=\"").append(metadata.getSslSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"sslHostnameVerification\" value=\"").append(metadata.getSslHostnameVerification()).append("\"/>\n" +
+                "           <property name=\"signMetadata\" value=\"").append(metadata.isSignMetadata()).append("\"/>\n" +
                 "           <property name=\"signingKey\" value=\"").append(metadata.getSigningKey()).append("\"/>\n" +
                 "           <property name=\"encryptionKey\" value=\"").append(metadata.getEncryptionKey()).append("\"/>\n");
-      if (metadata.getTlsKey() != null) {
-      sb.append("           <property name=\"tlsKey\" value=\"").append(metadata.getTlsKey()).append("\"/>\n");
-      }
-      sb.append("           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
+        if (metadata.getTlsKey() != null) {
+            sb.append("           <property name=\"tlsKey\" value=\"").append(metadata.getTlsKey()).append("\"/>\n");
+        }
+        if (metadata.getSigningAlgorithm() != null) {
+            sb.append("           <property name=\"signingAlgorithm\" value=\"").append(metadata.getSigningAlgorithm()).append("\"/>\n");
+        }
+        sb.append("           <property name=\"requireArtifactResolveSigned\" value=\"").append(metadata.isRequireArtifactResolveSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutRequestSigned\" value=\"").append(metadata.isRequireLogoutRequestSigned()).append("\"/>\n" +
                 "           <property name=\"requireLogoutResponseSigned\" value=\"").append(metadata.isRequireLogoutResponseSigned()).append("\"/>\n");
-      sb.append("           <property name=\"idpDiscoveryEnabled\" value=\"").append(metadata.isIdpDiscoveryEnabled()).append("\"/>\n");
-      if (metadata.isIdpDiscoveryEnabled()) {
-      sb.append("           <property name=\"idpDiscoveryURL\" value=\"").append(metadata.getIdpDiscoveryURL()).append("\"/>\n" +
-                "           <property name=\"idpDiscoveryResponseURL\" value=\"").append(metadata.getIdpDiscoveryResponseURL()).append("\"/>\n");
-      }
-      sb.append("        </bean>\n" +
+        sb.append("           <property name=\"idpDiscoveryEnabled\" value=\"").append(metadata.isIdpDiscoveryEnabled()).append("\"/>\n");
+        if (metadata.isIdpDiscoveryEnabled()) {
+            sb.append("           <property name=\"idpDiscoveryURL\" value=\"").append(metadata.getIdpDiscoveryURL()).append("\"/>\n" +
+                    "           <property name=\"idpDiscoveryResponseURL\" value=\"").append(metadata.getIdpDiscoveryResponseURL()).append("\"/>\n");
+        }
+        sb.append("        </bean>\n" +
                 "    </constructor-arg>\n" +
                 "</bean>");
-      return sb.toString();
+        return sb.toString();
     }
 
 }

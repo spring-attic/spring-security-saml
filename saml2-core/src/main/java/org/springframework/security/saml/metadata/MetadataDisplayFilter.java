@@ -14,23 +14,19 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.Configuration;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
-import org.w3c.dom.Element;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -59,6 +55,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      * Class storing all SAML metadata documents
      */
     protected MetadataManager manager;
+
+    /**
+     * Key manager for metadata signatures
+     */
+    protected KeyManager keyManager;
 
     /**
      * Provider for context based on URL
@@ -133,10 +134,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             if (descriptor == null) {
                 throw new ServletException("Metadata entity with ID " + manager.getHostedSPName() + " wasn't found");
             } else {
-                MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
-                Marshaller marshaller = marshallerFactory.getMarshaller(descriptor);
-                Element element = marshaller.marshall(descriptor);
-                writer.print(XMLHelper.nodeToString(element));
+                writer.print(getMetadataAsString(descriptor));
             }
         } catch (MarshallingException e) {
             log.error("Error marshalling entity descriptor", e);
@@ -147,6 +145,10 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         }
     }
 
+    protected String getMetadataAsString(EntityDescriptor descriptor) throws MarshallingException {
+        return SAMLUtil.getMetadataAsString(manager, keyManager , descriptor, null);
+    }
+
     @Autowired
     public void setManager(MetadataManager manager) {
         this.manager = manager;
@@ -155,6 +157,11 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     @Autowired
     public void setContextProvider(SAMLContextProvider contextProvider) {
         this.contextProvider = contextProvider;
+    }
+
+    @Autowired
+    public void setKeyManager(KeyManager keyManager) {
+        this.keyManager = keyManager;
     }
 
     /**
@@ -182,6 +189,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();
         Assert.notNull(manager, "MetadataManager must be set");
+        Assert.notNull(keyManager, "KeyManager must be set");
         Assert.notNull(contextProvider, "Context provider must be set");
     }
 

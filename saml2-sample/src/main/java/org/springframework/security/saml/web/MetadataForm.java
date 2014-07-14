@@ -29,6 +29,7 @@ public class MetadataForm {
     private boolean signMetadata = true;
     private String serializedMetadata;
     private String configuration;
+    private String signingAlgorithm;
     private String[] nameID;
     
     private String[] ssoBindings = new String[] {
@@ -283,6 +284,14 @@ public class MetadataForm {
 
     public void setSslHostnameVerification(String sslHostnameVerification) {
         this.sslHostnameVerification = sslHostnameVerification;
+    }
+
+    public String getSigningAlgorithm() {
+        return signingAlgorithm;
+    }
+
+    public void setSigningAlgorithm(String signingAlgorithm) {
+        this.signingAlgorithm = signingAlgorithm;
     }
 
 }

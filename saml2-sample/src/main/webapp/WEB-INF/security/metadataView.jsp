@@ -82,6 +82,20 @@
         </tr>
 
         <tr>
+            <td>Sign metadata</td>
+            <td>
+                <form:select path="signMetadata" multiple="false" disabled="true">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+        </tr>
+        <tr>
+            <td>Signing algorithm:</td>
+            <td><form:input readonly="true" path="signingAlgorithm" disabled="true"/></td>
+        </tr>
+
+        <tr>
             <td>Require signed LogoutRequest:</td>
             <td>
                 <form:select path="requireLogoutRequestSigned" multiple="false" disabled="true">
@@ -108,6 +122,15 @@
                 </form:select>
             </td>
         </tr>
+        <tr>
+            <td>Enabled IDP Discovery profile:</td>
+            <td>
+                <form:select path="includeDiscovery" multiple="false" disabled="true">
+                    <form:option value="true">Yes</form:option>
+                    <form:option value="false">No</form:option>
+                </form:select>
+            </td>
+        </tr>
 
         <c:if test="${metadata.local eq true}">
 
@@ -120,8 +143,8 @@
                 <td>
                     <strong>In order to permanently store the metadata follow these instructions:</strong>
                     <ul>
-                        <li>Store metadata content in file ${storagePath}</li>
-                        <li>Make sure to update your identity provider(s) with the generated metadata.</li>
+                        <li>Store metadata content in file WEB-INF/classes/security/${storagePath}</li>
+                        <li>Make sure to update your identity provider(s) with the generated metadata</li>
                         <li>Modify bean "metadata" in your securityContext.xml and include content from the
                             configuration bellow
                         </li>

@@ -243,6 +243,19 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
+            <td>Signing algorithm:</td>
+            <td><form:input path="signingAlgorithm"/></td>
+            <td><form:errors path="signingAlgorithm"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>Algorithm used for creation of digital signature on metadata. Typical values are "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" and "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"</small>
+            </td>
+        </tr>
+
+        <tr>
             <td>&nbsp;</td>
         </tr>
 

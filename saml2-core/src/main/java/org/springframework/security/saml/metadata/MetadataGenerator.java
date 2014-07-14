@@ -15,10 +15,8 @@
 package org.springframework.security.saml.metadata;
 
 import org.opensaml.Configuration;
-import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.common.Extensions;
 import org.opensaml.saml2.common.impl.ExtensionsBuilder;
@@ -27,17 +25,12 @@ import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.samlext.idpdisco.DiscoveryResponse;
 import org.opensaml.util.URLBuilder;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
-import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.signature.*;
+import org.opensaml.xml.security.keyinfo.KeyInfoGenerator;
+import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +57,10 @@ public class MetadataGenerator {
     private String entityBaseURL;
     private String entityAlias;
 
+    private boolean signMetadata = true;
     private boolean requestSigned = true;
     private boolean wantAssertionSigned = true;
-    private boolean signMetadata = true;
 
-    private String signingAlgorithm = null;
     private String signingKey = null;
     private String encryptionKey = null;
     private String tlsKey = null;
@@ -169,7 +161,6 @@ public class MetadataGenerator {
 
         boolean requestSigned = isRequestSigned();
         boolean assertionSigned = isWantAssertionSigned();
-        boolean signMetadata = isSignMetadata();
 
         Collection<String> includedNameID = getNameID();
 
@@ -193,16 +184,6 @@ public class MetadataGenerator {
         }
         descriptor.setEntityID(entityId);
         descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
-
-        try {
-            if (signMetadata) {
-                signSAMLObject(descriptor, keyManager.getCredential(signingKey), signingAlgorithm);
-            } else {
-                marshallSAMLObject(descriptor);
-            }
-        } catch (MessageEncodingException e) {
-            throw new RuntimeException(e);
-        }
 
         return descriptor;
 
@@ -249,6 +230,7 @@ public class MetadataGenerator {
             metadata.setIdpDiscoveryResponseURL(null);
         }
 
+        metadata.setSignMetadata(signMetadata);
         metadata.setEncryptionKey(encryptionKey);
         metadata.setSigningKey(signingKey);
         metadata.setAlias(entityAlias);
@@ -261,10 +243,12 @@ public class MetadataGenerator {
 
     protected KeyInfo generateKeyInfoForCredential(Credential credential) {
         try {
-            NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
-            SecurityHelper.getKeyInfoGenerator(credential, null, getKeyInfoGeneratorName());
-            KeyInfoGeneratorFactory factory = manager.getDefaultManager().getFactory(credential);
-            return factory.newInstance().generate(credential);
+            String keyInfoGeneratorName = org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
+            if (extendedMetadata != null && extendedMetadata.getKeyInfoGeneratorName() != null) {
+                keyInfoGeneratorName = extendedMetadata.getKeyInfoGeneratorName();
+            }
+            KeyInfoGenerator keyInfoGenerator = SecurityHelper.getKeyInfoGenerator(credential, null, keyInfoGeneratorName);
+            return keyInfoGenerator.generate(credential);
         } catch (org.opensaml.xml.security.SecurityException e) {
             log.error("Can't obtain key from the keystore or generate key info: " + encryptionKey, e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
@@ -595,102 +579,6 @@ public class MetadataGenerator {
         this.samlEntryPoint = samlEntryPoint;
     }
 
-    /**
-     * Signs the given SAML message if it a {@link org.opensaml.common.SignableSAMLObject} and this encoder has signing credentials.
-     *
-     * @param signableObject    object to sign
-     * @param signingCredential credential to sign with
-     * @param signingAlgorithm  signing algorithm to use (optional). Leave null to use credential's default algorithm
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
-     *          thrown if there is a problem marshalling or signing the outbound message
-     */
-    @SuppressWarnings("unchecked")
-    protected void signSAMLObject(SAMLObject signableObject, Credential signingCredential, String signingAlgorithm) throws MessageEncodingException {
-
-        if (signableObject instanceof SignableSAMLObject && signingCredential != null) {
-            SignableSAMLObject signableMessage = (SignableSAMLObject) signableObject;
-
-            XMLObjectBuilder<Signature> signatureBuilder = Configuration.getBuilderFactory().getBuilder(
-                    Signature.DEFAULT_ELEMENT_NAME);
-            Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
-
-            if (signingAlgorithm != null) {
-                signature.setSignatureAlgorithm(signingAlgorithm);
-            }
-
-            signature.setSigningCredential(signingCredential);
-            try {
-                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, getKeyInfoGeneratorName());
-            } catch (org.opensaml.xml.security.SecurityException e) {
-                throw new MessageEncodingException("Error preparing signature for signing", e);
-            }
-
-            signableMessage.setSignature(signature);
-            marshallSAMLObject(signableMessage);
-
-            try {
-                Signer.signObject(signature);
-            } catch (SignatureException e) {
-                log.error("Unable to sign protocol message", e);
-                throw new MessageEncodingException("Unable to sign protocol message", e);
-            }
-
-        }
-    }
-
-    private void marshallSAMLObject(SAMLObject samlObject) throws MessageEncodingException {
-        try {
-            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(samlObject);
-            if (marshaller == null) {
-                throw new MessageEncodingException("No marshaller registered for "
-                        + samlObject.getElementQName() + ", unable to marshall in preperation for signing");
-            }
-            marshaller.marshall(samlObject);
-        } catch (MarshallingException e) {
-            log.error("Unable to marshall protocol message in preparation for signing", e);
-            throw new MessageEncodingException("Unable to marshall protocol message in preparation for signing", e);
-        }
-    }
-
-    /**
-     * Name of the KeyInfoGenerator registered at default KeyInfoGeneratorManager.
-     *
-     * @return key info generator name
-     * @see Configuration#getGlobalSecurityConfiguration()
-     * @see org.opensaml.xml.security.SecurityConfiguration#getKeyInfoGeneratorManager()
-     */
-    protected String getKeyInfoGeneratorName() {
-        return org.springframework.security.saml.SAMLConstants.SAML_METADATA_KEY_INFO_GENERATOR;
-    }
-
-    /**
-     * Gets the signing algorithm to use when signing the SAML messages.
-     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
-     *
-     * @return A signing algorithm URI, if set. Otherwise returns null.
-     * @see org.opensaml.xml.signature.SignatureConstants
-     */
-    public String getSigningAlgorithm() {
-        return signingAlgorithm;
-    }
-
-    /**
-     * Sets the signing algorithm to use when signing the SAML messages.
-     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
-     * If this property is null, then the {@link org.opensaml.xml.security.credential.Credential} default algorithm will be used instead.
-     *
-     * Typical values are:
-     * http://www.w3.org/2000/09/xmldsig#rsa-sha1
-     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
-     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
-     *
-     * @param signingAlgorithm The new signing algorithm to use
-     * @see org.opensaml.xml.signature.SignatureConstants
-     */
-    public void setSigningAlgorithm(String signingAlgorithm) {
-        this.signingAlgorithm = signingAlgorithm;
-    }
-
     public boolean isRequestSigned() {
         return requestSigned;
     }
@@ -711,6 +599,12 @@ public class MetadataGenerator {
         return signMetadata;
     }
 
+    /**
+     * Sets flag indicating metadata should be digitally signed before display. Value will be copied
+     * to the extended metadata.
+     *
+     * @param signMetadata metadata sign flag
+     */
     public void setSignMetadata(boolean signMetadata) {
         this.signMetadata = signMetadata;
     }

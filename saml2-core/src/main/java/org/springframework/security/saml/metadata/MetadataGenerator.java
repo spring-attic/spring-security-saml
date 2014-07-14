@@ -168,9 +168,7 @@ public class MetadataGenerator {
         String entityBaseURL = getEntityBaseURL();
         String entityAlias = getEntityAlias();
 
-        if (entityId == null || entityBaseURL == null) {
-            throw new RuntimeException("Required attributes weren't set");
-        }
+        validateRequiredAttributes(entityId, entityBaseURL);
 
         if (id == null) {
             // Use entityID cleaned as NCName for ID in case no value is provided
@@ -183,10 +181,20 @@ public class MetadataGenerator {
             descriptor.setID(id);
         }
         descriptor.setEntityID(entityId);
-        descriptor.getRoleDescriptors().add(buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID));
+
+        SPSSODescriptor ssoDescriptor = buildSPSSODescriptor(entityBaseURL, entityAlias, requestSigned, assertionSigned, includedNameID);
+        if (ssoDescriptor != null) {
+            descriptor.getRoleDescriptors().add(ssoDescriptor);
+        }
 
         return descriptor;
 
+    }
+
+    protected void validateRequiredAttributes(String entityId, String entityBaseURL) {
+        if (entityId == null || entityBaseURL == null) {
+            throw new RuntimeException("Required attributes weren't set");
+        }
     }
 
     protected KeyInfo getServerKeyInfo(String alias) {

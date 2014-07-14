@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Vladimir Schaefer
  */
-public class ParserPoolHolder {
+public final class ParserPoolHolder {
 
     /**
      * Pool instance.

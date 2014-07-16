@@ -124,6 +124,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             throw new SAMLException("Response issue time is either too old or with date in the future, skew " + getResponseSkew() + ", time " + time);
         }
 
+        // Reject unsolicited messages when disabled
+        if (!context.getPeerExtendedMetadata().isSupportUnsolicitedResponse() && response.getInResponseTo() == null) {
+            throw new SAMLException("Reception of Unsolicited Response messages (without InResponseToField) is disabled");
+        }
+
         // Verify response to field if present, set request if correct
         SAMLMessageStorage messageStorage = context.getMessageStorage();
         if (messageStorage != null && response.getInResponseTo() != null) {

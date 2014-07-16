@@ -289,12 +289,12 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 								<row>
 									<entry><literal>customDiscoveryURL</literal></entry>
 									<entry>When <literal>includeDiscovery</literal> is true value overrides default discovery request URL.</entry>
-									<entry>generated value for internal discovery service, deprecated, use property idpDiscoveryURL in extendedMetadata instead</entry>
+									<entry>generated value for internal discovery service, deprecated, use property idpDiscoveryURL in ExtendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>customDiscoveryResponseURL</literal></entry>
 									<entry>When <literal>includeDiscoveryExtension</literal> is true value overrides default discovery response URL.</entry>
-									<entry>generated value for entry point response URL, deprecated, use property idpDiscoveryResponseURL in extendedMetadata instead</entry>
+									<entry>generated value for entry point response URL, deprecated, use property idpDiscoveryResponseURL in ExtendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>includeDiscoveryExtension</literal></entry>
@@ -342,7 +342,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				<title>Pre-configured metadata</title>
 				<para>In some situations it is beneficial to provide static version of the metadata document instead of the automatic generation. Need
 				for manual changes in the metadata or fixing of production settings are some of those. A custom metadata document describing local SP application
-				can be added by updating the <emphasis>metadata</emphasis> bean with correct <emphasis>ExtendedMetadata</emphasis>. Please follow these steps
+				can be added by updating the <emphasis>metadata</emphasis> bean with correct ExtendedMetadata. Please follow these steps
 				in order to do so: <itemizedlist>
 				  <listitem>
 					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <xref linkend="configuration-metadata-sp-generation">automatic metadata generator</xref>.</para>
@@ -408,7 +408,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 			<title>Identity provider metadata</title>
 			<para>Metadata for identity providers is imported to the <emphasis>metadataManager</emphasis> in a similar way as pre-configured
 			SP metadata. Metadata containing one or many identity providers can be added by providing an URL or a file. Processing of metadata and
-			processing of SAML messages can be customized using properties of <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtendedMetadata</emphasis>.</para>
+			processing of SAML messages can be customized using properties of ExtendedMetadataDelegate and ExtendedMetadata.</para>
 			<section id="configuration-metadata-idp-file">
 				<title>File-based metadata provider</title>
 				<para>File-based provider loads metadata from a file available in the filesystem or classpath.<programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
@@ -476,9 +476,9 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				<para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
 				When present, signature is verified with PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trust anchors. Make sure to include root CA
 				certificate and intermediary CA certificates of the signature in your <emphasis>keyStore</emphasis>. For details see <xref linkend="configuration-key-management-public-keys"/>.</para>
-				<para>You can limit certificates used to peform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the <emphasis>ExtendedMetadataDelegate</emphasis> bean. The provided
+				<para>You can limit certificates used to peform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the ExtendedMetadataDelegate bean. The provided
 				collection should contain aliases of keys to be used as trust anchors.</para>
-				<para>Signature verification can be disabled by setting property <emphasis>metadataTrustCheck</emphasis> to false in the <emphasis>ExtendedMetadataDelegate</emphasis> bean.
+				<para>Signature verification can be disabled by setting property <emphasis>metadataTrustCheck</emphasis> to false in the ExtendedMetadataDelegate bean.
 				Setting <emphasis>metadataRequireSignature</emphasis> to true will reject metadata unless it's digitally signed.</para>
 			</section>
 		</section>
@@ -678,6 +678,14 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                                     providers.
                                 </entry>
                             </row>
+                            <row>
+                                <entry>supportUnsolicitedResponse</entry>
+                                <entry>true</entry>
+                                <entry>remote only</entry>
+                                <entry>Enables support for Unsolicited Responses (IDP-Initialized SSO) sent from 
+                                    this remote entity.
+                                </entry>
+                            </row>
                         </tbody>
                     </tgroup>
                 </table>
@@ -747,7 +755,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  <para>Cryptographic material used to decrypt incoming data and verify trust of signatures in SAML messages and metadata is stored either
                  in metadata of remote entities or in the <emphasis>keyManager</emphasis>. In order to import additional trusted key to the keystore
                  run, e.g.: <programlisting>keytool -importcert -alias some-alias -file key.cer -keystore samlKeystore.jks</programlisting></para>
-                 <para>Imported keys can be referenced in <emphasis>ExtendedMetadataDelegate</emphasis> and <emphasis>ExtenedMetadata</emphasis> beans,
+                 <para>Imported keys can be referenced in ExtendedMetadataDelegate and ExtendedMetadata beans,
                  for details see <xref linkend="configuration-metadata-idp-signature"/> and <xref linkend="configuration-security-profiles"/>.</para>
              </section>
              <section id="configuration-key-management-ssl-keys">
@@ -955,8 +963,8 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
               </simplesect>
             </para>
         </section>
-        <section id="configuration-sso-process">
-             <title>Single sign-on process</title>
+        <section id="configuration-sso-process-sp-init">
+             <title>Single sign-on process (SP-initialized)</title>
              <para>SP initialized SSO process can be started in two ways:
              <itemizedlist>
                  <listitem>
@@ -1050,6 +1058,15 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                 </tgroup>
             </table>
             </para>
+        </section>
+        <section id="configuration-sso-process-idp-init">
+            <title>Single sign-on process (IDP-initialized)</title>
+            <para>Spring SAML supports reception of Unsolicited Response messages (so called IDP-initialized SSO). In this scenario IDP creates a Response object in the same way as if it was replying to 
+            an AuthnRequest message sent from SP, but it omits the InResponseTo parameter. Message is then sent to the AssertionConsumerURL of Spring SAML (typically 
+            <emphasis>scheme://server:port/contextPath/saml/SSO/alias/defaultAlias</emphasis>) using one of the supported bindings. List of all available endpoints and bindings can be found in the metadata 
+            of the Spring SAML application.</para>
+            <para>Received Unsolicited Respose message is processed and validated in exactly the same way as with SP-Initialized SSO.</para>
+            <para>Support for unsolicited messages can be disabled in the ExtendedMetadata of remote entities using property <emphasis>supportUnsolicitedResponse</emphasis>.</para>
         </section>
         <section id="configuration-logout">
             <title>Logout process</title>

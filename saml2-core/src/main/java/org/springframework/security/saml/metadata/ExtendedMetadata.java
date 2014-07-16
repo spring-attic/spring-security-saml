@@ -132,6 +132,12 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private boolean requireArtifactResolveSigned = true;
 
     /**
+     * Flag indicating whether to support unsolicited responses (IDP-initialized SSO). Only valid for remote
+     * entities.
+     */
+    private boolean supportUnsolicitedResponse = true;
+
+    /**
      * Security profile to use for this local entity - MetaIOP (default) or PKIX.
      *
      * @return profile
@@ -525,6 +531,25 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     public void setSignMetadata(boolean signMetadata) {
         this.signMetadata = signMetadata;
+    }
+
+    /**
+     * @return true when system should accept unsolicited response messages from this remote entity
+     */
+    public boolean isSupportUnsolicitedResponse() {
+        return supportUnsolicitedResponse;
+    }
+
+    /**
+     * When set to true system will support reception of Unsolicited SAML Response messages (IDP-initialized single
+     * sign-on) from this remote entity. When disabled such messages will be rejected.
+     *
+     * Unsolicited Responses are by default enabled.
+     *
+     * @param supportUnsolicitedResponse unsolicited response flag
+     */
+    public void setSupportUnsolicitedResponse(boolean supportUnsolicitedResponse) {
+        this.supportUnsolicitedResponse = supportUnsolicitedResponse;
     }
 
     /**

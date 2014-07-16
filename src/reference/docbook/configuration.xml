@@ -963,110 +963,114 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
               </simplesect>
             </para>
         </section>
-        <section id="configuration-sso-process-sp-init">
-             <title>Single sign-on process (SP-initialized)</title>
-             <para>SP initialized SSO process can be started in two ways:
-             <itemizedlist>
-                 <listitem>
-                     <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
-                 </listitem>
-                 <listitem>
-                     <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>
-                 </listitem>
-             </itemizedlist>
-             </para>
-             <para>After identification of IDP to use for authentication (for details see <xref linkend="configuration-discovery"/>), SAML Extension creates an AuthnRequest SAML message
-             and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
-             object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
-             The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
-             <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
-             <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
-	<property name="defaultProfileOptions">
-		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
-			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
-			<property name="includeScoping" value="false"/>
-		</bean>
-	</property>
-</bean>]]></programlisting></para>
-            <para>WebSSOProfileOptions supports the following settings:
-                <table id="configuration-sso-webssoprofile-table">
-                 <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
-                 <tgroup cols="2">
-                     <colspec colname="_1" colwidth="0.4*" align="left"/>
-                     <colspec colname="_2" colwidth="1.0*" align="left"/>
-                     <thead>
-                         <row>
-                             <entry>Property</entry>
-                             <entry>Description</entry>
-                         </row>
-                     </thead>
-                    <tbody>
-                        <row>
-                            <entry>binding</entry>
-                            <entry>Default: binding of the first declared SingleSignOnService in IDP metadata. Binding used to send message to IDP. Supported values depend on the SP configuration, typically "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                "urn:oasis:names:tc:SAML:2.0:bindings:PAOS" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser".</entry>
-                        </row>
-                        <row>
-                            <entry>providerName</entry>
-                            <entry>Default: empty. Human readable name of the local SP sent with the authentication request.</entry>
-                        </row>
-                        <row>
-                            <entry>assertionConsumerIndex</entry>
-                            <entry>Default: empty. When set determines where should IDP send response and which binding to use. Otherwise system uses the default assertion consumer service marked as default, or first applicable. Available indexes can be found in metadata of this service provider.</entry>
-                        </row>
-                        <row>
-                            <entry>nameID</entry>
-                            <entry>Default: empty. Name ID to request from IDP in the NameIDPolicy. No NameIDPolicy is sent when not specified. Typical values are "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted".</entry>
-                        </row>
-                        <row>
-                            <entry>allowCreate</entry>
-                            <entry>Default: empty. Only applicable when nameID is specified, when true instructs IDP that it is allowed to create new user based on the authentication request.</entry>
-                        </row>
-                        <row>
-                            <entry>passive</entry>
-                            <entry>Default: false. Sets whether the IdP should refrain from interacting with the user during the authentication process.</entry>
-                        </row>
-                        <row>
-                            <entry>forceAuthn</entry>
-                            <entry>Default: false. When true IDP is required to re-authenticate user and not rely on previous authentication events.</entry>
-                        </row>
-                        <row>
-                            <entry>includeScoping</entry>
-                            <entry>Default: true. When true request will include Scoping element.</entry>
-                        </row>
-                        <row>
-                            <entry>allowedIDPs</entry>
-                            <entry>Default: empty. Values to be included in the Scoping element on top of the IDP message is sent to. Only applicable when includeScoping is set to true.</entry>
-                        </row>
-                        <row>
-                            <entry>proxyCount</entry>
-                            <entry>Default: 2. Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. Use zero to disable proxying or value >0 to specify how many hops are allowed. Only applicable when includeScoping is set to true.</entry>
-                        </row>
-                        <row>
-                            <entry>authnContexts</entry>
-                            <entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
-                        </row>
-                        <row>
-                            <entry>authnContextComparison</entry>
-                            <entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
-                        </row>
-                        <row>
-                            <entry>relayState</entry>
-                            <entry>Default: empty. Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </table>
-            </para>
-        </section>
-        <section id="configuration-sso-process-idp-init">
-            <title>Single sign-on process (IDP-initialized)</title>
-            <para>Spring SAML supports reception of Unsolicited Response messages (so called IDP-initialized SSO). In this scenario IDP creates a Response object in the same way as if it was replying to 
-            an AuthnRequest message sent from SP, but it omits the InResponseTo parameter. Message is then sent to the AssertionConsumerURL of Spring SAML (typically 
-            <emphasis>scheme://server:port/contextPath/saml/SSO/alias/defaultAlias</emphasis>) using one of the supported bindings. List of all available endpoints and bindings can be found in the metadata 
-            of the Spring SAML application.</para>
-            <para>Received Unsolicited Respose message is processed and validated in exactly the same way as with SP-Initialized SSO.</para>
-            <para>Support for unsolicited messages can be disabled in the ExtendedMetadata of remote entities using property <emphasis>supportUnsolicitedResponse</emphasis>.</para>
+        <section id="configuration-sso-process">
+            <title>Single sign-on process</title>
+            <para>Spring SAML Extension supports both SP-initialized and IDP-initialized single sign-on.</para>        
+            <section id="configuration-sso-process-sp-init">
+                 <title>Service provider initialized SSO</title>
+                 <para>SP initialized SSO process can be started in two ways:
+                 <itemizedlist>
+                     <listitem>
+                         <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
+                     </listitem>
+                     <listitem>
+                         <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>
+                     </listitem>
+                 </itemizedlist>
+                 </para>
+                 <para>After identification of IDP to use for authentication (for details see <xref linkend="configuration-discovery"/>), SAML Extension creates an AuthnRequest SAML message
+                 and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
+                 object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
+                 The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
+                 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
+                 <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
+    	<property name="defaultProfileOptions">
+    		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+    			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    			<property name="includeScoping" value="false"/>
+    		</bean>
+    	</property>
+    </bean>]]></programlisting></para>
+                <para>WebSSOProfileOptions supports the following settings:
+                    <table id="configuration-sso-webssoprofile-table">
+                     <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
+                     <tgroup cols="2">
+                         <colspec colname="_1" colwidth="0.4*" align="left"/>
+                         <colspec colname="_2" colwidth="1.0*" align="left"/>
+                         <thead>
+                             <row>
+                                 <entry>Property</entry>
+                                 <entry>Description</entry>
+                             </row>
+                         </thead>
+                        <tbody>
+                            <row>
+                                <entry>binding</entry>
+                                <entry>Default: binding of the first declared SingleSignOnService in IDP metadata. Binding used to send message to IDP. Supported values depend on the SP configuration, typically "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                    "urn:oasis:names:tc:SAML:2.0:bindings:PAOS" and "urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser".</entry>
+                            </row>
+                            <row>
+                                <entry>providerName</entry>
+                                <entry>Default: empty. Human readable name of the local SP sent with the authentication request.</entry>
+                            </row>
+                            <row>
+                                <entry>assertionConsumerIndex</entry>
+                                <entry>Default: empty. When set determines where should IDP send response and which binding to use. Otherwise system uses the default assertion consumer service marked as default, or first applicable. Available indexes can be found in metadata of this service provider.</entry>
+                            </row>
+                            <row>
+                                <entry>nameID</entry>
+                                <entry>Default: empty. Name ID to request from IDP in the NameIDPolicy. No NameIDPolicy is sent when not specified. Typical values are "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted".</entry>
+                            </row>
+                            <row>
+                                <entry>allowCreate</entry>
+                                <entry>Default: empty. Only applicable when nameID is specified, when true instructs IDP that it is allowed to create new user based on the authentication request.</entry>
+                            </row>
+                            <row>
+                                <entry>passive</entry>
+                                <entry>Default: false. Sets whether the IdP should refrain from interacting with the user during the authentication process.</entry>
+                            </row>
+                            <row>
+                                <entry>forceAuthn</entry>
+                                <entry>Default: false. When true IDP is required to re-authenticate user and not rely on previous authentication events.</entry>
+                            </row>
+                            <row>
+                                <entry>includeScoping</entry>
+                                <entry>Default: true. When true request will include Scoping element.</entry>
+                            </row>
+                            <row>
+                                <entry>allowedIDPs</entry>
+                                <entry>Default: empty. Values to be included in the Scoping element on top of the IDP message is sent to. Only applicable when includeScoping is set to true.</entry>
+                            </row>
+                            <row>
+                                <entry>proxyCount</entry>
+                                <entry>Default: 2. Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. Use zero to disable proxying or value >0 to specify how many hops are allowed. Only applicable when includeScoping is set to true.</entry>
+                            </row>
+                            <row>
+                                <entry>authnContexts</entry>
+                                <entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                            </row>
+                            <row>
+                                <entry>authnContextComparison</entry>
+                                <entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                            </row>
+                            <row>
+                                <entry>relayState</entry>
+                                <entry>Default: empty. Value is sent to IDP and provided back to SP as part of the authentication response.</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                </para>
+            </section>
+            <section id="configuration-sso-process-idp-init">
+                <title>Identity provider initialized SSO</title>
+                <para>Spring SAML supports reception of Unsolicited Response messages (so called IDP-initialized SSO). In this scenario IDP creates a Response object in the same way as if it was replying to 
+                an AuthnRequest message sent from SP, but it omits the InResponseTo parameter. Message is then sent to the AssertionConsumerURL of Spring SAML (typically 
+                <emphasis>scheme://server:port/contextPath/saml/SSO/alias/defaultAlias</emphasis>) using one of the supported bindings. List of all available endpoints and bindings can be found in the metadata 
+                of the Spring SAML application.</para>
+                <para>Received Unsolicited Respose message is processed and validated in exactly the same way as with SP-Initialized SSO.</para>
+                <para>Support for unsolicited messages can be disabled in the ExtendedMetadata of remote entities using property <emphasis>supportUnsolicitedResponse</emphasis>.</para>
+            </section>
         </section>
         <section id="configuration-logout">
             <title>Logout process</title>

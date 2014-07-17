@@ -81,6 +81,7 @@ public class WebSSOProfileConsumerImplTest {
         messageContext = contextProvider.getLocalEntity(request, null);
         messageContext.setLocalEntityEndpoint(assertionConsumerService);
         messageContext.setPeerEntityMetadata(manager.getEntityDescriptor(manager.getDefaultIDP()));
+        messageContext.setPeerExtendedMetadata(manager.getExtendedMetadata(manager.getDefaultIDP()));
         verify(request);
 
         helper = new WebSSOProfileTestHelper(builderFactory);

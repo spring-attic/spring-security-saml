@@ -602,7 +602,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         List<X509Certificate> certificates = new LinkedList<X509Certificate>();
         for (String key : trustedKeys) {
             log.debug("Adding PKIX trust anchor {} for metadata verification of provider {}", key, provider);
-            certificates.add(keyManager.getCertificate(key));
+            X509Certificate certificate = keyManager.getCertificate(key);
+            if (certificate != null) {
+                certificates.add(certificate);
+            } else {
+                log.warn("Cannot construct PKIX trust anchor for key with alias {} for provider {}, key isn't included in the keystore", key, provider);
+            }
         }
 
         List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();

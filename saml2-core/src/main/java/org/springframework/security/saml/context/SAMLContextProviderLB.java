@@ -151,6 +151,9 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
      * @param contextPath context path
      */
     public void setContextPath(String contextPath) {
+        if (contextPath == null || "/".equals(contextPath)) {
+            contextPath = "";
+        }
         this.contextPath = contextPath;
     }
 
@@ -167,7 +170,7 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
         Assert.hasText(serverName, "Server name must be set");
         Assert.notNull(contextPath, "Context path must be set");
         if (StringUtils.hasLength(contextPath)) {
-            Assert.isTrue(contextPath.startsWith("/"), "Context path must must start with a forward slash");
+            Assert.isTrue(contextPath.startsWith("/"), "Context path must be set and start with a forward slash");
         }
 
     }

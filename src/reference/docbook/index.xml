@@ -19,12 +19,6 @@
 	</info>
 	<toc/>
 
-	<!--
-	TODO
-	- Requirements
-	- Supported environments
-	-->
-
 	<part xml:id="getting-started">
 		<title>Getting Started</title>
 		<partintro>

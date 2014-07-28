@@ -156,8 +156,7 @@
 	<section id="section-requirements">
 		<title>Requirements</title>
 
-		<para>Spring Security SAML Extension requires as minimum Java 1.6.</para>
-		<!-- <para>TODO Apache Tomcat, Jetty, Oracle Weblogic, ....</para> -->
+		<para>Spring Security SAML Extension requires as a minimum Java 1.6 and is known to work with most Java containers and application servers.</para>
 	</section>
 
 	<section id="section-source">

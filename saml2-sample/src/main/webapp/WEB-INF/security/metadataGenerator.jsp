@@ -91,12 +91,40 @@ Generates new metadata for service provider. Output can be used to configure you
             <td></td>
             <td colspan="2">
                 <small>Alias is an internal mechanism allowing collocating multiple service providers on one server.
-                    Alias must be unique.
+                    When set, alias must be unique.
                 </small>
             </td>
         </tr>
         <tr>
-            <td>Security profile:</td>
+            <td>Signing key:</td>
+            <td><form:select path="signingKey" items="${availableKeys}"/></td>
+            <td class="error"><form:errors path="signingKey"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>Key used for digital signatures of SAML messages. Public key will be included in the metadata.</small>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Encryption key:</td>
+            <td><form:select path="encryptionKey" items="${availableKeys}"/></td>
+            <td class="error"><form:errors path="encryptionKey"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2">
+                <small>Key used for digital encryption of SAML messages. Public key will be included in the metadata.</small>
+            </td>
+        </tr>
+
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>Signature security profile:</td>
             <td>
                 <form:select path="securityProfile" multiple="false">
                     <form:option value="metaiop">MetaIOP</form:option>
@@ -127,35 +155,11 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>Signing key:</td>
-            <td><form:select path="signingKey" items="${availableKeys}"/></td>
-            <td class="error"><form:errors path="signingKey"/></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="2">
-                <small>Key used for digital signatures of SAML messages. Public key will be included in the metadata.</small>
-            </td>
-        </tr>
-
-        <tr>
-            <td>Encryption key:</td>
-            <td><form:select path="encryptionKey" items="${availableKeys}"/></td>
-            <td class="error"><form:errors path="encryptionKey"/></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="2">
-                <small>Key used for digital encryption of SAML messages. Public key will be included in the metadata.</small>
-            </td>
-        </tr>
-
-        <tr>
             <td>&nbsp;</td>
         </tr>
 
         <tr>
-            <td>SSL/TLS Security profile:</td>
+            <td>SSL/TLS security profile:</td>
             <td>
                 <form:select path="sslSecurityProfile" multiple="false">
                     <form:option value="pkix">PKIX</form:option>
@@ -185,7 +189,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>SSL/TLS Hostname Verification:</td>
+            <td>SSL/TLS hostname verification:</td>
             <td>
                 <form:select path="sslHostnameVerification" multiple="false">
                     <form:option value="default">Standard hostname verifier</form:option>
@@ -204,7 +208,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>SSL/TLS Client authentication:</td>
+            <td>SSL/TLS client authentication:</td>
             <td>
                 <form:select path="tlsKey">
                     <form:option value="">None</form:option>
@@ -375,7 +379,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>Enable IDP Discovery profile:</td>
+            <td>Enable IDP discovery profile:</td>
             <td>
                 <form:select path="includeDiscovery" multiple="false">
                     <form:option value="true">Yes</form:option>
@@ -397,7 +401,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>Custom URL for IDP Discovery:</td>
+            <td>Custom URL for IDP discovery:</td>
                     <td>
                 <form:input path="customDiscoveryURL"/>
             </td>
@@ -411,7 +415,7 @@ Generates new metadata for service provider. Output can be used to configure you
         </tr>
 
         <tr>
-            <td>Include IDP Discovery extension in metadata:</td>
+            <td>Include IDP discovery extension in metadata:</td>
             <td>
                 <form:select path="includeDiscoveryExtension" multiple="false">
                     <form:option value="true">Yes</form:option>

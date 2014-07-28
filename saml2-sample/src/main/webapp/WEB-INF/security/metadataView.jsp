@@ -38,25 +38,6 @@
         </tr>
 
         <tr>
-            <td>Security profile:</td>
-            <td>
-                <form:select path="securityProfile" multiple="false" disabled="true">
-                    <form:option value="metaiop">MetaIOP</form:option>
-                    <form:option value="pkix">PKIX</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>SSL Security profile:</td>
-            <td>
-                <form:select path="sslSecurityProfile" multiple="false" disabled="true">
-                    <form:option value="pkix">PKIX</form:option>
-                    <form:option value="metaiop">MetaIOP</form:option>
-                </form:select>
-            </td>
-        </tr>
-
-        <tr>
             <td>Signing key:</td>
             <td><form:input readonly="true" path="signingKey"/></td>
         </tr>
@@ -64,13 +45,28 @@
             <td>Encryption key:</td>
             <td><form:input readonly="true" path="encryptionKey"/></td>
         </tr>
+
         <tr>
-            <td>SSL/TLS key:</td>
-            <td><form:input readonly="true" path="tlsKey"/></td>
+            <td>Signature security profile:</td>
+            <td>
+                <form:select path="securityProfile" multiple="false" disabled="true">
+                    <form:option value="metaiop">MetaIOP</form:option>
+                    <form:option value="pkix">PKIX</form:option>
+                </form:select>
+            </td>
         </tr>
 
         <tr>
-            <td>SSL/TLS Hostname Verification:</td>
+            <td>SSL/TLS security profile:</td>
+            <td>
+                <form:select path="sslSecurityProfile" multiple="false" disabled="true">
+                    <form:option value="pkix">PKIX</form:option>
+                    <form:option value="metaiop">MetaIOP</form:option>
+                </form:select>
+            </td>
+        </tr>
+        <tr>
+            <td>SSL/TLS hostname verification:</td>
             <td>
                 <form:select path="sslHostnameVerification" multiple="false" disabled="true">
                     <form:option value="default">Standard hostname verifier</form:option>
@@ -79,6 +75,10 @@
                     <form:option value="allowAll">Disable hostname verification (allow all)</form:option>
                 </form:select>
             </td>
+        </tr>
+        <tr>
+            <td>SSL/TLS client authentication:</td>
+            <td><form:input readonly="true" path="tlsKey"/></td>
         </tr>
 
         <tr>
@@ -123,7 +123,7 @@
             </td>
         </tr>
         <tr>
-            <td>Enabled IDP Discovery profile:</td>
+            <td>Enabled IDP discovery profile:</td>
             <td>
                 <form:select path="includeDiscovery" multiple="false" disabled="true">
                     <form:option value="true">Yes</form:option>

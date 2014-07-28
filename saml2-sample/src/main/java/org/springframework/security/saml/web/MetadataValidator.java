@@ -44,7 +44,6 @@ public class MetadataValidator implements Validator {
         MetadataForm metadata = (MetadataForm) target;
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "entityId", "required", "Entity id must be set.");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "alias", "required", "Alias must be set.");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "baseURL", "required", "Base URL is required.");
 
         if (metadata.getSecurityProfile() == null) {

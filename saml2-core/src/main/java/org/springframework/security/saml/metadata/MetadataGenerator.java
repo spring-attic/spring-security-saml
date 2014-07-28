@@ -95,8 +95,8 @@ public class MetadataGenerator {
         aliases.put("x509_subject", NameIDType.X509_SUBJECT);
     }
 
-    private Collection<String> bindingsSSO = Arrays.asList("artifact", "post", "paos");
-    private Collection<String> bindingsHoKSSO = Arrays.asList("artifact", "post");
+    private Collection<String> bindingsSSO = Arrays.asList("artifact", "post");
+    private Collection<String> bindingsHoKSSO = Arrays.asList();
     private Collection<String> bindingsSLO = Arrays.asList("post", "redirect");
 
     @Deprecated
@@ -193,7 +193,7 @@ public class MetadataGenerator {
 
     protected void validateRequiredAttributes(String entityId, String entityBaseURL) {
         if (entityId == null || entityBaseURL == null) {
-            throw new RuntimeException("Required attributes weren't set");
+            throw new RuntimeException("Required attributes entityId or entityBaseURL weren't set");
         }
     }
 
@@ -492,16 +492,17 @@ public class MetadataGenerator {
      */
     private String getServerURL(String entityBaseURL, String entityAlias, String processingURL, Map<String, String> parameters) {
 
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append(entityBaseURL);
         if (!processingURL.startsWith("/")) {
             result.append("/");
         }
         result.append(processingURL);
-        if (!processingURL.endsWith("/")) {
-            result.append("/");
-        }
+
         if (entityAlias != null) {
+            if (!processingURL.endsWith("/")) {
+                result.append("/");
+            }
             result.append("alias/");
             result.append(entityAlias);
         }
@@ -682,6 +683,17 @@ public class MetadataGenerator {
         return bindingsSSO;
     }
 
+    /**
+     * List of bindings to be included in the generated metadata for Web Single Sign-On.
+     * Ordering of bindings affects inclusion in the generated metadata.
+     *
+     * Supported values are: "artifact" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"),
+     * "post" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST") and "paos" (or "urn:oasis:names:tc:SAML:2.0:bindings:PAOS").
+     *
+     * The following bindings are included by default: "artifact", "post"
+     *
+     * @param bindingsSSO bindings for web single sign-on
+     */
     public void setBindingsSSO(Collection<String> bindingsSSO) {
         if (bindingsSSO == null) {
             this.bindingsSSO = Collections.emptyList();
@@ -694,6 +706,17 @@ public class MetadataGenerator {
         return bindingsSLO;
     }
 
+    /**
+     * List of bindings to be included in the generated metadata for Single Logout.
+     * Ordering of bindings affects inclusion in the generated metadata.
+     *
+     * Supported values are: "post" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST") and
+     * "redirect" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect").
+     *
+     * The following bindings are included by default: "post", "redirect"
+     *
+     * @param bindingsSLO bindings for single logout
+     */
     public void setBindingsSLO(Collection<String> bindingsSLO) {
         if (bindingsSLO == null) {
             this.bindingsSLO = Collections.emptyList();
@@ -706,6 +729,17 @@ public class MetadataGenerator {
         return bindingsHoKSSO;
     }
 
+    /**
+     * List of bindings to be included in the generated metadata for Web Single Sign-On Holder of Key.
+     * Ordering of bindings affects inclusion in the generated metadata.
+     *
+     * Supported values are: "artifact" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact") and
+     * "post" (or "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST").
+     *
+     * By default there are no included bindings for the profile.
+     *
+     * @param bindingsHoKSSO bindings for web single sign-on holder-of-key
+     */
     public void setBindingsHoKSSO(Collection<String> bindingsHoKSSO) {
         if (bindingsHoKSSO == null) {
             this.bindingsHoKSSO = Collections.emptyList();

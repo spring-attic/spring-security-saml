@@ -57,6 +57,7 @@ public class MetadataGeneratorTest {
         EntityDescriptor metadata = generator.generateMetadata();
 
         assertEquals("my_entity", metadata.getEntityID());
+        assertEquals("my_entity", metadata.getID());
         SPSSODescriptor spssoDescriptor = metadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         assertNotNull(spssoDescriptor);
 
@@ -65,7 +66,7 @@ public class MetadataGeneratorTest {
         assertNotNull(spssoDescriptor.getExtensions().getUnknownXMLObjects());
         assertTrue(spssoDescriptor.getExtensions().getUnknownXMLObjects().size() == 1);
 
-        assertEquals(5, spssoDescriptor.getAssertionConsumerServices().size());
+        assertEquals(2, spssoDescriptor.getAssertionConsumerServices().size());
         assertEquals(2, spssoDescriptor.getSingleLogoutServices().size());
 
         // Custom bindings
@@ -81,17 +82,47 @@ public class MetadataGeneratorTest {
         List<AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
         assertEquals(2, assertionConsumerServices.size());
         assertEquals(SAMLConstants.SAML2_PAOS_BINDING_URI, assertionConsumerServices.get(0).getBinding());
+        assertEquals("http://localhost/saml/SSO", assertionConsumerServices.get(0).getLocation());
         assertEquals(SAMLConstants.SAML2_POST_BINDING_URI, assertionConsumerServices.get(1).getBinding());
+        assertEquals("http://localhost/saml/SSO", assertionConsumerServices.get(1).getLocation());
         assertEquals(Boolean.TRUE, assertionConsumerServices.get(1).isDefault());
 
         List<SingleLogoutService> logoutServices = spssoDescriptor.getSingleLogoutServices();
         assertEquals(1, logoutServices.size());
         assertEquals(SAMLConstants.SAML2_SOAP11_BINDING_URI, logoutServices.get(0).getBinding());
+        assertEquals("http://localhost/saml/SingleLogout", logoutServices.get(0).getLocation());
 
         List<NameIDFormat> nameID = spssoDescriptor.getNameIDFormats();
         assertEquals(2, nameID.size());
         assertEquals(NameIDType.TRANSIENT, nameID.get(0).getFormat());
         assertEquals(NameIDType.EMAIL, nameID.get(1).getFormat());
+
+    }
+
+
+    /**
+     * Test verifies that metadata with alias can be generated.
+     */
+    @Test
+    public void testGenerateMetadataAlias() {
+
+        generator.setEntityBaseURL("http://localhost");
+        generator.setEntityId("urn:myentity:fi");
+        generator.setEntityAlias("alias1");
+        EntityDescriptor metadata = generator.generateMetadata();
+
+        assertEquals("urn:myentity:fi", metadata.getEntityID());
+        assertEquals("urn_myentity_fi", metadata.getID());
+        SPSSODescriptor spssoDescriptor = metadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+        assertNotNull(spssoDescriptor);
+
+        List<AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
+        assertEquals(2, assertionConsumerServices.size());
+        assertEquals(SAMLConstants.SAML2_ARTIFACT_BINDING_URI, assertionConsumerServices.get(0).getBinding());
+        assertEquals("http://localhost/saml/SSO/alias/alias1", assertionConsumerServices.get(0).getLocation());
+        assertEquals(Boolean.TRUE, assertionConsumerServices.get(0).isDefault());
+        assertEquals(SAMLConstants.SAML2_POST_BINDING_URI, assertionConsumerServices.get(1).getBinding());
+        assertEquals("http://localhost/saml/SSO/alias/alias1", assertionConsumerServices.get(1).getLocation());
 
     }
 

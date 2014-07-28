@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -107,15 +108,8 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
                         log.info("No default metadata configured, generating with default values, please pre-configure metadata for production use");
 
                         // Defaults
-                        String alias = DEFAULT_ALIAS;
+                        String alias = generator.getEntityAlias();
                         String baseURL = getDefaultBaseURL(request);
-
-                        // Use default entityAlias if not set
-                        if (generator.getEntityAlias() == null) {
-                            generator.setEntityAlias(alias);
-                        } else {
-                            alias = generator.getEntityAlias();
-                        }
 
                         // Use default baseURL if not set
                         if (generator.getEntityBaseURL() == null) {
@@ -156,16 +150,23 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
     }
 
     protected String getDefaultEntityID(String entityBaseUrl, String alias) {
+
         String displayFilterUrl = MetadataDisplayFilter.FILTER_URL;
         if (displayFilter != null) {
             displayFilterUrl = displayFilter.getFilterProcessesUrl();
         }
+
         StringBuilder sb = new StringBuilder();
         sb.append(entityBaseUrl);
         sb.append(displayFilterUrl);
-        sb.append("/alias/");
-        sb.append(alias);
+
+        if (StringUtils.hasLength(alias)) {
+            sb.append("/alias/");
+            sb.append(alias);
+        }
+
         return sb.toString();
+
     }
 
     protected String getDefaultBaseURL(HttpServletRequest request) {

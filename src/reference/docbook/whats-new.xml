@@ -41,6 +41,7 @@
           <listitem><para>Possibility to include attributes from only the authenticated Assertion, or from all</para></listitem>
           <listitem><para>New socket factory for trust verification during loading of metadata from HTTPS</para></listitem>
           <listitem><para>Possibility to disable support for IDP-initialized SSO</para></listitem>
+          <listitem><para>Usage of metadata alias is now optional</para></listitem>
         </itemizedlist>
 		</para>
 	</section>
@@ -74,11 +75,14 @@
         <listitem><para>new mandatory property KeyManager (autowired)</para></listitem>
         </itemizedlist>
         </para>
-
+       
         <para><emphasis>MetadataGenerator</emphasis>
         <itemizedlist spacing="compact">
         <listitem><para>removed methods signSAMLObject (moved to SAMLUtil), getKeyInfoGeneratorName (moved to ExtendedMetadata)</para></listitem>
         <listitem><para>fields includeDiscovery, customDiscoveryURL and customDiscoveryResponseURL are now deprecated, use values in ExtendedMetadata instead</para></listitem>
+        <listitem><para>by default endpoint for Web SSO no longer includes PAOS binding, set property <emphasis>bindingsSSO</emphasis> with values "artifact", "post", "paos" for backwards compatibility</para></listitem>
+        <listitem><para>by default endpoints for Web SSO holder of key are no longer included, set property <emphasis>bindingsHoKSSO</emphasis> with values "artifact" and "post" for backwards compatibility</para></listitem>
+        <listitem><para>by default <emphasis>MetadataGeneratorFilter</emphasis> no longer sets property <emphasis>entityAlias</emphasis> to value <emphasis>defaultAlias</emphasis>, set the value manually for backwards compatibility</para></listitem>
         </itemizedlist>
         </para>
 

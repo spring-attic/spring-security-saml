@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.KeyStoreException;
 import java.util.*;
 
+import static org.springframework.util.StringUtils.hasLength;
+
 /**
  * Class allows manipulation of metadata from web UI.
  */
@@ -108,7 +110,6 @@ public class MetadataController {
         model.addObject("availableKeys", getAvailablePrivateKeys());
         defaultForm.setBaseURL(getBaseURL(request));
         defaultForm.setEntityId(getEntityId(request));
-        defaultForm.setAlias(getEntityId(request));
         defaultForm.setNameID(MetadataGenerator.defaultNameID.toArray(new String[MetadataGenerator.defaultNameID.size()]));
 
         model.addObject("metadata", defaultForm);
@@ -131,7 +132,11 @@ public class MetadataController {
         generator.setKeyManager(keyManager);
 
         generator.setEntityId(metadata.getEntityId());
-        generator.setEntityAlias(metadata.getAlias());
+
+        if (hasLength(metadata.getAlias())) {
+            generator.setEntityAlias(metadata.getAlias());
+        }
+
         generator.setEntityBaseURL(metadata.getBaseURL());
         generator.setSignMetadata(metadata.isSignMetadata());
         generator.setRequestSigned(metadata.isRequestSigned());
@@ -139,7 +144,7 @@ public class MetadataController {
         generator.setSigningKey(metadata.getSigningKey());
         generator.setEncryptionKey(metadata.getEncryptionKey());
 
-        if (metadata.getTlsKey() != null && metadata.getTlsKey().length() > 0) {
+        if (hasLength(metadata.getTlsKey())) {
             generator.setTlsKey(metadata.getTlsKey());
         }
 
@@ -201,7 +206,10 @@ public class MetadataController {
         extendedMetadata.setRequireLogoutResponseSigned(metadata.isRequireLogoutResponseSigned());
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
         extendedMetadata.setSslHostnameVerification(metadata.getSslHostnameVerification());
-        extendedMetadata.setSigningAlgorithm(metadata.getSigningAlgorithm());
+
+        if (hasLength(metadata.getSigningAlgorithm())) {
+            extendedMetadata.setSigningAlgorithm(metadata.getSigningAlgorithm());
+        }
 
         if (metadata.isStore()) {
 
@@ -341,9 +349,11 @@ public class MetadataController {
                 "    </constructor-arg>\n" +
                 "    <constructor-arg>\n" +
                 "        <bean class=\"org.springframework.security.saml.metadata.ExtendedMetadata\">\n" +
-                "           <property name=\"local\" value=\"true\"/>\n" +
-                "           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n" +
-                "           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
+                "           <property name=\"local\" value=\"true\"/>\n");
+        if (metadata.getAlias() != null) {
+            sb.append("           <property name=\"alias\" value=\"").append(metadata.getAlias()).append("\"/>\n");
+        }
+        sb.append("           <property name=\"securityProfile\" value=\"").append(metadata.getSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"sslSecurityProfile\" value=\"").append(metadata.getSslSecurityProfile()).append("\"/>\n" +
                 "           <property name=\"sslHostnameVerification\" value=\"").append(metadata.getSslHostnameVerification()).append("\"/>\n" +
                 "           <property name=\"signMetadata\" value=\"").append(metadata.isSignMetadata()).append("\"/>\n" +

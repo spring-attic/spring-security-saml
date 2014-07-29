@@ -57,7 +57,7 @@ configure(coreProjects) { p ->
 		manifest.attributes["Implementation-Title"] = p.name
 		manifest.attributes["Implementation-Version"] = p.version
 
-		from("${rootProject.projectDir}/src/dist") {
+		from("${rootProject.projectDir}/docs/dist") {
 			include "license.txt"
 			into "META-INF"
 			expand(copyright: new Date().format("yyyy"), version: project.version)
@@ -101,7 +101,7 @@ configure(rootProject) {
 	apply plugin: "docbook-reference"
 
 	reference {
-		sourceDir = file("src/reference/docbook")
+		sourceDir = file("docs/reference/docbook")
 		pdfFilename = "spring-security-saml-reference.pdf"
 	}
 
@@ -161,7 +161,7 @@ configure(rootProject) {
 
 		ext.baseDir = "${baseName}-${project.version}";
 
-		from("src/dist") {
+		from("docs/dist") {
 			include "readme.txt"
 			include "license.txt"
 			include "notice.txt"
@@ -173,7 +173,7 @@ configure(rootProject) {
 			into "${baseDir}/docs"
 		}
 
-        from("saml2-sample") {
+        from("sample") {
             include "src/**/*"
             include "pom.xml"
             into "${baseDir}/sample"

@@ -96,11 +96,6 @@
 			</itemizedlist>
 		</para>
 
-		<para>
-			Internal processing of SAML messages, marshalling and unmarshalling is handled by <link
-				xlink:href="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home">OpenSAML</link>.
-		</para>
-
 		<para>You can use the following supported standards as a reference:</para>
 
 			<para>SAML 2.0 basic profiles
@@ -204,10 +199,20 @@
 	<section id="section-support">
 		<title>Community support</title>
 
-		<para>For community support please use <link xlink:href="http://stackoverflow.com/questions">Stack Overflow</link>.
+		<para>For community support please use <link xlink:href="http://stackoverflow.com/questions/tagged/spring-saml">Stack Overflow</link>.
 		The <link
 			xlink:href="http://forum.springsource.org/forumdisplay.php?86-SAML">Spring Security forums</link> contain some previously answered
 		questions, but are now in read-only mode.</para>
 	</section>
+
+    <section id="section-dependencies">
+        <title>Dependencies</title>
+        <para>
+            Internal processing of SAML messages, marshalling and unmarshalling is handled by <link
+                xlink:href="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home">OpenSAML</link>.
+        </para>
+        <para>Spring SAML has a transitive dependency to library <link xlink:href="http://juliusdavies.ca/commons-ssl/">not-yet-commons-ssl</link>.
+            Inside Spring SAML this library is only used for hostname verifications and will be removed in case OpenSAML removes the dependency.</para>
+    </section>
 
 </chapter>

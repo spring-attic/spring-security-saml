@@ -103,8 +103,8 @@
 	<version>${version}</version>
 </dependency>]]></programlisting>
 			</para>
-			<para>The current version of SAML Extension has been tested to work with Spring 3.1.2, Spring Security 3.1.2 and OpenSAML 2.5.3.
-			Later versions of these libraries are likely to be compatible without modifications.</para>
+			<para>The current version of SAML Extension has been tested to work with Spring 3.1.2, Spring Security 3.1.2 and OpenSAML 2.6.1.
+			Later versions of these libraries are likely to be compatible without need for modifications.</para>
 		</section>
 		<section id="configuration-integration-bean-definitions">
 			<title>Bean definitions</title>

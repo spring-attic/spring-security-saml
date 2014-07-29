@@ -14,7 +14,7 @@ CI: https://build.springsource.org/browse/SES
 Releases: http://repo.spring.io/list/snapshot/org/springframework/security/extensions/
 
 Support:
-Stackoverflow: http://stackoverflow.com/questions/tagged/spring-security
+Stackoverflow: http://stackoverflow.com/questions/tagged/spring-saml
 Forum: http://forum.spring.io/forum/spring-projects/security/saml
 Commercial: vladimir@v7security.com
 

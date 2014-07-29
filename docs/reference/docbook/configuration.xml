@@ -223,13 +223,14 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 								</row>
 								<row>
 									<entry><literal>entityAlias</literal></entry>
-									<entry>Local alias for the entityId which can be part of a simple URL path and contains only alphanum characters. See <xref linkend="configuration-entity-alias"/>.</entry>
-									<entry><emphasis>defaultAlias</emphasis></entry>
+									<entry>Local alias for the entityId which can be part of a simple URL path and contains only alphanum characters. See <xref linkend="configuration-entity-alias"/>. Value
+									is only required in case you are deploying multiple collocated service providers.</entry>
+									<entry><emphasis>null</emphasis></entry>
 								</row>
 								<row>
 									<entry><literal>entityId</literal></entry>
 									<entry>Unique identifier of the service provider.</entry>
-									<entry>&lt;entityBaseUrl&gt;/saml/ metadata/alias/&lt;entityAlias&gt;</entry>
+									<entry>&lt;entityBaseUrl&gt;/saml/ metadata</entry>
 								</row>
 								<row>
 									<entry><literal>requestSigned</literal></entry>
@@ -369,7 +370,6 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	<constructor-arg>
 		<bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
 		   <property name="local" value="true"/>
-		   <property name="alias" value="default"/>
 		   <property name="securityProfile" value="metaiop"/>
 		   <property name="sslSecurityProfile" value="pkix"/>
 		   <property name="signMetadata" value="true"/>
@@ -380,9 +380,9 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 		   <property name="requireLogoutResponseSigned" value="false"/>
 		   <property name="idpDiscoveryEnabled" value="true"/>
 		   <property name="idpDiscoveryURL"
-			  value="https://www.server.com:8080/context/saml/discovery/alias/default"/>
+			  value="https://www.server.com:8080/context/saml/discovery"/>
 		   <property name="idpDiscoveryResponseURL"
-			  value="https://www.server.com:8080/context/saml/login/alias/default?disco=true"/>
+			  value="https://www.server.com:8080/context/saml/login?disco=true"/>
 		</bean>
 	</constructor-arg>
 </bean>]]></programlisting></para>
@@ -974,7 +974,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                          <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
                      </listitem>
                      <listitem>
-                         <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login/alias/defaultAlias</para>
+                         <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login</para>
                      </listitem>
                  </itemizedlist>
                  </para>
@@ -1066,7 +1066,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                 <title>Identity provider initialized SSO</title>
                 <para>Spring SAML supports reception of Unsolicited Response messages (so called IDP-initialized SSO). In this scenario IDP creates a Response object in the same way as if it was replying to 
                 an AuthnRequest message sent from SP, but it omits the InResponseTo parameter. Message is then sent to the AssertionConsumerURL of Spring SAML (typically 
-                <emphasis>scheme://server:port/contextPath/saml/SSO/alias/defaultAlias</emphasis>) using one of the supported bindings. List of all available endpoints and bindings can be found in the metadata 
+                <emphasis>scheme://server:port/contextPath/saml/SSO</emphasis>) using one of the supported bindings. List of all available endpoints and bindings can be found in the metadata
                 of the Spring SAML application.</para>
                 <para>Received Unsolicited Respose message is processed and validated in exactly the same way as with SP-Initialized SSO.</para>
                 <para>Support for unsolicited messages can be disabled in the ExtendedMetadata of remote entities using property <emphasis>supportUnsolicitedResponse</emphasis>.</para>
@@ -1581,6 +1581,60 @@ public class TestUserDetails implements SAMLUserDetailsService {
 	</property>
 </bean>]]></programlisting>
             </para>
+        </section>
+        <section id="endpoint-url">
+            <title>Endpoint URLs</title>
+            <para>By default Spring SAML uses the following endpoints, which can optionally also contain information about <link linkend="configuration-entity-alias">entity alias</link> of the local Service Provider:
+                <table id="endpoint-url-overview">
+                <title>Endpoint overview</title>
+                <tgroup cols="3">
+                <colspec colname="_1" colwidth="0.6*" align="left"/>
+                <colspec colname="_2" colwidth="0.8*" align="left"/>
+                <colspec colname="_2" colwidth="0.8*" align="left"/>
+                <thead>
+                    <row>
+                        <entry>Profile</entry>
+                        <entry>Binding</entry>
+                        <entry>Endpoint</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>Web Single Sign-on</entry>
+                        <entry>HTTP-POST, HTTP-Artifact, PAOS</entry>
+                        <entry>scheme://server:port/contextPath/saml/SSO</entry>
+                    </row>
+                    <row>
+                        <entry>Web Single Sign-on Holder of Key</entry>
+                        <entry>HTTP-POST, HTTP-Artifact</entry>
+                        <entry>scheme://server:port/contextPath/saml/HoKSSO</entry>
+                    </row>
+                    <row>
+                        <entry>Single Logout</entry>
+                        <entry>HTTP-POST, HTTP-Redirect</entry>
+                        <entry>scheme://server:port/contextPath/saml/SingleLogout</entry>
+                    </row>
+                </tbody>
+                </tgroup>
+                </table>
+            </para>
+            <para>The default URLs can be altered with these steps:
+                <itemizedlist spacing="compact">
+                    <listitem>
+                        <para>change property <emphasis>filterProcessesUrl</emphasis> on the corresponding processing bean (<emphasis>samlWebSSOProcessingFilter</emphasis>, <emphasis>samlWebSSOHoKProcessingFilter</emphasis>, <emphasis>samlLogoutProcessingFilter</emphasis> or <emphasis>samlIDPDiscovery</emphasis>) to the new URL, for example <emphasis>/samlResponse</emphasis></para>
+                    </listitem>
+                    <listitem>
+                        <para>update the <emphasis>samlFilter</emphasis> bean and make sure that the modified processing filter is mapped to the correct pattern, for example <emphasis>/samlResponse/**</emphasis>, the <emphasis>/**</emphasis> part is only needed in case you're using the entity alias feature</para>
+                    </listitem>
+                    <listitem>
+                        <para>re-generate metadata for your service provider, in case you are using <link linkend="configuration-metadata-sp-generation">automatic metadata generator</link> the endpoints will be automatically generated with the new URLs</para>
+                    </listitem>
+                    <listitem>
+                        <para>in case you are using <link linkend="configuration-metadata-sp-import">pre-configured metadata</link> you can perform changes manually in your existing metadata file</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Endpoints of filters <emphasis>samlEntryPoint</emphasis>, <emphasis>samlLogoutFilter</emphasis> and <emphasis>metadataDisplayFilter</emphasis> can be changed using the same process and without need to re-generate the metadata.</para>
         </section>
     </chapter>
 

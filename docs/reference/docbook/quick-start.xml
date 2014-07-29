@@ -109,7 +109,7 @@
 			</para>
 			<para>
 				You can find the compiled war archive <emphasis>spring-security-saml2-sample.war</emphasis> in directory
-				<emphasis>sample/build/libs/</emphasis> or <emphasis>sample/target/</emphasis>.
+				<emphasis>sample/build/libs/</emphasis> (gradle) or <emphasis>sample/target/</emphasis> (maven).
 			</para>
 		</section>
 
@@ -132,7 +132,7 @@
 				<listitem>
 					<para>Select first item from category <emphasis>Service providers</emphasis>, e.g.
 						<emphasis>
-							http://localhost:8080/spring-security-saml2-sample/saml/metadata/alias/defaultAlias
+							http://localhost:8080/spring-security-saml2-sample/saml/metadata
 						</emphasis>
 					</para>
 				</listitem>

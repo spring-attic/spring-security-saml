@@ -20,8 +20,6 @@ import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -37,8 +35,6 @@ import java.util.List;
  * @author Vladimir Schäfer
  */
 public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl implements WebSSOProfileConsumer {
-
-    private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerHoKImpl.class);
 
     @Override
     public String getProfileIdentifier() {

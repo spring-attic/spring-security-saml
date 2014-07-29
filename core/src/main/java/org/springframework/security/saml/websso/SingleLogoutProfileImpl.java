@@ -30,8 +30,6 @@ import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.validation.ValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.SAMLStatusException;
@@ -50,11 +48,6 @@ import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewVali
  * @author Vladimir Schaefer
  */
 public class SingleLogoutProfileImpl extends AbstractProfileBase implements SingleLogoutProfile {
-
-    /**
-     * Class logger.
-     */
-    private final static Logger log = LoggerFactory.getLogger(SingleLogoutProfileImpl.class);
 
     @Override
     public String getProfileIdentifier() {

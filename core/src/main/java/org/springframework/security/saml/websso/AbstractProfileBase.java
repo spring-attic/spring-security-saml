@@ -69,7 +69,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(WebSSOProfileImpl.class);
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected MetadataManager metadata;
     protected SAMLProcessor processor;

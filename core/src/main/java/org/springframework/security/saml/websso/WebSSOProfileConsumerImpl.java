@@ -24,8 +24,6 @@ import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.validation.ValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -52,8 +50,6 @@ import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewVali
  * @author Vladimir Schäfer
  */
 public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements WebSSOProfileConsumer {
-
-    private final static Logger log = LoggerFactory.getLogger(WebSSOProfileConsumerImpl.class);
 
     public WebSSOProfileConsumerImpl() {
     }

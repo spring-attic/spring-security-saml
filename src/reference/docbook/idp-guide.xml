@@ -37,10 +37,10 @@
 						<para>Download AD FS 2.0 metadata from e.g. <emphasis>https://adfsserver/FederationMetadata/2007-06/FederationMetadata.xml</emphasis></para>
 					</listitem>
 					<listitem>
-						<para>Store the downloaded content to saml2-sample/WEB-INF/src/main/resources/security/FederationMetadata.xml</para>
+						<para>Store the downloaded content to <emphasis>sample/src/main/resources/security/FederationMetadata.xml</emphasis></para>
 					</listitem>
 					<listitem>
-						<para>Modify bean <emphasis>metadata</emphasis> in <emphasis>securityContext.xml</emphasis> and replace <emphasis>classpath:security/idp.xml</emphasis> with <emphasis>classpath:security/FederationMetadata.xml</emphasis> and add property <emphasis>metadataTrustCheck</emphasis> to <emphasis>false</emphasis> to skip signature validation:
+						<para>Modify bean <emphasis>metadata</emphasis> in <emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis> and replace <emphasis>classpath:security/idp.xml</emphasis> with <emphasis>classpath:security/FederationMetadata.xml</emphasis> and add property <emphasis>metadataTrustCheck</emphasis> to <emphasis>false</emphasis> to skip signature validation:
 <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
 		<bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
@@ -64,7 +64,7 @@
 		<title>Initialize SP metadata</title>
 		<para><itemizedlist spacing="compact">
 				<listitem>
-					<para>Deploy SAML 2 Extension war archive from <emphasis>saml2-sample/target/spring-security-saml2-sample.war</emphasis></para>
+					<para>Deploy SAML 2 Extension war archive from <emphasis>sample/target/spring-security-saml2-sample.war</emphasis>, or use embedded Tomcat with command: <programlisting>mvn tomcat7:run</programlisting></para>
 				</listitem>
 				<listitem>
 					<para>Open browser to e.g. https://localhost:8443/spring-security-saml2-sample, making sure to use HTTPS protocol</para>

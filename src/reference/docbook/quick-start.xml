@@ -25,13 +25,10 @@
 		<para>Please make sure the following items are available before starting the installation:
 			<itemizedlist spacing="compact">
 				<listitem>
-					<para>Supported application server or container</para>
-				</listitem>
-				<listitem>
-					<para>Spring Security SAML Extension</para>
-				</listitem>
-				<listitem>
 					<para>Java 1.6+ SDK</para>
+				</listitem>
+				<listitem>
+					<para>Apache Maven</para>
 				</listitem>
 			</itemizedlist>
 		</para>
@@ -48,30 +45,19 @@
 	<section id="quick-start-steps">
 		<title>Installation steps</title>
 
-		<section id="quick-start-compilation">
-			<title>Compilation of the module</title>
-			<para>
-				When building from <link xlink:href="https://github.com/SpringSource/spring-security-saml">sources</link> compile whole project using: 
-				<programlisting>gradlew build</programlisting>
-			</para>
-			<para>
-				Command will create file <emphasis>spring-security-saml2-sample.war</emphasis> in directory
-				<emphasis>saml2-sample/build/libs/</emphasis>.
-			</para>
-			<para>
-				When using the release zip compile the sample application available in the <emphasis>sample</emphasis> directory using:
-				<programlisting>mvn package</programlisting>
-			</para>
-			<para>
-				We will be customizing content of the application in the following steps.
-			</para>
-		</section>
+	<section id="quick-start-download">
+		<title>Downloading sample application</title>
+		<para>Download the Spring SAML Extension either from <link xlink:href="https://github.com/SpringSource/spring-security-saml">sources</link> or
+		from one of the <link xlink:href="http://repo.spring.io/list/milestone/org/springframework/security/extensions/spring-security-saml">releases</link>.</para>
+		<para>The Spring SAML Sample application is included in <emphasis>sample</emphasis> directory. We will be customizing
+		content of the sample application in the following steps.</para>
+	</section> 
 
 		<section id="quick-start-idp-metadata">
 			<title>Configuration of IDP metadata</title>
 			<para>Modify file
-				<emphasis>WEB-INF/classes/security/securityContext.xml</emphasis>
-				inside the war archive and replace <emphasis>metadata</emphasis> bean as follows:
+				<emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis>
+				of the sample application and replace <emphasis>metadata</emphasis> bean as follows:
 				<programlisting><![CDATA[<bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
 	<constructor-arg>
 		<list>
@@ -97,8 +83,8 @@
 		<section id="quick-start-sp-metadata">
 			<title>Generation of SP metadata</title>
 			<para>Modify file
-				<emphasis>WEB-INF/classes/security/securityContext.xml</emphasis>
-				inside the war archive and replace <emphasis>metadataGeneratorFilter</emphasis> bean as follows and make sure to replace
+				<emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis>
+				of the sample application, replace <emphasis>metadataGeneratorFilter</emphasis> bean as follows and make sure to replace
 				the entityId value with a string which is unique within the SSO Circle service (e.g. urn:test:yourname:yourcity):
 				<programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
 	<constructor-arg>
@@ -111,11 +97,27 @@
 			</para>
 		</section>
 
+		<section id="quick-start-compilation">
+			<title>Compilation</title>
+			<para>
+				When building from sources compile whole project and install artifacts into your local Maven repository using:
+				<programlisting>gradlew build install</programlisting>
+			</para>
+			<para>
+				When using the release zip compile the sample application available in the <emphasis>sample</emphasis> directory using:
+				<programlisting>mvn package</programlisting>
+			</para>
+			<para>
+				You can find the compiled war archive <emphasis>spring-security-saml2-sample.war</emphasis> in directory
+				<emphasis>sample/build/libs/</emphasis> or <emphasis>sample/target/</emphasis>.
+			</para>
+		</section>
+
 		<section id="quick-start-deploy">
 			<title>Deployment</title>
-			<para>Deploy the updated war archive to your application server or container. After deployment the
-				SP module will be available at e.g. <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis>
-			</para>
+			<para>You can start the application from the <emphasis>sample</emphasis> directory using command: <programlisting>mvn tomcat7:run</programlisting></para>
+			<para>After startup the Spring SAML sample application will be available at <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis></para>
+			<para>Alternatively you can deploy the war archive to your application server or container.</para>
 		</section>
 
 		<section id="quick-start-sp-metadata-to-idp">

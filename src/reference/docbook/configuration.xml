@@ -22,28 +22,28 @@
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						<emphasis>saml2-core</emphasis>
+						<emphasis>core</emphasis>
 						contains implementation of the WebSSO profiles of the SAML 2.0 protocol and is required for
 						integration to target systems.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>saml2-sample</emphasis>
+						<emphasis>sample</emphasis>
 						contains example of Spring configuration used for integration to target systems. It also
 						contains user interface for generation and management of metadata.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>saml2-doc</emphasis>
+						<emphasis>docs</emphasis>
 						contains this documentation.
 					</para>
 				</listitem>
 			</itemizedlist>
 		</para>
 		<para>Configuration of the library is done using Spring context XML. An example of configuration can be found
-			under<emphasis>saml2-sample/src/main/resources/security/securityContext.xml</emphasis>.
+			under <emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis>.
 			Setting up of the library typically involves these steps:
 			<itemizedlist spacing="compact">
 				<listitem>
@@ -109,7 +109,7 @@
 		<section id="configuration-integration-bean-definitions">
 			<title>Bean definitions</title>
 			<para>Configuration of the SAML library requires beans definitions included in the
-				<emphasis>saml2-sample/src/main/resources/security/securityContext.xml</emphasis>
+				<emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis>
 				configuration file. Include copy of the file in your own Spring application, either directly or with
 				an inclusion. Configuration steps in the following chapters will be customizing beans included in
 				the default context.
@@ -160,7 +160,7 @@
    <scope>compile</scope>
 </dependency>]]></programlisting></para>
             <para>In case you are using another logging library, make sure to change the dependency accordingly.</para>
-            <para>You can enable debug logging by modifying file <emphasis>saml2-sample/src/main/resources/log4j.properties</emphasis> and adding:
+            <para>You can enable debug logging by modifying file <emphasis>sample/src/main/resources/log4j.properties</emphasis> and adding:
                 <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
 log4j.logger.org.opensaml=DEBUG
 log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
@@ -947,7 +947,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                         </listitem>
                   </itemizedlist>
                 </para>
-                <para>See the default implementation in <emphasis>saml2-sample/src/main/webapp/WEB-INF/security/idpSelection.jsp</emphasis> for an example.</para>
+                <para>See the default implementation in <emphasis>sample/src/main/webapp/WEB-INF/security/idpSelection.jsp</emphasis> for an example.</para>
               </simplesect>
               <simplesect>
                 <title>Remote discovery service</title>
@@ -982,7 +982,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
                  object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
                  The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
-                 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your securityContext.xml, e.g.:
+                 <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your <emphasis>securityContext.xml</emphasis>, e.g.:
                  <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
     	<property name="defaultProfileOptions">
     		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
@@ -1190,7 +1190,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
             <title>Authentication log</title>
             <para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.
             A custom logger can be created by implementing interface <emphasis>org.springframework.security.saml.log.SAMLLogger</emphasis> and including its bean
-            in the securityContext.xml, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
+            in the <emphasis>securityContext.xml</emphasis>, e.g.:<programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>]]></programlisting></para>
             <para>Two basic implementations are provided by default:
             <itemizedlist>
               <listitem>

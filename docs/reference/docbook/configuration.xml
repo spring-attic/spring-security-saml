@@ -168,8 +168,6 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
         </section>
 	</chapter>
 
-	<!-- TODO Combining other authentication methods -->
-
 	<chapter id="configuration-metadata">
 		<title>Metadata configuration</title>
 		<para>
@@ -346,7 +344,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				can be added by updating the <emphasis>metadata</emphasis> bean with correct ExtendedMetadata. Please follow these steps
 				in order to do so: <itemizedlist>
 				  <listitem>
-					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <xref linkend="configuration-metadata-sp-generation">automatic metadata generator</xref>.</para>
+					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <link linkend="configuration-metadata-sp-generation">automatic metadata generator</link>.</para>
 				  </listitem>
 				  <listitem>
 					  <para>Store the metadata file as part of your project classpath, e.g. in <emphasis>WEB-INF/classes/security/localhost_sp.xml</emphasis>.</para>
@@ -389,10 +387,9 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				  </listitem>
 				</itemizedlist></para>
 				<para>Same instance of your application can include multiple statically declared local service providers each differentiated by its own unique
-				alias and entity ID. Each service provider can e.g. process a different domain or have different security key settings. This feature makes it possible to create multi-tenant applications with
-				individual SAML settings for each of the tenants. In case multiple local SPs are declared, property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis>
-				bean should be set to the entity ID of the default one.</para>
-				<para>The xml file doesn't need to include signaure. Metadata will be automatically signed when property <emphasis>signMetadata</emphasis> is set to <emphasis>true</emphasis>.</para>
+				alias and entity ID, see <xref linkend="configuration-entity-alias"/> for details. In case your application defines multiple local service providers,
+                set property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis> bean to the entity ID of the default one.</para>
+				<para>The xml file doesn't need to include signature. Metadata will be automatically signed when property <emphasis>signMetadata</emphasis> is set to <emphasis>true</emphasis>.</para>
 				<para>For details about available settings of the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.</para>
 			</section>
 			<section id="configuration-metadata-sp-display">
@@ -696,8 +693,19 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
             </para>
         </section>
         <section id="configuration-entity-alias">
-            <title>Multi-tenancy and Entity alias</title>
-            <para>TODO</para>
+            <title>Multi-tenancy and entity alias</title>
+            <para>Spring SAML contains limited support for multi-tenancy. It is possible to define configuration for multiple instances of local service providers, where each
+                can have different URLs and security settings. System is differentiating between the service provider instances using <emphasis>entity alias</emphasis> which
+                is a unique identifier within deployment of Spring SAML.</para>
+            <para><emphasis>Entity alias</emphasis> is appended to URLs of SAML endpoints and used by Spring SAML to identify the correct instance.
+                For example for local service provider with <emphasis>entity alias</emphasis>
+                <emphasis>customer123</emphasis> the standard URL <emphasis>scheme://server:port/contextPath/saml/login</emphasis> becomes
+                <emphasis>scheme://server:port/contextPath/saml/login/alias/customer123</emphasis>.</para>
+            <para>The entity alias functionality can only be used together with pre-configured metadata (see <xref linkend="configuration-metadata-sp-import"/>).
+                The <emphasis>entity alias</emphasis> is specified in the extended metadata of each of the configured service providers.</para>
+            <para>Spring SAML doesn't enforce any limitations on which Identity Provider can be deliver messages to which of the local Service Providers. In case your application
+            requires similar rules (for example only certain tenants can authenticate using a specific IDP), make sure to implement them for example in your <emphasis>SAMLUserDetailsService</emphasis> (for single sign-on).</para>
+            <para>Selection of the correct Service Provider instance based on URL is performed inside <emphasis>SAMLContextProviderImpl</emphasis> class.</para>
         </section>
     </chapter>
 
@@ -1640,13 +1648,8 @@ public class TestUserDetails implements SAMLUserDetailsService {
 
 	<!-- TODO
 	Message storage
-  Java configuration
-  Sample application
-
 	Bindings configuration
 	- artifact resolution
-	- custom URLs
-	Service URLs
 	Using the HoK profile
 	-->
   

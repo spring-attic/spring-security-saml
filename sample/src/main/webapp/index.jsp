@@ -2,167 +2,178 @@
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ page import="org.springframework.security.core.Authentication" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title>User authenticated</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<jsp:include page="/WEB-INF/templates/head.jsp"/>
 <body>
-
-<h1>User has been authenticated</h1>
-
-<%
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-    pageContext.setAttribute("authentication", authentication);
-    pageContext.setAttribute("credential", credential);
-%>
-
-<p>
-<table>
-    <tr>
-        <td colspan="2"><b>General information</b></td>
-    </tr>
-    <tr>
-        <td width="300">Principal:</td>
-        <td><c:out value="${authentication.principal}"/></td>
-    </tr>
-    <tr>
-        <td width="300">Name ID:</td>
-        <td><c:out value="${credential.nameID.value}"/></td>
-    </tr>
-    <tr>
-        <td>Name ID format:</td>
-        <td><c:out value="${credential.nameID.format}"/></td>
-    </tr>
-    <tr>
-        <td>IDP:</td>
-        <td><c:out value="${credential.authenticationAssertion.issuer.value}"/></td>
-    </tr>
-    <tr>
-        <td>Assertion issue time:</td>
-        <td><c:out value="${credential.authenticationAssertion.issueInstant}"/></td>
-    </tr>
-</table>
-</p>
-
-<p>
-<table>
-    <tr>
-        <td colspan="2"><b>Principal's Attributes</b></td>
-    </tr>
-
-    <c:forEach var="attribute"
-               items="${credential.attributes}">
-        <tr>
-            <td width="300"><c:out value="${attribute.friendlyName}"/></td>
-            <td>
-                <c:forEach var="attributeValue"
-                           items="${attribute.attributeValues}">
-                    <c:catch var ="catchException">
-                        <c:out value="${attributeValue.value}"/>&nbsp;
-                    </c:catch>
-                    <c:if test="${not empty catchException}">
-                        <c:out value="${attributeValue}"/>&nbsp;
-                    </c:if>
-                </c:forEach>
-            </td>
-        </tr>
-    </c:forEach>
-</table>
-</p>
-
-<p>
-<table>
-    <tr>
-        <td colspan="2"><b>Subject confirmation</b></td>
-    </tr>
-    <tr>
-        <td width="300">Method:</td>
-        <td><c:out value="${credential.authenticationAssertion.subject.subjectConfirmations[0].method}"/></td>
-    </tr>
-    <tr>
-        <td width="300">In response to:</td>
-        <td><c:out
-                value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.inResponseTo}"/></td>
-    </tr>
-    <tr>
-        <td width="300">Not on or after:</td>
-        <td><c:out
-                value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.notOnOrAfter}"/></td>
-    </tr>
-    <tr>
-        <td width="300">Recipient:</td>
-        <td><c:out
-                value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.recipient}"/></td>
-    </tr>
-</table>
-</p>
-
-<p>
-<table>
-    <tr>
-        <td colspan="2"><b>Authentication statement</b></td>
-    </tr>
-    <tr>
-        <td width="300">Authentication instance:</td>
-        <td><c:out value="${credential.authenticationAssertion.authnStatements[0].authnInstant}"/></td>
-    </tr>
-    <tr>
-        <td>Session validity:</td>
-        <td><c:out value="${credential.authenticationAssertion.authnStatements[0].sessionNotOnOrAfter}"/></td>
-    </tr>
-    <tr>
-        <td>Authentication context class:</td>
-        <td><c:out
-                value="${credential.authenticationAssertion.authnStatements[0].authnContext.authnContextClassRef.authnContextClassRef}"/></td>
-    </tr>
-    <tr>
-        <td>Session index:</td>
-        <td><c:out
-                value="${credential.authenticationAssertion.authnStatements[0].sessionIndex}"/></td>
-    </tr>
-    <tr>
-        <td>Subject locality:</td>
-        <td><c:out value="${credential.authenticationAssertion.authnStatements[0].subjectLocality.address}"/></td>
-    </tr>
-</table>
-</p>
-
-<p>
-<table>
-    <tr>
-        <td colspan="2"><b>Conditions</b></td>
-    </tr>
-    <tr>
-        <td width="300">Not before:</td>
-        <td><c:out value="${credential.authenticationAssertion.conditions.notBefore}"/></td>
-    </tr>
-    <tr>
-        <td width="300">Not on or after:</td>
-        <td><c:out value="${credential.authenticationAssertion.conditions.notOnOrAfter}"/></td>
-    </tr>
-    <tr>
-        <td width="300">Audience restriction:</td>
-        <td>
-            <c:forEach var="audience"
-                       items="${credential.authenticationAssertion.conditions.audienceRestrictions[0].audiences}">
-                <c:out value="${audience.audienceURI}"/><br/>
-            </c:forEach>
-        </td>
-    </tr>
-</table>
-</p>
-
-<p>
-    <a href="<c:url value="/saml/logout"/>">Global Logout</a><br/>
-    <a href="<c:url value="/saml/logout?local=true"/>">Local Logout</a>
-</p>
-
-<p>
-    <a href="<c:url value="/saml/web/metadata"/>">Metadata information</a>
-</p>
-
+<div id="site-wrapper">
+    <jsp:include page="/WEB-INF/templates/navigation.jsp"/>
+    <div class="main" id="main-two-columns">
+        <div class="left" id="main-content">
+            <div class="section">
+                <div class="section-content">
+                    <div class="post">
+                        <div class="post-title"><h2 class="label label-green">Authenticated user</h2></div>
+                        <p class="quiet large">Overview of the authenticated user's data.</p>
+                        <div class="post-body">
+                            <%
+                                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                                SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+                                pageContext.setAttribute("authentication", authentication);
+                                pageContext.setAttribute("credential", credential);
+                            %>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td colspan="2"><h5>General information</h5></td>
+                                </tr>
+                                <tr>
+                                    <td width="200"><strong>Name:</strong></td>
+                                    <td><c:out value="${authentication.name}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Principal:</strong></td>
+                                    <td><c:out value="${authentication.principal}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name ID:</strong></td>
+                                    <td><c:out value="${credential.nameID.value}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name ID format:</strong></td>
+                                    <td><c:out value="${credential.nameID.format}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>IDP:</strong></td>
+                                    <td><c:out value="${credential.authenticationAssertion.issuer.value}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Assertion issue time:</strong></td>
+                                    <td><c:out value="${credential.authenticationAssertion.issueInstant}"/></td>
+                                </tr>
+                            </table>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td colspan="2"><h5>Principal's Attributes</h5></td>
+                                </tr>
+                                <c:forEach var="attribute"
+                                           items="${credential.attributes}">
+                                    <tr>
+                                        <td width="200"><strong><c:out value="${attribute.friendlyName}"/></strong></td>
+                                        <td>
+                                            <c:forEach var="attributeValue"
+                                                       items="${attribute.attributeValues}">
+                                                <c:catch var="catchException">
+                                                    <c:out value="${attributeValue.value}"/>&nbsp;
+                                                </c:catch>
+                                                <c:if test="${not empty catchException}">
+                                                    <c:out value="${attributeValue}"/>&nbsp;
+                                                </c:if>
+                                            </c:forEach>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </table>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td colspan="2"><h5>Subject confirmation</h5></td>
+                                </tr>
+                                <tr>
+                                    <td width="200"><strong>Method:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.subject.subjectConfirmations[0].method}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>In response to:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.inResponseTo}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Not on or after:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.notOnOrAfter}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Recipient:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.subject.subjectConfirmations[0].subjectConfirmationData.recipient}"/></td>
+                                </tr>
+                            </table>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td colspan="2"><h5>Authentication statement</h5></td>
+                                </tr>
+                                <tr>
+                                    <td width="200"><strong>Authentication instance:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.authnStatements[0].authnInstant}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Session validity:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.authnStatements[0].sessionNotOnOrAfter}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Authentication context class:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.authnStatements[0].authnContext.authnContextClassRef.authnContextClassRef}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Session index:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.authnStatements[0].sessionIndex}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Subject locality:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.authnStatements[0].subjectLocality.address}"/></td>
+                                </tr>
+                            </table>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td colspan="2"><h5>Conditions</h5></td>
+                                </tr>
+                                <tr>
+                                    <td width="200"><strong>Not before:</strong></td>
+                                    <td><c:out value="${credential.authenticationAssertion.conditions.notBefore}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Not on or after:</strong></td>
+                                    <td><c:out
+                                            value="${credential.authenticationAssertion.conditions.notOnOrAfter}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Audience restriction:</strong></td>
+                                    <td>
+                                        <c:forEach var="audience"
+                                                   items="${credential.authenticationAssertion.conditions.audienceRestrictions[0].audiences}">
+                                            <c:out value="${audience.audienceURI}"/><br/>
+                                        </c:forEach>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div>
+                            <form class="left" action="<c:url value="/saml/logout"/>" method="get">
+                                <input type="submit" value="Global Logout" class="button"/>
+                            </form>
+                                <form class="left" action="<c:url value="/saml/logout?local=true"/>" method="get">
+                                    <input type="submit" value="Local Logout" class="button"/>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearer">&nbsp;</div>
+                </div>
+            </div>
+            <div class="clearer">&nbsp;</div>
+        </div>
+        <jsp:include page="/WEB-INF/templates/sidebar.jsp"/>
+    </div>
+    <jsp:include page="/WEB-INF/templates/footer.jsp"/>
+</div>
 </body>
 </html>

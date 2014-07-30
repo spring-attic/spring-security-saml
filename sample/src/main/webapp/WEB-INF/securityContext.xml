@@ -13,8 +13,9 @@
     <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Unsecured pages -->
+    <security:http security="none" pattern="/images/**"/>
+    <security:http security="none" pattern="/css/**"/>
     <security:http security="none" pattern="/logout.jsp"/>
-    <security:http security="none" pattern="/favicon.ico"/>
 
     <!-- Security for the administration UI, can be removed in case UI isn't included -->
     <security:http pattern="/saml/web/**">

@@ -3,47 +3,46 @@
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%@ page import="java.util.Set" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title>Spring Security SAML Extension - Metadata</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<jsp:include page="/WEB-INF/templates/head.jsp" />
 <body>
-
-<h1>IDP selection</h1>
-
-<%
-    WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletConfig().getServletContext());
-    MetadataManager mm = context.getBean("metadata", MetadataManager.class);
-    Set<String> idps = mm.getIDPEntityNames();
-    pageContext.setAttribute("idp", idps);
-%>
-
-<p>
-<form action="<c:url value="${requestScope.idpDiscoReturnURL}"/>" method="GET">
-    <table>
-        <tr>
-            <td><b>Select IDP: </b></td>
-            <td>
-                <c:forEach var="idpItem" items="${idp}">
-                    <input type="radio" name="${requestScope.idpDiscoReturnParam}" id="idp_<c:out value="${idpItem}"/>" value="<c:out value="${idpItem}"/>"/>
-                    <label for="idp_<c:out value="${idpItem}"/>"><c:out value="${idpItem}"/></label>
-                    <br/>
-                </c:forEach>
-            </td>
-        </tr>
-        <tr>
-            <td>&nbsp;</td>
-            <td><input type="submit" value="Login"/></td>
-        </tr>
-    </table>
-</form>
-</p>
-
-<p>
-    <a href="<c:url value="/saml/web/metadata"/>">Metadata information</a>
-</p>
-
+<div id="site-wrapper">
+<jsp:include page="/WEB-INF/templates/navigation.jsp" />
+<div class="main" id="main-two-columns">
+    <div class="left" id="main-content">
+        <div class="section">
+            <div class="section-content">
+                <div class="post">
+                    <div class="post-title"><h2 class="label label-green">IDP Selection</h2></div>
+                    <p class="quiet large">Please select Identity Provider to authenticate with.</p>
+                    <div class="post-body">
+                        <%
+                            WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletConfig().getServletContext());
+                            MetadataManager mm = context.getBean("metadata", MetadataManager.class);
+                            Set<String> idps = mm.getIDPEntityNames();
+                            pageContext.setAttribute("idp", idps);
+                        %>
+                        <p>
+                        <form action="<c:url value="${requestScope.idpDiscoReturnURL}"/>" method="GET">
+                            <c:forEach var="idpItem" items="${idp}">
+                                <input type="radio" name="${requestScope.idpDiscoReturnParam}" id="idp_<c:out value="${idpItem}"/>" value="<c:out value="${idpItem}"/>"/>
+                                <label for="idp_<c:out value="${idpItem}"/>"><c:out value="${idpItem}"/></label>
+                                <br/>
+                            </c:forEach>
+                            <br>
+                            <input class="button" type="submit" value="Start single sign-on"/>
+                        </form>
+                    </div>
+                </div>
+                <div class="clearer">&nbsp;</div>
+            </div>
+        </div>
+        <div class="clearer">&nbsp;</div>
+    </div>
+    <jsp:include page="/WEB-INF/templates/sidebar.jsp" />
+</div>
+<jsp:include page="/WEB-INF/templates/footer.jsp" />
+</div>
 </body>
 </html>

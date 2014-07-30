@@ -1,194 +1,96 @@
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page import="org.springframework.security.saml.web.MetadataController" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title>Spring Security SAML Extension - Metadata</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-</head>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<jsp:include page="/WEB-INF/templates/head.jsp"/>
 <body>
-
-<h1>Metadata detail</h1>
-
-<p>
-    <a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a>
-</p>
-
-<form:form commandName="metadata">
-
-    <p>
-        <c:choose>
-            <c:when test="${metadata.alias != null}">
-                <a href="<c:url value="/saml/metadata/alias/${metadata.alias}"/>">Download entity metadata</a>
-            </c:when>
-            <c:otherwise>
-                <a href="<c:url value="/saml/metadata"/>">Download entity metadata</a>
-            </c:otherwise>
-        </c:choose>
-    </p>
-
-    <table>
-        <tr>
-            <td>Entity ID:</td>
-            <td><form:input readonly="true" path="entityId"/></td>
-        </tr>
-        <tr>
-            <td>Entity alias:</td>
-            <td><form:input readonly="true" path="alias"/></td>
-        </tr>
-
-        <tr>
-            <td>Signing key:</td>
-            <td><form:input readonly="true" path="signingKey"/></td>
-        </tr>
-        <tr>
-            <td>Encryption key:</td>
-            <td><form:input readonly="true" path="encryptionKey"/></td>
-        </tr>
-
-        <tr>
-            <td>Signature security profile:</td>
-            <td>
-                <form:select path="securityProfile" multiple="false" disabled="true">
-                    <form:option value="metaiop">MetaIOP</form:option>
-                    <form:option value="pkix">PKIX</form:option>
-                </form:select>
-            </td>
-        </tr>
-
-        <tr>
-            <td>SSL/TLS security profile:</td>
-            <td>
-                <form:select path="sslSecurityProfile" multiple="false" disabled="true">
-                    <form:option value="pkix">PKIX</form:option>
-                    <form:option value="metaiop">MetaIOP</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>SSL/TLS hostname verification:</td>
-            <td>
-                <form:select path="sslHostnameVerification" multiple="false" disabled="true">
-                    <form:option value="default">Standard hostname verifier</form:option>
-                    <form:option value="defaultAndLocalhost">Standard hostname verifier (skips verification for localhost)</form:option>
-                    <form:option value="strict">Strict hostname verifier</form:option>
-                    <form:option value="allowAll">Disable hostname verification (allow all)</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>SSL/TLS client authentication:</td>
-            <td><form:input readonly="true" path="tlsKey"/></td>
-        </tr>
-
-        <tr>
-            <td>Sign metadata</td>
-            <td>
-                <form:select path="signMetadata" multiple="false" disabled="true">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>Signing algorithm:</td>
-            <td><form:input readonly="true" path="signingAlgorithm" disabled="true"/></td>
-        </tr>
-
-        <tr>
-            <td>Require signed LogoutRequest:</td>
-            <td>
-                <form:select path="requireLogoutRequestSigned" multiple="false" disabled="true">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>Require signed LogoutResponse:</td>
-            <td>
-                <form:select path="requireLogoutResponseSigned" multiple="false" disabled="true">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>Require signed ArtifactResolve:</td>
-            <td>
-                <form:select path="requireArtifactResolveSigned" multiple="false" disabled="true">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-        </tr>
-        <tr>
-            <td>Enabled IDP discovery profile:</td>
-            <td>
-                <form:select path="includeDiscovery" multiple="false" disabled="true">
-                    <form:option value="true">Yes</form:option>
-                    <form:option value="false">No</form:option>
-                </form:select>
-            </td>
-        </tr>
-
-        <c:if test="${metadata.local eq true}">
-
-            <tr>
-                <td>&nbsp;</td>
-            </tr>
-
-            <tr>
-                <td>Instructions:</td>
-                <td>
-                    <strong>In order to permanently store the metadata follow these instructions:</strong>
-                    <ul>
-                        <li>Store metadata content in file WEB-INF/classes/security/${storagePath}</li>
-                        <li>Make sure to update your identity provider(s) with the generated metadata</li>
-                        <li>Modify bean "metadata" in your securityContext.xml and include content from the
-                            configuration bellow
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-
-        </c:if>
-
-        <tr>
-            <td>&nbsp;</td>
-        </tr>
-
-        <tr>
-            <td>Metadata:</td>
-            <td>
-                <textarea rows="15" cols="100" readonly="true"><c:out
-                        value="${metadata.serializedMetadata}"/></textarea>
-            </td>
-        </tr>
-
-        <c:if test="${metadata.local eq true}">
-
-            <tr>
-                <td>&nbsp;</td>
-            </tr>
-
-            <tr>
-                <td>Configuration:</td>
-
-                <td>
-                    <textarea rows="15" cols="100" readonly="true"><c:out value="${metadata.configuration}"/></textarea>
-                </td>
-            </tr>
-
-        </c:if>
-
-    </table>
-
-    <p>
-        <a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a>
-    </p>
-
-</form:form>
-
+<div id="site-wrapper">
+    <jsp:include page="/WEB-INF/templates/navigation.jsp"/>
+    <div class="main" id="main-two-columns">
+        <div class="left" id="main-content">
+            <div class="section">
+                <div class="section-content">
+                    <div class="post">
+                        <div class="post-title"><h2 class="label label-green">Metadata detail</h2></div>
+                        <p class="quiet large">Detail of a single entity imported to Spring SAML's MetadataManager.</p>
+                        <div class="post-body">
+                            <p><a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a></p>
+                            <form:form commandName="metadata">
+                                <table>
+                                    <tr>
+                                        <td><label for="local">Local entity:</label></td>
+                                        <td><form:input id="local" readonly="true" path="local"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="entityId">Entity ID:</label></td>
+                                        <td><form:input id="entityId" readonly="true" path="entityId"/></td>
+                                    </tr>
+                                    <c:if test="${metadata.local eq true}">
+                                    <tr>
+                                        <td><label for="alias">Entity alias:</label></td>
+                                        <td><form:input id="alias" readonly="true" path="alias"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="signingKey">Signing key:</label></td>
+                                        <td><form:input id="signingKey" readonly="true" path="signingKey"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="encryptionKey">Encryption key:</label></td>
+                                        <td><form:input id="encryptionKey" readonly="true" path="encryptionKey"/></td>
+                                    </tr>
+                                    </c:if>
+                                    <tr>
+                                        <td colspan="2">
+                                            <label for="metadata">Metadata:</label><br>
+                                            <textarea rows="15" cols="115" id="metadata" readonly="true"><c:out value="${metadata.serializedMetadata}"/></textarea>
+                                        </td>
+                                    </tr>
+                                    <c:if test="${metadata.local eq true}">
+                                        <tr>
+                                            <td colspan="2">
+                                                <label for="configuration">Configuration:</label><br>
+                                                <textarea rows="15" cols="115" id="configuration" readonly="true"><c:out
+                                                        value="${metadata.configuration}"/></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <strong>In order to permanently store the metadata follow these instructions:</strong>
+                                                <ul>
+                                                    <li>Store metadata content in file WEB-INF/classes/security/${storagePath}</li>
+                                                    <li>Make sure to update your identity provider(s) with the generated metadata</li>
+                                                    <li>Modify bean "metadata" in your securityContext.xml and include content from the configuration bellow</li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </table>
+                            </form:form>
+                            <c:choose>
+                            <c:when test="${metadata.alias != null}">
+                                <form action="<c:url value="/saml/metadata/alias/${metadata.alias}"/>" method="get">
+                                    <input type="submit" value="Download entity metadata" class="button"/>
+                                </form>
+                            </c:when>
+                            <c:otherwise>
+                                <form action="<c:url value="/saml/metadata"/>" method="get">
+                                    <input type="submit" value="Download entity metadata" class="button"/>
+                                </form>
+                            </c:otherwise>
+                            </c:choose>
+                            <br>
+                            <p><a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a></p>
+                        </div>
+                    </div>
+                    <div class="clearer">&nbsp;</div>
+                </div>
+            </div>
+            <div class="clearer">&nbsp;</div>
+        </div>
+        <jsp:include page="/WEB-INF/templates/sidebar.jsp"/>
+    </div>
+    <jsp:include page="/WEB-INF/templates/footer.jsp"/>
+</div>
 </body>
 </html>

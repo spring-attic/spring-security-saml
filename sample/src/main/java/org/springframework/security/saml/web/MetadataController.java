@@ -387,4 +387,9 @@ public class MetadataController {
         return sb.toString();
     }
 
+    @ModelAttribute(value = "tab")
+    public String getTabName() {
+        return "metadata";
+    }
+
 }

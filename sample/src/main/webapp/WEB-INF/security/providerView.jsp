@@ -1,44 +1,38 @@
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title>Spring Security SAML Extension - Metadata</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-</head>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<jsp:include page="/WEB-INF/templates/head.jsp" />
 <body>
-
-<h1>Metadata provider detail</h1>
-
-<p>
-    <a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a>
-</p>
-
-<form:form commandName="provider" action="removeProvider">
-
-    <input type="hidden" name="providerIndex" value="<c:out value="${providerIndex}"/>"/>
-
-    <table>
-
-        <tr>
-            <td>Provider:</td>
-            <td><c:out value="${provider}"/></td>
-        </tr>
-
-        <tr>
-            <td colspan="2">
-                <br/>
-                <input type="submit" value="Remove provider"/>
-            </td>
-        </tr>
-
-    </table>
-
-    <p>
-        <a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a>
-    </p>
-
-</form:form>
-
+<div id="site-wrapper">
+    <jsp:include page="/WEB-INF/templates/navigation.jsp" />
+    <div class="main" id="main-two-columns">
+        <div class="left" id="main-content">
+            <div class="section">
+                <div class="section-content">
+                    <div class="post">
+                        <div class="post-title"><h2 class="label label-green">Metadata provider detail</h2></div>
+                        <p class="quiet large">Overview of a metadata provider which can include multiple SAML entities.</p>
+                        <div class="post-body">
+                            <p><a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a></p>
+                            <strong>Provider:</strong> <c:out value="${provider}"/>
+                            <p>
+                            <form:form commandName="provider" action="removeProvider">
+                                <input type="hidden" name="providerIndex" value="<c:out value="${providerIndex}"/>"/>
+                                <input type="submit" class="button" value="Remove provider"/>
+                            </form:form>
+                            <br>
+                            <p><a href="<c:url value="/saml/web/metadata"/>">&lt;&lt Back</a></p>
+                        </div>
+                    </div>
+                    <div class="clearer">&nbsp;</div>
+                </div>
+            </div>
+            <div class="clearer">&nbsp;</div>
+        </div>
+        <jsp:include page="/WEB-INF/templates/sidebar.jsp" />
+    </div>
+    <jsp:include page="/WEB-INF/templates/footer.jsp" />
+</div>
 </body>
 </html>

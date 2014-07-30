@@ -42,6 +42,7 @@
           <listitem><para>New socket factory for trust verification during loading of metadata from HTTPS</para></listitem>
           <listitem><para>Possibility to disable support for IDP-initialized SSO</para></listitem>
           <listitem><para>Usage of metadata alias is now optional</para></listitem>
+          <listitem><para>New look and feel of the sample application</para></listitem>
         </itemizedlist>
 		</para>
 	</section>
@@ -61,6 +62,7 @@
         <para><emphasis>Descriptor securityContext.xml</emphasis>
         <itemizedlist spacing="compact">
         <listitem><para>file was moved from saml2-sample/src/main/resources/security/securityContext.xml to sample/src/main/webapp/WEB-INF/securityContext.xml</para></listitem>
+        <listitem><para>administration part of the UI is now secured with username/password</para></listitem>
         <listitem><para>updated initialization of ParserPool to disable defer node expansion</para></listitem>
         <listitem><para>HttpClient in ArtifactResolution was made thread safe</para></listitem>
         <listitem><para>added new failure handler</para></listitem>

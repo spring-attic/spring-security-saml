@@ -73,6 +73,14 @@ public class MetadataController {
 
     }
 
+    @RequestMapping(value = "/login")
+    public ModelAndView adminLogin() {
+
+        ModelAndView model = new ModelAndView(new InternalResourceView("/WEB-INF/security/adminLogin.jsp", true));
+        return model;
+
+    }
+
     @RequestMapping(value = "/refresh")
     public ModelAndView refreshMetadata() throws MetadataProviderException {
 

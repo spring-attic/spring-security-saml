@@ -8,14 +8,22 @@
 
     <!-- Enable auto-wiring -->
     <context:annotation-config/>
+
+    <!-- Scan for auto-wiring classes in spring saml packages -->
     <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Unsecured pages -->
-    <security:http security="none" pattern="/saml/web/**"/>
     <security:http security="none" pattern="/logout.jsp"/>
     <security:http security="none" pattern="/favicon.ico"/>
 
-    <!-- Secured pages -->
+    <!-- Security for the administration UI, can be removed in case UI isn't included -->
+    <security:http pattern="/saml/web/**">
+        <security:form-login login-processing-url="/saml/web/login" login-page="/saml/web/metadata/login" default-target-url="/saml/web/metadata"/>
+        <security:intercept-url pattern="/saml/web/metadata/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/saml/web/**" access="ROLE_ADMIN"/>
+    </security:http>
+
+    <!-- Secured pages with SAML as entry point -->
     <security:http entry-point-ref="samlEntryPoint">
         <security:intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
         <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
@@ -58,9 +66,15 @@
         <property name="defaultTargetUrl" value="/logout.jsp"/>
     </bean>
 
-    <!-- Register authentication manager with SAML provider -->
     <security:authentication-manager alias="authenticationManager">
+        <!-- Register authentication manager for SAML provider -->
         <security:authentication-provider ref="samlAuthenticationProvider"/>
+        <!-- Register authentication manager for administration UI -->
+        <security:authentication-provider>
+            <security:user-service id="adminInterfaceService">
+                <security:user name="admin" password="admin" authorities="ROLE_ADMIN"/>
+            </security:user-service>
+        </security:authentication-provider>
     </security:authentication-manager>
 
     <!-- Logger for SAML messages and events -->

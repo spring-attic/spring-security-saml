@@ -308,17 +308,17 @@
                                         </tr>
                                         <tr>
                                             <td><form:radiobutton path="ssoDefaultBinding"
-                                                                  value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>"/></td>
-                                            <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>"
+                                                                  value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>"/></td>
+                                            <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>"
                                                                id="sso_0"/></td>
-                                            <td><label for="sso_0">SSO Artifact</label></td>
+                                            <td><label for="sso_0">SSO HTTP-POST</label></td>
                                         </tr>
                                         <tr>
                                             <td><form:radiobutton path="ssoDefaultBinding"
-                                                                  value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>"/></td>
-                                            <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_POST %>"
+                                                                  value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>"/></td>
+                                            <td><form:checkbox path="ssoBindings" value="<%= MetadataController.AllowedSSOBindings.SSO_ARTIFACT %>"
                                                                id="sso_1"/></td>
-                                            <td><label for="sso_1">SSO HTTP-POST</label></td>
+                                            <td><label for="sso_1">SSO Artifact</label></td>
                                         </tr>
                                         <tr>
                                             <td><form:radiobutton path="ssoDefaultBinding"

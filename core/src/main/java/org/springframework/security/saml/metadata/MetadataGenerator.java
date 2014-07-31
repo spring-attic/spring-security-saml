@@ -100,7 +100,7 @@ public class MetadataGenerator {
     /**
      * Bindings for single sign-on
      */
-    private Collection<String> bindingsSSO = Arrays.asList("artifact", "post");
+    private Collection<String> bindingsSSO = Arrays.asList("post", "artifact");
 
     /**
      * Bindings for single sign-on holder of key

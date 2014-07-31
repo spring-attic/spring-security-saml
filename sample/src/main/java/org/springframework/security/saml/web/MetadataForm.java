@@ -26,26 +26,23 @@ public class MetadataForm {
     private String sslHostnameVerification;
     private String baseURL;
     private String alias;
-    private boolean signMetadata = true;
+    private boolean signMetadata;
     private String serializedMetadata;
     private String configuration;
     private String signingAlgorithm;
     private String[] nameID;
     
     private String[] ssoBindings = new String[] {
-            MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString(),
             MetadataController.AllowedSSOBindings.SSO_POST.toString(),
+            MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString()
     };
-    private String ssoDefaultBinding = MetadataController.AllowedSSOBindings.SSO_ARTIFACT.toString();
+    private String ssoDefaultBinding = MetadataController.AllowedSSOBindings.SSO_POST.toString();
 
     private String signingKey;
     private String encryptionKey;
     private String tlsKey;
 
     private boolean local;
-
-    private boolean includeSSO = true;
-    private boolean includeHokSSO = false;
 
     private boolean includeDiscovery = true;
     private boolean includeDiscoveryExtension = false;
@@ -220,22 +217,6 @@ public class MetadataForm {
 
     public void setIncludeDiscoveryExtension(boolean includeDiscoveryExtension) {
         this.includeDiscoveryExtension = includeDiscoveryExtension;
-    }
-
-    public boolean isIncludeHokSSO() {
-        return includeHokSSO;
-    }
-
-    public void setIncludeHokSSO(boolean includeHokSSO) {
-        this.includeHokSSO = includeHokSSO;
-    }
-
-    public boolean isIncludeSSO() {
-        return includeSSO;
-    }
-
-    public void setIncludeSSO(boolean includeSSO) {
-        this.includeSSO = includeSSO;
     }
 
     public String[] getNameID() {

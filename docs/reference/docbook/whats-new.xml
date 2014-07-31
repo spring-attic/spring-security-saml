@@ -104,7 +104,7 @@
             </itemizedlist>
         </para></listitem>
         <listitem><para>removed methods signSAMLObject (moved to SAMLUtil) and getKeyInfoGeneratorName (moved to ExtendedMetadata)</para></listitem>
-        <listitem><para>by default endpoint for Web SSO no longer includes PAOS binding, set property <emphasis>bindingsSSO</emphasis> with values "artifact", "post", "paos" for backwards compatibility</para></listitem>
+        <listitem><para>by default the first binding is now HTTP-POST instead of HTTP-Artifact, endpoint for Web SSO no longer includes PAOS binding, set property <emphasis>bindingsSSO</emphasis> with values "artifact", "post", "paos" for backwards compatibility</para></listitem>
         <listitem><para>by default endpoints for Web SSO holder of key are no longer included, set property <emphasis>bindingsHoKSSO</emphasis> with values "artifact" and "post" for backwards compatibility</para></listitem>
         <listitem><para>by default <emphasis>MetadataGeneratorFilter</emphasis> no longer sets property <emphasis>entityAlias</emphasis> to value <emphasis>defaultAlias</emphasis>, set the value manually for backwards compatibility</para></listitem>
         </itemizedlist>

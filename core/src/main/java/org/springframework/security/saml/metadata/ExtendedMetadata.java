@@ -32,7 +32,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * Setting of the value determines whether the entity is deployed locally (hosted on the current installation) or
      * whether it's an entity deployed elsewhere.
      */
-    private boolean local = false;
+    private boolean local;
 
     /**
      * Local alias of the entity used for construction of well-known metadata address and determining target
@@ -43,7 +43,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * When true IDP discovery will be invoked before SSO. Only valid for local entities.
      */
-    private boolean idpDiscoveryEnabled = false;
+    private boolean idpDiscoveryEnabled;
 
     /**
      * URL of the IDP Discovery service user should be redirected to upon request to determine which IDP to use.
@@ -61,7 +61,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * Indicates whether Enhanced Client/Proxy profile should be used for requests which support it. Only valid for
      * local entities.
      */
-    private boolean ecpEnabled = false;
+    private boolean ecpEnabled;
 
     /**
      * Profile used for trust verification, MetaIOP by default. Only relevant for local entities.
@@ -93,7 +93,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Flag indicating whether to sign metadata for this entity. Only valid for local entities.
      */
-    private boolean signMetadata = true;
+    private boolean signMetadata;
 
     /**
      * Name of generator for KeyInfo elements in metadata and signatures. At the moment only used for metadata signatures.
@@ -124,6 +124,9 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      */
     private boolean requireLogoutRequestSigned = true;
 
+    /**
+     * Flag indicating whether incoming LogoutResposne messages must be authenticated.
+     */
     private boolean requireLogoutResponseSigned;
 
     /**

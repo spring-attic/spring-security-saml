@@ -136,40 +136,27 @@ public class MetadataController {
             return modelAndView;
         }
 
+        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
         MetadataGenerator generator = new MetadataGenerator();
         generator.setKeyManager(keyManager);
+        generator.setExtendedMetadata(extendedMetadata);
 
+        // Basic metadata properties
         generator.setEntityId(metadata.getEntityId());
-
-        if (hasLength(metadata.getAlias())) {
-            generator.setEntityAlias(metadata.getAlias());
-        }
-
         generator.setEntityBaseURL(metadata.getBaseURL());
-        generator.setSignMetadata(metadata.isSignMetadata());
         generator.setRequestSigned(metadata.isRequestSigned());
         generator.setWantAssertionSigned(metadata.isWantAssertionSigned());
-        generator.setSigningKey(metadata.getSigningKey());
-        generator.setEncryptionKey(metadata.getEncryptionKey());
-
-        if (hasLength(metadata.getTlsKey())) {
-            generator.setTlsKey(metadata.getTlsKey());
-        }
 
         Collection<String> bindingsSSO = new LinkedList<String>();
         Collection<String> bindingsHoKSSO = new LinkedList<String>();
         String defaultBinding = metadata.getSsoDefaultBinding();
-
         int assertionConsumerIndex = 0;
 
+        // Set default and included bindings
         for (String binding : metadata.getSsoBindings()) {
-
-            // Set default binding
             if (binding.equalsIgnoreCase(defaultBinding)) {
                 assertionConsumerIndex = bindingsSSO.size() + bindingsHoKSSO.size();
             }
-
-            // Set included bindings
             if (AllowedSSOBindings.SSO_POST.toString().equalsIgnoreCase(binding)) {
                 bindingsSSO.add(SAMLConstants.SAML2_POST_BINDING_URI);
             } else if (AllowedSSOBindings.SSO_ARTIFACT.toString().equalsIgnoreCase(binding)) {
@@ -181,7 +168,6 @@ public class MetadataController {
             } else if (AllowedSSOBindings.HOKSSO_ARTIFACT.toString().equalsIgnoreCase(binding)) {
                 bindingsHoKSSO.add(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
             }
-
         }
 
         // Set bindings
@@ -189,25 +175,37 @@ public class MetadataController {
         generator.setBindingsHoKSSO(bindingsHoKSSO);
         generator.setAssertionConsumerIndex(assertionConsumerIndex);
 
+        // Name IDs
+        generator.setNameID(Arrays.asList(metadata.getNameID()));
+
+        // Keys
+        extendedMetadata.setSigningKey(metadata.getSigningKey());
+        extendedMetadata.setEncryptionKey(metadata.getEncryptionKey());
+        if (hasLength(metadata.getTlsKey())) {
+            extendedMetadata.setTlsKey(metadata.getTlsKey());
+        }
+
         // Discovery
         if (metadata.isIncludeDiscovery()) {
-            generator.setIncludeDiscovery(true);
+            extendedMetadata.setIdpDiscoveryEnabled(true);
             generator.setIncludeDiscoveryExtension(metadata.isIncludeDiscoveryExtension());
             if (metadata.getCustomDiscoveryURL() != null && metadata.getCustomDiscoveryURL().length() > 0) {
-                generator.setCustomDiscoveryURL(metadata.getCustomDiscoveryURL());
+                extendedMetadata.setIdpDiscoveryURL(metadata.getCustomDiscoveryURL());
             }
             if (metadata.getCustomDiscoveryResponseURL() != null && metadata.getCustomDiscoveryResponseURL().length() > 0) {
-                generator.setCustomDiscoveryResponseURL(metadata.getCustomDiscoveryResponseURL());
+                extendedMetadata.setIdpDiscoveryResponseURL(metadata.getCustomDiscoveryResponseURL());
             }
         } else {
-            generator.setIncludeDiscovery(false);
+            extendedMetadata.setIdpDiscoveryEnabled(false);
             generator.setIncludeDiscoveryExtension(false);
         }
 
-        generator.setNameID(Arrays.asList(metadata.getNameID()));
+        // Alias
+        if (hasLength(metadata.getAlias())) {
+            extendedMetadata.setAlias(metadata.getAlias());
+        }
 
-        EntityDescriptor descriptor = generator.generateMetadata();
-        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
+        // Security settings
         extendedMetadata.setSecurityProfile(metadata.getSecurityProfile());
         extendedMetadata.setSslSecurityProfile(metadata.getSslSecurityProfile());
         extendedMetadata.setRequireLogoutRequestSigned(metadata.isRequireLogoutRequestSigned());
@@ -215,23 +213,29 @@ public class MetadataController {
         extendedMetadata.setRequireArtifactResolveSigned(metadata.isRequireArtifactResolveSigned());
         extendedMetadata.setSslHostnameVerification(metadata.getSslHostnameVerification());
 
+        // Metadata signing
+        extendedMetadata.setSignMetadata(metadata.isSignMetadata());
         if (hasLength(metadata.getSigningAlgorithm())) {
             extendedMetadata.setSigningAlgorithm(metadata.getSigningAlgorithm());
         }
 
+        // Generate values
+        EntityDescriptor generatedDescriptor = generator.generateMetadata();
+        ExtendedMetadata generatedExtendedMetadata = generator.generateExtendedMetadata();
+
         if (metadata.isStore()) {
 
-            MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
+            MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(generatedDescriptor);
             memoryProvider.initialize();
-            MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
+            MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, generatedExtendedMetadata);
             metadataManager.addMetadataProvider(metadataProvider);
-            metadataManager.setHostedSPName(descriptor.getEntityID());
+            metadataManager.setHostedSPName(generatedDescriptor.getEntityID());
             metadataManager.setRefreshRequired(true);
             metadataManager.refreshMetadata();
 
         }
 
-        return displayMetadata(descriptor, extendedMetadata);
+        return displayMetadata(generatedDescriptor, generatedExtendedMetadata);
 
     }
 

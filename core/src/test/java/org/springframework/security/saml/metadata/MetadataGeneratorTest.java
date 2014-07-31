@@ -106,9 +106,11 @@ public class MetadataGeneratorTest {
     @Test
     public void testGenerateMetadataAlias() {
 
+        generator.setExtendedMetadata(new ExtendedMetadata());
         generator.setEntityBaseURL("http://localhost");
         generator.setEntityId("urn:myentity:fi");
-        generator.setEntityAlias("alias1");
+        generator.getExtendedMetadata().setAlias("alias1");
+
         EntityDescriptor metadata = generator.generateMetadata();
 
         assertEquals("urn:myentity:fi", metadata.getEntityID());
@@ -150,8 +152,10 @@ public class MetadataGeneratorTest {
 
         ExtendedMetadata extendedMetadata;
 
-        generator.setEntityAlias("testAlias");
+        generator.setExtendedMetadata(new ExtendedMetadata());
         generator.setEntityBaseURL("http://localhost:8080");
+        generator.getExtendedMetadata().setAlias("testAlias");
+        generator.getExtendedMetadata().setIdpDiscoveryEnabled(true);
 
         // Default generation
         extendedMetadata = generator.generateExtendedMetadata();
@@ -162,7 +166,7 @@ public class MetadataGeneratorTest {
         assertEquals("http://localhost:8080/saml/login/alias/testAlias?disco=true", extendedMetadata.getIdpDiscoveryResponseURL());
 
         // Disabled discovery
-        generator.setIncludeDiscovery(false);
+        generator.getExtendedMetadata().setIdpDiscoveryEnabled(false);
         generator.setIncludeDiscoveryExtension(false);
         extendedMetadata = generator.generateExtendedMetadata();
         assertFalse(extendedMetadata.isIdpDiscoveryEnabled());
@@ -170,15 +174,15 @@ public class MetadataGeneratorTest {
         assertNull(extendedMetadata.getIdpDiscoveryResponseURL());
 
         // Default extended metadata
-        ExtendedMetadata defaultMetadata = new ExtendedMetadata();
-        defaultMetadata.setRequireLogoutResponseSigned(true);
-        generator.setExtendedMetadata(defaultMetadata);
-        generator.setIncludeDiscovery(true);
+        generator.setExtendedMetadata(new ExtendedMetadata());
+        generator.getExtendedMetadata().setRequireLogoutResponseSigned(true);
+        generator.getExtendedMetadata().setIdpDiscoveryEnabled(true);
+        generator.getExtendedMetadata().setIdpDiscoveryResponseURL("http://testDisco.com/response");
         generator.setIncludeDiscoveryExtension(true);
-        generator.setCustomDiscoveryResponseURL("http://testDisco.com/response");
+
         extendedMetadata = generator.generateExtendedMetadata();
         assertTrue(extendedMetadata.isIdpDiscoveryEnabled());
-        assertEquals("http://localhost:8080/saml/discovery/alias/testAlias", extendedMetadata.getIdpDiscoveryURL());
+        assertEquals("http://localhost:8080/saml/discovery", extendedMetadata.getIdpDiscoveryURL());
         assertEquals("http://testDisco.com/response", extendedMetadata.getIdpDiscoveryResponseURL());
         assertTrue(extendedMetadata.isRequireLogoutResponseSigned());
 

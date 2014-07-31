@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,6 +73,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * Flag indicating whether to include attributes from all assertions, false by default.
      */
     private boolean includeAllAttributes = false;
+
+    /**
+     * Flag indicates whether to release internal DOM structures before returning SAMLCredential.
+     */
+    private boolean releaseDOM = true;
 
     /**
      * The input context object must have set the properties related to the returned Response, which is validated
@@ -178,25 +184,29 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         Assertion subjectAssertion = null;
-        List<Attribute> attributes = new LinkedList<Attribute>();
-
-        // Verify assertions
+        List<Attribute> attributes = new ArrayList<Attribute>();
         List<Assertion> assertionList = response.getAssertions();
-        List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
-        for (EncryptedAssertion ea : encryptedAssertionList) {
-            try {
-                Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
-                log.debug("Decrypting assertion");
-                Assertion decryptedAssertion = context.getLocalDecrypter().decrypt(ea);
-                assertionList.add(decryptedAssertion);
-            } catch (DecryptionException e) {
-                log.debug("Decryption of received assertion failed, assertion will be skipped", e);
+
+        // Decrypt assertions
+        if (response.getEncryptedAssertions().size() > 0) {
+            assertionList = new ArrayList<Assertion>(response.getAssertions().size() + response.getEncryptedAssertions().size());
+            assertionList.addAll(response.getAssertions());
+            List<EncryptedAssertion> encryptedAssertionList = response.getEncryptedAssertions();
+            for (EncryptedAssertion ea : encryptedAssertionList) {
+                try {
+                    Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
+                    log.debug("Decrypting assertion");
+                    Assertion decryptedAssertion = context.getLocalDecrypter().decrypt(ea);
+                    assertionList.add(decryptedAssertion);
+                } catch (DecryptionException e) {
+                    log.debug("Decryption of received assertion failed, assertion will be skipped", e);
+                }
             }
         }
 
         Exception lastError = null;
 
-        // Find the assertion to be used for session creation
+        // Find the assertion to be used for session creation and verify
         for (Assertion assertion : assertionList) {
             if (assertion.getAuthnStatements().size() > 0) {
                 try {
@@ -244,6 +254,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Populate custom data, if any
         Serializable additionalData = processAdditionalData(context);
+
+        // Release extra DOM data which might get otherwise stored in session
+        if (isReleaseDOM()) {
+            subjectAssertion.releaseDOM();
+            subjectAssertion.releaseChildrenDOM(true);
+        }
 
         // Create the credential
         return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes, context.getLocalEntityId(), additionalData);
@@ -604,6 +620,23 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      */
     public void setIncludeAllAttributes(boolean includeAllAttributes) {
         this.includeAllAttributes = includeAllAttributes;
+    }
+
+    /**
+     * @return release dom flag, true by default
+     */
+    public boolean isReleaseDOM() {
+        return releaseDOM;
+    }
+
+    /**
+     * Flag indicates whether to release internal structure of the assertion returned in SAMLCredential. Set to false
+     * in case you'd like to have access to the original Assertion value (include signatures).
+     *
+     * @param releaseDOM release dom flag
+     */
+    public void setReleaseDOM(boolean releaseDOM) {
+        this.releaseDOM = releaseDOM;
     }
 
 }

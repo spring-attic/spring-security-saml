@@ -120,10 +120,10 @@ public class MetadataGeneratorTest {
 
         List<AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
         assertEquals(2, assertionConsumerServices.size());
-        assertEquals(SAMLConstants.SAML2_ARTIFACT_BINDING_URI, assertionConsumerServices.get(0).getBinding());
+        assertEquals(SAMLConstants.SAML2_POST_BINDING_URI, assertionConsumerServices.get(0).getBinding());
         assertEquals("http://localhost/saml/SSO/alias/alias1", assertionConsumerServices.get(0).getLocation());
         assertEquals(Boolean.TRUE, assertionConsumerServices.get(0).isDefault());
-        assertEquals(SAMLConstants.SAML2_POST_BINDING_URI, assertionConsumerServices.get(1).getBinding());
+        assertEquals(SAMLConstants.SAML2_ARTIFACT_BINDING_URI, assertionConsumerServices.get(1).getBinding());
         assertEquals("http://localhost/saml/SSO/alias/alias1", assertionConsumerServices.get(1).getLocation());
 
     }

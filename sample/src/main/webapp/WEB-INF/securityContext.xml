@@ -17,11 +17,12 @@
     <security:http security="none" pattern="/css/**"/>
     <security:http security="none" pattern="/logout.jsp"/>
 
-    <!-- Security for the administration UI, can be removed in case UI isn't included -->
-    <security:http pattern="/saml/web/**">
+    <!-- Security for the administration UI -->
+    <security:http pattern="/saml/web/**" access-denied-page="/saml/web/metadata/login">
         <security:form-login login-processing-url="/saml/web/login" login-page="/saml/web/metadata/login" default-target-url="/saml/web/metadata"/>
         <security:intercept-url pattern="/saml/web/metadata/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/saml/web/**" access="ROLE_ADMIN"/>
+        <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
     </security:http>
 
     <!-- Secured pages with SAML as entry point -->
@@ -31,6 +32,7 @@
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
     </security:http>
 
+    <!-- Filters for processing of SAML messages -->
     <bean id="samlFilter" class="org.springframework.security.web.FilterChainProxy">
         <security:filter-chain-map request-matcher="ant">
             <security:filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>

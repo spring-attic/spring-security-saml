@@ -29,6 +29,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.trust.AllowAllSignatureTrustEngine;
+import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
@@ -1051,6 +1052,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     @Autowired
     public void setKeyManager(KeyManager keyManager) {
         this.keyManager = keyManager;
+    }
+
+    @Autowired(required = false)
+    public void setTLSConfigurer(TLSProtocolConfigurer configurer) {
+        // Only explicit dependency
     }
 
 }

@@ -1,6 +1,8 @@
 package org.springframework.security.saml.trust.httpclient;
 
 import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.opensaml.xml.security.CriteriaSet;
 import org.opensaml.xml.security.trust.TrustEngine;
@@ -9,12 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
 import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
 import org.springframework.security.saml.util.SAMLUtil;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.HostnameVerifier;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -31,9 +37,9 @@ import java.util.Set;
  * with property trustedKeys (all all keys on KeyManager when trustKeys are null). Implementation uses hostname verification
  * algorithm.
  */
-public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory, InitializingBean {
+public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory {
 
-    private final Logger log = LoggerFactory.getLogger(TLSProtocolSocketFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(TLSProtocolSocketFactory.class);
 
     /**
      * Storage for all available keys.
@@ -52,9 +58,24 @@ public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory, In
     private Set<String> trustedKeys;
 
     /**
-     * Internally used socket factory where createSocket methods are deleated to.
+     * Internally used socket factory where createSocket methods are delegated to.
      */
     private SecureProtocolSocketFactory socketFactory;
+
+    /**
+     * Default constructor, which initializes socket factory to trust all keys with alias from the trusted
+     * keys as found in the keyManager.
+     *
+     * @param keyManager key manager includes all cryptography material for the SAML instance
+     * @param trustedKeys when not set all certificates included in the keystore will be used as trusted certificate authorities. When specified, only keys with the defined aliases will be used for trust evaluation.
+     * @param sslHostnameVerification type of hostname verification
+     */
+    public TLSProtocolSocketFactory(KeyManager keyManager, Set<String> trustedKeys, String sslHostnameVerification) {
+        this.keyManager = keyManager;
+        this.sslHostnameVerification = sslHostnameVerification;
+        this.trustedKeys = trustedKeys;
+        this.socketFactory = initializeDelegate();
+    }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException {
@@ -74,35 +95,6 @@ public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory, In
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort, HttpConnectionParams connParams) throws IOException {
         return socketFactory.createSocket(host, port, localHost, localPort, connParams);
-    }
-
-    /**
-     * Key manager includes all cryptography material for the SAML instance.
-     *
-     * @param keyManager key manager
-     */
-    @Autowired
-    public void setKeyManager(KeyManager keyManager) {
-        this.keyManager = keyManager;
-    }
-
-    public void setSslHostnameVerification(String sslHostnameVerification) {
-        this.sslHostnameVerification = sslHostnameVerification;
-    }
-
-    /**
-     * When not set all certificates included in the keystore will be used as trusted certificate authorities. When specified,
-     * only keys with the defined aliases will be used for trust evaluation.
-     *
-     * @param trustedKeys trusted keys
-     */
-    public void setTrustedKeys(Set<String> trustedKeys) {
-        this.trustedKeys = trustedKeys;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.socketFactory = initializeDelegate();
     }
 
     /**

@@ -1626,12 +1626,43 @@ public class TestUserDetails implements SAMLUserDetailsService {
             </para>
             <para>Endpoints of filters <emphasis>samlEntryPoint</emphasis>, <emphasis>samlLogoutFilter</emphasis> and <emphasis>metadataDisplayFilter</emphasis> can be changed using the same process and without need to re-generate the metadata.</para>
         </section>
+        <section id="artifact-resolution">
+            <title>Artifact resolution</title>
+            <para>Usage of HTTP-Artifact binding requires Spring SAML to make a direct SOAP call to the Identity Provider. Sometimes it's necessary to configure correct HTTP proxy for the call. This can be achieved
+            by setting property <emphasis>hostConfiguration</emphasis> on <emphasis>HttpClient</emphasis> plugged to the <emphasis>artifactBinding</emphasis> bean. The following configuration demonstrates creation of the bean
+            for the <emphasis>hostConfiguration</emphasis>: <programlisting><![CDATA[<bean id="hostConfiguration" class="org.apache.commons.httpclient.HostConfiguration"/>
+<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetObject" ref="hostConfiguration"/>
+    <property name="targetMethod" value="setProxy"/>
+    <property name="arguments">
+        <list>
+            <value>testHost</value>
+            <value>8080</value>
+        </list>
+    </property>
+</bean>]]></programlisting>
+            </para>
+            <para>Another common use-case is situation when artifact resolution endpoint at IDP is secured using HTTP-Basic authentication. Authentication can be configured by setting 
+            HTTPClient's property <emphasis>state</emphasis> with the following bean: <programlisting><![CDATA[<bean id="state" class="org.apache.commons.httpclient.HttpState"/>
+<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetObject" ref="state"/>
+    <property name="targetMethod" value="setCredentials"/>
+    <property name="arguments">
+        <list>
+            <util:constant static-field="org.apache.commons.httpclient.auth.AuthScope.ANY"/>
+            <bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+                <constructor-arg value="username"/>
+                <constructor-arg value="password"/>
+            </bean>
+        </list>
+    </property>
+</bean>]]></programlisting>
+            </para>
+        </section>
     </chapter>
 
 	<!-- TODO
 	Message storage
-	Bindings configuration
-	- artifact resolution
 	Using the HoK profile
 	-->
   

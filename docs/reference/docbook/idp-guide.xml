@@ -64,7 +64,7 @@
 		<title>Initialize SP metadata</title>
 		<para><itemizedlist spacing="compact">
 				<listitem>
-					<para>Deploy SAML 2 Extension war archive from <emphasis>sample/target/spring-security-saml2-sample.war</emphasis>, or use embedded Tomcat with command: <emphasis>mvn tomcat7:run</emphasis></para>
+					<para>Deploy SAML 2 Extension war archive from <emphasis>sample/target/spring-security-saml2-sample.war</emphasis>, or use embedded Jetty with command: <emphasis>mvn jetty:run</emphasis></para>
 				</listitem>
 				<listitem>
 					<para>Open browser to e.g. https://localhost:8443/spring-security-saml2-sample, making sure to use HTTPS protocol</para>

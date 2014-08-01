@@ -1,4 +1,5 @@
 apply plugin: 'war'
+apply plugin: 'jetty'
 
 // Do not generate POM for this module
 install.enabled = false

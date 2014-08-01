@@ -159,10 +159,10 @@
             <title>Logging</title>
             <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
                 library. The sample application by default uses log4j version 1.2 binding for SLF4J, configured with the following dependency:<programlisting><![CDATA[<dependency>
-   <groupId>org.slf4j</groupId>
-   <artifactId>slf4j-log4j12</artifactId>
-   <version>1.6.3</version>
-   <scope>compile</scope>
+	<groupId>org.slf4j</groupId>
+	<artifactId>slf4j-log4j12</artifactId>
+	<version>1.6.3</version>
+	<scope>compile</scope>
 </dependency>]]></programlisting></para>
             <para>In case you are using another logging library, make sure to change the dependency accordingly.</para>
             <para>You can enable debug logging by modifying file <emphasis>sample/src/main/resources/log4j.properties</emphasis> and adding:
@@ -336,20 +336,20 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	</constructor-arg>
 	<constructor-arg>
 		<bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
-		   <property name="local" value="true"/>
-		   <property name="securityProfile" value="metaiop"/>
-		   <property name="sslSecurityProfile" value="pkix"/>
-		   <property name="signMetadata" value="true"/>
-		   <property name="signingKey" value="apollo"/>
-		   <property name="encryptionKey" value="apollo"/>
-		   <property name="requireArtifactResolveSigned" value="false"/>
-		   <property name="requireLogoutRequestSigned" value="false"/>
-		   <property name="requireLogoutResponseSigned" value="false"/>
-		   <property name="idpDiscoveryEnabled" value="true"/>
-		   <property name="idpDiscoveryURL"
-			  value="https://www.server.com:8080/context/saml/discovery"/>
-		   <property name="idpDiscoveryResponseURL"
-			  value="https://www.server.com:8080/context/saml/login?disco=true"/>
+			<property name="local" value="true"/>
+			<property name="securityProfile" value="metaiop"/>
+			<property name="sslSecurityProfile" value="pkix"/>
+			<property name="signMetadata" value="true"/>
+			<property name="signingKey" value="apollo"/>
+			<property name="encryptionKey" value="apollo"/>
+			<property name="requireArtifactResolveSigned" value="false"/>
+			<property name="requireLogoutRequestSigned" value="false"/>
+			<property name="requireLogoutResponseSigned" value="false"/>
+			<property name="idpDiscoveryEnabled" value="true"/>
+			<property name="idpDiscoveryURL"
+				value="https://www.server.com:8080/context/saml/discovery"/>
+			<property name="idpDiscoveryResponseURL"
+				value="https://www.server.com:8080/context/saml/login?disco=true"/>
 		</bean>
 	</constructor-arg>
 </bean>]]></programlisting></para>
@@ -945,13 +945,13 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
                  <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your <emphasis>securityContext.xml</emphasis>, e.g.:
                  <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
-    	<property name="defaultProfileOptions">
-    		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
-    			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
-    			<property name="includeScoping" value="false"/>
-    		</bean>
-    	</property>
-    </bean>]]></programlisting></para>
+	<property name="defaultProfileOptions">
+		<bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+			<property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+			<property name="includeScoping" value="false"/>
+		</bean>
+	</property>
+</bean>]]></programlisting></para>
                 <para>WebSSOProfileOptions supports the following settings:
                     <table id="configuration-sso-webssoprofile-table">
                      <title><emphasis>org.springframework.security.saml.websso.WebSSOProfileOptions</emphasis> parameters</title>
@@ -1598,30 +1598,30 @@ public class TestUserDetails implements SAMLUserDetailsService {
             by setting property <emphasis>hostConfiguration</emphasis> on <emphasis>HttpClient</emphasis> plugged to the <emphasis>artifactBinding</emphasis> bean. The following configuration demonstrates creation of the bean
             for the <emphasis>hostConfiguration</emphasis>: <programlisting><![CDATA[<bean id="hostConfiguration" class="org.apache.commons.httpclient.HostConfiguration"/>
 <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject" ref="hostConfiguration"/>
-    <property name="targetMethod" value="setProxy"/>
-    <property name="arguments">
-        <list>
-            <value>testHost</value>
-            <value>8080</value>
-        </list>
-    </property>
+	<property name="targetObject" ref="hostConfiguration"/>
+	<property name="targetMethod" value="setProxy"/>
+	<property name="arguments">
+		<list>
+			<value>testHost</value>
+			<value>8080</value>
+		</list>
+	</property>
 </bean>]]></programlisting>
             </para>
             <para>Another common use-case is situation when artifact resolution endpoint at IDP is secured using HTTP-Basic authentication. Authentication can be configured by setting 
             <emphasis>HTTPClient's</emphasis> property <emphasis>state</emphasis> with the following bean: <programlisting><![CDATA[<bean id="state" class="org.apache.commons.httpclient.HttpState"/>
 <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject" ref="state"/>
-    <property name="targetMethod" value="setCredentials"/>
-    <property name="arguments">
-        <list>
-            <util:constant static-field="org.apache.commons.httpclient.auth.AuthScope.ANY"/>
-            <bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
-                <constructor-arg value="username"/>
-                <constructor-arg value="password"/>
-            </bean>
-        </list>
-    </property>
+	<property name="targetObject" ref="state"/>
+	<property name="targetMethod" value="setCredentials"/>
+	<property name="arguments">
+		<list>
+			<util:constant static-field="org.apache.commons.httpclient.auth.AuthScope.ANY"/>
+			<bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+				<constructor-arg value="username"/>
+				<constructor-arg value="password"/>
+			</bean>
+		</list>
+	</property>
 </bean>]]></programlisting>
             </para>
         </section>

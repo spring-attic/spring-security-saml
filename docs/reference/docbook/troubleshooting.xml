@@ -43,6 +43,12 @@
       <para>Make sure the <emphasis>Unlimited Strength Jurisdiction Policy Files</emphasis> are correctly installed in your JDK. See <xref linkend="quick-start-prerequisites"/> for details.</para>      
     </simplesect>
     
+    <simplesect>
+      <title>My system fails during validation of certificates with errors similar to "PKIX path building failed"</title>
+      <para>This is typically caused by misconfiguration of certificates. Either your metadata or keyStore do not contain the correct leaf certificates or CA certificates, or your certificates are invalid.
+      You can get additional information by starting your application with flag <emphasis>-Djavax.net.debug=all</emphasis>.</para>      
+    </simplesect>
+    
 	<!--
 	TODO
 	- XML parsing libraries and endorsing

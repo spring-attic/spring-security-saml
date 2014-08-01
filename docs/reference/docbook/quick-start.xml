@@ -115,7 +115,7 @@
 
 		<section id="quick-start-deploy">
 			<title>Deployment</title>
-			<para>You can start the application from the release <emphasis>sample</emphasis> directory using command: <programlisting>mvn jetty:run</programlisting>, or from sources using <emphasis>gradlew jettyRun</emphasis></para>
+			<para>You can start the application from the release <emphasis>sample</emphasis> directory using command: <programlisting>mvn tomcat7:run</programlisting>, or from sources using <emphasis>gradlew tomcatRun</emphasis></para>
 			<para>After startup the Spring SAML sample application will be available at <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis></para>
 			<para>Alternatively you can deploy the war archive to your application server or container.</para>
 		</section>

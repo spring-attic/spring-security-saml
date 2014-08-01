@@ -1,5 +1,5 @@
 apply plugin: 'war'
-apply plugin: 'jetty'
+apply plugin: 'tomcat'
 
 // Do not generate POM for this module
 install.enabled = false
@@ -29,5 +29,12 @@ dependencies {
 	providedCompile "javax.servlet:jsp-api:2.0"
 
 	testCompile "junit:junit:4.4"
+
+	def tomcatVersion = '7.0.11'
+	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+		"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+	tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+		exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+	}
 
 }

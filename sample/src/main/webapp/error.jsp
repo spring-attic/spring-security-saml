@@ -26,19 +26,17 @@
                             <% if (exception != null) { %>
                                 <strong>Message:</strong><br>
                                 <%= exception.getMessage() %>
-                                <p>
+                                <br><br>
                                 <strong>StackTrace:</strong><br>
-                                <pre>
-                                <%
+                                <div style="width: 100%; overflow: scroll"><pre><%
                                     StringWriter stringWriter = new StringWriter();
                                     PrintWriter printWriter = new PrintWriter(stringWriter);
                                     exception.printStackTrace(printWriter);
                                     out.println(stringWriter);
                                     printWriter.close();
                                     stringWriter.close();
-                                %>
-                                </pre>
-                                <p>
+                                %></pre></div>
+                                <br>
                                 <strong>Make sure to hide error content from your production environments to minimize leakage of useful data to potential
                                 attackers.</strong>
                             <% } %>

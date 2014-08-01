@@ -590,7 +590,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     /**
      * Maximum time between authentication of user and processing of an authentication statement.
      *
-     * @return max authentication age, defaults to 7200
+     * @return max authentication age, defaults to 7200 (in seconds)
      */
     public int getMaxAuthenticationAge() {
         return maxAuthenticationAge;

@@ -111,11 +111,15 @@
 				You can find the compiled war archive <emphasis>spring-security-saml2-sample.war</emphasis> in directory
 				<emphasis>sample/build/libs/</emphasis> (gradle) or <emphasis>sample/target/</emphasis> (maven).
 			</para>
+			<para>
+				Project files for your IDE can be created with <emphasis>gradlew eclipse</emphasis> or <emphasis>gradlew idea</emphasis>.
+			</para>
 		</section>
 
 		<section id="quick-start-deploy">
 			<title>Deployment</title>
-			<para>You can start the application from the release <emphasis>sample</emphasis> directory using command: <programlisting>mvn tomcat7:run</programlisting>, or from sources using <emphasis>gradlew tomcatRun</emphasis></para>
+			<para>You can start the application from the release <emphasis>sample</emphasis> directory using command: <programlisting>mvn tomcat7:run</programlisting></para>
+			<para>Same can be achieved using gradle with: <programlisting>gradlew tomcatRun</programlisting></para>
 			<para>After startup the Spring SAML sample application will be available at <emphasis>http://localhost:8080/spring-security-saml2-sample</emphasis></para>
 			<para>Alternatively you can deploy the war archive to your application server or container.</para>
 		</section>

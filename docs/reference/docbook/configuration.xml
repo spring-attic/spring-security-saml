@@ -122,6 +122,11 @@
 ]]></programlisting>
 				</para>
 			</section>
+			<section id="configuration-java">
+			<title>Java-based configuration</title>
+				<para>Spring SAML will include configuration classes for Spring Java-based configuration in future versions.</para>
+				<para>For an example of <emphasis>securityContext.xml</emphasis> translated into Java configuration in a Spring Boot application see project by Vincenzo De Notaris at <ulink url="https://github.com/vdenotaris/spring-boot-security-saml-sample"/>.</para>
+			</section>
 			<section id="configuration-integration-spring-security">
 				<title>Spring Security integration</title>
 				<para>Filters of the SAML module need to be enabled as part of the Spring Security settings. In case
@@ -220,15 +225,14 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 									<entry>Values from the request in format: <emphasis>scheme://server:port/contextPath</emphasis></entry>
 								</row>
 								<row>
-									<entry><literal>entityAlias</literal></entry>
-									<entry>Local alias for the entityId which can be part of a simple URL path and contains only alphanum characters. See <xref linkend="configuration-entity-alias"/>. Value
-									is only required in case you are deploying multiple collocated service providers.</entry>
-									<entry><emphasis>null</emphasis></entry>
-								</row>
-								<row>
 									<entry><literal>entityId</literal></entry>
 									<entry>Unique identifier of the service provider.</entry>
-									<entry>&lt;entityBaseUrl&gt;/saml/ metadata</entry>
+									<entry>&lt;entityBaseUrl&gt;/saml/metadata</entry>
+								</row>
+								<row>
+									<entry><literal>id</literal></entry>
+									<entry>XML identifier of the root metadata element referred in signature.</entry>
+									<entry>entityId with removed illegal characters (NCName)</entry>
 								</row>
 								<row>
 									<entry><literal>requestSigned</literal></entry>
@@ -241,34 +245,14 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 									<entry>true</entry>
 								</row>
 								<row>
-									<entry><literal>signingKey</literal></entry>
-									<entry>Key to include with usage "signing" in the metadata. Value will be set in ExtendedMetadata as <literal>signingKey</literal>.</entry>
-									<entry>Default private key from the KeyManager</entry>
-								</row>
-								<row>
-									<entry><literal>encryptionKey</literal></entry>
-									<entry>Key to include with usage "encryption" in the metadata. Value will be set in ExtendedMetadata as <literal>encryptionKey</literal>.</entry>
-									<entry>Default private key from the KeyManager</entry>
-								</row>
-								<row>
-									<entry><literal>tlsKey</literal></entry>
-									<entry>Key to include with usage "unspecified" in the metadata. Value will be set in ExtendedMetadata as <literal>tlsKey</literal>.</entry>
-									<entry>By default not included. The key is only included in metadata when it's different from signing and encryption keys.</entry>
-								</row>
-								<row>
-									<entry><literal>signMetadata</literal></entry>
-									<entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>. Value will be set in ExtendedMetadata as <literal>signMetadata</literal>.</entry>
-									<entry>true</entry>
-								</row>
-								<row>
 									<entry><literal>bindingsSSO</literal></entry>
 									<entry>Bindings to be included in the metadata for WebSSO profile. Supported values are: POST, Artifact and PAOS. Order of bindings in the property determines order of endpoints in the generated metadata.</entry>
-									<entry>Artifact, POST, PAOS</entry>
+									<entry>POST, Artifact</entry>
 								</row>
 								<row>
 									<entry><literal>bindingsHoKSSO</literal></entry>
 									<entry>Bindings to be included in the metadata for WebSSO Holder-of-Key profile. Supported values are: POST and Artifact. Order of bindings in the property determines order of endpoints in the generated metadata.</entry>
-									<entry>Artifact, POST</entry>
+									<entry></entry>
 								</row>
 								<row>
 									<entry><literal>bindingsSLO</literal></entry>
@@ -279,21 +263,6 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 									<entry><literal>assertionConsumerIndex</literal></entry>
 									<entry>Index of assertion consumer point to be marked as default.</entry>
 									<entry>0</entry>
-								</row>
-								<row>
-									<entry><literal>includeDiscovery</literal></entry>
-									<entry>When true system will initialize discovery process during attempt to initialize single sign-on without pre-selected IDP.</entry>
-									<entry>true, deprecated, use property idpDiscoveryEnabled in extendedMetadata instead</entry>
-								</row>
-								<row>
-									<entry><literal>customDiscoveryURL</literal></entry>
-									<entry>When <literal>includeDiscovery</literal> is true value overrides default discovery request URL.</entry>
-									<entry>generated value for internal discovery service, deprecated, use property idpDiscoveryURL in ExtendedMetadata instead</entry>
-								</row>
-								<row>
-									<entry><literal>customDiscoveryResponseURL</literal></entry>
-									<entry>When <literal>includeDiscoveryExtension</literal> is true value overrides default discovery response URL.</entry>
-									<entry>generated value for entry point response URL, deprecated, use property idpDiscoveryResponseURL in ExtendedMetadata instead</entry>
 								</row>
 								<row>
 									<entry><literal>includeDiscoveryExtension</literal></entry>
@@ -307,16 +276,17 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 								</row>
 								<row>
 									<entry><literal>extendedMetadata</literal></entry>
-									<entry>Additional settings such as metadata signing, IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="configuration-metadata-extended"/> for details.</entry>
+									<entry>Additional settings such as security keys, entity alias, metadata signing, IDP discovery, ECP settings, security profiles and signature requirements can be specified in the ExtendedMetadata, see <xref linkend="configuration-metadata-extended"/> for details.</entry>
+									<entry>no extended metadata</entry>
 								</row>
 							</tbody>
 						</tgroup>
 					</table>
 				</para>
 				<para>
-					Property <literal>entityBaseURL</literal> is automatically generated based on values in the first HTTP request, unless explictly specified in the MetadataGenerator.
+					In case property <literal>entityBaseURL</literal> is not specified, it will be automatically generated based on values in the first HTTP request.
 					Generated value can be normalized to exclude standard 80/443 ports for http/https schemes by setting property <literal>normalizeBaseUrl</literal> of the MetadataGeneratorFilter
-					to <literal>true</literal>.
+					to <literal>true</literal>. It is recommended to provide the value explicitly in the configuration.
 				</para>
 				<para>
 					Providing an empty collection or null value to properties <emphasis>bindingsSSO</emphasis>, <emphasis>bindingsHoKSSO</emphasis> and <emphasis>bindingsSLO</emphasis>
@@ -327,9 +297,8 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	<property name="bindingsHoKSSO"><list/></property>
 </bean>]]></programlisting></para>
 				<para>
-					By default generated metadata will be digitally signed using the default credential specified in KeyManager
-					(see <xref linkend="configuration-key-management"/> for details). Digital signature can be disabled using property
-					<literal>signMetadata</literal> of the <emphasis>metadataGeneratorFilter</emphasis> bean.
+					By default generated metadata will not be digitally signed. Digital signature can be enabled using property
+					<literal>signMetadata</literal> of the <emphasis>extendedMetdata</emphasis> bean.
 				</para>
 				<para>
 					In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
@@ -344,7 +313,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				can be added by updating the <emphasis>metadata</emphasis> bean with correct ExtendedMetadata. Please follow these steps
 				in order to do so: <itemizedlist>
 				  <listitem>
-					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata information -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <link linkend="configuration-metadata-sp-generation">automatic metadata generator</link>.</para>
+					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata Administration -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <link linkend="configuration-metadata-sp-generation">automatic metadata generator</link>.</para>
 				  </listitem>
 				  <listitem>
 					  <para>Store the metadata file as part of your project classpath, e.g. in <emphasis>WEB-INF/classes/security/localhost_sp.xml</emphasis>.</para>
@@ -356,7 +325,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 					  <para>Include the SP metadata in the <emphasis>metadata</emphasis> bean and mark the entity as <emphasis>local</emphasis> in the extended metadata. Make sure to specify the <emphasis>alias</emphasis>
 					  property in case it was used during metadata generation.</para>
 					  <para>It is recommended to use the administration UI which also generates all the Spring declarations ready for inclusion in your <emphasis>securityContext.xml</emphasis>.</para>
-					  <para><programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+					  <para>Configuration for pre-configured local metdadata can look for example like this: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
 		<bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
 			<constructor-arg>
@@ -388,8 +357,8 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				</itemizedlist></para>
 				<para>Same instance of your application can include multiple statically declared local service providers each differentiated by its own unique
 				alias and entity ID, see <xref linkend="configuration-entity-alias"/> for details. In case your application defines multiple local service providers,
-                set property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis> bean to the entity ID of the default one.</para>
-				<para>The xml file doesn't need to include signature. Metadata will be automatically signed when property <emphasis>signMetadata</emphasis> is set to <emphasis>true</emphasis>.</para>
+				set property <emphasis>hostedSPName</emphasis> of the <emphasis>metadata</emphasis> bean to the entity ID of the default one.</para>
+				<para>The file with pre-configured metadata doesn't need to include digital signature. Metadata will be automatically signed during runtime when property <emphasis>signMetadata</emphasis> is set to <emphasis>true</emphasis>.</para>
 				<para>For details about available settings of the ExtendedMetadata see <xref linkend="configuration-metadata-extended"/>.</para>
 			</section>
 			<section id="configuration-metadata-sp-display">
@@ -593,7 +562,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                                 <entry>signingAlgorithm</entry>
                                 <entry>-</entry>
                                 <entry>local only</entry>
-                                <entry>When set customized algorithm used to create digital signature on the metadata object. Typical values are <emphasis>http://www.w3.org/2000/09/xmldsig#rsa-sha1</emphasis>,
+                                <entry>Algorithm used to create digital signature on the metadata object. Typical values are <emphasis>http://www.w3.org/2000/09/xmldsig#rsa-sha1</emphasis>,
                                   <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</emphasis> and <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</emphasis>.</entry>
                             </row>
                             <row>
@@ -733,7 +702,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  which can be used for initial testing, but for security reason should be replaced with your own key in early development stages.</para>
                  <para>In case your IDP doesn't require keys signed by a specific certification authority you can generate your own self-signed key using the
                  Java utility <emphasis>keytool</emphasis>, e.g. with: <programlisting>keytool -genkeypair -alias some-alias -keypass changeit -keystore samlKeystore.jks</programlisting></para>
-                 <para>The keystore will now contain additional PrivateKeyEntry with alias mykey which can be imported to the <emphasis>keyManager</emphasis> in your <emphasis>securityContext.xml</emphasis>.</para>
+                 <para>The keystore will now contain additional PrivateKeyEntry with alias <emphasis>mykey</emphasis> which can be imported to the <emphasis>keyManager</emphasis> in your <emphasis>securityContext.xml</emphasis>.</para>
                  <para>Keys signed by certification authorities are typically provided in .p12/.pfx format (or can be converted to such using OpenSSL) and imported to Java keystore with, e.g.:
                  <programlisting>keytool -importkeystore -srckeystore key.p12 -srcstoretype PKCS12 -srcstorepass password \
 	-alias some-alias -destkeystore samlKeystore.jks -destalias some-alias \
@@ -906,11 +875,12 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
         <title>Single sign-on configuration</title>
         <section id="configuration-discovery">
             <title>IDP selection and discovery</title>
-            <para>SAML Extension supports the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service
-    Protocol and Profile</ulink>.</para>
+            <para>Discovery helps your Service Provider determine which Identity Provider should be used for authentication of the current user. It is automatically initialized during calls to 
+            single sign-on endpoint at <emphasis>scheme://server:port/contextPath/saml/login</emphasis>. SAML Extension supports multiple modes of discovery including 
+            the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service Protocol and Profile</ulink>.</para>
             <para>
-              IDP discovery can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the
-              entityId of the required IDP, e.g. http://host:port/app/saml/login?idp=mySelectedIDP.
+              IDP discovery modes can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the
+              entityId of the required IDP, e.g. <emphasis>scheme://server:port/contextPath/saml/login?idp=mySelectedIDP</emphasis>.
             </para>
             <para>
               The URL where local SP expects discovery response can be included in the SP metadata as one of the extensions. The feature can be enabled by setting property <emphasis>includeDiscoveryExtension</emphasis>
@@ -923,11 +893,18 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	</constructor-arg>
 </bean>]]></programlisting>
             </para>
-            <para>It is possible to configure the following IDP discovery modes:
+            <para>
+              <simplesect>
+                <title>Default IDP without discovery</title>
+                <para>The mode is enabled by default and automatically selects the default IDP without performing discovery.</para>
+                <para>The default IDP can be configured using property <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration. 
+                In case the property isn't set, system will automatically use the first available IDP.</para>
+              </simplesect>
               <simplesect>
                 <title>Local discovery service</title>
-                <para>SAML Extension includes a local IDP discovery service which presents user with an IDP selection page. The selection page can be customized using property
-                <emphasis>idpSelectionPath</emphasis> on bean samlIDPDiscovery. System forwards to this page during discovery request and includes the following request attributes:
+                <para>SAML Extension includes a local IDP discovery service which presents user with an IDP selection page. This mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
+                <link linkend="configuration-metadata-extended">local SP extended metadata</link> to <emphasis>true</emphasis>.</para> 
+                <para>The selection page can be customized using property <emphasis>idpSelectionPath</emphasis> on bean <emphasis>samlIDPDiscovery</emphasis>. System forwards to this page wih a discovery request which includes the following request attributes:
                   <itemizedlist>
                         <listitem>
                             <para><emphasis>idpDiscoReturnURL</emphasis> - URL to send the IDP selection result to using GET action</para>
@@ -942,14 +919,8 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
               <simplesect>
                 <title>Remote discovery service</title>
                 <para>In order to enable external IDP discovery service configure property <emphasis>idpDiscoveryURL</emphasis> in your <link linkend="configuration-metadata-extended">local
-                SP extended metadata</link> to the external discovery URL. Make sure property <emphasis>idpDiscoveryEnabled</emphasis> is set to true. For details on configuring local extended metadata
-                see <xref linkend="configuration-metadata-sp"/>.</para>
-              </simplesect>
-              <simplesect>
-                <title>Default IDP without discovery</title>
-                <para>In this mode the system automatically selects the default IDP and doesn't perform discovery. This mode can be enabled by setting property <emphasis>includeDiscovery</emphasis> in the
-                <link linkend="configuration-metadata-extended">local SP extended metadata</link> to false. For details on configuring local extended metadata see <xref linkend="configuration-metadata-sp"/>.</para>
-                <para>The default IDP can be configured using property <emphasis>defaultIDP</emphasis> on bean <emphasis>metadata</emphasis> in the Spring Security configuration.</para>
+                SP extended metadata</link> to the external discovery URL. Make sure property <emphasis>idpDiscoveryEnabled</emphasis> is set to true. The remote discovery service needs to support
+                the Identity Provider Discovery Service Protocol and Profile.</para>
               </simplesect>
             </para>
         </section>
@@ -964,7 +935,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                          <para>User accesses a resource protected by Spring Security which initializes SAMLEntryPoint</para>
                      </listitem>
                      <listitem>
-                         <para>User is redirected to the SSO page at e.g. https://www.server.com/context/saml/login</para>
+                         <para>User is redirected to the SSO endpoint at e.g. https://www.server.com/context/saml/login</para>
                      </listitem>
                  </itemizedlist>
                  </para>
@@ -1110,8 +1081,10 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
             the <emphasis>SAMLAuthenticationProvider</emphasis>. By default instance of <emphasis>org.springframework.security.providers.ExpiringUsernameAuthenticationToken</emphasis>
             is created. Content of the resulting object can be customized by setting properties of the <emphasis>samlAuthenticationProvider</emphasis> bean in the <emphasis>securityContext.xml</emphasis>.
             An instance of <emphasis>org.springframework.security.saml.userdetails.SAMLUserDetailsService</emphasis> can be provided to supply application-specific information about the
-            authenticated user. Property <emphasis>forcePrincipalAsString</emphasis> can be used to force String value of the <emphasis>principal</emphasis> property. The Authentication object
-            is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
+            authenticated user.</para>
+            <para>The <emphasis>Authentication</emphasis> object will by default include string version of the <emphasis>NameID</emphasis> included in the SAML Assertion as its<emphasis>principal</emphasis>. 
+            Property <emphasis>forcePrincipalAsString</emphasis> can be used to change this to include the raw <emphasis>NameID</emphasis> element.</para>
+            <para>The Authentication object is available in pages secured with Spring Security using <emphasis>SecurityContextHolder.getContext().getAuthentication()</emphasis> and is populated with the following values:
             <table id="authentication-object-table">
                 <title>ExpiringUsernameAuthenticationToken values.</title>
                 <tgroup cols="2">
@@ -1126,11 +1099,11 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                     <tbody>
                         <row>
                             <entry>Principal</entry>
-                            <entry>When forcePrincipalAsString = false AND userDetail = null (default) - <emphasis>NameID</emphasis> object included in the SAML Assertion (<emphasis>credential.getNameID()</emphasis> of type <emphasis>org.opensaml.saml2.core.NameID</emphasis>)</entry>
+                            <entry>When forcePrincipalAsString = true (default) - <emphasis>String</emphasis> value of <emphasis>NameID</emphasis> included in the SAML Assertion (<emphasis>credential.getNameID().getValue()</emphasis> of type java.lang.String)</entry>
                         </row>
                         <row>
                             <entry>Principal</entry>
-                            <entry>When forcePrincipalAsString = true - <emphasis>String</emphasis> value of <emphasis>NameID</emphasis> included in the SAML Assertion (<emphasis>credential.getNameID().getValue()</emphasis> of type java.lang.String)</entry>
+                            <entry>When forcePrincipalAsString = false AND userDetail = null (default) - <emphasis>NameID</emphasis> object included in the SAML Assertion (<emphasis>credential.getNameID()</emphasis> of type <emphasis>org.opensaml.saml2.core.NameID</emphasis>)</entry>
                         </row>
                         <row>
                             <entry>Principal</entry>
@@ -1189,10 +1162,10 @@ public class TestUserDetails implements SAMLUserDetailsService {
               </listitem>
               <listitem>
                   <para>org.springframework.security.saml.log.SAMLDefaultLogger</para>
-                  <para>Logs events as INFO level messages to the standard log configurable as described in <xref linkend="logging"/>. Setting
+                  <para>Logs events as INFO level messages to the log name <emphasis>org.springframework.security.saml.log.SAMLDefaultLogger</emphasis> configurable as described in <xref linkend="logging"/>. Setting
                   property <emphasis>logMessages</emphasis> to <emphasis>true</emphasis> will include content of the SAML messages as part of the log. Logging of exceptions
-            can be disabled by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>. Fields are semicolon separated with the following values:
-                      <itemizedlist>
+            can be disabled by setting <emphasis>logErrors</emphasis> to <emphasis>false</emphasis>. Fields are semicolon separated with the following values:</para>
+                  <para><itemizedlist spacing="compact">
                           <listitem><para>type of SAML message (AuthNRequest, AuthNResponse, LogoutRequest or LogoutResponse)</para></listitem>
                           <listitem><para>result of processing (SUCCESS or FAILURE)</para></listitem>
                           <listitem><para>IP address of the peer who made the current request to SP</para></listitem>
@@ -1201,8 +1174,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
                           <listitem><para>identifier of the authenticated user</para></listitem>
                           <listitem><para>SAML message (when logMessages is enabled)</para></listitem>
                           <listitem><para>text of the error (only for failures, when logErrors is enabled)</para></listitem>
-                      </itemizedlist>
-                  </para>
+                      </itemizedlist></para>
               </listitem>
             </itemizedlist></para>
         <para>The logger is only called for messages which can be correctly received and parsed. For errors which occur before correct parsing see <xref linkend="error-handling"/>.</para>
@@ -1220,7 +1192,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
                     <listitem>
                         <para>Make sure that your reverse-proxy or load-balancer is configured to use sticky sessions. Information about e.g. sent requests is stored
                             within a user's HTTP session and sending of response to another back-end node would make the original request data unavailable and fail the validation.
-                            Sticky session are not necessary in case only IDP-initialized SSO is used.</para>
+                            Sticky session are not necessary in case only IDP-initialized SSO is used or when sessions are replicated to all nodes.</para>
                     </listitem>
                     <listitem>
                         <para>Provide information about front-end URL to the back-end servers by changing the <emphasis>contextProvider</emphasis> bean implementation in your <emphasis>securityContext.xml</emphasis>
@@ -1643,7 +1615,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
 </bean>]]></programlisting>
             </para>
             <para>Another common use-case is situation when artifact resolution endpoint at IDP is secured using HTTP-Basic authentication. Authentication can be configured by setting 
-            HTTPClient's property <emphasis>state</emphasis> with the following bean: <programlisting><![CDATA[<bean id="state" class="org.apache.commons.httpclient.HttpState"/>
+            <emphasis>HTTPClient's</emphasis> property <emphasis>state</emphasis> with the following bean: <programlisting><![CDATA[<bean id="state" class="org.apache.commons.httpclient.HttpState"/>
 <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="state"/>
     <property name="targetMethod" value="setCredentials"/>

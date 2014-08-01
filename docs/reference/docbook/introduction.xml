@@ -14,15 +14,15 @@
 		<title>What this manual covers</title>
 
 		<para>This manual describes Spring Security SAML Extension component, its uses, installation, configuration,
-			design and tested environments.
+			design and integartion possibilities.
 		</para>
 	</section>
 
 	<section id="section-when-to-use">
 		<title>When to use Spring Security SAML Extension</title>
 
-		<para>The extension enables both new and existing applications to act as a Service Provider in federations based on
-			SAML 2.0 protocol and enable Web Single Sign-On. The extension allows seamless combination of SAML 2.0 and other authentication and federation
+		<para>The extension enables both new and existing applications to act as a Service Provider in federations based on Web Single Sign-On
+			and Single Logout profiles of SAML 2.0 protocol. The extension allows seamless combination of SAML 2.0 and other authentication and federation
 			mechanisms in a single application. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, RM5 IdM or Ping
 			Federate) can be used with the extension.</para>
 		<para>The extension can also be used in applications which are not primarily secured using Spring Security. It can be adapted

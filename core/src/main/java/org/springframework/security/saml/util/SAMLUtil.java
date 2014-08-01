@@ -374,6 +374,10 @@ public class SAMLUtil {
      */
     public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
         try {
+            if (message.getDOM() != null) {
+                logger.debug("XMLObject already had cached DOM, returning that element");
+                return message.getDOM();
+            }
             Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
             if (marshaller == null) {
                 throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "

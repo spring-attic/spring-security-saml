@@ -43,6 +43,7 @@
           <listitem><para>Usage of metadata alias is now optional</para></listitem>
           <listitem><para>New look and feel of the sample application</para></listitem>
           <listitem><para>Cleanup of duplicate values in MetadataGenerator and ExtendedMetadata</para></listitem>
+          <listitem><para>SAMLCredential now contains facility methods for handling of String SAML attributes</para></listitem>
         </itemizedlist>
 		</para>
 	</section>
@@ -113,6 +114,12 @@
         <para><emphasis>SAMLAuthenticationProvider</emphasis>
         <itemizedlist spacing="compact">
         <listitem><para>property forcePrincipalAsString is now set to true by default</para></listitem>
+        </itemizedlist>
+        </para>
+
+        <para><emphasis>SAMLCredential</emphasis>
+        <itemizedlist spacing="compact">
+        <listitem><para>method getAttributeByName was renamed to getAttribute</para></listitem>
         </itemizedlist>
         </para>
 

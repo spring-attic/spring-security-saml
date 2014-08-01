@@ -17,6 +17,9 @@ package org.springframework.security.saml;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.NameID;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.schema.XSAny;
+import org.opensaml.xml.schema.XSString;
 import org.springframework.security.saml.parser.SAMLCollection;
 import org.springframework.security.saml.parser.SAMLObject;
 
@@ -138,16 +141,82 @@ public class SAMLCredential implements Serializable {
      * Name comparing is only done by "name" attribute, disregarding "friendly-name" and "name-format".
      * Attributes are searched in order as received in SAML message.
      *
+     * Attribute names are case-insensitive.
+     *
      * @param name name of attribute to find
      * @return the first occurrence of the attribute with the given name or null if not found
      */
-    public Attribute getAttributeByName(String name) {
+    public Attribute getAttribute(String name) {
         for (Attribute attribute : getAttributes()) {
             if (name.equalsIgnoreCase(attribute.getName())) {
                 return attribute;
             }
         }
         return null;
+    }
+
+    /**
+     * Method searches for the first occurrence of the Attribute with given name. It returns text content of the first
+     * AttributeValue element. In case there's multiple AttributeValues, the others are ignored. In case the Attribute
+     * is not found or doesn't contain any values method returns null.
+     *
+     * The AttributeValue must be of type xs:String or xs:Any, other types are ignored and return null.
+     *
+     * Attribute names are case-insensitive.
+     *
+     * @param name name of attribute to find
+     * @return the first occurrence of the attribute with the given name or null if not found
+     */
+    public String getAttributeAsString(String name) {
+        Attribute attribute = getAttribute(name);
+        if (attribute == null) {
+            return null;
+        }
+        List<XMLObject> attributeValues = attribute.getAttributeValues();
+        if (attributeValues == null || attributeValues.size() == 0) {
+            return null;
+        }
+        XMLObject xmlValue = attributeValues.iterator().next();
+        return getString(xmlValue);
+    }
+
+    /**
+     * Method searches for the first occurrence of the Attribute with given name. It returns array with text contents of all
+     * the AttributeValue elements. In case the Attribute is not found method returns null. In case Attribute doesn't contain
+     * any values an empty array is returned. Array has always length equal to number of values in the attribute.
+     *
+     * The AttributeValues must be of type xs:String or xs:Any, other types are ignored and add null value to the array.
+     *
+     * Attribute names are case-insensitive.
+     *
+     * @param name name of attribute to find
+     * @return the first occurrence of the attribute with the given name or null if not found
+     */
+    public String[] getAttributeAsStringArray(String name) {
+        Attribute attribute = getAttribute(name);
+        if (attribute == null) {
+            return null;
+        }
+        List<XMLObject> attributeValues = attribute.getAttributeValues();
+        if (attributeValues == null || attributeValues.size() == 0) {
+            return new String[0];
+        }
+        String[] result = new String[attributeValues.size()];
+        int i = 0;
+        for (XMLObject attributeValue : attributeValues) {
+            result[i++] = getString(attributeValue);
+        }
+        return result;
+    }
+
+    private String getString(XMLObject xmlValue) {
+        if (xmlValue instanceof XSString) {
+            return ((XSString) xmlValue).getValue();
+        } else if (xmlValue instanceof XSAny) {
+            return ((XSAny) xmlValue).getTextContent();
+        } else {
+            return null;
+        }
     }
 
     /**

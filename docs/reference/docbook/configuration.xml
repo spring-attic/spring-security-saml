@@ -1137,13 +1137,7 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 public class TestUserDetails implements SAMLUserDetailsService {
 	@Override
 	public Object loadUserBySAML(SAMLCredential cred) throws UsernameNotFoundException {
-		Attribute accountID = cred.getAttributeByName("accountID");
-		if (accountID == null || accountID.getAttributeValues() == null
-			|| accountID.getAttributeValues().size() == 0) {
-			return null;
-		}
-		XMLObject attributeValue = accountID.getAttributeValues().iterator().next();
-		return attributeValue.getDOM().getTextContent();
+		return cred.getAttributeAsString("accountID");
 	}
 }]]></programlisting></para>
             <para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods

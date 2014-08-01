@@ -57,21 +57,16 @@
                                 <tr>
                                     <td colspan="2"><h5>Principal's SAML attributes</h5></td>
                                 </tr>
-                                <c:forEach var="attribute"
-                                           items="${credential.attributes}">
+                                <c:forEach var="attribute" items="${credential.attributes}">
                                     <tr>
                                         <td width="200">
                                             <strong><c:out value="${attribute.name}"/></strong><c:if test="${not empty attribute.friendlyName}"> (<c:out value="${attribute.friendlyName}"/>)</c:if>
                                         </td>
                                         <td>
-                                            <c:forEach var="attributeValue"
-                                                       items="${attribute.attributeValues}">
-                                                <c:catch var="catchException">
-                                                    <c:out value="${attributeValue.value}"/>&nbsp;
-                                                </c:catch>
-                                                <c:if test="${not empty catchException}">
+                                            <c:forEach var="attributeValues" items="${credential.getAttributeAsStringArray(attribute.name)}">
+                                                <c:forEach var="attributeValue" items="${attributeValues}">
                                                     <c:out value="${attributeValue}"/>&nbsp;
-                                                </c:if>
+                                                </c:forEach>
                                             </c:forEach>
                                         </td>
                                     </tr>

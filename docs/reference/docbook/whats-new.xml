@@ -17,7 +17,7 @@
     <para>
         <itemizedlist spacing="compact">
           <listitem><para>Metadata signing now supports custom keyInfoGenerator and signingAlgorithm, signing can be enable per-entity</para></listitem>
-          <listitem><para>SAMLContextProvider has new customization possibilities for PKIXTrustEvaluator, PKIXInformationResolver and MetaDataResolver</para></listitem>
+          <listitem><para>SAMLContextProvider has new customization possibilities for PKIXTrustEvaluator, PKIXInformationResolver and MetadataResolver</para></listitem>
           <listitem><para>CertPathPKIXTrustEvaluator supports customization of security provider and explicit validation of certification path</para></listitem>
           <listitem><para>MetadataCredentialResolver can be configured to load data from XML metadata and/or ExtendedMetadata</para></listitem>
           <listitem><para>PKIXInformationResolver has an extension point for population of CRLs</para></listitem>
@@ -53,9 +53,9 @@
 
         <para><emphasis>Module names</emphasis>
         <itemizedlist spacing="compact">
-        <listitem><para>module saml2-core was renamed to core, jar name and maven artifact name stays the same</para></listitem>
-        <listitem><para>module saml2-sample was renamed to sample, jar name and maven artifact name stays the same</para></listitem>
-        <listitem><para>module src was renamed to docs, jar names and mave artifact name stays the same</para></listitem>
+        <listitem><para>module saml2-core was renamed to core, jar and maven artifact names stay the same</para></listitem>
+        <listitem><para>module saml2-sample was renamed to sample, jar and maven artifact names stay the same</para></listitem>
+        <listitem><para>module src was renamed to docs, jar and mave artifact names stay the same</para></listitem>
         </itemizedlist>
         </para>
 
@@ -107,6 +107,12 @@
         <listitem><para>by default the first binding is now HTTP-POST instead of HTTP-Artifact, endpoint for Web SSO no longer includes PAOS binding, set property <emphasis>bindingsSSO</emphasis> with values "artifact", "post", "paos" for backwards compatibility</para></listitem>
         <listitem><para>by default endpoints for Web SSO holder of key are no longer included, set property <emphasis>bindingsHoKSSO</emphasis> with values "artifact" and "post" for backwards compatibility</para></listitem>
         <listitem><para>by default <emphasis>MetadataGeneratorFilter</emphasis> no longer sets property <emphasis>entityAlias</emphasis> to value <emphasis>defaultAlias</emphasis>, set the value manually for backwards compatibility</para></listitem>
+        </itemizedlist>
+        </para>
+
+        <para><emphasis>SAMLAuthenticationProvider</emphasis>
+        <itemizedlist spacing="compact">
+        <listitem><para>property forcePrincipalAsString is now set to true by default</para></listitem>
         </itemizedlist>
         </para>
 

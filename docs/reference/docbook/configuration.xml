@@ -316,7 +316,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 					  <para>Generate and download metadata, e.g. using the <emphasis>Metadata Administration -&gt; Generate new service provider metadata</emphasis> option in the sample application's administration UI or using instructions in <link linkend="configuration-metadata-sp-generation">automatic metadata generator</link>.</para>
 				  </listitem>
 				  <listitem>
-					  <para>Store the metadata file as part of your project classpath, e.g. in <emphasis>WEB-INF/classes/security/localhost_sp.xml</emphasis>.</para>
+					  <para>Store the metadata file as part of your project classpath, e.g. in <emphasis>WEB-INF/classes/metadata/localhost_sp.xml</emphasis>.</para>
 				  </listitem>
 				  <listitem>
 					  <para>Disable the automatic metadata generator by removing the following custom filter from the <emphasis>securityContext.xml</emphasis>: <programlisting><![CDATA[<security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>]]></programlisting></para>
@@ -327,9 +327,14 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 					  <para>It is recommended to use the administration UI which also generates all the Spring declarations ready for inclusion in your <emphasis>securityContext.xml</emphasis>.</para>
 					  <para>Configuration for pre-configured local metdadata can look for example like this: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
-		<bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+		<bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
 			<constructor-arg>
-				<value type="java.io.File">classpath:security/localhost_sp.xml</value>
+				<bean class="java.util.Timer"/>
+			</constructor-arg>
+			<constructor-arg>
+				<bean class="org.opensaml.util.resource.ClasspathResource">
+					<constructor-arg value="/metadata/localhost_sp.xml"/>
+				</bean>
 			</constructor-arg>
 			<property name="parserPool" ref="parserPool"/>
 		</bean>

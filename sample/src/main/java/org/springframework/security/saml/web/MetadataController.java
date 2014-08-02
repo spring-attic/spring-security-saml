@@ -352,9 +352,14 @@ public class MetadataController {
         StringBuilder sb = new StringBuilder();
         sb.append("<bean class=\"org.springframework.security.saml.metadata.ExtendedMetadataDelegate\">\n" +
                 "    <constructor-arg>\n" +
-                "        <bean class=\"org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider\">\n" +
+                "        <bean class=\"org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider\">\n" +
                 "            <constructor-arg>\n" +
-                "                <value type=\"java.io.File\">classpath:security/").append(fileName).append("</value>\n" +
+                "                <bean class=\"java.util.Timer\"/>\n" +
+                "            </constructor-arg>\n" +
+                "            <constructor-arg>\n" +
+                "                <bean class=\"org.opensaml.util.resource.ClasspathResource\">\n" +
+                "                    <constructor-arg value=\"/metadata/").append(fileName).append("\"/>\n" +
+                "                </bean>\n" +
                 "            </constructor-arg>\n" +
                 "            <property name=\"parserPool\" ref=\"parserPool\"/>\n" +
                 "        </bean>\n" +

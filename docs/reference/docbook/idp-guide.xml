@@ -37,15 +37,20 @@
 						<para>Download AD FS 2.0 metadata from e.g. <emphasis>https://adfsserver/FederationMetadata/2007-06/FederationMetadata.xml</emphasis></para>
 					</listitem>
 					<listitem>
-						<para>Store the downloaded content to <emphasis>sample/src/main/resources/security/FederationMetadata.xml</emphasis></para>
+						<para>Store the downloaded content to <emphasis>sample/src/main/resources/metadata/FederationMetadata.xml</emphasis></para>
 					</listitem>
 					<listitem>
 						<para>Modify bean <emphasis>metadata</emphasis> in <emphasis>sample/src/main/webapp/WEB-INF/securityContext.xml</emphasis> and replace <emphasis>classpath:security/idp.xml</emphasis> with <emphasis>classpath:security/FederationMetadata.xml</emphasis> and add property <emphasis>metadataTrustCheck</emphasis> to <emphasis>false</emphasis> to skip signature validation:
 <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
-		<bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+		<bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
 			<constructor-arg>
-				<value type="java.io.File">classpath:security/FederationMetadata.xml</value>
+				<bean class="java.util.Timer"/>
+			</constructor-arg>
+			<constructor-arg>
+				<bean class="org.opensaml.util.resource.ClasspathResource">
+					<constructor-arg value="/metadata/FederationMetadata.xml"/>
+				</bean>
 			</constructor-arg>
 			<property name="parserPool" ref="parserPool"/>
 		</bean>

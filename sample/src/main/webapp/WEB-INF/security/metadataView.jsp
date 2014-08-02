@@ -1,4 +1,3 @@
-<%@ page import="org.springframework.security.saml.web.MetadataController" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -19,38 +18,38 @@
                             <form:form commandName="metadata">
                                 <table>
                                     <tr>
-                                        <td><label for="local">Local entity:</label></td>
-                                        <td><form:input id="local" readonly="true" path="local"/></td>
+                                        <td><strong>Local entity:</strong></td>
+                                        <td><c:out value="${metadata.local}"/></td>
                                     </tr>
                                     <tr>
-                                        <td><label for="entityId">Entity ID:</label></td>
-                                        <td><form:input id="entityId" readonly="true" path="entityId"/></td>
+                                        <td><strong>Entity ID:</strong></td>
+                                        <td><c:out value="${metadata.entityId}"/></td>
                                     </tr>
                                     <c:if test="${metadata.local eq true}">
                                     <tr>
-                                        <td><label for="alias">Entity alias:</label></td>
-                                        <td><form:input id="alias" readonly="true" path="alias"/></td>
+                                        <td><strong>Entity alias:</strong></td>
+                                        <td><c:out value="${metadata.alias}"/></td>
                                     </tr>
                                     <tr>
-                                        <td><label for="signingKey">Signing key:</label></td>
-                                        <td><form:input id="signingKey" readonly="true" path="signingKey"/></td>
+                                        <td><strong>Signing key:</strong></td>
+                                        <td><c:out value="${metadata.signingKey}"/></td>
                                     </tr>
                                     <tr>
-                                        <td><label for="encryptionKey">Encryption key:</label></td>
-                                        <td><form:input id="encryptionKey" readonly="true" path="encryptionKey"/></td>
+                                        <td><strong>Encryption key:</strong></td>
+                                        <td><c:out value="${metadata.encryptionKey}"/></td>
                                     </tr>
                                     </c:if>
                                     <tr>
                                         <td colspan="2">
                                             <label for="metadata">Metadata:</label><br>
-                                            <textarea rows="15" cols="115" id="metadata" readonly="true"><c:out value="${metadata.serializedMetadata}"/></textarea>
+                                            <textarea rows="15" cols="115" id="metadata" readonly="readonly"><c:out value="${metadata.serializedMetadata}"/></textarea>
                                         </td>
                                     </tr>
                                     <c:if test="${metadata.local eq true}">
                                         <tr>
                                             <td colspan="2">
                                                 <label for="configuration">Configuration:</label><br>
-                                                <textarea rows="15" cols="115" id="configuration" readonly="true"><c:out
+                                                <textarea rows="15" cols="115" id="configuration" readonly="readonly"><c:out
                                                         value="${metadata.configuration}"/></textarea>
                                             </td>
                                         </tr>
@@ -58,9 +57,9 @@
                                             <td colspan="2">
                                                 <strong>In order to permanently store the metadata follow these instructions:</strong>
                                                 <ul>
-                                                    <li>Store metadata content in file WEB-INF/classes/security/${storagePath}</li>
+                                                    <li>Store metadata content inside your achive at /WEB-INF/classes/metadata/${storagePath}</li>
                                                     <li>Make sure to update your identity provider(s) with the generated metadata</li>
-                                                    <li>Modify bean "metadata" in your securityContext.xml and include content from the configuration bellow</li>
+                                                    <li>Modify bean "metadata" in your securityContext.xml and include content from the configuration above</li>
                                                 </ul>
                                             </td>
                                         </tr>

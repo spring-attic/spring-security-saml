@@ -129,11 +129,17 @@
     <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
         <constructor-arg>
             <list>
+                <!-- Example of classpath metadata with Extended Metadata -->
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                        <bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
                             <constructor-arg>
-                                <value type="java.io.File">classpath:security/idp.xml</value>
+                                <bean class="java.util.Timer"/>
+                            </constructor-arg>
+                            <constructor-arg>
+                                <bean class="org.opensaml.util.resource.ClasspathResource">
+                                    <constructor-arg value="/metadata/idp.xml"/>
+                                </bean>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool"/>
                         </bean>
@@ -143,6 +149,7 @@
                         </bean>
                     </constructor-arg>
                 </bean>
+                <!-- Example of HTTP metadata without Extended Metadata -->
                 <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
                     <!-- URL containing the metadata -->
                     <constructor-arg>
@@ -154,6 +161,15 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
+                <!-- Example of file system metadata without Extended Metadata -->
+                <!--
+                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                    <constructor-arg>
+                        <value type="java.io.File">/usr/local/metadata/idp.xml</value>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                -->
             </list>
         </constructor-arg>
         <!-- OPTIONAL used when one of the metadata files contains information about this service provider -->

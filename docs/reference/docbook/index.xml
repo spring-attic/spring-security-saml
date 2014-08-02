@@ -39,11 +39,10 @@
 
 	<xi:include href="configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 		  
-	<part xml:id="administration-ui">
-		<title>Administration user interface</title>
+	<part xml:id="sample-app">
+		<title>Sample application</title>
 		<partintro>
-			<para>Chapter provides reference for the administrative user interface included
-      in the sample application.</para>
+			<para>Chapter provides reference for the sample application and its administration user interface.</para>
 		</partintro>
 
 		<xi:include href="administration-ui.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />

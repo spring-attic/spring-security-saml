@@ -190,7 +190,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 		<section id="configuration-metadata-sp">
 			<title>Service provider metadata</title>
 			<para>Service provider metadata contains keys, services and URLs defining SAML endpoints of your application. Metadata can be either
-			generated automatically upon first request to the service, or it can be pre-created (see <xref linkend="chapter-administration-ui"/>).
+			generated automatically upon first request to the service, or it can be pre-created (see <xref linkend="chapter-sample-app"/>).
 			Once created metadata needs to be provided to the identity providers with whom we want to establish trust.</para>
 			<section id="configuration-metadata-sp-generation">
 				<title>Automatic metadata generation</title>

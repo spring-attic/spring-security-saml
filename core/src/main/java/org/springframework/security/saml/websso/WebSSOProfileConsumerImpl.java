@@ -455,17 +455,20 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
             if (conditionQName.equals(AudienceRestriction.DEFAULT_ELEMENT_NAME)) {
 
+                // Multiple AudienceRestrictions form a logical "AND" (saml-core, 922-925)
                 audience:
                 for (AudienceRestriction rest : conditions.getAudienceRestrictions()) {
                     if (rest.getAudiences().size() == 0) {
                         throw new SAMLException("No audit audience specified for the assertion");
                     }
                     for (Audience aud : rest.getAudiences()) {
+                        // Multiple Audiences within one AudienceRestriction form a logical "OR" (saml-core, 922-925)
                         if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
                             continue audience;
                         }
                     }
-                    throw new SAMLException("Our entity is not the intended audience of the assertion");
+                    throw new SAMLException("Local entity is not the intended audience of the assertion in at least " +
+                            "one AudienceRestriction");
                 }
 
             } else if (conditionQName.equals(OneTimeUse.DEFAULT_ELEMENT_NAME)) {

@@ -263,7 +263,7 @@ public class WebSSOProfileConsumerImplTest {
     }
 
     /**
-     * Verifies that audience restriction passes when localEntityId matches.
+     * Verifies that audience restriction passes when localEntityId matches in at least one Audience (OR matching).
      *
      * @throws Exception error
      */
@@ -271,6 +271,21 @@ public class WebSSOProfileConsumerImplTest {
     public void testCondition_Audience_pass() throws Exception {
         SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
         Conditions conditions = builder.buildObject();
+        conditions.getConditions().add(helper.getAudienceRestriction("anotherURI", messageContext.getLocalEntityId(), "yetAnotherURI"));
+        profile.verifyAssertionConditions(conditions, messageContext, true);
+    }
+
+    /**
+     * Verifies that audience restriction doesn't pass when it matches only one of the AudienceRestriction, but not
+     * the others (AND matching).
+     *
+     * @throws Exception error
+     */
+    @Test(expected = SAMLException.class)
+    public void testCondition_Audience_two_restrictions_pass() throws Exception {
+        SAMLObjectBuilder<Conditions> builder = (SAMLObjectBuilder<Conditions>) builderFactory.getBuilder(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = builder.buildObject();
+        conditions.getConditions().add(helper.getAudienceRestriction("anotherAudience", "yetAnotherURI"));
         conditions.getConditions().add(helper.getAudienceRestriction(messageContext.getLocalEntityId()));
         profile.verifyAssertionConditions(conditions, messageContext, true);
     }

@@ -11,7 +11,10 @@ Documentation: http://docs.spring.io/spring-security-saml/docs/1.0.x-SNAPSHOT/re
 Jira: https://jira.spring.io/browse/SES/component/10711/
 CI: https://build.springsource.org/browse/SES
 
-Releases: http://repo.spring.io/list/snapshot/org/springframework/security/extensions/
+Releases:
+Final: http://repo.spring.io/list/release/org/springframework/security/extensions/
+Milestone: http://repo.spring.io/list/milestone/org/springframework/security/extensions/
+Snapshot: http://repo.spring.io/list/snapshot/org/springframework/security/extensions/
 
 Support:
 Stackoverflow: http://stackoverflow.com/questions/tagged/spring-saml

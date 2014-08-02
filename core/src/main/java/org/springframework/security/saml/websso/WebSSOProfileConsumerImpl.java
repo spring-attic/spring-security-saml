@@ -455,21 +455,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
             if (conditionQName.equals(AudienceRestriction.DEFAULT_ELEMENT_NAME)) {
 
-                // Multiple AudienceRestrictions form a logical "AND" (saml-core, 922-925)
-                audience:
-                for (AudienceRestriction rest : conditions.getAudienceRestrictions()) {
-                    if (rest.getAudiences().size() == 0) {
-                        throw new SAMLException("No audit audience specified for the assertion");
-                    }
-                    for (Audience aud : rest.getAudiences()) {
-                        // Multiple Audiences within one AudienceRestriction form a logical "OR" (saml-core, 922-925)
-                        if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
-                            continue audience;
-                        }
-                    }
-                    throw new SAMLException("Local entity is not the intended audience of the assertion in at least " +
-                            "one AudienceRestriction");
-                }
+                verifyAudience(context, conditions.getAudienceRestrictions());
 
             } else if (conditionQName.equals(OneTimeUse.DEFAULT_ELEMENT_NAME)) {
 
@@ -491,6 +477,35 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Check not understood conditions
         verifyConditions(context, notUnderstoodConditions);
+
+    }
+
+    /**
+     * Method verifies audience restrictions of the assertion. Multiple audience restrictions are treated as
+     * a logical AND and local entity must be present in all of them. Multiple audiences within one restrictions
+     * for a logical OR.
+     *
+     * @param context context
+     * @param audienceRestrictions audience restrictions to verify
+     * @throws SAMLException in case local entity doesn't match the audience restrictions
+     */
+    protected void verifyAudience(SAMLMessageContext context, List<AudienceRestriction> audienceRestrictions) throws SAMLException {
+
+        // Multiple AudienceRestrictions form a logical "AND" (saml-core, 922-925)
+        audience:
+        for (AudienceRestriction rest : audienceRestrictions) {
+            if (rest.getAudiences().size() == 0) {
+                throw new SAMLException("No audit audience specified for the assertion");
+            }
+            for (Audience aud : rest.getAudiences()) {
+                // Multiple Audiences within one AudienceRestriction form a logical "OR" (saml-core, 922-925)
+                if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
+                    continue audience;
+                }
+            }
+            throw new SAMLException("Local entity is not the intended audience of the assertion in at least " +
+                    "one AudienceRestriction");
+        }
 
     }
 

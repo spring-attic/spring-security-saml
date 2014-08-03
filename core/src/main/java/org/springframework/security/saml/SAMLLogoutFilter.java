@@ -183,8 +183,8 @@ public class SAMLLogoutFilter extends LogoutFilter {
      * @return true if single logout with IDP is required
      */
     protected boolean isGlobalLogout(HttpServletRequest request, Authentication auth) {
-        String login = request.getParameter(LOGOUT_PARAMETER);
-        return (login == null || !"true".equals(login.toLowerCase().trim())) && (auth.getCredentials() instanceof SAMLCredential);
+        String localLogout = request.getParameter(LOGOUT_PARAMETER);
+        return (localLogout == null || !"true".equals(localLogout.toLowerCase().trim())) && (auth.getCredentials() instanceof SAMLCredential);
     }
 
      /**

@@ -1,6 +1,7 @@
 <%@ page import="org.springframework.security.saml.SAMLCredential" %>
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ page import="org.springframework.security.core.Authentication" %>
+<%@ page import="org.opensaml.saml2.core.Attribute" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -63,10 +64,13 @@
                                             <strong><c:out value="${attribute.name}"/></strong><c:if test="${not empty attribute.friendlyName}"> (<c:out value="${attribute.friendlyName}"/>)</c:if>
                                         </td>
                                         <td>
-                                            <c:forEach var="attributeValues" items="${credential.getAttributeAsStringArray(attribute.name)}">
-                                                <c:forEach var="attributeValue" items="${attributeValues}">
-                                                    <c:out value="${attributeValue}"/>&nbsp;
-                                                </c:forEach>
+                                            <%
+                                                Attribute a = (Attribute) pageContext.getAttribute("attribute");
+                                                String[] attributeValues = credential.getAttributeAsStringArray(a.getName());
+                                                pageContext.setAttribute("attributeValues", attributeValues);
+                                            %>
+                                            <c:forEach var="attributeValue" items="${attributeValues}">
+                                                <c:out value="${attributeValue}"/>&nbsp;
                                             </c:forEach>
                                         </td>
                                     </tr>

@@ -20,10 +20,10 @@
                             <form:form commandName="metadata" action="create">
                             <table>
                             <tr>
-                                <td>Store for the current session:</td>
+                                <td><label for="store">Store for the current session:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="store"/>
-                                    <form:select path="store" multiple="false">
+                                    <form:select id="store" path="store" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
@@ -39,10 +39,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Entity ID:</td>
+                                <td><label for="entityId">Entity ID:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="entityId"/>
-                                    <form:input cssClass="text" path="entityId"/>
+                                    <form:input cssClass="text" id="entityId" path="entityId"/>
                                 </td>
                             </tr>
                             <tr>
@@ -54,10 +54,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Entity base URL:</td>
+                                <td><label for="baseURL">Entity base URL:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="baseURL"/>
-                                    <form:input cssClass="text" path="baseURL"/>
+                                    <form:input cssClass="text" id="baseURL" path="baseURL"/>
                                 </td>
                             </tr>
                             <tr>
@@ -69,10 +69,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Entity alias:</td>
+                                <td><label for="alias">Entity alias:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="alias"/>
-                                    <form:input cssClass="text" path="alias"/>
+                                    <form:input cssClass="text" id="alias" path="alias"/>
                                 </td>
                             </tr>
                             <tr>
@@ -84,10 +84,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Signing key:</td>
+                                <td><label for="signingKey">Signing key:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="signingKey"/>
-                                    <form:select path="signingKey" items="${availableKeys}"/>
+                                    <form:select path="signingKey" id="signingKey" items="${availableKeys}"/>
                                 </td>
                             </tr>
                             <tr>
@@ -97,10 +97,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Encryption key:</td>
+                                <td><label for="encryptionKey">Encryption key:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="encryptionKey"/>
-                                    <form:select path="encryptionKey" items="${availableKeys}"/>
+                                    <form:select path="encryptionKey" id="encryptionKey" items="${availableKeys}"/>
                                 </td>
                             </tr>
                             <tr>
@@ -110,10 +110,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Signature security profile:</td>
+                                <td><label for="securityProfile">Signature security profile:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="securityProfile"/>
-                                    <form:select path="securityProfile" multiple="false">
+                                    <form:select path="securityProfile" id="securityProfile" multiple="false">
                                         <form:option value="metaiop">MetaIOP</form:option>
                                         <form:option value="pkix">PKIX</form:option>
                                     </form:select>
@@ -144,10 +144,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>SSL/TLS security profile:</td>
+                                <td><label for="sslSecurityProfile">SSL/TLS security profile:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="sslSecurityProfile"/>
-                                    <form:select path="sslSecurityProfile" multiple="false">
+                                    <form:select path="sslSecurityProfile" id="sslSecurityProfile" multiple="false">
                                         <form:option value="pkix">PKIX</form:option>
                                         <form:option value="metaiop">MetaIOP</form:option>
                                     </form:select>
@@ -177,10 +177,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>SSL/TLS hostname verification:</td>
+                                <td><label for="sslHostnameVerification">SSL/TLS hostname verification:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="sslHostnameVerification"/>
-                                    <form:select path="sslHostnameVerification" multiple="false">
+                                    <form:select path="sslHostnameVerification" id="sslHostnameVerification" multiple="false">
                                         <form:option value="default">Standard hostname verifier</form:option>
                                         <form:option
                                                 value="defaultAndLocalhost">Standard hostname verifier (skips verification for localhost)</form:option>
@@ -197,10 +197,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>SSL/TLS client authentication:</td>
+                                <td><label for="tlsKey">SSL/TLS client authentication:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="tlsKey"/>
-                                    <form:select path="tlsKey">
+                                    <form:select path="tlsKey" id="tlsKey">
                                         <form:option value="">None</form:option>
                                         <form:options items="${availableKeys}"/>
                                     </form:select>
@@ -213,10 +213,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Sign metadata:</td>
+                                <td><label for="signMetadata">Sign metadata:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="signMetadata"/>
-                                    <form:select path="signMetadata" multiple="false">
+                                    <form:select path="signMetadata" id="signMetadata" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
@@ -230,10 +230,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Signing algorithm:</td>
+                                <td><label for="signingAlgorithm">Signing algorithm:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="signingAlgorithm"/>
-                                    <form:input cssClass="text" path="signingAlgorithm"/>
+                                    <form:input cssClass="text" id="signingAlgorithm" path="signingAlgorithm"/>
                                 </td>
                             </tr>
                             <tr>
@@ -246,57 +246,57 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Sign sent AuthNRequests:</td>
+                                <td><label for="requestSigned">Sign sent AuthNRequests:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="requestSigned"/>
-                                    <form:select path="requestSigned" multiple="false">
+                                    <form:select path="requestSigned" id="requestSigned" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Require signed authentication Assertion:</td>
+                                <td><label for="wantAssertionSigned">Require signed authentication Assertion:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="wantAssertionSigned"/>
-                                    <form:select path="wantAssertionSigned" multiple="false">
+                                    <form:select path="wantAssertionSigned" id="wantAssertionSigned" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Require signed LogoutRequest:</td>
+                                <td><label for="requireLogoutRequestSigned">Require signed LogoutRequest:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="requireLogoutRequestSigned"/>
-                                    <form:select path="requireLogoutRequestSigned" multiple="false">
+                                    <form:select path="requireLogoutRequestSigned" id="requireLogoutRequestSigned" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Require signed LogoutResponse:</td>
+                                <td><label for="requireLogoutResponseSigned">Require signed LogoutResponse:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="requireLogoutResponseSigned"/>
-                                    <form:select path="requireLogoutResponseSigned" multiple="false">
+                                    <form:select path="requireLogoutResponseSigned" id="requireLogoutResponseSigned" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Require signed ArtifactResolve:</td>
+                                <td><label for="requireArtifactResolveSigned">Require signed ArtifactResolve:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="requireArtifactResolveSigned"/>
-                                    <form:select path="requireArtifactResolveSigned" multiple="false">
+                                    <form:select path="requireArtifactResolveSigned" id="requireArtifactResolveSigned" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Single sign-on bindings:</td>
+                                <td><label>Single sign-on bindings:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="ssoBindings"/>
                                     <form:errors cssClass="error" element="div" path="ssoDefaultBinding"/>
@@ -346,7 +346,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Supported NameIDs:</td>
+                                <td><label>Supported NameIDs:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="nameID"/>
                                     <table>
@@ -379,10 +379,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Enable IDP discovery profile:</td>
+                                <td><label for="includeDiscovery">Enable IDP discovery profile:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="includeDiscovery"/>
-                                    <form:select path="includeDiscovery" multiple="false">
+                                    <form:select path="includeDiscovery" id="includeDiscovery" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>
@@ -400,10 +400,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Custom URL for IDP discovery:</td>
+                                <td><label for="customDiscoveryURL">Custom URL for IDP discovery:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="customDiscoveryURL"/>
-                                    <form:input cssClass="text" path="customDiscoveryURL"/>
+                                    <form:input cssClass="text" id="customDiscoveryURL" path="customDiscoveryURL"/>
                                 </td>
                             </tr>
                             <tr>
@@ -413,10 +413,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Include IDP discovery extension in metadata:</td>
+                                <td><label for="includeDiscoveryExtension">Include IDP discovery extension in metadata:</label></td>
                                 <td>
                                     <form:errors cssClass="error" element="div" path="includeDiscoveryExtension"/>
-                                    <form:select path="includeDiscoveryExtension" multiple="false">
+                                    <form:select path="includeDiscoveryExtension" id="includeDiscoveryExtension" multiple="false">
                                         <form:option value="true">Yes</form:option>
                                         <form:option value="false">No</form:option>
                                     </form:select>

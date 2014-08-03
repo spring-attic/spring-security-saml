@@ -129,9 +129,6 @@ public class SAMLEntryPointTest {
     public void testIDPSelection_defaultURL() throws Exception {
 
         expect(request.getSession(true)).andReturn(session);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getHeader("Accept")).andReturn("text/html");
         expect(request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER)).andReturn(null);
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
@@ -265,9 +262,6 @@ public class SAMLEntryPointTest {
     public void testInvalidIDP() throws Exception {
 
         expect(request.getSession(true)).andReturn(session);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        session.setAttribute(eq("_springSamlStorageKey"), notNull());
         expect(request.getParameter(SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER)).andReturn("false");
 
         SAMLTestHelper.setLocalContextParameters(request, "/samlApp", null);
@@ -291,9 +285,6 @@ public class SAMLEntryPointTest {
     public void testCorrectIDP() throws Exception {
 
         expect(request.getSession(true)).andReturn(session);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        expect(session.getAttribute("_springSamlStorageKey")).andReturn(null);
-        session.setAttribute(eq("_springSamlStorageKey"), notNull());
 
         SAMLTestHelper.setLocalContextParameters(request, "/samlApp", null);
         SAMLTestHelper.setPeerContextParameters(request, "http://localhost:8080/opensso", null);

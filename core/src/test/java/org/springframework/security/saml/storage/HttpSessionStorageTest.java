@@ -43,6 +43,7 @@ public class HttpSessionStorageTest {
     @Test
     public void testNonExisting() {
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null);
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null);
         session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), notNull());
@@ -62,6 +63,7 @@ public class HttpSessionStorageTest {
     @Test
     public void testRaceInitialization() throws Exception {
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null).times(3);
         session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), notNull());
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(new Hashtable());
@@ -73,6 +75,7 @@ public class HttpSessionStorageTest {
 
             public void start() {
                 storage = new HttpSessionStorage(session);
+                storage.retrieveMessage("abc123");
             }
         }
 
@@ -104,6 +107,7 @@ public class HttpSessionStorageTest {
     public void testEmptyExisting() {
         Hashtable<String, SAMLObject> storage = new Hashtable<String, SAMLObject>();
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(storage);
 
         replay(session);
@@ -125,7 +129,9 @@ public class HttpSessionStorageTest {
         SAMLObject<Audience> audience = new SAMLObject<Audience>(audienceMock);
         storage.put("testKey", audience);
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(storage);
+        session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), anyObject());
 
         replay(session);
         cache = new HttpSessionStorage(session);
@@ -146,7 +152,10 @@ public class HttpSessionStorageTest {
         Assertion assertionMock = createNiceMock(Assertion.class);
         storage.put("testKey", new SAMLObject<Audience>(audienceMock));
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(storage);
+        session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), anyObject());
+        expectLastCall().times(2);
 
         replay(session);
         cache = new HttpSessionStorage(session);
@@ -173,7 +182,10 @@ public class HttpSessionStorageTest {
         Assertion assertionMock = createNiceMock(Assertion.class);
         storage.put("testKey", new SAMLObject<Audience>(audienceMock));
         session = createMock(HttpSession.class);
+        expect(session.getId()).andReturn("session123").anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(storage);
+        session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), anyObject());
+        expectLastCall().times(2);
 
         replay(session);
         cache = new HttpSessionStorage(session);

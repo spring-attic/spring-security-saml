@@ -158,10 +158,11 @@
                                 </tr>
                             </table>
                             <div>
-                            <form class="left" action="<c:url value="/saml/logout"/>" method="get">
-                                <input type="submit" value="Global Logout" class="button"/>
-                            </form>
-                                <form class="left" action="<c:url value="/saml/logout?local=true"/>" method="get">
+                                <form class="left" action="<c:url value="/saml/logout"/>" method="get">
+                                    <input type="submit" value="Global Logout" class="button"/>
+                                </form>
+                                <form class="left" action="<c:url value="/saml/logout"/>" method="get">
+                                    <input type="hidden" name="local" value="true"/>
                                     <input type="submit" value="Local Logout" class="button"/>
                                 </form>
                             </div>

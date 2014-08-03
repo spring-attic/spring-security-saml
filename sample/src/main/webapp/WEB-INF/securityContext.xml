@@ -13,6 +13,7 @@
     <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Unsecured pages -->
+    <security:http security="none" pattern="/favicon.ico"/>
     <security:http security="none" pattern="/images/**"/>
     <security:http security="none" pattern="/css/**"/>
     <security:http security="none" pattern="/logout.jsp"/>

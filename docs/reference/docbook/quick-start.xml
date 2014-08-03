@@ -13,11 +13,12 @@
 		This chapter will guide you through steps required to easily integrate Spring Security SAML Extension with
 		ssocircle.com's IDP service using SAML 2.0 protocol.
 		When done you will have a working example of Web SSO against a single Identity Provider. The steps will
-		guide you through deployment of the module,
+		guide you through deployment of the <link linkend="chapter-sample-app">sample application</link>,
 		configuration of IDP metadata (XML document describing how to connect to the IDP server using SAML 2.0
 		protocol) and SP metadata (XML document describing
 		your own service) and testing of web single sign-on and single logout.
 	</para>
+  <para>Public demo of the sample application is available at <ulink url="https://saml-federation.appspot.com">saml-federation.appspot.com</ulink></para>
 
 	<section id="quick-start-prerequisites">
 		<title>Pre-requisites</title>

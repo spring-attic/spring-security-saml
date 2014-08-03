@@ -12,6 +12,8 @@
 		<para>Spring SAML includes a sample application which demonstrates key capabilities of this product. For details on compilation and deployment of the sample application
     please see <xref linkend="chapter-quick-start"/>.</para>
     
+    <para>Public demo of the sample application is available at <ulink url="https://saml-federation.appspot.com">saml-federation.appspot.com</ulink></para>
+    
     <section id="sample-authentication">
         <title>SAML login</title>
         <para>Sample application demonstrates usage of IDP discovery which is automatically invoked on access to the application root. Discovery presents selection of all available Identity Providers

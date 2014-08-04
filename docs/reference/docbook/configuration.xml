@@ -492,7 +492,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                             </row>
                             <row>
                                 <entry>alias</entry>
-                                <entry>defaultAlias</entry>
+                                <entry></entry>
                                 <entry>local only</entry>
                                 <entry>Unique alias used to identify the selected local service provider based on
                                     used URL. See <xref linkend="configuration-entity-alias"/>.
@@ -500,7 +500,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                             </row>
                             <row>
                                 <entry>signMetadata</entry>
-                                <entry>true</entry>
+                                <entry>false</entry>
                                 <entry>local only</entry>
                                 <entry>When true generated metadata will be signed using XML Signature using certificate with alias of <literal>signingKey</literal>.</entry>
                             </row>

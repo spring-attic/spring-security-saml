@@ -21,6 +21,8 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.binding.artifact.SAMLArtifactMap;
+import org.opensaml.common.binding.decoding.BasicURLComparator;
+import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.Endpoint;
@@ -75,9 +77,11 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected SAMLProcessor processor;
     protected SAMLArtifactMap artifactMap;
     protected XMLObjectBuilderFactory builderFactory;
+    protected URIComparator uriComparator;
 
     public AbstractProfileBase() {
         this.builderFactory = Configuration.getBuilderFactory();
+        this.uriComparator = new BasicURLComparator();
     }
 
     public AbstractProfileBase(SAMLProcessor processor, MetadataManager manager) {
@@ -240,12 +244,12 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected void verifyEndpoint(Endpoint endpoint, String destination) throws SAMLException {
         // Verify that destination in the response matches one of the available endpoints
         if (destination != null) {
-            if (destination.equals(endpoint.getLocation())) {
+            if (uriComparator.compare(destination, endpoint.getLocation())) {
                 // Expected
-            } else if (destination.equals(endpoint.getResponseLocation())) {
+            } else if (uriComparator.compare(destination, endpoint.getResponseLocation())) {
                 // Expected
             } else {
-                throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs for profile " + getProfileIdentifier());
+                throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs on endpoint " + endpoint.getLocation() + " for profile " + getProfileIdentifier());
             }
         }
     }

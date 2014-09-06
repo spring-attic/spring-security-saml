@@ -78,7 +78,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
             // Override set values
             context.setCommunicationProfileId(getProfileName());
-            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), getFilterProcessesUrl()));
+            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), request.getRequestURL().toString()));
 
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
             return getAuthenticationManager().authenticate(token);

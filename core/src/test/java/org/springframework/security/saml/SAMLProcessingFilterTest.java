@@ -38,8 +38,7 @@ import static org.easymock.EasyMock.*;
 /**
  * @author Vladimir Schafer
  */
-public class
-        SAMLProcessingFilterTest {
+public class SAMLProcessingFilterTest {
 
     ApplicationContext context;
     SAMLProcessingFilter processingFiler;
@@ -104,6 +103,36 @@ public class
 
         SAMLTestHelper.setLocalContextParameters(request, "/saml", null);
         final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost:8081/spring-security-saml2-webapp/saml/SSO"));
+        expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
+            public SAMLMessageContext answer() throws Throwable {
+                context.getValue().setInboundSAMLBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                return context.getValue();
+            }
+        });
+
+        replay(manager);
+        replayMock();
+        processingFiler.attemptAuthentication(request, null);
+        verifyMock();
+        verify(manager);
+
+    }
+
+    /**
+     * Verifies that endpoint check fails when incoming URL doesn't correspond to any endpoint URL.
+     *
+     * @throws Exception error
+     */
+    @Test(expected = AuthenticationServiceException.class)
+    public void testInvalidEndpoint() throws Exception {
+
+        AuthenticationManager manager = createMock(AuthenticationManager.class);
+        processingFiler.setAuthenticationManager(manager);
+
+        SAMLTestHelper.setLocalContextParameters(request, "/saml", null);
+        final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost:8081/spring-security-saml2-webapp/saml/SSOMissing"));
         expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
             public SAMLMessageContext answer() throws Throwable {
                 context.getValue().setInboundSAMLBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
@@ -135,6 +164,7 @@ public class
         SAMLTestHelper.setLocalContextParameters(request, "/saml", null);
 
         final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost:8081/spring-security-saml2-webapp/saml/SSO"));
         expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
             public SAMLMessageContext answer() throws Throwable {
                 context.getValue().setInboundSAMLBinding(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI);

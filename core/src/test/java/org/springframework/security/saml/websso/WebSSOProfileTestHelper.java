@@ -57,7 +57,7 @@ public class WebSSOProfileTestHelper {
         subjectConfirmation.setMethod(SubjectConfirmation.METHOD_BEARER);
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
 
-        subjectConfirmationData.setRecipient("testLocation");
+        subjectConfirmationData.setRecipient("http://www.test.local/SSO");
 
         return subjectConfirmation;
 

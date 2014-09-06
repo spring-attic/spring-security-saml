@@ -214,7 +214,7 @@ public class WebSSOProfileImplTest {
      */
     @Test(expected = MetadataProviderException.class)
     public void testUnsupportedConsumerIndex() throws Exception {
-        options.setAssertionConsumerIndex(1);
+        options.setAssertionConsumerIndex(2);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options);

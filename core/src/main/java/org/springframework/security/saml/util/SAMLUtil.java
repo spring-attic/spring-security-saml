@@ -18,6 +18,8 @@ package org.springframework.security.saml.util;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.binding.decoding.BasicURLComparator;
+import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -31,6 +33,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.*;
+import org.opensaml.xml.util.DatatypeHelper;
 import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,9 @@ import java.util.List;
 public class SAMLUtil {
 
     private final static Logger logger = LoggerFactory.getLogger(SAMLUtil.class);
+
+    /** The URIComparator implementation to use. */
+    private static final URIComparator uriComparator = new BasicURLComparator();
 
     /**
      * Method determines binding supported by the given endpoint. Usually the biding is encoded in the binding attribute
@@ -319,30 +325,32 @@ public class SAMLUtil {
 
     /**
      * Method helps to identify which endpoint is used to process the current message. It expects a list of potential
-     * endpoints based on the current profile and selects the one which uses the specified binding and contains the
-     * filterURL in it's name. We presume that each profile-binding combination has a unique name. We also presume
-     * that filterURL string is contained exactly once in the endpoint location.
+     * endpoints based on the current profile and selects the one which uses the specified binding and matches
+     * the URL of incoming message.
      *
      * @param endpoints      endpoints to check
      * @param messageBinding binding
-     * @param filterURL      url of the filter processing the request
+     * @param requestURL      url of the filter processing the request
      * @param <T>            type of the endpoint
-     * @return first endpoint satisfying the filterURL and binding conditions
+     * @return first endpoint satisfying the requestURL and binding conditions
      * @throws SAMLException in case endpoint can't be found
      */
-    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, String filterURL) throws SAMLException {
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, String requestURL) throws SAMLException {
+        requestURL = DatatypeHelper.safeTrimOrNullString(requestURL);
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches
             if (binding.equals(messageBinding)) {
-                if (endpoint.getLocation().contains(filterURL)) {
+                if (endpoint.getLocation() != null && uriComparator.compare(endpoint.getLocation(), requestURL)) {
+                    logger.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
                     return endpoint;
-                } else if (endpoint.getResponseLocation() != null && endpoint.getResponseLocation().contains(filterURL)) {
+                } else if (endpoint.getResponseLocation() != null && uriComparator.compare(endpoint.getResponseLocation(), requestURL)) {
+                    logger.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 }
             }
         }
-        throw new SAMLException("Endpoint with message binding " + messageBinding + " and filter URL " + filterURL + " wasn't found");
+        throw new SAMLException("Endpoint with message binding " + messageBinding + " and URL " + requestURL + " wasn't found in local metadata");
     }
 
     /**

@@ -180,9 +180,6 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param samlContext context
      * @param sign        true when sent message should be signed
      * @return resulting context, might be a copy
-     * @throws SAMLException
-     * @throws MetadataProviderException
-     * @throws MessageEncodingException
      */
     public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign)
             throws SAMLException, MetadataProviderException, MessageEncodingException {

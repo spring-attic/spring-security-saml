@@ -65,6 +65,8 @@ public class TLSProtocolConfigurer implements InitializingBean {
     /**
      * Hostname verifier to use for verification of SSL connections. Default value is "default", other supported options
      * are "defaultAndLocalhost", "strict" and "allowAll".
+     *
+     * @param sslHostnameVerification hostname verification type flag
      */
     public void setSslHostnameVerification(String sslHostnameVerification) {
         this.sslHostnameVerification = sslHostnameVerification;

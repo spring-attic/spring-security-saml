@@ -151,17 +151,17 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * Sets profile used for verification of signatures and encryption. The following profiles are available:
-     * <p/>
+     * <p>
      * MetaIOP profile (by default):
-     * <br/>
+     * <br>
      * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
      * or revocation of certificates is done in this mode. All keys must be known in advance.
-     * <p/>
+     * <p>
      * PKIX profile:
-     * <br/>
+     * <br>
      * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
      * configured as trusted anchors.
-     * <p/>
+     * <p>
      * This setting is only relevant for local entities.
      *
      * @param securityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
@@ -181,19 +181,19 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * Sets profile used for verification of SSL/TLS connections. The following profiles are available:
-     * <p/>
+     * <p>
      * PKIX profile (by default), value "pkix":
-     * <br/>
+     * <br>
      * Signatures are deemed as trusted when credential can be verified using PKIX with trusted keys of the peer
      * configured as trusted anchors.
-     * <p/>
+     * <p>
      * MetaIOP profile, any other value:
-     * <br/>
+     * <br>
      * Uses cryptographic data from the metadata document of the entity in question. No checks for validity
      * or revocation of certificates is done in this mode. All keys must be known in advance.
-     * <p/>
+     * <p>
      * Logic is enforced in SAMLContextProviderImpl#populateSSLTrustEngine. Values are case insensitive.
-     * <p/>
+     * <p>
      * This setting is only relevant for local entities.
      *
      * @param sslSecurityProfile profile to use - PKIX when set to "pkix", MetaIOP otherwise
@@ -213,19 +213,21 @@ public class ExtendedMetadata implements Serializable, Cloneable {
 
     /**
      * Sets hostname verifier to use for verification of SSL connections. The following values are available:
-     * <p/>
+     * <p>
      * default: org.apache.commons.ssl.HostnameVerifier.DEFAULT
-     * <br/>
+     * <br>
      * defaultAndLocalhost: org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST
-     * <br/>
+     * <br>
      * strict: org.apache.commons.ssl.HostnameVerifier.STRICT
-     * <br/>
+     * <br>
      * allowAll: org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL, doesn't perform any validation
-     * <p/>
+     * <p>
      * Logic is enforced in SAMLContextProviderImpl#populateSSLHostnameVerifier. Values are case insensitive.
      * Unrecognized value revert to default setting.
-     * <p/>
+     * <p>
      * This setting is only relevant for local entities.
+     *
+     * @param sslHostnameVerification hostname verification type flag
      */
     public void setSslHostnameVerification(String sslHostnameVerification) {
         this.sslHostnameVerification = sslHostnameVerification;
@@ -243,10 +245,10 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Alias is used to identify a destination entity as part of the URL. It only applies to local entities. Only
      * ASCII characters can be used as alias.
-     * <p/>
+     * <p>
      * In case the alias is null on a local entity it must be set as a default
      * to be accessible.
-     * <p/>
+     * <p>
      * Alias must be unique for each local entityId.
      *
      * @param alias alias value
@@ -267,7 +269,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Sets signing key to be used for interaction with the current entity. In case the entity is local the keyStore
      * must contain a private and public key with the given name. For remote entities only public key is required.
-     * <p/>
+     * <p>
      * Value can be used to override credential contained in the remote metadata.
      *
      * @param signingKey key for creation/verification of signatures
@@ -289,7 +291,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * Sets encryption key to be used for interaction with the current entity. In case the entity is local the keyStore
      * must contain a private key with the given name which will be used for decryption incoming message.
      * For remote entities only public key is required and will be used for encryption of the sent data.
-     * <p/>
+     * <p>
      * Value can be used to override credential contained in the remote metadata.
      *
      * @param encryptionKey key for creation/verification of signatures
@@ -387,9 +389,9 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Set of keys used as anchors for PKIX verification of messages coming from this entity. Only applicable for
      * remote entities and used when local entity has the PKIX profile enabled.
-     * <p/>
+     * <p>
      * When no trusted keys are specified all keys in the keyManager are treated as trusted.
-     * <p/>
+     * <p>
      * This setting is only relevant for remote entities.
      *
      * @param trustedKeys keys
@@ -442,6 +444,8 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * When true IDP discovery will be invoked before initializing WebSSO, unless IDP is already specified inside
      * SAMLContext.
+     *
+     * @return true when idp discovery is enabled
      */
     public boolean isIdpDiscoveryEnabled() {
         return idpDiscoveryEnabled;

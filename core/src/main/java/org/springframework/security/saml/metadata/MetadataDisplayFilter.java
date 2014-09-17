@@ -182,8 +182,6 @@ public class MetadataDisplayFilter extends GenericFilterBean {
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

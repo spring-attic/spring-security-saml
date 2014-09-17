@@ -128,7 +128,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
      * SAMLUserDetailsService is called and value of type UserDetails is returned. Users are encouraged to supply
      * implementation of this class and also include correct implementation of the getAuthorities method in it, which
      * is used to populate the entitlements inside the Authentication object.
-     * <p/>
+     * <p>
      * If no SAMLUserDetailsService is specified null is returned.
      *
      * @param credential credential to load user from
@@ -165,7 +165,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     /**
      * Method is responsible for returning collection of users entitlements. Default implementation verifies
      * whether userDetail object is of UserDetails type and returns userDetail.getAuthorities().
-     * <p/>
+     * <p>
      * In case object of other type is found empty list is returned. Users are supposed to override this
      * method to provide custom parsing is such case.
      *
@@ -304,8 +304,6 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws ServletException
      */
     public void afterPropertiesSet() throws ServletException {
         Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");

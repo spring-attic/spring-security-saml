@@ -106,7 +106,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * Filter loads SAML message from the request object and processes it. In case the message is of LogoutResponse
      * type it is validated and user is redirected to the success page. In case the message is invalid error
      * is logged and user is redirected to the success page anyway.
-     * <p/>
+     * <p>
      * In case the LogoutRequest message is received it will be verified and local session will be destroyed.
      *
      * @param request  http request
@@ -277,8 +277,6 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

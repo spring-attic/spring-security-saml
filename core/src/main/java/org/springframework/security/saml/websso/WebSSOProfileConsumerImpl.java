@@ -551,12 +551,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     /**
      * Implementation is expected to verify that the requested authentication context corresponds with the received value.
      * Identity provider sending the context can be loaded from the SAMLContext.
-     * <p/>
+     * <p>
      * By default verification is done only for "exact" context. It is checked whether received context contains one of the requested
      * method.
-     * <p/>
+     * <p>
      * In case requestedAuthnContext is null no verification is done.
-     * <p/>
+     * <p>
      * Method can be reimplemented in subclasses.
      *
      * @param requestedAuthnContext context requested in the original request, null for unsolicited messages or when no context was required

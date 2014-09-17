@@ -44,7 +44,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
     /**
      * Verifies validity of Subject element as per http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml2-holder-of-key-cs-02.pdf  and
      * http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso-cs-02.pdf.
-     * <p/>
+     * <p>
      * Only verification based on X509Certificate content of the X509Data in KeyInfo is supported. Subject is deemed as
      * confirmed when at least one of the certificates present in the SubjectConfirmation matches the one used in TLS/SSL
      * client authentication. No verification on trust or validity of the certificate itself is performed.

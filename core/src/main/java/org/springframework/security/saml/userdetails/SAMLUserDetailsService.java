@@ -32,7 +32,7 @@ public interface SAMLUserDetailsService {
      * The method is supposed to identify local account of user referenced by data in the SAML assertion
      * and return UserDetails object describing the user. In case the user has no local account, implementation
      * may decide to create one or just populate UserDetails object with data from assertion.
-     * <p/>
+     * <p>
      * Returned object should correctly implement the getAuthorities method as it will be used to populate
      * entitlements inside the Authentication object.
      *

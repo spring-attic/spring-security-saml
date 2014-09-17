@@ -754,6 +754,8 @@ public class MetadataGenerator {
      * Provides set discovery request url or generates a default when none was provided. Primarily value set on extenedMetadata property
      *  idpDiscoveryURL is used, when empty local property customDiscoveryURL is used, when empty URL is automatically generated.
      *
+     * @param entityBaseURL base URL for generation of endpoints
+     * @param entityAlias alias of entity, or null when there's no alias required
      * @return URL to use for IDP discovery request
      */
     protected String getDiscoveryURL(String entityBaseURL, String entityAlias) {
@@ -768,6 +770,8 @@ public class MetadataGenerator {
      * Provides set discovery response url or generates a default when none was provided. Primarily value set on extenedMetadata property
      *  idpDiscoveryResponseURL is used, when empty local property customDiscoveryResponseURL is used, when empty URL is automatically generated.
      *
+     * @param entityBaseURL base URL for generation of endpoints
+     * @param entityAlias alias of entity, or null when there's no alias required
      * @return URL to use for IDP discovery response
      */
     protected String getDiscoveryResponseURL(String entityBaseURL, String entityAlias) {

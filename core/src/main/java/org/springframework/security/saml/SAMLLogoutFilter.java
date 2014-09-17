@@ -45,7 +45,7 @@ import java.io.IOException;
  * Logout filter leveraging SAML 2.0 Single Logout profile. Upon invocation of the filter URL it is
  * determined whether global (termination of all participating sessions) or local (termination of only
  * session running within Spring Security) logout is requested based on request attribute.
- * <p/>
+ * <p>
  * In case global logout is in question a LogoutRequest is sent to the IDP.
  *
  * @author Vladimir Schäfer
@@ -222,8 +222,6 @@ public class SAMLLogoutFilter extends LogoutFilter {
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

@@ -208,8 +208,6 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws javax.servlet.ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

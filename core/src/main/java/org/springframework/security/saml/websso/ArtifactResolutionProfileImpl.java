@@ -122,14 +122,14 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
     /**
      * Method is expected to determine hostConfiguration used to send request to the server by back-channel. Configuration
      * should contain URI of the host and used protocol including all security settings.
-     * <p/>
+     * <p>
      * Default implementation uses either default http protocol for non-SSL requests or constructs a separate
      * TrustManager using trust engine specified in the SAMLMessageContext - based either on MetaIOP (certificates
      * obtained from Metadata and ExtendedMetadata are trusted) or PKIX (certificates from metadata and ExtendedMetadata
      * including specified trust anchors are trusted and verified using PKIX).
-     * <p/>
+     * <p>
      * Used trust engine can be customized as part of the SAMLContextProvider used to process this request.
-     * <p/>
+     * <p>
      * Default values for the HostConfiguration are cloned from the HTTPClient set in this instance, when there are
      * no defaults available a new object is created.
      *
@@ -205,6 +205,8 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
     /**
      * Check for the latest OpenSAML library. Support for HostnameVerification was added in openws-1.5.1 and
      * customers might use previous versions of OpenSAML.
+     *
+     * @return true when OpenSAML library support hostname verification
      */
     protected boolean isHostnameVerificationSupported() {
         try {

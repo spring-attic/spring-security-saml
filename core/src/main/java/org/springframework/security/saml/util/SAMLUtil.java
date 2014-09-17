@@ -237,9 +237,10 @@ public class SAMLUtil {
     }
 
     /**
-     * Verifies that the alias is valid.
+     * Verifies that the alias is valid. Alias mus be non-empty string which only include ASCII characters.
      *
      * @param alias alias to verify
+     * @param entityId id of the entity
      * @throws MetadataProviderException in case any validation problem is found
      */
     public static void verifyAlias(String alias, String entityId) throws MetadataProviderException {
@@ -413,6 +414,7 @@ public class SAMLUtil {
      * @param keyInfoGenerator name of generator used to create KeyInfo elements with key data
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the message
+     * @return marshalled and signed message
      */
     @SuppressWarnings("unchecked")
     public static Element marshallAndSignMessage(SignableXMLObject signableMessage, Credential signingCredential, String signingAlgorithm, String keyInfoGenerator) throws MessageEncodingException {

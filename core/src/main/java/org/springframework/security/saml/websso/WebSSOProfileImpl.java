@@ -156,7 +156,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * binding. In case assertionConsumerIndex in the WebSSOProfileOptions is specified the endpoint with the given ID is used.
      * Otherwise assertionConsumerService marked as default is used when present, otherwise first found supported
      * assertionConsumerService is used.
-     * <p/>
+     * <p>
      * In case endpoint determined by the webSSOProfileOptions index is not supported by the profile
      * an exception is raised.
      *

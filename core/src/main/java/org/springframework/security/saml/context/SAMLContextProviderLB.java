@@ -44,7 +44,6 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
      * @param request  original request
      * @param response response object
      * @param context  context to populate values to
-     * @throws MetadataProviderException
      */
     @Override
     protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
@@ -127,7 +126,7 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
     }
 
     /**
-     * Port of the server, in case value is <= 0 port will not be included in the requestURL and port
+     * Port of the server, in case value is &lt;= 0 port will not be included in the requestURL and port
      * from the original request will be used for getServerPort calls.
      *
      * @param serverPort server port
@@ -159,8 +158,6 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
 
     /**
      * Verifies that required entities were autowired or set and initializes resolvers used to construct trust engines.
-     *
-     * @throws javax.servlet.ServletException
      */
     public void afterPropertiesSet() throws ServletException {
 

@@ -186,7 +186,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
     /**
      * If set returns set of keys which can be used to verify whether signature of the metadata is trusted. When
      * not set any of the keys in the configured KeyManager can be used to verify trust.
-     * <p/>
+     * <p>
      * By default the value is null.
      *
      * @return trusted keys or null
@@ -207,7 +207,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
 
     /**
      * Flag indicating whether metadata must be signed.
-     * <p/>
+     * <p>
      * By default signature is not required.
      *
      * @return signature flag
@@ -242,7 +242,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * Determines whether check for certificate revocation should always be done as part of the PKIX validation.
      * Revocation is evaluated by the underlaying JCE implementation and depending on configuration may include
      * CRL and OCSP verification of the certificate in question.
-     * <p/>
+     * <p>
      * When set to false revocation is only performed when MetadataManager includes CRLs
      *
      * @param forceMetadataRevocationCheck revocation flag

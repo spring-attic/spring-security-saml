@@ -155,6 +155,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * Method responsible for loading of PKIX information.
      *
      * @param criteriaSet criteria for selection of data to include
+     * @throws SecurityException in case credentials cannot be populated
      * @return PKIX information
      */
     protected Collection<PKIXValidationInformation> populateCredentials(CriteriaSet criteriaSet) throws SecurityException {
@@ -287,6 +288,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * @param criteriaSet     criteria set
      * @param anchors pkix anchors
      * @param crls crls to be populated
+     * @throws SecurityException never thrown in default implementation
      */
     protected void populateCRLs(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
             throws SecurityException {

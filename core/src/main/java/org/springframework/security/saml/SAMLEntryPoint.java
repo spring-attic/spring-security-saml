@@ -54,7 +54,7 @@ import java.util.List;
 /**
  * Class initializes SAML WebSSO Profile, IDP Discovery or ECP Profile from the SP side. Configuration
  * of the local service provider and incoming request determines which profile will get invoked.
- * <p/>
+ * <p>
  * There are two ways the entry point can get invoked. Either user accesses a URL configured to require
  * some degree of authentication and throws AuthenticationException which is handled and invokes the entry point.
  * The other way is direct invocation of the entry point by accessing the /saml/login URL.
@@ -122,15 +122,15 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * Method starts a process used to ultimately authenticate user using WebSSO Profile. First task of the mechanism
      * is to determine which IDP to use. Available options are: let the user agent determine IDP for us (ECP profile), use IDP discovery
      * to determine IDP (or accept a predefined IDP in request), or use the default IDP. The following logic is used to determine our case:
-     * <p/>
+     * <br>
      * <ul>
      * <li>In case IDP wasn't determined in contextProvider and discovery is enabled and the current request doesn't already contain IDP information then IDP Discovery is initialized</li>
      * <li>In case request supports Enhanced Client or Proxy as per SAML specification and ECP is supported authentication is initialized using ECP.</li>
      * <li>In case IDP is available WebSSO or HoKWebSSO is initialized otherwise we fail during SSO initialization.</li>
      * </ul>
-     * <p/>
+     * <p>
      * By default contextProvider determines IDP to use by parameter "idp". In case parameter is missing the defaultIDP is used instead.
-     * <p/>
+     * <p>
      * Subclasses can customize the WebSSO initialization behavior.
      *
      * @param request  request
@@ -168,7 +168,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     /**
      * Initializes ECP profile.
-     * <p/>
+     * <p>
      * Subclasses can alter the initialization behaviour.
      *
      * @param context saml context, also containing wrapped request and response objects
@@ -192,7 +192,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * In case Enhanced Client/Proxy is enabled and the request claims to support this profile it is used. Otherwise it is verified what is the binding
      * and profile specified for the assertionConsumerIndex in the WebSSOProfileOptions. In case it is HoK the WebSSO Holder-of-Key profile is used,
      * otherwise the ordinary WebSSO.
-     * <p/>
+     * <p>
      * Subclasses can alter the initialization behaviour.
      *
      * @param context saml context, also containing wrapped request and response objects
@@ -439,8 +439,6 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

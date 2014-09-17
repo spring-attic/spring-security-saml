@@ -99,10 +99,10 @@ public class HttpSessionStorage implements SAMLMessageStorage {
     /**
      * Returns previously stored message with the given ID or null, if there is no message
      * stored.
-     * <p/>
+     * <p>
      * Message is stored in String format and must be unmarshalled into XMLObject. Call to this
      * method may thus be expensive.
-     * <p/>
+     * <p>
      * Messages are automatically cleared upon successful reception, as we presume that there
      * are never multiple ongoing SAML exchanges for the same session. This saves memory used by
      * the session.
@@ -148,7 +148,7 @@ public class HttpSessionStorage implements SAMLMessageStorage {
     /**
      * Call to the method tries to load internalMessages hashtable object from the session, if the object doesn't exist
      * it will be created and stored.
-     * <p/>
+     * <p>
      * Method synchronizes on session object to prevent two threads from overwriting each others hashtable.
      */
     @SuppressWarnings("unchecked")

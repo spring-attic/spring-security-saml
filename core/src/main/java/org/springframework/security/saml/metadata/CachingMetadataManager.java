@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Metadata manager caches all results of EntityDescriptors loaded from the providers. Cache is cleaned
  * whenever some of the providers published an observed message.
- * <p/>
+ * <p>
  * The class is synchronized using the superclass ReentrantReadWriteLock.
  *
  * @author Vladimir Schaefer

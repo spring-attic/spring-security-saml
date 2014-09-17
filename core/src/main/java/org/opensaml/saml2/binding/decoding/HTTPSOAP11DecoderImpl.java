@@ -51,7 +51,6 @@ public class HTTPSOAP11DecoderImpl extends HTTPSOAP11Decoder {
      * @param messageDestination destination from the SAML message
      * @param receiverEndpoint   endpoint address
      * @return true if the endpoints are equivalent, false otherwise
-     * @throws MessageDecodingException
      */
     @Override
     protected boolean compareEndpointURIs(String messageDestination, String receiverEndpoint) throws MessageDecodingException {

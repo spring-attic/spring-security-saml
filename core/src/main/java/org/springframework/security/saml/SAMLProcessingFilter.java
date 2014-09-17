@@ -115,7 +115,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
     /**
      * Use setAuthenticationSuccessHandler method and pass a custom handler instead.
-     * <p/>
+     * <p>
      * Creates a new successHandler and sets default URL for redirect after login. In case user requests a specific
      * page which caused the login process initialization the original page will be reused. Any existing handler
      * will be overwritten.

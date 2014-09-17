@@ -150,6 +150,8 @@ public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory {
     /**
      * Check for the latest OpenSAML library. Support for HostnameVerification was added in openws-1.5.1 and
      * customers might use previous versions of OpenSAML.
+     *
+     * @return true when OpenSAML library support hostname verification
      */
     protected boolean isHostnameVerificationSupported() {
         try {

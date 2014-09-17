@@ -394,7 +394,7 @@ public class SAMLDiscovery extends GenericFilterBean {
     /**
      * Metadata manager, cannot be null, must be set.
      *
-     * @param metadata manager
+     * @param metadata metadata manager
      */
     @Autowired
     public void setMetadata(MetadataManager metadata) {
@@ -405,7 +405,7 @@ public class SAMLDiscovery extends GenericFilterBean {
     /**
      * Dependency for loading of entry point URL
      *
-     * @param samlEntryPoint
+     * @param samlEntryPoint entry point bean
      */
     @Autowired(required = false)
     public void setSamlEntryPoint(SAMLEntryPoint samlEntryPoint) {
@@ -441,8 +441,6 @@ public class SAMLDiscovery extends GenericFilterBean {
 
     /**
      * Verifies that required entities were autowired or set.
-     *
-     * @throws javax.servlet.ServletException
      */
     @Override
     public void afterPropertiesSet() throws ServletException {

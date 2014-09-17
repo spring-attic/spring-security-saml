@@ -134,7 +134,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * First tries to find pre-configured IDP from the request attribute. If not found
      * loads the IDP_PARAMETER from the request and if it is not null verifies whether IDP with this value is valid
      * IDP in our circle of trust. Processing fails when IDP is not valid. IDP is set as PeerEntityId in the context.
-     * <p/>
+     * <p>
      * If request parameter is null the default IDP is returned.
      *
      * @param context context to populate ID for
@@ -227,7 +227,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * Method tries to load localEntityAlias and localEntityRole from the request path. Path is supposed to be in format:
      * https(s)://server:port/application/saml/filterName/alias/aliasName/idp|sp?query. In case alias is missing from
      * the path defaults are used. Otherwise localEntityId and sp or idp localEntityRole is entered into the context.
-     * <p/>
+     * <p>
      * In case alias entity id isn't found an exception is raised.
      *
      * @param context     context to populate fields localEntityId and localEntityRole for
@@ -534,8 +534,6 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     /**
      * Verifies that required entities were autowired or set and initializes resolvers used to construct trust engines.
-     *
-     * @throws javax.servlet.ServletException
      */
     public void afterPropertiesSet() throws ServletException {
 

@@ -110,7 +110,7 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     }
 
     /**
-     * @return null to skip proxyCount, 0 to disable proxying, >0 to allow proxying
+     * @return null to skip proxyCount, 0 to disable proxying, &gt;0 to allow proxying
      */
     public Integer getProxyCount() {
         return proxyCount;
@@ -118,12 +118,12 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
 
     /**
      * Determines value to be used in the proxyCount attribute of the scope in the AuthnRequest. In case value is null
-     * the proxyCount attribute is omitted. Use zero to disable proxying or value >0 to specify how many hops are allowed.
+     * the proxyCount attribute is omitted. Use zero to disable proxying or value &gt;0 to specify how many hops are allowed.
      * <p>
      * Property includeScoping must be enabled for this value to take any effect.
      * </p>
      *
-     * @param proxyCount null to skip proxyCount in the AuthnRequest, 0 to disable proxying, >0 to allow proxying
+     * @param proxyCount null to skip proxyCount in the AuthnRequest, 0 to disable proxying, &gt;0 to allow proxying
      */
     public void setProxyCount(Integer proxyCount) {
         this.proxyCount = proxyCount;

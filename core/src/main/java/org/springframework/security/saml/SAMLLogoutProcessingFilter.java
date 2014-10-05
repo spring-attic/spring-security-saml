@@ -127,7 +127,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 context = contextProvider.getLocalEntity(request, response);
                 context.setCommunicationProfileId(getProfileName());
                 processor.retrieveMessage(context);
-                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), request.getRequestURL().toString()));
+                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
 
             } catch (SAMLException e) {
                 logger.debug("Incoming SAML message is invalid", e);

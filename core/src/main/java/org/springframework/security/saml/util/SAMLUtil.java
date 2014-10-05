@@ -25,6 +25,9 @@ import org.opensaml.saml2.metadata.*;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.ws.transport.InTransport;
+import org.opensaml.ws.transport.http.HTTPInTransport;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
@@ -331,13 +334,14 @@ public class SAMLUtil {
      *
      * @param endpoints      endpoints to check
      * @param messageBinding binding
-     * @param requestURL      url of the filter processing the request
+     * @param inTransport      transport which received the current message
      * @param <T>            type of the endpoint
      * @return first endpoint satisfying the requestURL and binding conditions
      * @throws SAMLException in case endpoint can't be found
      */
-    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, String requestURL) throws SAMLException {
-        requestURL = DatatypeHelper.safeTrimOrNullString(requestURL);
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException {
+        HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
+        String requestURL = DatatypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches

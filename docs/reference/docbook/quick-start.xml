@@ -90,8 +90,13 @@
 				<programlisting><![CDATA[<bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
 	<constructor-arg>
 		<bean class="org.springframework.security.saml.metadata.MetadataGenerator">
-		<property name="entityId" value="replaceWithUniqueIdentifier"/>
-		<property name="signMetadata" value="false"/>
+			<property name="entityId" value="replaceWithUniqueIdentifier"/>
+			<property name="extendedMetadata">
+				<bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+					<property name="signMetadata" value="false"/>
+					<property name="idpDiscoveryEnabled" value="true"/>
+				</bean>
+			</property>
 		</bean>
 	</constructor-arg>
 </bean>]]></programlisting>

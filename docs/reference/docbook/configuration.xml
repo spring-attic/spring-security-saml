@@ -1027,6 +1027,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                     </tgroup>
                 </table>
                 </para>
+                <para>The AuthnRequest message is sent unencrypted on message level. If needed, encryption should be provided by SSL/TLS on transport layer.</para>
             </section>
             <section id="configuration-sso-process-idp-init">
                 <title>Identity provider initialized SSO</title>

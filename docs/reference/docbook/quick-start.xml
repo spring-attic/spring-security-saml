@@ -181,5 +181,7 @@
 		<para>Pressing local logout will destroy local session and logout the user. While a session is still active at the IDP an attempt to reauthenticate
 		will proceed without need to enter credentials.</para>
 		<para>Pressing global logout will destroy both local session and the session at IDP.</para>
+		<para>You can test IDP initialized single sign-on with URL <emphasis>https://idp.ssocircle.com:443/sso/saml2/jsp/idpSSOInit.jsp?metaAlias=/ssocircle&amp;spEntityID=replaceWithUniqueIdentifier</emphasis>, after replacing
+		the service provider identifier with the one configured as entityId in your securityContext.xml.
 	</section>
 </chapter>

@@ -182,6 +182,6 @@
 		will proceed without need to enter credentials.</para>
 		<para>Pressing global logout will destroy both local session and the session at IDP.</para>
 		<para>You can test IDP initialized single sign-on with URL <emphasis>https://idp.ssocircle.com:443/sso/saml2/jsp/idpSSOInit.jsp?metaAlias=/ssocircle&amp;spEntityID=replaceWithUniqueIdentifier</emphasis>, after replacing
-		the service provider identifier with the one configured as entityId in your securityContext.xml.
+		the service provider identifier with the one configured as entityId in your securityContext.xml. It is possible to provide relayState data sent to your SP with parameter <emphasis>RelayState</emphasis>.</para>
 	</section>
 </chapter>

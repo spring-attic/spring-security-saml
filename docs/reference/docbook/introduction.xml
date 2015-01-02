@@ -151,7 +151,8 @@
 	<section id="section-requirements">
 		<title>Requirements</title>
 
-		<para>Spring Security SAML Extension requires as a minimum Java 1.6 and is known to work with most Java containers and application servers.</para>
+		<para>Spring Security SAML Extension requires as a minimum Java 1.6 and is known to work with most Java containers and application servers. It can also be used
+    with PaaS providers, such as Google App Engine, please see <link xlink:href="https://github.com/vschafer/spring-security-saml-gae">https://github.com/vschafer/spring-security-saml-gae</link> for details.</para>
 	</section>
 
 	<section id="section-source">

@@ -26,7 +26,6 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
@@ -481,7 +480,7 @@ public class SAMLUtil {
      * @param time time the current time must fit into with the given skew
      * @return true if time matches, false otherwise
      */
-    public static boolean isDateTimeSkewValid(int skewInSec, int forwardInterval, DateTime time) {
+    public static boolean isDateTimeSkewValid(int skewInSec, long forwardInterval, DateTime time) {
         long reference = System.currentTimeMillis();
         return time.isBefore(reference + (skewInSec * 1000)) && time.isAfter(reference - ((skewInSec + forwardInterval) * 1000));
     }

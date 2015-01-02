@@ -67,7 +67,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     /**
      * Maximum time between users authentication and processing of the AuthNResponse message.
      */
-    private int maxAuthenticationAge = 7200;
+    private long maxAuthenticationAge = 7200;
 
     /**
      * Flag indicating whether to include attributes from all assertions, false by default.
@@ -610,7 +610,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @return max authentication age, defaults to 7200 (in seconds)
      */
-    public int getMaxAuthenticationAge() {
+    public long getMaxAuthenticationAge() {
         return maxAuthenticationAge;
     }
 
@@ -619,7 +619,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *
      * @param maxAuthenticationAge authentication age
      */
-    public void setMaxAuthenticationAge(int maxAuthenticationAge) {
+    public void setMaxAuthenticationAge(long maxAuthenticationAge) {
         this.maxAuthenticationAge = maxAuthenticationAge;
     }
 

@@ -50,7 +50,7 @@
 	</part>  		
   
 	<part xml:id="integration">
-		<title>IDP integration guide</title>
+		<title>Integration guide</title>
 		<partintro>
 			<para>This chapter includes step-by-step instructions on basic steps required for 
       enabling single sign-on with common identity providers.</para>

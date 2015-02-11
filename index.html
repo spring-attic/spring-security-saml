@@ -22,7 +22,7 @@ badges:
       icon: ci
 
     - name: StackOverflow
-      url:  http://stackoverflow.com/questions/tagged/spring-security
+      url:  http://stackoverflow.com/questions/tagged/spring-saml
       icon: stackoverflow
 
 ---
@@ -43,17 +43,20 @@ Spring Security Extension allows seamless combination of SAML 2.0 and other auth
 
 {% capture main_content %}
 
-Spring Security Extension allows seamless combination of SAML 2.0 and other authentication and federation mechanisms in a single application. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, RM5 IdM or Ping Federate) can be used to connect with Spring Security SAML Extension.
+Spring Security SAML Extension allows seamless combination of SAML 2.0 and authentication and federation mechanisms in a single application. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS, Okta, Shibboleth, OpenAM, Efecte EIM or Ping Federate) can be used to connect with the extension.
 
 ## Features
 
-* Support multiple SAML profiles (Web single sign-on, Web single sign-on holder-of-key, Single logout, Enhanced client/proxy, etc)
+* Support multiple SAML 2.0 profiles (web single sign-on, web single sign-on holder-of-key, single logout, enhanced client/proxy, etc)
 * IDP and SP initialized single sign-on
 * Identity provider discovery profile and IDP selection
 * Metadata interoperability and PKIX trust management
 * Automatic service provider metadata generation
 * Metadata loading from files, URLs, file-backed URLs
 * Processing and automatic reloading of metadata with many identity providers
+* Processing of SAML attributes
+* Easy to integrate sample application
+* Quick start guides for popular IDPs
 * Much more...
 
 <span id="quick-start"></span>
@@ -67,7 +70,7 @@ Spring Security Extension allows seamless combination of SAML 2.0 and other auth
 
 ### Resources
 
-* [Quick Start](http://docs.spring.io/spring-security-saml/docs/1.0.x/reference/html/chapter-quick-start.html)
+* [Quick Start](http://docs.spring.io/spring-security-saml/docs/1.0.0.RELEASE/reference/html/chapter-quick-start.html)
 * [Spring Security]({{site.projects_site_url}}/spring-security)
 
 {% endcapture %}

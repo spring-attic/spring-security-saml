@@ -1149,6 +1149,14 @@ public class TestUserDetails implements SAMLUserDetailsService {
             <para>Population of the authentication object can be further customized by overriding of the <emphasis>getUserDetails</emphasis>, <emphasis>getPrincipal</emphasis>, <emphasis>getEntitlements</emphasis> and <emphasis>getExpirationDate</emphasis> methods
             in the <emphasis>SAMLAuthenticationProvider</emphasis>.</para>
         </section>
+        <section id="configuration-authentication-assertion">
+            <title>Authentication assertion</title>
+            <para>Assertion used to authenticate user is stored in the <emphasis>SAMLCredential</emphasis> object under property <emphasis>authenticationAssertion</emphasis>. By default the original content (DOM) of the assertion is discarded and system only keeps an unmarshalled version which might slightly differ from the original, e.g. in white-spaces.
+            In order to instruct Spring SAML to keep the assertion in the original form (keep its DOM) set property <emphasis>releaseDOM</emphasis> to <emphasis>false</emphasis> on bean <emphasis>WebSSOProfileConsumerImpl</emphasis>.</para>
+            <para>Assertion can be serialized to String using the following call:
+            <programlisting>XMLHelper.nodeToString(SAMLUtil.marshallMessage(credential.getAuthenticationAssertion()))</programlisting>
+            </para>
+        </section>
         <section id="configuration-authentication-log">
             <title>Authentication log</title>
             <para>Key events such as single sign-on and single logout initialization, success or failure can be logged for creation of an audit trail.

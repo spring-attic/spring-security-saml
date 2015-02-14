@@ -2,6 +2,8 @@
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ page import="org.springframework.security.core.Authentication" %>
 <%@ page import="org.opensaml.saml2.core.Attribute" %>
+<%@ page import="org.springframework.security.saml.util.SAMLUtil" %>
+<%@ page import="org.opensaml.xml.util.XMLHelper" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -22,6 +24,7 @@
                                 SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
                                 pageContext.setAttribute("authentication", authentication);
                                 pageContext.setAttribute("credential", credential);
+                                pageContext.setAttribute("assertion", XMLHelper.nodeToString(SAMLUtil.marshallMessage(credential.getAuthenticationAssertion())));
                             %>
                             <p>
                             <table>
@@ -154,6 +157,17 @@
                                                    items="${credential.authenticationAssertion.conditions.audienceRestrictions[0].audiences}">
                                             <c:out value="${audience.audienceURI}"/><br/>
                                         </c:forEach>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p>
+                            <table>
+                                <tr>
+                                    <td><h5>Assertion XML</h5></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <textarea cols="60" rows="20" style="width:100%" disabled="disabled"><c:out value="${assertion}"/></textarea>
                                     </td>
                                 </tr>
                             </table>

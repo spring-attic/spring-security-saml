@@ -677,15 +677,21 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
             <para>
                 SAML exchanges involve usage of cryptography for signing and encryption of data. All interaction with cryptographic keys is
                 done through interface <emphasis>org.springframework.security.saml.key.KeyManager</emphasis>. The default implementation
-                relies on a single JKS key store which contains all private and public keys. KeyManager must contain at least one private key
-                which should be marked as default by using the alias of the private key as part of the KeyManager constructor.
+                <emphasis>org.springframework.security.saml.key.JKSKeyManager</emphasis> relies on a single JKS key store which contains 
+                all private and public keys. KeyManager should contain at least one private key which should be marked as default by using 
+                the alias of the private key as part of the <emphasis>JKSKeyManager</emphasis> constructor.
             </para>
             <para>
-                Make sure that your configuration of SAML module contains bean keyManager with your custom key store and passwords.
+                In case your application doesn't need to create digital signatures and/or decrypt incoming messages, it is possible to use an empty 
+                implementation of the keystore which doesn't require any JKS file - <emphasis>org.springframework.security.saml.key.EmptyKeyManager</emphasis>. 
+                This can be the case for example when using only IDP-Initialized single sign-on. Please note that when using the <emphasis>EmptyKeyManager</emphasis> 
+                some of Spring SAML features will be unavailable. This includes at least SP-initialized Single Sign-on, Single Logout, usage of additional 
+                keys in <emphasis>ExtendedMetadata</emphasis> and verification of metadata signatures. Use the following bean in order to initialize the <emphasis>EmptyKeyManager</emphasis>:
+<programlisting><![CDATA[<bean id="keyManager" class="org.springframework.security.saml.key.EmptyKeyManager"/>]]></programlisting>
             </para>
-            <section id="configuration-key-management-sample">
-                <title>Sample keystore</title>
-                <para>Sample application contains a default key store with a sample private certificate usable for test purposes. The key store
+            <section id="configuration-key-management-jks">
+                <title>Sample JKS keystore</title>
+                <para>Sample application contains a default JKS key store with a sample private certificate usable for test purposes. The key store
                     is defined as:<programlisting><![CDATA[<bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
 	<constructor-arg value="classpath:security/samlKeystore.jks"/>
 	<constructor-arg type="java.lang.String" value="nalle123"/>

@@ -327,9 +327,13 @@ public class MetadataGenerator {
         // Generate key info
         if (signingKey != null) {
             spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.SIGNING, getServerKeyInfo(signingKey)));
+        } else {
+            log.info("Generating metadata without signing key, KeyStore doesn't contain any default private key, or the signingKey specified in ExtendedMetadata cannot be found");
         }
         if (encryptionKey != null) {
             spDescriptor.getKeyDescriptors().add(getKeyDescriptor(UsageType.ENCRYPTION, getServerKeyInfo(encryptionKey)));
+        } else {
+            log.info("Generating metadata without encryption key, KeyStore doesn't contain any default private key, or the encryptionKey specified in ExtendedMetadata cannot be found");
         }
 
         // Include TLS key with unspecified usage in case it differs from the singing and encryption keys

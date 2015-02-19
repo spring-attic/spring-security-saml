@@ -23,7 +23,7 @@ import org.opensaml.xml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.key.JKSKeyManager;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.*;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.stereotype.Controller;
@@ -57,7 +57,7 @@ public class MetadataController {
     MetadataManager metadataManager;
 
     @Autowired
-    JKSKeyManager keyManager;
+    KeyManager keyManager;
 
     @RequestMapping
     public ModelAndView metadataList() throws MetadataProviderException {

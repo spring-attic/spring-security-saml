@@ -126,6 +126,13 @@
     <!-- The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there -->
     <bean id="metadataDisplayFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter"/>
 
+    <!-- Configure HTTP Client to accept certificates from the keystore for HTTPS verification -->
+    <!--
+    <bean class="org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer">
+        <property name="sslHostnameVerification" value="default"/>
+    </bean>
+    -->
+
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
         <constructor-arg>

@@ -103,7 +103,7 @@
 					<para>Select "Add Rule", choose "Send LDAP Attributes as Claims" and press Next</para>
 				</listitem>
 				<listitem>
-					<para>Add NameID as "Claim rule name", choose "Active Directory" as Attribute store, choose "SAM-Account-Name" as LDAP Attribute and "Name ID" as "Outgoing claim type", finish the wizard and confirm the claim rules window</para>
+					<para>Add NameID as "Claim rule name", choose "Active Directory" as Attribute store, choose "SAM-Account-Name" as LDAP Attribute and "Name ID" as "Outgoing claim type", finish the wizard and confirm the claim rules window, in ADFS 3.0 you might need to configure the Name ID as a Pass Through claim</para>
 				</listitem>
 				<listitem>
 					<para>Open the provider by double-clicking it, select tab Advanced and change "Secure hash algorithm" to SHA-1</para>

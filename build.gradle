@@ -4,6 +4,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
+		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("org.gradle.api.plugins:gradle-tomcat-plugin:1.2.4")
 	}
@@ -52,6 +53,22 @@ configure(subprojects) { subproject ->
 }
 
 configure(coreProjects) { p ->
+	apply plugin: 'spring-io'
+
+	ext.springIoVersion = project.hasProperty('platformVersion') ? platformVersion : 'latest.integration'
+	
+	configurations.springIoTestRuntime {
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.name == 'servlet-api') {
+				details.useTarget 'javax.servlet:javax.servlet-api:3.0.1'
+			}
+		}
+	}
+	
+	dependencies {
+		springIoVersions "io.spring.platform:platform-versions:${springIoVersion}@properties"
+	}
+
 	jar {
 		manifest.attributes["Created-By"] =
 			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"

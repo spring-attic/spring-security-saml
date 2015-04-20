@@ -42,6 +42,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +73,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
      * Logout handlers.
      */
     private final List<LogoutHandler> handlers;
+	private String filterProcessesUrl;
 
     /**
      * Constructor defines URL to redirect to after successful logout and handlers.
@@ -226,11 +228,6 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
         return SAMLUtil.processFilter(getFilterProcessesUrl(), request);
     }
 
-    @Override
-    public String getFilterProcessesUrl() {
-        return super.getFilterProcessesUrl();
-    }
-
     /**
      * Object capable of parse SAML messages from requests, must be set.
      *
@@ -285,6 +282,24 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
         Assert.notNull(contextProvider, "Context provider must be set");
         Assert.notNull(logoutProfile, "Logout profile must be set");
         Assert.notNull(samlLogger, "SAML Logger must be set");
+    }
+
+    /**
+     * Sets the URL used to determine if this Filter is invoked
+     * @param filterProcessesUrl the URL used to determine if this Filter is invoked
+     */
+    @Override
+    public void setFilterProcessesUrl(String filterProcessesUrl) {
+        this.filterProcessesUrl = filterProcessesUrl;
+        super.setFilterProcessesUrl(filterProcessesUrl);
+    }
+
+    /**
+     * Gets the URL used to determine if this Filter is invoked
+     * @return the URL used to determine if this Fitler is invoked
+     */
+    public String getFilterProcessesUrl() {
+        return filterProcessesUrl;
     }
 
 }

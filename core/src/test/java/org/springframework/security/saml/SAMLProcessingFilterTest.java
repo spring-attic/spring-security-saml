@@ -22,6 +22,8 @@ import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,8 +34,8 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static junit.framework.Assert.assertEquals;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Vladimir Schafer
@@ -60,6 +62,20 @@ public class SAMLProcessingFilterTest {
         request = createMock(HttpServletRequest.class);
         session = createMock(HttpSession.class);
 
+    }
+
+    @Test
+    public void constructorDefaultFilterProcessUrlNotNull() {
+        processingFiler = new SAMLProcessingFilter();
+
+        assertNotNull(processingFiler.getFilterProcessesUrl());
+    }
+
+    @Test
+    public void constructorStringFilterProcessUrlNotNull() {
+        processingFiler = new SAMLProcessingFilter("/custom");
+
+        assertNotNull(processingFiler.getFilterProcessesUrl());
     }
 
     /**
@@ -180,6 +196,18 @@ public class SAMLProcessingFilterTest {
         verifyMock();
         verify(manager);
 
+    }
+
+    @Test
+    public void requiresLogout() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertEquals(false, processingFiler.requiresAuthentication(request, response));
+
+        request.setRequestURI("/logout");
+
+        assertEquals(false, processingFiler.requiresAuthentication(request, response));
     }
 
     private void replayMock() {

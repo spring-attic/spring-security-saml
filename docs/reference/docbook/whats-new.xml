@@ -8,12 +8,27 @@
 	xsi:schemaLocation="
 		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
 		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-  <title>What's new</title>
-  <para>This section contains overview of important changes since Spring SAML 1.0 RC2 and highlights changes which might have effect on backwards compatibility.</para>
+	<title>What's new</title>
+	<para>This section contains overview of important changes for released versions of Spring SAML.</para>
 
-	<section id="section-whats-new-highlight">
-		<title>New features, improvements and fixes</title>
-		<para>Below is an overview of major changes since Spring SAML 1.0 RC2.</para>
+  <section id="section-whats-new-highlight-1.0.1">
+    <title>New features, improvements and fixes in 1.0.1.FINAL</title>  
+    <para>Version 1.0.1.FINAL is fully backwards compatible with 1.0.0.FINAL and contains the following changes:</para>
+    <para>
+        <itemizedlist spacing="compact">
+          <listitem><para>Added support for Spring Security 4.0</para></listitem>
+          <listitem><para>Added integration guide with Okta</para></listitem>
+          <listitem><para>MaxAuthenticationAge time supports longer expiration times than 21 days</para></listitem>
+          <listitem><para>Deployment without JKS keystore is now supported</para></listitem>
+          <listitem><para>Service provider can now define multiple assertion consumer endpoints with same binding</para></listitem>
+          <listitem><para>Minor fixes and documentation improvements</para></listitem>
+        </itemizedlist>
+    </para>
+  </section>
+
+	<section id="section-whats-new-highlight-1.0.0">
+		<title>New features, improvements and fixes in 1.0.0.FINAL</title>
+    <para>Final release is not directly compatible with the previous RC versions, please make sure to migrate your code based on guidlines and changes below:</para>
     <para>
         <itemizedlist spacing="compact">
           <listitem><para>Metadata signing now supports custom keyInfoGenerator and signingAlgorithm, signing can be enable per-entity</para></listitem>
@@ -48,8 +63,8 @@
 		</para>
 	</section>
 
-	<section id="section-whats-new-code-changes">
-        <title>Important code changes</title>
+	<section id="section-whats-new-code-changes-1.0.0">
+        <title>Important code changes in 1.0.0.FINAL</title>
         <para>Below is an overview of major code and structure changes since Spring SAML 1.0 RC2 with possible effect on backwards compatibility.</para>
 
         <para><emphasis>Module names</emphasis>

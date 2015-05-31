@@ -41,9 +41,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Class offers extra services on top of the underlying chaining MetadataProviders. Manager keeps track of all available
  * identity and service providers configured inside the chained metadata providers. Exactly one service provider can
  * be determined as hosted.
- * <p>
+ * <p/>
  * The class is synchronized using in internal ReentrantReadWriteLock.
- * <p>
+ * <p/>
  * All metadata providers are kept in two groups - available providers - which contain all the ones users have registered,
  * and active providers - all those which passed validation. List of active providers is updated during each refresh.
  *
@@ -100,7 +100,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Creates new metadata manager, automatically registers itself for notifications from metadata changes and calls
      * reload upon a change. Also registers timer which verifies whether metadata needs to be reloaded in a specified
      * time interval.
-     * <p>
+     * <p/>
      * It is mandatory that method afterPropertiesSet is called after the construction.
      *
      * @param providers providers to include, mustn't be null or empty
@@ -168,7 +168,10 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             }
 
             // Workaround for Tomcat detection of terminated threads
-            try {Thread.sleep( 1000 );} catch ( InterruptedException ie ) { }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
 
             setRefreshRequired(false);
 
@@ -211,6 +214,63 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      */
     public void refreshMetadata() {
 
+        log.debug("Reloading metadata");
+
+        try {
+
+            // Let's load new metadata lists
+            lock.writeLock().lock();
+
+            // Remove existing providers, they'll get repopulated
+            super.setProviders(Collections.<MetadataProvider>emptyList());
+
+            // Reinitialize the sets
+            idpName = new HashSet<String>();
+            spName = new HashSet<String>();
+            aliasSet = new HashSet<String>();
+
+            for (ExtendedMetadataDelegate provider : availableProviders) {
+
+                try {
+
+                    log.debug("Refreshing metadata provider {}", provider.toString());
+                    initializeProviderFilters(provider);
+                    initializeProvider(provider);
+                    initializeProviderData(provider);
+
+                    // Make provider available for queries
+                    super.addMetadataProvider(provider);
+                    log.debug("Metadata provider was initialized {}", provider.toString());
+
+                } catch (MetadataProviderException e) {
+
+                    log.error("Initialization of metadata provider " + provider + " failed, provider will be ignored", e);
+
+                }
+
+            }
+
+            log.debug("Reloading metadata was finished");
+
+        } catch (MetadataProviderException e) {
+
+            throw new RuntimeException("Error clearing existing providers");
+
+        } finally {
+
+            lock.writeLock().unlock();
+
+        }
+
+    }
+
+    /**
+     * Determines whether metadata requires refresh and if so clears the flag.
+     *
+     * @return true in case refresh should be performed
+     */
+    private boolean isRefreshNowAndClear() {
+
         try {
 
             // Prevent anyone from changing the refresh status during reload to avoid missed calls
@@ -219,59 +279,11 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
             // Make sure refresh is really necessary
             if (!isRefreshRequired()) {
                 log.debug("Refresh is not required, isRefreshRequired flag isn't set");
-                return;
+                return false;
             }
 
-            log.debug("Reloading metadata");
-
-            try {
-
-                // Let's load new metadata lists
-                lock.writeLock().lock();
-
-                // Remove existing providers, they'll get repopulated
-                super.setProviders(Collections.<MetadataProvider>emptyList());
-
-                // Reinitialize the sets
-                idpName = new HashSet<String>();
-                spName = new HashSet<String>();
-                aliasSet = new HashSet<String>();
-
-                for (ExtendedMetadataDelegate provider : availableProviders) {
-
-                    try {
-
-                        log.debug("Refreshing metadata provider {}", provider.toString());
-                        initializeProviderFilters(provider);
-                        initializeProvider(provider);
-                        initializeProviderData(provider);
-
-                        // Make provider available for queries
-                        super.addMetadataProvider(provider);
-                        log.debug("Metadata provider was initialized {}", provider.toString());
-
-                    } catch (MetadataProviderException e) {
-
-                        log.error("Initialization of metadata provider " + provider + " failed, provider will be ignored", e);
-
-                    }
-
-                }
-
-                // Clear the refresh flag
-                setRefreshRequired(false);
-
-                log.debug("Reloading metadata was finished");
-
-            } catch (MetadataProviderException e) {
-
-                throw new RuntimeException("Error clearing existing providers");
-
-            } finally {
-
-                lock.writeLock().unlock();
-
-            }
+            // Clear the refresh flag
+            setRefreshRequired(false);
 
         } finally {
 
@@ -279,12 +291,14 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         }
 
+        return true;
+
     }
 
     /**
      * Adds a new metadata provider to the managed list. At first provider is only registered and will be validated
      * upon next round of metadata refreshing or call to refreshMetadata.
-     * <p>
+     * <p/>
      * Unless provider already extends class ExtendedMetadataDelegate it will be automatically wrapped in it as part of the
      * addition.
      *
@@ -489,9 +503,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Method is automatically called during each attempt to initialize the provider data. It expects to load
      * all filters required for metadata verification. It must also be ensured that metadata provider is ready to be used
      * after call to this method.
-     * <p>
+     * <p/>
      * Each provider must extend AbstractMetadataProvider or be of ExtendedMetadataDelegate type.
-     * <p>
+     * <p/>
      * By default a SignatureValidationFilter is added together with any existing filters.
      *
      * @param provider provider to check
@@ -802,9 +816,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     /**
      * Tries to locate ExtendedMetadata by trying one provider after another. Only providers implementing
      * ExtendedMetadataProvider are considered.
-     * <p>
+     * <p/>
      * In case none of the providers can supply the extended version, the default is used.
-     * <p>
+     * <p/>
      * A copy of the internal representation is always returned, modifying the returned object will not be reflected
      * in the subsequent calls.
      *
@@ -978,14 +992,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * @param refreshRequired true if refresh is required
      */
     public void setRefreshRequired(boolean refreshRequired) {
-
         try {
             refreshLock.writeLock().lock();
             this.refreshRequired = refreshRequired;
         } finally {
             refreshLock.writeLock().unlock();
         }
-
     }
 
 
@@ -993,9 +1005,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Interval in milliseconds used for re-verification of metadata and their reload. Upon trigger each provider
      * is asked to return it's metadata, which might trigger their reloading. In case metadata is reloaded the manager
      * is notified and automatically refreshes all internal data by calling refreshMetadata.
-     * <p>
+     * <p/>
      * In case the value is smaller than zero the timer is not created. The default value is 10000l.
-     * <p>
+     * <p/>
      * The value can only be modified before the call to the afterBeanPropertiesSet, the changes are not applied after that.
      *
      * @param refreshCheckInterval internal, timer not created if &lt;= 2000
@@ -1024,7 +1036,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                 // Refresh the metadataManager if needed
                 if (isRefreshRequired()) {
-                    refreshMetadata();
+                    if (isRefreshNowAndClear()) {
+                        refreshMetadata();
+                    }
                 }
 
             } catch (Throwable e) {

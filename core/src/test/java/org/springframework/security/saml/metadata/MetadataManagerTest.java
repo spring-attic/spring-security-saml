@@ -17,17 +17,15 @@ package org.springframework.security.saml.metadata;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.*;
 
@@ -133,7 +131,6 @@ public class MetadataManagerTest {
 
         // Remove an existing metadata
         manager.removeMetadataProvider(manager.getProviders().iterator().next());
-        manager.setRefreshRequired(true);
 
         synchronized (this) {
             wait(500);
@@ -169,6 +166,23 @@ public class MetadataManagerTest {
             metadataLoader.schedule(verifier, 7l, 7l);
         }
 
+        // Explicitly refreshing providers to add concurrency
+        Timer refresher = new Timer(true);
+        refresher.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                for (MetadataProvider metadataProvider : manager.getProviders()) {
+                    try {
+                        AbstractMetadataDelegate delegate = (AbstractMetadataDelegate) metadataProvider;
+                        AbstractReloadingMetadataProvider prov = (AbstractReloadingMetadataProvider) delegate.getDelegate();
+                        prov.refresh();
+                    } catch (MetadataProviderException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, 100l, 10l);
+
         Timer reloader = new Timer(true);
         MetadataReloader reloaderTask = new MetadataReloader();
         reloader.schedule(reloaderTask, 50l, 50l);
@@ -180,18 +194,31 @@ public class MetadataManagerTest {
         reloader.cancel();
         metadataLoader.cancel();
 
-        System.out.println("Manager was reloaded "  + reloaderTask.reloaded + " times");
+        System.out.println("Manager was reloaded " + reloaderTask.reloaded + " times");
         for (int i = 0; i < verifiers.size(); i++) {
             System.out.println("Verifier " + i + " was executed " + verifiers.get(i).getExecutions() + " times");
         }
 
-        // Make sure the verifiers passsed witnout problems
+        // Make sure the verifiers passed without problems
         assertVerifiers(verifiers);
+
+        // Verify manager is not deadlocked and has correct data
+        Set<String> idpEntityNames = manager.getIDPEntityNames();
+        Set<String> spEntityNames = manager.getSPEntityNames();
+        assertTrue(idpEntityNames.contains("nest1"));
+        assertTrue(idpEntityNames.contains("nest2"));
+        assertTrue(idpEntityNames.contains("nest3"));
+        assertTrue(idpEntityNames.contains("http://localhost:8080/opensso"));
+        assertTrue(spEntityNames.contains("http://localhost:8081/spring-security-saml2-webapp"));
+        assertEquals(4, idpEntityNames.size());
+        assertEquals(1, spEntityNames.size());
+        assertEquals(3, manager.getAvailableProviders().size());
 
     }
 
     /**
      * Test verifies that new metadata provider can be added after manager has already been created.
+     *
      * @throws Exception error
      */
     @Test
@@ -206,7 +233,7 @@ public class MetadataManagerTest {
 
         boolean found = false;
         for (ExtendedMetadataDelegate provider : manager.getAvailableProviders()) {
-            if (newProvider.equals(provider) || newProvider.equals(provider.getDelegate()) ) {
+            if (newProvider.equals(provider) || newProvider.equals(provider.getDelegate())) {
                 found = true;
                 break;
             }

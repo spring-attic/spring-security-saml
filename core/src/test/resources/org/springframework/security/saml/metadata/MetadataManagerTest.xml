@@ -27,7 +27,7 @@
           depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
                     <constructor-arg index="0">
                         <value type="java.io.File">classpath:testIDP.xml</value>
                     </constructor-arg>
@@ -36,7 +36,7 @@
 
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                        <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
                             <constructor-arg index="0">
                                 <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
                             </constructor-arg>
@@ -72,7 +72,7 @@
                 <!-- Default extended -->
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                        <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
                             <constructor-arg index="0">
                                 <value type="java.io.File">classpath:testSP.xml</value>
                             </constructor-arg>
@@ -95,7 +95,7 @@
     </bean>
 
     <!-- A provider we will add/remove from metadata manager -->
-    <bean id="singleProvider" class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider"
+    <bean id="singleProvider" class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider"
           init-method="initialize">
         <constructor-arg index="0">
             <value type="java.io.File">classpath:testIDPNoSSOBinding.xml</value>

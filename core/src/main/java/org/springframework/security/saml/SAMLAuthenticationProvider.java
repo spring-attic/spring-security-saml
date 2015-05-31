@@ -75,6 +75,11 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
 
         SAMLAuthenticationToken token = (SAMLAuthenticationToken) authentication;
         SAMLMessageContext context = token.getCredentials();
+
+        if (context == null) {
+            throw new AuthenticationServiceException("SAML message context is not available in the authentication token");
+        }
+
         SAMLCredential credential;
 
         try {

@@ -30,7 +30,7 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
     /**
      * SAML context with content to verify
      */
-    private SAMLMessageContext credentials;
+    private transient SAMLMessageContext credentials;
 
     /**
      * Default constructor initializing the context

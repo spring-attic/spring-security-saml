@@ -142,7 +142,7 @@ ul.nice-list li .right {color: #999;}
 
 /* Tables */
 
-table {margin-bottom: 1.4em;}
+table {margin-bottom: 1.4em; width: 100%;}
 th {font-weight: bold;}
 thead th {background: #C3D9FF;}
 th,td,caption {padding: 4px 10px 4px 5px;}
@@ -233,7 +233,11 @@ legend {
     font-weight: bold;
     font-size: 1.2em;
 }
-textarea {overflow: auto;}
+textarea {
+    overflow: auto;
+    width: 100%;
+    height: 200px;
+}
 input.text, textarea, select {
     background: #FCFCFC;
     border: 1px inset #AAA;

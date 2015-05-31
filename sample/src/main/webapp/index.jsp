@@ -167,7 +167,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <textarea cols="60" rows="20" style="width:100%" disabled="disabled"><c:out value="${assertion}"/></textarea>
+                                        <textarea style="height: 400px" disabled="disabled"><c:out value="${assertion}"/></textarea>
                                     </td>
                                 </tr>
                             </table>

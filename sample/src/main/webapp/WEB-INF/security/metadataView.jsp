@@ -42,14 +42,14 @@
                                     <tr>
                                         <td colspan="2">
                                             <label for="metadata">Metadata:</label><br>
-                                            <textarea rows="15" cols="115" id="metadata" readonly="readonly"><c:out value="${metadata.serializedMetadata}"/></textarea>
+                                            <textarea id="metadata" readonly="readonly"><c:out value="${metadata.serializedMetadata}"/></textarea>
                                         </td>
                                     </tr>
                                     <c:if test="${metadata.local eq true}">
                                         <tr>
                                             <td colspan="2">
                                                 <label for="configuration">Configuration:</label><br>
-                                                <textarea rows="15" cols="115" id="configuration" readonly="readonly"><c:out
+                                                <textarea id="configuration" readonly="readonly"><c:out
                                                         value="${metadata.configuration}"/></textarea>
                                             </td>
                                         </tr>

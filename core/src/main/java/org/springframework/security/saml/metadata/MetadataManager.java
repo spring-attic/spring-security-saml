@@ -41,9 +41,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Class offers extra services on top of the underlying chaining MetadataProviders. Manager keeps track of all available
  * identity and service providers configured inside the chained metadata providers. Exactly one service provider can
  * be determined as hosted.
- * <p/>
+ * <p>
  * The class is synchronized using in internal ReentrantReadWriteLock.
- * <p/>
+ * <p>
  * All metadata providers are kept in two groups - available providers - which contain all the ones users have registered,
  * and active providers - all those which passed validation. List of active providers is updated during each refresh.
  *
@@ -100,7 +100,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Creates new metadata manager, automatically registers itself for notifications from metadata changes and calls
      * reload upon a change. Also registers timer which verifies whether metadata needs to be reloaded in a specified
      * time interval.
-     * <p/>
+     * <p>
      * It is mandatory that method afterPropertiesSet is called after the construction.
      *
      * @param providers providers to include, mustn't be null or empty
@@ -298,7 +298,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     /**
      * Adds a new metadata provider to the managed list. At first provider is only registered and will be validated
      * upon next round of metadata refreshing or call to refreshMetadata.
-     * <p/>
+     * <p>
      * Unless provider already extends class ExtendedMetadataDelegate it will be automatically wrapped in it as part of the
      * addition.
      *
@@ -503,9 +503,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Method is automatically called during each attempt to initialize the provider data. It expects to load
      * all filters required for metadata verification. It must also be ensured that metadata provider is ready to be used
      * after call to this method.
-     * <p/>
+     * <p>
      * Each provider must extend AbstractMetadataProvider or be of ExtendedMetadataDelegate type.
-     * <p/>
+     * <p>
      * By default a SignatureValidationFilter is added together with any existing filters.
      *
      * @param provider provider to check
@@ -816,9 +816,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     /**
      * Tries to locate ExtendedMetadata by trying one provider after another. Only providers implementing
      * ExtendedMetadataProvider are considered.
-     * <p/>
+     * <p>
      * In case none of the providers can supply the extended version, the default is used.
-     * <p/>
+     * <p>
      * A copy of the internal representation is always returned, modifying the returned object will not be reflected
      * in the subsequent calls.
      *
@@ -1005,9 +1005,9 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * Interval in milliseconds used for re-verification of metadata and their reload. Upon trigger each provider
      * is asked to return it's metadata, which might trigger their reloading. In case metadata is reloaded the manager
      * is notified and automatically refreshes all internal data by calling refreshMetadata.
-     * <p/>
+     * <p>
      * In case the value is smaller than zero the timer is not created. The default value is 10000l.
-     * <p/>
+     * <p>
      * The value can only be modified before the call to the afterBeanPropertiesSet, the changes are not applied after that.
      *
      * @param refreshCheckInterval internal, timer not created if &lt;= 2000

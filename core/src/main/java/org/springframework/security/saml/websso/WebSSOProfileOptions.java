@@ -44,6 +44,8 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     private Collection<String> authnContexts;
     private AuthnContextComparisonTypeEnumeration authnContextComparison = AuthnContextComparisonTypeEnumeration.EXACT;
 
+    private Set<String> requesterIds;
+
     public WebSSOProfileOptions() {
     }
 
@@ -271,4 +273,20 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
         this.relayState = relayState;
     }
 
+    public Set<String> getRequesterIds() {
+        return requesterIds;
+    }
+
+    /**
+     * Identifies the set of requesting entities on whose behalf the requester is acting. Used to communicate
+     * the chain of requesters when proxying occurs.
+     * <p>
+     * Property includeScoping must be enabled for this value to take any effect.
+     * </p>
+     *
+     * @param requesterIds the names of the requester
+     */
+    public void setRequesterIds(Set<String> requesterIds) {
+        this.requesterIds = requesterIds;
+    }
 }

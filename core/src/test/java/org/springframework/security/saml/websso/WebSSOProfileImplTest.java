@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.RequesterID;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
@@ -37,6 +38,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 import static junit.framework.Assert.assertNull;
 import static org.easymock.EasyMock.*;
@@ -357,6 +361,27 @@ public class WebSSOProfileImplTest {
         assertEquals(false, authnRequest.isForceAuthn());
         assertEquals(false, authnRequest.isPassive());
         assertNull(authnRequest.getScoping().getProxyCount());
+    }
+
+    /**
+     * Verifies that requesterIDs are added to the scoping element, if set in options.
+     *
+     * @throws Exception error
+     */
+    @Test
+    public void testRequesterIds() throws Exception {
+        options.setIncludeScoping(true);
+        List<String> ids = Arrays.asList("requesterId1", "requesterId2");
+        options.setRequesterIds(new HashSet<String>(ids));
+        storage.storeMessage((String) notNull(), (XMLObject) notNull());
+        replyMock();
+        profile.sendAuthenticationRequest(samlContext, options);
+        AuthnRequest authnRequest = (AuthnRequest) samlContext.getOutboundSAMLMessage();
+        verifyMock();
+        List<RequesterID> requesterIDs = authnRequest.getScoping().getRequesterIDs();
+        assertEquals(2, requesterIDs.size());
+        assertTrue(ids.contains(requesterIDs.get(0).getRequesterID()));
+        assertTrue(ids.contains(requesterIDs.get(1).getRequesterID()));
     }
 
     private void verifyMock() {

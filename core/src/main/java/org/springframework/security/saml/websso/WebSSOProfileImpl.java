@@ -19,6 +19,7 @@ import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.impl.RequesterIDBuilder;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -31,6 +32,7 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -363,7 +365,19 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
             Scoping scoping = scopingBuilder.buildObject();
             scoping.setIDPList(idpList);
             scoping.setProxyCount(options.getProxyCount());
+
+            if (!CollectionUtils.isEmpty(options.getRequesterIds())) {
+                RequesterIDBuilder requesterIDBuilder = new RequesterIDBuilder();
+                for (String id : options.getRequesterIds()) {
+                    RequesterID requesterID = requesterIDBuilder.buildObject();
+                    requesterID.setRequesterID(id);
+                    scoping.getRequesterIDs().add(requesterID);
+                }
+            }
+
             request.setScoping(scoping);
+
+
 
         }
 

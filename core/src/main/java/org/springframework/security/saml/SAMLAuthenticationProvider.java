@@ -310,7 +310,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
     /**
      * Verifies that required entities were autowired or set.
      */
-    public void afterPropertiesSet() throws ServletException {
+    public void afterPropertiesSet() throws Exception {
         Assert.notNull(consumer, "WebSSO Profile Consumer can't be null");
         Assert.notNull(hokConsumer, "WebSSO Profile HoK Consumer can't be null");
         Assert.notNull(samlLogger, "SAMLLogger can't be null");

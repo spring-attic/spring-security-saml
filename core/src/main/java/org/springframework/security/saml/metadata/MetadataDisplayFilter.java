@@ -49,7 +49,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(MetadataDisplayFilter.class);
+    protected static final Logger log = LoggerFactory.getLogger(MetadataDisplayFilter.class);
 
     /**
      * Class storing all SAML metadata documents

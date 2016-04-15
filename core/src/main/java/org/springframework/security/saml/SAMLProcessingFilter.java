@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-    protected final static Logger logger = LoggerFactory.getLogger(SAMLProcessingFilter.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLProcessingFilter.class);
 
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
@@ -75,7 +75,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
         try {
 
-            logger.debug("Attempting SAML2 authentication using profile {}", getProfileName());
+            log.debug("Attempting SAML2 authentication using profile {}", getProfileName());
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
             processor.retrieveMessage(context);
 
@@ -87,16 +87,16 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
-            logger.debug("Incoming SAML message is invalid", e);
+            log.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
-            logger.debug("Error determining metadata contracts", e);
+            log.debug("Error determining metadata contracts", e);
             throw new AuthenticationServiceException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
-            logger.debug("Error decoding incoming SAML message", e);
+            log.debug("Error decoding incoming SAML message", e);
             throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.debug("Incoming SAML message is invalid", e);
+            log.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         }
 

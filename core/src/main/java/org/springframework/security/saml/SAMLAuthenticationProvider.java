@@ -49,7 +49,8 @@ import java.util.*;
  */
 public class SAMLAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLAuthenticationProvider.class);
+
     private boolean forcePrincipalAsString = true;
     private boolean excludeCredential = false;
     protected WebSSOProfileConsumer consumer;

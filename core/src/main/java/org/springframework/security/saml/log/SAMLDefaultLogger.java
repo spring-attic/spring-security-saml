@@ -36,7 +36,7 @@ import java.io.StringWriter;
  */
 public class SAMLDefaultLogger implements SAMLLogger {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLDefaultLogger.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLDefaultLogger.class);
 
     private boolean logMessages = false;
     private boolean logErrors = true;

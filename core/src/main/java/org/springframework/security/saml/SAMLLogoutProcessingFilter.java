@@ -132,16 +132,17 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
 
             } catch (SAMLException e) {
-                logger.debug("Incoming SAML message is invalid", e);
+                log.debug("Incoming SAML message is invalid", e);
                 throw new ServletException("Incoming SAML message is invalid", e);
             } catch (MetadataProviderException e) {
-                logger.debug("Error determining metadata contracts", e);
+                log.debug("Error determining metadata contracts", e);
                 throw new ServletException("Error determining metadata contracts", e);
             } catch (MessageDecodingException e) {
-                logger.debug("Error decoding incoming SAML message", e);
+                log.debug("Error decoding incoming SAML message", e);
                 throw new ServletException("Error decoding incoming SAML message", e);
             } catch (org.opensaml.xml.security.SecurityException e) {
-                logger.debug("Incoming SAML message failed security validation", e);
+                log.debug("Incoming SAML message failed security validation", e);
+                logger.debug("a");
                 throw new ServletException("Incoming SAML message failed security validation", e);
             }
 

@@ -35,7 +35,7 @@ public class SAMLRelayStateSuccessHandler extends SavedRequestAwareAuthenticatio
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(SAMLRelayStateSuccessHandler.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLRelayStateSuccessHandler.class);
 
     /**
      * Implementation tries to load RelayString from the SAMLCredential authentication object and in case the state

@@ -152,7 +152,7 @@ public class MetadataGenerator {
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(MetadataGenerator.class);
+    protected static final Logger log = LoggerFactory.getLogger(MetadataGenerator.class);
 
     /**
      * Default constructor.

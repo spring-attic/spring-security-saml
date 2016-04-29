@@ -16,6 +16,7 @@
 package org.springframework.security.saml.util;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.common.binding.decoding.BasicURLComparator;
@@ -481,8 +482,12 @@ public class SAMLUtil {
      * @return true if time matches, false otherwise
      */
     public static boolean isDateTimeSkewValid(int skewInSec, long forwardInterval, DateTime time) {
-        long reference = System.currentTimeMillis();
-        return time.isBefore(reference + (skewInSec * 1000)) && time.isAfter(reference - ((skewInSec + forwardInterval) * 1000));
+        final DateTime reference = new DateTime();
+        final Interval validTimeInterval = new Interval(
+                reference.minusSeconds(skewInSec + (int)forwardInterval),
+                reference.plusSeconds(skewInSec)
+        );
+        return validTimeInterval.contains(time);
     }
 
     /**

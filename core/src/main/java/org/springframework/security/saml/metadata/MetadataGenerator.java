@@ -369,11 +369,12 @@ public class MetadataGenerator {
     protected Extensions buildExtensions(String entityBaseURL, String entityAlias) {
 
         boolean include = false;
+        int index = 0;
         Extensions extensions = new ExtensionsBuilder().buildObject();
 
         // Add discovery
         if (isIncludeDiscoveryExtension()) {
-            DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityAlias);
+            DiscoveryResponse discoveryService = getDiscoveryService(entityBaseURL, entityAlias, index++);
             extensions.getUnknownXMLObjects().add(discoveryService);
             include = true;
         }
@@ -459,11 +460,12 @@ public class MetadataGenerator {
         return hokAssertionConsumer;
     }
 
-    protected DiscoveryResponse getDiscoveryService(String entityBaseURL, String entityAlias) {
+    protected DiscoveryResponse getDiscoveryService(String entityBaseURL, String entityAlias, int index) {
         SAMLObjectBuilder<DiscoveryResponse> builder = (SAMLObjectBuilder<DiscoveryResponse>) builderFactory.getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         DiscoveryResponse discovery = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
         discovery.setLocation(getDiscoveryResponseURL(entityBaseURL, entityAlias));
+        discovery.setIndex(index);
         return discovery;
     }
 

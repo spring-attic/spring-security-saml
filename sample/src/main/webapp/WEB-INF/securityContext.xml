@@ -308,14 +308,20 @@
     <!-- Initialization of the velocity engine -->
     <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine"/>
 
-    <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize">
-        <property name="builderFeatures">
-            <map>
-                <entry key="http://apache.org/xml/features/dom/defer-node-expansion" value="false"/>
-            </map>
-        </property>
-    </bean>
+    <!-- 
+        XML parser pool needed for OpenSAML parsing
+
+        WARNING: If customizing a ParserPool implementation See https://shibboleth.net/community/advisories/secadv_20131213.txt
+                 Specifically the following should be explicitly set to avoid exploits:
+                 
+                 1) set pool property 'expandEntityReferences' to 'false'
+                 2) set feature 'javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING' to true
+                 3) set feature 'http://apache.org/xml/features/disallow-doctype-decl' to true. This is a Xerces-specific feature,
+                    including derivatives such as the internal JAXP implementations supplied with the Oracle and OpenJDK JREs. For
+                    other JAXP implementations, consult the documentation for the implementation for guidance on how to achieve a
+                    similar configuration.
+    -->
+    <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize"/>
 
     <bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder"/>
 

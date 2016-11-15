@@ -38,7 +38,8 @@ public class SAMLDefaultLogger implements SAMLLogger {
 
     private final static Logger log = LoggerFactory.getLogger(SAMLDefaultLogger.class);
 
-    private boolean logMessages = false;
+    private boolean logMessagesOnException = false;
+    private boolean logAllMessages = false;
     private boolean logErrors = true;
 
     public void log(String operation, String result, SAMLMessageContext context) {
@@ -101,7 +102,8 @@ public class SAMLDefaultLogger implements SAMLLogger {
 
         // Log SAML message
         sb.append(";");
-        if (logMessages) {
+        boolean exceptionOccurred = e != null;
+        if (logAllMessages || (logMessagesOnException && exceptionOccurred)) {
             try {
                 if (context.getInboundSAMLMessage() != null) {
                     String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
@@ -130,10 +132,29 @@ public class SAMLDefaultLogger implements SAMLLogger {
 
     /**
      * @param logMessages when true whole message will get logged
+     * @deprecated use {@link #setLogAllMessages(boolean)} instead
      */
+    @Deprecated
     public void setLogMessages(boolean logMessages) {
-        this.logMessages = logMessages;
+        this.setLogAllMessages(logMessages);
     }
+
+    /**
+     * Determines if all SAML messages should be logged.
+     * If set to true {@link #setLogMessagesOnException(boolean)} has no effect.
+     */
+    public void setLogAllMessages(boolean logAllMessages) {
+        this.logAllMessages = logAllMessages;
+    }
+
+    /**
+     * Determines if SAML messages should be logged when an exception occurs during processing.
+     * if {@link #setLogAllMessages(boolean)} is set to true, this has no effect as all messages will be logged regardless of exceptions.
+     */
+    public void setLogMessagesOnException(boolean logMessagesOnException) {
+        this.logMessagesOnException = logMessagesOnException;
+    }
+
 
     /**
      * @param logErrors when true exceptions will be logged

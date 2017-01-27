@@ -40,10 +40,13 @@ public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
     public boolean supports(InTransport transport) {
 	    if (transport instanceof HttpServletRequestAdapter) {
 	        HttpServletRequestAdapter t = (HttpServletRequestAdapter) transport;
+			if(!"POST".equalsIgnoreCase(t.getHTTPMethod())){
+				return false;
+			}
 	        HttpServletRequest request = t.getWrappedRequest();
-	        return "POST".equalsIgnoreCase(t.getHTTPMethod())
-                && request.getContentType().startsWith(
-                        org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER);
+			String contentType = request.getContentType();
+			return contentType != null
+					&& contentType.startsWith(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER);
 	    } else {
 	        return false;
 	    }

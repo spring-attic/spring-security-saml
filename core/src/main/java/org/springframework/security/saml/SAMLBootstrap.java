@@ -20,7 +20,7 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.access.BootstrapException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
@@ -42,7 +42,7 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
             PaosBootstrap.bootstrap();
             setMetadataKeyInfoGenerator();
         } catch (ConfigurationException e) {
-            throw new BootstrapException("Error invoking OpenSAML bootstrap", e);
+            throw new FatalBeanException("Error invoking OpenSAML bootstrap", e);
         }
     }
 

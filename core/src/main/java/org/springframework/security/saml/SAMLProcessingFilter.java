@@ -15,8 +15,11 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.decoding.BasicURLComparator;
+import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * Filter processes arriving SAML messages by delegating to the WebSSOProfile. After the SAMLAuthenticationToken
@@ -46,6 +50,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
+    protected URIComparator uriComparator = new BasicURLComparator();
 
     private String filterProcessesUrl;
 
@@ -81,7 +86,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
             // Override set values
             context.setCommunicationProfileId(getProfileName());
-            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
+            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport(), uriComparator));
 
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
             return getAuthenticationManager().authenticate(token);
@@ -155,6 +160,17 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
+    }
+
+    /**
+     * Sets URI comparator used to get local entity endpoint
+     * @param uriComparator    URI comparator
+     * @see SAMLUtil#getEndpoint(List, String, InTransport, URIComparator)
+     */
+    @Autowired(required = false)
+    public void setUriComparator(URIComparator uriComparator) {
+        Assert.notNull(uriComparator, "URI comparator can't be null");
+        this.uriComparator = uriComparator;
     }
 
     /**

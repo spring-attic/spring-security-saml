@@ -15,7 +15,6 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
 import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
@@ -29,6 +28,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.DefaultURLComparator;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -50,7 +50,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
-    protected URIComparator uriComparator = new BasicURLComparator();
+    protected URIComparator uriComparator = new DefaultURLComparator();
 
     private String filterProcessesUrl;
 

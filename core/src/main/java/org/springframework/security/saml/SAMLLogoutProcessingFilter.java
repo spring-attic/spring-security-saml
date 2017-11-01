@@ -15,7 +15,6 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
 import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
@@ -32,6 +31,7 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.DefaultURLComparator;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -45,7 +45,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +60,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     protected SingleLogoutProfile logoutProfile;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
-    protected URIComparator uriComparator = new BasicURLComparator();
+    protected URIComparator uriComparator = new DefaultURLComparator();
 
     /**
      * Class logger.

@@ -55,7 +55,7 @@ configure(subprojects) { subproject ->
 configure(coreProjects) { p ->
 	apply plugin: 'spring-io'
 
-	ext.springIoVersion = project.hasProperty('platformVersion') ? platformVersion : 'latest.integration'
+	ext.springIoVersion = project.hasProperty('platformVersion') ? platformVersion : 'Brussels-SR6'
 
 	configurations {
 		springIoTestRuntime {

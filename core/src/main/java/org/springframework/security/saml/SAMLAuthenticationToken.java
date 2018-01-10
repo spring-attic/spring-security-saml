@@ -42,7 +42,6 @@ public class SAMLAuthenticationToken extends AbstractAuthenticationToken {
         super(null);
 
         Assert.notNull(credentials, "SAMLAuthenticationToken requires the credentials parameter to be set");
-        Assert.notNull(credentials, "SAMLAuthenticationToken requires the message storage parameter to be set");
 
         this.credentials = credentials;
 

@@ -15,9 +15,9 @@ def coreProjects = subprojects.findAll { !it.name.contains("sample") }
 configure(allprojects) { project ->
 	group = "org.springframework.security.extensions"
 
-	ext.slf4jVersion = "1.6.3"
-	ext.springVersion = "3.1.2.RELEASE"
-	ext.springSecurityVersion = "3.1.2.RELEASE"
+	ext.slf4jVersion = "1.7.25"
+	ext.springVersion = "4.3.14.RELEASE"
+	ext.springSecurityVersion = "4.2.4.RELEASE"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"

@@ -3,7 +3,7 @@ description = "Spring Security SAML v2 library"
 dependencies {
 	compile "org.springframework.security:spring-security-core:$springSecurityVersion",
 		"org.springframework.security:spring-security-config:$springSecurityVersion",
-		"org.slf4j:slf4j-api:$slf4jVersion"	
+		"org.slf4j:slf4j-api:$slf4jVersion"
 	compile ("org.springframework.security:spring-security-web:$springSecurityVersion") {
 		exclude group: "org.springframework", module: "spring-jdbc"
 		exclude group: "org.springframework", module: "spring-tx"
@@ -14,13 +14,13 @@ dependencies {
 		exclude group: "org.apache.xerces", module: "xml-apis"
 		exclude group: "org.apache.xerces", module: "serializer"
 	}
-	provided "javax.servlet:servlet-api:2.5"
-	runtime	"xml-apis:xml-apis:1.4.01"
-	testCompile "org.slf4j:slf4j-log4j12:1.6.3",
-		"org.easymock:easymock:2.4",
-		"junit:junit:4.4",
-		"commons-logging:commons-logging:1.1.1",
-		"xmlunit:xmlunit:1.0"
+	provided "javax.servlet:javax.servlet-api:3.0.1"
+	runtime	"xml-apis:xml-apis:2.0.2"
+	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion",
+		"org.easymock:easymock:3.5.1",
+		"junit:junit:4.12",
+		"commons-logging:commons-logging:1.2",
+		"xmlunit:xmlunit:1.6"
 	testCompile	("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

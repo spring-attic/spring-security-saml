@@ -8,7 +8,7 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-jdbc"
 		exclude group: "org.springframework", module: "spring-tx"
 	}
-	compile ("org.opensaml:opensaml:2.6.1") {
+	compile ("org.opensaml:opensaml:2.6.4") {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		exclude group: "org.slf4j", module: "log4j-over-slf4j"
 		exclude group: "org.apache.xerces", module: "xml-apis"

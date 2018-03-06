@@ -16,7 +16,9 @@ dependencies {
 		exclude(group: 'org.owasp.esapi', module: 'esapi')
 		exclude(group: 'ca.juliusdavies', module: 'not-yet-commons-ssl')
 		exclude(group: 'org.beanshell', module: 'beanshell')
+		exclude(group: "org.apache.velocity", module: 'velocity')
 	}
+	compile group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.0'
 	compile group:'org.bouncycastle', name:'bcprov-jdk15on', version: "$bcprovVersion"
 	compile group:'org.bouncycastle', name:'bcpkix-jdk15on', version: "$bcpkixVersion"
 	compile group: 'org.apache.santuario', name: 'xmlsec', version: "$openSamlXmlSec"

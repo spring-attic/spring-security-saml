@@ -27,6 +27,7 @@ configure(allprojects) { project ->
 	ext.commonsBeanUtilsVersion = "1.9.3"
 	ext.antisamyVersion = "1.5.7"
 	ext.xalanVersion = "2.7.2"
+	ext.xmlApisVersion = "1.4"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"

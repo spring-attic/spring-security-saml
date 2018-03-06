@@ -31,10 +31,10 @@ dependencies {
 	compile group: 'org.owasp.antisamy', name: 'antisamy', version: "$antisamyVersion"
 	compile group: 'xalan', name: 'xalan', version:"$xalanVersion"
 	compile group: "ca.juliusdavies", name: "not-yet-commons-ssl", version: "0.3.17"
-
+	compile group: "xml-apis", name: "xml-apis", version: "$xmlApisVersion"
 
 	provided "javax.servlet:javax.servlet-api:3.0.1"
-	runtime "xml-apis:xml-apis:1.4"
+
 	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion",
 		"org.easymock:easymock:3.5.1",
 		"junit:junit:4.12",

@@ -14,12 +14,41 @@
  */
 package org.springframework.security.saml.metadata;
 
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.*;
-import org.opensaml.saml2.metadata.provider.*;
+import org.opensaml.saml2.metadata.EntitiesDescriptor;
+import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
+import org.opensaml.saml2.metadata.provider.MetadataFilter;
+import org.opensaml.saml2.metadata.provider.MetadataFilterChain;
+import org.opensaml.saml2.metadata.provider.MetadataProvider;
+import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
+import org.opensaml.saml2.metadata.provider.SignatureValidationFilter;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.security.x509.*;
+import org.opensaml.xml.security.CriteriaSet;
+import org.opensaml.xml.security.SecurityException;
+import org.opensaml.xml.security.x509.BasicPKIXValidationInformation;
+import org.opensaml.xml.security.x509.BasicX509CredentialNameEvaluator;
+import org.opensaml.xml.security.x509.CertPathPKIXValidationOptions;
+import org.opensaml.xml.security.x509.PKIXValidationInformation;
+import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.xml.security.x509.StaticPKIXValidationInformationResolver;
 import org.opensaml.xml.signature.SignatureTrustEngine;
 import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
@@ -32,10 +61,6 @@ import org.springframework.security.saml.trust.AllowAllSignatureTrustEngine;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class offers extra services on top of the underlying chaining MetadataProviders. Manager keeps track of all available
@@ -627,7 +652,21 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();
         info.add(new BasicPKIXValidationInformation(certificates, null, 4));
-        return new StaticPKIXValidationInformationResolver(info, trustedNames);
+        return new StaticPKIXValidationInformationResolver(info, trustedNames) {
+            @Override
+            public Set<String> resolveTrustedNames(CriteriaSet criteriaSet)
+                throws SecurityException, UnsupportedOperationException {
+                Set<String> names = super.resolveTrustedNames(criteriaSet);
+                //previous implementation returned true
+                //if trustedNames was empty(), not just null
+                //https://git.shibboleth.net/view/?p=java-xmltooling.git;a=commitdiff;h=c3c19e4857b815c7c05fa3b675f9cd1adde43429#patch2
+                if (names.isEmpty()) {
+                    return null;
+                } else {
+                    return names;
+                }
+            }
+        };
 
     }
 

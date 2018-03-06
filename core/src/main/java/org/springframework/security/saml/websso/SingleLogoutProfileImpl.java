@@ -15,12 +15,22 @@
  */
 package org.springframework.security.saml.websso;
 
+import java.util.List;
+
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.LogoutRequest;
+import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.SessionIndex;
+import org.opensaml.saml2.core.Status;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.StatusMessage;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -37,8 +47,6 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import java.util.List;
 
 import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
@@ -340,13 +348,14 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         } else if (StatusCode.PARTIAL_LOGOUT_URI.equals(statusCode)) {
             log.debug("Single Logout was partially successful");
         } else {
-            String[] logMessage = new String[2];
-            logMessage[0] = response.getStatus().getStatusCode().getValue();
-            StatusMessage message1 = response.getStatus().getStatusMessage();
-            if (message1 != null) {
-                logMessage[1] = message1.getMessage();
+
+            String message1 = response.getStatus().getStatusCode().getValue();
+            String message2 = "N/A";
+            StatusMessage status = response.getStatus().getStatusMessage();
+            if (status != null) {
+                message2 = status.getMessage();
             }
-            log.warn("Received LogoutResponse has invalid status code", logMessage);
+            log.warn("Received LogoutResponse has invalid status code: %s; message: %s", message1, message2);
         }
     }
 }

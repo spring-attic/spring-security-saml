@@ -14,6 +14,8 @@
  */
 package org.springframework.security.saml.metadata;
 
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
@@ -21,8 +23,6 @@ import org.opensaml.xml.parse.ParserPool;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.key.KeyManager;
-
-import java.io.File;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -234,9 +234,9 @@ public class MetadataManagerSignaturesTest {
 
     protected ExtendedMetadataDelegate getMetadata(String fileName) throws Exception {
         File file = context.getResource(fileName).getFile();
-        FilesystemMetadataProvider innterProvider = new FilesystemMetadataProvider(file);
-        innterProvider.setParserPool(pool);
-        return new ExtendedMetadataDelegate(innterProvider);
+        FilesystemMetadataProvider innerProvider = new FilesystemMetadataProvider(file);
+        innerProvider.setParserPool(pool);
+        return new ExtendedMetadataDelegate(innerProvider);
     }
 
 }

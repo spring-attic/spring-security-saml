@@ -19,6 +19,7 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Audience;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.springframework.security.saml.parser.SAMLObject;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
@@ -44,6 +45,7 @@ public class HttpSessionStorageTest {
     public void testNonExisting() {
         session = createMock(HttpSession.class);
         expect(session.getId()).andReturn("session123").anyTimes();
+        expect(session.getAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE)).andReturn(session);
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null);
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null);
         session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), notNull());
@@ -64,6 +66,7 @@ public class HttpSessionStorageTest {
     public void testRaceInitialization() throws Exception {
         session = createMock(HttpSession.class);
         expect(session.getId()).andReturn("session123").anyTimes();
+        expect(session.getAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE)).andReturn(session).anyTimes();
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(null).times(3);
         session.setAttribute(eq(SPRING_SAML_STORAGE_KEY), notNull());
         expect(session.getAttribute(SPRING_SAML_STORAGE_KEY)).andReturn(new Hashtable());

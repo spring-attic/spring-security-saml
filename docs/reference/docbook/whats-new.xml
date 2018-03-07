@@ -28,7 +28,7 @@
 
 	<section id="section-whats-new-highlight-1.0.0">
 		<title>New features, improvements and fixes in 1.0.0.FINAL</title>
-    <para>Final release is not directly compatible with the previous RC versions, please make sure to migrate your code based on guidlines and changes below:</para>
+    <para>Final release is not directly compatible with the previous RC versions, please make sure to migrate your code based on guidelines and changes below:</para>
     <para>
         <itemizedlist spacing="compact">
           <listitem><para>Metadata signing now supports custom keyInfoGenerator and signingAlgorithm, signing can be enable per-entity</para></listitem>
@@ -71,7 +71,7 @@
         <itemizedlist spacing="compact">
         <listitem><para>module saml2-core was renamed to core, jar and maven artifact names stay the same</para></listitem>
         <listitem><para>module saml2-sample was renamed to sample, jar and maven artifact names stay the same</para></listitem>
-        <listitem><para>module src was renamed to docs, jar and mave artifact names stay the same</para></listitem>
+        <listitem><para>module src was renamed to docs, jar and maven artifact names stay the same</para></listitem>
         </itemizedlist>
         </para>
 
@@ -174,7 +174,7 @@
         <para><emphasis>WebSSOProfileConsumerImpl</emphasis>
         <itemizedlist spacing="compact">
         <listitem><para>new property includeAllAttributes, set to true for original behavior</para></listitem>
-        <listitem><para>throws SAMLException instead of CredentialExpiredException on check of resposne issue instant and assertion issue instant</para></listitem>
+        <listitem><para>throws SAMLException instead of CredentialExpiredException on check of response issue instant and assertion issue instant</para></listitem>
         </itemizedlist>
         </para>
   

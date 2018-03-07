@@ -166,8 +166,9 @@
 </dependency>]]></programlisting></para>
             <para>To view the contents of SAML messages and errors from the logs, adjust the settings of the SAMLDefaultLogger bean.</para>
             <programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger">
-       	<property name="logMessages" value="true"/>
+       	<property name="logAllMessages" value="true"/>
     	<property name="logErrors" value="true"/>
+    	<property name="logMessagesOnException" value="true"/>
 	</bean>]]></programlisting>
             <para>In case you are using another logging library, make sure to change the dependency accordingly.</para>
             <para>You can enable debug logging by modifying file <emphasis>sample/src/main/resources/log4j.properties</emphasis> and adding:

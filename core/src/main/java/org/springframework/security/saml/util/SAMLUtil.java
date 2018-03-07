@@ -71,7 +71,7 @@ import java.util.List;
  */
 public class SAMLUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(SAMLUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLUtil.class);
 
     /** The URIComparator implementation to use. */
     private static final URIComparator DEFAULT_URI_COMPARATOR = new DefaultURLComparator();
@@ -117,7 +117,7 @@ public class SAMLUtil {
                 return service;
             }
         }
-        logger.debug("No binding found for IDP with binding " + binding);
+        log.debug("No binding found for IDP with binding " + binding);
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
     }
 
@@ -153,7 +153,7 @@ public class SAMLUtil {
 
         IDPSSODescriptor idpSSODescriptor = idpEntityDescriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
         if (idpSSODescriptor == null) {
-            logger.error("Could not find an IDPSSODescriptor in metadata.");
+            log.error("Could not find an IDPSSODescriptor in metadata.");
             throw new MessageDecodingException("Could not find an IDPSSODescriptor in metadata.");
         }
 
@@ -175,13 +175,13 @@ public class SAMLUtil {
         if (index != null) {
             for (AssertionConsumerService service : ssoDescriptor.getAssertionConsumerServices()) {
                 if (index.equals(service.getIndex())) {
-                    logger.debug("Found assertionConsumerService with index {} and binding {}", index, service.getBinding());
+                    log.debug("Found assertionConsumerService with index {} and binding {}", index, service.getBinding());
                     return service;
                 }
             }
             throw new SAMLRuntimeException("AssertionConsumerService with index " + index + " wasn't found for ServiceProvider " + ssoDescriptor.getID() + ", please check your metadata");
         }
-        logger.debug("Index for AssertionConsumerService not specified, returning default");
+        log.debug("Index for AssertionConsumerService not specified, returning default");
         return ssoDescriptor.getDefaultAssertionConsumerService();
     }
 
@@ -189,7 +189,7 @@ public class SAMLUtil {
 
         List<ArtifactResolutionService> artifactResolutionServices = idpssoDescriptor.getArtifactResolutionServices();
         if (artifactResolutionServices == null || artifactResolutionServices.size() == 0) {
-            logger.error("Could not find any artifact resolution services in metadata.");
+            log.error("Could not find any artifact resolution services in metadata.");
             throw new MessageDecodingException("Could not find any artifact resolution services in metadata.");
         }
 
@@ -379,10 +379,10 @@ public class SAMLUtil {
             // Check that destination and binding matches
             if (binding.equals(messageBinding)) {
                 if (endpoint.getLocation() != null && uriComparator.compare(endpoint.getLocation(), requestURL)) {
-                    logger.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
+                    log.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 } else if (endpoint.getResponseLocation() != null && uriComparator.compare(endpoint.getResponseLocation(), requestURL)) {
-                    logger.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
+                    log.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 }
             }
@@ -399,7 +399,7 @@ public class SAMLUtil {
      */
     public static IDPSSODescriptor getIDPDescriptor(MetadataManager metadata, String idpId) throws MetadataProviderException {
         if (!metadata.isIDPValid(idpId)) {
-            logger.debug("IDP name of the authenticated user is not valid", idpId);
+            log.debug("IDP name of the authenticated user is not valid", idpId);
             throw new MetadataProviderException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
         }
         IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
@@ -420,7 +420,7 @@ public class SAMLUtil {
     public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
         try {
             if (message.getDOM() != null) {
-                logger.debug("XMLObject already had cached DOM, returning that element");
+                log.debug("XMLObject already had cached DOM, returning that element");
                 return message.getDOM();
             }
             Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
@@ -429,12 +429,12 @@ public class SAMLUtil {
                                                    + message.getElementQName());
             }
             Element messageElem = marshaller.marshall(message);
-            if (logger.isTraceEnabled()) {
-                logger.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+            if (log.isTraceEnabled()) {
+                log.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
             }
             return messageElem;
         } catch (MarshallingException e) {
-            logger.error("Encountered error marshalling message to its DOM representation", e);
+            log.error("Encountered error marshalling message to its DOM representation", e);
             throw new MessageEncodingException("Encountered error marshalling message into its DOM representation", e);
         }
     }
@@ -479,7 +479,7 @@ public class SAMLUtil {
             try {
                 Signer.signObject(signature);
             } catch (SignatureException e) {
-                logger.error("Unable to sign protocol message", e);
+                log.error("Unable to sign protocol message", e);
                 throw new MessageEncodingException("Unable to sign protocol message", e);
             }
 
@@ -585,7 +585,7 @@ public class SAMLUtil {
             try {
                 extendedMetadata = metadataManager.getExtendedMetadata(descriptor.getEntityID());
             } catch (MetadataProviderException e) {
-                logger.error("Unable to locate extended metadata", e);
+                log.error("Unable to locate extended metadata", e);
                 throw new MarshallingException("Unable to locate extended metadata", e);
             }
         }
@@ -600,7 +600,7 @@ public class SAMLUtil {
                 element = SAMLUtil.marshallMessage(descriptor);
             }
         } catch (MessageEncodingException e) {
-            logger.error("Unable to marshall message", e);
+            log.error("Unable to marshall message", e);
             throw new MarshallingException("Unable to marshall message", e);
         }
 

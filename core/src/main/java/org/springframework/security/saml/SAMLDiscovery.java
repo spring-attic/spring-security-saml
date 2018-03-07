@@ -51,7 +51,7 @@ import java.util.List;
  */
 public class SAMLDiscovery extends GenericFilterBean {
 
-    protected final static Logger logger = LoggerFactory.getLogger(SAMLDiscovery.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLDiscovery.class);
 
     /**
      * Used to store return URL in the forwarded request object.
@@ -164,13 +164,13 @@ public class SAMLDiscovery extends GenericFilterBean {
      */
     protected void processDiscoveryRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
-        logger.debug("Processing IDP Discovery Service request");
+        log.debug("Processing IDP Discovery Service request");
 
         // Requesting entity, MUST be present and valid, IDPDisco, 239
         String entityId = request.getParameter(ENTITY_ID_PARAM);
 
         if (entityId == null) {
-            logger.debug("Received IDP Discovery request without entityId");
+            log.debug("Received IDP Discovery request without entityId");
             throw new ServletException(new SAMLException("Entity ID parameter must be specified"));
         }
 
@@ -183,7 +183,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             messageContext = contextProvider.getLocalEntity(request, response);
 
         } catch (MetadataProviderException e) {
-            logger.debug("Error loading metadata", e);
+            log.debug("Error loading metadata", e);
             throw new ServletException(new SAMLException("Error loading metadata", e));
         }
 
@@ -192,7 +192,7 @@ public class SAMLDiscovery extends GenericFilterBean {
         if (returnURL == null) {
             returnURL = getDefaultReturnURL(messageContext);
         } else if (!isResponseURLValid(returnURL, messageContext)) {
-            logger.debug("Return URL {} designated in IDP Discovery request for entity {} is not valid", returnURL, entityId);
+            log.debug("Return URL {} designated in IDP Discovery request for entity {} is not valid", returnURL, entityId);
             throw new ServletException(new SAMLException("Return URL designated in IDP Discovery request for entity is not valid"));
         }
 
@@ -204,7 +204,7 @@ public class SAMLDiscovery extends GenericFilterBean {
         // Policy to be used, MAY be present, only default "single" policy is supported
         String policy = request.getParameter(POLICY_PARAM);
         if (policy != null && !policy.equals(IDP_DISCO_PROTOCOL_SINGLE)) {
-            logger.debug("Received IDP Discovery with unsupported policy {}", policy);
+            log.debug("Received IDP Discovery with unsupported policy {}", policy);
             throw new ServletException(new SAMLException("Unsupported IDP discovery profile was requested"));
         }
 
@@ -224,7 +224,7 @@ public class SAMLDiscovery extends GenericFilterBean {
         } else if (getIdpSelectionPath() == null) {
 
             // Send a passive response as no IDP selection is available
-            logger.debug("No IDP selection path configured, sending passive response");
+            log.debug("No IDP selection path configured, sending passive response");
             String passiveIDP = getPassiveIDP(request);
             sendPassiveResponse(request, response, returnURL, returnParam, passiveIDP);
 
@@ -258,7 +258,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             finalResponseURL = urlBuilder.buildURL();
         }
 
-        logger.debug("Responding to a passive IDP Discovery request with URL {}", finalResponseURL);
+        log.debug("Responding to a passive IDP Discovery request with URL {}", finalResponseURL);
         response.sendRedirect(finalResponseURL);
 
     }
@@ -282,7 +282,7 @@ public class SAMLDiscovery extends GenericFilterBean {
         request.setAttribute(RETURN_PARAM, returnParam);
 
         String path = getIdpSelectionPath();
-        logger.debug("Initializing IDP Discovery selection page at {} with return url {}", path, responseURL);
+        log.debug("Initializing IDP Discovery selection page at {} with return url {}", path, responseURL);
         request.getRequestDispatcher(path).forward(request, response);
 
     }
@@ -311,7 +311,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             for (XMLObject element : discoveryResponseElements) {
                 DiscoveryResponse response = (DiscoveryResponse) element;
                 if (response.getBinding().equals(DiscoveryResponse.IDP_DISCO_NS)) {
-                    logger.debug("Using IDP Discovery response URL from metadata {}", response.getLocation());
+                    log.debug("Using IDP Discovery response URL from metadata {}", response.getLocation());
                     return response.getLocation();
                 }
             }
@@ -328,7 +328,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             String contextPath = (String) messageContext.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             String responseURL = contextPath + filterUrl + (extendedMetadata.getAlias() != null ? "/alias/" + extendedMetadata.getAlias() : "") + "?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true";
 
-            logger.debug("Using IDP Discovery response URL calculated for local entity {}", responseURL);
+            log.debug("Using IDP Discovery response URL calculated for local entity {}", responseURL);
             return responseURL;
 
         }

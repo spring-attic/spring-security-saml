@@ -15,7 +15,6 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -63,7 +62,7 @@ import java.util.List;
  */
 public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationEntryPoint {
 
-    protected final static Logger logger = LoggerFactory.getLogger(SAMLEntryPoint.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLEntryPoint.class);
 
     protected WebSSOProfileOptions defaultOptions;
     protected WebSSOProfile webSSOprofile;
@@ -154,13 +153,13 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             }
 
         } catch (SAMLException e1) {
-            logger.debug("Error initializing entry point", e1);
+            log.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         } catch (MetadataProviderException e1) {
-            logger.debug("Error initializing entry point", e1);
+            log.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         } catch (MessageEncodingException e1) {
-            logger.debug("Error initializing entry point", e1);
+            log.debug("Error initializing entry point", e1);
             throw new ServletException(e1);
         }
 
@@ -181,7 +180,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
-        logger.debug("Processing SSO using ECP profile");
+        log.debug("Processing SSO using ECP profile");
         webSSOprofileECP.sendAuthenticationRequest(context, options);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
 
@@ -212,9 +211,9 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         // HoK WebSSO
         if (SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(consumerService.getBinding())) {
             if (webSSOprofileHoK == null) {
-                logger.warn("WebSSO HoK profile was specified to be used, but profile is not configured in the EntryPoint, HoK will be skipped");
+                log.warn("WebSSO HoK profile was specified to be used, but profile is not configured in the EntryPoint, HoK will be skipped");
             } else {
-                logger.debug("Processing SSO using WebSSO HolderOfKey profile");
+                log.debug("Processing SSO using WebSSO HolderOfKey profile");
                 webSSOprofileHoK.sendAuthenticationRequest(context, options);
                 samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
                 return;
@@ -222,7 +221,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         }
 
         // Ordinary WebSSO
-        logger.debug("Processing SSO using WebSSO profile");
+        log.debug("Processing SSO using WebSSO profile");
         webSSOprofile.sendAuthenticationRequest(context, options);
         samlLogger.log(SAMLConstants.AUTH_N_REQUEST, SAMLConstants.SUCCESS, context);
 
@@ -249,7 +248,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             queryParams.add(new Pair<String, String>(SAMLDiscovery.RETURN_ID_PARAM, IDP_PARAMETER));
             discoveryURL = urlBuilder.buildURL();
 
-            logger.debug("Using discovery URL from extended metadata");
+            log.debug("Using discovery URL from extended metadata");
 
         } else {
 
@@ -261,11 +260,11 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
 
-            logger.debug("Using local discovery URL");
+            log.debug("Using local discovery URL");
 
         }
 
-        logger.debug("Redirecting to discovery URL {}", discoveryURL);
+        log.debug("Redirecting to discovery URL {}", discoveryURL);
         HTTPOutTransport response = (HTTPOutTransport) context.getOutboundMessageTransport();
         response.sendRedirect(discoveryURL);
 
@@ -332,7 +331,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         boolean ecp = context.getLocalExtendedMetadata().isEcpEnabled() && SAMLUtil.isECPRequest(request);
         if (ecp) {
             if (webSSOprofileECP == null) {
-                logger.warn("ECP profile was specified to be used, but profile is not configured in the EntryPoint, ECP will be skipped");
+                log.warn("ECP profile was specified to be used, but profile is not configured in the EntryPoint, ECP will be skipped");
                 return false;
             } else {
                 return true;

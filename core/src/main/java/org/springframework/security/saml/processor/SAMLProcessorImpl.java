@@ -46,7 +46,7 @@ import java.util.Collection;
  */
 public class SAMLProcessorImpl implements SAMLProcessor {
 
-    private final static Logger log = LoggerFactory.getLogger(SAMLProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLProcessorImpl.class);
 
     /**
      * Bindings supported by this processor.

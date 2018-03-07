@@ -15,8 +15,10 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.DefaultURLComparator;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -33,6 +36,7 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * Filter processes arriving SAML messages by delegating to the WebSSOProfile. After the SAMLAuthenticationToken
@@ -42,10 +46,11 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-    protected final static Logger logger = LoggerFactory.getLogger(SAMLProcessingFilter.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLProcessingFilter.class);
 
     protected SAMLProcessor processor;
     protected SAMLContextProvider contextProvider;
+    protected URIComparator uriComparator = new DefaultURLComparator();
 
     private String filterProcessesUrl;
 
@@ -75,28 +80,28 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
         try {
 
-            logger.debug("Attempting SAML2 authentication using profile {}", getProfileName());
+            log.debug("Attempting SAML2 authentication using profile {}", getProfileName());
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
             processor.retrieveMessage(context);
 
             // Override set values
             context.setCommunicationProfileId(getProfileName());
-            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
+            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport(), uriComparator));
 
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
-            logger.debug("Incoming SAML message is invalid", e);
+            log.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         } catch (MetadataProviderException e) {
-            logger.debug("Error determining metadata contracts", e);
+            log.debug("Error determining metadata contracts", e);
             throw new AuthenticationServiceException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
-            logger.debug("Error decoding incoming SAML message", e);
+            log.debug("Error decoding incoming SAML message", e);
             throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
         } catch (org.opensaml.xml.security.SecurityException e) {
-            logger.debug("Incoming SAML message is invalid", e);
+            log.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         }
 
@@ -155,6 +160,17 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
+    }
+
+    /**
+     * Sets URI comparator used to get local entity endpoint
+     * @param uriComparator    URI comparator
+     * @see SAMLUtil#getEndpoint(List, String, InTransport, URIComparator)
+     */
+    @Autowired(required = false)
+    public void setUriComparator(URIComparator uriComparator) {
+        Assert.notNull(uriComparator, "URI comparator can't be null");
+        this.uriComparator = uriComparator;
     }
 
     /**

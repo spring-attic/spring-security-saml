@@ -141,6 +141,12 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     private boolean supportUnsolicitedResponse = true;
 
     /**
+     * Algorithm used for creation of digest method of this entity. At the moment only used for metadata signatures.
+     * Only valid for local entities.
+     */
+    private String digestMethodAlgorithm;
+
+    /**
      * Security profile to use for this local entity - MetaIOP (default) or PKIX.
      *
      * @return profile
@@ -573,4 +579,36 @@ public class ExtendedMetadata implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Returns digest method algorithm value
+     * @return String
+     */
+    public String getDigestMethodAlgorithm()
+    {
+        return digestMethodAlgorithm;
+    }
+
+    /**
+     * Sets the digest method algorithm to use when signing the SAML messages.
+     * This can be used, for example, when a strong algorithm is required (e.g. SHA 256 instead of SHA 128).
+     * If this property is null, then the {@link org.opensaml.xml.Configuration} default algorithm will be used instead.
+     *
+     * Value only applies to local entities.
+     *
+     * At the moment the value is only used for signatures on metadata.
+     *
+     * Typical values are:
+     * http://www.w3.org/2001/04/xmlenc#sha1
+     * http://www.w3.org/2001/04/xmlenc#sha256
+     * http://www.w3.org/2001/04/xmlenc#sha384
+     * http://www.w3.org/2001/04/xmlenc#sha512
+     * http://www.w3.org/2001/04/xmlenc#ripemd160
+     *
+     * @param digestMethodAlgorithm The new digest method algorithm to use
+     * @see org.opensaml.xml.signature.SignatureConstants
+     */
+    public void setDigestMethodAlgorithm(String digestMethodAlgorithm)
+    {
+        this.digestMethodAlgorithm = digestMethodAlgorithm;
+    }
 }

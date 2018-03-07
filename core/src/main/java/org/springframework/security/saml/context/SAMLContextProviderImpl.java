@@ -72,7 +72,7 @@ import java.util.Arrays;
  */
 public class SAMLContextProviderImpl implements SAMLContextProvider, InitializingBean {
 
-    protected final static Logger logger = LoggerFactory.getLogger(SAMLContextProviderImpl.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLContextProviderImpl.class);
 
     // Way to obtain encrypted key info from XML Encryption
     private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
@@ -147,15 +147,15 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);
         if (entityId != null) { // Pre-configured entity Id
-            logger.debug("Using protocol specified IDP {}", entityId);
+            log.debug("Using protocol specified IDP {}", entityId);
         } else {
             entityId = inTransport.getParameterValue(SAMLEntryPoint.IDP_PARAMETER);
             if (entityId != null) { // IDP from request
-                logger.debug("Using user specified IDP {} from request", entityId);
+                log.debug("Using user specified IDP {} from request", entityId);
                 context.setPeerUserSelected(true);
             } else { // Default IDP
                 entityId = metadata.getDefaultIDP();
-                logger.debug("No IDP specified, using default {}", entityId);
+                log.debug("No IDP specified, using default {}", entityId);
                 context.setPeerUserSelected(false);
             }
         }
@@ -242,7 +242,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         // Pre-configured entity Id
         entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
         if (entityId != null) {
-            logger.debug("Using protocol specified SP {}", entityId);
+            log.debug("Using protocol specified SP {}", entityId);
             context.setLocalEntityId(entityId);
             context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
             return;
@@ -278,7 +278,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             if (entityId == null) {
                 throw new MetadataProviderException("No local entity found for alias " + localAlias + ", verify your configuration.");
             } else {
-                logger.debug("Using SP {} specified in request with alias {}", entityId, localAlias);
+                log.debug("Using SP {} specified in request with alias {}", entityId, localAlias);
             }
 
             context.setLocalEntityId(entityId);
@@ -286,11 +286,33 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         } else { // Defaults
 
-            context.setLocalEntityId(metadata.getHostedSPName());
-            context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            context.setLocalEntityId(getDefaultLocalEntityId(context, requestURI));
+            context.setLocalEntityRole(getDefaultLocalEntityRole(context, requestURI));
 
         }
 
+    }
+
+    /**
+     * Returns localEntityId to be populated for the context in case alias is missing from the path
+     * @param context context to retrieve localEntityId for
+     * @param requestURI context path to parse entityId from
+     * @return localEntityId
+     * @throws MetadataProviderException in case entityId can't be retrieved
+     */
+    protected String getDefaultLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+        return metadata.getHostedSPName();
+    }
+
+    /**
+     * Returns localEntityRole to be populated for the context in case alias is missing from the path
+     * @param context context to retrieve localEntityRole for
+     * @param requestURI context path to parse entityRole from
+     * @return localEntityRole
+     * @throws MetadataProviderException in case entityRole can't be retrieved
+     */
+    protected QName getDefaultLocalEntityRole(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+        return SPSSODescriptor.DEFAULT_ELEMENT_NAME;
     }
 
     /**
@@ -374,7 +396,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         if (chain != null && chain.length > 0) {
 
-            logger.debug("Found certificate chain from request {}", chain[0]);
+            log.debug("Found certificate chain from request {}", chain[0]);
             BasicX509Credential credential = new BasicX509Credential();
             credential.setEntityCertificate(chain[0]);
             credential.setEntityCertificateChain(Arrays.asList(chain));

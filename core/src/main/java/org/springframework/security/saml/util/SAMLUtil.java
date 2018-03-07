@@ -16,12 +16,19 @@
 package org.springframework.security.saml.util;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
 import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.*;
+import org.opensaml.saml2.metadata.ArtifactResolutionService;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.Endpoint;
+import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.SSODescriptor;
+import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
@@ -32,9 +39,15 @@ import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.security.BasicSecurityConfiguration;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.*;
+import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.SignableXMLObject;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.signature.X509Data;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
@@ -59,10 +72,10 @@ import java.util.List;
  */
 public class SAMLUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(SAMLUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLUtil.class);
 
     /** The URIComparator implementation to use. */
-    private static final URIComparator uriComparator = new BasicURLComparator();
+    private static final URIComparator DEFAULT_URI_COMPARATOR = new DefaultURLComparator();
 
     /**
      * Method determines binding supported by the given endpoint. Usually the biding is encoded in the binding attribute
@@ -105,7 +118,7 @@ public class SAMLUtil {
                 return service;
             }
         }
-        logger.debug("No binding found for IDP with binding " + binding);
+        log.debug("No binding found for IDP with binding " + binding);
         throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
     }
 
@@ -141,7 +154,7 @@ public class SAMLUtil {
 
         IDPSSODescriptor idpSSODescriptor = idpEntityDescriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
         if (idpSSODescriptor == null) {
-            logger.error("Could not find an IDPSSODescriptor in metadata.");
+            log.error("Could not find an IDPSSODescriptor in metadata.");
             throw new MessageDecodingException("Could not find an IDPSSODescriptor in metadata.");
         }
 
@@ -163,13 +176,13 @@ public class SAMLUtil {
         if (index != null) {
             for (AssertionConsumerService service : ssoDescriptor.getAssertionConsumerServices()) {
                 if (index.equals(service.getIndex())) {
-                    logger.debug("Found assertionConsumerService with index {} and binding {}", index, service.getBinding());
+                    log.debug("Found assertionConsumerService with index {} and binding {}", index, service.getBinding());
                     return service;
                 }
             }
             throw new SAMLRuntimeException("AssertionConsumerService with index " + index + " wasn't found for ServiceProvider " + ssoDescriptor.getID() + ", please check your metadata");
         }
-        logger.debug("Index for AssertionConsumerService not specified, returning default");
+        log.debug("Index for AssertionConsumerService not specified, returning default");
         return ssoDescriptor.getDefaultAssertionConsumerService();
     }
 
@@ -177,7 +190,7 @@ public class SAMLUtil {
 
         List<ArtifactResolutionService> artifactResolutionServices = idpssoDescriptor.getArtifactResolutionServices();
         if (artifactResolutionServices == null || artifactResolutionServices.size() == 0) {
-            logger.error("Could not find any artifact resolution services in metadata.");
+            log.error("Could not find any artifact resolution services in metadata.");
             throw new MessageDecodingException("Could not find any artifact resolution services in metadata.");
         }
 
@@ -339,17 +352,38 @@ public class SAMLUtil {
      * @throws SAMLException in case endpoint can't be found
      */
     public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException {
+        return getEndpoint(endpoints, messageBinding, inTransport, DEFAULT_URI_COMPARATOR);
+    }
+
+    /**
+     * Method helps to identify which endpoint is used to process the current message. It expects a list of potential
+     * endpoints based on the current profile and selects the one which uses the specified binding and matches
+     * the URL of incoming message.
+     *
+     * @param endpoints      endpoints to check
+     * @param messageBinding binding
+     * @param inTransport      transport which received the current message
+     * @param uriComparator     URI comparator
+     * @param <T>            type of the endpoint
+     * @return first endpoint satisfying the requestURL and binding conditions
+     * @throws SAMLException in case endpoint can't be found
+     */
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport, URIComparator uriComparator) throws SAMLException {
         HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
         String requestURL = DatatypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
+        String queryString = DatatypeHelper.safeTrimOrNullString(httpRequest.getQueryString());
+        if (queryString != null){
+            requestURL += '?' + queryString;
+        }
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches
             if (binding.equals(messageBinding)) {
                 if (endpoint.getLocation() != null && uriComparator.compare(endpoint.getLocation(), requestURL)) {
-                    logger.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
+                    log.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 } else if (endpoint.getResponseLocation() != null && uriComparator.compare(endpoint.getResponseLocation(), requestURL)) {
-                    logger.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
+                    log.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 }
             }
@@ -366,7 +400,7 @@ public class SAMLUtil {
      */
     public static IDPSSODescriptor getIDPDescriptor(MetadataManager metadata, String idpId) throws MetadataProviderException {
         if (!metadata.isIDPValid(idpId)) {
-            logger.debug("IDP name of the authenticated user is not valid", idpId);
+            log.debug("IDP name of the authenticated user is not valid", idpId);
             throw new MetadataProviderException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
         }
         IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
@@ -387,7 +421,7 @@ public class SAMLUtil {
     public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
         try {
             if (message.getDOM() != null) {
-                logger.debug("XMLObject already had cached DOM, returning that element");
+                log.debug("XMLObject already had cached DOM, returning that element");
                 return message.getDOM();
             }
             Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
@@ -396,12 +430,12 @@ public class SAMLUtil {
                                                    + message.getElementQName());
             }
             Element messageElem = marshaller.marshall(message);
-            if (logger.isTraceEnabled()) {
-                logger.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+            if (log.isTraceEnabled()) {
+                log.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
             }
             return messageElem;
         } catch (MarshallingException e) {
-            logger.error("Encountered error marshalling message to its DOM representation", e);
+            log.error("Encountered error marshalling message to its DOM representation", e);
             throw new MessageEncodingException("Encountered error marshalling message into its DOM representation", e);
         }
     }
@@ -414,13 +448,14 @@ public class SAMLUtil {
      * @param signableMessage    object to sign
      * @param signingCredential credential to sign with
      * @param signingAlgorithm  signing algorithm to use (optional). Leave null to use credential's default algorithm
+     * @param signingAlgorithm  digest method algorithm to use (optional). Leave null to use credential's default algorithm
      * @param keyInfoGenerator name of generator used to create KeyInfo elements with key data
      * @throws org.opensaml.ws.message.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the message
      * @return marshalled and signed message
      */
     @SuppressWarnings("unchecked")
-    public static Element marshallAndSignMessage(SignableXMLObject signableMessage, Credential signingCredential, String signingAlgorithm, String keyInfoGenerator) throws MessageEncodingException {
+    public static Element marshallAndSignMessage(SignableXMLObject signableMessage, Credential signingCredential, String signingAlgorithm, String digestMethodAlgorithm, String keyInfoGenerator) throws MessageEncodingException {
 
         if (signingCredential != null && !signableMessage.isSigned()) {
 
@@ -434,8 +469,17 @@ public class SAMLUtil {
 
             signature.setSigningCredential(signingCredential);
 
+            BasicSecurityConfiguration secConfig = null;
+            
+            if (digestMethodAlgorithm != null)
+            {
+                secConfig = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
+                
+                secConfig.setSignatureReferenceDigestMethod(digestMethodAlgorithm);
+            }
+
             try {
-                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, keyInfoGenerator);
+                SecurityHelper.prepareSignatureParams(signature, signingCredential, secConfig, keyInfoGenerator);
             } catch (org.opensaml.xml.security.SecurityException e) {
                 throw new MessageEncodingException("Error preparing signature for signing", e);
             }
@@ -446,7 +490,7 @@ public class SAMLUtil {
             try {
                 Signer.signObject(signature);
             } catch (SignatureException e) {
-                logger.error("Unable to sign protocol message", e);
+                log.error("Unable to sign protocol message", e);
                 throw new MessageEncodingException("Unable to sign protocol message", e);
             }
 
@@ -481,8 +525,12 @@ public class SAMLUtil {
      * @return true if time matches, false otherwise
      */
     public static boolean isDateTimeSkewValid(int skewInSec, long forwardInterval, DateTime time) {
-        long reference = System.currentTimeMillis();
-        return time.isBefore(reference + (skewInSec * 1000)) && time.isAfter(reference - ((skewInSec + forwardInterval) * 1000));
+        final DateTime reference = new DateTime();
+        final Interval validTimeInterval = new Interval(
+                reference.minusSeconds(skewInSec + (int)forwardInterval),
+                reference.plusSeconds(skewInSec)
+        );
+        return validTimeInterval.contains(time);
     }
 
     /**
@@ -548,7 +596,7 @@ public class SAMLUtil {
             try {
                 extendedMetadata = metadataManager.getExtendedMetadata(descriptor.getEntityID());
             } catch (MetadataProviderException e) {
-                logger.error("Unable to locate extended metadata", e);
+                log.error("Unable to locate extended metadata", e);
                 throw new MarshallingException("Unable to locate extended metadata", e);
             }
         }
@@ -558,12 +606,13 @@ public class SAMLUtil {
                 Credential credential = keyManager.getCredential(extendedMetadata.getSigningKey());
                 String signingAlgorithm = extendedMetadata.getSigningAlgorithm();
                 String keyGenerator = extendedMetadata.getKeyInfoGeneratorName();
-                element = SAMLUtil.marshallAndSignMessage(descriptor, credential, signingAlgorithm, keyGenerator);
+                String digestMethodAlgorithm = extendedMetadata.getDigestMethodAlgorithm();
+                element = SAMLUtil.marshallAndSignMessage(descriptor, credential, signingAlgorithm, digestMethodAlgorithm, keyGenerator);
             } else {
                 element = SAMLUtil.marshallMessage(descriptor);
             }
         } catch (MessageEncodingException e) {
-            logger.error("Unable to marshall message", e);
+            log.error("Unable to marshall message", e);
             throw new MarshallingException("Unable to marshall message", e);
         }
 

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.parser.SAMLObject;
 import org.springframework.util.Assert;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -149,13 +150,14 @@ public class HttpSessionStorage implements SAMLMessageStorage {
      * Call to the method tries to load internalMessages hashtable object from the session, if the object doesn't exist
      * it will be created and stored.
      * <p>
-     * Method synchronizes on session object to prevent two threads from overwriting each others hashtable.
+     * Method synchronizes on session mutex to prevent two threads from overwriting each others hashtable.
      */
     @SuppressWarnings("unchecked")
     private Hashtable<String, SAMLObject<XMLObject>> initializeSession() {
         Hashtable<String, SAMLObject<XMLObject>> messages = (Hashtable<String, SAMLObject<XMLObject>>) session.getAttribute(SAML_STORAGE_KEY);
         if (messages == null) {
-            synchronized (session) {
+            final Object mutex = WebUtils.getSessionMutex(session);
+            synchronized (mutex) {
                 messages = (Hashtable<String, SAMLObject<XMLObject>>) session.getAttribute(SAML_STORAGE_KEY);
                 if (messages == null) {
                     messages = new Hashtable<String, SAMLObject<XMLObject>>();

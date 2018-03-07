@@ -38,7 +38,7 @@ import java.io.Serializable;
  */
 public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
 
-    protected final static Logger log = LoggerFactory.getLogger(SAMLBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(SAMLBase.class);
 
     /**
      * Version of the value stored within object transferable during serialization.

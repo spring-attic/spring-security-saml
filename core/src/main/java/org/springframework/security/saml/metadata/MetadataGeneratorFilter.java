@@ -44,7 +44,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(MetadataGeneratorFilter.class);
+    protected static final Logger log = LoggerFactory.getLogger(MetadataGeneratorFilter.class);
 
     /**
      * Class storing all SAML metadata documents

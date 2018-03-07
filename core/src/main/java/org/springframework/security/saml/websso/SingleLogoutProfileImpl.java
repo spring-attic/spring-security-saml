@@ -81,14 +81,13 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         context.setOutboundSAMLMessage(logoutRequest);
         context.setPeerEntityEndpoint(logoutServiceIDP);
 
-        boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
-        sendMessage(context, signMessage);
-
         SAMLMessageStorage messageStorage = context.getMessageStorage();
         if (messageStorage != null) {
             messageStorage.storeMessage(logoutRequest.getID(), logoutRequest);
         }
 
+        boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
+        sendMessage(context, signMessage);
     }
 
     /**

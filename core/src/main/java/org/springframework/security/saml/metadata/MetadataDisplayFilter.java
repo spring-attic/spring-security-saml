@@ -49,7 +49,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     /**
      * Class logger.
      */
-    protected final static Logger log = LoggerFactory.getLogger(MetadataDisplayFilter.class);
+    protected static final Logger log = LoggerFactory.getLogger(MetadataDisplayFilter.class);
 
     /**
      * Class storing all SAML metadata documents
@@ -114,6 +114,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
             String entityId = context.getLocalEntityId();
             response.setContentType("application/samlmetadata+xml"); // SAML_Meta, 4.1.1 - line 1235
+            response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", "attachment; filename=\"spring_saml_metadata.xml\"");
             displayMetadata(entityId, response.getWriter());
         } catch (MetadataProviderException e) {

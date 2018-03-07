@@ -20,7 +20,7 @@
     
     <simplesect>
       <title>Error 'InResponseToField doesn't correspond to sent message' during SSO</title>
-      <para>Make sure that application uses the same HttpSession during sending of the request and reception of the response. Typically, this problem arises when the auhentication request is initialized 
+      <para>Make sure that application uses the same HttpSession during sending of the request and reception of the response. Typically, this problem arises when the authentication request is initialized
       from localhost address or http scheme, while response is received at a public host name or https scheme. E.g., when initializing authentication from URL https://host:port/app/saml/login, the response 
       must be received at https://host;port/app/saml/SSO, not http://host:port/app/saml/SSO or https://localhost:port/app/saml/SSO.</para>
       <para>The checking of the InResponseToField can be disabled by re-configuring the context provider as follows:

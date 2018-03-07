@@ -83,7 +83,12 @@
     </security:authentication-manager>
 
     <!-- Logger for SAML messages and events -->
-    <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>
+    <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger">
+    	<!-- Enable these to see the actual SAML Messages in logs -->
+       	<!-- <property name="logAllMessages" value="true"/>  -->
+    	<!-- <property name="logErrors" value="true"/>  -->
+    	<!-- <property name="logMessagesOnException" value="true"/>  -->
+	</bean>
 
     <!-- Central storage of cryptographic keys -->
     <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">

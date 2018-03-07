@@ -15,11 +15,13 @@
 package org.springframework.security.saml;
 
 import org.opensaml.common.SAMLException;
+import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.processor.SAMLProcessor;
+import org.springframework.security.saml.util.DefaultURLComparator;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -42,7 +45,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +60,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     protected SingleLogoutProfile logoutProfile;
     protected SAMLLogger samlLogger;
     protected SAMLContextProvider contextProvider;
+    protected URIComparator uriComparator = new DefaultURLComparator();
 
     /**
      * Class logger.
@@ -129,19 +132,19 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 context = contextProvider.getLocalEntity(request, response);
                 context.setCommunicationProfileId(getProfileName());
                 processor.retrieveMessage(context);
-                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
+                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport(), uriComparator));
 
             } catch (SAMLException e) {
-                logger.debug("Incoming SAML message is invalid", e);
+                log.debug("Incoming SAML message is invalid", e);
                 throw new ServletException("Incoming SAML message is invalid", e);
             } catch (MetadataProviderException e) {
-                logger.debug("Error determining metadata contracts", e);
+                log.debug("Error determining metadata contracts", e);
                 throw new ServletException("Error determining metadata contracts", e);
             } catch (MessageDecodingException e) {
-                logger.debug("Error decoding incoming SAML message", e);
+                log.debug("Error decoding incoming SAML message", e);
                 throw new ServletException("Error decoding incoming SAML message", e);
             } catch (org.opensaml.xml.security.SecurityException e) {
-                logger.debug("Incoming SAML message failed security validation", e);
+                log.debug("Incoming SAML message failed security validation", e);
                 throw new ServletException("Incoming SAML message failed security validation", e);
             }
 
@@ -270,6 +273,17 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     public void setContextProvider(SAMLContextProvider contextProvider) {
         Assert.notNull(contextProvider, "Context provider can't be null");
         this.contextProvider = contextProvider;
+    }
+
+    /**
+     * Sets URI comparator used to get local entity endpoint
+     * @param uriComparator    URI comparator
+     * @see SAMLUtil#getEndpoint(List, String, InTransport, URIComparator)
+     */
+    @Autowired(required = false)
+    public void setUriComparator(URIComparator uriComparator) {
+        Assert.notNull(uriComparator, "URI comparator can't be null");
+        this.uriComparator = uriComparator;
     }
 
     /**

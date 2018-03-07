@@ -157,13 +157,19 @@
         </section>
         <section id="logging">
             <title>Logging</title>
-            <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlaying OpenSAML
+            <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlying OpenSAML
                 library. The sample application by default uses log4j version 1.2 binding for SLF4J, configured with the following dependency:<programlisting><![CDATA[<dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-log4j12</artifactId>
 	<version>1.6.3</version>
 	<scope>compile</scope>
 </dependency>]]></programlisting></para>
+            <para>To view the contents of SAML messages and errors from the logs, adjust the settings of the SAMLDefaultLogger bean.</para>
+            <programlisting><![CDATA[<bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger">
+       	<property name="logAllMessages" value="true"/>
+    	<property name="logErrors" value="true"/>
+    	<property name="logMessagesOnException" value="true"/>
+	</bean>]]></programlisting>
             <para>In case you are using another logging library, make sure to change the dependency accordingly.</para>
             <para>You can enable debug logging by modifying file <emphasis>sample/src/main/resources/log4j.properties</emphasis> and adding:
                 <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
@@ -298,7 +304,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 </bean>]]></programlisting></para>
 				<para>
 					By default generated metadata will not be digitally signed. Digital signature can be enabled using property
-					<literal>signMetadata</literal> of the <emphasis>extendedMetdata</emphasis> bean.
+					<literal>signMetadata</literal> of the <emphasis>extendedMetadata</emphasis> bean.
 				</para>
 				<para>
 					In case application is deployed behind a reverse-proxy or other mechanism which makes the URL at the application server different
@@ -325,7 +331,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 					  <para>Include the SP metadata in the <emphasis>metadata</emphasis> bean and mark the entity as <emphasis>local</emphasis> in the extended metadata. Make sure to specify the <emphasis>alias</emphasis>
 					  property in case it was used during metadata generation.</para>
 					  <para>It is recommended to use the administration UI which also generates all the Spring declarations ready for inclusion in your <emphasis>securityContext.xml</emphasis>.</para>
-					  <para>Configuration for pre-configured local metdadata can look for example like this: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+					  <para>Configuration for pre-configured local metadata can look for example like this: <programlisting><![CDATA[<bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
 	<constructor-arg>
 		<bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
 			<constructor-arg>
@@ -433,7 +439,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 				<para>Importing of digitally signed metadata requires verification of signature's validity and trust. Metadata is not required to be signed by default.
 				When present, signature is verified with PKIX algorithm and uses all public keys present in the configured <emphasis>keyManager</emphasis> as trust anchors. Make sure to include root CA
 				certificate and intermediary CA certificates of the signature in your <emphasis>keyStore</emphasis>. For details see <xref linkend="configuration-key-management-public-keys"/>.</para>
-				<para>You can limit certificates used to peform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the ExtendedMetadataDelegate bean. The provided
+				<para>You can limit certificates used to perform the verification by setting property <emphasis>metadataTrustedKeys</emphasis> of the ExtendedMetadataDelegate bean. The provided
 				collection should contain aliases of keys to be used as trust anchors.</para>
 				<para>Signature verification can be disabled by setting property <emphasis>metadataTrustCheck</emphasis> to false in the ExtendedMetadataDelegate bean.
 				Setting <emphasis>metadataRequireSignature</emphasis> to true will reject metadata unless it's digitally signed.</para>
@@ -740,7 +746,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
          <section id="configuration-security-profiles">
              <title>Security profiles</title>
              <para>Exchanges of messages between identity providers and service providers with SAML protocol
-                 involves usage of digital signatures. Signatures are typically constructed using means of asymetric
+                 involves usage of digital signatures. Signatures are typically constructed using means of asymmetric
                  cryptography and public key infrastructure with public and private keys signed by trusted certification
                  authorities. Signatures are either applied directly to parts of XML representation of SAML messages
                  using XML Signature or are part of the transport layer used to deliver the message like SSL/TLS.
@@ -860,7 +866,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                      <para>
                          Engine used to verify trust of signatures for given combination of SP/IDP is created in methods
                          <emphasis>populateTrustEngine</emphasis> and <emphasis>populateSSLTrustEngine</emphasis> of interface
-                         <emphasis>org.springframework.security.saml.context.SAMLContextProvider</emphasis> and can be overriden
+                         <emphasis>org.springframework.security.saml.context.SAMLContextProvider</emphasis> and can be overridden
                          with custom implementation. See <xref linkend="configuration-context-provider"/> for details on context customization.
                      </para>
              </section>
@@ -953,7 +959,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  <para>After identification of IDP to use for authentication (for details see <xref linkend="configuration-discovery"/>), SAML Extension creates an AuthnRequest SAML message
                  and sends it to the selected IDP. Both construction of the AuthnRequest and binding used to send it can be customized using <emphasis>WebSSOProfileOptions</emphasis>
                  object. SAMLEntryPoint determines <emphasis>WebSSOProfileOptions</emphasis> configuration to use by calling method <emphasis>getProfileOptions</emphasis>.
-                 The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overriden to provide custom logic for SSO initialization.</para>
+                 The default implementation returns the value specified in property <emphasis>defaultOptions</emphasis>. The method can be overridden to provide custom logic for SSO initialization.</para>
                  <para>Default settings for <emphasis>WebSSOProfileOptions</emphasis> can be specified in bean <emphasis>samlEntryPoint</emphasis> of your <emphasis>securityContext.xml</emphasis>, e.g.:
                  <programlisting><![CDATA[<bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
 	<property name="defaultProfileOptions">
@@ -1070,7 +1076,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
              <section id="configuration-logout-global">
                      <title>Global logout</title>
                      <para>Global logout implements the SAML 2.0 Single Logout profile which terminates both session at the current SP, the IDP session and sessions at other SPs connected to the same IDP session. Single Logout
-                 can be initialized from any of the participaing SPs or from the IDP.</para>
+                 can be initialized from any of the participating SPs or from the IDP.</para>
                  <para>Single Logout is currently supported with HTTP-Redirect and HTTP-POST bindings. SOAP binding is not available.</para>
                  <para>Global logout can be initialized at <emphasis>scheme://server:port/contextPath/saml/logout</emphasis>. System automatically determines which IDP to send the request to based on the currently authenticated user. Single logout can be configured using beans <emphasis>samlLogoutFilter</emphasis> and <emphasis>samlLogoutProcessingFilter</emphasis> with the following options:
                  <itemizedlist>
@@ -1199,7 +1205,7 @@ public class TestUserDetails implements SAMLUserDetailsService {
         <title>Advanced configuration</title>
         <section id="configuration-load-balancing">
             <title>Reverse proxies and load balancers</title>
-            <para>SAML Extension can be deployed in scenarios where mutliple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
+            <para>SAML Extension can be deployed in scenarios where multiple back-end servers process SAML requests forwarded by a reverse-proxy or a load balancer.
                 SSL termination proxies which communicate using an unencrypted channel between the proxy and back-end servers are also supported. In order
                 to configure SAML Extension for deployment behind a load balancer or a reverse-proxy please follow these steps:
                 <itemizedlist>

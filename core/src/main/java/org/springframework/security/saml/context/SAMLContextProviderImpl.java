@@ -286,11 +286,33 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         } else { // Defaults
 
-            context.setLocalEntityId(metadata.getHostedSPName());
-            context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            context.setLocalEntityId(getDefaultLocalEntityId(context, requestURI));
+            context.setLocalEntityRole(getDefaultLocalEntityRole(context, requestURI));
 
         }
 
+    }
+
+    /**
+     * Returns localEntityId to be populated for the context in case alias is missing from the path
+     * @param context context to retrieve localEntityId for
+     * @param requestURI context path to parse entityId from
+     * @return localEntityId
+     * @throws MetadataProviderException in case entityId can't be retrieved
+     */
+    protected String getDefaultLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+        return metadata.getHostedSPName();
+    }
+
+    /**
+     * Returns localEntityRole to be populated for the context in case alias is missing from the path
+     * @param context context to retrieve localEntityRole for
+     * @param requestURI context path to parse entityRole from
+     * @return localEntityRole
+     * @throws MetadataProviderException in case entityRole can't be retrieved
+     */
+    protected QName getDefaultLocalEntityRole(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+        return SPSSODescriptor.DEFAULT_ELEMENT_NAME;
     }
 
     /**

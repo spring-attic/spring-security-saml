@@ -18,10 +18,16 @@ package org.springframework.security.saml.util;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
 import org.opensaml.common.binding.decoding.URIComparator;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.*;
+import org.opensaml.saml2.metadata.ArtifactResolutionService;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.Endpoint;
+import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.SSODescriptor;
+import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
@@ -34,7 +40,12 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.*;
+import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.SignableXMLObject;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.signature.X509Data;
 import org.opensaml.xml.util.DatatypeHelper;
 import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
@@ -62,7 +73,7 @@ public class SAMLUtil {
     private final static Logger logger = LoggerFactory.getLogger(SAMLUtil.class);
 
     /** The URIComparator implementation to use. */
-    private static final URIComparator uriComparator = new BasicURLComparator();
+    private static final URIComparator DEFAULT_URI_COMPARATOR = new DefaultURLComparator();
 
     /**
      * Method determines binding supported by the given endpoint. Usually the biding is encoded in the binding attribute
@@ -339,8 +350,29 @@ public class SAMLUtil {
      * @throws SAMLException in case endpoint can't be found
      */
     public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException {
+        return getEndpoint(endpoints, messageBinding, inTransport, DEFAULT_URI_COMPARATOR);
+    }
+
+    /**
+     * Method helps to identify which endpoint is used to process the current message. It expects a list of potential
+     * endpoints based on the current profile and selects the one which uses the specified binding and matches
+     * the URL of incoming message.
+     *
+     * @param endpoints      endpoints to check
+     * @param messageBinding binding
+     * @param inTransport      transport which received the current message
+     * @param uriComparator     URI comparator
+     * @param <T>            type of the endpoint
+     * @return first endpoint satisfying the requestURL and binding conditions
+     * @throws SAMLException in case endpoint can't be found
+     */
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport, URIComparator uriComparator) throws SAMLException {
         HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
         String requestURL = DatatypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
+        String queryString = DatatypeHelper.safeTrimOrNullString(httpRequest.getQueryString());
+        if (queryString != null){
+            requestURL += '?' + queryString;
+        }
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches

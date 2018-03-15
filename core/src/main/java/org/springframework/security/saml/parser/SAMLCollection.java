@@ -13,12 +13,6 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.XMLHelper;
-import org.springframework.security.saml.util.SAMLUtil;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,6 +20,11 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.springframework.security.saml.util.SAMLUtil;
 
 /**
  * SAMLCollection is a wrapper around a collection od XMLObject instances of OpenSAML library As some collections of

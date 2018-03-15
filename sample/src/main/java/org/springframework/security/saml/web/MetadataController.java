@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.*;
+import org.opensaml.compat.MetadataProviderException;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;

@@ -16,12 +16,12 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import org.opensaml.common.impl.AbstractSAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.liberty.paos.Request;
+import org.opensaml.saml.common.AbstractSAMLObjectBuilder;
+import org.opensaml.saml.common.xml.SAMLConstants;
 
 public class RequestBuilder extends AbstractSAMLObjectBuilder<Request> {
-    
+
     /**
      * Constructor.
      */
@@ -33,7 +33,7 @@ public class RequestBuilder extends AbstractSAMLObjectBuilder<Request> {
     @Override
     public Request buildObject() {
         return buildObject(SAMLConstants.PAOS_NS, Request.DEFAULT_ELEMENT_LOCAL_NAME,
-                SAMLConstants.PAOS_PREFIX);
+                           SAMLConstants.PAOS_PREFIX);
     }
 
     /** {@inheritDoc} */

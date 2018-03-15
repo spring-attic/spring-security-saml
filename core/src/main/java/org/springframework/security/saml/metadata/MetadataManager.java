@@ -26,31 +26,30 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.EntitiesDescriptor;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataFilter;
-import org.opensaml.saml2.metadata.provider.MetadataFilterChain;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
-import org.opensaml.saml2.metadata.provider.SignatureValidationFilter;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.x509.BasicPKIXValidationInformation;
-import org.opensaml.xml.security.x509.BasicX509CredentialNameEvaluator;
-import org.opensaml.xml.security.x509.CertPathPKIXValidationOptions;
-import org.opensaml.xml.security.x509.PKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
-import org.opensaml.xml.security.x509.StaticPKIXValidationInformationResolver;
-import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.ChainingMetadataProvider;
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.ObservableMetadataProvider;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilterChain;
+import org.opensaml.saml.metadata.resolver.filter.impl.SignatureValidationFilter;
+import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.security.x509.PKIXValidationInformation;
+import org.opensaml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.security.x509.impl.BasicPKIXValidationInformation;
+import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
+import org.opensaml.security.x509.impl.CertPathPKIXValidationOptions;
+import org.opensaml.security.x509.impl.StaticPKIXValidationInformationResolver;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -131,7 +130,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      * @param providers providers to include, mustn't be null or empty
      * @throws MetadataProviderException error during initialization
      */
-    public MetadataManager(List<MetadataProvider> providers) throws MetadataProviderException {
+    public MetadataManager(List<org.opensaml.compat.MetadataProvider> providers) throws MetadataProviderException {
 
         super();
 

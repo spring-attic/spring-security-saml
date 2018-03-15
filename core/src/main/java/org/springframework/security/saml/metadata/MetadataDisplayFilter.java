@@ -14,20 +14,6 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.io.MarshallingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.context.SAMLContextProvider;
-import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.util.SAMLUtil;
-import org.springframework.security.web.FilterInvocation;
-import org.springframework.util.Assert;
-import org.springframework.web.filter.GenericFilterBean;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -36,6 +22,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.key.KeyManager;
+import org.opensaml.compat.MetadataProviderException;
+import org.springframework.security.saml.util.SAMLUtil;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.util.Assert;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * The filter expects calls on configured URL and presents user with SAML2 metadata representing

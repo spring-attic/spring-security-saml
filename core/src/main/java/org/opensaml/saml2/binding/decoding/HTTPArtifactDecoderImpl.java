@@ -15,17 +15,18 @@
  */
 package org.opensaml.saml2.binding.decoding;
 
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.ws.message.MessageContext;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.util.DatatypeHelper;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.compat.DataTypeHelper;
+import org.opensaml.compat.decoding.BaseSAML2MessageDecoder;
+import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 
 /**
@@ -76,7 +77,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         /*
          * Artifact parameter.
          */
-        String artifactId = DatatypeHelper.safeTrimOrNullString(inTransport.getParameterValue("SAMLart"));
+        String artifactId = DataTypeHelper.safeTrimOrNullString(inTransport.getParameterValue("SAMLart"));
         if (artifactId == null) {
             log.error("SAMLart parameter was missing or did not contain a value.");
             throw new MessageDecodingException("SAMLArt parameter was missing or did not contain a value.");
@@ -100,7 +101,7 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         samlMessageContext.setInboundSAMLBinding(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
 
         populateMessageContext(samlMessageContext);
-        
+
     }
 
 }

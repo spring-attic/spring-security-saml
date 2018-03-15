@@ -15,32 +15,26 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
-import org.opensaml.ws.security.ServletRequestX509CredentialAdapter;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
-import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.*;
-import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
-import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
+import javax.net.ssl.HostnameVerifier;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import org.opensaml.security.x509.PKIXTrustEvaluator;
+import org.opensaml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.ws.transport.http.HttpClientInTransport;
+import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -49,20 +43,13 @@ import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.opensaml.compat.MetadataProviderException;
 import org.springframework.security.saml.storage.HttpSessionStorageFactory;
 import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
 import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
 import org.springframework.security.saml.trust.PKIXInformationResolver;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.namespace.QName;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 /**
  * Class is responsible for parsing HttpRequest/Response and determining which local entity (IDP/SP) is responsible
@@ -99,7 +86,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @return context
      * @throws MetadataProviderException in case of metadata problems
      */
-    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
+    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response)
+        throws MetadataProviderException {
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
@@ -118,7 +106,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @return context
      * @throws MetadataProviderException in case of metadata problems
      */
-    public SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
+    public SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response)
+        throws MetadataProviderException {
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
@@ -142,7 +131,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
 
-        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
+        HttpClientInTransport inTransport = (HttpClientInTransport) context.getInboundMessageTransport();
         String entityId;
 
         entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);
@@ -195,7 +184,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
-    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context)
+        throws MetadataProviderException {
 
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
         HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, request.isSecure());
@@ -230,11 +220,12 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * <p>
      * In case alias entity id isn't found an exception is raised.
      *
-     * @param context     context to populate fields localEntityId and localEntityRole for
+     * @param context    context to populate fields localEntityId and localEntityRole for
      * @param requestURI context path to parse entityId and entityRole from
      * @throws MetadataProviderException in case entityId can't be populated
      */
-    protected void populateLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+    protected void populateLocalEntityId(SAMLMessageContext context, String requestURI)
+        throws MetadataProviderException {
 
         String entityId;
         HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
@@ -295,23 +286,27 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     /**
      * Returns localEntityId to be populated for the context in case alias is missing from the path
-     * @param context context to retrieve localEntityId for
+     *
+     * @param context    context to retrieve localEntityId for
      * @param requestURI context path to parse entityId from
      * @return localEntityId
      * @throws MetadataProviderException in case entityId can't be retrieved
      */
-    protected String getDefaultLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+    protected String getDefaultLocalEntityId(SAMLMessageContext context, String requestURI)
+        throws MetadataProviderException {
         return metadata.getHostedSPName();
     }
 
     /**
      * Returns localEntityRole to be populated for the context in case alias is missing from the path
-     * @param context context to retrieve localEntityRole for
+     *
+     * @param context    context to retrieve localEntityRole for
      * @param requestURI context path to parse entityRole from
      * @return localEntityRole
      * @throws MetadataProviderException in case entityRole can't be retrieved
      */
-    protected QName getDefaultLocalEntityRole(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+    protected QName getDefaultLocalEntityRole(SAMLMessageContext context, String requestURI)
+        throws MetadataProviderException {
         return SPSSODescriptor.DEFAULT_ELEMENT_NAME;
     }
 
@@ -321,8 +316,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * are used instead.
      *
      * @param samlContext context to populate
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
-     *          in case metadata do not contain expected entities or localAlias is specified but not found
+     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException in case metadata do not contain expected entities or localAlias is specified but not found
      */
     protected void populateLocalEntity(SAMLMessageContext samlContext) throws MetadataProviderException {
 
@@ -492,9 +486,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     /**
      * Sets resolver used to populate data for PKIX trust engine. Trust anchors are internally cached. They get populated
      * using configured MetadataResolver and enhanced with trustedKeys from the ExtendedMetadata.
-     *
+     * <p>
      * System uses default configuration when property is not set.
-     *
+     * <p>
      * Default implementation (org.springframework.security.saml.trust.PKIXInformationResolver) loads trust anchors
      * from both metadata and extended metadata of the peer entity. In case ExtendedMetadata doesn't define any
      * trustedKeys (property trustedKeys is null which is the default), system will use all certificates available
@@ -509,9 +503,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     /**
      * Trust evaluator is responsible for verifying whether to trust certificate based on PKIX verification.
-     *
+     * <p>
      * System uses default configuration when property is not set.
-     *
+     * <p>
      * Default implementation (org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator) uses Java CertPath API
      * to perform the verification. The default implementation can be constructed with an instance of
      * org.opensaml.xml.security.x509.CertPathPKIXValidationOptions which further customizes the PKIX process, e.g. in
@@ -529,9 +523,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * Sets resolver used to populate trusted credentials from XML and Extended metadata. Metadata resolver
      * is used as the only resolver for MetaIOP security profile. It is also used for loading of trusted anchors in
      * the PKIX profile.
-     *
+     * <p>
      * System uses default configuration when property is not set.
-     *
+     * <p>
      * Default implementation (org.springframework.security.saml.trust.MetadataCredentialResolver) populates
      * trusted certificates from both peer metadata and peer extended metadata (properties signingKey, encryptionKey
      * and tlsKey).

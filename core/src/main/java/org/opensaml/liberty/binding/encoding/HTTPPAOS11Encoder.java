@@ -16,33 +16,35 @@
 
 package org.opensaml.liberty.binding.encoding;
 
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.BaseSAML2MessageEncoder;
-import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
-import org.opensaml.saml2.ecp.RelayState;
-import org.opensaml.ws.message.MessageContext;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.common.SOAPObjectBuilder;
-import org.opensaml.ws.soap.soap11.Body;
-import org.opensaml.ws.soap.soap11.Envelope;
-import org.opensaml.ws.soap.util.SOAPHelper;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.ws.transport.http.HTTPTransportUtils;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.util.XMLHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
+import org.opensaml.compat.transport.http.HTTPTransportUtils;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.binding.encoding.impl.BaseSAML2MessageEncoder;
+import org.opensaml.saml.saml2.ecp.RelayState;
+import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
+import org.opensaml.soap.common.SOAPObjectBuilder;
+import org.opensaml.soap.soap11.Body;
+import org.opensaml.soap.soap11.Envelope;
+import org.opensaml.ws.soap.util.SOAPHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.w3c.dom.Element;
+
+import static org.opensaml.saml.common.messaging.SAMLMessageSecuritySupport.signMessage;
 
 public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
 
@@ -119,7 +121,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             throw new IllegalArgumentException("Relay state can't exceed size 80 when using ECP profile");
         }
 
-        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
         SAMLObjectBuilder<RelayState> relayStateBuilder = (SAMLObjectBuilder<RelayState>) builderFactory.getBuilder(RelayState.DEFAULT_ELEMENT_NAME);
         RelayState relayState = relayStateBuilder.buildObject();
         relayState.setSOAP11Actor(RelayState.SOAP11_ACTOR_NEXT);
@@ -132,7 +134,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
     protected Envelope buildPAOSMessage(SAMLObject samlMessage, XMLObject outboundEnvelope) {
 
         Envelope envelope;
-        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
         if (outboundEnvelope != null && outboundEnvelope instanceof Envelope) {
             // We already have a complete envelope with specified headers that we want to keep.

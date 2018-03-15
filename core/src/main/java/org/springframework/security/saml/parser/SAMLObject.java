@@ -14,16 +14,15 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.XMLHelper;
-import org.springframework.security.saml.util.SAMLUtil;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringReader;
+
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.springframework.security.saml.util.SAMLUtil;
 
 /**
  * SAMLObject is a wrapper around XMLObject instances of OpenSAML library As some XMLObjects are stored

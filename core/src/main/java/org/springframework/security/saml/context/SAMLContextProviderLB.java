@@ -15,14 +15,14 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+
+import org.opensaml.compat.MetadataProviderException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Context provider which overrides request attributes with values of the load-balancer or reverse-proxy in front
@@ -46,7 +46,8 @@ public class SAMLContextProviderLB extends SAMLContextProviderImpl {
      * @param context  context to populate values to
      */
     @Override
-    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context)
+        throws MetadataProviderException {
 
         super.populateGenericContext(new LPRequestWrapper(request), response, context);
 

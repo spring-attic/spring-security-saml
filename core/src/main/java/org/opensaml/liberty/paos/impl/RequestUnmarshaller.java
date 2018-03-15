@@ -18,29 +18,29 @@ package org.opensaml.liberty.paos.impl;
 
 import javax.xml.namespace.QName;
 
-import org.opensaml.common.impl.AbstractSAMLObjectUnmarshaller;
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSBooleanValue;
 import org.opensaml.liberty.paos.Request;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.schema.XSBooleanValue;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.common.AbstractSAMLObjectUnmarshaller;
 import org.w3c.dom.Attr;
 
 /**
  * Unmarshaller for instances of {@link Request}.
  */
 public class RequestUnmarshaller extends AbstractSAMLObjectUnmarshaller {
-    
+
     /** {@inheritDoc} */
     protected void processAttribute(XMLObject samlObject, Attr attribute)
-            throws UnmarshallingException {
+        throws UnmarshallingException {
         Request request = (Request) samlObject;
-        
+
         QName attrName = XMLHelper.getNodeQName(attribute);
-        if (Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
-            request.setSOAP11MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
+        if (Request.SOAP12_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
+            request.setSOAP12MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
         } else if (Request.SOAP11_ACTOR_ATTR_NAME.equals(attrName)) {
-            request.setSOAP11Actor(attribute.getValue()); 
+            request.setSOAP11Actor(attribute.getValue());
         } else if (Request.RESPONSE_CONSUMER_URL_ATTRIB_NAME.equals(attribute.getLocalName())) {
             request.setResponseConsumerURL(attribute.getValue());
         } else if (Request.SERVICE_ATTRIB_NAME.equals(attribute.getLocalName())) {
@@ -50,7 +50,7 @@ public class RequestUnmarshaller extends AbstractSAMLObjectUnmarshaller {
         } else {
             super.processAttribute(samlObject, attribute);
         }
-        
+
     }
 
 }

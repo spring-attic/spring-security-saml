@@ -14,11 +14,11 @@
  */
 package org.springframework.security.saml.key;
 
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.CredentialResolver;
-
 import java.security.cert.X509Certificate;
 import java.util.Set;
+
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.CredentialResolver;
 
 /**
  * Interface defines basic service required by the SAML Extension implementation.

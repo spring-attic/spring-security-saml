@@ -15,12 +15,12 @@
  */
 package org.opensaml.saml2.binding.decoding;
 
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpClientInTransport;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.compat.decoding.HTTPSOAP11Decoder;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.LocationAwareInTransport;
-import org.opensaml.xml.parse.ParserPool;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Custom implementation of the decoder which takes into account user HTTPInput method
@@ -29,8 +29,11 @@ import org.opensaml.xml.parse.ParserPool;
 public class HTTPSOAP11DecoderImpl extends HTTPSOAP11Decoder {
 
     public HTTPSOAP11DecoderImpl(ParserPool pool) {
-        super(pool);
-    }   
+        super();
+        setParserPool(pool);
+    }
+
+
 
     @Override
     protected String getActualReceiverEndpointURI(SAMLMessageContext messageContext) throws MessageDecodingException {

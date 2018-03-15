@@ -17,6 +17,7 @@ package org.springframework.security.saml.metadata;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.compat.MetadataProviderException;
 
 import java.util.HashMap;
 import java.util.List;

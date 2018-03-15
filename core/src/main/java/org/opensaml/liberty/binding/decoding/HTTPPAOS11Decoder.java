@@ -16,21 +16,20 @@
 
 package org.opensaml.liberty.binding.decoding;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.decoding.HTTPSOAP11Decoder;
-import org.opensaml.saml2.ecp.RelayState;
-import org.opensaml.saml2.ecp.impl.RelayStateImpl;
-import org.opensaml.ws.message.MessageContext;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.soap.soap11.Envelope;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.parse.ParserPool;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPSOAP11Decoder;
+import org.opensaml.saml.saml2.ecp.RelayState;
+import org.opensaml.saml.saml2.ecp.impl.RelayStateImpl;
+import org.opensaml.soap.soap11.Envelope;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
 
@@ -40,34 +39,35 @@ public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
     }
 
     public HTTPPAOS11Decoder(ParserPool pool) {
-        super(pool);
+        super();
+        setParserPool(pool);
         initUnderstoodHeaders();
     }
 
     private void initUnderstoodHeaders() {
         QName paosResponse = new QName(SAMLConstants.PAOS_NS,
-                "Response", SAMLConstants.PAOS_PREFIX);
-        
+                                       "Response", SAMLConstants.PAOS_PREFIX);
+
         List<QName> headerNames = new ArrayList<QName>();
         headerNames.add(paosResponse);
-        
+
         setUnderstoodHeaders(headerNames);
     }
 
     @Override
     protected void doDecode(MessageContext messageContext)
-            throws MessageDecodingException {
+        throws MessageDecodingException {
         super.doDecode(messageContext);
-        
+
         // Setting the RelayState in the message context
         SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
         Envelope soapMessage = (Envelope) samlMsgCtx.getInboundMessage();
-        
+
         List<XMLObject> relayStateHeader = soapMessage.getHeader().getUnknownXMLObjects(
                 new QName(SAMLConstants.SAML20ECP_NS,
-                        RelayState.DEFAULT_ELEMENT_LOCAL_NAME,
-                        SAMLConstants.SAML20ECP_PREFIX));
-        
+                          RelayState.DEFAULT_ELEMENT_LOCAL_NAME,
+                          SAMLConstants.SAML20ECP_PREFIX));
+
         if (relayStateHeader.size() == 1
             && relayStateHeader.get(0) instanceof RelayStateImpl) {
             samlMsgCtx.setRelayState(((RelayStateImpl) relayStateHeader.get(0)).getValue());

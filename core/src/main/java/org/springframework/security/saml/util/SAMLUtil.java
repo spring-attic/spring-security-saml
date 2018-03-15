@@ -15,48 +15,6 @@
  */
 package org.springframework.security.saml.util;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.ArtifactResolutionService;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SSODescriptor;
-import org.opensaml.saml2.metadata.SingleLogoutService;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.security.BasicSecurityConfiguration;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.SignableXMLObject;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
-import org.opensaml.xml.signature.X509Data;
-import org.opensaml.xml.util.DatatypeHelper;
-import org.opensaml.xml.util.XMLHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.ExtendedMetadata;
-import org.springframework.security.saml.metadata.MetadataManager;
-import org.w3c.dom.Element;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
@@ -64,6 +22,49 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLRuntimeException;
+import org.opensaml.common.binding.decoding.URIComparator;
+import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.ArtifactResolutionService;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.Endpoint;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml2.metadata.SSODescriptor;
+import org.opensaml.saml2.metadata.SingleLogoutService;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.ws.transport.InTransport;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.security.BasicSecurityConfiguration;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
+import org.opensaml.xml.signature.X509Data;
+import org.opensaml.xml.util.DataTypeHelper;
+import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.xmlsec.signature.SignableXMLObject;
+import org.opensaml.xmlsec.signature.Signature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.metadata.MetadataManager;
+import org.opensaml.compat.MetadataProviderException;
+import org.w3c.dom.Element;
 
 /**
  * Utility class for SAML entities
@@ -310,7 +311,7 @@ public class SAMLUtil {
             return certList;
         }
 
-        for (org.opensaml.xml.signature.X509Certificate xmlCert : x509Data.getX509Certificates()) {
+        for (org.opensaml.xmlsec.signature.X509Certificate xmlCert : x509Data.getX509Certificates()) {
             if (xmlCert != null && xmlCert.getValue() != null) {
                 certList.add(xmlCert.getValue());
             }
@@ -370,8 +371,8 @@ public class SAMLUtil {
      */
     public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport, URIComparator uriComparator) throws SAMLException {
         HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
-        String requestURL = DatatypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
-        String queryString = DatatypeHelper.safeTrimOrNullString(httpRequest.getQueryString());
+        String requestURL = DataTypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
+        String queryString = DataTypeHelper.safeTrimOrNullString(httpRequest.getQueryString());
         if (queryString != null){
             requestURL += '?' + queryString;
         }
@@ -459,8 +460,7 @@ public class SAMLUtil {
 
         if (signingCredential != null && !signableMessage.isSigned()) {
 
-            XMLObjectBuilder<Signature> signatureBuilder = org.opensaml.Configuration.getBuilderFactory().getBuilder(
-                    Signature.DEFAULT_ELEMENT_NAME);
+            XMLObjectBuilder<Signature> signatureBuilder = org.opensaml.core.config.XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME);
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
 
             if (signingAlgorithm != null) {
@@ -470,11 +470,11 @@ public class SAMLUtil {
             signature.setSigningCredential(signingCredential);
 
             BasicSecurityConfiguration secConfig = null;
-            
+
             if (digestMethodAlgorithm != null)
             {
                 secConfig = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
-                
+
                 secConfig.setSignatureReferenceDigestMethod(digestMethodAlgorithm);
             }
 

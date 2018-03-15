@@ -15,11 +15,10 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.springframework.security.saml.SAMLCredential;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.opensaml.compat.MetadataProviderException;
 
 /**
  * Implementation is supposed to provide SAMLContext by populating all data about the local entity related

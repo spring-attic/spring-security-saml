@@ -15,24 +15,24 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import javax.net.ssl.HostnameVerifier;
+
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-
-import javax.net.ssl.HostnameVerifier;
 
 /**
  * Message context with Spring Extension SAML module specific values.
  *
  * @author Vladimir Schaefer
  */
-public class SAMLMessageContext extends BasicSAMLMessageContext {
+public class SAMLMessageContext extends MessageContext {
 
     private Decrypter localDecrypter;
     private Credential localSigningCredential;

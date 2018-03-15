@@ -14,7 +14,8 @@
  */
 package org.springframework.security.saml.storage;
 
-import org.opensaml.xml.XMLObject;
+
+import org.opensaml.core.xml.XMLObject;
 
 /**
  * Implementations serve as data stores for sent/received SAML messages. Potential implementations could

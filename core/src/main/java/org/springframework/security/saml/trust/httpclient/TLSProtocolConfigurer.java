@@ -1,12 +1,10 @@
 package org.springframework.security.saml.trust.httpclient;
 
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import java.util.Set;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;
-
-import java.util.Set;
 
 /**
  * Class initializes instance of TLSProtocolSocketFactory and registers is at one of the protocol
@@ -47,9 +45,10 @@ public class TLSProtocolConfigurer implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        ProtocolSocketFactory socketFactory = new TLSProtocolSocketFactory(keyManager, trustedKeys, sslHostnameVerification);
-        Protocol p = new Protocol(protocolName, socketFactory, protocolPort);
-        Protocol.registerProtocol(protocolName, p);
+//        ProtocolSocketFactory socketFactory = new TLSProtocolSocketFactory(keyManager, trustedKeys, sslHostnameVerification);
+//        Protocol p = new Protocol(protocolName, socketFactory, protocolPort);
+//        Protocol.registerProtocol(protocolName, p);
+        throw new UnsupportedOperationException();
     }
 
     /**

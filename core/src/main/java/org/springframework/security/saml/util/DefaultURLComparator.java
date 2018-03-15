@@ -1,16 +1,20 @@
 package org.springframework.security.saml.util;
 
-import org.opensaml.common.binding.decoding.BasicURLComparator;
-import org.opensaml.ws.transport.InTransport;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
+import net.shibboleth.utilities.java.support.net.BasicURLComparator;
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import net.shibboleth.utilities.java.support.net.URIException;
+
 /**
- * Default implementation of {@link org.opensaml.common.binding.decoding.URIComparator} used in {@link SAMLUtil#getEndpoint(List, String, InTransport)}
+ * Default implementation of {@link URIComparator} used in {@link SAMLUtil#getEndpoint(List, String, InTransport)}
  */
 public class DefaultURLComparator extends BasicURLComparator {
+
     @Override
-    public boolean compare(String uri1, String uri2) {
+    public boolean compare(@Nullable final String uri1, @Nullable String uri2) throws URIException {
         if (uri2 == null){
             return uri1 == null;
         }

@@ -14,18 +14,18 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.validation.ValidationException;
+import javax.xml.bind.ValidationException;
+
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 /**
  * @author Vladimir Schäfer
  */
 public interface WebSSOProfileConsumer {
 
-    SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException;
-    
+    SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, SecurityException, ValidationException, DecryptionException;
+
 }

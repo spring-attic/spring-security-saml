@@ -16,23 +16,23 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import org.opensaml.common.impl.AbstractSAMLObjectMarshaller;
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.liberty.paos.Request;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.common.AbstractSAMLObjectMarshaller;
 import org.w3c.dom.Element;
 
 /**
  * Marshaller for instances of {@link Request}.
  */
 public class RequestMarshaller extends AbstractSAMLObjectMarshaller {
-    
+
     /** {@inheritDoc} */
     protected void marshallAttributes(XMLObject xmlObject, Element domElement)
-            throws MarshallingException {
+        throws MarshallingException {
         Request request = (Request) xmlObject;
-        
+
         if (request.getResponseConsumerURL() != null) {
             domElement.setAttributeNS(null, Request.RESPONSE_CONSUMER_URL_ATTRIB_NAME,
                     request.getResponseConsumerURL());
@@ -44,14 +44,14 @@ public class RequestMarshaller extends AbstractSAMLObjectMarshaller {
             domElement.setAttributeNS(null, Request.MESSAGE_ID_ATTRIB_NAME,
                     request.getMessageID());
         }
-        if (request.isSOAP11MustUnderstandXSBoolean() != null) {
-            XMLHelper.marshallAttribute(Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME, 
-                    request.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
+        if (request.isSOAP12MustUnderstandXSBoolean() != null) {
+            XMLHelper.marshallAttribute(Request.SOAP12_MUST_UNDERSTAND_ATTR_NAME,
+                    request.isSOAP12MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (request.getSOAP11Actor() != null) {
-            XMLHelper.marshallAttribute(Request.SOAP11_ACTOR_ATTR_NAME, 
+            XMLHelper.marshallAttribute(Request.SOAP11_ACTOR_ATTR_NAME,
                     request.getSOAP11Actor(), domElement, false);
         }
-        
+
     }
 }

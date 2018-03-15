@@ -15,21 +15,20 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.parse.XMLParserException;
-import org.opensaml.xml.util.XMLHelper;
+import java.io.Reader;
+import java.io.Serializable;
+
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.Reader;
-import java.io.Serializable;
 
 /**
  * Base class for implementing holders for XML objects capable of serialization.
@@ -97,7 +96,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             }
 
             log.debug("Unmarshalling message DOM");
-            Unmarshaller unmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(messageElem);
+            Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(messageElem);
             if (unmarshaller == null) {
                 throw new MessageDecodingException(
                         "Unable to unmarshall message, no unmarshaller registered for message element "

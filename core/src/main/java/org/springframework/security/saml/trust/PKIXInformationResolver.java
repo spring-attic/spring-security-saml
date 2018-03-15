@@ -30,7 +30,7 @@ import org.opensaml.xml.security.x509.BasicPKIXValidationInformation;
 import org.opensaml.xml.security.x509.PKIXValidationInformation;
 import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
 import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.xml.util.DataTypeHelper;
 import org.opensaml.security.MetadataCredentialResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +182,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         if (mdCriteria == null) {
             throw new IllegalArgumentException("SAML metadata criteria must be supplied");
         }
-        if (DatatypeHelper.isEmpty(entityCriteria.getEntityID())) {
+        if (DataTypeHelper.isEmpty(entityCriteria.getEntityID())) {
             throw new IllegalArgumentException("Credential owner entity ID criteria value must be supplied");
         }
         if (mdCriteria.getRole() == null) {

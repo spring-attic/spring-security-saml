@@ -14,16 +14,19 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntitiesDescriptor;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.provider.*;
-import org.opensaml.xml.XMLObject;
-import org.springframework.util.Assert;
-
 import javax.xml.namespace.QName;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.ObservableMetadataProvider;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
+import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
+import org.springframework.util.Assert;
 
 /**
  * Class wraps an existing provider and delegates all method calls to it. Subclasses can thus add additional functionality

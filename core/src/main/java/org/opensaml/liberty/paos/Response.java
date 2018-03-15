@@ -18,24 +18,23 @@ package org.opensaml.liberty.paos;
 
 import javax.xml.namespace.QName;
 
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.ws.soap.soap11.ActorBearing;
-import org.opensaml.ws.soap.soap11.MustUnderstandBearing;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.soap.soap11.ActorBearing;
+import org.opensaml.soap.soap12.MustUnderstandBearing;
 
 /**
  * Liberty Alliance PAOS Response header.
  */
-public interface Response extends SAMLObject, MustUnderstandBearing,
-        ActorBearing {
-    
+public interface Response extends SAMLObject, MustUnderstandBearing, ActorBearing {
+
     /** Element local name. */
     public static final String DEFAULT_ELEMENT_LOCAL_NAME = "Response";
 
     /** Default element name. */
     public static final QName DEFAULT_ELEMENT_NAME =
         new QName(SAMLConstants.PAOS_NS, DEFAULT_ELEMENT_LOCAL_NAME,
-                SAMLConstants.PAOS_PREFIX);
+                  SAMLConstants.PAOS_PREFIX);
 
     /** Local name of the XSI type. */
     public static final String TYPE_LOCAL_NAME = "ResponseType";
@@ -46,17 +45,17 @@ public interface Response extends SAMLObject, MustUnderstandBearing,
 
     /** messageID attribute name. */
     public static final String REF_TO_MESSAGE_ID_ATTRIB_NAME = "refToMessageID";
-    
+
     /**
      * Get the refToMessageID attribute value.
-     * 
+     *
      * @return the refToMessageID attribute value
      */
     public String getRefToMessageID();
-    
+
     /**
      * Set the refToMessageID attribute value.
-     * 
+     *
      * @param newRefToMessageID the new refToMessageID attribute value
      */
     public void setRefToMessageID(String newRefToMessageID);

@@ -22,6 +22,7 @@ import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.opensaml.compat.MetadataProviderException;
 
 import java.util.*;
 

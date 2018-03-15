@@ -69,7 +69,7 @@ public class WebSSOProfileConsumerImplTest {
         processor = context.getBean("processor", SAMLProcessor.class);
         profile = new WebSSOProfileConsumerImpl(processor, manager);
         contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
-        builderFactory = Configuration.getBuilderFactory();
+        builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
         HttpServletRequest request = createMock(HttpServletRequest.class);
         SAMLTestHelper.setLocalContextParameters(request, "/", null);

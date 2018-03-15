@@ -18,29 +18,29 @@ package org.opensaml.liberty.paos.impl;
 
 import javax.xml.namespace.QName;
 
-import org.opensaml.common.impl.AbstractSAMLObjectUnmarshaller;
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSBooleanValue;
 import org.opensaml.liberty.paos.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.schema.XSBooleanValue;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.common.AbstractSAMLObjectUnmarshaller;
 import org.w3c.dom.Attr;
 
 /**
  * Unmarshaller for instances of {@link Response}.
  */
 public class ResponseUnmarshaller extends AbstractSAMLObjectUnmarshaller {
-    
+
     /** {@inheritDoc} */
     protected void processAttribute(XMLObject samlObject, Attr attribute)
-            throws UnmarshallingException {
+        throws UnmarshallingException {
         Response response = (Response) samlObject;
-        
+
         QName attrName = XMLHelper.getNodeQName(attribute);
-        if (Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
-            response.setSOAP11MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
+        if (Response.SOAP12_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
+            response.setSOAP12MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
         } else if (Response.SOAP11_ACTOR_ATTR_NAME.equals(attrName)) {
-            response.setSOAP11Actor(attribute.getValue()); 
+            response.setSOAP11Actor(attribute.getValue());
         } else if (Response.REF_TO_MESSAGE_ID_ATTRIB_NAME.equals(attribute.getLocalName())) {
             response.setRefToMessageID(attribute.getValue());
         } else {

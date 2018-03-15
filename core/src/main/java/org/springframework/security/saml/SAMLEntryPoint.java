@@ -14,16 +14,24 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.util.URLBuilder;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+import net.shibboleth.utilities.java.support.collection.Pair;
+import net.shibboleth.utilities.java.support.net.URLBuilder;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +41,7 @@ import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.opensaml.compat.MetadataProviderException;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -40,15 +49,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Class initializes SAML WebSSO Profile, IDP Discovery or ECP Profile from the SP side. Configuration

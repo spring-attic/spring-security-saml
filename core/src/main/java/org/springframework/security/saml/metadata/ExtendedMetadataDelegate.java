@@ -14,15 +14,15 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.opensaml.compat.AbstractMetadataProvider;
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class enables delegation of normal entity metadata loading to the selected provider while enhancing data with

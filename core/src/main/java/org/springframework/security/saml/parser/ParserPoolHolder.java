@@ -14,8 +14,8 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.xml.parse.BasicParserPool;
-import org.opensaml.xml.parse.ParserPool;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

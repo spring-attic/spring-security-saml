@@ -14,10 +14,14 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.common.SAMLException;
 import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +37,6 @@ import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.util.Assert;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * Filter processes arriving SAML messages by delegating to the WebSSOProfile. After the SAMLAuthenticationToken
@@ -100,7 +100,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         } catch (MessageDecodingException e) {
             log.debug("Error decoding incoming SAML message", e);
             throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (SecurityException e) {
             log.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
         }

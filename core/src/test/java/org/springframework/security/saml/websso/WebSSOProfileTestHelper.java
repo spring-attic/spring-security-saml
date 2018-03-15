@@ -17,7 +17,7 @@ public class WebSSOProfileTestHelper {
     XMLObjectBuilderFactory builderFactory;
 
     public WebSSOProfileTestHelper(XMLObjectBuilderFactory builderFactory) {
-        this.builderFactory = Configuration.getBuilderFactory();
+        this.builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
     }
 
     public Response getValidResponse() {

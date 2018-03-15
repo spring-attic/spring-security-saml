@@ -80,7 +80,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected URIComparator uriComparator;
 
     public AbstractProfileBase() {
-        this.builderFactory = Configuration.getBuilderFactory();
+        this.builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
         this.uriComparator = new BasicURLComparator();
     }
 

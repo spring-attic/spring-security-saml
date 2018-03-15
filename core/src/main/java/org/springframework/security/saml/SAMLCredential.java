@@ -14,18 +14,18 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.XSAny;
-import org.opensaml.xml.schema.XSString;
-import org.springframework.security.saml.parser.SAMLCollection;
-import org.springframework.security.saml.parser.SAMLObject;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSAny;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.NameID;
+import org.springframework.security.saml.parser.SAMLCollection;
+import org.springframework.security.saml.parser.SAMLObject;
 
 /**
  * Object is a storage for entities parsed from SAML2 response during its authentication. The object is stored
@@ -245,7 +245,7 @@ public class SAMLCredential implements Serializable {
     public String getLocalEntityID() {
         return localEntityID;
     }
-    
+
     /**
      * Custom data created by profile customization
      *

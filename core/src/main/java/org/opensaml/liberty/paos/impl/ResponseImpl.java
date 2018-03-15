@@ -16,27 +16,29 @@
 
 package org.opensaml.liberty.paos.impl;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
-import org.opensaml.common.impl.AbstractSAMLObject;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSBooleanValue;
 import org.opensaml.liberty.paos.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.XSBooleanValue;
+import org.opensaml.saml.common.AbstractSAMLObject;
+
 
 public class ResponseImpl extends AbstractSAMLObject implements Response {
-    
+
     /** refToMessageID attribute */
     private String refToMessageID;
-    
+
     /** soap11:actor attribute. */
     private String soap11Actor;
-    
+
     /** soap11:mustUnderstand. */
     private XSBooleanValue soap11MustUnderstand;
 
     /**
      * Constructor.
-     * 
+     *
      * @param namespaceURI the namespace the element is in
      * @param elementLocalName the local name of the XML element this Object represents
      * @param namespacePrefix the prefix for the given namespace
@@ -78,7 +80,7 @@ public class ResponseImpl extends AbstractSAMLObject implements Response {
     /** {@inheritDoc} */
     public void setSOAP11MustUnderstand(Boolean newMustUnderstand) {
         if (newMustUnderstand != null) {
-            soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand, 
+            soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand,
                     new XSBooleanValue(newMustUnderstand, true));
         } else {
             soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand, null);
@@ -101,4 +103,25 @@ public class ResponseImpl extends AbstractSAMLObject implements Response {
         soap11Actor = prepareForAssignment(soap11Actor, newActor);
     }
 
+    @Nullable
+    @Override
+    public Boolean isSOAP12MustUnderstand() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Nullable
+    @Override
+    public XSBooleanValue isSOAP12MustUnderstandXSBoolean() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSOAP12MustUnderstand(@Nullable Boolean newMustUnderstand) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSOAP12MustUnderstand(@Nullable XSBooleanValue newMustUnderstand) {
+        throw new UnsupportedOperationException();
+    }
 }

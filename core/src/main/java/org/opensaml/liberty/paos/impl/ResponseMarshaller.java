@@ -16,35 +16,35 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import org.opensaml.common.impl.AbstractSAMLObjectMarshaller;
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.liberty.paos.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.common.AbstractSAMLObjectMarshaller;
 import org.w3c.dom.Element;
 
 /**
  * Marshaller for instances of {@link Response}.
  */
 public class ResponseMarshaller extends AbstractSAMLObjectMarshaller {
-    
+
     /** {@inheritDoc} */
     protected void marshallAttributes(XMLObject xmlObject, Element domElement)
-            throws MarshallingException {
+        throws MarshallingException {
         Response response = (Response) xmlObject;
-        
+
         if (response.getRefToMessageID() != null) {
             domElement.setAttributeNS(null, Response.REF_TO_MESSAGE_ID_ATTRIB_NAME,
                     response.getRefToMessageID());
         }
-        if (response.isSOAP11MustUnderstandXSBoolean() != null) {
-            XMLHelper.marshallAttribute(Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME, 
-                    response.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
+        if (response.isSOAP12MustUnderstandXSBoolean() != null) {
+            XMLHelper.marshallAttribute(Response.SOAP12_MUST_UNDERSTAND_ATTR_NAME,
+                                        response.isSOAP12MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (response.getSOAP11Actor() != null) {
-            XMLHelper.marshallAttribute(Response.SOAP11_ACTOR_ATTR_NAME, 
+            XMLHelper.marshallAttribute(Response.SOAP11_ACTOR_ATTR_NAME,
                     response.getSOAP11Actor(), domElement, false);
         }
-        
+
     }
 }

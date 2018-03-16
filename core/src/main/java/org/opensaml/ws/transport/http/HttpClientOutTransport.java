@@ -15,16 +15,19 @@
  */
 package org.opensaml.ws.transport.http;
 
-import org.apache.commons.httpclient.HttpVersion;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.params.HttpParams;
-import org.opensaml.ws.transport.http.httpclient.OutputStreamRequestEntity;
-import org.opensaml.xml.security.credential.Credential;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
+
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.params.HttpParams;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
+import org.opensaml.compat.transport.http.HTTPTransport;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.ws.transport.http.httpclient.OutputStreamRequestEntity;
 
 /**
  * Implementation of HTTPOutTransport delegating to a HTTPClient PortMethod object.
@@ -33,9 +36,9 @@ import java.util.List;
  */
 public class HttpClientOutTransport implements HTTPOutTransport {
 
-    private final PostMethod postMethod;
+    private final HttpPost postMethod;
 
-    public HttpClientOutTransport(PostMethod postMethod) {
+    public HttpClientOutTransport(HttpPost postMethod) {
         this.postMethod = postMethod;
     }
 
@@ -53,7 +56,7 @@ public class HttpClientOutTransport implements HTTPOutTransport {
     }
 
     public void setHeader(String s, String s1) {
-        postMethod.setRequestHeader(s, s1);
+        postMethod.addHeader(s, s1);
     }
 
     public void addParameter(String s, String s1) {
@@ -78,10 +81,8 @@ public class HttpClientOutTransport implements HTTPOutTransport {
 
     public OutputStream getOutgoingStream() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        RequestEntity requestEntity = new OutputStreamRequestEntity(outputStream);
-
-        postMethod.setRequestEntity(requestEntity);
-
+        AbstractHttpEntity requestEntity = new OutputStreamRequestEntity(outputStream);
+        postMethod.setEntity(requestEntity);
         return outputStream;
     }
 
@@ -90,7 +91,7 @@ public class HttpClientOutTransport implements HTTPOutTransport {
     }
 
     public String getCharacterEncoding() {
-        return postMethod.getParameter("http.protocol.content-charset").getValue();
+        return postMethod("http.protocol.content-charset").getValue();
     }
 
     public Credential getLocalCredential() {
@@ -145,11 +146,11 @@ public class HttpClientOutTransport implements HTTPOutTransport {
         return null;
     }
 
-    public HTTP_VERSION getVersion() {
+    public HTTPTransport.HTTP_VERSION getVersion() {
         HttpVersion httpVersion = (HttpVersion) postMethod.getParams().getParameter("http.protocol.version");
 
         if (httpVersion == HttpVersion.HTTP_1_1) {
-            return HTTP_VERSION.HTTP1_1;
+            return HTTPTransport.HTTP_VERSION.HTTP1_1;
         }
 
         return HTTP_VERSION.HTTP1_0;

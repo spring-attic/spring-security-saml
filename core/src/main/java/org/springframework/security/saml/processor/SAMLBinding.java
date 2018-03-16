@@ -14,14 +14,14 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.OutTransport;
-import org.springframework.security.saml.context.SAMLMessageContext;
-
 import java.util.List;
+
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.compat.transport.OutTransport;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.encoder.MessageEncoder;
+import org.opensaml.ws.security.SecurityPolicyRule;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Implementation describes a single binding usable for parsing of a SAML message.

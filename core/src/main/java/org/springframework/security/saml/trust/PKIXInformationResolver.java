@@ -16,36 +16,42 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.criteria.UsageCriteria;
-import org.opensaml.xml.security.x509.BasicPKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationInformationResolver;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.util.DataTypeHelper;
-import org.opensaml.security.MetadataCredentialResolver;
+import javax.xml.namespace.QName;
+import java.lang.ref.SoftReference;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.compat.DataTypeHelper;
+import org.opensaml.compat.MetadataCriteria;
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.ObservableMetadataProvider;
+import org.opensaml.compat.UsageCriteria;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.x509.PKIXValidationInformation;
+import org.opensaml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.security.x509.impl.BasicPKIXValidationInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
-
-import javax.xml.namespace.QName;
-import java.lang.ref.SoftReference;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Implementation resolves PKIX information based on extended metadata configuration and provider data.
@@ -101,7 +107,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         this.metadataResolver = metadataResolver;
         this.metadata = metadataProvider;
         this.keyManager = keyManager;
-        this.cache = new HashMap<MetadataCacheKey, SoftReference<Collection<PKIXValidationInformation>>>();
+        this.cache = new HashMap<>();
         this.rwlock = new ReentrantReadWriteLock();
         this.metadata.getObservers().add(new MetadataProviderObserver());
 
@@ -116,11 +122,11 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         return rwlock;
     }
 
-    protected Iterable<PKIXValidationInformation> resolveFromSource(CriteriaSet criteriaSet) throws SecurityException {
+    protected Iterable<PKIXValidationInformation> resolveFromSource(CriteriaSet criteriaSet) throws ResolverException {
 
         checkCriteriaRequirements(criteriaSet);
 
-        String entityID = criteriaSet.get(EntityIDCriteria.class).getEntityID();
+        String entityID = criteriaSet.get(EntityIdCriterion.class).getEntityId();
         MetadataCriteria mdCriteria = criteriaSet.get(MetadataCriteria.class);
         QName role = mdCriteria.getRole();
         String protocol = mdCriteria.getProtocol();
@@ -155,17 +161,17 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * Method responsible for loading of PKIX information.
      *
      * @param criteriaSet criteria for selection of data to include
-     * @throws SecurityException in case credentials cannot be populated
+     * @throws ResolverException in case credentials cannot be populated
      * @return PKIX information
      */
-    protected Collection<PKIXValidationInformation> populateCredentials(CriteriaSet criteriaSet) throws SecurityException {
+    protected Collection<PKIXValidationInformation> populateCredentials(CriteriaSet criteriaSet) throws ResolverException {
         Collection<X509Certificate> anchors = new ArrayList<X509Certificate>();
         Collection<X509CRL> crls = new ArrayList<X509CRL>();
         populateMetadataAnchors(criteriaSet, anchors, crls);
         populateTrustedKeysAnchors(criteriaSet, anchors, crls);
         populateCRLs(criteriaSet, anchors, crls);
         PKIXValidationInformation info = new BasicPKIXValidationInformation(anchors, crls, getPKIXDepth());
-        return new ArrayList<PKIXValidationInformation>(Arrays.asList(info));
+        return new ArrayList<>(Arrays.asList(info));
     }
 
     /**
@@ -174,7 +180,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * @param criteriaSet the credential set to evaluate
      */
     protected void checkCriteriaRequirements(CriteriaSet criteriaSet) {
-        EntityIDCriteria entityCriteria = criteriaSet.get(EntityIDCriteria.class);
+        EntityIdCriterion entityCriteria = criteriaSet.get(EntityIdCriterion.class);
         MetadataCriteria mdCriteria = criteriaSet.get(MetadataCriteria.class);
         if (entityCriteria == null) {
             throw new IllegalArgumentException("Entity criteria must be supplied");
@@ -182,7 +188,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         if (mdCriteria == null) {
             throw new IllegalArgumentException("SAML metadata criteria must be supplied");
         }
-        if (DataTypeHelper.isEmpty(entityCriteria.getEntityID())) {
+        if (DataTypeHelper.isEmpty(entityCriteria.getEntityId())) {
             throw new IllegalArgumentException("Credential owner entity ID criteria value must be supplied");
         }
         if (mdCriteria.getRole() == null) {
@@ -224,11 +230,12 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * @param criteriaSet     criteria set
      * @param anchors pkix anchors
      * @param crls CRLs for the anchors
-     * @throws SecurityException thrown if the key, certificate, or CRL information is represented in an unsupported format
+     * @throws ResolverException thrown if the key, certificate, or CRL information is represented in an unsupported format
      */
-    protected void populateMetadataAnchors(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls) throws SecurityException {
+    protected void populateMetadataAnchors(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
+        throws ResolverException {
 
-        String entityID = criteriaSet.get(EntityIDCriteria.class).getEntityID();
+        String entityID = criteriaSet.get(EntityIdCriterion.class).getEntityId();
         log.debug("Attempting to retrieve PKIX trust anchors from metadata configuration for entity: {}", entityID);
         Iterable<Credential> metadataCredentials = metadataResolver.resolve(criteriaSet);
 
@@ -256,11 +263,11 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      *                           format
      */
     protected void populateTrustedKeysAnchors(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
-            throws SecurityException {
+            throws ResolverException {
 
         try {
 
-            String entityID = criteriaSet.get(EntityIDCriteria.class).getEntityID();
+            String entityID = criteriaSet.get(EntityIdCriterion.class).getEntityId();
             log.debug("Attempting to retrieve credentials from metadata configuration for entity: {}", entityID);
             Set<String> trustedKeys;
 
@@ -277,7 +284,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
             }
 
         } catch (MetadataProviderException e) {
-            throw new SecurityException("Error loading extended metadata", e);
+            throw new ResolverException("Error loading extended metadata", e);
         }
 
     }
@@ -291,7 +298,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * @throws SecurityException never thrown in default implementation
      */
     protected void populateCRLs(CriteriaSet criteriaSet, Collection<X509Certificate> anchors, Collection<X509CRL> crls)
-            throws SecurityException {
+            throws ResolverException {
     }
 
     /**
@@ -442,7 +449,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         }
     }
 
-    public Set<String> resolveTrustedNames(CriteriaSet criteriaSet) throws org.opensaml.xml.security.SecurityException, UnsupportedOperationException {
+    public Set<String> resolveTrustedNames(CriteriaSet criteriaSet) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Method isn't supported");
     }
 
@@ -450,7 +457,7 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
         return false;
     }
 
-    public Iterable<PKIXValidationInformation> resolve(CriteriaSet criteria) throws SecurityException {
+    public Iterable<PKIXValidationInformation> resolve(CriteriaSet criteria) throws ResolverException {
         return resolveFromSource(criteria);
     }
 
@@ -461,8 +468,13 @@ public class PKIXInformationResolver implements PKIXValidationInformationResolve
      * @return first instance
      * @throws SecurityException error
      */
-    public PKIXValidationInformation resolveSingle(CriteriaSet criteria) throws SecurityException {
-        Iterator<PKIXValidationInformation> iterator = resolveFromSource(criteria).iterator();
+    public PKIXValidationInformation resolveSingle(CriteriaSet criteria) {
+        Iterator<PKIXValidationInformation> iterator;
+        try {
+            iterator = resolveFromSource(criteria).iterator();
+        } catch (ResolverException e) {
+            return null;
+        }
         if (iterator.hasNext()) {
             return iterator.next();
         } else {

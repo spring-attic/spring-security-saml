@@ -15,10 +15,10 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.security.SecurityException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
@@ -75,9 +75,8 @@ public interface SingleLogoutProfile {
      *
      * @param context        context containing processed SAML message
      * @throws SAMLException       in case the received SAML message is malformed or invalid
-     * @throws org.opensaml.xml.security.SecurityException in case the signature of the message is not trusted
-     * @throws ValidationException in case the signature of the message is invalid
+     * @throws SecurityException in case the signature of the message is not trusted
      */
-    void processLogoutResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException;
+    void processLogoutResponse(SAMLMessageContext context) throws SAMLException, SecurityException;
 
 }

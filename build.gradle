@@ -35,12 +35,12 @@ configure(allprojects) { project ->
 	apply from: "${gradleScriptDir}/ide.gradle"
 
 	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
 	}
 	compileTestJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
 	}
 
 	test {

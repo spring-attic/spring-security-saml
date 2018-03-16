@@ -14,14 +14,14 @@
  */
 package org.springframework.security.saml.key;
 
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.Set;
+
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.cert.X509Certificate;
-import java.util.*;
 
 /**
  * Key manager doesn't provide access to any keys and can be used to skip inclusion of keystore files in the

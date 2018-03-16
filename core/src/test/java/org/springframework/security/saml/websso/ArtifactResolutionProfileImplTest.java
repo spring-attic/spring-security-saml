@@ -15,11 +15,12 @@
 package org.springframework.security.saml.websso;
 
 import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.URI;
+import org.apache.http.client.HttpClient;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Vladimir Schäfer
@@ -31,7 +32,7 @@ public class ArtifactResolutionProfileImplTest {
      */
     @Test
     public void testHostConfigurationNoDefaults() throws Exception {
-        HttpClient client = new HttpClient();
+        HttpClient client = HttpClient.
         ArtifactResolutionProfileImpl artifactResolutionProfile = new ArtifactResolutionProfileImpl(client);
         URI uri = new URI("http", "test", "/artifact", null);
         HostConfiguration hostConfiguration = artifactResolutionProfile.getHostConfiguration(uri, null);

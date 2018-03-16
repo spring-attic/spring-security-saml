@@ -15,12 +15,10 @@
 
 package org.opensaml.compat.transport;
 
-import org.opensaml.ws.WSException;
-
 /**
  * Base exception for transport-related errors.
  */
-public class TransportException extends WSException {
+public class TransportException extends Exception {
 
     /** Serial version UID. */
     private static final long serialVersionUID = -3982638571562100128L;

@@ -16,10 +16,18 @@
 package org.springframework.security.saml.context;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.xml.namespace.QName;
 
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.saml2.core.ArtifactResolve;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.trust.TrustEngine;
 import org.opensaml.security.x509.X509Credential;
@@ -47,6 +55,28 @@ public class SAMLMessageContext extends MessageContext {
     private boolean peerUserSelected;
     private String inboundSAMLBinding;
     private SAMLMessageStorage messageStorage;
+    //backwards compatible fields
+    private EntityDescriptor peerEntityMetadata;
+    private RoleDescriptor peerEntityRoleMetadata;
+    private String peerEntityId;
+    private QName peerEntityRole;
+
+    private String localEntityId;
+    private EntityDescriptor localEntityMetadata;
+    private QName localEntityRole;
+    private RoleDescriptor localEntityRoleMetadata;
+
+
+    private MetadataProvider metadataProvider;
+    private InTransport inboundTransport;
+    private String communicationProfileId;
+    private ArtifactResolve outboundMessage;
+    private ArtifactResolve outboundSAMLMessage;
+    private ArtifactResolutionService peerEntityEndpoint;
+    private InTransport inboundMessageTransport;
+    private OutTransport outboundMessageTransport;
+    private String relayState;
+
 
     /**
      * Extended metadata of the local entity
@@ -230,4 +260,139 @@ public class SAMLMessageContext extends MessageContext {
         this.messageStorage = messageStorage;
     }
 
+    public EntityDescriptor getPeerEntityMetadata() {
+        return peerEntityMetadata;
+    }
+
+    public void setPeerEntityMetadata(EntityDescriptor peerEntityMetadata) {
+        this.peerEntityMetadata = peerEntityMetadata;
+    }
+
+    public RoleDescriptor getPeerEntityRoleMetadata() {
+        return peerEntityRoleMetadata;
+    }
+
+    public void setPeerEntityRoleMetadata(RoleDescriptor peerEntityRoleMetadata) {
+        this.peerEntityRoleMetadata = peerEntityRoleMetadata;
+    }
+
+    public String getPeerEntityId() {
+        return peerEntityId;
+    }
+
+    public void setPeerEntityId(String peerEntityId) {
+        this.peerEntityId = peerEntityId;
+    }
+
+    public QName getPeerEntityRole() {
+        return peerEntityRole;
+    }
+
+    public void setPeerEntityRole(QName peerEntityRole) {
+        this.peerEntityRole = peerEntityRole;
+    }
+
+    public MetadataProvider getMetadataProvider() {
+        return metadataProvider;
+    }
+
+    public void setMetadataProvider(MetadataProvider metadataProvider) {
+        this.metadataProvider = metadataProvider;
+    }
+
+    public InTransport getInboundTransport() {
+        return inboundTransport;
+    }
+
+    public void setInboundTransport(InTransport inboundTransport) {
+        this.inboundTransport = inboundTransport;
+    }
+
+    public String getLocalEntityId() {
+        return localEntityId;
+    }
+
+    public void setLocalEntityId(String localEntityId) {
+        this.localEntityId = localEntityId;
+    }
+
+    public EntityDescriptor getLocalEntityMetadata() {
+        return localEntityMetadata;
+    }
+
+    public void setLocalEntityMetadata(EntityDescriptor localEntityMetadata) {
+        this.localEntityMetadata = localEntityMetadata;
+    }
+
+    public QName getLocalEntityRole() {
+        return localEntityRole;
+    }
+
+    public void setLocalEntityRole(QName localEntityRole) {
+        this.localEntityRole = localEntityRole;
+    }
+
+    public RoleDescriptor getLocalEntityRoleMetadata() {
+        return localEntityRoleMetadata;
+    }
+
+    public void setLocalEntityRoleMetadata(RoleDescriptor localEntityRoleMetadata) {
+        this.localEntityRoleMetadata = localEntityRoleMetadata;
+    }
+
+    public void setCommunicationProfileId(String communicationProfileId) {
+        this.communicationProfileId = communicationProfileId;
+    }
+
+    public String getCommunicationProfileId() {
+        return communicationProfileId;
+    }
+
+    public void setOutboundMessage(ArtifactResolve outboundMessage) {
+        this.outboundMessage = outboundMessage;
+    }
+
+    public ArtifactResolve getOutboundMessage() {
+        return outboundMessage;
+    }
+
+    public void setOutboundSAMLMessage(ArtifactResolve outboundSAMLMessage) {
+        this.outboundSAMLMessage = outboundSAMLMessage;
+    }
+
+    public ArtifactResolve getOutboundSAMLMessage() {
+        return outboundSAMLMessage;
+    }
+
+    public void setPeerEntityEndpoint(ArtifactResolutionService peerEntityEndpoint) {
+        this.peerEntityEndpoint = peerEntityEndpoint;
+    }
+
+    public ArtifactResolutionService getPeerEntityEndpoint() {
+        return peerEntityEndpoint;
+    }
+
+    public InTransport getInboundMessageTransport() {
+        return inboundMessageTransport;
+    }
+
+    public void setInboundMessageTransport(InTransport inboundMessageTransport) {
+        this.inboundMessageTransport = inboundMessageTransport;
+    }
+
+    public void setOutboundMessageTransport(OutTransport outboundMessageTransport) {
+        this.outboundMessageTransport = outboundMessageTransport;
+    }
+
+    public OutTransport getOutboundMessageTransport() {
+        return outboundMessageTransport;
+    }
+
+    public void setRelayState(String relayState) {
+        this.relayState = relayState;
+    }
+
+    public String getRelayState() {
+        return relayState;
+    }
 }

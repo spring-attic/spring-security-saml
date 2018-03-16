@@ -27,11 +27,12 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.compat.ChainingMetadataProvider;
+import org.opensaml.compat.GlobalSecurityConfiguration;
 import org.opensaml.compat.MetadataProvider;
 import org.opensaml.compat.MetadataProviderException;
 import org.opensaml.compat.ObservableMetadataProvider;
-import org.opensaml.core.config.Configuration;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
@@ -609,14 +610,14 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             return new PKIXSignatureTrustEngine(
                     getPKIXResolver(provider, trustedKeys, null),
-                    Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(),
+                    GlobalSecurityConfiguration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(),
                     new org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator(pkixOptions),
                     new BasicX509CredentialNameEvaluator());
 
         } else {
 
             log.debug("Trust verification skipped for metadata provider {}", provider);
-            return new AllowAllSignatureTrustEngine(Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+            return new AllowAllSignatureTrustEngine(GlobalSecurityConfiguration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
 
         }
 
@@ -654,7 +655,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
         return new StaticPKIXValidationInformationResolver(info, trustedNames) {
             @Override
             public Set<String> resolveTrustedNames(CriteriaSet criteriaSet)
-                throws SecurityException, UnsupportedOperationException {
+                throws SecurityException, UnsupportedOperationException, ResolverException {
                 Set<String> names = super.resolveTrustedNames(criteriaSet);
                 //previous implementation returned true
                 //if trustedNames was empty(), not just null

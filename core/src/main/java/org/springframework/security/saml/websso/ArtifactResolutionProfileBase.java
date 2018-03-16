@@ -16,24 +16,25 @@
 package org.springframework.security.saml.websso;
 
 import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.binding.artifact.SAML2ArtifactType0004;
-import org.opensaml.saml2.binding.artifact.SAML2ArtifactType0004Builder;
-import org.opensaml.saml2.core.Artifact;
-import org.opensaml.saml2.core.ArtifactResolve;
-import org.opensaml.saml2.core.ArtifactResponse;
-import org.opensaml.saml2.metadata.ArtifactResolutionService;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.util.Base64;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml2.binding.artifact.SAML2ArtifactType0004;
+import org.opensaml.saml.saml2.binding.artifact.SAML2ArtifactType0004Builder;
+import org.opensaml.saml.saml2.core.Artifact;
+import org.opensaml.saml.saml2.core.ArtifactResolve;
+import org.opensaml.saml.saml2.core.ArtifactResponse;
+import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.security.SecurityException;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -68,7 +69,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
         try {
 
             // Decode artifact.
-            SAML2ArtifactType0004 decodedArtifact = new SAML2ArtifactType0004Builder().buildArtifact(Base64.decode(artifactId));
+            SAML2ArtifactType0004 decodedArtifact = new SAML2ArtifactType0004Builder().buildArtifact(Base64.decode(artifactId.getBytes()));
 
             // Endpoint index.
             int endpointIndex = parseEndpointIndex(decodedArtifact.getEndpointIndex());
@@ -124,7 +125,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
             throw new MessageDecodingException("Could not encode artifact resolve message", e);
         } catch (MessageDecodingException e) {
             throw new MessageDecodingException("Could not decode artifact response message", e);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (SecurityException e) {
             throw new MessageDecodingException("Security error when decoding artifact response message", e);
         } catch (SAMLException e) {
             throw new MessageDecodingException("Error during message processing", e);
@@ -139,15 +140,15 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
      *
      * @param endpointURI URI incoming artifactMessage is addressed to
      * @param context     context with filled communicationProfileId, outboundMessage, outboundSAMLMessage, peerEntityEndpoint, peerEntityId, peerEntityMetadata, peerEntityRole, peerEntityRoleMetadata
-     * @throws org.opensaml.common.SAMLException
+     * @throws SAMLException
      *          error processing artifact messages
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws MessageEncodingException
      *          error sending artifactRequest
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws MessageDecodingException
      *          error retrieveing articatResponse
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws MetadataProviderException
      *          error resolving metadata
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *          invalid message signature
      */
     protected abstract void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException;

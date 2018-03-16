@@ -15,30 +15,39 @@
  */
 package org.springframework.security.saml.websso;
 
+import java.util.Random;
+
+import net.shibboleth.utilities.java.support.net.BasicURLComparator;
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import net.shibboleth.utilities.java.support.net.URIException;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.binding.artifact.SAMLArtifactMap;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.criteria.UsageCriteria;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.compat.MetadataCriteria;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.UsageCriteria;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.saml.common.binding.artifact.SAMLArtifactMap;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.NameIDType;
+import org.opensaml.saml.saml2.core.RequestAbstractType;
+import org.opensaml.saml.saml2.core.Status;
+import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.saml.saml2.core.StatusMessage;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,8 +57,6 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import java.util.Random;
 
 /**
  * Base superclass for classes implementing processing of SAML messages.
@@ -141,7 +148,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * @param sign    whether the message should be signed
      * @throws MetadataProviderException metadata error
      * @throws SAMLException             SAML encoding error
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws MessageEncodingException
      *                                   message encoding error
      */
     protected void sendMessage(SAMLMessageContext context, boolean sign) throws MetadataProviderException, SAMLException, MessageEncodingException {
@@ -157,7 +164,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
      * @param binding binding to use to send the message
      * @throws MetadataProviderException metadata error
      * @throws SAMLException             SAML encoding error
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws MessageEncodingException
      *                                   message encoding error
      */
     protected void sendMessage(SAMLMessageContext context, boolean sign, String binding) throws MetadataProviderException, SAMLException, MessageEncodingException {
@@ -244,9 +251,9 @@ public abstract class AbstractProfileBase implements InitializingBean {
     protected void verifyEndpoint(Endpoint endpoint, String destination) throws SAMLException {
         // Verify that destination in the response matches one of the available endpoints
         if (destination != null) {
-            if (uriComparator.compare(destination, endpoint.getLocation())) {
+            if (compareUrls(destination, endpoint.getLocation())) {
                 // Expected
-            } else if (uriComparator.compare(destination, endpoint.getResponseLocation())) {
+            } else if (compareUrls(destination, endpoint.getResponseLocation())) {
                 // Expected
             } else {
                 throw new SAMLException("Intended destination " + destination + " doesn't match any of the endpoint URLs on endpoint " + endpoint.getLocation() + " for profile " + getProfileIdentifier());
@@ -254,7 +261,16 @@ public abstract class AbstractProfileBase implements InitializingBean {
         }
     }
 
-    protected void verifySignature(Signature signature, String IDPEntityID, SignatureTrustEngine trustEngine) throws org.opensaml.xml.security.SecurityException, ValidationException {
+    private boolean compareUrls(String destination, String location)  {
+        try {
+            return uriComparator.compare(destination, location);
+        } catch (URIException e) {
+            return false;
+        }
+    }
+
+    protected void verifySignature(Signature signature, String IDPEntityID, SignatureTrustEngine trustEngine)
+        throws SecurityException, SignatureException {
 
         if (trustEngine == null) {
             throw new SecurityException("Trust engine is not set, signature can't be verified");
@@ -263,13 +279,13 @@ public abstract class AbstractProfileBase implements InitializingBean {
         SAMLSignatureProfileValidator validator = new SAMLSignatureProfileValidator();
         validator.validate(signature);
         CriteriaSet criteriaSet = new CriteriaSet();
-        criteriaSet.add(new EntityIDCriteria(IDPEntityID));
+        criteriaSet.add(new EntityIdCriterion(IDPEntityID));
         criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         criteriaSet.add(new UsageCriteria(UsageType.SIGNING));
         log.debug("Verifying signature", signature);
 
         if (!trustEngine.validate(signature, criteriaSet)) {
-            throw new ValidationException("Signature is not trusted or invalid");
+            throw new SignatureException("Signature is not trusted or invalid");
         }
 
     }

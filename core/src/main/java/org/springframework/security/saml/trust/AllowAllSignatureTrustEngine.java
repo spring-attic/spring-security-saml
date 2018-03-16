@@ -14,12 +14,12 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.*;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 
 /**
  * Special type of trust engine which always trusts the credential and thus skips the verification.
@@ -36,7 +36,7 @@ public class AllowAllSignatureTrustEngine implements SignatureTrustEngine {
         return keyInfoResolver;
     }
 
-    public boolean validate(byte[] signature, byte[] content, String algorithmURI, CriteriaSet trustBasisCriteria, Credential candidateCredential) throws org.opensaml.xml.security.SecurityException {
+    public boolean validate(byte[] signature, byte[] content, String algorithmURI, CriteriaSet trustBasisCriteria, Credential candidateCredential) throws SecurityException {
         return true;
     }
 

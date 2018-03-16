@@ -18,7 +18,7 @@ package org.opensaml.compat.transport;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.security.credential.Credential;
 
 /**
  * Base abstract class for a {@link Transport} that provides local storage for all transport properties.

@@ -15,34 +15,36 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.spy.memcached.ConnectionFactoryBuilder;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
+import org.opensaml.compat.MetadataCriteria;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.UsageCriteria;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.UsageType;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.HttpClientOutTransport;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.criteria.UsageCriteria;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
-
-import javax.net.ssl.HostnameVerifier;
-import java.io.IOException;
+import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
 
 /**
  * Implementation of the artifact resolution protocol which uses Apache HTTPClient for SOAP binding transport.
@@ -57,8 +59,8 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
     /**
      * @param httpClient client used to send SOAP messages
      */
-    public ArtifactResolutionProfileImpl(HttpClient httpClient) {
-        this.httpClient = httpClient;
+    public ArtifactResolutionProfileImpl() {
+
     }
 
     /**
@@ -70,20 +72,18 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @throws MessageEncodingException  error sending artifactRequest
      * @throws MessageDecodingException  error retrieving artifactResponse
      * @throws MetadataProviderException error resolving metadata
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *                                   invalid message signature
      */
-    protected void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException {
+    protected void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, SecurityException {
 
-        PostMethod postMethod = null;
+        HttpPost postMethod = null;
 
         try {
 
-            URI uri = new URI(context.getPeerEntityEndpoint().getLocation(), true, "UTF-8");
-            postMethod = new PostMethod();
-            postMethod.setPath(uri.getPath());
-
-            HostConfiguration hc = getHostConfiguration(uri, context);
+            URI uri = new URI(context.getPeerEntityEndpoint().getLocation());
+            postMethod = new HttpPost(uri);
+            postMethod.setConfig(getHostConfiguration(uri, context));
 
             HttpClientOutTransport clientOutTransport = new HttpClientOutTransport(postMethod);
             HttpClientInTransport clientInTransport = new HttpClientInTransport(postMethod, endpointURI);
@@ -105,7 +105,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             // Decode artifact response message.
             processor.retrieveMessage(context, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
 
             throw new MessageDecodingException("Error when sending request to artifact resolution service.", e);
 
@@ -138,31 +138,24 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @return host configuration
      * @throws MessageEncodingException in case peer URI can't be parsed
      */
-    protected HostConfiguration getHostConfiguration(URI uri, SAMLMessageContext context) throws MessageEncodingException {
+    protected RequestConfig getHostConfiguration(URI uri, SAMLMessageContext context) throws MessageEncodingException {
 
         try {
 
-            HostConfiguration hc = httpClient.getHostConfiguration();
 
-            if (hc != null) {
-                // Clone configuration from the HTTP Client object
-                hc = new HostConfiguration(hc);
-            } else {
-                // Create brand new configuration when there are no defaults
-                hc = new HostConfiguration();
-            }
+            RequestConfig.Builder builder = RequestConfig.custom();
+            builder.setConnectTimeout(5000);
 
             if (uri.getScheme().equalsIgnoreCase("http")) {
 
                 log.debug("Using HTTP configuration");
-                hc.setHost(uri);
 
             } else {
 
                 log.debug("Using HTTPS configuration");
 
                 CriteriaSet criteriaSet = new CriteriaSet();
-                criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
+                criteriaSet.add(new EntityIdCriterion(context.getPeerEntityId()));
                 criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
                 criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
 
@@ -170,16 +163,18 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());
                 HostnameVerifier hostnameVerifier = context.getLocalSSLHostnameVerifier();
 
-                ProtocolSocketFactory socketFactory = getSSLSocketFactory(context, manager, trustManager, hostnameVerifier);
-                Protocol protocol = new Protocol("https", socketFactory, 443);
-                hc.setHost(uri.getHost(), uri.getPort(), protocol);
+                LayeredConnectionSocketFactory socketFactory = getSSLSocketFactory(context, manager, trustManager, hostnameVerifier);
+
+
 
             }
 
-            return hc;
+            return builder.build();
 
-        } catch (URIException e) {
-            throw new MessageEncodingException("Error parsing remote location URI", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new MessageEncodingException("Error getting SSL context, algorithm not found", e);
+        } catch (KeyManagementException e) {
+            throw new MessageEncodingException("Error getting SSL context, key issues", e);
         }
 
     }
@@ -194,7 +189,8 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @param hostnameVerifier verifier for server hostname, or null
      * @return socket factory
      */
-    protected SecureProtocolSocketFactory getSSLSocketFactory(SAMLMessageContext context, X509KeyManager manager, X509TrustManager trustManager, HostnameVerifier hostnameVerifier) {
+    protected LayeredConnectionSocketFactory getSSLSocketFactory(SAMLMessageContext context, X509KeyManager manager, X509TrustManager trustManager, HostnameVerifier hostnameVerifier)
+        throws NoSuchAlgorithmException, KeyManagementException {
         if (isHostnameVerificationSupported()) {
             return new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
         } else {

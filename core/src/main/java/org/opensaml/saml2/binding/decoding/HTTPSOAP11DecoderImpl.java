@@ -16,11 +16,7 @@
 package org.opensaml.saml2.binding.decoding;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
-import org.opensaml.compat.decoding.HTTPSOAP11Decoder;
-import org.opensaml.compat.transport.InTransport;
-import org.opensaml.messaging.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.LocationAwareInTransport;
-import org.springframework.security.saml.context.SAMLMessageContext;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPSOAP11Decoder;
 
 /**
  * Custom implementation of the decoder which takes into account user HTTPInput method
@@ -31,36 +27,6 @@ public class HTTPSOAP11DecoderImpl extends HTTPSOAP11Decoder {
     public HTTPSOAP11DecoderImpl(ParserPool pool) {
         super();
         setParserPool(pool);
-    }
-
-
-
-    @Override
-    protected String getActualReceiverEndpointURI(SAMLMessageContext messageContext) throws MessageDecodingException {
-
-        InTransport inTransport = messageContext.getInboundMessageTransport();
-        if (inTransport instanceof LocationAwareInTransport) {
-            return ((LocationAwareInTransport)inTransport).getLocalAddress();
-        } else {
-            return super.getActualReceiverEndpointURI(messageContext);
-        }
-
-    }
-
-    /**
-     * In case message destination is set (was included in the message) check is made against the endpoint. Otherwise
-     * always passes.
-     *
-     * @param messageDestination destination from the SAML message
-     * @param receiverEndpoint   endpoint address
-     * @return true if the endpoints are equivalent, false otherwise
-     */
-    @Override
-    protected boolean compareEndpointURIs(String messageDestination, String receiverEndpoint) throws MessageDecodingException {
-
-        // Message destination is not obligatory
-        return messageDestination == null || super.compareEndpointURIs(messageDestination, receiverEndpoint);
-
     }
 
 }

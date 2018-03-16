@@ -14,11 +14,13 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
+import org.opensaml.compat.GlobalSecurityConfiguration;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.xmlsec.config.JavaCryptoValidationInitializer;
+import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -39,9 +41,24 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
      */
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         try {
+
+            JavaCryptoValidationInitializer javaCryptoValidationInitializer = new JavaCryptoValidationInitializer();
+            try {
+                javaCryptoValidationInitializer.init();
+            } catch (InitializationException e) {
+                throw new FatalBeanException("Unable to initialize SAML crypto libraries.", e);
+            }
+
+
+            try {
+                InitializationService.initialize();
+            } catch (InitializationException e) {
+                throw new FatalBeanException("Unable to initialize SAML libraries.", e);
+            }
+
             PaosBootstrap.bootstrap();
             setMetadataKeyInfoGenerator();
-        } catch (ConfigurationException e) {
+        } catch (Exception e) {
             throw new FatalBeanException("Error invoking OpenSAML bootstrap", e);
         }
     }
@@ -52,7 +69,7 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
      * @see SAMLConstants#SAML_METADATA_KEY_INFO_GENERATOR
      */
     protected void setMetadataKeyInfoGenerator() {
-        NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
+        NamedKeyInfoGeneratorManager manager = GlobalSecurityConfiguration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
         X509KeyInfoGeneratorFactory generator = new X509KeyInfoGeneratorFactory();
         generator.setEmitEntityCertificate(true);
         generator.setEmitEntityCertificateChain(true);

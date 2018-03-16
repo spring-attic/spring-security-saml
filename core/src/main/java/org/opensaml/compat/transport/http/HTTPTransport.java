@@ -17,7 +17,7 @@ package org.opensaml.compat.transport.http;
 
 import java.util.List;
 
-import org.opensaml.ws.transport.Transport;
+import org.opensaml.compat.transport.Transport;
 
 /**
  * An HTTP-based transport.
@@ -25,7 +25,7 @@ import org.opensaml.ws.transport.Transport;
 public interface HTTPTransport extends Transport {
 
     /** HTTP version identifier. */
-    public static enum HTTP_VERSION {
+    enum HTTP_VERSION {
         /** HTTP version 1.0. */
         HTTP1_0,
 

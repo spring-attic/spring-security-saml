@@ -23,18 +23,38 @@ import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import org.opensaml.compat.GlobalSecurityConfiguration;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
+import org.opensaml.compat.transport.http.HttpServletResponseAdapter;
 import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.messaging.ServletRequestX509CredentialAdapter;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.trust.impl.ExplicitX509CertificateTrustEngine;
+import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.PKIXTrustEvaluator;
 import org.opensaml.security.x509.PKIXValidationInformationResolver;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
+import org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,7 +63,6 @@ import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
-import org.opensaml.compat.MetadataProviderException;
 import org.springframework.security.saml.storage.HttpSessionStorageFactory;
 import org.springframework.security.saml.storage.SAMLMessageStorageFactory;
 import org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator;
@@ -72,7 +91,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     protected KeyManager keyManager;
     protected MetadataManager metadata;
-    protected MetadataCredentialResolver metadataResolver;
+    protected org.springframework.security.saml.trust.MetadataCredentialResolver metadataResolver;
     protected PKIXValidationInformationResolver pkixResolver;
     protected PKIXTrustEvaluator pkixTrustEvaluator;
     protected SAMLMessageStorageFactory storageFactory = new HttpSessionStorageFactory();
@@ -316,7 +335,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * are used instead.
      *
      * @param samlContext context to populate
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException in case metadata do not contain expected entities or localAlias is specified but not found
+     * @throws MetadataProviderException in case metadata do not contain expected entities or localAlias is specified but not found
      */
     protected void populateLocalEntity(SAMLMessageContext samlContext) throws MetadataProviderException {
 
@@ -391,7 +410,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         if (chain != null && chain.length > 0) {
 
             log.debug("Found certificate chain from request {}", chain[0]);
-            BasicX509Credential credential = new BasicX509Credential();
+            BasicX509Credential credential = new BasicX509Credential(chain[0]);
             credential.setEntityCertificate(chain[0]);
             credential.setEntityCertificateChain(Arrays.asList(chain));
             samlContext.setPeerSSLCredential(credential);
@@ -438,9 +457,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateTrustEngine(SAMLMessageContext samlContext) {
         SignatureTrustEngine engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
-            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
+            engine = new PKIXSignatureTrustEngine(pkixResolver, GlobalSecurityConfiguration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
         } else {
-            engine = new ExplicitKeySignatureTrustEngine(metadataResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+            engine = new ExplicitKeySignatureTrustEngine(metadataResolver, GlobalSecurityConfiguration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
         }
         samlContext.setLocalTrustEngine(engine);
     }
@@ -558,9 +577,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         Assert.notNull(storageFactory, "MessageStorageFactory must be set");
 
         if (metadataResolver == null) {
-            MetadataCredentialResolver resolver = new org.springframework.security.saml.trust.MetadataCredentialResolver(metadata, keyManager);
-            resolver.setMeetAllCriteria(false);
-            resolver.setUnevaluableSatisfies(true);
+            org.springframework.security.saml.trust.MetadataCredentialResolver resolver = new org.springframework.security.saml.trust.MetadataCredentialResolver(metadata, keyManager);
             this.metadataResolver = resolver;
         }
 

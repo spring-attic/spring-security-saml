@@ -15,12 +15,15 @@
  */
 package org.opensaml.ws.transport.http;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.opensaml.xml.security.credential.Credential;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.security.credential.Credential;
+import org.springframework.http.HttpMethod;
 
 /**
  * Implementation of HTTPInTransport delegating to a HTTPClient postMethod object.
@@ -29,10 +32,10 @@ import java.util.List;
  */
 public class HttpClientInTransport implements HTTPInTransport, LocationAwareInTransport {
 
-    private final PostMethod postMethod;
+    private final HttpResponse postMethod;
     private final String endpointURI;
 
-    public HttpClientInTransport(PostMethod postMethod, String endpointURI) {
+    public HttpClientInTransport(HttpResponse postMethod, String endpointURI) {
         this.postMethod = postMethod;
         this.endpointURI = endpointURI;
     }
@@ -51,7 +54,7 @@ public class HttpClientInTransport implements HTTPInTransport, LocationAwareInTr
 
     public InputStream getIncomingStream() {
         try {
-            return postMethod.getResponseBodyAsStream();
+            return postMethod.getEntity().getContent();
         } catch (IOException ioe) {
             return null;
         }
@@ -62,7 +65,7 @@ public class HttpClientInTransport implements HTTPInTransport, LocationAwareInTr
     }
 
     public String getCharacterEncoding() {
-        return postMethod.getResponseCharSet();
+        return ContentType.getOrDefault(postMethod.getEntity()).getCharset().toString();
     }
 
     public Credential getLocalCredential() {
@@ -102,11 +105,11 @@ public class HttpClientInTransport implements HTTPInTransport, LocationAwareInTr
     }
 
     public String getHTTPMethod() {
-        return postMethod.getName();
+        return HttpMethod.POST.name();
     }
 
     public int getStatusCode() {
-        return postMethod.getStatusCode();
+        return postMethod.getStatusLine().getStatusCode();
     }
 
     public String getParameterValue(String s) {

@@ -14,9 +14,10 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.saml2.core.AuthnRequest;
 
 import javax.xml.namespace.QName;
+
+import org.opensaml.saml.saml2.core.AuthnRequest;
 
 /**
  * Constant values for SAML module.
@@ -63,7 +64,7 @@ public class SAMLConstants {
 
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILURE = "FAILURE";
-    
+
     public static final String PAOS_HTTP_ACCEPT_HEADER = "application/vnd.paos+xml";
     public static final String PAOS_HTTP_HEADER = "PAOS";
 

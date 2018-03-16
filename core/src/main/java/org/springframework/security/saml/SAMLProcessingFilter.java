@@ -20,9 +20,9 @@ import java.util.List;
 
 import net.shibboleth.utilities.java.support.net.URIComparator;
 import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.transport.InTransport;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.saml.common.SAMLException;
-import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

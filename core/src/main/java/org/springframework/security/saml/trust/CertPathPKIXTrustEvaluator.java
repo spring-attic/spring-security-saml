@@ -14,16 +14,23 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.x509.PKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationOptions;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.security.x509.X509Util;
+import java.security.GeneralSecurityException;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertPathValidator;
+import java.security.cert.Certificate;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathBuilderResult;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+
+import org.opensaml.compat.X509Util;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.x509.PKIXValidationInformation;
+import org.opensaml.security.x509.PKIXValidationOptions;
+import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.GeneralSecurityException;
-import java.security.cert.*;
 
 /**
  * PKIX trust evaluator based on Java CertPath API. Class first constructs PKIXBuilderParameters using call to
@@ -35,7 +42,7 @@ import java.security.cert.*;
  * In earlier Java versions the builder implementation doesn't support e.g. OCSP checking. Running a separate path
  * validation makes it possible to use these features..
  */
-public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.CertPathPKIXTrustEvaluator {
+public class CertPathPKIXTrustEvaluator extends org.opensaml.security.x509.impl.CertPathPKIXTrustEvaluator {
 
     /**
      * Class logger.
@@ -61,11 +68,11 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
 
     /** {@inheritDoc} */
     public boolean validate(PKIXValidationInformation validationInfo, X509Credential untrustedCredential)
-            throws org.opensaml.xml.security.SecurityException {
+        throws SecurityException {
 
         if (log.isDebugEnabled()) {
             log.debug("Attempting PKIX path validation on untrusted credential: {}",
-                    X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
+                      X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
         }
 
         try {

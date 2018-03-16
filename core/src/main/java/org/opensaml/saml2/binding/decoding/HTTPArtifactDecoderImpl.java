@@ -17,7 +17,6 @@ package org.opensaml.saml2.binding.decoding;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.opensaml.compat.DataTypeHelper;
-import org.opensaml.compat.decoding.BaseSAML2MessageDecoder;
 import org.opensaml.compat.transport.http.HTTPInTransport;
 import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.messaging.context.MessageContext;

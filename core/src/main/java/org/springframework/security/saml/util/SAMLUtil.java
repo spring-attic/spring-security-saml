@@ -15,55 +15,64 @@
  */
 package org.springframework.security.saml.util;
 
-import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import net.shibboleth.utilities.java.support.net.URIException;
+import org.apache.commons.ssl.HostnameVerifier;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.core.config.Configuration;
+import org.opensaml.compat.BasicSecurityConfiguration;
+import org.opensaml.compat.DataTypeHelper;
+import org.opensaml.compat.GlobalSecurityConfiguration;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.SecurityHelper;
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
 import org.opensaml.core.xml.XMLObject;
-import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.Marshaller;
 import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.ArtifactResolutionService;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SSODescriptor;
-import org.opensaml.saml2.metadata.SingleLogoutService;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SSODescriptor;
+import org.opensaml.saml.saml2.metadata.SingleLogoutService;
+import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.security.BasicSecurityConfiguration;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
-import org.opensaml.xml.signature.X509Data;
-import org.opensaml.xml.util.DataTypeHelper;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.SignableXMLObject;
 import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.X509Data;
+import org.opensaml.xmlsec.signature.impl.SignatureBuilder;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
-import org.opensaml.compat.MetadataProviderException;
 import org.w3c.dom.Element;
 
 /**
@@ -170,7 +179,7 @@ public class SAMLUtil {
      * @param ssoDescriptor descriptor
      * @param index         to load, can be null
      * @return consumer service
-     * @throws org.opensaml.common.SAMLRuntimeException
+     * @throws SAMLRuntimeException
      *          in case assertionConsumerService with given index isn't found
      */
     public static AssertionConsumerService getConsumerService(SPSSODescriptor ssoDescriptor, Integer index) {
@@ -335,8 +344,8 @@ public class SAMLUtil {
         String paosHeader = request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER);
         return acceptHeader != null && paosHeader != null
                 && acceptHeader.contains(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER)
-                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.PAOS_NS)
-                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS);
+                && paosHeader.contains(SAMLConstants.PAOS_NS)
+                && paosHeader.contains(SAMLConstants.SAML20ECP_NS);
 
     }
 
@@ -380,16 +389,24 @@ public class SAMLUtil {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches
             if (binding.equals(messageBinding)) {
-                if (endpoint.getLocation() != null && uriComparator.compare(endpoint.getLocation(), requestURL)) {
+                if (endpoint.getLocation() != null && compareUrls(uriComparator, requestURL, endpoint.getLocation())) {
                     log.debug("Found endpoint {} for request URL {} based on location attribute in metadata", endpoint, requestURL);
                     return endpoint;
-                } else if (endpoint.getResponseLocation() != null && uriComparator.compare(endpoint.getResponseLocation(), requestURL)) {
+                } else if (endpoint.getResponseLocation() != null && compareUrls(uriComparator, requestURL, endpoint.getResponseLocation())) {
                     log.debug("Found endpoint {} for request URL {} based on response location attribute in metadata", endpoint, requestURL);
                     return endpoint;
                 }
             }
         }
         throw new SAMLException("Endpoint with message binding " + messageBinding + " and URL " + requestURL + " wasn't found in local metadata");
+    }
+
+    private static boolean compareUrls(URIComparator uriComparator, String requestURL, String location) {
+        try {
+            return uriComparator.compare(location, requestURL);
+        } catch (URIException e) {
+            return false;
+        }
     }
 
     /**
@@ -416,7 +433,7 @@ public class SAMLUtil {
      *
      * @param message message the marshall and serialize
      * @return marshaled message
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws MessageEncodingException
      *          thrown if the give message can not be marshaled into its DOM representation
      */
     public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
@@ -425,7 +442,7 @@ public class SAMLUtil {
                 log.debug("XMLObject already had cached DOM, returning that element");
                 return message.getDOM();
             }
-            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(message);
             if (marshaller == null) {
                 throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "
                                                    + message.getElementQName());
@@ -451,7 +468,7 @@ public class SAMLUtil {
      * @param signingAlgorithm  signing algorithm to use (optional). Leave null to use credential's default algorithm
      * @param signingAlgorithm  digest method algorithm to use (optional). Leave null to use credential's default algorithm
      * @param keyInfoGenerator name of generator used to create KeyInfo elements with key data
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws MessageEncodingException
      *          thrown if there is a problem marshalling or signing the message
      * @return marshalled and signed message
      */
@@ -460,7 +477,7 @@ public class SAMLUtil {
 
         if (signingCredential != null && !signableMessage.isSigned()) {
 
-            XMLObjectBuilder<Signature> signatureBuilder = org.opensaml.core.config.XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME);
+            SignatureBuilder signatureBuilder = new SignatureBuilder();
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
 
             if (signingAlgorithm != null) {
@@ -473,14 +490,14 @@ public class SAMLUtil {
 
             if (digestMethodAlgorithm != null)
             {
-                secConfig = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
+                secConfig = (BasicSecurityConfiguration) GlobalSecurityConfiguration.getGlobalSecurityConfiguration();
 
                 secConfig.setSignatureReferenceDigestMethod(digestMethodAlgorithm);
             }
 
             try {
                 SecurityHelper.prepareSignatureParams(signature, signingCredential, secConfig, keyInfoGenerator);
-            } catch (org.opensaml.xml.security.SecurityException e) {
+            } catch (SecurityException e) {
                 throw new MessageEncodingException("Error preparing signature for signing", e);
             }
 
@@ -558,9 +575,9 @@ public class SAMLUtil {
      * @param hostnameVerificationType type
      * @return verifier
      */
-    public static HostnameVerifier getHostnameVerifier(String hostnameVerificationType) {
+    public static X509HostnameVerifier getHostnameVerifier(String hostnameVerificationType) {
 
-        HostnameVerifier hostnameVerifier;
+        final HostnameVerifier hostnameVerifier;
         if ("default".equalsIgnoreCase(hostnameVerificationType)) {
             hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
         } else if ("defaultAndLocalhost".equalsIgnoreCase(hostnameVerificationType)) {
@@ -573,7 +590,35 @@ public class SAMLUtil {
             hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
         }
 
-        return hostnameVerifier;
+        return new X509HostnameVerifier() {
+            @Override
+            public void verify(String host, SSLSocket ssl) throws IOException {
+                hostnameVerifier.check(host, ssl);
+            }
+
+            @Override
+            public void verify(String host, X509Certificate cert) throws SSLException {
+                hostnameVerifier.check(host, cert);
+            }
+
+            @Override
+            public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException {
+                hostnameVerifier.check(host, cns, subjectAlts);
+            }
+
+            @Override
+            public boolean verify(String host, SSLSession sslSession) {
+                try {
+                    final Certificate[] certs = sslSession.getPeerCertificates();
+                    final X509Certificate x509 = (X509Certificate) certs[0];
+                    verify(host, x509);
+                    return true;
+                }
+                catch(final SSLException e) {
+                    return false;
+                }
+            }
+        };
 
     }
 

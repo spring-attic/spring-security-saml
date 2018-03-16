@@ -15,7 +15,7 @@
 
 package org.opensaml.compat.transport.http;
 
-import org.opensaml.ws.transport.OutTransport;
+import org.opensaml.compat.transport.OutTransport;
 
 /**
  * HTTP-based outbound transport.

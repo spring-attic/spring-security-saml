@@ -15,25 +15,27 @@
  */
 package org.opensaml.ws.transport.http.httpclient;
 
-import org.apache.commons.httpclient.methods.RequestEntity;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.apache.http.Header;
+import org.apache.http.entity.AbstractHttpEntity;
 
 /**
  * @author Mandus Elfving
  */
-public class OutputStreamRequestEntity implements RequestEntity {
+public class OutputStreamRequestEntity extends AbstractHttpEntity {
 
     private final ByteArrayOutputStream outputStream;
-    private final String contentType;
+    private final Header contentType;
 
     public OutputStreamRequestEntity(ByteArrayOutputStream outputStream) {
         this(outputStream, null);
     }
 
-    public OutputStreamRequestEntity(ByteArrayOutputStream outputStream, String contentType) {
+    public OutputStreamRequestEntity(ByteArrayOutputStream outputStream, Header contentType) {
         this.outputStream = outputStream;
         this.contentType = contentType;
     }
@@ -42,15 +44,26 @@ public class OutputStreamRequestEntity implements RequestEntity {
         return true;
     }
 
-    public void writeRequest(OutputStream outputStream) throws IOException {
-        this.outputStream.writeTo(outputStream);
-    }
-
     public long getContentLength() {
         return this.outputStream.size();
     }
 
-    public String getContentType() {
+    public Header getContentType() {
         return this.contentType;
+    }
+
+    @Override
+    public InputStream getContent() throws IOException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public void writeTo(OutputStream outstream) throws IOException {
+        this.outputStream.writeTo(outstream);
+    }
+
+    @Override
+    public boolean isStreaming() {
+        return false;
     }
 }

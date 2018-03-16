@@ -14,27 +14,27 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
 
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-
 /**
  * Class customizes resolving from metadata by first using values present in the ExtenedeMetadata of an entity.
  *
  * @author Vladimir Schafer
  */
-public class MetadataCredentialResolver extends org.opensaml.security.MetadataCredentialResolver {
+public class MetadataCredentialResolver extends org.opensaml.compat.MetadataCredentialResolver {
 
     /**
      * Class logger.
@@ -127,7 +127,7 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
 
             return credentials;
 
-        } catch (MetadataProviderException e) {
+        } catch (MetadataProviderException | ResolverException e) {
 
             throw new SecurityException("Error loading metadata information", e);
 

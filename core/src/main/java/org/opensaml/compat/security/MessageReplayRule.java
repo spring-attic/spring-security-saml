@@ -15,12 +15,12 @@
 
 package org.opensaml.compat.security;
 
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.util.storage.ReplayCache;
-import org.opensaml.ws.message.MessageContext;
-import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.compat.DataTypeHelper;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.storage.ReplayCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that which checks for replay of SAML messages.
@@ -73,7 +73,7 @@ public class MessageReplayRule implements SecurityPolicyRule {
 
         SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
 
-        String messageIsuer = DatatypeHelper.safeTrimOrNullString(samlMsgCtx.getInboundMessageIssuer());
+        String messageIsuer = DataTypeHelper.safeTrimOrNullString(samlMsgCtx.getInboundMessageIssuer());
         if (messageIsuer == null) {
             if (requiredRule) {
                 log.warn("Message contained no Issuer ID, replay check not possible");
@@ -82,7 +82,7 @@ public class MessageReplayRule implements SecurityPolicyRule {
             return;
         }
 
-        String messageId = DatatypeHelper.safeTrimOrNullString(samlMsgCtx.getInboundSAMLMessageId());
+        String messageId = DataTypeHelper.safeTrimOrNullString(samlMsgCtx.getInboundSAMLMessageId());
         if (messageId == null) {
             if (requiredRule) {
                 log.warn("Message contained no ID, replay check not possible");
@@ -91,7 +91,7 @@ public class MessageReplayRule implements SecurityPolicyRule {
             return;
         }
 
-        if (replayCache.isReplay(messageIsuer, messageId)) {
+        if (!replayCache.check(messageIsuer, messageId, 10000)) {
             log.warn("Replay detected of message '" + messageId + "' from issuer " + messageIsuer);
             throw new SecurityPolicyException("Rejecting replayed message ID '" + messageId + "' from issuer "
                     + messageIsuer);

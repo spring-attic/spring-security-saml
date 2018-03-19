@@ -18,15 +18,15 @@ package org.opensaml.compat.validation;
 import java.util.Collections;
 import java.util.List;
 
-import org.opensaml.xml.AbstractXMLObject;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.LazyList;
+import net.shibboleth.utilities.java.support.collection.LazyList;
+import org.opensaml.core.xml.AbstractXMLObject;
+import org.opensaml.core.xml.XMLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Extension of {@link org.opensaml.xml.AbstractXMLObject} that implements
- * {@link org.opensaml.xml.validation.ValidatingXMLObject}.
+ * Extension of {@link AbstractXMLObject} that implements
+ * {@link ValidatingXMLObject}.
  */
 public abstract class AbstractValidatingXMLObject extends AbstractXMLObject implements ValidatingXMLObject {
 

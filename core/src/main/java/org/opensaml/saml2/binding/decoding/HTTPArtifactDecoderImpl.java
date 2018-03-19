@@ -20,6 +20,7 @@ import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.transport.http.HTTPInTransport;
 import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -34,7 +35,7 @@ import org.springframework.security.saml.websso.ArtifactResolutionProfile;
  *
  * @author Mandus Elfving
  */
-public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
+public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder implements MessageDecoder {
 
     private final Logger log = LoggerFactory.getLogger(HTTPArtifactDecoderImpl.class);
 

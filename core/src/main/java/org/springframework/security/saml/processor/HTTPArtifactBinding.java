@@ -23,12 +23,12 @@ import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPArtifactEncoder;
 import org.opensaml.saml2.binding.decoding.HTTPArtifactDecoderImpl;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
@@ -48,10 +48,10 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
      * @param artifactProfile profile used to retrieven the artifact message
      */
     public HTTPArtifactBinding(ParserPool parserPool, VelocityEngine velocityEngine, ArtifactResolutionProfile artifactProfile) {
-        HTTPArtifactEncoder artifactEncoder = new HTTPArtifactEncoder();
+        super(new HTTPArtifactDecoderImpl(artifactProfile, parserPool), new HTTPArtifactEncoder());
+        HTTPArtifactEncoder artifactEncoder = (HTTPArtifactEncoder) getMessageEncoder();
         artifactEncoder.setVelocityEngine(velocityEngine);
         artifactEncoder.setVelocityTemplateId("/templates/saml2-post-artifact-binding.vm");
-        this(new HTTPArtifactDecoderImpl(artifactProfile, parserPool), artifactEncoder);
     }
 
     /**

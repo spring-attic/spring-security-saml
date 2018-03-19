@@ -16,10 +16,10 @@
 package org.opensaml.compat.security;
 
 import org.joda.time.DateTime;
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.ws.message.MessageContext;
+import org.opensaml.messaging.context.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that checks for validity of SAML message issue instant date and time.

@@ -18,12 +18,13 @@ package org.springframework.security.saml.context;
 import javax.net.ssl.HostnameVerifier;
 import javax.xml.namespace.QName;
 
+import org.joda.time.DateTime;
 import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.security.SecurityPolicyResolver;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
-import org.opensaml.saml.saml2.core.ArtifactResolve;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.Endpoint;
@@ -72,9 +73,9 @@ public class SAMLMessageContext extends MessageContext {
     private MetadataProvider metadataProvider;
     private InTransport inboundTransport;
     private String communicationProfileId;
-    private ArtifactResolve outboundMessage;
-    private ArtifactResolve outboundSAMLMessage;
-    private ArtifactResolutionService peerEntityEndpoint;
+    private SAMLObject outboundMessage;
+    private SAMLObject outboundSAMLMessage;
+    private Endpoint peerEntityEndpoint;
     private InTransport inboundMessageTransport;
     private OutTransport outboundMessageTransport;
     private String relayState;
@@ -84,6 +85,9 @@ public class SAMLMessageContext extends MessageContext {
     private Credential outboundSAMLMessageSigningCredential;
     private boolean issuerAuthenticated;
     private boolean inboundSAMLMessageAuthenticated;
+    private DateTime inboundSAMLMessageIssueInstant;
+    private String inboundSAMLMessageId;
+    private SecurityPolicyResolver securityPolicyResolver;
 
 
     /**
@@ -356,23 +360,23 @@ public class SAMLMessageContext extends MessageContext {
         return communicationProfileId;
     }
 
-    public void setOutboundMessage(ArtifactResolve outboundMessage) {
+    public void setOutboundMessage(SAMLObject outboundMessage) {
         this.outboundMessage = outboundMessage;
     }
 
-    public ArtifactResolve getOutboundMessage() {
+    public SAMLObject getOutboundMessage() {
         return outboundMessage;
     }
 
-    public void setOutboundSAMLMessage(ArtifactResolve outboundSAMLMessage) {
+    public void setOutboundSAMLMessage(SAMLObject outboundSAMLMessage) {
         this.outboundSAMLMessage = outboundSAMLMessage;
     }
 
-    public ArtifactResolve getOutboundSAMLMessage() {
+    public SAMLObject getOutboundSAMLMessage() {
         return outboundSAMLMessage;
     }
 
-    public void setPeerEntityEndpoint(ArtifactResolutionService peerEntityEndpoint) {
+    public void setPeerEntityEndpoint(Endpoint peerEntityEndpoint) {
         this.peerEntityEndpoint = peerEntityEndpoint;
     }
 
@@ -450,5 +454,29 @@ public class SAMLMessageContext extends MessageContext {
 
     public void setInboundSAMLMessageAuthenticated(boolean inboundSAMLMessageAuthenticated) {
         this.inboundSAMLMessageAuthenticated = inboundSAMLMessageAuthenticated;
+    }
+
+    public DateTime getInboundSAMLMessageIssueInstant() {
+        return inboundSAMLMessageIssueInstant;
+    }
+
+    public void setInboundSAMLMessageIssueInstant(DateTime inboundSAMLMessageIssueInstant) {
+        this.inboundSAMLMessageIssueInstant = inboundSAMLMessageIssueInstant;
+    }
+
+    public String getInboundSAMLMessageId() {
+        return inboundSAMLMessageId;
+    }
+
+    public void setInboundSAMLMessageId(String inboundSAMLMessageId) {
+        this.inboundSAMLMessageId = inboundSAMLMessageId;
+    }
+
+    public void setSecurityPolicyResolver(SecurityPolicyResolver securityPolicyResolver) {
+        this.securityPolicyResolver = securityPolicyResolver;
+    }
+
+    public SecurityPolicyResolver getSecurityPolicyResolver() {
+        return securityPolicyResolver;
     }
 }

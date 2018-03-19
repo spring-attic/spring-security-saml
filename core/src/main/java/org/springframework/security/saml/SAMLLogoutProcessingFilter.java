@@ -14,14 +14,24 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.InTransport;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.security.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +48,6 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.util.Assert;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Filter processes arriving SAML Single Logout messages by delegating to the LogoutProfile.
@@ -143,7 +143,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
             } catch (MessageDecodingException e) {
                 log.debug("Error decoding incoming SAML message", e);
                 throw new ServletException("Error decoding incoming SAML message", e);
-            } catch (org.opensaml.xml.security.SecurityException e) {
+            } catch (SecurityException e) {
                 log.debug("Incoming SAML message failed security validation", e);
                 throw new ServletException("Incoming SAML message failed security validation", e);
             }
@@ -194,7 +194,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                         }
                     }
 
-                    logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS_URI, null);
+                    logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS, null);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
                 } catch (Exception e) {
@@ -278,7 +278,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
     /**
      * Sets URI comparator used to get local entity endpoint
      * @param uriComparator    URI comparator
-     * @see SAMLUtil#getEndpoint(List, String, InTransport, URIComparator)
+     *
      */
     @Autowired(required = false)
     public void setUriComparator(URIComparator uriComparator) {

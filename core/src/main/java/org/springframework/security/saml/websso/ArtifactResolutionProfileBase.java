@@ -151,7 +151,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
      * @throws SecurityException
      *          invalid message signature
      */
-    protected abstract void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException;
+    protected abstract void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, SecurityException;
 
     protected ArtifactResolve createArtifactResolve(SAMLMessageContext context, String artifactId, Endpoint endpoint) {
 

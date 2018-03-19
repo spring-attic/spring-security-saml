@@ -1,6 +1,6 @@
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
+import org.opensaml.saml.common.SAMLException;
 
 /**
  * SAML exception which contains status code which should be returned to the caller as part of status message.

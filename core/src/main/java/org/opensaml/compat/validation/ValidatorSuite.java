@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opensaml.xml.XMLObject;
+import org.opensaml.core.xml.XMLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * A collection of validators that can be applied to an XMLObject and its children. These collections can represent
  * usage specific checks, such as those outlined in things like profiles for specific XML specification.
  *
- * Registered {@link org.opensaml.xml.validation.Validator}s must be stateless. The xmlObjectTarget may be the
- * XMLObject's element QName retrieved by {@link org.opensaml.xml.XMLObject#getElementQName()} or schema type, retrieved
- * by {@link org.opensaml.xml.XMLObject#getSchemaType()}, with schema type registered checks performed first.
+ * Registered {@link Validator}s must be stateless. The xmlObjectTarget may be the
+ * XMLObject's element QName retrieved by {@link XMLObject#getElementQName()} or schema type, retrieved
+ * by {@link XMLObject#getSchemaType()}, with schema type registered checks performed first.
  */
 public class ValidatorSuite {
 

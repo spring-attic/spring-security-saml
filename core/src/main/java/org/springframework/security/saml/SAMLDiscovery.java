@@ -14,14 +14,24 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.samlext.idpdisco.DiscoveryResponse;
-import org.opensaml.util.URLBuilder;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.Pair;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
+
+import net.shibboleth.utilities.java.support.collection.Pair;
+import net.shibboleth.utilities.java.support.net.URLBuilder;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +44,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
+import static org.opensaml.saml.common.xml.SAMLConstants.SAML_IDP_DISCO_NS;
 
 /**
  * Filter implements Identity Provider Discovery Service and Profile as defined in
@@ -310,7 +313,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             List<XMLObject> discoveryResponseElements = descriptor.getExtensions().getUnknownXMLObjects(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
             for (XMLObject element : discoveryResponseElements) {
                 DiscoveryResponse response = (DiscoveryResponse) element;
-                if (response.getBinding().equals(DiscoveryResponse.IDP_DISCO_NS)) {
+                if (response.getBinding().equals(SAML_IDP_DISCO_NS)) {
                     log.debug("Using IDP Discovery response URL from metadata {}", response.getLocation());
                     return response.getLocation();
                 }
@@ -346,16 +349,18 @@ public class SAMLDiscovery extends GenericFilterBean {
      * @return true if the request is valid, false otherwise
      */
     protected boolean isResponseURLValid(String returnURL, SAMLMessageContext messageContext) {
+        try {
+            URLBuilder foundURL = new URLBuilder(returnURL);
+            URLBuilder defaultURL = new URLBuilder(getDefaultReturnURL(messageContext));
 
-        URLBuilder foundURL = new URLBuilder(returnURL);
-        URLBuilder defaultURL = new URLBuilder(getDefaultReturnURL(messageContext));
+            if (!defaultURL.getHost().equals(foundURL.getHost())) {
+                return false;
+            }
 
-        if (!defaultURL.getHost().equals(foundURL.getHost())) {
+            return true;
+        } catch (MalformedURLException e) {
             return false;
         }
-
-        return true;
-
     }
 
     /**

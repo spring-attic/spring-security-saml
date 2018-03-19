@@ -14,18 +14,29 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.core.impl.RequesterIDBuilder;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.saml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.IDPEntry;
+import org.opensaml.saml.saml2.core.IDPList;
+import org.opensaml.saml.saml2.core.NameIDPolicy;
+import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.core.RequesterID;
+import org.opensaml.saml.saml2.core.Scoping;
+import org.opensaml.saml.saml2.core.impl.RequesterIDBuilder;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
@@ -33,10 +44,6 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Class implements WebSSO profile and offers capabilities for SP initialized SSO and
@@ -217,9 +224,9 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @throws MetadataProviderException in case system can't verify whether endpoint is supported or not
      */
     protected boolean isEndpointSupported(SingleSignOnService endpoint) throws MetadataProviderException {
-        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) ||
-                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding()) ||
-                org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI.equals(endpoint.getBinding());
+        return org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) ||
+            org.opensaml.saml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding()) ||
+            org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI.equals(endpoint.getBinding());
     }
 
     /**
@@ -231,8 +238,8 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @throws MetadataProviderException in case system can't verify whether endpoint is supported or not
      */
     protected boolean isEndpointSupported(AssertionConsumerService endpoint) throws MetadataProviderException {
-        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) |
-                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding());
+        return org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(endpoint.getBinding()) |
+            org.opensaml.saml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(endpoint.getBinding());
     }
 
     /**

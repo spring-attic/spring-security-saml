@@ -15,16 +15,16 @@
 
 package org.opensaml.compat.security;
 
-import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.ws.message.MessageContext;
-import org.opensaml.ws.security.provider.CertificateNameOptions;
-import org.opensaml.ws.security.provider.ClientCertAuthRule;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.X509Credential;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.MetadataCriteria;
+import org.opensaml.compat.security.provider.CertificateNameOptions;
+import org.opensaml.compat.security.provider.ClientCertAuthRule;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * SAML specialization of {@link ClientCertAuthRule} which provides support for X509Credential trust engine validation

@@ -16,11 +16,11 @@ package org.springframework.security.saml.processor;
 
 import java.util.List;
 
+import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**

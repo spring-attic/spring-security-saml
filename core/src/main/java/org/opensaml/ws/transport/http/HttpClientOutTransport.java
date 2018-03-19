@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
@@ -91,7 +90,7 @@ public class HttpClientOutTransport implements HTTPOutTransport {
     }
 
     public String getCharacterEncoding() {
-        return postMethod("http.protocol.content-charset").getValue();
+        throw new UnsupportedOperationException("not yet");
     }
 
     public Credential getLocalCredential() {
@@ -127,11 +126,11 @@ public class HttpClientOutTransport implements HTTPOutTransport {
     }
 
     public String getHeaderValue(String s) {
-        return postMethod.getRequestHeader(s).getValue();
+        return postMethod.getFirstHeader(s).getValue();
     }
 
     public String getHTTPMethod() {
-        return postMethod.getParameter("http.protocol.version").getValue();
+        return postMethod.getMethod();
     }
 
     public int getStatusCode() {

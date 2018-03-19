@@ -18,17 +18,17 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
-import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
+import org.opensaml.compat.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
+import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder;
 import org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl;
-import org.opensaml.ws.security.SecurityPolicyRule;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 

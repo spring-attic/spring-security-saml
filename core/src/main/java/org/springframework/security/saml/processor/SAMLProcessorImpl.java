@@ -14,29 +14,34 @@
  */
 package org.springframework.security.saml.processor;
 
+import javax.xml.namespace.QName;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncoder;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecoder;
+import org.opensaml.security.SecurityException;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.security.SecurityPolicy;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
-import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import javax.xml.namespace.QName;
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * Processor is capable of parsing SAML message from HttpServletRequest and populate the SAMLMessageContext
@@ -82,10 +87,10 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws SAMLException             error retrieving the message from the request
      * @throws MetadataProviderException error retrieving metadata
      * @throws MessageDecodingException  error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *                                   error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, SecurityException {
 
         log.debug("Retrieving message using binding {}", binding.getBindingURI());
 
@@ -102,7 +107,8 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
         // Decode the message
         MessageDecoder decoder = binding.getMessageDecoder();
-        decoder.decode(samlContext);
+        //decoder.decode(samlContext);
+        decoder.decode();
 
         if (samlContext.getPeerEntityMetadata() == null) {
             throw new MetadataProviderException("Metadata for issuer " + samlContext.getInboundMessageIssuer() + " wasn't found");
@@ -138,16 +144,16 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param samlContext saml context
      * @param binding     to use for message extraction
      * @return SAML message context with filled information about the message
-     * @throws org.opensaml.common.SAMLException
+     * @throws SAMLException
      *          error retrieving the message from the request
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws MetadataProviderException
      *          error retrieving metadat
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws MessageDecodingException
      *          error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *          error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, SecurityException {
 
         return retrieveMessage(samlContext, getBinding(binding));
 
@@ -158,16 +164,17 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      *
      * @param samlContext saml context
      * @return SAML message context with filled information about the message
-     * @throws org.opensaml.common.SAMLException
+     * @throws SAMLException
      *          error retrieving the message from the request
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws MetadataProviderException
      *          error retrieving metadat
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws MessageDecodingException
      *          error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *          error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext)
+        throws SAMLException, MetadataProviderException, MessageDecodingException, SecurityException {
 
         return retrieveMessage(samlContext, getBinding(samlContext.getInboundMessageTransport()));
 
@@ -221,7 +228,8 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         }
 
         MessageEncoder encoder = binding.getMessageEncoder();
-        encoder.encode(samlContext);
+        //encoder.encode(samlContext);
+        encoder.encode();
 
         return samlContext;
 
@@ -275,7 +283,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @return binding
      * @throws SAMLException in case binding can't be found
      * @throws MetadataProviderException in case binding of the endpoint can't be determined
-     * @see SAMLUtil#getBindingForEndpoint(org.opensaml.saml2.metadata.Endpoint)
+     * @see SAMLUtil#getBindingForEndpoint(Endpoint)
      */
     protected SAMLBinding getBinding(Endpoint endpoint) throws SAMLException, MetadataProviderException {
         return getBinding(SAMLUtil.getBindingForEndpoint(endpoint));

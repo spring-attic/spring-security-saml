@@ -35,7 +35,6 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.messaging.ServletRequestX509CredentialAdapter;
 import org.opensaml.security.trust.TrustEngine;
@@ -81,12 +80,16 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected static final Logger log = LoggerFactory.getLogger(SAMLContextProviderImpl.class);
 
     // Way to obtain encrypted key info from XML Encryption
-    private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
+    private static ChainingEncryptedKeyResolver encryptedKeyResolver;
 
     static {
-        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+        encryptedKeyResolver = new ChainingEncryptedKeyResolver(
+            Arrays.asList(
+                new InlineEncryptedKeyResolver(),
+                new EncryptedElementTypeEncryptedKeyResolver(),
+                new SimpleRetrievalMethodEncryptedKeyResolver()
+            )
+        );
     }
 
     protected KeyManager keyManager;
@@ -552,7 +555,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param metadataResolver metaiop resolver
      * @see org.springframework.security.saml.trust.MetadataCredentialResolver
      */
-    public void setMetadataResolver(MetadataCredentialResolver metadataResolver) {
+    public void setMetadataResolver(org.springframework.security.saml.trust.MetadataCredentialResolver metadataResolver) {
         this.metadataResolver = metadataResolver;
     }
 

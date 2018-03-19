@@ -14,15 +14,14 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.compat.MetadataProviderException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 
 /**
  * Metadata manager caches all results of EntityDescriptors loaded from the providers. Cache is cleaned

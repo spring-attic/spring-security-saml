@@ -14,24 +14,24 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.util.SimpleURLCanonicalizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.opensaml.compat.MetadataProviderException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.MalformedURLException;
+
+import net.shibboleth.utilities.java.support.net.SimpleURLCanonicalizer;
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * The filter expects calls on configured URL and presents user with SAML2 metadata representing
@@ -176,7 +176,11 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
         sb.append(request.getContextPath());
         String url = sb.toString();
         if (isNormalizeBaseUrl()) {
-            return SimpleURLCanonicalizer.canonicalize(url);
+            try {
+                return SimpleURLCanonicalizer.canonicalize(url);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             return url;
         }

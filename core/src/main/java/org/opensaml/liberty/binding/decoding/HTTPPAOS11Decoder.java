@@ -51,17 +51,18 @@ public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
         List<QName> headerNames = new ArrayList<QName>();
         headerNames.add(paosResponse);
 
-        setUnderstoodHeaders(headerNames);
+        //setUnderstoodHeaders(headerNames);
     }
 
-    @Override
+
     protected void doDecode(MessageContext messageContext)
         throws MessageDecodingException {
-        super.doDecode(messageContext);
+        setMessageContext(messageContext);
+        super.doDecode();
 
         // Setting the RelayState in the message context
         SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
-        Envelope soapMessage = (Envelope) samlMsgCtx.getInboundMessage();
+        Envelope soapMessage = (Envelope) samlMsgCtx.getInboundSAMLMessage();
 
         List<XMLObject> relayStateHeader = soapMessage.getHeader().getUnknownXMLObjects(
                 new QName(SAMLConstants.SAML20ECP_NS,

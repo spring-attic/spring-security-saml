@@ -14,17 +14,6 @@
  */
 package org.springframework.security.saml.key;
 
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.CredentialResolver;
-import org.opensaml.xml.security.credential.KeyStoreCredentialResolver;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -35,6 +24,17 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.CredentialResolver;
+import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
 /**
  * Class provides access to private and trusted keys for SAML Extension configuration. Keys are stored in the underlaying
@@ -163,11 +163,11 @@ public class JKSKeyManager implements KeyManager {
         }
     }
 
-    public Iterable<Credential> resolve(CriteriaSet criteriaSet) throws org.opensaml.xml.security.SecurityException {
+    public Iterable<Credential> resolve(CriteriaSet criteriaSet) throws ResolverException {
         return credentialResolver.resolve(criteriaSet);
     }
 
-    public Credential resolveSingle(CriteriaSet criteriaSet) throws SecurityException {
+    public Credential resolveSingle(CriteriaSet criteriaSet) throws ResolverException {
         return credentialResolver.resolveSingle(criteriaSet);
     }
 
@@ -186,10 +186,10 @@ public class JKSKeyManager implements KeyManager {
 
         try {
             CriteriaSet cs = new CriteriaSet();
-            EntityIDCriteria criteria = new EntityIDCriteria(keyName);
+            EntityIdCriterion criteria = new EntityIdCriterion(keyName);
             cs.add(criteria);
             return resolveSingle(cs);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (ResolverException e) {
             throw new SAMLRuntimeException("Can't obtain SP signing key", e);
         }
 

@@ -22,6 +22,7 @@ import org.opensaml.compat.MetadataProvider;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.ArtifactResolve;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
@@ -55,6 +56,7 @@ public class SAMLMessageContext extends MessageContext {
     private boolean peerUserSelected;
     private String inboundSAMLBinding;
     private SAMLMessageStorage messageStorage;
+
     //backwards compatible fields
     private EntityDescriptor peerEntityMetadata;
     private RoleDescriptor peerEntityRoleMetadata;
@@ -76,6 +78,12 @@ public class SAMLMessageContext extends MessageContext {
     private InTransport inboundMessageTransport;
     private OutTransport outboundMessageTransport;
     private String relayState;
+    private SAMLObject inboundSAMLMessage;
+    private String inboundSAMLProtocol;
+    private String inboundMessageIssuer;
+    private Credential outboundSAMLMessageSigningCredential;
+    private boolean issuerAuthenticated;
+    private boolean inboundSAMLMessageAuthenticated;
 
 
     /**
@@ -394,5 +402,53 @@ public class SAMLMessageContext extends MessageContext {
 
     public String getRelayState() {
         return relayState;
+    }
+
+    public void setInboundSAMLMessage(SAMLObject inboundSAMLMessage) {
+        this.inboundSAMLMessage = inboundSAMLMessage;
+    }
+
+    public SAMLObject getInboundSAMLMessage() {
+        return inboundSAMLMessage;
+    }
+
+    public void setInboundSAMLProtocol(String inboundSAMLProtocol) {
+        this.inboundSAMLProtocol = inboundSAMLProtocol;
+    }
+
+    public String getInboundSAMLProtocol() {
+        return inboundSAMLProtocol;
+    }
+
+    public String getInboundMessageIssuer() {
+        return inboundMessageIssuer;
+    }
+
+    public void setInboundMessageIssuer(String inboundMessageIssuer) {
+        this.inboundMessageIssuer = inboundMessageIssuer;
+    }
+
+    public void setOutboundSAMLMessageSigningCredential(Credential outboundSAMLMessageSigningCredential) {
+        this.outboundSAMLMessageSigningCredential = outboundSAMLMessageSigningCredential;
+    }
+
+    public Credential getOutboundSAMLMessageSigningCredential() {
+        return outboundSAMLMessageSigningCredential;
+    }
+
+    public boolean isIssuerAuthenticated() {
+        return issuerAuthenticated;
+    }
+
+    public void setIssuerAuthenticated(boolean issuerAuthenticated) {
+        this.issuerAuthenticated = issuerAuthenticated;
+    }
+
+    public boolean isInboundSAMLMessageAuthenticated() {
+        return inboundSAMLMessageAuthenticated;
+    }
+
+    public void setInboundSAMLMessageAuthenticated(boolean inboundSAMLMessageAuthenticated) {
+        this.inboundSAMLMessageAuthenticated = inboundSAMLMessageAuthenticated;
     }
 }

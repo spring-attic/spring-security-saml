@@ -52,12 +52,6 @@ import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFacto
 public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase {
 
     /**
-     * Client used to perform HTTP calls for artifact resolution.
-     */
-    private HttpClient httpClient;
-
-    /**
-     * @param httpClient client used to send SOAP messages
      */
     public ArtifactResolutionProfileImpl() {
 

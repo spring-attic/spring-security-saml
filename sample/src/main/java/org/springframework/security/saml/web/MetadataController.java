@@ -14,18 +14,30 @@
  */
 package org.springframework.security.saml.web;
 
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.security.credential.Credential;
+import javax.servlet.http.HttpServletRequest;
+import java.security.KeyStoreException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.metadata.*;
-import org.opensaml.compat.MetadataProviderException;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
+import org.springframework.security.saml.metadata.MetadataGenerator;
+import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.metadata.MetadataMemoryProvider;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -34,10 +46,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.InternalResourceView;
-
-import javax.servlet.http.HttpServletRequest;
-import java.security.KeyStoreException;
-import java.util.*;
 
 import static org.springframework.util.StringUtils.hasLength;
 
@@ -299,7 +307,8 @@ public class MetadataController {
 
     }
 
-    protected String getMetadataAsString(EntityDescriptor descriptor, ExtendedMetadata extendedMetadata) throws MarshallingException {
+    protected String getMetadataAsString(EntityDescriptor descriptor, ExtendedMetadata extendedMetadata)
+        throws MarshallingException {
         return SAMLUtil.getMetadataAsString(metadataManager, keyManager, descriptor, extendedMetadata);
     }
 

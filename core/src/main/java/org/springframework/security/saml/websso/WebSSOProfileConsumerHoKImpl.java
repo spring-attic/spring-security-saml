@@ -14,19 +14,24 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.util.Base64;
+import java.security.cert.CertificateEncodingException;
+import java.util.List;
+
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.KeyInfoConfirmationDataType;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
-
-import java.security.cert.CertificateEncodingException;
-import java.util.List;
 
 /**
  * Class implements processing of the SAML Holder-of-Key Browser SSO profile as per
@@ -52,9 +57,9 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
      * @param subject subject to validate
      * @param request request
      * @param context context
-     * @throws org.opensaml.common.SAMLException
+     * @throws SAMLException
      *          error validating the object
-     * @throws org.opensaml.xml.encryption.DecryptionException
+     * @throws DecryptionException
      *          in case the NameID can't be decrypted
      */
     protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
@@ -166,7 +171,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
         }
 
         try {
-            return Base64.encodeBytes(context.getPeerSSLCredential().getEntityCertificate().getEncoded());
+            return new String(Base64.encode(context.getPeerSSLCredential().getEntityCertificate().getEncoded()));
         } catch (CertificateEncodingException e) {
             throw new SAMLException("Error base64 encoding peer certificate");
         }

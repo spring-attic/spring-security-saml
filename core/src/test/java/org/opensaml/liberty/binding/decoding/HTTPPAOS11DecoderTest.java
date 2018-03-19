@@ -23,45 +23,44 @@ package org.opensaml.liberty.binding.decoding;
 import javax.xml.namespace.QName;
 
 import org.opensaml.common.BaseTestCase;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.security.SecurityException;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 public class HTTPPAOS11DecoderTest extends BaseTestCase {
-    
+
     private HTTPPAOS11Decoder decoder;
     private SAMLMessageContext messageContext;
     private MockHttpServletRequest httpRequest;
-    
+
     private String expectedRelayState;
-    
+
     /** {@inheritDoc} */
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         expectedRelayState = "df558a";
-        
+
         httpRequest = new MockHttpServletRequest();
         httpRequest.setMethod("POST");
-        
+
         messageContext = new SAMLMessageContext();
         messageContext.setInboundMessageTransport(new HttpServletRequestAdapter(httpRequest));
-        
+
         decoder = new HTTPPAOS11Decoder();
     }
-    
+
     public void testUnderstandsPaosResponseHeader() {
         QName paosResponseHeader = new QName(SAMLConstants.PAOS_NS, "Response",
-                SAMLConstants.PAOS_PREFIX);
-        
-        assertTrue("The PAOS Decoder does not understand paos:Response header",
-                decoder.getUnderstoodHeaders().contains(paosResponseHeader));
+                                             SAMLConstants.PAOS_PREFIX);
+
+        fail("not implemented");
+//        assertTrue("The PAOS Decoder does not understand paos:Response header",
+//                decoder.getUnderstoodHeaders().contains(paosResponseHeader));
     }
-    
-    public void testRelayState() throws MessageDecodingException, SecurityException {
+
+    public void testRelayState() throws Exception {
         String soapMessage =
             "<soap11:Envelope xmlns:soap11=\"http://schemas.xmlsoap.org/soap/envelope/\"> " +
             "<soap11:Header> " +
@@ -75,15 +74,15 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
                 "Version=\"2.0\" xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\"> " +
                 "<samlp:Status><samlp:StatusCode " +
                 "Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\"/> " +
-                "</samlp:Status></samlp:Response>" + 
+                "</samlp:Status></samlp:Response>" +
             "</soap11:Body></soap11:Envelope>";
-            
+
         httpRequest.setContent(soapMessage.getBytes());
-    
-        decoder.decode(messageContext);
-        
+
+        decoder.doDecode(messageContext);
+
         assertEquals("The messageContext does not have the correct RelayState",
-                expectedRelayState, messageContext.getRelayState());        
+                expectedRelayState, messageContext.getRelayState());
     }
 
 }

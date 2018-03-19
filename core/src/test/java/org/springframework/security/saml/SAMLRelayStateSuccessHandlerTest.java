@@ -14,20 +14,24 @@
  */
 package org.springframework.security.saml;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.impl.AssertionBuilder;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.RedirectStrategy;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 
-import static org.easymock.EasyMock.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.impl.AssertionBuilder;
+import org.opensaml.saml.saml2.core.impl.NameIDBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.RedirectStrategy;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Michael Beauregard

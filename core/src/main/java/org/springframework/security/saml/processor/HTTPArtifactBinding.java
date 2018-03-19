@@ -48,7 +48,7 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
      * @param artifactProfile profile used to retrieven the artifact message
      */
     public HTTPArtifactBinding(ParserPool parserPool, VelocityEngine velocityEngine, ArtifactResolutionProfile artifactProfile) {
-        super(new HTTPArtifactDecoderImpl(artifactProfile, parserPool), new HTTPArtifactEncoder());
+        super(new HTTPArtifactDecoderImpl(artifactProfile, parserPool, null), new HTTPArtifactEncoder());
         HTTPArtifactEncoder artifactEncoder = (HTTPArtifactEncoder) getMessageEncoder();
         artifactEncoder.setVelocityEngine(velocityEngine);
         artifactEncoder.setVelocityTemplateId("/templates/saml2-post-artifact-binding.vm");
@@ -83,7 +83,7 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
 
     @Override
     public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
-
+        HTTPArtifactDecoderImpl decoder = (HTTPArtifactDecoderImpl) getMessageDecoder();
         SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
         securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
 

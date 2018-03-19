@@ -15,6 +15,7 @@
 
 package org.opensaml.compat.security;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.MetadataProvider;
 import org.opensaml.compat.MetadataProviderException;
@@ -27,7 +28,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that enforces the AuthnRequestsSigned flag of
@@ -40,11 +40,11 @@ public class SAML2AuthnRequestsSignedRule implements SecurityPolicyRule {
 
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.debug("Invalid message context type, this policy rule only supports SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.debug("Invalid message context type, this policy rule only supports BackwardsCompatibleMessageContext");
             return;
         }
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
 
         SAMLObject samlMessage = samlMsgCtx.getInboundSAMLMessage();
         if (! (samlMessage instanceof AuthnRequest) ) {
@@ -96,7 +96,7 @@ public class SAML2AuthnRequestsSignedRule implements SecurityPolicyRule {
      * @param messageContext the message context being evaluated
      * @return true if the inbound message is signed, otherwise false
      */
-    protected boolean isMessageSigned(SAMLMessageContext messageContext) {
+    protected boolean isMessageSigned(BackwardsCompatibleMessageContext messageContext) {
         // TODO this really should be determined by the decoders and supplied to the rule
         // in some fashion, to handle binding-specific signature mechanisms. See JIRA issue JOWS-4.
         //

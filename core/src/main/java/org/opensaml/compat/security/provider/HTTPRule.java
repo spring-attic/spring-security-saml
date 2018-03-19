@@ -15,6 +15,7 @@
 
 package org.opensaml.compat.security.provider;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.security.SecurityPolicyException;
 import org.opensaml.compat.security.SecurityPolicyRule;
@@ -22,7 +23,6 @@ import org.opensaml.compat.transport.http.HTTPTransport;
 import org.opensaml.messaging.context.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * A security rule that checks basic HTTP connection properties.
@@ -57,7 +57,7 @@ public class HTTPRule implements SecurityPolicyRule {
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
 
-        if (!(((SAMLMessageContext)messageContext).getInboundMessageTransport() instanceof HTTPTransport)) {
+        if (!(((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport() instanceof HTTPTransport)) {
             log.debug("Message context was did not contain an HTTP transport, unable to evaluate security rule");
             return;
         }
@@ -74,7 +74,7 @@ public class HTTPRule implements SecurityPolicyRule {
      * @throws SecurityPolicyException thrown if the message context does not meet the requirements of an evaluated rule
      */
     protected void doEvaluate(MessageContext messageContext) throws SecurityPolicyException {
-        HTTPTransport transport = (HTTPTransport) ((SAMLMessageContext)messageContext).getInboundMessageTransport();
+        HTTPTransport transport = (HTTPTransport) ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport();
         evaluateContentType(transport);
         evaluateRequestMethod(transport);
         evaluateSecured(transport);

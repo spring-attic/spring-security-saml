@@ -15,19 +15,25 @@
  */
 package org.springframework.security.saml.websso;
 
-import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Set;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
-import net.spy.memcached.ConnectionFactoryBuilder;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
+import org.apache.http.impl.NoConnectionReuseStrategy;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.opensaml.compat.MetadataCriteria;
 import org.opensaml.compat.MetadataProviderException;
 import org.opensaml.compat.UsageCriteria;
@@ -42,14 +48,21 @@ import org.opensaml.security.credential.UsageType;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.HttpClientOutTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.trust.X509KeyManager;
-import org.springframework.security.saml.trust.X509TrustManager;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
 
 /**
  * Implementation of the artifact resolution protocol which uses Apache HTTPClient for SOAP binding transport.
  */
 public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase {
+
+    private String sslHostnameVerification = "default";
+
+    /**
+     * Keys used as anchors for trust verification when PKIX mode is enabled for the local entity. In case value is null
+     * all keys in the keyStore will be treated as trusted.
+     */
+    private Set<String> trustedKeys;
+
 
     /**
      */
@@ -79,22 +92,34 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             postMethod = new HttpPost(uri);
             postMethod.setConfig(getHostConfiguration(uri, context));
 
-            HttpClientOutTransport clientOutTransport = new HttpClientOutTransport(postMethod);
-            HttpClientInTransport clientInTransport = new HttpClientInTransport(postMethod, endpointURI);
-
-            context.setInboundMessageTransport(clientInTransport);
-            context.setOutboundMessageTransport(clientOutTransport);
 
             // Send artifact retrieve message
             boolean signMessage = context.getPeerExtendedMetadata().isRequireArtifactResolveSigned();
             processor.sendMessage(context, signMessage, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
             log.debug("Sending ArtifactResolution message to {}", uri);
-            int responseCode = httpClient.executeMethod(hc, postMethod);
+
+            CloseableHttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.DEFAULT)
+                .setDefaultHeaders(new ArrayList<>())
+                .setDefaultCookieStore(new BasicCookieStore())
+                .setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE)
+                .build();
+
+            CloseableHttpResponse response = client.execute(postMethod);
+
+            int responseCode = response.getStatusLine().getStatusCode();
             if (responseCode != 200) {
-                String responseBody = postMethod.getResponseBodyAsString();
+                String responseBody = EntityUtils.toString(response.getEntity());
                 throw new MessageDecodingException("Problem communicating with Artifact Resolution service, received response " + responseCode + ", body " + responseBody);
             }
+
+            HttpClientOutTransport clientOutTransport = new HttpClientOutTransport(postMethod);
+            HttpClientInTransport clientInTransport = new HttpClientInTransport(response, endpointURI);
+
+            context.setInboundMessageTransport(clientInTransport);
+            context.setOutboundMessageTransport(clientOutTransport);
+
 
             // Decode artifact response message.
             processor.retrieveMessage(context, SAMLConstants.SAML2_SOAP11_BINDING_URI);
@@ -153,22 +178,17 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
                 criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
 
-                X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
-                X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());
-                HostnameVerifier hostnameVerifier = context.getLocalSSLHostnameVerifier();
-
-                LayeredConnectionSocketFactory socketFactory = getSSLSocketFactory(context, manager, trustManager, hostnameVerifier);
-
-
 
             }
 
             return builder.build();
 
-        } catch (NoSuchAlgorithmException e) {
-            throw new MessageEncodingException("Error getting SSL context, algorithm not found", e);
-        } catch (KeyManagementException e) {
-            throw new MessageEncodingException("Error getting SSL context, key issues", e);
+        } catch (Exception x) {
+            if (x instanceof RuntimeException) {
+                throw (RuntimeException)x;
+            } else {
+                throw new RuntimeException(x);
+            }
         }
 
     }
@@ -180,15 +200,23 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @param context current SAML context
      * @param manager keys used for client authentication
      * @param trustManager trust manager for server verification
-     * @param hostnameVerifier verifier for server hostname, or null
      * @return socket factory
      */
-    protected LayeredConnectionSocketFactory getSSLSocketFactory(SAMLMessageContext context, X509KeyManager manager, X509TrustManager trustManager, HostnameVerifier hostnameVerifier)
+    protected LayeredConnectionSocketFactory getSSLSocketFactory(SAMLMessageContext context,
+                                                                 org.springframework.security.saml.key.KeyManager manager,
+                                                                 TrustManager trustManager)
         throws NoSuchAlgorithmException, KeyManagementException {
         if (isHostnameVerificationSupported()) {
-            return new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
+            return new TLSProtocolSocketFactory(manager,
+                                                trustManager,
+                                                getTrustedKeys(),
+                                                getSslHostnameVerification()
+            );
         } else {
-            return new TLSProtocolSocketFactory(manager, trustManager);
+            return new TLSProtocolSocketFactory(manager,
+                                                trustManager,
+                                                getTrustedKeys(),
+                                                "default");
         }
     }
 
@@ -208,4 +236,19 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
         }
     }
 
+    public String getSslHostnameVerification() {
+        return sslHostnameVerification;
+    }
+
+    public void setSslHostnameVerification(String sslHostnameVerification) {
+        this.sslHostnameVerification = sslHostnameVerification;
+    }
+
+    public Set<String> getTrustedKeys() {
+        return trustedKeys;
+    }
+
+    public void setTrustedKeys(Set<String> trustedKeys) {
+        this.trustedKeys = trustedKeys;
+    }
 }

@@ -18,6 +18,7 @@ import javax.xml.bind.ValidationException;
 
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
@@ -26,6 +27,7 @@ import org.springframework.security.saml.context.SAMLMessageContext;
  */
 public interface WebSSOProfileConsumer {
 
-    SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, SecurityException, ValidationException, DecryptionException;
+    SAMLCredential processAuthenticationResponse(SAMLMessageContext context)
+        throws SAMLException, SecurityException, ValidationException, DecryptionException, SignatureException, org.opensaml.security.SecurityException, org.opensaml.compat.validation.ValidationException;
 
 }

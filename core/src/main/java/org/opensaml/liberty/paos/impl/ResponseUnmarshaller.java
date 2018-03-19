@@ -37,8 +37,8 @@ public class ResponseUnmarshaller extends AbstractSAMLObjectUnmarshaller {
         Response response = (Response) samlObject;
 
         QName attrName = XMLHelper.getNodeQName(attribute);
-        if (Response.SOAP12_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
-            response.setSOAP12MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
+        if (Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
+            response.setSOAP11MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
         } else if (Response.SOAP11_ACTOR_ATTR_NAME.equals(attrName)) {
             response.setSOAP11Actor(attribute.getValue());
         } else if (Response.REF_TO_MESSAGE_ID_ATTRIB_NAME.equals(attribute.getLocalName())) {

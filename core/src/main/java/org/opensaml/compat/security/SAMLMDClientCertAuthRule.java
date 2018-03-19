@@ -16,6 +16,7 @@
 package org.opensaml.compat.security;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.MetadataCriteria;
 import org.opensaml.compat.security.provider.CertificateNameOptions;
 import org.opensaml.compat.security.provider.ClientCertAuthRule;
@@ -24,7 +25,6 @@ import org.opensaml.security.trust.TrustEngine;
 import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * SAML specialization of {@link ClientCertAuthRule} which provides support for X509Credential trust engine validation
@@ -49,12 +49,12 @@ public class SAMLMDClientCertAuthRule extends ClientCertAuthRule {
     protected CriteriaSet buildCriteriaSet(String entityID, MessageContext messageContext)
         throws SecurityPolicyException {
 
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.error("Supplied message context was not an instance of SAMLMessageContext, can not build criteria set from SAML metadata parameters");
-            throw new SecurityPolicyException("Supplied message context was not an instance of SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.error("Supplied message context was not an instance of BackwardsCompatibleMessageContext, can not build criteria set from SAML metadata parameters");
+            throw new SecurityPolicyException("Supplied message context was not an instance of BackwardsCompatibleMessageContext");
         }
 
-        SAMLMessageContext samlContext = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlContext = (BackwardsCompatibleMessageContext) messageContext;
 
         CriteriaSet criteriaSet = super.buildCriteriaSet(entityID, messageContext);
         MetadataCriteria mdCriteria =

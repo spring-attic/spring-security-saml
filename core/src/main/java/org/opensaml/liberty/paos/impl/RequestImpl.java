@@ -16,7 +16,6 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import org.opensaml.core.xml.XMLObject;
@@ -49,7 +48,7 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
      * @param namespacePrefix the prefix for the given namespace
      */
     protected RequestImpl(String namespaceURI, String elementLocalName,
-            String namespacePrefix) {
+                          String namespacePrefix) {
         super(namespaceURI, elementLocalName, namespacePrefix);
     }
 
@@ -76,7 +75,7 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
     /** {@inheritDoc} */
     public void setResponseConsumerURL(String newResponseConsumerURL) {
         responseConsumerURL = prepareForAssignment(responseConsumerURL,
-                newResponseConsumerURL);
+                                                   newResponseConsumerURL);
     }
 
     /** {@inheritDoc} */
@@ -86,7 +85,7 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
 
     /** {@inheritDoc} */
     public List<XMLObject> getOrderedChildren() {
-     // No elements
+        // No elements
         return null;
     }
 
@@ -107,7 +106,7 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
     public void setSOAP11MustUnderstand(Boolean newMustUnderstand) {
         if (newMustUnderstand != null) {
             soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand,
-                    new XSBooleanValue(newMustUnderstand, true));
+                                                        new XSBooleanValue(newMustUnderstand, true));
         } else {
             soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand, null);
         }
@@ -115,8 +114,8 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
 
     /** {@inheritDoc} */
     public void setSOAP11MustUnderstand(XSBooleanValue newMustUnderstand) {
-            soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand,
-                    newMustUnderstand);
+        soap11MustUnderstand = prepareForAssignment(soap11MustUnderstand,
+                                                    newMustUnderstand);
     }
 
     /** {@inheritDoc} */
@@ -129,25 +128,4 @@ public class RequestImpl extends AbstractSAMLObject implements Request {
         soap11Actor = prepareForAssignment(soap11Actor, newActor);
     }
 
-    @Nullable
-    @Override
-    public Boolean isSOAP12MustUnderstand() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Nullable
-    @Override
-    public XSBooleanValue isSOAP12MustUnderstandXSBoolean() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setSOAP12MustUnderstand(@Nullable Boolean newMustUnderstand) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setSOAP12MustUnderstand(@Nullable XSBooleanValue newMustUnderstand) {
-        throw new UnsupportedOperationException();
-    }
 }

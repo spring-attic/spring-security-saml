@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecodingException;
@@ -29,7 +30,6 @@ import org.opensaml.saml.saml2.binding.decoding.impl.HTTPSOAP11Decoder;
 import org.opensaml.saml.saml2.ecp.RelayState;
 import org.opensaml.saml.saml2.ecp.impl.RelayStateImpl;
 import org.opensaml.soap.soap11.Envelope;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
 
@@ -61,7 +61,7 @@ public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
         super.doDecode();
 
         // Setting the RelayState in the message context
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
         Envelope soapMessage = (Envelope) samlMsgCtx.getInboundSAMLMessage();
 
         List<XMLObject> relayStateHeader = soapMessage.getHeader().getUnknownXMLObjects(

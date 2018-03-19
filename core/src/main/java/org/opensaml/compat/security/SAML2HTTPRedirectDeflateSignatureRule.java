@@ -18,12 +18,13 @@ package org.opensaml.compat.security;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.transport.http.HTTPTransportUtils;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
+
 
 /**
  * Security policy which evaluates simple "blob" signatures according to the SAML 2 HTTP-Redirect DEFLATE binding.
@@ -43,7 +44,7 @@ public class SAML2HTTPRedirectDeflateSignatureRule extends BaseSAMLSimpleSignatu
     }
 
     /** {@inheritDoc} */
-    protected boolean ruleHandles(HttpServletRequest request, SAMLMessageContext samlMsgCtx)
+    protected boolean ruleHandles(HttpServletRequest request, BackwardsCompatibleMessageContext samlMsgCtx)
             throws SecurityPolicyException {
         return "GET".equals(request.getMethod());
     }

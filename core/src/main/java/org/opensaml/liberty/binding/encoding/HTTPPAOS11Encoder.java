@@ -21,12 +21,15 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
+import org.opensaml.compat.SOAPHelper;
 import org.opensaml.compat.XMLHelper;
 import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.compat.transport.http.HTTPTransportUtils;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLObject;
@@ -34,11 +37,11 @@ import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.encoding.impl.BaseSAML2MessageEncoder;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
+import org.opensaml.security.SecurityException;
 import org.opensaml.soap.common.SOAPObjectBuilder;
 import org.opensaml.soap.soap11.Body;
 import org.opensaml.soap.soap11.Envelope;
-import org.opensaml.ws.soap.util.SOAPHelper;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -48,21 +51,36 @@ import static org.opensaml.saml.common.messaging.SAMLMessageSecuritySupport.sign
 
 public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
 
+    private MessageContext messageContext;
+
+    public HTTPPAOS11Encoder(MessageContext messageContext) {
+        this.messageContext = messageContext;
+    }
+
     /**
      * Logger
      */
-    private final Logger log = LoggerFactory.getLogger(HTTPSOAP11Encoder.class);
+    private final Logger log = LoggerFactory.getLogger(HTTPPAOS11Encoder.class);
 
     @Override
-    protected void doEncode(MessageContext messageContext) throws MessageEncodingException {
+    protected void doEncode() throws MessageEncodingException {
+        try {
+            this.doEncode(this.messageContext);
+        } catch (MarshallingException | SecurityException | SignatureException e) {
+            throw new MessageEncodingException(e);
+        }
+    }
 
-        if (!(messageContext instanceof SAMLMessageContext)) {
+    protected void doEncode(MessageContext messageContext)
+        throws MessageEncodingException, MarshallingException, SecurityException, SignatureException {
+
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
             log.error("Invalid message context type, this encoder only support SAMLMessageContext");
             throw new MessageEncodingException(
                     "Invalid message context type, this encoder only support SAMLMessageContext");
         }
 
-        if (!(messageContext.getOutboundMessageTransport() instanceof HTTPOutTransport)) {
+        if (!(((BackwardsCompatibleMessageContext)messageContext).getOutboundMessageTransport() instanceof HTTPOutTransport)) {
             log.error("Invalid outbound message transport type, this encoder only support HTTPOutTransport");
             throw new MessageEncodingException(
                     "Invalid outbound message transport type, this encoder only support HTTPOutTransport");
@@ -89,7 +107,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
         Element envelopeElem = marshallMessage(envelope);
 
         try {
-            HTTPOutTransport outTransport = (HTTPOutTransport) messageContext.getOutboundMessageTransport();
+            HTTPOutTransport outTransport = (HTTPOutTransport) ((BackwardsCompatibleMessageContext)messageContext).getOutboundMessageTransport();
             HTTPTransportUtils.addNoCacheHeaders(outTransport);
             HTTPTransportUtils.setUTF8Encoding(outTransport);
             HTTPTransportUtils.setContentType(outTransport, "text/xml");
@@ -159,11 +177,11 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
     }
 
     public boolean providesMessageConfidentiality(MessageContext messageContext) throws MessageEncodingException {
-        return messageContext.getOutboundMessageTransport().isConfidential();
+        return ((BackwardsCompatibleMessageContext)messageContext).getOutboundMessageTransport().isConfidential();
     }
 
     public boolean providesMessageIntegrity(MessageContext messageContext) throws MessageEncodingException {
-        return messageContext.getOutboundMessageTransport().isIntegrityProtected();
+        return ((BackwardsCompatibleMessageContext)messageContext).getOutboundMessageTransport().isIntegrityProtected();
     }
 
 }

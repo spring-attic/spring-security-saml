@@ -15,9 +15,12 @@
  */
 package org.springframework.security.saml.log;
 
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.xml.util.XMLHelper;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import org.opensaml.compat.XMLHelper;
+import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -25,9 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * Default Logger implementation sending message logs into standard Log4J logger.

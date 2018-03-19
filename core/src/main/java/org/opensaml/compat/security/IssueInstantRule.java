@@ -16,10 +16,10 @@
 package org.opensaml.compat.security;
 
 import org.joda.time.DateTime;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that checks for validity of SAML message issue instant date and time.
@@ -73,11 +73,11 @@ public class IssueInstantRule implements SecurityPolicyRule {
 
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.debug("Invalid message context type, this policy rule only supports SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.debug("Invalid message context type, this policy rule only supports BackwardsCompatibleMessageContext");
             return;
         }
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
 
         if (samlMsgCtx.getInboundSAMLMessageIssueInstant() == null) {
             if(requiredRule){

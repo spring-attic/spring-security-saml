@@ -15,21 +15,21 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.xml.SAMLConstants;
+import javax.servlet.http.HttpServletRequest;
+
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
 import org.opensaml.liberty.binding.decoding.HTTPPAOS11Decoder;
 import org.opensaml.liberty.binding.encoding.HTTPPAOS11Encoder;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.parse.ParserPool;
-
-import javax.servlet.http.HttpServletRequest;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.encoder.MessageEncoder;
+import org.opensaml.saml.common.xml.SAMLConstants;
 
 public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
 
 	public HTTPPAOS11Binding(ParserPool parserPool) {
-		super(new HTTPPAOS11Decoder(parserPool), new HTTPPAOS11Encoder());
+		super(new HTTPPAOS11Decoder(parserPool), new HTTPPAOS11Encoder(null));
 	}
 
     public HTTPPAOS11Binding(MessageDecoder decoder, MessageEncoder encoder) {

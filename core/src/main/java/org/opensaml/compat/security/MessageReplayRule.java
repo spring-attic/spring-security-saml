@@ -15,12 +15,12 @@
 
 package org.opensaml.compat.security;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.storage.ReplayCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that which checks for replay of SAML messages.
@@ -66,12 +66,12 @@ public class MessageReplayRule implements SecurityPolicyRule {
 
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.debug("Invalid message context type, this policy rule only supports SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.debug("Invalid message context type, this policy rule only supports BackwardsCompatibleMessageContext");
             return;
         }
 
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
 
         String messageIsuer = DataTypeHelper.safeTrimOrNullString(samlMsgCtx.getInboundMessageIssuer());
         if (messageIsuer == null) {

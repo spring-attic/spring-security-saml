@@ -14,12 +14,20 @@
  */
 package org.springframework.security.saml;
 
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
 import org.joda.time.DateTime;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.compat.validation.ValidationException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,9 +45,6 @@ import org.springframework.security.saml.log.SAMLLogger;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.util.Assert;
-
-import javax.servlet.ServletException;
-import java.util.*;
 
 /**
  * Authentication provider is capable of verifying validity of a SAMLAuthenticationToken and in case
@@ -103,12 +108,20 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
             log.debug("Error validating signature", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message signature", e);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (org.opensaml.security.SecurityException e) {
             log.debug("Error validating signature", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error validating SAML message signature", e);
         } catch (DecryptionException e) {
             log.debug("Error decrypting SAML message", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
+            throw new AuthenticationServiceException("Error decrypting SAML message", e);
+        } catch (SignatureException e) {
+            log.debug("Error decrypting SAML message, signature", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
+            throw new AuthenticationServiceException("Error decrypting SAML message", e);
+        } catch (javax.xml.bind.ValidationException e) {
+            log.debug("Error decrypting SAML message, validation", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error decrypting SAML message", e);
         }

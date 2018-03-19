@@ -16,24 +16,18 @@
 
 package org.opensaml.common;
 
-import org.opensaml.DefaultBootstrap;
 import org.opensaml.PaosBootstrap;
-import org.opensaml.xml.ConfigurationException;
 
 /**
  * Extension to the default bootstrap process which sets up configuration for testing
  * purposes.
  */
-public class BootstrapHelper extends DefaultBootstrap {
-    
-    /** List of XMLTooling configuration files with any needed test configuration. */
-    private static String[] testConfigs = {  };
-    
+public class BootstrapHelper {
+
+
     /** {@inheritDoc} */
-    public static synchronized void bootstrap() throws ConfigurationException {
+    public static synchronized void bootstrap() throws Exception {
         PaosBootstrap.bootstrap();
-        
-        initializeXMLTooling(testConfigs);
     }
 
 }

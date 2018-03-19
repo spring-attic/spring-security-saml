@@ -25,6 +25,7 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.Unmarshaller;
@@ -37,7 +38,6 @@ import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.saml.context.SAMLMessageContext;
 import org.w3c.dom.Document;
 
 /**
@@ -70,7 +70,7 @@ public class SAML2HTTPPostSimpleSignRule extends BaseSAMLSimpleSignatureSecurity
     }
 
     /** {@inheritDoc} */
-    protected boolean ruleHandles(HttpServletRequest request, SAMLMessageContext samlMsgCtx) {
+    protected boolean ruleHandles(HttpServletRequest request, BackwardsCompatibleMessageContext samlMsgCtx) {
         return "POST".equals(request.getMethod());
     }
 
@@ -115,7 +115,7 @@ public class SAML2HTTPPostSimpleSignRule extends BaseSAMLSimpleSignatureSecurity
     }
 
     /** {@inheritDoc} */
-    protected List<Credential> getRequestCredentials(HttpServletRequest request, SAMLMessageContext samlContext)
+    protected List<Credential> getRequestCredentials(HttpServletRequest request, BackwardsCompatibleMessageContext samlContext)
             throws SecurityPolicyException {
 
         String kiBase64 = request.getParameter("KeyInfo");

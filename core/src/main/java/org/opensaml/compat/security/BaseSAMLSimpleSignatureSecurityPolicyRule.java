@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.MetadataCriteria;
 import org.opensaml.compat.UsageCriteria;
@@ -32,7 +33,7 @@ import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.saml.context.SAMLMessageContext;
+
 
 /**
  * Base class for security rules which verify simple "blob" signatures computed over some components of a request.
@@ -57,18 +58,18 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException, SecurityException {
         log.debug("Evaluating simple signature rule of type: {}", getClass().getName());
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.debug("Invalid message context type, this policy rule only supports SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.debug("Invalid message context type, this policy rule only supports BackwardsCompatibleMessageContext");
             return;
         }
 
-        if (!(((SAMLMessageContext)messageContext).getInboundMessageTransport() instanceof HttpServletRequestAdapter)) {
+        if (!(((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport() instanceof HttpServletRequestAdapter)) {
             log.debug("Invalid inbound message transport type, this rule only supports HttpServletRequestAdapter");
             return;
         }
 
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
-        HttpServletRequestAdapter requestAdapter = (HttpServletRequestAdapter) ((SAMLMessageContext)messageContext)
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
+        HttpServletRequestAdapter requestAdapter = (HttpServletRequestAdapter) ((BackwardsCompatibleMessageContext)messageContext)
                 .getInboundMessageTransport();
         HttpServletRequest request = requestAdapter.getWrappedRequest();
 
@@ -111,7 +112,7 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
      *
      */
     private void doEvaluate(byte[] signature, byte[] signedContent, String algorithmURI, HttpServletRequest request,
-            SAMLMessageContext samlMsgCtx) throws SecurityPolicyException, SecurityException {
+            BackwardsCompatibleMessageContext samlMsgCtx) throws SecurityPolicyException, SecurityException {
 
         List<Credential> candidateCredentials = getRequestCredentials(request, samlMsgCtx);
 
@@ -217,7 +218,7 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
      * @return a list of candidate validation credentials in the request, or null if none were present
      * @throws SecurityPolicyException thrown if there is an error during request processing
      */
-    protected List<Credential> getRequestCredentials(HttpServletRequest request, SAMLMessageContext samlContext)
+    protected List<Credential> getRequestCredentials(HttpServletRequest request, BackwardsCompatibleMessageContext samlContext)
             throws SecurityPolicyException {
         // This will be specific to the binding and message types, so no default.
         return null;
@@ -272,7 +273,7 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
      * @return the signer's derived entity ID
      * @throws SecurityPolicyException thrown if there is an error during request processing
      */
-    protected String deriveSignerEntityID(SAMLMessageContext samlContext) throws SecurityPolicyException {
+    protected String deriveSignerEntityID(BackwardsCompatibleMessageContext samlContext) throws SecurityPolicyException {
         // No default
         return null;
     }
@@ -285,7 +286,7 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
      * @return a newly constructly set of criteria suitable for the configured trust engine
      * @throws SecurityPolicyException thrown if criteria set can not be constructed
      */
-    protected CriteriaSet buildCriteriaSet(String entityID, SAMLMessageContext samlContext)
+    protected CriteriaSet buildCriteriaSet(String entityID, BackwardsCompatibleMessageContext samlContext)
             throws SecurityPolicyException {
 
         CriteriaSet criteriaSet = new CriteriaSet();
@@ -321,7 +322,7 @@ public abstract class BaseSAMLSimpleSignatureSecurityPolicyRule implements Secur
      * @return true if the rule should attempt to process the request, otherwise false
      * @throws SecurityPolicyException thrown if there is an error during request processing
      */
-    protected abstract boolean ruleHandles(HttpServletRequest request, SAMLMessageContext samlMsgCtx)
+    protected abstract boolean ruleHandles(HttpServletRequest request, BackwardsCompatibleMessageContext samlMsgCtx)
             throws SecurityPolicyException;
 
 }

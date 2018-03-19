@@ -15,23 +15,23 @@
  */
 package org.springframework.security.saml.context;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.ssl.HostnameVerifier;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.springframework.security.saml.SAMLTestHelper.setLocalContextParameters;
 
 /**
@@ -89,7 +89,7 @@ public class SAMLContextProviderImplTest {
         assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
         verifyMock();
-    }    
+    }
 
     @Test
     public void testPopulateLocalEntityAliasNoRole() throws Exception {

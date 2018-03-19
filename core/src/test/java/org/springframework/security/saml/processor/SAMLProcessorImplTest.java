@@ -14,14 +14,16 @@
  */
 package org.springframework.security.saml.processor;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URL;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.util.Base64;
+import org.opensaml.compat.Base64;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.Response;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.SAMLConstants;
@@ -29,11 +31,14 @@ import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
-import javax.servlet.http.HttpServletRequest;
-import java.net.URL;
-
-import static junit.framework.Assert.*;
-import static org.easymock.EasyMock.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Vladimir Schaefer
@@ -154,6 +159,43 @@ public class SAMLProcessorImplTest {
         expect(request.isSecure()).andReturn(false).anyTimes();
         expect(request.getAttribute(SAMLConstants.LOCAL_ENTITY_ID)).andReturn(null).anyTimes();
     }
+
+    public static String encodeFromFile( String filename )
+    {
+        String encodedData = null;
+        Base64.InputStream bis = null;
+        try
+        {
+            // Set up some useful variables
+            java.io.File file = new java.io.File( filename );
+            byte[] buffer = new byte[ Math.max((int)(file.length() * 1.4),40) ]; // Need max() for math on small files (v2.2.1)
+            int length   = 0;
+            int numBytes = 0;
+
+            // Open a stream
+            bis = new Base64.InputStream(
+                new java.io.BufferedInputStream(
+                    new java.io.FileInputStream( file ) ), Base64.ENCODE );
+
+            // Read until done
+            while( ( numBytes = bis.read( buffer, length, 4096 ) ) >= 0 )
+                length += numBytes;
+
+            // Save in a variable to return
+            encodedData = new String( buffer, 0, length, Base64.PREFERRED_ENCODING );
+
+        }   // end try
+        catch( java.io.IOException e )
+        {
+            throw new RuntimeException(e);
+        }   // end catch: IOException
+        finally
+        {
+            try{ bis.close(); } catch( Exception e) {}
+        }   // end finally
+
+        return encodedData;
+    }   // end encodeFromFile
 
     private void replayMock() {
         replay(request);

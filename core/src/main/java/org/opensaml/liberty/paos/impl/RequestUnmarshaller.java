@@ -37,8 +37,8 @@ public class RequestUnmarshaller extends AbstractSAMLObjectUnmarshaller {
         Request request = (Request) samlObject;
 
         QName attrName = XMLHelper.getNodeQName(attribute);
-        if (Request.SOAP12_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
-            request.setSOAP12MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
+        if (Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
+            request.setSOAP11MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
         } else if (Request.SOAP11_ACTOR_ATTR_NAME.equals(attrName)) {
             request.setSOAP11Actor(attribute.getValue());
         } else if (Request.RESPONSE_CONSUMER_URL_ATTRIB_NAME.equals(attribute.getLocalName())) {

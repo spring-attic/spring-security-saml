@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.soap.soap11.ActorBearing;
-import org.opensaml.soap.soap12.MustUnderstandBearing;
+import org.opensaml.soap.soap11.MustUnderstandBearing;
 
 /**
  * Liberty Alliance PAOS Response header.

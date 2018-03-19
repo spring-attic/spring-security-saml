@@ -16,16 +16,23 @@
 
 package org.opensaml;
 
-import org.opensaml.xml.ConfigurationException;
 
-public class PaosBootstrap extends DefaultBootstrap {
-    
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.config.XMLConfigurator;
+import org.opensaml.xmlsec.config.JavaCryptoValidationInitializer;
+
+public class PaosBootstrap {
+
     /** XMLTooling configuration file for PAOS binding */
-    private static String[] paosXmlToolingConfig = { "/liberty-paos-config.xml" };
-    
-    public static synchronized void bootstrap() throws ConfigurationException {
-        DefaultBootstrap.bootstrap();
-        DefaultBootstrap.initializeXMLTooling(paosXmlToolingConfig);
+    private static String paosXmlToolingConfig = "/liberty-paos-config.xml";
+
+    public static synchronized void bootstrap() throws Exception {
+        new JavaCryptoValidationInitializer().init();
+        InitializationService.initialize();
+        XMLConfigurator configurator = new XMLConfigurator();
+        configurator.load(PaosBootstrap.class.getResourceAsStream(paosXmlToolingConfig));
+//        DefaultBootstrap.bootstrap();
+//        DefaultBootstrap.initializeXMLTooling(paosXmlToolingConfig);
     }
 
 }

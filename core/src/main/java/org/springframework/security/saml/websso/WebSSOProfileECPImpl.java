@@ -15,24 +15,24 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.ecp.Request;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.common.SOAPObjectBuilder;
-import org.opensaml.ws.soap.soap11.Envelope;
-import org.opensaml.ws.soap.util.SOAPHelper;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
+import java.util.Set;
+
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.compat.SOAPHelper;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
+import org.opensaml.liberty.paos.Request;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SingleSignOnService;
+import org.opensaml.soap.common.SOAPObjectBuilder;
+import org.opensaml.soap.soap11.Envelope;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
-
-import java.util.Set;
 
 /**
  * Class implementing the SAML ECP Profile and offers capabilities for SP initialized SSO and
@@ -49,7 +49,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
     @Override
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options)
-            throws SAMLException, MetadataProviderException, MessageEncodingException {
+        throws SAMLException, MetadataProviderException, MessageEncodingException {
 
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         AssertionConsumerService assertionConsumer = getAssertionConsumerService(options, null, spDescriptor);
@@ -66,7 +66,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
 
         sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
-        
+
         HTTPOutTransport outTransport = (HTTPOutTransport) context.getOutboundMessageTransport();
         outTransport.setHeader("Content-Type", "application/vnd.paos+xml");
 
@@ -89,7 +89,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
     protected org.opensaml.liberty.paos.Request getPAOSRequest(AssertionConsumerService assertionConsumer) {
 
-        SAMLObjectBuilder<org.opensaml.liberty.paos.Request> paosRequestBuilder = (SAMLObjectBuilder<org.opensaml.liberty.paos.Request>) builderFactory.getBuilder(org.opensaml.liberty.paos.Request.DEFAULT_ELEMENT_NAME);
+        SAMLObjectBuilder<Request> paosRequestBuilder = (SAMLObjectBuilder<org.opensaml.liberty.paos.Request>) builderFactory.getBuilder(org.opensaml.liberty.paos.Request.DEFAULT_ELEMENT_NAME);
         org.opensaml.liberty.paos.Request paosRequest = paosRequestBuilder.buildObject();
 
         paosRequest.setSOAP11Actor(Request.SOAP11_ACTOR_NEXT);
@@ -109,16 +109,18 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         ecpRequest.setSOAP11Actor(Request.SOAP11_ACTOR_NEXT);
         ecpRequest.setSOAP11MustUnderstand(true);
 
-        ecpRequest.setPassive(options.getPassive());
-        ecpRequest.setProviderName(options.getProviderName());
-        ecpRequest.setIssuer(getIssuer(context.getLocalEntityId()));
+
+//        ecpRequest.setPassive(options.getPassive());
+//        ecpRequest.setProviderName(options.getProviderName());
+//        ecpRequest.setIssuer(getIssuer(context.getLocalEntityId()));
 
         Set<String> idpEntityNames = options.getAllowedIDPs();
         if (options.isIncludeScoping() && idpEntityNames != null) {
-            ecpRequest.setIDPList(buildIDPList(idpEntityNames, null));
+            //ecpRequest.setIDPList(buildIDPList(idpEntityNames, null));
         }
+        throw new UnsupportedOperationException("not resolved");
 
-        return ecpRequest;
+        //return ecpRequest;
 
     }
 

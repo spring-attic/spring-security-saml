@@ -14,21 +14,24 @@
  */
 package org.springframework.security.saml.metadata;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.compat.MetadataProvider;
+import org.opensaml.compat.MetadataProviderException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.opensaml.compat.MetadataProviderException;
-
-import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Vladimir Schäfer
@@ -175,8 +178,8 @@ public class MetadataManagerTest {
                 for (MetadataProvider metadataProvider : manager.getProviders()) {
                     try {
                         AbstractMetadataDelegate delegate = (AbstractMetadataDelegate) metadataProvider;
-                        AbstractReloadingMetadataProvider prov = (AbstractReloadingMetadataProvider) delegate.getDelegate();
-                        prov.refresh();
+//                        AbstractReloadingMetadataProvider prov = (AbstractReloadingMetadataProvider) delegate.getDelegate();
+//                        prov.refresh();
                     } catch (MetadataProviderException e) {
                         e.printStackTrace();
                     }

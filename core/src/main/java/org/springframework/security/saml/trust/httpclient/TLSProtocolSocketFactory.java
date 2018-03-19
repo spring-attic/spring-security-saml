@@ -5,6 +5,7 @@ import javax.net.ssl.TrustManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -17,7 +18,6 @@ import java.util.Set;
 import net.shibboleth.utilities.java.support.httpclient.TLSSocketFactory;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import org.apache.http.HttpHost;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.protocol.HttpContext;
@@ -44,7 +44,7 @@ import org.springframework.security.saml.util.SAMLUtil;
  * with property trustedKeys (all all keys on KeyManager when trustKeys are null). Implementation uses hostname verification
  * algorithm.
  */
-public class TLSProtocolSocketFactory implements ConnectionSocketFactory {
+public class TLSProtocolSocketFactory implements LayeredConnectionSocketFactory {
 
     private static final Logger log = LoggerFactory.getLogger(TLSProtocolSocketFactory.class);
 
@@ -52,6 +52,8 @@ public class TLSProtocolSocketFactory implements ConnectionSocketFactory {
      * Storage for all available keys.
      */
     private KeyManager keyManager;
+
+    private TrustManager trustManager;
 
     /**
      * Hostname verifier to use for verification of SSL connections, e.g. for ArtifactResolution.
@@ -77,11 +79,15 @@ public class TLSProtocolSocketFactory implements ConnectionSocketFactory {
      * @param trustedKeys when not set all certificates included in the keystore will be used as trusted certificate authorities. When specified, only keys with the defined aliases will be used for trust evaluation.
      * @param sslHostnameVerification type of hostname verification
      */
-    public TLSProtocolSocketFactory(KeyManager keyManager, Set<String> trustedKeys, String sslHostnameVerification)
+    public TLSProtocolSocketFactory(KeyManager keyManager,
+                                    TrustManager trustManager,
+                                    Set<String> trustedKeys,
+                                    String sslHostnameVerification)
         throws KeyManagementException, NoSuchAlgorithmException {
         this.keyManager = keyManager;
         this.sslHostnameVerification = sslHostnameVerification;
         this.trustedKeys = trustedKeys;
+        this.trustManager = trustManager;
         this.socketFactory = initializeDelegate();
     }
 
@@ -167,5 +173,11 @@ public class TLSProtocolSocketFactory implements ConnectionSocketFactory {
     public Socket connectSocket(int connectTimeout, Socket sock, HttpHost host, InetSocketAddress remoteAddress, InetSocketAddress localAddress, HttpContext context)
         throws IOException {
         return socketFactory.connectSocket(connectTimeout, sock, host, remoteAddress, localAddress, context);
+    }
+
+    @Override
+    public Socket createLayeredSocket(Socket socket, String target, int port, HttpContext context)
+        throws IOException, UnknownHostException {
+        return socket;
     }
 }

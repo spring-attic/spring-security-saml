@@ -19,6 +19,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -33,11 +35,14 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
 import net.shibboleth.utilities.java.support.collection.LazyMap;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.XMLConstants;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLRuntimeException;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.AttributeMap;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMConfiguration;
@@ -1181,6 +1186,32 @@ public final class XMLHelper {
     public static String longToDuration(long duration) {
         Duration xmlDuration = getDataTypeFactory().newDuration(duration);
         return xmlDuration.toString();
+    }
+
+    public static XMLObject unmarshallMetadata(InputStream metadataInput) throws UnmarshallingException {
+        try {
+            BasicParserPool parserPool = new BasicParserPool();
+            Document mdDocument = parserPool.parse(metadataInput);
+
+
+            Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(mdDocument.getDocumentElement());
+            if (unmarshaller == null) {
+                String msg ="No unmarshaller registered for document element " + XMLHelper
+                    .getNodeQName(mdDocument.getDocumentElement());
+
+                throw new UnmarshallingException(msg);
+            }
+            XMLObject metadata = unmarshaller.unmarshall(mdDocument.getDocumentElement());
+            return metadata;
+        } catch (Exception e) {
+            throw new UnmarshallingException(e);
+        } finally {
+            try {
+                metadataInput.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 
 }

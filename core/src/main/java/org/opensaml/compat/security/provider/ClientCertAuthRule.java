@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.UsageCriteria;
 import org.opensaml.compat.X509Util;
@@ -37,7 +38,6 @@ import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Policy rule that checks if the client cert used to authenticate the request is valid and trusted.
@@ -100,7 +100,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException, SecurityException {
 
-        Credential peerCredential = ((SAMLMessageContext)messageContext).getInboundMessageTransport().getPeerCredential();
+        Credential peerCredential = ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport().getPeerCredential();
 
         if (peerCredential == null) {
             log.info("Inbound message transport did not contain a peer credential, "
@@ -154,7 +154,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
             if (evaluate(requestCredential, presenterEntityID, messageContext)) {
                 log.info("Authentication via client certificate succeeded for context presenter entity ID: {}",
                         presenterEntityID);
-                ((SAMLMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
+                ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
             } else {
                 log.error("Authentication via client certificate failed for context presenter entity ID {}",
                         presenterEntityID);
@@ -169,7 +169,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
             log.info("Authentication via client certificate succeeded for certificate-derived presenter entity ID {}",
                     derivedPresenter);
             setAuthenticatedCertificatePresenterEntityID(messageContext, derivedPresenter);
-            ((SAMLMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
+            ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
             return;
         }
 
@@ -178,7 +178,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
             log.info("Authentication via client certificate succeeded for derived presenter entity ID {}",
                     derivedPresenter);
             setAuthenticatedCertificatePresenterEntityID(messageContext, derivedPresenter);
-            ((SAMLMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
+            ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageTransport().setAuthenticated(true);
             return;
         }
     }
@@ -187,7 +187,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
      * Get the entity ID of the presenter of the client TLS certificate, as will be used for trust evaluation purposes.
      *
      * <p>
-     * The default behavior is to return the value of {@link SAMLMessageContext#getInboundMessageIssuer()}. Subclasses may
+     * The default behavior is to return the value of {@link BackwardsCompatibleMessageContext#getInboundMessageIssuer()}. Subclasses may
      * override to implement different logic.
      * </p>
      *
@@ -195,14 +195,14 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
      * @return the entity ID of the client TLS certificate presenter
      */
     protected String getCertificatePresenterEntityID(MessageContext messageContext) {
-        return ((SAMLMessageContext)messageContext).getInboundMessageIssuer();
+        return ((BackwardsCompatibleMessageContext)messageContext).getInboundMessageIssuer();
     }
 
     /**
      * Store the sucessfully authenticated derived entity ID of the certificate presenter in the message context.
      *
      * <p>
-     * The default behavior is to set the value by calling {@link SAMLMessageContext#setInboundMessageIssuer(String)}.
+     * The default behavior is to set the value by calling {@link BackwardsCompatibleMessageContext#setInboundMessageIssuer(String)}.
      * Subclasses may override to implement different logic.
      * </p>
      *
@@ -210,7 +210,7 @@ public class ClientCertAuthRule extends BaseTrustEngineRule<X509Credential> {
      * @param entityID the successfully authenticated derived entity ID of the client TLS certificate presenter
      */
     protected void setAuthenticatedCertificatePresenterEntityID(MessageContext messageContext, String entityID) {
-        ((SAMLMessageContext)messageContext).setInboundMessageIssuer(entityID);
+        ((BackwardsCompatibleMessageContext)messageContext).setInboundMessageIssuer(entityID);
     }
 
     /** {@inheritDoc} */

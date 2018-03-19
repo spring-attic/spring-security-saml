@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.opensaml.compat.XMLHelper;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.Unmarshaller;
@@ -81,7 +82,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
      *
      * @return the inbound message
      *
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws MessageDecodingException
      *          thrown if there is a problem deserializing and unmarshalling the message
      */
     protected T unmarshallMessage(Reader messageStream) throws MessageDecodingException {

@@ -17,19 +17,19 @@ package org.springframework.security.saml.processor;
 import java.util.List;
 
 import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.compat.security.SAML2HTTPRedirectDeflateSignatureRule;
 import org.opensaml.compat.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.compat.transport.InTransport;
 import org.opensaml.compat.transport.OutTransport;
 import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
 import org.opensaml.compat.transport.http.HTTPTransport;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder;
-import org.opensaml.saml2.binding.security.SAML2HTTPRedirectDeflateSignatureRule;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
@@ -46,7 +46,9 @@ public class HTTPRedirectDeflateBinding extends SAMLBindingImpl {
      * @param parserPool parser pool
      */
     public HTTPRedirectDeflateBinding(ParserPool parserPool) {
-        this(new HTTPRedirectDeflateDecoder(parserPool), new HTTPRedirectDeflateEncoder());
+        super(new HTTPRedirectDeflateDecoder(), new HTTPRedirectDeflateEncoder());
+        HTTPRedirectDeflateDecoder decoder = (HTTPRedirectDeflateDecoder) getMessageDecoder();
+        decoder.setParserPool(parserPool);
     }
 
     /**

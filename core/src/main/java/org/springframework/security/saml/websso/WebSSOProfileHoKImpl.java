@@ -14,9 +14,9 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SingleSignOnService;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.compat.MetadataProviderException;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.util.SAMLUtil;
 
@@ -43,9 +43,9 @@ public class WebSSOProfileHoKImpl extends WebSSOProfileImpl {
         }
 
         String binding = SAMLUtil.getBindingForEndpoint(endpoint);
-        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(binding) ||
-                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(binding) ||
-                org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI.equals(binding);
+        return org.opensaml.saml.common.xml.SAMLConstants .SAML2_POST_BINDING_URI.equals(binding) ||
+            org.opensaml.saml.common.xml.SAMLConstants .SAML2_ARTIFACT_BINDING_URI.equals(binding) ||
+            org.opensaml.saml.common.xml.SAMLConstants .SAML2_REDIRECT_BINDING_URI.equals(binding);
 
     }
 
@@ -58,8 +58,8 @@ public class WebSSOProfileHoKImpl extends WebSSOProfileImpl {
         }
 
         String binding = SAMLUtil.getBindingForEndpoint(endpoint);
-        return org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(binding) ||
-                org.opensaml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(binding);
+        return org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI.equals(binding) ||
+            org.opensaml.saml.common.xml.SAMLConstants.SAML2_ARTIFACT_BINDING_URI.equals(binding);
 
     }
 

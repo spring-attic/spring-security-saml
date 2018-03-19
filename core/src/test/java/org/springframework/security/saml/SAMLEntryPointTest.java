@@ -14,11 +14,16 @@
  */
 package org.springframework.security.saml;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
+import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
+import org.opensaml.compat.transport.http.HttpServletResponseAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -28,15 +33,13 @@ import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.notNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -226,7 +229,7 @@ public class SAMLEntryPointTest {
         WebSSOProfileOptions defaultOptions = new WebSSOProfileOptions();
         defaultOptions.setProxyCount(0);
         defaultOptions.setIncludeScoping(false);
-        defaultOptions.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+        defaultOptions.setBinding(org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI);
 
         // Set default values
         entryPoint.setDefaultProfileOptions(defaultOptions);
@@ -237,7 +240,7 @@ public class SAMLEntryPointTest {
         assertFalse(ssoProfileOptions.isIncludeScoping());
         assertFalse(ssoProfileOptions.getForceAuthN());
         assertFalse(ssoProfileOptions.getPassive());
-        assertEquals(SAMLConstants.SAML2_REDIRECT_BINDING_URI, ssoProfileOptions.getBinding());
+        assertEquals(org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI, ssoProfileOptions.getBinding());
 
         // Check that value can't be altered after being set
         defaultOptions.setIncludeScoping(true);
@@ -247,7 +250,7 @@ public class SAMLEntryPointTest {
         // Check that default values can be cleared
         entryPoint.setDefaultProfileOptions(null);
         ssoProfileOptions = entryPoint.getProfileOptions(new SAMLMessageContext(), null);
-        assertTrue(ssoProfileOptions.isIncludeScoping());        
+        assertTrue(ssoProfileOptions.isIncludeScoping());
 
         verifyMock();
 

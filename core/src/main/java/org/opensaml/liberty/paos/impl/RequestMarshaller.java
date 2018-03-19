@@ -44,9 +44,9 @@ public class RequestMarshaller extends AbstractSAMLObjectMarshaller {
             domElement.setAttributeNS(null, Request.MESSAGE_ID_ATTRIB_NAME,
                     request.getMessageID());
         }
-        if (request.isSOAP12MustUnderstandXSBoolean() != null) {
-            XMLHelper.marshallAttribute(Request.SOAP12_MUST_UNDERSTAND_ATTR_NAME,
-                    request.isSOAP12MustUnderstandXSBoolean().toString(), domElement, false);
+        if (request.isSOAP11MustUnderstandXSBoolean() != null) {
+            XMLHelper.marshallAttribute(Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME,
+                    request.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (request.getSOAP11Actor() != null) {
             XMLHelper.marshallAttribute(Request.SOAP11_ACTOR_ATTR_NAME,

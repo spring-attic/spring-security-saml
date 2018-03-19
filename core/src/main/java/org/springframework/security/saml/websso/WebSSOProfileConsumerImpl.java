@@ -21,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.opensaml.compat.validation.ValidationException;
+import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -28,6 +30,7 @@ import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.Audience;
 import org.opensaml.saml.saml2.core.AudienceRestriction;
+import org.opensaml.saml.saml2.core.AuthnContext;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnContextDeclRef;
@@ -50,11 +53,10 @@ import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.security.SecurityException;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
 import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -112,11 +114,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param context context including response object
      * @return SAMLCredential with information about user
      * @throws SAMLException       in case the response is invalid
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *                             in the signature on response can't be verified
      * @throws ValidationException in case the response structure is not conforming to the standard
      */
-    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context)
+        throws SAMLException, SecurityException, ValidationException, DecryptionException, SignatureException {
 
         AuthnRequest request = null;
         SAMLObject message = context.getInboundSAMLMessage();
@@ -304,7 +307,8 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         return null;
     }
 
-    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context)
+        throws AuthenticationException, SAMLException, SecurityException, ValidationException, DecryptionException, SignatureException {
 
         // Verify storage time skew
         if (!isDateTimeSkewValid(getResponseSkew(), getMaxAssertionTime(), assertion.getIssueInstant())) {
@@ -433,11 +437,12 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param signature signature to verify
      * @param context   context
      * @throws SAMLException       signature missing although required
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *                             signature can't be validated
      * @throws ValidationException signature is malformed
      */
-    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context)
+        throws SAMLException, SecurityException, ValidationException, SignatureException {
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
         if (signature != null) {

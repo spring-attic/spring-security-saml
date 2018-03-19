@@ -16,6 +16,7 @@
 package org.opensaml.compat.security;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.MetadataCriteria;
 import org.opensaml.compat.UsageCriteria;
@@ -27,7 +28,6 @@ import org.opensaml.security.trust.TrustEngine;
 import org.opensaml.xmlsec.signature.Signature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Base class for SAML security policy rules which evaluate a signature with a signature trust engine.
@@ -49,12 +49,12 @@ public abstract class BaseSAMLXMLSignatureSecurityPolicyRule extends BaseTrustEn
     /** {@inheritDoc} */
     protected CriteriaSet buildCriteriaSet(String entityID, MessageContext messageContext)
         throws SecurityPolicyException {
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.error("Supplied message context was not an instance of SAMLMessageContext, can not build criteria set from SAML metadata parameters");
-            throw new SecurityPolicyException("Supplied message context was not an instance of SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.error("Supplied message context was not an instance of BackwardsCompatibleMessageContext, can not build criteria set from SAML metadata parameters");
+            throw new SecurityPolicyException("Supplied message context was not an instance of BackwardsCompatibleMessageContext");
         }
 
-        SAMLMessageContext samlContext = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlContext = (BackwardsCompatibleMessageContext) messageContext;
 
         CriteriaSet criteriaSet = new CriteriaSet();
         if (! DataTypeHelper.isEmpty(entityID)) {

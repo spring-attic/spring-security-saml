@@ -15,13 +15,13 @@
 
 package org.opensaml.compat.security.provider;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.DataTypeHelper;
 import org.opensaml.compat.security.SecurityPolicyException;
 import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.messaging.context.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule implementation that which requires that an inbound message context issuer has been set by a
@@ -35,7 +35,7 @@ public class MandatoryIssuerRule implements SecurityPolicyRule {
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
 
-        if (DataTypeHelper.isEmpty(((SAMLMessageContext)messageContext).getInboundMessageIssuer())) {
+        if (DataTypeHelper.isEmpty(((BackwardsCompatibleMessageContext)messageContext).getInboundMessageIssuer())) {
             log.error("Mandatory inbound message context issuer was not present");
             throw new SecurityPolicyException("Mandatory inbound message context issuer not present");
         }

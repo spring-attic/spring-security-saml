@@ -37,9 +37,9 @@ public class ResponseMarshaller extends AbstractSAMLObjectMarshaller {
             domElement.setAttributeNS(null, Response.REF_TO_MESSAGE_ID_ATTRIB_NAME,
                     response.getRefToMessageID());
         }
-        if (response.isSOAP12MustUnderstandXSBoolean() != null) {
-            XMLHelper.marshallAttribute(Response.SOAP12_MUST_UNDERSTAND_ATTR_NAME,
-                                        response.isSOAP12MustUnderstandXSBoolean().toString(), domElement, false);
+        if (response.isSOAP11MustUnderstandXSBoolean() != null) {
+            XMLHelper.marshallAttribute(Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME,
+                                        response.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (response.getSOAP11Actor() != null) {
             XMLHelper.marshallAttribute(Response.SOAP11_ACTOR_ATTR_NAME,

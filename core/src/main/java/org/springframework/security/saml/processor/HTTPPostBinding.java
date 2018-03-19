@@ -14,25 +14,26 @@
  */
 package org.springframework.security.saml.processor;
 
+import java.util.List;
+
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.apache.velocity.app.VelocityEngine;
-import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
-import org.opensaml.saml2.binding.encoding.HTTPPostEncoder;
-import org.opensaml.saml2.binding.security.SAML2HTTPPostSimpleSignRule;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.OutTransport;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.ws.transport.http.HTTPTransport;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.opensaml.compat.security.SAML2HTTPPostSimpleSignRule;
+import org.opensaml.compat.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
+import org.opensaml.compat.security.SecurityPolicyRule;
+import org.opensaml.compat.transport.InTransport;
+import org.opensaml.compat.transport.OutTransport;
+import org.opensaml.compat.transport.http.HTTPInTransport;
+import org.opensaml.compat.transport.http.HTTPOutTransport;
+import org.opensaml.compat.transport.http.HTTPTransport;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.encoder.MessageEncoder;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
-import java.util.List;
 
 /**
  * Http POST binding.
@@ -53,7 +54,13 @@ public class HTTPPostBinding extends SAMLBindingImpl {
      * @param velocityEngine engine for message formatting
      */
     public HTTPPostBinding(ParserPool parserPool, VelocityEngine velocityEngine) {
-        this(parserPool, new HTTPPostDecoder(parserPool), new HTTPPostEncoder(velocityEngine, "/templates/saml2-post-binding.vm"));
+        super(new HTTPPostDecoder(), new HTTPPostEncoder());
+        HTTPPostDecoder decoder = (HTTPPostDecoder) getMessageDecoder();
+        decoder.setParserPool(parserPool);
+        HTTPPostEncoder encoder = (HTTPPostEncoder) getMessageEncoder();
+        encoder.setVelocityEngine(velocityEngine);
+        encoder.setVelocityTemplateId("/templates/saml2-post-binding.vm");
+        this.parserPool = parserPool;
     }
 
     /**

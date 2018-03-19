@@ -14,18 +14,28 @@
  */
 package org.springframework.security.saml.storage;
 
-import org.junit.Test;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Audience;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.springframework.security.saml.parser.SAMLObject;
-import org.springframework.web.util.WebUtils;
-
 import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.springframework.security.saml.parser.SAMLObject;
+import org.springframework.web.util.WebUtils;
+
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.notNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Vladimir Schäfer

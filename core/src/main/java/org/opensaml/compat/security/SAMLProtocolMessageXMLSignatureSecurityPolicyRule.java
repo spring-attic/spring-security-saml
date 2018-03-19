@@ -15,6 +15,7 @@
 
 package org.opensaml.compat.security;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.validation.ValidationException;
 import org.opensaml.compat.validation.Validator;
 import org.opensaml.messaging.context.MessageContext;
@@ -27,7 +28,7 @@ import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
+
 
 /**
  * SAML security policy rule which validates the signature (if present) on the {@link SAMLObject} which represents the
@@ -91,12 +92,12 @@ public class SAMLProtocolMessageXMLSignatureSecurityPolicyRule extends BaseSAMLX
 
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException, SecurityException {
-        if (!(messageContext instanceof SAMLMessageContext)) {
-            log.debug("Invalid message context type, this policy rule only supports SAMLMessageContext");
+        if (!(messageContext instanceof BackwardsCompatibleMessageContext)) {
+            log.debug("Invalid message context type, this policy rule only supports BackwardsCompatibleMessageContext");
             return;
         }
 
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
 
         SAMLObject samlMsg = samlMsgCtx.getInboundSAMLMessage();
         if (!(samlMsg instanceof SignableSAMLObject)) {
@@ -124,7 +125,7 @@ public class SAMLProtocolMessageXMLSignatureSecurityPolicyRule extends BaseSAMLX
      * @param samlMsgCtx the SAML message context being processed
      * @throws SecurityPolicyException thrown if the signature fails validation
      */
-    protected void doEvaluate(Signature signature, SignableSAMLObject signableObject, SAMLMessageContext samlMsgCtx)
+    protected void doEvaluate(Signature signature, SignableSAMLObject signableObject, BackwardsCompatibleMessageContext samlMsgCtx)
         throws SecurityPolicyException, SecurityException {
 
         String contextIssuer = samlMsgCtx.getInboundMessageIssuer();

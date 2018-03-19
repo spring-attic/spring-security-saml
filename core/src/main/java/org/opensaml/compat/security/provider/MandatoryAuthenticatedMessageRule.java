@@ -15,12 +15,12 @@
 
 package org.opensaml.compat.security.provider;
 
+import org.opensaml.compat.BackwardsCompatibleMessageContext;
 import org.opensaml.compat.security.SecurityPolicyException;
 import org.opensaml.compat.security.SecurityPolicyRule;
 import org.opensaml.messaging.context.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
  * Security policy rule that requires that a message has been authenticated.
@@ -32,7 +32,7 @@ public class MandatoryAuthenticatedMessageRule implements SecurityPolicyRule {
 
     /** {@inheritDoc} */
     public void evaluate(MessageContext messageContext) throws SecurityPolicyException {
-        if(!((SAMLMessageContext)messageContext).isIssuerAuthenticated()) {
+        if(!((BackwardsCompatibleMessageContext)messageContext).isIssuerAuthenticated()) {
             log.error("Inbound message issuer was not authenticated.");
             throw new SecurityPolicyException("Inbound message issuer was not authenticated.");
         }

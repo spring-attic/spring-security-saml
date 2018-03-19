@@ -14,18 +14,18 @@
  */
 package org.springframework.security.saml.storage;
 
-import org.opensaml.xml.XMLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.saml.parser.SAMLObject;
-import org.springframework.util.Assert;
-import org.springframework.web.util.WebUtils;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Set;
+
+import org.opensaml.core.xml.XMLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.parser.SAMLObject;
+import org.springframework.util.Assert;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Class implements storage of SAML messages and uses HttpSession as underlying dataStore. As the XMLObjects

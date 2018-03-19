@@ -21,8 +21,8 @@ import org.easymock.Capture;
 import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -129,7 +129,7 @@ public class SAMLProcessingFilterTest {
         expect(request.getQueryString()).andReturn(null);
         expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
             public SAMLMessageContext answer() throws Throwable {
-                context.getValue().setInboundSAMLBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                context.getValue().setInboundSAMLBinding(org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI);
                 return context.getValue();
             }
         });
@@ -192,7 +192,7 @@ public class SAMLProcessingFilterTest {
         expect(request.getQueryString()).andReturn(null);
         expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
             public SAMLMessageContext answer() throws Throwable {
-                context.getValue().setInboundSAMLBinding(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI);
+                context.getValue().setInboundSAMLBinding(SAMLConstants.SAML2_POST_BINDING_URI);
                 return context.getValue();
             }
         });

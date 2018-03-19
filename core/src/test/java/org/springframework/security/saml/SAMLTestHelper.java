@@ -16,11 +16,9 @@ package org.springframework.security.saml;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
+import org.opensaml.PaosBootstrap;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
-import org.opensaml.xml.ConfigurationException;
 
 import static org.easymock.EasyMock.expect;
 
@@ -68,8 +66,8 @@ public class SAMLTestHelper {
     public static XMLObjectBuilderFactory getBuilderFactory() {
         if (builderFactory == null) {
             try {
-                DefaultBootstrap.bootstrap();
-            } catch (ConfigurationException e) {
+                PaosBootstrap.bootstrap();
+            } catch (Exception e) {
                 throw new RuntimeException("Error creating builder factory");
             }
             builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();

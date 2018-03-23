@@ -45,7 +45,6 @@ import org.opensaml.security.x509.PKIXValidationInformationResolver;
 import org.opensaml.security.x509.X509Credential;
 import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
 import org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine;
-import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
@@ -153,7 +152,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
 
-        HttpClientInTransport inTransport = (HttpClientInTransport) context.getInboundMessageTransport();
+        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
         String entityId;
 
         entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);

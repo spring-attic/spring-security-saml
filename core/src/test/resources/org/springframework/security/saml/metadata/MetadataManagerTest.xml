@@ -7,11 +7,11 @@
     <context:component-scan base-package="org.springframework.security.saml"/>
 
     <!-- Initialization of OpenSAML library-->
-    <bean id="bootstrap" class="org.opensaml.DefaultBootstrap" init-method="bootstrap" lazy-init="false"/>
+    <bean id="bootstrap" class="org.opensaml.PaosBootstrap" init-method="bootstrap" lazy-init="false"/>
 
     <!-- Central storage of cryptographic keys -->
     <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
-        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+        <constructor-arg value="org/springframework/security/saml/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>
@@ -27,18 +27,23 @@
           depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-                <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
+                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
-                        <value type="java.io.File">classpath:testIDP.xml</value>
+                        <bean class="org.springframework.core.io.ClassPathResource">
+                            <constructor-arg value="testIDP.xml"/>
+                        </bean>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
 
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
+                        <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+
                             <constructor-arg index="0">
-                                <value type="java.io.File">classpath:testIDPnestedMetadata.xml</value>
+                                <bean class="org.springframework.core.io.ClassPathResource">
+                                    <constructor-arg value="testIDPnestedMetadata.xml"/>
+                                </bean>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool"/>
                         </bean>
@@ -72,9 +77,11 @@
                 <!-- Default extended -->
                 <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider">
+                        <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
                             <constructor-arg index="0">
-                                <value type="java.io.File">classpath:testSP.xml</value>
+                                <bean class="org.springframework.core.io.ClassPathResource">
+                                    <constructor-arg value="testSP.xml"/>
+                                </bean>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool"/>
                         </bean>
@@ -95,15 +102,20 @@
     </bean>
 
     <!-- A provider we will add/remove from metadata manager -->
-    <bean id="singleProvider" class="org.springframework.security.saml.metadata.TestingFilesystemMetadataProvider"
-          init-method="initialize">
+    <bean id="singleProvider" class="org.springframework.security.saml.metadata.FileMetadataProvider">
         <constructor-arg index="0">
-            <value type="java.io.File">classpath:testIDPNoSSOBinding.xml</value>
+            <bean class="org.springframework.core.io.ClassPathResource">
+                <constructor-arg value="testIDPNoSSOBinding.xml"/>
+            </bean>
         </constructor-arg>
         <property name="parserPool" ref="parserPool"/>
     </bean>
 
+
     <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
+    <bean id="parserPool"
+          class="org.opensaml.PaosBootstrap"
+          scope="singleton"
+          factory-method="createParserPool"/>
 
 </beans>

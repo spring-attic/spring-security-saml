@@ -38,6 +38,7 @@ import net.shibboleth.utilities.java.support.collection.LazyMap;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.XMLConstants;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.opensaml.PaosBootstrap;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLRuntimeException;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
@@ -1190,7 +1191,7 @@ public final class XMLHelper {
 
     public static XMLObject unmarshallMetadata(InputStream metadataInput) throws UnmarshallingException {
         try {
-            BasicParserPool parserPool = new BasicParserPool();
+            BasicParserPool parserPool = PaosBootstrap.createParserPool();
             Document mdDocument = parserPool.parse(metadataInput);
 
 

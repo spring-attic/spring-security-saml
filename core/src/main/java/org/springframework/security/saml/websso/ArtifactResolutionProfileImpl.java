@@ -48,6 +48,7 @@ import org.opensaml.security.credential.UsageType;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.HttpClientOutTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
 
 /**
@@ -228,7 +229,10 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      */
     protected boolean isHostnameVerificationSupported() {
         try {
-            TLSProtocolSocketFactory.class.getConstructor(javax.net.ssl.X509KeyManager.class, javax.net.ssl.X509TrustManager.class, javax.net.ssl.HostnameVerifier.class);
+            TLSProtocolSocketFactory.class.getConstructor(KeyManager.class,
+                                                          TrustManager.class,
+                                                          Set.class,
+                                                          String.class);
             return true;
         } catch (NoSuchMethodException e) {
             log.warn("HostnameVerification is not supported, update your OpenSAML libraries");

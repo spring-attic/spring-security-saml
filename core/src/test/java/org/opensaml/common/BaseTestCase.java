@@ -18,10 +18,12 @@ package org.opensaml.common;
 
 import javax.xml.namespace.QName;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.opensaml.PaosBootstrap;
 import org.opensaml.compat.XMLHelper;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilder;
@@ -58,11 +60,20 @@ public abstract class BaseTestCase extends XMLTestCase {
     private static Logger log = LoggerFactory.getLogger(BaseTestCase.class);
 
     /** Constructor. */
-    public BaseTestCase(){
+    public BaseTestCase() {
         super();
-
+        try {
+            PaosBootstrap.bootstrap();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         parser = new BasicParserPool();
         parser.setNamespaceAware(true);
+        try {
+            parser.initialize();
+        } catch (ComponentInitializationException e) {
+            throw new RuntimeException(e);
+        }
         builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
         marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
         unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();

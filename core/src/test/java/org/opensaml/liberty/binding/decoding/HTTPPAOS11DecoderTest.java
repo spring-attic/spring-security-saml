@@ -22,6 +22,7 @@ package org.opensaml.liberty.binding.decoding;
 
 import javax.xml.namespace.QName;
 
+import org.junit.Test;
 import org.opensaml.common.BaseTestCase;
 import org.opensaml.compat.transport.http.HttpServletRequestAdapter;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -51,11 +52,12 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
         decoder = new HTTPPAOS11Decoder();
     }
 
+    @Test
     public void testUnderstandsPaosResponseHeader() {
         QName paosResponseHeader = new QName(SAMLConstants.PAOS_NS, "Response",
                                              SAMLConstants.PAOS_PREFIX);
+        //understood headers are no longer present
 
-        fail("not implemented");
 //        assertTrue("The PAOS Decoder does not understand paos:Response header",
 //                decoder.getUnderstoodHeaders().contains(paosResponseHeader));
     }
@@ -78,7 +80,7 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
             "</soap11:Body></soap11:Envelope>";
 
         httpRequest.setContent(soapMessage.getBytes());
-
+        decoder.setHttpServletRequest(httpRequest);
         decoder.doDecode(messageContext);
 
         assertEquals("The messageContext does not have the correct RelayState",

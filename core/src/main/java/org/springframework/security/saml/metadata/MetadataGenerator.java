@@ -46,6 +46,7 @@ import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
 import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.signature.KeyInfo;
@@ -270,7 +271,12 @@ public class MetadataGenerator {
             if (extendedMetadata != null && extendedMetadata.getKeyInfoGeneratorName() != null) {
                 keyInfoGeneratorName = extendedMetadata.getKeyInfoGeneratorName();
             }
-            KeyInfoGenerator keyInfoGenerator = KeyInfoSupport.getKeyInfoGenerator(credential, null, keyInfoGeneratorName);
+
+            KeyInfoGenerator keyInfoGenerator = KeyInfoSupport.getKeyInfoGenerator(
+                credential,
+                DefaultSecurityConfigurationBootstrap.buildDefaultSignatureSigningConfiguration().getKeyInfoGeneratorManager(),
+                keyInfoGeneratorName
+            );
             return keyInfoGenerator.generate(credential);
         } catch (SecurityException e) {
             log.error("Can't obtain key from the keystore or generate key info for credential: " + credential, e);

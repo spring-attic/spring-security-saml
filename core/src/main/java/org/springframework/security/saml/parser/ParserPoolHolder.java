@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml.parser;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,14 @@ public final class ParserPoolHolder {
      */
     public synchronized static ParserPool getPool() {
         if (pool == null) {
-            setPool(new BasicParserPool());
+            BasicParserPool parserPool = new BasicParserPool();
+            try {
+                parserPool.initialize();
+            } catch (ComponentInitializationException e) {
+                throw new RuntimeException(e);
+            }
+            setPool(parserPool);
+
         }
         return pool;
     }

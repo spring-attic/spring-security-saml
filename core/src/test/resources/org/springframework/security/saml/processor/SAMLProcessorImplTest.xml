@@ -32,25 +32,25 @@
         <bean class="org.springframework.security.saml.processor.HTTPPostBinding">
             <constructor-arg ref="parserPool"/>
             <constructor-arg>
-                <bean class="org.opensaml.saml2.binding.decoding.HTTPPostDecoder">
-                    <constructor-arg ref="parserPool"/>
+                <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder">
+                    <property name="parserPool" ref="parserPool"/>
                 </bean>
             </constructor-arg>
             <constructor-arg>
-                <bean class="org.opensaml.saml2.binding.encoding.HTTPPostEncoder">
-                    <constructor-arg ref="velocityEngine"/>
-                    <constructor-arg value="/templates/saml2-post-binding.vm"/>
+                <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder">
+                    <property name="velocityEngine" ref="velocityEngine"/>
+                    <property name="velocityTemplateId" value="/templates/saml2-post-binding.vm"/>
                 </bean>
             </constructor-arg>
         </bean>
         <bean class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
             <constructor-arg>
-                <bean class="org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder">
-                    <constructor-arg ref="parserPool"/>
+                <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder">
+                    <property name="parserPool" ref="parserPool"/>
                 </bean>
             </constructor-arg>
             <constructor-arg>
-                <bean class="org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder"/>
+                <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder"/>
             </constructor-arg>
         </bean>
     </util:list>
@@ -60,15 +60,19 @@
     <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg index="0">
             <list>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
-                        <value type="java.io.File">classpath:testIDP.xml</value>
+                        <bean class="org.springframework.core.io.ClassPathResource">
+                            <constructor-arg value="testIDP.xml"/>
+                        </bean>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider">
+                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
-                        <value type="java.io.File">classpath:testSP.xml</value>
+                        <bean class="org.springframework.core.io.ClassPathResource">
+                            <constructor-arg value="testSP.xml"/>
+                        </bean>
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
@@ -86,7 +90,7 @@
     <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
 
     <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
+    <bean id="parserPool" class="org.opensaml.PaosBootstrap" factory-method="createParserPool" scope="singleton"/>
 
     <!-- Instantiator of the velocity engine -->
     <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"

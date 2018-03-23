@@ -29,6 +29,7 @@ import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPSOAP11Decoder;
 import org.opensaml.saml.saml2.ecp.RelayState;
 import org.opensaml.saml.saml2.ecp.impl.RelayStateImpl;
+import org.opensaml.soap.messaging.context.SOAP11Context;
 import org.opensaml.soap.soap11.Envelope;
 
 public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
@@ -62,7 +63,8 @@ public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
 
         // Setting the RelayState in the message context
         BackwardsCompatibleMessageContext samlMsgCtx = (BackwardsCompatibleMessageContext) messageContext;
-        Envelope soapMessage = (Envelope) samlMsgCtx.getInboundSAMLMessage();
+        //Envelope soapMessage = (Envelope) samlMsgCtx.getInboundSAMLMessage();
+        Envelope soapMessage = getMessageContext().getSubcontext(SOAP11Context.class, true).getEnvelope();
 
         List<XMLObject> relayStateHeader = soapMessage.getHeader().getUnknownXMLObjects(
                 new QName(SAMLConstants.SAML20ECP_NS,

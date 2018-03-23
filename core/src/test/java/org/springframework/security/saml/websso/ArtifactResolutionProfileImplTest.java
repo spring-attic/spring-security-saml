@@ -16,7 +16,9 @@ package org.springframework.security.saml.websso;
 
 import java.net.URI;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.PaosBootstrap;
 
 import static org.junit.Assert.assertTrue;
 
@@ -24,6 +26,12 @@ import static org.junit.Assert.assertTrue;
  * @author Vladimir Schäfer
  */
 public class ArtifactResolutionProfileImplTest {
+
+
+    @Before
+    public void setup() throws Exception {
+        PaosBootstrap.bootstrap();
+    }
 
     /**
      * Verifies that hostConfiguration can be loaded when HttpClient has no defaults.

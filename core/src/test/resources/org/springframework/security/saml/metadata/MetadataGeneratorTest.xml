@@ -73,7 +73,7 @@
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.BasicParserPool" scope="singleton"/>
+    <bean id="parserPool" class="org.opensaml.PaosBootstrap" factory-method="createParserPool" scope="singleton"/>
 
     <!-- Initialization of OpenSAML library-->
     <bean class="org.springframework.security.saml.SAMLBootstrap"/>

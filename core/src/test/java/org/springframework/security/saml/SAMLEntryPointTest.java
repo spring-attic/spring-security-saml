@@ -19,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.net.MalformedURLException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -179,7 +180,7 @@ public class SAMLEntryPointTest {
      *
      * @throws Exception error
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = MalformedURLException.class)
     public void testIDPSelection_invalidDiscoURL() throws Exception {
 
         SAMLMessageContext context = new SAMLMessageContext();

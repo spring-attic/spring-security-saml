@@ -262,7 +262,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
 
         buildScoping(request, bindingService, options);
-        builNameIDPolicy(request, options);
+        buildNameIDPolicy(request, options);
         buildAuthnContext(request, options);
         buildReturnAddress(request, assertionConsumer);
 
@@ -276,7 +276,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
      * @param request request to fill
      * @param options options driving generation of the element
      */
-    protected void builNameIDPolicy(AuthnRequest request, WebSSOProfileOptions options) {
+    protected void buildNameIDPolicy(AuthnRequest request, WebSSOProfileOptions options) {
 
         if (options.getNameID() != null) {
             SAMLObjectBuilder<NameIDPolicy> builder = (SAMLObjectBuilder<NameIDPolicy>) builderFactory.getBuilder(NameIDPolicy.DEFAULT_ELEMENT_NAME);

@@ -124,7 +124,7 @@ public class SAMLObjectTest {
      */
     @Test(expected = MessageEncodingException.class)
     public void testMarshallObjectWithoutMarshaller() throws Exception {
-        TestObject to = new TestObject("xxx", "", "");
+        TestObject to = new TestObject("xxx", "test", "saml");
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
         XMLObjectProviderRegistrySupport.getMarshallerFactory().deregisterMarshaller(to.getElementQName());
@@ -138,7 +138,7 @@ public class SAMLObjectTest {
      */
     @Test(expected = IOException.class)
     public void testMarshallingError() throws Exception {
-        TestObject to = new TestObject("xxx", "", "");
+        TestObject to = new TestObject("xxx", "test", "saml");
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
         Marshaller mock = createMock(Marshaller.class);

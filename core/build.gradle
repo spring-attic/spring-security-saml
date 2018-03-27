@@ -30,14 +30,14 @@ dependencies {
 	compile(group: "org.opensaml", name: "opensaml-xacml-saml-api", version: "$openSamlVersion")
 	compile(group: "org.opensaml", name: "opensaml-xacml-saml-impl", version: "$openSamlVersion")
 
-	compile group: "ca.juliusdavies", name: "not-yet-commons-ssl", version: "0.3.17"
-	provided "javax.servlet:javax.servlet-api:3.0.1"
+	provided "javax.servlet:javax.servlet-api:3.1.0"
+
+	testCompile(group: "org.junit.jupiter", name: "junit-jupiter-api", version: "$junitVersion")
+	testCompile(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: "$junitVersion")
 
 	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion",
-		"org.easymock:easymock:3.5.1",
-		"junit:junit:4.12",
 		"commons-logging:commons-logging:1.2",
-		"xmlunit:xmlunit:1.6"
+
 	testCompile	("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

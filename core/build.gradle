@@ -32,13 +32,10 @@ dependencies {
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 
-	testCompile(group: "org.junit.jupiter", name: "junit-jupiter-api", version: "$junitVersion")
-	testCompile(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: "$junitVersion")
+	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+	testCompile "commons-logging:commons-logging:1.2"
 
-	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion",
-		"commons-logging:commons-logging:1.2",
-
-	testCompile	("org.springframework:spring-test:$springVersion") {
+	testCompile ("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 }

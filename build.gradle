@@ -7,6 +7,7 @@ buildscript {
 		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("org.gradle.api.plugins:gradle-tomcat-plugin:1.2.4")
+		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
 	}
 }
 
@@ -34,6 +35,7 @@ configure(allprojects) { project ->
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply from: "${gradleScriptDir}/ide.gradle"
+	apply plugin: 'org.junit.platform.gradle.plugin'
 
 	compileJava {
 		sourceCompatibility=1.8
@@ -51,9 +53,13 @@ configure(allprojects) { project ->
 
 	repositories {
 		mavenCentral()
-		maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases/' }
-		maven { url 'http://repository.mulesoft.org/releases/'}
 	}
+
+	dependencies {
+		testCompile(group: "org.junit.jupiter", name: "junit-jupiter-api", version: "$junitVersion")
+		testCompile(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: "$junitVersion")
+	}
+
 
 	ext.javadocLinks = [
 		"http://docs.oracle.com/javase/6/docs/api",

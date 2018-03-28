@@ -57,25 +57,13 @@ def customizePom(pom, gradleProject) {
 			}
 			developers {
 				developer {
-					id = "vschafer"
-					name = "Vladimir Schafer"
-					email = "vladimir.schafer at gmail.com"
-					timezone = "+2"
+					id = "fhanik"
+					name = "Filip Hanik"
+					email = "fhanik@pivotal.io"
+					timezone = "-8"
 				}
 			}
 			contributors {
-				contributor {
-					name = "Mandus Elfvingr"
-				}
-				contributor {
-					name = "Rob Moore"
-				}
-				contributor {
-					name = "Jonathan Tellier"
-				}
-				contributor {
-					name = "Wade Dorrell"
-				}
 			}
 			issueManagement {
 				system = "jira"

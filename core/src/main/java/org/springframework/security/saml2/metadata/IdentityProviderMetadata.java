@@ -13,7 +13,7 @@
  *
  */
 
-package org.springframework.security.saml.metadata;
+package org.springframework.security.saml2.metadata;
 
 public interface IdentityProviderMetadata extends Metadata {
 }

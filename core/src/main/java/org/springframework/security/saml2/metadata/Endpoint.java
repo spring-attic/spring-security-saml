@@ -15,22 +15,19 @@
 
 package org.springframework.security.saml2.metadata;
 
-import org.springframework.security.saml2.Saml2Object;
-
 /**
- * Represents metadata for a
- * <li>
- *     <ul>SSO Service Provider</ul>
- *     <ul>SSO Identity Provider</ul>
- * </li>
- * Currently does <b>not support</b> metadata for
- * <li>
- *     <ul>Authentication Authority</ul>
- *     <ul>Attribute Authority</ul>
- *     <ul>Policy Decision Point</ul>
- *     <ul>Affiliation</ul>
- * </li>
+ * Defined on
+ * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">lines 295-305</a>
  */
-public interface Metadata extends Saml2Object {
+public interface Endpoint {
 
+    int getIndex();
+
+    boolean isDefault();
+
+    String getBinding();
+
+    String getLocation();
+
+    String getResponseLocation();
 }

@@ -15,5 +15,10 @@
 
 package org.springframework.security.saml2.metadata;
 
+/**
+ * Represents metadata providing the IDPSSODescriptor entity
+ */
 public interface IdentityProviderMetadata extends Metadata {
+
+
 }

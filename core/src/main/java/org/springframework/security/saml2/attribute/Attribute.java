@@ -13,24 +13,13 @@
  *
  */
 
-package org.springframework.security.saml2.metadata;
+package org.springframework.security.saml2.attribute;
 
-import org.springframework.security.saml2.Saml2Object;
+import java.util.List;
 
-/**
- * Represents metadata for a
- * <li>
- *     <ul>SSO Service Provider</ul>
- *     <ul>SSO Identity Provider</ul>
- * </li>
- * Currently does <b>not support</b> metadata for
- * <li>
- *     <ul>Authentication Authority</ul>
- *     <ul>Attribute Authority</ul>
- *     <ul>Policy Decision Point</ul>
- *     <ul>Affiliation</ul>
- * </li>
- */
-public interface Metadata extends Saml2Object {
-
+public interface Attribute {
+    List<AttributeValue> getValues();
+    String getName();
+    NameFormat getNameFormat();
+    String getFriendlyName();
 }

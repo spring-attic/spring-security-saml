@@ -13,24 +13,19 @@
  *
  */
 
-package org.springframework.security.saml2.metadata;
+package org.springframework.security.saml2.util;
 
-import org.springframework.security.saml2.Saml2Object;
+public class StringUtils {
 
-/**
- * Represents metadata for a
- * <li>
- *     <ul>SSO Service Provider</ul>
- *     <ul>SSO Identity Provider</ul>
- * </li>
- * Currently does <b>not support</b> metadata for
- * <li>
- *     <ul>Authentication Authority</ul>
- *     <ul>Attribute Authority</ul>
- *     <ul>Policy Decision Point</ul>
- *     <ul>Affiliation</ul>
- * </li>
- */
-public interface Metadata extends Saml2Object {
+    public static String getNCNameString(String value) {
+        if (value == null) {
+            return null;
+        }
+        String cleanValue = value.replaceAll("[^a-zA-Z0-9-_.]", "_");
+        if (cleanValue.startsWith("-")) {
+            cleanValue = "_" + cleanValue.substring(1);
+        }
+        return cleanValue;
+    }
 
 }

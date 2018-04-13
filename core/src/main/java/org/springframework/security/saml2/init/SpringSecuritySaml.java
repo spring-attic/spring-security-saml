@@ -32,12 +32,9 @@ package org.springframework.security.saml2.init;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
-
 public class SpringSecuritySaml {
 
-    private static final SpringSecuritySaml INSTANCE = new SpringSecuritySaml();
+    private static final SpringSecuritySaml INSTANCE = new OpenSamlConfiguration();
 
     public static SpringSecuritySaml getInstance() {
         return INSTANCE;
@@ -45,20 +42,21 @@ public class SpringSecuritySaml {
 
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 
+
     public void init() {
         if (!hasInitCompleted.get()) {
             performInit();
         }
     }
 
-    private synchronized void performInit() {
+    protected synchronized void performInit() {
         if (hasInitCompleted.compareAndSet(false, true)) {
-            try {
-                InitializationService.initialize();
-
-            } catch (InitializationException e) {
-                throw new RuntimeException(e);
-            }
+            ((OpenSamlConfiguration)this).bootstrap();
         }
     }
+
+
+
+
+
 }

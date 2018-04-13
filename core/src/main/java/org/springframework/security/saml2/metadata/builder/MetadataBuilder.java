@@ -47,6 +47,7 @@ public class MetadataBuilder {
             NameID.X509_SUBJECT
         )
     );
+    private EntityDescriptorBuilder descriptor;
 
     protected MetadataBuilder(String baseUrl) {
         if (isEmpty(baseUrl)) {
@@ -119,12 +120,25 @@ public class MetadataBuilder {
     }
 
 
+    public MetadataBuilder setEntityDescriptor(EntityDescriptorBuilder descriptor) {
+        this.descriptor = descriptor;
+        return this;
+    }
+
     public ServiceProviderMetadata buildServiceProviderMetadata() {
         if (isEmpty(entityId)) {
             throw new InvalidMetadataException("entityId is a required attribute for metadata");
-        };
+        }
+
+        if (descriptor == null) {
+            throw new InvalidMetadataException("EntityDescriptor can not be null");
+        }
+
+
         throw new UnsupportedOperationException();
     }
+
+
 
 
 

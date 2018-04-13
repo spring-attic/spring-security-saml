@@ -28,7 +28,7 @@ import org.springframework.security.saml2.Saml2Object;
  * </a>
  */
 public interface EntityDescriptor extends Saml2Object {
-    String getID();
+    String getId();
 
     String getEntityId();
 

@@ -13,21 +13,27 @@
  *
  */
 
-package org.springframework.security.saml2.metadata;
+package org.springframework.security.saml2.metadata.builder;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml2.attribute.Attribute;
+import org.joda.time.DateTime;
+import org.springframework.security.saml2.xml.KeyDescriptor;
 
-/**
- * Represents an IDPSSODescriptor
- * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
- */
-public interface IdentityProviderDescriptor extends SsoProviderDescriptor {
-    boolean getWantAuthnRequestsSigned();
-    List<Endpoint> getSingleSignOnService();
-    List<Endpoint> getNameIDMappingService();
-    List<Endpoint> getAssertionIDRequestService();
-    List<String> getAttributeProfile();
-    List<Attribute> getAttribute();
+public abstract class SsoProviderDescriptorBuilder {
+
+
+    private List<KeyDescriptor> keyDescriptors = new LinkedList<>();
+    private String id;
+    private DateTime validUntil;
+    private String cacheDuration;
+    private String protocolSupportEnumeration;
+
+    protected SsoProviderDescriptorBuilder() {
+    }
+
+
+
+
 }

@@ -13,8 +13,16 @@
  *
  */
 
-package org.springframework.security.saml2.metadata;
+package org.springframework.security.saml2.metadata.builder.opensaml;
 
-public class EntitiesDescriptor {
-    //TODO - decide if we will support this type of metadata
+import org.springframework.security.saml2.metadata.Metadata;
+
+public class OpenSamlMetadataGenerator {
+
+    public static String getMetadata(Metadata metadata) {
+        return null;
+    }
+
+
+
 }

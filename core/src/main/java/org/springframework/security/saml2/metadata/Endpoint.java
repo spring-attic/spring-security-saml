@@ -19,15 +19,56 @@ package org.springframework.security.saml2.metadata;
  * Defined on
  * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">lines 295-305</a>
  */
-public interface Endpoint {
+public class Endpoint {
 
-    int getIndex();
+    private int index = 0;
+    private boolean isDefault;
+    private Binding binding;
+    private String location;
+    private String responseLocation;
 
-    boolean isDefault();
+    public int getIndex() {
+        return index;
+    }
 
-    String getBinding();
+    public Endpoint setIndex(int index) {
+        this.index = index;
+        return this;
+    }
 
-    String getLocation();
+    public boolean isDefault() {
+        return isDefault;
+    }
 
-    String getResponseLocation();
+    public Endpoint setDefault(boolean isDefault) {
+        this.isDefault = isDefault;
+        return this;
+    }
+
+    public Binding getBinding() {
+        return binding;
+    }
+
+    public Endpoint setBinding(Binding binding) {
+        this.binding = binding;
+        return this;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Endpoint setLocation(String location) {
+        this.location = location;
+        return this;
+    }
+
+    public String getResponseLocation() {
+        return responseLocation;
+    }
+
+    public Endpoint setResponseLocation(String responseLocation) {
+        this.responseLocation = responseLocation;
+        return this;
+    }
 }

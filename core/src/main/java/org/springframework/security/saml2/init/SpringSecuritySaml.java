@@ -51,6 +51,9 @@ public class SpringSecuritySaml {
 
     protected synchronized void performInit() {
         if (hasInitCompleted.compareAndSet(false, true)) {
+            java.security.Security.addProvider(
+                new org.bouncycastle.jce.provider.BouncyCastleProvider()
+            );
             ((OpenSamlConfiguration)this).bootstrap();
         }
     }

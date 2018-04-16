@@ -21,129 +21,209 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.springframework.security.saml2.Namespace;
+import org.springframework.security.saml2.init.OpenSamlConfiguration;
+import org.springframework.security.saml2.init.SpringSecuritySaml;
+import org.springframework.security.saml2.metadata.Binding;
+import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.InvalidMetadataException;
 import org.springframework.security.saml2.metadata.NameID;
-import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.metadata.builder.EntityDescriptorBuilder;
+import org.springframework.security.saml2.xml.SimpleKey;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.w3c.dom.Element;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
 public class SimpleMetadataBuilder {
 
-        private boolean requestSigned = true;
-        private boolean wantAssertionSigned = true;
-        private String entityId = null;
-        private String baseUrl;
-        private String entityAlias = null;
-        private String id;
+    private boolean requestSigned = true;
+    private boolean wantAssertionSigned = true;
+    private String baseUrl;
+    private String entityId = null;
+    private String entityAlias = null;
+    private String id;
 
-        private Set<NameID> nameIDs = new HashSet<>(
-            Arrays.asList(
-                NameID.EMAIL,
-                NameID.TRANSIENT,
-                NameID.PERSISTENT,
-                NameID.UNSPECIFIED,
-                NameID.X509_SUBJECT
-            )
-        );
-        private EntityDescriptorBuilder descriptor;
 
-        protected SimpleMetadataBuilder(String baseUrl) {
-            if (isEmpty(baseUrl)) {
-                throw new InvalidMetadataException("Invalid base URL for metadata:'"+baseUrl+"'");
-            }
-            try {
-                new URI(baseUrl);
-            } catch (URISyntaxException e) {
-                throw new InvalidMetadataException("Invalid base URL for metadata:'"+baseUrl+"'", e);
-            }
+    private List<SimpleKey> keys = new LinkedList<>();
+    private List<Endpoint> logoutEndpoints = new LinkedList<>();
+    private List<Endpoint> assertionEndpoints = new LinkedList<>();
+
+    private Set<NameID> nameIDs = new HashSet<>(
+        Arrays.asList(
+            NameID.EMAIL,
+            NameID.TRANSIENT,
+            NameID.PERSISTENT,
+            NameID.UNSPECIFIED,
+            NameID.X509_SUBJECT
+        )
+    );
+
+    protected SimpleMetadataBuilder(String baseUrl) {
+        if (isEmpty(baseUrl)) {
+            throw new InvalidMetadataException("Invalid base URL for metadata:'" + baseUrl + "'");
+        }
+
+        try {
+            URI uri = new URI(baseUrl);
             this.baseUrl = baseUrl;
+            this.entityId = uri.toString();
+            this.entityAlias = uri.getHost();
+
+        } catch (URISyntaxException e) {
+            throw new InvalidMetadataException("Invalid base URL for metadata:'" + baseUrl + "'", e);
         }
-
-        public static SimpleMetadataBuilder builder(HttpServletRequest request) {
-            return builder((String)null);
-        }
-
-        public static SimpleMetadataBuilder builder(String urlPrefix) {
-            return new SimpleMetadataBuilder(urlPrefix);
-        }
-
-        public SimpleMetadataBuilder wantAssertionSigned(boolean wantAssertionSigned) {
-            this.wantAssertionSigned = wantAssertionSigned;
-            return this;
-        }
-
-        public SimpleMetadataBuilder requestSigned(boolean requestSigned) {
-            this.requestSigned =requestSigned;
-            return this;
-        }
-
-        public SimpleMetadataBuilder clearNameIDs() {
-            nameIDs.clear();
-            return this;
-        }
-
-        public SimpleMetadataBuilder addNameID(NameID id) {
-            nameIDs.add(id);
-            return this;
-        }
-
-        public SimpleMetadataBuilder addNameIDs(NameID... ids) {
-            nameIDs.addAll(Arrays.asList(ids));
-            return this;
-        }
-
-        public SimpleMetadataBuilder addNameIDs(Collection<NameID> ids) {
-            nameIDs.addAll(ids);
-            return this;
-        }
-
-        public SimpleMetadataBuilder removeNameID(NameID id) {
-            nameIDs.remove(id);
-            return this;
-        }
-
-        public SimpleMetadataBuilder setEntityID(String id) {
-            this.entityId = id;
-            return this;
-        }
-
-        public SimpleMetadataBuilder setEntityAlias(String alias) {
-            this.entityAlias = alias;
-            return this;
-        }
-
-        public SimpleMetadataBuilder setId(String id) {
-            this.id = id;
-            return this;
-        }
-
-
-        public SimpleMetadataBuilder setEntityDescriptor(EntityDescriptorBuilder descriptor) {
-            this.descriptor = descriptor;
-            return this;
-        }
-
-        public ServiceProviderMetadata buildServiceProviderMetadata() {
-            if (isEmpty(entityId)) {
-                throw new InvalidMetadataException("entityId is a required attribute for metadata");
-            }
-
-            if (descriptor == null) {
-                throw new InvalidMetadataException("EntityDescriptor can not be null");
-            }
-
-
-            throw new UnsupportedOperationException();
-        }
-
-
-
-
-
-
-
-
     }
+
+    public static SimpleMetadataBuilder builder(HttpServletRequest request) {
+        return builder((String) null);
+    }
+
+    public static SimpleMetadataBuilder builder(String urlPrefix) {
+        return new SimpleMetadataBuilder(urlPrefix);
+    }
+
+    public SimpleMetadataBuilder wantAssertionSigned(boolean wantAssertionSigned) {
+        this.wantAssertionSigned = wantAssertionSigned;
+        return this;
+    }
+
+    public SimpleMetadataBuilder requestSigned(boolean requestSigned) {
+        this.requestSigned = requestSigned;
+        return this;
+    }
+
+    public SimpleMetadataBuilder clearNameIDs() {
+        nameIDs.clear();
+        return this;
+    }
+
+    public SimpleMetadataBuilder addNameID(NameID id) {
+        nameIDs.add(id);
+        return this;
+    }
+
+    public SimpleMetadataBuilder addNameIDs(NameID... ids) {
+        nameIDs.addAll(Arrays.asList(ids));
+        return this;
+    }
+
+    public SimpleMetadataBuilder addNameIDs(Collection<NameID> ids) {
+        nameIDs.addAll(ids);
+        return this;
+    }
+
+    public SimpleMetadataBuilder removeNameID(NameID id) {
+        nameIDs.remove(id);
+        return this;
+    }
+
+    public SimpleMetadataBuilder setEntityID(String id) {
+        this.entityId = id;
+        return this;
+    }
+
+    public SimpleMetadataBuilder setEntityAlias(String alias) {
+        this.entityAlias = alias;
+        return this;
+    }
+
+    public SimpleMetadataBuilder setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public SimpleMetadataBuilder addKey(SimpleKey key) {
+        this.keys.add(key);
+        return this;
+    }
+
+    public SimpleMetadataBuilder addLogoutPath(String path, Binding binding) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        builder.pathSegment(path);
+        int index = logoutEndpoints.size();
+        this.logoutEndpoints.add(
+            new Endpoint()
+                .setIndex(index)
+                .setBinding(binding)
+                .setLocation(builder.build().toUriString())
+        );
+        return this;
+    }
+
+    public SimpleMetadataBuilder addAssertionPath(String path, Binding binding, boolean isDefault) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        builder.pathSegment(path);
+        int index = assertionEndpoints.size();
+        this.assertionEndpoints.add(
+            new Endpoint()
+                .setDefault(isDefault)
+                .setIndex(index)
+                .setBinding(binding)
+                .setLocation(builder.build().toUriString())
+        );
+        return this;
+    }
+
+
+    public String buildServiceProviderMetadata() {
+        if (isEmpty(entityId)) {
+            throw new InvalidMetadataException("entityId is a required attribute for metadata");
+        }
+
+        OpenSamlConfiguration config = (OpenSamlConfiguration) SpringSecuritySaml.getInstance();
+        config.init();
+        EntityDescriptor entity = config.getEntityDescriptor();
+        entity.setEntityID(entityId);
+        entity.setID(UUID.randomUUID().toString());
+
+        SPSSODescriptor descriptor = config.getSPSSODescriptor();
+        entity.getRoleDescriptors().add(descriptor);
+
+        descriptor.setWantAssertionsSigned(wantAssertionSigned);
+        descriptor.setAuthnRequestsSigned(requestSigned);
+        descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
+
+        nameIDs.forEach(n ->
+            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
+        );
+
+        if (!keys.isEmpty()) {
+            descriptor.getKeyDescriptors().add(
+                config.getKeyDescriptor(keys.get(0))
+            );
+        }
+
+
+        for (int i=0; i<assertionEndpoints.size(); i++) {
+            Endpoint ep = assertionEndpoints.get(i);
+            descriptor.getAssertionConsumerServices()
+                .add(config.getAssertionConsumerService(ep, i));
+        }
+
+        for (int i=0; i<logoutEndpoints.size(); i++) {
+            Endpoint ep = logoutEndpoints.get(i);
+            descriptor.getSingleLogoutServices()
+                .add(config.getSingleLogoutService(ep));
+        }
+
+        try {
+            final Element element = config
+                .getMarshallerFactory()
+                .getMarshaller(entity)
+                .marshall(entity);
+            return SerializeSupport.nodeToString(element);
+        } catch (Exception e) {
+            throw new InvalidMetadataException("Failed to create metadata", e);
+        }
+    }
+
+
+}

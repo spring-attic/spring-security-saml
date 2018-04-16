@@ -13,16 +13,25 @@
  *
  */
 
-package org.springframework.security.saml2.metadata.builder.opensaml;
+package org.springframework.security.saml2.metadata;
 
-import org.springframework.security.saml2.metadata.Metadata;
+import javax.annotation.Nonnull;
 
-public class OpenSamlMetadataGenerator {
+public enum Binding {
 
-    public static String getMetadata(Metadata metadata) {
-        return null;
+    POST("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"),
+    REDIRECT("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"),
+    URI("urn:oasis:names:tc:SAML:2.0:bindings:URI");
+
+    private final String urn;
+
+    Binding(@Nonnull String urn) {
+        this.urn = urn;
     }
 
 
-
+    @Override
+    public String toString() {
+        return this.urn;
+    }
 }

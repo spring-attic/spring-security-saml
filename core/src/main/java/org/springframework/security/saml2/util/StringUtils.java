@@ -15,6 +15,10 @@
 
 package org.springframework.security.saml2.util;
 
+import java.net.URISyntaxException;
+
+import org.apache.http.client.utils.URIBuilder;
+
 public class StringUtils {
 
     public static String getNCNameString(String value) {
@@ -26,6 +30,14 @@ public class StringUtils {
             cleanValue = "_" + cleanValue.substring(1);
         }
         return cleanValue;
+    }
+
+    public static URIBuilder fromString(String url) {
+        try {
+            return new URIBuilder(url);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

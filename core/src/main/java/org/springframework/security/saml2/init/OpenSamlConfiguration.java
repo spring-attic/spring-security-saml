@@ -161,7 +161,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         SAMLObjectBuilder<NameIDFormat> builder =
             (SAMLObjectBuilder<NameIDFormat>) getBuilderFactory().getBuilder(NameIDFormat.DEFAULT_ELEMENT_NAME);
         NameIDFormat format = builder.buildObject();
-        format.setFormat(nameID.name());
+        format.setFormat(nameID.toString());
         return format;
     }
 
@@ -170,7 +170,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
             (SAMLObjectBuilder<AssertionConsumerService>) getBuilderFactory().getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         AssertionConsumerService consumer = builder.buildObject();
         consumer.setLocation(endpoint.getLocation());
-        consumer.setBinding(endpoint.getBinding().name());
+        consumer.setBinding(endpoint.getBinding().toString());
         consumer.setIsDefault(endpoint.isDefault());
         consumer.setIndex(index);
         return consumer;
@@ -180,7 +180,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         SAMLObjectBuilder<SingleLogoutService> builder =
             (SAMLObjectBuilder<SingleLogoutService>) getBuilderFactory().getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
         SingleLogoutService service = builder.buildObject();
-        service.setBinding(endpoint.getBinding().name());
+        service.setBinding(endpoint.getBinding().toString());
         service.setLocation(endpoint.getLocation());
         return service;
     }

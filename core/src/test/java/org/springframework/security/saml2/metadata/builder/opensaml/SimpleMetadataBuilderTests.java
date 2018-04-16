@@ -18,9 +18,8 @@ package org.springframework.security.saml2.metadata.builder.opensaml;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleMetadataBuilderTests {
 
@@ -28,7 +27,7 @@ public class SimpleMetadataBuilderTests {
     public void getMetaData() {
         String baseUrl = "http://localhost:8080/uaa";
         String metadata = new SimpleMetadataBuilder(baseUrl)
-            .addKey(new SimpleKey("alias",key, cert, passphrase))
+            .addKey(new SimpleKey("alias", key, cert, passphrase, KeyType.SIGNING))
             .addAssertionPath("saml/SSO", Binding.POST, true)
             .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
             .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)

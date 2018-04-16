@@ -21,15 +21,18 @@ public class SimpleKey {
     private final String privateKey;
     private final String certificate;
     private final String passphrase;
+    private final KeyType type;
 
     public SimpleKey(String alias,
                      String privateKey,
                      String certificate,
-                     String passphrase) {
+                     String passphrase,
+                     KeyType type) {
         this.alias = alias;
         this.privateKey = privateKey;
         this.certificate = certificate;
         this.passphrase = passphrase;
+        this.type = type;
     }
 
     public String getPrivateKey() {
@@ -46,5 +49,9 @@ public class SimpleKey {
 
     public String getAlias() {
         return alias;
+    }
+
+    public KeyType getType() {
+        return type;
     }
 }

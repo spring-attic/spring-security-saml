@@ -17,6 +17,7 @@ package org.springframework.security.saml2.xml;
 
 public enum KeyType {
     SIGNING("signing"),
+    UNSPECIFIED("unspecified"),
     ENCRYPTION("encryption");
 
     private final String type;

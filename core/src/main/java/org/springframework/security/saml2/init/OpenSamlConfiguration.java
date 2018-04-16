@@ -42,6 +42,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleLogoutService;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
 import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
@@ -195,6 +196,9 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         try {
             KeyInfo info = getKeyInfoGenerator(credential).generate(credential);
             descriptor.setKeyInfo(info);
+            if (key.getType()!=null) {
+                descriptor.setUse(UsageType.valueOf(key.getType().toString()));
+            }
             return descriptor;
         } catch (SecurityException e) {
             throw new RuntimeException(e);

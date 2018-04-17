@@ -24,11 +24,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.Namespace;
 import org.springframework.security.saml2.init.OpenSamlConfiguration;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
@@ -53,6 +54,12 @@ public class SimpleMetadataBuilder {
 
 
     private List<SimpleKey> keys = new LinkedList<>();
+
+    private SimpleKey signingKey = null;
+    private AlgorithmMethod signatureAlgorithm = null;
+    private DigestMethod signatureDigestMethod = null;
+
+
     private List<Endpoint> logoutEndpoints = new LinkedList<>();
     private List<Endpoint> assertionEndpoints = new LinkedList<>();
 
@@ -76,6 +83,7 @@ public class SimpleMetadataBuilder {
             this.baseUrl = baseUrl;
             this.entityId = uri.toString();
             this.entityAlias = uri.getHost();
+            this.id = uri.getHost();
 
         } catch (URISyntaxException e) {
             throw new InvalidMetadataException("Invalid base URL for metadata:'" + baseUrl + "'", e);
@@ -145,6 +153,15 @@ public class SimpleMetadataBuilder {
         return this;
     }
 
+    public SimpleMetadataBuilder addSigningKey(SimpleKey key,
+                                               AlgorithmMethod signatureAlgorithm,
+                                               DigestMethod signatureDigestMethod) {
+        this.signatureAlgorithm = signatureAlgorithm;
+        this.signatureDigestMethod = signatureDigestMethod;
+        this.signingKey = key;
+        return this;
+    }
+
     public SimpleMetadataBuilder addLogoutPath(String path, Binding binding) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
         builder.pathSegment(path);
@@ -182,7 +199,7 @@ public class SimpleMetadataBuilder {
         config.init();
         EntityDescriptor entity = config.getEntityDescriptor();
         entity.setEntityID(entityId);
-        entity.setID(UUID.randomUUID().toString());
+        entity.setID(id);
 
         SPSSODescriptor descriptor = config.getSPSSODescriptor();
         entity.getRoleDescriptors().add(descriptor);
@@ -215,7 +232,11 @@ public class SimpleMetadataBuilder {
         }
 
         try {
-            final Element element = config
+            if (signingKey!=null) {
+                config.signObject(entity, signingKey, signatureAlgorithm, signatureDigestMethod);
+            }
+
+            Element element = config
                 .getMarshallerFactory()
                 .getMarshaller(entity)
                 .marshall(entity);

@@ -27,12 +27,16 @@ import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.core.xml.XMLObjectBuilder;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistry;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Marshaller;
 import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
@@ -45,12 +49,20 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
 import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
 import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.SignatureSupport;
+import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.Canonicalization;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.util.InMemoryKeyStore;
 import org.springframework.security.saml2.xml.SimpleKey;
 
@@ -229,6 +241,38 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
     public KeyInfoGenerator getKeyInfoGenerator(Credential credential) {
         NamedKeyInfoGeneratorManager manager = DefaultSecurityConfigurationBootstrap.buildBasicKeyInfoGeneratorManager();
         return manager.getDefaultManager().getFactory(credential).newInstance();
+    }
+
+    public void signObject(SignableSAMLObject signable,
+                           SimpleKey key,
+                           AlgorithmMethod algorithm,
+                           DigestMethod digest) {
+
+        KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
+        Credential credential = getCredential(key, resolver);
+
+        XMLObjectBuilder<Signature> signatureBuilder =
+            (XMLObjectBuilder<Signature>) getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME);
+        Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+
+        signable.setSignature(signature);
+
+
+        SignatureSigningParameters parameters = new SignatureSigningParameters();
+        parameters.setSigningCredential(credential);
+        parameters.setKeyInfoGenerator(getKeyInfoGenerator(credential));
+        parameters.setSignatureAlgorithm(algorithm.toString());
+        parameters.setSignatureReferenceDigestMethod(digest.toString());
+        parameters.setSignatureCanonicalizationAlgorithm(Canonicalization.ALGO_ID_C14N_OMIT_COMMENTS.toString());
+
+        try {
+            SignatureSupport.prepareSignatureParams(signature, parameters);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(signable);
+            marshaller.marshall(signable);
+            Signer.signObject(signature);
+        } catch (SecurityException | MarshallingException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

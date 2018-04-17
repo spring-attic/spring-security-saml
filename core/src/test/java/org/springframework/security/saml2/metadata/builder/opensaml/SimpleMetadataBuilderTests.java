@@ -15,19 +15,38 @@
 
 package org.springframework.security.saml2.metadata.builder.opensaml;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.NameID;
 import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
+import org.w3c.dom.Node;
+
+import static org.springframework.security.saml2.signature.AlgorithmMethod.RSA_SHA1;
+import static org.springframework.security.saml2.signature.DigestMethod.SHA1;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
+import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
 public class SimpleMetadataBuilderTests {
+
+
+
+    @BeforeEach
+    public void setup() throws Exception {
+    }
 
     @Test
     public void getMetaData() {
         String baseUrl = "http://localhost:8080/uaa";
         String metadata = new SimpleMetadataBuilder(baseUrl)
             .addKey(new SimpleKey("alias", key, cert, passphrase, KeyType.SIGNING))
+            .addSigningKey(
+                new SimpleKey("alias", key, cert, passphrase, KeyType.SIGNING),
+                RSA_SHA1,
+                SHA1
+            )
             .addAssertionPath("saml/SSO", Binding.POST, true)
             .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
             .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
@@ -38,6 +57,13 @@ public class SimpleMetadataBuilderTests {
             .requestSigned(true)
             .buildServiceProviderMetadata();
 
+        assertNodeCount(metadata, "//md:EntityDescriptor", 1);
+        Iterable<Node> nodes = getNodes(metadata, "//md:EntityDescriptor");
+        assertNodeAttribute(nodes.iterator().next(), "ID", "localhost");
+        assertNodeAttribute(nodes.iterator().next(), "entityID", "http://localhost:8080/uaa");
+
+        assertNodeCount(metadata, "//ds:Signature", 1);
+        assertNodeCount(metadata, "//ds:SignedInfo", 1);
         System.out.println("metadata:\n"+metadata);
 
     }

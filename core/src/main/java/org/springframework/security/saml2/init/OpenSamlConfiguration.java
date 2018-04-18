@@ -263,7 +263,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         parameters.setKeyInfoGenerator(getKeyInfoGenerator(credential));
         parameters.setSignatureAlgorithm(algorithm.toString());
         parameters.setSignatureReferenceDigestMethod(digest.toString());
-        parameters.setSignatureCanonicalizationAlgorithm(Canonicalization.ALGO_ID_C14N_OMIT_COMMENTS.toString());
+        parameters.setSignatureCanonicalizationAlgorithm(Canonicalization.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString());
 
         try {
             SignatureSupport.prepareSignatureParams(signature, parameters);

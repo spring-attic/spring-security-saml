@@ -40,16 +40,16 @@ public interface EntityDescriptor extends Saml2Object {
 
     /**
      * The time interval in format "PnYnMnDTnHnMnS"
-     * <li>
-     *   <ul>P indicates the period (required)</ul>
-     *   <ul>nY indicates the number of years</ul>
-     *   <ul>nM indicates the number of months</ul>
-     *   <ul>nD indicates the number of days</ul>
-     *   <ul>T indicates the start of a time section (required if you are going to specify hours, minutes, or seconds)</ul>
-     *   <ul>nH indicates the number of hours</ul>
-     *   <ul>nM indicates the number of minutes</ul>
-     *   <ul>nS indicates the number of seconds</ul>
-     * </li>
+     * <ul>
+     *   <li>P indicates the period (required)</li>
+     *   <li>nY indicates the number of years</li>
+     *   <li>nM indicates the number of months</li>
+     *   <li>nD indicates the number of days</li>
+     *   <li>T indicates the start of a time section (required if you are going to specify hours, minutes, or seconds)</li>
+     *   <li>nH indicates the number of hours</li>
+     *   <li>nM indicates the number of minutes</li>
+     *   <li>nS indicates the number of seconds</li>
+     * </ul>
      * @return the cache duration for the metadata. null if no duration has been set.
      */
     String getCacheDuration();

@@ -42,6 +42,8 @@ import java.util.UUID;
 
 import org.springframework.security.saml2.xml.SimpleKey;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class InMemoryKeyStore {
 
     private static final char[] KS_PASSWD = UUID.randomUUID().toString().toCharArray();
@@ -50,14 +52,16 @@ public class InMemoryKeyStore {
         try {
             KeyStore ks = KeyStore.getInstance("JKS");
             ks.load(null, KS_PASSWD);
-            byte[] keybytes = X509Utilities.getDER(key.getPrivateKey());
+
             byte[] certbytes = X509Utilities.getDER(key.getCertificate());
-
             Certificate certificate = X509Utilities.getCertificate(certbytes);
-            RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
-
             ks.setCertificateEntry(key.getAlias(), certificate);
-            ks.setKeyEntry(key.getAlias(), privateKey, key.getPassphrase().toCharArray(), new Certificate[] {certificate});
+
+            if (hasText(key.getPrivateKey())) {
+                byte[] keybytes = X509Utilities.getDER(key.getPrivateKey());
+                RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
+                ks.setKeyEntry(key.getAlias(), privateKey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+            }
 
             return new InMemoryKeyStore(ks);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidKeySpecException e) {

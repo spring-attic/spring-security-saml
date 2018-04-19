@@ -15,8 +15,13 @@
 
 package org.springframework.security.saml2.metadata.builder.opensaml;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.xmlsec.signature.X509Certificate;
+import org.springframework.security.saml2.init.OpenSamlConfiguration;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.NameID;
 import org.springframework.security.saml2.xml.KeyType;
@@ -31,7 +36,7 @@ import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
 public class SimpleMetadataBuilderTests {
 
-
+    OpenSamlConfiguration config = (OpenSamlConfiguration) OpenSamlConfiguration.getInstance().init();
 
     @BeforeEach
     public void setup() throws Exception {
@@ -40,22 +45,7 @@ public class SimpleMetadataBuilderTests {
     @Test
     public void getMetaData() {
         String baseUrl = "http://localhost:8080/uaa";
-        String metadata = new SimpleMetadataBuilder(baseUrl)
-            .addKey(new SimpleKey("alias", key, cert, passphrase, KeyType.SIGNING))
-            .addSigningKey(
-                new SimpleKey("alias", key, cert, passphrase, KeyType.SIGNING),
-                RSA_SHA1,
-                SHA1
-            )
-            .addAssertionPath("saml/SSO", Binding.POST, true)
-            .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
-            .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
-            .clearNameIDs()
-            .addNameID(NameID.EMAIL)
-            .addNameID(NameID.PERSISTENT)
-            .wantAssertionSigned(true)
-            .requestSigned(true)
-            .buildServiceProviderMetadata();
+        String metadata = getSampleMetadata(baseUrl);
 
         assertNodeCount(metadata, "//md:EntityDescriptor", 1);
         Iterable<Node> nodes = getNodes(metadata, "//md:EntityDescriptor");
@@ -68,9 +58,62 @@ public class SimpleMetadataBuilderTests {
 
     }
 
-    private static final String passphrase = "password";
+    @Test
+    public void readMetaDataAndValidateSignature() {
+        String baseUrl = "http://localhost:8080/uaa";
+        String metadata = getSampleMetadata(baseUrl);
+        EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
+        config.validateSignature(object, Arrays.asList(getPublicKey()));
+    }
 
-    private static final String key = "-----BEGIN RSA PRIVATE KEY-----\n" +
+    @Test
+    public void readMetaDataAndExtractKeyAndValidateSignature() {
+        String baseUrl = "http://localhost:8080/uaa";
+        String metadata = getSampleMetadata(baseUrl);
+        EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
+
+        X509Certificate certificate = object.getRoleDescriptors().get(0)
+            .getKeyDescriptors().get(0)
+            .getKeyInfo().getX509Datas().get(0)
+            .getX509Certificates().get(0);
+        String certValue = certificate.getValue();
+        config.validateSignature(object, Arrays.asList(getPublicKey(certValue)));
+    }
+
+
+    public String getSampleMetadata(String baseUrl) {
+        return new SimpleMetadataBuilder(baseUrl)
+                .addKey(getDefaultKey())
+                .addSigningKey(
+                    getDefaultKey(),
+                    RSA_SHA1,
+                    SHA1
+                )
+                .addAssertionPath("saml/SSO", Binding.POST, true)
+                .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
+                .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
+                .clearNameIDs()
+                .addNameID(NameID.EMAIL)
+                .addNameID(NameID.PERSISTENT)
+                .wantAssertionSigned(true)
+                .requestSigned(true)
+                .buildServiceProviderMetadata();
+    }
+
+    private SimpleKey getDefaultKey() {
+        return new SimpleKey("alias", SIGNING_KEY, SIGNING_CERT, SIGNING_KEY_PASSPHRASE, KeyType.SIGNING);
+    }
+
+    private SimpleKey getPublicKey() {
+        return getPublicKey(SIGNING_CERT);
+    }
+    private SimpleKey getPublicKey(String cert) {
+        return new SimpleKey("alias", null, cert, null, KeyType.SIGNING);
+    }
+
+    public static final String SIGNING_KEY_PASSPHRASE = "password";
+
+    public static final String SIGNING_KEY = "-----BEGIN RSA PRIVATE KEY-----\n" +
         "MIICXQIBAAKBgQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5\n" +
         "L39WqS9u0hnA+O7MCA/KlrAR4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vA\n" +
         "fpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCYxhMol6ZnTbSsFW6VZjFMjQIDAQAB\n" +
@@ -86,7 +129,7 @@ public class SimpleMetadataBuilderTests {
         "qy45ptdwJLqLJCeNoR0JUcDNIRhOCuOPND7pcMtX6hI/\n" +
         "-----END RSA PRIVATE KEY-----";
 
-    private static final String cert = "-----BEGIN CERTIFICATE-----\n" +
+    public static final String SIGNING_CERT = "-----BEGIN CERTIFICATE-----\n" +
         "MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEO\n" +
         "MAwGA1UECBMFYXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEO\n" +
         "MAwGA1UECxMFYXJ1YmExDjAMBgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5h\n" +

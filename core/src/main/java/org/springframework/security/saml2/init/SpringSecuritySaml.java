@@ -43,10 +43,11 @@ public class SpringSecuritySaml {
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 
 
-    public void init() {
+    public SpringSecuritySaml init() {
         if (!hasInitCompleted.get()) {
             performInit();
         }
+        return this;
     }
 
     protected synchronized void performInit() {

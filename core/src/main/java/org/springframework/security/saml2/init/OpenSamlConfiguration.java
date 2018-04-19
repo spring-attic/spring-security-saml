@@ -15,18 +15,23 @@
 
 package org.springframework.security.saml2.init;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilder;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistry;
@@ -35,6 +40,7 @@ import org.opensaml.core.xml.io.Marshaller;
 import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
@@ -57,6 +63,7 @@ import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
+import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.NameID;
@@ -65,9 +72,12 @@ import org.springframework.security.saml2.signature.Canonicalization;
 import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.util.InMemoryKeyStore;
 import org.springframework.security.saml2.xml.SimpleKey;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static org.springframework.util.StringUtils.hasText;
 
 public class OpenSamlConfiguration extends SpringSecuritySaml {
 
@@ -231,9 +241,12 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
 
     public KeyStoreCredentialResolver getCredentialsResolver(SimpleKey key) {
         InMemoryKeyStore ks = InMemoryKeyStore.fromKey(key);
+        Map<String, String> passwords = hasText(key.getPrivateKey()) ?
+            Collections.singletonMap(key.getAlias(), key.getPassphrase()) :
+            Collections.emptyMap();
         KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(
             ks.getKeyStore(),
-            Collections.singletonMap(key.getAlias(), key.getPassphrase())
+            passwords
         );
         return resolver;
     }
@@ -271,6 +284,31 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
             marshaller.marshall(signable);
             Signer.signObject(signature);
         } catch (SecurityException | MarshallingException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
+        try {
+            SimpleKey key = keys.get(0);
+            KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
+            Credential credential = getCredential(key, resolver);
+            SignatureValidator.validate(object.getSignature(),credential);
+        } catch (SignatureException e) {
+            throw new org.springframework.security.saml2.signature.SignatureException(e.getMessage(), e);
+        }
+    }
+
+    public XMLObject parse(String xml) {
+        return parse(xml.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public XMLObject parse(byte[] xml) {
+        try {
+            Document document = getParserPool().parse(new ByteArrayInputStream(xml));
+            Element element = document.getDocumentElement();
+            return getUnmarshallerFactory().getUnmarshaller(element).unmarshall(element);
+        } catch (UnmarshallingException | XMLParserException e) {
             throw new RuntimeException(e);
         }
     }

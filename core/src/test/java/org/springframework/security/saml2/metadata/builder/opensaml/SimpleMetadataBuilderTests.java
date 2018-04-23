@@ -64,6 +64,8 @@ public class SimpleMetadataBuilderTests {
         String metadata = getSampleMetadata(baseUrl);
         EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
         config.validateSignature(object, Arrays.asList(getPublicKey()));
+
+        System.out.println("Entity Descriptor:"+object);
     }
 
     @Test

@@ -32,12 +32,28 @@ package org.springframework.security.saml2.metadata;
 
 import java.util.List;
 
-public interface SsoProviderDescriptor extends ProviderDescriptor {
+public class SsoProvider extends Provider {
 
-    List<Endpoint> getArtifactResolutionService();
-    List<Endpoint> getSingleLogoutService();
-    List<Endpoint> getManageNameIDService();
-    List<NameID> getNameIDs();
+    private List<Endpoint> artifactResolutionService;
+    private List<Endpoint> singleLogoutService;
+    private List<Endpoint> manageNameIDService;
+    private List<NameID> nameIDs;
+
+    public List<Endpoint> getArtifactResolutionService() {
+        return artifactResolutionService;
+    }
+
+    public List<Endpoint> getSingleLogoutService() {
+        return singleLogoutService;
+    }
+
+    public List<Endpoint> getManageNameIDService() {
+        return manageNameIDService;
+    }
+
+    public List<NameID> getNameIDs() {
+        return nameIDs;
+    }
 
 
 }

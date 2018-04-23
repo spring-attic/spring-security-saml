@@ -30,9 +30,13 @@
 
 package org.springframework.security.saml2.init;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SpringSecuritySaml {
+import org.springframework.security.saml2.metadata.Metadata;
+import org.springframework.security.saml2.xml.SimpleKey;
+
+public abstract class SpringSecuritySaml {
 
     private static final SpringSecuritySaml INSTANCE = new OpenSamlConfiguration();
 
@@ -58,6 +62,10 @@ public class SpringSecuritySaml {
             ((OpenSamlConfiguration)this).bootstrap();
         }
     }
+
+    public abstract Metadata resolveMetadata(String xml, List<SimpleKey> trustedKeys);
+
+
 
 
 

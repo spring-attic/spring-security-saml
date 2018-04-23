@@ -13,26 +13,47 @@
  *
  */
 
-package org.springframework.security.saml2.metadata.builder;
+package org.springframework.security.saml2.metadata;
 
-import java.util.LinkedList;
+import javax.xml.crypto.dsig.XMLSignature;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.xml.KeyDescriptor;
 
-public abstract class SsoProviderDescriptorBuilder {
+public class Provider {
 
-
-    private List<KeyDescriptor> keyDescriptors = new LinkedList<>();
+    private List<XMLSignature> signatures;
+    private List<KeyDescriptor> keyDescriptors;
     private String id;
     private DateTime validUntil;
     private String cacheDuration;
     private String protocolSupportEnumeration;
 
-    protected SsoProviderDescriptorBuilder() {
+    public List<XMLSignature> getSignatures() {
+        return signatures;
     }
 
+    public List<KeyDescriptor> getKeyDescriptors() {
+        return keyDescriptors;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public DateTime getValidUntil() {
+        return validUntil;
+    }
+
+    public String getCacheDuration() {
+        return cacheDuration;
+
+    }
+
+    public String getProtocolSupportEnumeration() {
+        return protocolSupportEnumeration;
+    }
 
 
 

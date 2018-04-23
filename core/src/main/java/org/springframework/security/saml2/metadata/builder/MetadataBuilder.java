@@ -15,39 +15,17 @@
 
 package org.springframework.security.saml2.metadata.builder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.security.saml2.metadata.InvalidMetadataException;
-import org.springframework.security.saml2.metadata.NameID;
-import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
 public class MetadataBuilder {
 
-    private boolean requestSigned = true;
-    private boolean wantAssertionSigned = true;
-    private String entityId = null;
-    private String baseUrl;
-    private String entityAlias = null;
-    private String id;
 
-    private Set<NameID> nameIDs = new HashSet<>(
-        Arrays.asList(
-            NameID.EMAIL,
-            NameID.TRANSIENT,
-            NameID.PERSISTENT,
-            NameID.UNSPECIFIED,
-            NameID.X509_SUBJECT
-        )
-    );
-    private EntityDescriptorBuilder descriptor;
+    private String baseUrl;
 
     protected MetadataBuilder(String baseUrl) {
         if (isEmpty(baseUrl)) {
@@ -60,87 +38,6 @@ public class MetadataBuilder {
         }
         this.baseUrl = baseUrl;
     }
-
-    public static MetadataBuilder builder(HttpServletRequest request) {
-        return builder((String)null);
-    }
-
-    public static MetadataBuilder builder(String urlPrefix) {
-        return new MetadataBuilder(urlPrefix);
-    }
-
-    public MetadataBuilder wantAssertionSigned(boolean wantAssertionSigned) {
-        this.wantAssertionSigned = wantAssertionSigned;
-        return this;
-    }
-
-    public MetadataBuilder requestSigned(boolean requestSigned) {
-        this.requestSigned =requestSigned;
-        return this;
-    }
-
-    public MetadataBuilder clearNameIDs() {
-        nameIDs.clear();
-        return this;
-    }
-
-    public MetadataBuilder addNameID(NameID id) {
-        nameIDs.add(id);
-        return this;
-    }
-
-    public MetadataBuilder addNameIDs(NameID... ids) {
-        nameIDs.addAll(Arrays.asList(ids));
-        return this;
-    }
-
-    public MetadataBuilder addNameIDs(Collection<NameID> ids) {
-        nameIDs.addAll(ids);
-        return this;
-    }
-
-    public MetadataBuilder removeNameID(NameID id) {
-        nameIDs.remove(id);
-        return this;
-    }
-
-    public MetadataBuilder setEntityID(String id) {
-        this.entityId = id;
-        return this;
-    }
-
-    public MetadataBuilder setEntityAlias(String alias) {
-        this.entityAlias = alias;
-        return this;
-    }
-
-    public MetadataBuilder setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-
-    public MetadataBuilder setEntityDescriptor(EntityDescriptorBuilder descriptor) {
-        this.descriptor = descriptor;
-        return this;
-    }
-
-    public ServiceProviderMetadata buildServiceProviderMetadata() {
-        if (isEmpty(entityId)) {
-            throw new InvalidMetadataException("entityId is a required attribute for metadata");
-        }
-
-        if (descriptor == null) {
-            throw new InvalidMetadataException("EntityDescriptor can not be null");
-        }
-
-
-        throw new UnsupportedOperationException();
-    }
-
-
-
-
 
 
 

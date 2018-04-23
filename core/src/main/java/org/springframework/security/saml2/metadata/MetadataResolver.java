@@ -12,20 +12,15 @@
  *  limitations under the License.
  *
  */
-
 package org.springframework.security.saml2.metadata;
 
 import java.util.List;
 
-/**
- * Represents an SPSSODescriptor
- * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
- */
-public interface ServiceProviderDescriptor extends SsoProviderDescriptor {
+import org.springframework.security.saml2.xml.SimpleKey;
 
-    boolean getAuthnRequestsSigned();
-    boolean getWantAssertionsSigned();
+public class MetadataResolver {
 
-    List<Endpoint> getAssertionConsumerService();
-    List<Endpoint> getAttributeConsumingService();
+    public Metadata resolve(String xml, List<SimpleKey> trustedKeys) {
+        throw new UnsupportedOperationException();
+    }
 }

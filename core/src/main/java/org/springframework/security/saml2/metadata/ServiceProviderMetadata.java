@@ -18,5 +18,13 @@ package org.springframework.security.saml2.metadata;
 /**
  * Represents metadata providing the SPSSODescriptor entity
  */
-public interface ServiceProviderMetadata extends Metadata {
+public class ServiceProviderMetadata extends Metadata {
+
+    public ServiceProvider getServiceProvider() {
+        return (ServiceProvider) getProviders()
+            .stream()
+            .filter(p -> p instanceof ServiceProvider)
+            .findFirst()
+            .get();
+    }
 }

@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.springframework.security.saml2.metadata.ProviderDescriptor;
+import org.springframework.security.saml2.metadata.Provider;
 
 public class EntityDescriptorBuilder {
 
@@ -27,7 +27,7 @@ public class EntityDescriptorBuilder {
     private String entityId;
     private String duration;
     private DateTime validUntil;
-    private List<ProviderDescriptor> providers = new LinkedList<>();
+    private List<Provider> providers = new LinkedList<>();
 
     protected EntityDescriptorBuilder() {
     }
@@ -60,7 +60,7 @@ public class EntityDescriptorBuilder {
         return this;
     }
 
-    public EntityDescriptorBuilder addProviderDescriptor(ProviderDescriptor provider) {
+    public EntityDescriptorBuilder addProviderDescriptor(Provider provider) {
         this.providers.add(provider);
         return this;
     }

@@ -17,17 +17,30 @@ package org.springframework.security.saml2.metadata;
 
 import java.util.List;
 
-import org.springframework.security.saml2.attribute.Attribute;
-
 /**
- * Represents an IDPSSODescriptor
+ * Represents an SPSSODescriptor
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  */
-public interface IdentityProviderDescriptor extends SsoProviderDescriptor {
-    boolean getWantAuthnRequestsSigned();
-    List<Endpoint> getSingleSignOnService();
-    List<Endpoint> getNameIDMappingService();
-    List<Endpoint> getAssertionIDRequestService();
-    List<String> getAttributeProfile();
-    List<Attribute> getAttribute();
+public class ServiceProvider extends SsoProvider {
+
+    private boolean authnRequestsSigned;
+    private boolean wantAssertionsSigned;
+    private List<Endpoint> assertionConsumerService;
+    private List<Endpoint> attributeConsumingService;
+
+    public boolean getAuthnRequestsSigned() {
+        return authnRequestsSigned;
+    }
+
+    public boolean getWantAssertionsSigned() {
+        return wantAssertionsSigned;
+    }
+
+    public List<Endpoint> getAssertionConsumerService() {
+        return assertionConsumerService;
+    }
+
+    public List<Endpoint> getAttributeConsumingService() {
+        return attributeConsumingService;
+    }
 }

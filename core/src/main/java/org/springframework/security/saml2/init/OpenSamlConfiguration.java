@@ -66,6 +66,7 @@ import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.metadata.Endpoint;
+import org.springframework.security.saml2.metadata.Metadata;
 import org.springframework.security.saml2.metadata.NameID;
 import org.springframework.security.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml2.signature.Canonicalization;
@@ -313,5 +314,22 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         }
     }
 
+    @Override
+    public Metadata resolveMetadata(String xml, List<SimpleKey> trustedKeys) {
+        XMLObject object = parse(xml);
+        if (trustedKeys!=null) {
+            validateSignature((SignableSAMLObject) object, trustedKeys);
+        }
+        if (object instanceof EntityDescriptor) {
 
+        } else {
+            throw new IllegalArgumentException("Unable to cast object of class:"+object.getClass().getName() + " as metadata.");
+        }
+
+        EntityDescriptor descriptor = (EntityDescriptor)object;
+
+
+
+        throw new UnsupportedOperationException();
+    }
 }

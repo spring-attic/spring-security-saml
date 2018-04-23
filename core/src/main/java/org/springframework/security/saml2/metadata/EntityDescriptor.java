@@ -21,22 +21,39 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.Saml2Object;
 
+import static org.springframework.security.saml2.util.TimeUtil.*;
+import static org.springframework.util.StringUtils.hasText;
+
 /**
  * EntityDescriptor as defined in
  * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">
  *     Line 466-494
  * </a>
  */
-public interface EntityDescriptor extends Saml2Object {
-    String getId();
+public class EntityDescriptor implements Saml2Object {
 
-    String getEntityId();
+    private String id;
+    private String entityId;
+    private DateTime validUntil;
+    private String cacheDuration;
+    private List<Provider> providers;
+    private List<XMLSignature> signatures;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
 
     /**
      *
      * @return the timestamp of the metadata expiration date. null if this value has not been set.
      */
-    DateTime getValidUntil();
+    public DateTime getValidUntil() {
+        return validUntil;
+    }
 
     /**
      * The time interval in format "PnYnMnDTnHnMnS"
@@ -52,15 +69,59 @@ public interface EntityDescriptor extends Saml2Object {
      * </ul>
      * @return the cache duration for the metadata. null if no duration has been set.
      */
-    String getCacheDuration();
-
-    List<XMLSignature> getSignatures();
+    public String getCacheDuration() {
+        return cacheDuration;
+    }
 
     /**
      * Transforms {@link #getCacheDuration()} into milli seconds.
      * @return returns the number of milli seconds this metadata should be cached for. -1 if the value is not set.
      */
-    long getCacheDurationMillis();
+    public long getCacheDurationMillis() {
+        String duration = getCacheDuration();
+        return hasText(duration) ? durationToMillis(duration) : -1;
 
-    List<ProviderDescriptor> getProviderDescriptors();
+    }
+
+    public List<Provider> getProviderDescriptors() {
+        return providers;
+    }
+
+    public List<XMLSignature> getSignatures() {
+        return signatures;
+    }
+
+    public EntityDescriptor setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public EntityDescriptor setEntityId(String entityId) {
+        this.entityId = entityId;
+        return this;
+    }
+
+    public EntityDescriptor setValidUntil(DateTime validUntil) {
+        this.validUntil = validUntil;
+        return this;
+    }
+
+    public EntityDescriptor setCacheDuration(String cacheDuration) {
+        this.cacheDuration = cacheDuration;
+        return this;
+    }
+
+    public EntityDescriptor setCacheDurationMillis(long millis) {
+        return setCacheDuration(millisToDuration(millis));
+    }
+
+    public EntityDescriptor setProviders(List<Provider> providers) {
+        this.providers = providers;
+        return this;
+    }
+
+    public EntityDescriptor setSignatures(List<XMLSignature> signatures) {
+        this.signatures = signatures;
+        return this;
+    }
 }

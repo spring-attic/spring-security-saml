@@ -30,6 +30,7 @@
 
 package org.springframework.security.saml2.init;
 
+import javax.xml.datatype.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,12 +64,22 @@ public abstract class SpringSecuritySaml {
         }
     }
 
+    public static long durationToMillis(Duration duration) {
+        return getInstance()
+            .init()
+            .toMillis(duration);
+    }
+
+    public static Duration millisToDuration(long millis) {
+        return getInstance()
+            .init()
+            .toDuration(millis);
+    }
+
     public abstract Metadata resolveMetadata(String xml, List<SimpleKey> trustedKeys);
 
+    public abstract long toMillis(Duration duration);
 
-
-
-
-
+    public abstract Duration toDuration(long millis);
 
 }

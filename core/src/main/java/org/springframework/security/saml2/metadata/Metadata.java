@@ -15,8 +15,6 @@
 
 package org.springframework.security.saml2.metadata;
 
-import java.util.List;
-
 import org.springframework.security.saml2.Saml2Object;
 
 /**
@@ -33,13 +31,9 @@ import org.springframework.security.saml2.Saml2Object;
  *     <li>Affiliation</li>
  * </ul>
  */
-public class Metadata implements Saml2Object {
+public class Metadata extends EntityDescriptor implements Saml2Object {
 
 
-    private List<SsoProvider> providers;
 
-    public List<SsoProvider> getProviders() {
-        return providers;
-    }
 
 }

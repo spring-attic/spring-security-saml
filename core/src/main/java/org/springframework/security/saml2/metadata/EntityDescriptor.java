@@ -16,13 +16,15 @@
 package org.springframework.security.saml2.metadata;
 
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.datatype.Duration;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.Saml2Object;
 
-import static org.springframework.security.saml2.util.TimeUtil.*;
-import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.security.saml2.init.SpringSecuritySaml.durationToMillis;
+import static org.springframework.security.saml2.init.SpringSecuritySaml.millisToDuration;
 
 /**
  * EntityDescriptor as defined in
@@ -35,8 +37,8 @@ public class EntityDescriptor implements Saml2Object {
     private String id;
     private String entityId;
     private DateTime validUntil;
-    private String cacheDuration;
-    private List<Provider> providers;
+    private Duration cacheDuration;
+    private List<? extends Provider> providers;
     private List<XMLSignature> signatures;
 
     public String getId() {
@@ -69,7 +71,7 @@ public class EntityDescriptor implements Saml2Object {
      * </ul>
      * @return the cache duration for the metadata. null if no duration has been set.
      */
-    public String getCacheDuration() {
+    public Duration getCacheDuration() {
         return cacheDuration;
     }
 
@@ -78,13 +80,23 @@ public class EntityDescriptor implements Saml2Object {
      * @return returns the number of milli seconds this metadata should be cached for. -1 if the value is not set.
      */
     public long getCacheDurationMillis() {
-        String duration = getCacheDuration();
-        return hasText(duration) ? durationToMillis(duration) : -1;
+        return durationToMillis(getCacheDuration());
 
     }
 
-    public List<Provider> getProviderDescriptors() {
+    public List<? extends Provider> getProviders() {
         return providers;
+    }
+
+    public List<SsoProvider> getSsoProviders() {
+        List<SsoProvider> result = new LinkedList<>();
+        if (getProviders()!=null) {
+            getProviders()
+                .stream()
+                .filter(p -> p instanceof SsoProvider)
+                .forEach(p -> result.add((SsoProvider) p));
+        }
+        return result;
     }
 
     public List<XMLSignature> getSignatures() {
@@ -106,7 +118,7 @@ public class EntityDescriptor implements Saml2Object {
         return this;
     }
 
-    public EntityDescriptor setCacheDuration(String cacheDuration) {
+    public EntityDescriptor setCacheDuration(Duration cacheDuration) {
         this.cacheDuration = cacheDuration;
         return this;
     }
@@ -115,7 +127,7 @@ public class EntityDescriptor implements Saml2Object {
         return setCacheDuration(millisToDuration(millis));
     }
 
-    public EntityDescriptor setProviders(List<Provider> providers) {
+    public EntityDescriptor setProviders(List<? extends Provider> providers) {
         this.providers = providers;
         return this;
     }

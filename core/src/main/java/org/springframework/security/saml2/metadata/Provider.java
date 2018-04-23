@@ -16,19 +16,22 @@
 package org.springframework.security.saml2.metadata;
 
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.datatype.Duration;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.xml.KeyDescriptor;
 
-public class Provider {
+import static org.springframework.security.saml2.init.SpringSecuritySaml.millisToDuration;
+
+public class Provider<T extends Provider<T>> {
 
     private List<XMLSignature> signatures;
     private List<KeyDescriptor> keyDescriptors;
     private String id;
     private DateTime validUntil;
-    private String cacheDuration;
-    private String protocolSupportEnumeration;
+    private Duration cacheDuration;
+    private List<String> protocolSupportEnumeration;
 
     public List<XMLSignature> getSignatures() {
         return signatures;
@@ -46,15 +49,46 @@ public class Provider {
         return validUntil;
     }
 
-    public String getCacheDuration() {
+    public Duration getCacheDuration() {
         return cacheDuration;
 
     }
 
-    public String getProtocolSupportEnumeration() {
+    public List<String> getProtocolSupportEnumeration() {
         return protocolSupportEnumeration;
     }
 
+    public T setSignatures(List<XMLSignature> signatures) {
+        this.signatures = signatures;
+        return (T) this;
+    }
 
+    public T setKeyDescriptors(List<KeyDescriptor> keyDescriptors) {
+        this.keyDescriptors = keyDescriptors;
+        return (T) this;
+    }
 
+    public T setId(String id) {
+        this.id = id;
+        return (T) this;
+    }
+
+    public T setValidUntil(DateTime validUntil) {
+        this.validUntil = validUntil;
+        return (T) this;
+    }
+
+    public T setCacheDuration(Duration cacheDuration) {
+        this.cacheDuration = cacheDuration;
+        return (T) this;
+    }
+
+    public T setCacheDurationMillis(long millis) {
+        return setCacheDuration(millisToDuration(millis));
+    }
+
+    public T setProtocolSupportEnumeration(List<String> protocolSupportEnumeration) {
+        this.protocolSupportEnumeration = protocolSupportEnumeration;
+        return (T) this;
+    }
 }

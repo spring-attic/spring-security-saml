@@ -55,5 +55,23 @@ public class SsoProvider extends Provider {
         return nameIDs;
     }
 
+    public SsoProvider setArtifactResolutionService(List<Endpoint> artifactResolutionService) {
+        this.artifactResolutionService = artifactResolutionService;
+        return this;
+    }
 
+    public SsoProvider setSingleLogoutService(List<Endpoint> singleLogoutService) {
+        this.singleLogoutService = singleLogoutService;
+        return this;
+    }
+
+    public SsoProvider setManageNameIDService(List<Endpoint> manageNameIDService) {
+        this.manageNameIDService = manageNameIDService;
+        return this;
+    }
+
+    public SsoProvider setNameIDs(List<NameID> nameIDs) {
+        this.nameIDs = nameIDs;
+        return this;
+    }
 }

@@ -34,4 +34,13 @@ public enum Binding {
     public String toString() {
         return this.urn;
     }
+
+    public static Binding fromUrn(String other) {
+        for (Binding binding : values()) {
+            if (binding.toString().equals(other)) {
+                return binding;
+            }
+        }
+        throw new IllegalArgumentException("No enum for:"+other);
+    }
 }

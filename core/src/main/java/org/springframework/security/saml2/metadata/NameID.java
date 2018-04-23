@@ -17,7 +17,7 @@ package org.springframework.security.saml2.metadata;
 
 import javax.annotation.Nonnull;
 
-public enum NameID {
+public enum NameID  {
 
     UNSPECIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"),
     EMAIL("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"),
@@ -39,5 +39,14 @@ public enum NameID {
     @Override
     public String toString() {
         return this.urn;
+    }
+
+    public static NameID fromUrn(String other) {
+        for (NameID name : values()) {
+            if (name.toString().equals(other)) {
+                return name;
+            }
+        }
+        throw new IllegalArgumentException("No enum for:"+other);
     }
 }

@@ -23,11 +23,14 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.springframework.security.saml2.init.OpenSamlConfiguration;
 import org.springframework.security.saml2.metadata.Binding;
+import org.springframework.security.saml2.metadata.Metadata;
 import org.springframework.security.saml2.metadata.NameID;
 import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Node;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml2.signature.DigestMethod.SHA1;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
@@ -56,6 +59,16 @@ public class SimpleMetadataBuilderTests {
         assertNodeCount(metadata, "//ds:SignedInfo", 1);
         System.out.println("metadata:\n"+metadata);
 
+    }
+
+    @Test
+    public void readMetaDataToJavaObject() {
+        String baseUrl = "http://localhost:8080/uaa";
+        String xml = getSampleMetadata(baseUrl);
+        Metadata metadata = config.resolveMetadata(xml, null);
+        assertNotNull(metadata);
+        assertNotNull(metadata.getSsoProviders());
+        assertEquals(1, metadata.getSsoProviders().size());
     }
 
     @Test

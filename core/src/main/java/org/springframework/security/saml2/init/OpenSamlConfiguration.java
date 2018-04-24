@@ -56,6 +56,7 @@ import org.opensaml.saml.saml2.metadata.NameIDFormat;
 import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleLogoutService;
+import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
@@ -186,6 +187,12 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         return builder.buildObject();
     }
 
+    public IDPSSODescriptor getIDPSSODescriptor() {
+        SAMLObjectBuilder<IDPSSODescriptor> builder =
+            (SAMLObjectBuilder<IDPSSODescriptor>) getBuilderFactory().getBuilder(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+        return builder.buildObject();
+    }
+
     public Extensions getMetadataExtensions() {
         SAMLObjectBuilder<Extensions> builder =
             (SAMLObjectBuilder<Extensions>) getBuilderFactory().getBuilder(Extensions.DEFAULT_ELEMENT_NAME);
@@ -198,6 +205,15 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         NameIDFormat format = builder.buildObject();
         format.setFormat(nameID.toString());
         return format;
+    }
+
+    public SingleSignOnService getSingleSignOnService(Endpoint endpoint, int index) {
+        SAMLObjectBuilder<SingleSignOnService> builder =
+            (SAMLObjectBuilder<SingleSignOnService>) getBuilderFactory().getBuilder(SingleSignOnService.DEFAULT_ELEMENT_NAME);
+        SingleSignOnService sso = builder.buildObject();
+        sso.setLocation(endpoint.getLocation());
+        sso.setBinding(endpoint.getBinding().toString());
+        return sso;
     }
 
     public AssertionConsumerService getAssertionConsumerService(Endpoint endpoint, int index) {

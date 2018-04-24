@@ -46,14 +46,42 @@ public class SimpleMetadataBuilderTests {
     }
 
     @Test
-    public void getMetaData() {
+    public void getServiceProviderMetaData() {
         String baseUrl = "http://localhost:8080/uaa";
-        String metadata = getSampleMetadata(baseUrl);
+        String metadata = getSampleServiceProviderMetadata(baseUrl);
 
         assertNodeCount(metadata, "//md:EntityDescriptor", 1);
         Iterable<Node> nodes = getNodes(metadata, "//md:EntityDescriptor");
         assertNodeAttribute(nodes.iterator().next(), "ID", "localhost");
         assertNodeAttribute(nodes.iterator().next(), "entityID", "http://localhost:8080/uaa");
+
+        assertNodeCount(metadata, "//md:SPSSODescriptor", 1);
+        nodes = getNodes(metadata, "//md:SPSSODescriptor");
+        assertNodeAttribute(nodes.iterator().next(), "AuthnRequestsSigned", "true");
+        assertNodeAttribute(nodes.iterator().next(), "WantAssertionsSigned", "true");
+        assertNodeAttribute(nodes.iterator().next(), "protocolSupportEnumeration", "urn:oasis:names:tc:SAML:2.0:protocol");
+
+
+        assertNodeCount(metadata, "//ds:Signature", 1);
+        assertNodeCount(metadata, "//ds:SignedInfo", 1);
+        System.out.println("metadata:\n"+metadata);
+
+    }
+
+    @Test
+    public void getIdentityProviderMetaData() {
+        String baseUrl = "http://localhost:8080/uaa";
+        String metadata = getSampleIdentityProviderMetadata(baseUrl);
+
+        assertNodeCount(metadata, "//md:EntityDescriptor", 1);
+        Iterable<Node> nodes = getNodes(metadata, "//md:EntityDescriptor");
+        assertNodeAttribute(nodes.iterator().next(), "ID", "localhost");
+        assertNodeAttribute(nodes.iterator().next(), "entityID", "http://localhost:8080/uaa");
+
+        assertNodeCount(metadata, "//md:IDPSSODescriptor", 1);
+        nodes = getNodes(metadata, "//md:IDPSSODescriptor");
+        assertNodeAttribute(nodes.iterator().next(), "WantAuthnRequestsSigned", "true");
+        assertNodeAttribute(nodes.iterator().next(), "protocolSupportEnumeration", "urn:oasis:names:tc:SAML:2.0:protocol");
 
         assertNodeCount(metadata, "//ds:Signature", 1);
         assertNodeCount(metadata, "//ds:SignedInfo", 1);
@@ -64,7 +92,7 @@ public class SimpleMetadataBuilderTests {
     @Test
     public void readMetaDataToJavaObject() {
         String baseUrl = "http://localhost:8080/uaa";
-        String xml = getSampleMetadata(baseUrl);
+        String xml = getSampleServiceProviderMetadata(baseUrl);
         Metadata metadata = config.resolveMetadata(xml, null);
         assertNotNull(metadata);
         assertNotNull(metadata.getSsoProviders());
@@ -74,7 +102,7 @@ public class SimpleMetadataBuilderTests {
     @Test
     public void readMetaDataAndValidateSignature() {
         String baseUrl = "http://localhost:8080/uaa";
-        String metadata = getSampleMetadata(baseUrl);
+        String metadata = getSampleServiceProviderMetadata(baseUrl);
         EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
         config.validateSignature(object, Arrays.asList(getPublicKey()));
 
@@ -84,7 +112,7 @@ public class SimpleMetadataBuilderTests {
     @Test
     public void readMetaDataAndExtractKeyAndValidateSignature() {
         String baseUrl = "http://localhost:8080/uaa";
-        String metadata = getSampleMetadata(baseUrl);
+        String metadata = getSampleServiceProviderMetadata(baseUrl);
         EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
 
         X509Certificate certificate = object.getRoleDescriptors().get(0)
@@ -96,7 +124,7 @@ public class SimpleMetadataBuilderTests {
     }
 
 
-    public String getSampleMetadata(String baseUrl) {
+    public String getSampleServiceProviderMetadata(String baseUrl) {
         return new SimpleMetadataBuilder(baseUrl)
                 .addKey(getDefaultKey())
                 .addSigningKey(
@@ -113,6 +141,24 @@ public class SimpleMetadataBuilderTests {
                 .wantAssertionSigned(true)
                 .requestSigned(true)
                 .buildServiceProviderMetadata();
+    }
+
+    public String getSampleIdentityProviderMetadata(String baseUrl) {
+        return new SimpleMetadataBuilder(baseUrl)
+            .addKey(getDefaultKey())
+            .addSigningKey(
+                getDefaultKey(),
+                RSA_SHA1,
+                SHA1
+            )
+            .addSingleSignOnPath("saml/sp/SSO", Binding.POST)
+            .addSingleSignOnPath("saml/sp/SSO", Binding.REDIRECT)
+            .clearNameIDs()
+            .addNameID(NameID.EMAIL)
+            .addNameID(NameID.PERSISTENT)
+            .addNameID(NameID.WIN_DOMAIN_QUALIFIED)
+            .wantAuthnRequestsSigned(true)
+            .buildIdentityProviderMetadata();
     }
 
     private SimpleKey getDefaultKey() {

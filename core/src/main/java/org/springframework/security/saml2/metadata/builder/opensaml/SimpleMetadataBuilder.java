@@ -27,6 +27,7 @@ import java.util.Set;
 
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.springframework.security.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml2.signature.DigestMethod;
@@ -47,6 +48,7 @@ public class SimpleMetadataBuilder {
 
     private boolean requestSigned = true;
     private boolean wantAssertionSigned = true;
+    private boolean wantAuthnRequestsSigned = true;
     private String baseUrl;
     private String entityId = null;
     private String entityAlias = null;
@@ -60,6 +62,7 @@ public class SimpleMetadataBuilder {
     private DigestMethod signatureDigestMethod = null;
 
 
+    private List<Endpoint> ssoEndpoints = new LinkedList<>();
     private List<Endpoint> logoutEndpoints = new LinkedList<>();
     private List<Endpoint> assertionEndpoints = new LinkedList<>();
 
@@ -105,6 +108,11 @@ public class SimpleMetadataBuilder {
 
     public SimpleMetadataBuilder requestSigned(boolean requestSigned) {
         this.requestSigned = requestSigned;
+        return this;
+    }
+
+    public SimpleMetadataBuilder wantAuthnRequestsSigned(boolean wantAuthnRequestsSigned) {
+        this.wantAuthnRequestsSigned = wantAuthnRequestsSigned;
         return this;
     }
 
@@ -162,6 +170,19 @@ public class SimpleMetadataBuilder {
         return this;
     }
 
+    public SimpleMetadataBuilder addSingleSignOnPath(String path, Binding binding) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        builder.pathSegment(path);
+        int index = ssoEndpoints.size();
+        this.ssoEndpoints.add(
+            new Endpoint()
+                .setIndex(index)
+                .setBinding(binding)
+                .setLocation(builder.build().toUriString())
+        );
+        return this;
+    }
+
     public SimpleMetadataBuilder addLogoutPath(String path, Binding binding) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
         builder.pathSegment(path);
@@ -195,8 +216,7 @@ public class SimpleMetadataBuilder {
             throw new InvalidMetadataException("entityId is a required attribute for metadata");
         }
 
-        OpenSamlConfiguration config = (OpenSamlConfiguration) SpringSecuritySaml.getInstance();
-        config.init();
+        OpenSamlConfiguration config = (OpenSamlConfiguration) SpringSecuritySaml.getInstance().init();
         EntityDescriptor entity = config.getEntityDescriptor();
         entity.setEntityID(entityId);
         entity.setID(id);
@@ -223,6 +243,60 @@ public class SimpleMetadataBuilder {
             Endpoint ep = assertionEndpoints.get(i);
             descriptor.getAssertionConsumerServices()
                 .add(config.getAssertionConsumerService(ep, i));
+        }
+
+        for (int i=0; i<logoutEndpoints.size(); i++) {
+            Endpoint ep = logoutEndpoints.get(i);
+            descriptor.getSingleLogoutServices()
+                .add(config.getSingleLogoutService(ep));
+        }
+
+        try {
+            if (signingKey!=null) {
+                config.signObject(entity, signingKey, signatureAlgorithm, signatureDigestMethod);
+            }
+
+            Element element = config
+                .getMarshallerFactory()
+                .getMarshaller(entity)
+                .marshall(entity);
+            return SerializeSupport.nodeToString(element);
+        } catch (Exception e) {
+            throw new InvalidMetadataException("Failed to create metadata", e);
+        }
+    }
+
+    public String buildIdentityProviderMetadata() {
+        if (isEmpty(entityId)) {
+            throw new InvalidMetadataException("entityId is a required attribute for metadata");
+        }
+
+        OpenSamlConfiguration config = (OpenSamlConfiguration) SpringSecuritySaml.getInstance().init();
+        EntityDescriptor entity = config.getEntityDescriptor();
+        entity.setEntityID(entityId);
+        entity.setID(id);
+
+        IDPSSODescriptor descriptor = config.getIDPSSODescriptor();
+        entity.getRoleDescriptors().add(descriptor);
+
+        descriptor.setWantAuthnRequestsSigned(wantAuthnRequestsSigned);
+        descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
+
+        nameIDs.forEach(n ->
+            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
+        );
+
+        if (!keys.isEmpty()) {
+            descriptor.getKeyDescriptors().add(
+                config.getKeyDescriptor(keys.get(0))
+            );
+        }
+
+
+        for (int i=0; i<ssoEndpoints.size(); i++) {
+            Endpoint ep = ssoEndpoints.get(i);
+            descriptor.getSingleSignOnServices()
+                .add(config.getSingleSignOnService(ep, i));
         }
 
         for (int i=0; i<logoutEndpoints.size(); i++) {

@@ -61,7 +61,6 @@ import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
-import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
@@ -260,8 +259,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
             CriteriaSet cs = new CriteriaSet();
             EntityIdCriterion criteria = new EntityIdCriterion(key.getAlias());
             cs.add(criteria);
-            X509Credential creds = (X509Credential) resolver.resolveSingle(cs);
-            return creds;
+            return resolver.resolveSingle(cs);
         } catch (ResolverException e) {
             throw new RuntimeException("Can't obtain SP private key", e);
         }

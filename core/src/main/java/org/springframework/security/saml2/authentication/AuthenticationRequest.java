@@ -18,7 +18,7 @@ package org.springframework.security.saml2.authentication;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 
-public class AuthenticationRequest extends Request {
+public class AuthenticationRequest extends Request<AuthenticationRequest> {
 
     private String providerName;
     private String destination;
@@ -29,5 +29,77 @@ public class AuthenticationRequest extends Request {
     private RequestedAuthenticationContext requestedAuthenticationContext;
     private AuthenticationContextReference authenticationContextReference;
 
+    public String getProviderName() {
+        return providerName;
+    }
 
+    @Override
+    public String getDestination() {
+        return destination;
+    }
+
+    public Binding getBinding() {
+        return binding;
+    }
+
+    public Boolean getForceAuth() {
+        return forceAuth;
+    }
+
+    public Boolean getPassive() {
+        return isPassive;
+    }
+
+    public Endpoint getAssertionConsumerService() {
+        return assertionConsumerService;
+    }
+
+    public RequestedAuthenticationContext getRequestedAuthenticationContext() {
+        return requestedAuthenticationContext;
+    }
+
+    public AuthenticationContextReference getAuthenticationContextReference() {
+        return authenticationContextReference;
+    }
+
+    public AuthenticationRequest setProviderName(String providerName) {
+        this.providerName = providerName;
+        return _this();
+    }
+
+    @Override
+    public AuthenticationRequest setDestination(String destination) {
+        this.destination = destination;
+        return _this();
+    }
+
+    public AuthenticationRequest setBinding(Binding binding) {
+        this.binding = binding;
+        return _this();
+    }
+
+    public AuthenticationRequest setForceAuth(Boolean forceAuth) {
+        this.forceAuth = forceAuth;
+        return _this();
+    }
+
+    public AuthenticationRequest setPassive(Boolean passive) {
+        isPassive = passive;
+        return _this();
+    }
+
+    public AuthenticationRequest setAssertionConsumerService(Endpoint assertionConsumerService) {
+        this.assertionConsumerService = assertionConsumerService;
+        return _this();
+    }
+
+    public AuthenticationRequest setRequestedAuthenticationContext(RequestedAuthenticationContext requestedAuthenticationContext) {
+        this.requestedAuthenticationContext = requestedAuthenticationContext;
+        return _this();
+    }
+
+    public AuthenticationRequest setAuthenticationContextReference(AuthenticationContextReference authenticationContextReference) {
+        this.authenticationContextReference = authenticationContextReference;
+        return _this();
+    }
 }

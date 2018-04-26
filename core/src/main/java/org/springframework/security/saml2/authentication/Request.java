@@ -20,7 +20,11 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-public class Request {
+public class Request<T extends Request<T>> {
+
+    protected T _this() {
+        return (T) this;
+    }
 
     private List<String> issuers;
     private List<XMLSignature> signatures;
@@ -32,6 +36,75 @@ public class Request {
     private String destination;
     private String consent;
 
+    public List<String> getIssuers() {
+        return issuers;
+    }
 
+    public List<XMLSignature> getSignatures() {
+        return signatures;
+    }
 
+    public List<Object> getExtensions() {
+        return extensions;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public DateTime getIssueInstant() {
+        return issueInstant;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public String getConsent() {
+        return consent;
+    }
+
+    public T setIssuers(List<String> issuers) {
+        this.issuers = issuers;
+        return _this();
+    }
+
+    public T setSignatures(List<XMLSignature> signatures) {
+        this.signatures = signatures;
+        return _this();
+    }
+
+    public T setExtensions(List<Object> extensions) {
+        this.extensions = extensions;
+        return _this();
+    }
+
+    public T setId(String id) {
+        this.id = id;
+        return _this();
+    }
+
+    public T setVersion(String version) {
+        this.version = version;
+        return _this();
+    }
+
+    public T setIssueInstant(DateTime issueInstant) {
+        this.issueInstant = issueInstant;
+        return _this();
+    }
+
+    public T setDestination(String destination) {
+        this.destination = destination;
+        return _this();
+    }
+
+    public T setConsent(String consent) {
+        this.consent = consent;
+        return _this();
+    }
 }

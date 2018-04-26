@@ -18,7 +18,9 @@ package org.springframework.security.saml2.scratch;
 public class InheritanceTest {
 
     public static void main(String[] args) {
-        new C<>().setSomething()
+        new D()
+            .yetAnotherSet()
+            .setSomething()
             .setSomethingElse()
             .anotherSet();
     }
@@ -45,6 +47,14 @@ class C<T extends C<T>> extends B<T> {
     public T anotherSet() {
         return _this();
     }
+}
+
+class D extends C<D> {
+
+    public D yetAnotherSet() {
+        return this;
+    }
+
 }
 
 

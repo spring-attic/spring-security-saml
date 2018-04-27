@@ -502,7 +502,7 @@ public class MetadataGenerator {
 
         StringBuilder result = new StringBuilder();
         result.append(entityBaseURL);
-        if (!processingURL.startsWith("/")) {
+        if (!processingURL.startsWith("/") && entityBaseURL.endsWith("/")) {
             result.append("/");
         }
         result.append(processingURL);

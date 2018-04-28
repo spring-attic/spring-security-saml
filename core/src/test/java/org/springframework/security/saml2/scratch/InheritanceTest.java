@@ -24,38 +24,40 @@ public class InheritanceTest {
             .setSomethingElse()
             .anotherSet();
     }
-}
 
-class A<T extends A<T>> {
-    public T setSomething() {
-        return _this();
+    public static class A<T extends A<T>> {
+        public T setSomething() {
+            return _this();
+        }
+
+        @SuppressWarnings("unchecked")
+        protected final T _this() {
+            return (T) this;
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    protected final T _this() {
-        return (T) this;
+    public static class B<T extends B<T>> extends A<T> {
+        public T setSomethingElse() {
+            return _this();
+        }
+    }
+
+    public static class C<T extends C<T>> extends B<T> {
+        public T anotherSet() {
+            return _this();
+        }
+    }
+
+    public static class D extends C<D> {
+
+        public D yetAnotherSet() {
+            return this;
+        }
+
     }
 }
 
-class B<T extends B<T>> extends A<T> {
-    public T setSomethingElse() {
-        return _this();
-    }
-}
 
-class C<T extends C<T>> extends B<T> {
-    public T anotherSet() {
-        return _this();
-    }
-}
-
-class D extends C<D> {
-
-    public D yetAnotherSet() {
-        return this;
-    }
-
-}
 
 
 

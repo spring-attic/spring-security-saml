@@ -13,23 +13,15 @@
  *
  */
 
-package org.springframework.security.saml2.xml;
+package org.springframework.security.saml2.spi.opensaml;
 
-import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
-public interface KeyDescriptor {
+public class CreateAuthNRequest {
 
-    /**
-     * Returns at least one key. Per
-     * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
-     * Line 700
-     * @return
-     */
-    List<KeyInfo> getKeyInfo();
 
-    List<String> getEncryptionMethod();
+    @Test
+    public void test() throws Exception {
 
-    KeyType getUse();
-
+    }
 }

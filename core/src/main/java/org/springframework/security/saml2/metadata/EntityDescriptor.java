@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.Saml2Object;
+import org.springframework.security.saml2.xml.SimpleKey;
 
 import static org.springframework.security.saml2.init.SpringSecuritySaml.durationToMillis;
 import static org.springframework.security.saml2.init.SpringSecuritySaml.millisToDuration;
@@ -32,7 +33,7 @@ import static org.springframework.security.saml2.init.SpringSecuritySaml.millisT
  *     Line 466-494
  * </a>
  */
-public class EntityDescriptor implements Saml2Object {
+public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object {
 
     private String id;
     private String entityId;
@@ -40,6 +41,13 @@ public class EntityDescriptor implements Saml2Object {
     private Duration cacheDuration;
     private List<? extends Provider> providers;
     private List<XMLSignature> signatures;
+    private List<SimpleKey> keys;
+    private SimpleKey signingKey;
+
+    @SuppressWarnings("unchecked")
+    protected T _this() {
+        return (T) this;
+    }
 
     public String getId() {
         return id;
@@ -103,37 +111,57 @@ public class EntityDescriptor implements Saml2Object {
         return signatures;
     }
 
-    public EntityDescriptor setId(String id) {
+    public List<SimpleKey> getKeys() {
+        return keys;
+    }
+
+    public SimpleKey getSigningKey() {
+        return signingKey;
+    }
+
+    public T setId(String id) {
         this.id = id;
-        return this;
+        return _this();
     }
 
-    public EntityDescriptor setEntityId(String entityId) {
+    public T setEntityId(String entityId) {
         this.entityId = entityId;
-        return this;
+        return _this();
     }
 
-    public EntityDescriptor setValidUntil(DateTime validUntil) {
+    public T setValidUntil(DateTime validUntil) {
         this.validUntil = validUntil;
-        return this;
+        return _this();
     }
 
-    public EntityDescriptor setCacheDuration(Duration cacheDuration) {
+    public T setCacheDuration(Duration cacheDuration) {
         this.cacheDuration = cacheDuration;
-        return this;
+        return _this();
     }
 
-    public EntityDescriptor setCacheDurationMillis(long millis) {
+    public T setCacheDurationMillis(long millis) {
         return setCacheDuration(millisToDuration(millis));
     }
 
-    public EntityDescriptor setProviders(List<? extends Provider> providers) {
+    public T setProviders(List<? extends Provider> providers) {
         this.providers = providers;
-        return this;
+        return _this();
     }
 
-    public EntityDescriptor setSignatures(List<XMLSignature> signatures) {
+    public T setSignatures(List<XMLSignature> signatures) {
         this.signatures = signatures;
-        return this;
+        return _this();
     }
+
+    public T setKeys(List<SimpleKey> keys) {
+        this.keys = keys;
+        return _this();
+    }
+
+    public T setSigningKey(SimpleKey signingKey) {
+        this.signingKey = signingKey;
+        return _this();
+    }
+
+
 }

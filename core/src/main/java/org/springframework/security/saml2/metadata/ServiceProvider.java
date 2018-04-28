@@ -21,7 +21,7 @@ import java.util.List;
  * Represents an SPSSODescriptor
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  */
-public class ServiceProvider extends SsoProvider {
+public class ServiceProvider extends SsoProvider<ServiceProvider> {
 
     private boolean authnRequestsSigned;
     private boolean wantAssertionsSigned;
@@ -46,17 +46,17 @@ public class ServiceProvider extends SsoProvider {
 
     public ServiceProvider setAuthnRequestsSigned(boolean authnRequestsSigned) {
         this.authnRequestsSigned = authnRequestsSigned;
-        return this;
+        return _this();
     }
 
     public ServiceProvider setWantAssertionsSigned(boolean wantAssertionsSigned) {
         this.wantAssertionsSigned = wantAssertionsSigned;
-        return this;
+        return _this();
     }
 
     public ServiceProvider setAssertionConsumerService(List<Endpoint> assertionConsumerService) {
         this.assertionConsumerService = assertionConsumerService;
-        return this;
+        return _this();
     }
 
 //    public ServiceProvider setAttributeConsumingService(List<Endpoint> attributeConsumingService) {

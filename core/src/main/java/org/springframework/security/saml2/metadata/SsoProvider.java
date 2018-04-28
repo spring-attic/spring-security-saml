@@ -32,7 +32,7 @@ package org.springframework.security.saml2.metadata;
 
 import java.util.List;
 
-public class SsoProvider extends Provider {
+public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
 
     private List<Endpoint> artifactResolutionService;
     private List<Endpoint> singleLogoutService;
@@ -55,23 +55,23 @@ public class SsoProvider extends Provider {
         return nameIDs;
     }
 
-    public SsoProvider setArtifactResolutionService(List<Endpoint> artifactResolutionService) {
+    public T setArtifactResolutionService(List<Endpoint> artifactResolutionService) {
         this.artifactResolutionService = artifactResolutionService;
-        return this;
+        return _this();
     }
 
-    public SsoProvider setSingleLogoutService(List<Endpoint> singleLogoutService) {
+    public T setSingleLogoutService(List<Endpoint> singleLogoutService) {
         this.singleLogoutService = singleLogoutService;
-        return this;
+        return _this();
     }
 
-    public SsoProvider setManageNameIDService(List<Endpoint> manageNameIDService) {
+    public T setManageNameIDService(List<Endpoint> manageNameIDService) {
         this.manageNameIDService = manageNameIDService;
-        return this;
+        return _this();
     }
 
-    public SsoProvider setNameIDs(List<NameID> nameIDs) {
+    public T setNameIDs(List<NameID> nameIDs) {
         this.nameIDs = nameIDs;
-        return this;
+        return _this();
     }
 }

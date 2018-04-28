@@ -20,26 +20,33 @@ import javax.xml.datatype.Duration;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.springframework.security.saml2.xml.KeyDescriptor;
+import org.springframework.security.saml2.xml.SimpleKey;
 
 import static org.springframework.security.saml2.init.SpringSecuritySaml.millisToDuration;
 
 public class Provider<T extends Provider<T>> {
 
     private List<XMLSignature> signatures;
-    private List<KeyDescriptor> keyDescriptors;
+    private List<SimpleKey> keys;
     private String id;
     private DateTime validUntil;
     private Duration cacheDuration;
     private List<String> protocolSupportEnumeration;
 
+    @SuppressWarnings("unchecked")
+    protected T _this() {
+        return (T) this;
+    }
+
     public List<XMLSignature> getSignatures() {
         return signatures;
     }
 
-    public List<KeyDescriptor> getKeyDescriptors() {
-        return keyDescriptors;
+    public List<SimpleKey> getKeys() {
+        return keys;
     }
+
+
 
     public String getId() {
         return id;
@@ -63,8 +70,8 @@ public class Provider<T extends Provider<T>> {
         return (T) this;
     }
 
-    public T setKeyDescriptors(List<KeyDescriptor> keyDescriptors) {
-        this.keyDescriptors = keyDescriptors;
+    public T setKeys(List<SimpleKey> keys) {
+        this.keys = keys;
         return (T) this;
     }
 

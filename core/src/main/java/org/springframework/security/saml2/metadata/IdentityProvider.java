@@ -23,7 +23,7 @@ import org.springframework.security.saml2.attribute.Attribute;
  * Represents an IDPSSODescriptor
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  */
-public class IdentityProvider extends SsoProvider {
+public class IdentityProvider extends SsoProvider<IdentityProvider> {
 
     private boolean wantAuthnRequestsSigned;
     private List<Endpoint> singleSignOnService;
@@ -54,5 +54,35 @@ public class IdentityProvider extends SsoProvider {
 
     public List<Attribute> getAttribute() {
         return attribute;
+    }
+
+    public IdentityProvider setWantAuthnRequestsSigned(boolean wantAuthnRequestsSigned) {
+        this.wantAuthnRequestsSigned = wantAuthnRequestsSigned;
+        return this;
+    }
+
+    public IdentityProvider setSingleSignOnService(List<Endpoint> singleSignOnService) {
+        this.singleSignOnService = singleSignOnService;
+        return this;
+    }
+
+    public IdentityProvider setNameIDMappingService(List<Endpoint> nameIDMappingService) {
+        this.nameIDMappingService = nameIDMappingService;
+        return this;
+    }
+
+    public IdentityProvider setAssertionIDRequestService(List<Endpoint> assertionIDRequestService) {
+        this.assertionIDRequestService = assertionIDRequestService;
+        return this;
+    }
+
+    public IdentityProvider setAttributeProfile(List<String> attributeProfile) {
+        this.attributeProfile = attributeProfile;
+        return this;
+    }
+
+    public IdentityProvider setAttribute(List<Attribute> attribute) {
+        this.attribute = attribute;
+        return this;
     }
 }

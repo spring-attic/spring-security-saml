@@ -34,8 +34,11 @@ import javax.xml.datatype.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.springframework.security.saml2.metadata.Binding;
+import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.Metadata;
 import org.springframework.security.saml2.xml.SimpleKey;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public abstract class SpringSecuritySaml {
 
@@ -82,4 +85,16 @@ public abstract class SpringSecuritySaml {
 
     public abstract Duration toDuration(long millis);
 
+
+    public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        builder.pathSegment(path);
+        return
+            new Endpoint()
+                .setIndex(index)
+                .setBinding(binding)
+                .setLocation(builder.build().toUriString())
+                .setDefault(isDefault)
+                .setIndex(index);
+    }
 }

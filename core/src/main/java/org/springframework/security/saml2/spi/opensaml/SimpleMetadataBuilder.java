@@ -13,7 +13,7 @@
  *
  */
 
-package org.springframework.security.saml2.metadata.builder.opensaml;
+package org.springframework.security.saml2.spi.opensaml;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;

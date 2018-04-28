@@ -31,9 +31,6 @@ import org.springframework.security.saml2.Saml2Object;
  *     <li>Affiliation</li>
  * </ul>
  */
-public class Metadata extends EntityDescriptor implements Saml2Object {
-
-
-
+public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T> implements Saml2Object {
 
 }

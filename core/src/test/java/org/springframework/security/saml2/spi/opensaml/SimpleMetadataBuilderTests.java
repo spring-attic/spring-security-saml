@@ -16,6 +16,7 @@
 package org.springframework.security.saml2.spi.opensaml;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,7 @@ public class SimpleMetadataBuilderTests {
     public void readMetaDataToJavaObject() {
         String baseUrl = "http://localhost:8080/uaa";
         String xml = getSampleServiceProviderMetadata(baseUrl);
-        Metadata metadata = config.resolveMetadata(xml, null);
+        Metadata metadata = (Metadata) config.resolve(xml, Collections.emptyList());
         assertNotNull(metadata);
         assertNotNull(metadata.getSsoProviders());
         assertEquals(1, metadata.getSsoProviders().size());

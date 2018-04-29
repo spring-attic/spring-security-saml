@@ -95,6 +95,7 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.Saml2Object;
 import org.springframework.security.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
@@ -114,6 +115,7 @@ import org.w3c.dom.Element;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
+import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
 import static org.springframework.util.StringUtils.hasText;
 
 public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
@@ -350,11 +352,11 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
     }
 
-    public XMLObject parse(String xml) {
+    protected XMLObject parse(String xml) {
         return parse(xml.getBytes(StandardCharsets.UTF_8));
     }
 
-    public XMLObject parse(byte[] xml) {
+    protected XMLObject parse(byte[] xml) {
         try {
             Document document = getParserPool().parse(new ByteArrayInputStream(xml));
             Element element = document.getDocumentElement();
@@ -362,28 +364,6 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         } catch (UnmarshallingException | XMLParserException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public Metadata resolveMetadata(String xml, List<SimpleKey> trustedKeys) {
-        XMLObject object = parse(xml);
-        if (trustedKeys != null) {
-            validateSignature((SignableSAMLObject) object, trustedKeys);
-        }
-        if (object instanceof EntityDescriptor) {
-
-        } else {
-            throw new IllegalArgumentException("Unable to cast object of class:" + object.getClass().getName() + " as metadata.");
-        }
-
-        EntityDescriptor descriptor = (EntityDescriptor) object;
-        Metadata desc = new Metadata();
-        desc.setCacheDurationMillis(descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1);
-        desc.setEntityId(descriptor.getEntityID());
-        desc.setId(descriptor.getID());
-        desc.setValidUntil(descriptor.getValidUntil());
-        desc.setProviders(getSsoProviders(descriptor));
-        return desc;
     }
 
     protected List<? extends Provider> getSsoProviders(EntityDescriptor descriptor) {
@@ -476,7 +456,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     @Override
     public String toXml(Saml2Object saml2Object) {
         if (saml2Object instanceof AuthenticationRequest) {
-            return internalToXml((AuthenticationRequest)saml2Object);
+            return internalToXml((AuthenticationRequest) saml2Object);
         }
         throw new UnsupportedOperationException();
     }
@@ -494,7 +474,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         auth.setDestination(request.getDestination().getLocation());
         auth.setNameIDPolicy(getNameIDPolicy(request.getNameIDPolicy()));
         auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
-        if (request.getSigningKey()!=null) {
+        if (request.getSigningKey() != null) {
             this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
         }
 
@@ -514,7 +494,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             result = buildSAMLObject(RequestedAuthnContext.class);
             switch (request.getRequestedAuthenticationContext()) {
                 case exact:
-                    result.setComparison(AuthnContextComparisonTypeEnumeration.EXACT);
+                    result.setComparison(EXACT);
                     break;
                 case better:
                     result.setComparison(AuthnContextComparisonTypeEnumeration.BETTER);
@@ -526,7 +506,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
                     break;
                 default:
-                    result.setComparison(AuthnContextComparisonTypeEnumeration.EXACT);
+                    result.setComparison(EXACT);
                     break;
             }
         }
@@ -535,7 +515,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     protected NameIDPolicy getNameIDPolicy(org.springframework.security.saml2.authentication.NameIDPolicy nameIDPolicy) {
         NameIDPolicy result = null;
-        if (nameIDPolicy!=null) {
+        if (nameIDPolicy != null) {
             result = buildSAMLObject(NameIDPolicy.class);
             result.setAllowCreate(nameIDPolicy.getAllowCreate());
             result.setFormat(nameIDPolicy.getFormat().toString());
@@ -544,12 +524,23 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return result;
     }
 
-    public static <T> T buildSAMLObject(final Class<T> clazz) {
+    protected org.springframework.security.saml2.authentication.NameIDPolicy fromNameIDPolicy(NameIDPolicy nameIDPolicy) {
+        org.springframework.security.saml2.authentication.NameIDPolicy result = null;
+        if (nameIDPolicy != null) {
+            result = new org.springframework.security.saml2.authentication.NameIDPolicy()
+                .setAllowCreate(nameIDPolicy.getAllowCreate())
+                .setFormat(NameID.fromUrn(nameIDPolicy.getFormat()))
+                .setSpNameQualifier(nameIDPolicy.getSPNameQualifier());
+        }
+        return result;
+    }
+
+    public <T> T buildSAMLObject(final Class<T> clazz) {
         T object = null;
         try {
             XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
-            QName defaultElementName = (QName)clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
-            object = (T)builderFactory.getBuilder(defaultElementName).buildObject(defaultElementName);
+            QName defaultElementName = (QName) clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
+            object = (T) builderFactory.getBuilder(defaultElementName).buildObject(defaultElementName);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not create SAML object");
         } catch (NoSuchFieldException e) {
@@ -557,5 +548,72 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
 
         return object;
+    }
+
+    @Override
+    public Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
+        XMLObject parsed = parse(xml);
+        if (trustedKeys != null) {
+            validateSignature((SignableSAMLObject) parsed, trustedKeys);
+        }
+        if (parsed instanceof EntityDescriptor) {
+            return resolveMetadata((EntityDescriptor) parsed);
+        }
+        if (parsed instanceof AuthnRequest) {
+            return resolveAuthenticationRequest((AuthnRequest) parsed);
+        }
+        throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
+    }
+
+    protected Saml2Object resolveAuthenticationRequest(AuthnRequest parsed) {
+        AuthnRequest request = parsed;
+        AuthenticationRequest result = new AuthenticationRequest()
+            .setBinding(Binding.fromUrn(request.getProtocolBinding()))
+            .setAssertionConsumerService(
+                getEndpoint(request.getAssertionConsumerServiceURL(),
+                            Binding.fromUrn(request.getProtocolBinding()),
+                            request.getAssertionConsumerServiceIndex(),
+                            false)
+            )
+            .setDestination(
+                getEndpoint(
+                    request.getDestination(),
+                    Binding.fromUrn(request.getProtocolBinding()),
+                    -1,
+                    false
+                )
+            )
+            .setForceAuth(request.isForceAuthn())
+            .setPassive(request.isPassive())
+            .setId(request.getID())
+            .setIssueInstant(request.getIssueInstant())
+            .setVersion(request.getVersion().toString())
+            .setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
+            .setNameIDPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
+
+        return result;
+    }
+
+    protected RequestedAuthenticationContext getRequestedAuthenticationContext(AuthnRequest request) {
+        RequestedAuthenticationContext result = null;
+
+        if (request.getRequestedAuthnContext() != null ) {
+            AuthnContextComparisonTypeEnumeration comparison = request.getRequestedAuthnContext().getComparison();
+            if (null != comparison) {
+                result = RequestedAuthenticationContext.valueOf(comparison.toString());
+            }
+        }
+        return result;
+    }
+
+    protected Saml2Object resolveMetadata(EntityDescriptor parsed) {
+        EntityDescriptor descriptor = parsed;
+        Metadata desc = new Metadata();
+        desc.setCacheDurationMillis(descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1);
+        desc.setEntityId(descriptor.getEntityID());
+        desc.setId(descriptor.getID());
+        desc.setValidUntil(descriptor.getValidUntil());
+        desc.setProviders(getSsoProviders(descriptor));
+        return desc;
     }
 }

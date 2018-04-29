@@ -35,6 +35,7 @@ public class Request<T extends Request<T>> {
     private DateTime issueInstant;
     private Endpoint destination;
     private String consent;
+    private String version;
 
     public List<String> getIssuers() {
         return issuers;
@@ -96,6 +97,15 @@ public class Request<T extends Request<T>> {
 
     public T setConsent(String consent) {
         this.consent = consent;
+        return _this();
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public T setVersion(String version) {
+        this.version = version;
         return _this();
     }
 }

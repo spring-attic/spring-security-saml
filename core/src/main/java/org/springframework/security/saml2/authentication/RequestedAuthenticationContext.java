@@ -20,4 +20,6 @@ public enum RequestedAuthenticationContext {
     minimum,
     maximum,
     better
+
+
 }

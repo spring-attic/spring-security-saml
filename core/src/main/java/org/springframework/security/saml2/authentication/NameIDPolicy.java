@@ -23,6 +23,9 @@ public class NameIDPolicy {
     private String spNameQualifier;
     private Boolean allowCreate;
 
+    public NameIDPolicy() {
+    }
+
     public NameIDPolicy(NameID format, String spNameQualifier, Boolean allowCreate) {
         this.format = format;
         this.spNameQualifier = spNameQualifier;

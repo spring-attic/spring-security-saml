@@ -342,13 +342,15 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     }
 
     public void validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
-        try {
-            SimpleKey key = keys.get(0);
-            KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
-            Credential credential = getCredential(key, resolver);
-            SignatureValidator.validate(object.getSignature(), credential);
-        } catch (SignatureException e) {
-            throw new org.springframework.security.saml2.signature.SignatureException(e.getMessage(), e);
+        if (keys!=null && !keys.isEmpty()) {
+            try {
+                SimpleKey key = keys.get(0);
+                KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
+                Credential credential = getCredential(key, resolver);
+                SignatureValidator.validate(object.getSignature(), credential);
+            } catch (SignatureException e) {
+                throw new org.springframework.security.saml2.signature.SignatureException(e.getMessage(), e);
+            }
         }
     }
 

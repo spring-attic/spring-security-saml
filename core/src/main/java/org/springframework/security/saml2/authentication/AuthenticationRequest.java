@@ -15,38 +15,41 @@
 
 package org.springframework.security.saml2.authentication;
 
+import org.springframework.security.saml2.Saml2Object;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
+import org.springframework.security.saml2.xml.SimpleKey;
 
-public class AuthenticationRequest extends Request<AuthenticationRequest> {
+public class AuthenticationRequest extends Request<AuthenticationRequest> implements Saml2Object {
 
     private String providerName;
-    private String destination;
     private Binding binding;
     private Boolean forceAuth;
     private Boolean isPassive;
     private Endpoint assertionConsumerService;
     private RequestedAuthenticationContext requestedAuthenticationContext;
     private AuthenticationContextReference authenticationContextReference;
+    private SimpleKey signingKey;
+    private AlgorithmMethod algorithm;
+    private DigestMethod digest;
+
+    private NameIDPolicy nameIDPolicy;
 
     public String getProviderName() {
         return providerName;
-    }
-
-    @Override
-    public String getDestination() {
-        return destination;
     }
 
     public Binding getBinding() {
         return binding;
     }
 
-    public Boolean getForceAuth() {
+    public Boolean isForceAuth() {
         return forceAuth;
     }
 
-    public Boolean getPassive() {
+    public Boolean isPassive() {
         return isPassive;
     }
 
@@ -64,12 +67,6 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 
     public AuthenticationRequest setProviderName(String providerName) {
         this.providerName = providerName;
-        return _this();
-    }
-
-    @Override
-    public AuthenticationRequest setDestination(String destination) {
-        this.destination = destination;
         return _this();
     }
 
@@ -100,6 +97,34 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 
     public AuthenticationRequest setAuthenticationContextReference(AuthenticationContextReference authenticationContextReference) {
         this.authenticationContextReference = authenticationContextReference;
+        return _this();
+    }
+
+    public SimpleKey getSigningKey() {
+        return signingKey;
+    }
+
+    public AuthenticationRequest setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+        this.signingKey = signingKey;
+        this.algorithm = algorithm;
+        this.digest = digest;
+        return _this();
+    }
+
+    public AlgorithmMethod getAlgorithm() {
+        return algorithm;
+    }
+
+    public DigestMethod getDigest() {
+        return digest;
+    }
+
+    public NameIDPolicy getNameIDPolicy() {
+        return nameIDPolicy;
+    }
+
+    public AuthenticationRequest setNameIDPolicy(NameIDPolicy nameIDPolicy) {
+        this.nameIDPolicy = nameIDPolicy;
         return _this();
     }
 }

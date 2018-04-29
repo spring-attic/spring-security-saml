@@ -26,6 +26,8 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
     private boolean authnRequestsSigned;
     private boolean wantAssertionsSigned;
     private List<Endpoint> assertionConsumerService;
+    private Endpoint configuredAssertionConsumerService;
+
     //private List<AttributeConsumingService> attributeConsumingService;
 
     public boolean getAuthnRequestsSigned() {
@@ -59,7 +61,24 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
         return _this();
     }
 
-//    public ServiceProvider setAttributeConsumingService(List<Endpoint> attributeConsumingService) {
+    public boolean isAuthnRequestsSigned() {
+        return authnRequestsSigned;
+    }
+
+    public boolean isWantAssertionsSigned() {
+        return wantAssertionsSigned;
+    }
+
+    public Endpoint getConfiguredAssertionConsumerService() {
+        return configuredAssertionConsumerService;
+    }
+
+    public ServiceProvider setConfiguredAssertionConsumerService(Endpoint configuredAssertionConsumerService) {
+        this.configuredAssertionConsumerService = configuredAssertionConsumerService;
+        return _this();
+    }
+
+    //    public ServiceProvider setAttributeConsumingService(List<Endpoint> attributeConsumingService) {
 //        this.attributeConsumingService = attributeConsumingService;
 //        return this;
 //    }

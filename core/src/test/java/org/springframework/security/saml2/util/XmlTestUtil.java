@@ -20,11 +20,14 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.hamcrest.Matcher;
 import org.springframework.security.saml2.Namespace;
 import org.w3c.dom.Node;
 import org.xmlunit.xpath.JAXPXPathEngine;
 import org.xmlunit.xpath.XPathEngine;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class XmlTestUtil {
@@ -36,6 +39,8 @@ public class XmlTestUtil {
         HashMap<String, String> nsContext = new HashMap<>();
         nsContext.put("md", Namespace.NS_METADATA);
         nsContext.put("ds", Namespace.NS_SIGNATURE);
+        nsContext.put("saml2p", Namespace.NS_PROTOCOL);
+        nsContext.put("samlp", Namespace.NS_PROTOCOL);
         engine.setNamespaceContext(nsContext);
     }
 
@@ -45,8 +50,17 @@ public class XmlTestUtil {
         assertEquals(expected, attr.getTextContent());
     }
 
+    public static void assertNodeAttribute(Node node, String attribute, Matcher<String> matcher) {
+        Node attr = node.getAttributes().getNamedItem(attribute);
+        assertThat(attr.getTextContent(), matcher);
+    }
+
     public static void assertNodeCount(String xml, String xPath, int expected) {
+        assertThat("XML cannot be null", xml, notNullValue(String.class));
         Iterable<Node> nodes = getNodes(xml, xPath);
+        if (nodes == null) {
+            assertEquals(expected, 0);
+        }
         AtomicInteger count = new AtomicInteger(0);
         nodes.forEach(p -> count.incrementAndGet());
         assertEquals(

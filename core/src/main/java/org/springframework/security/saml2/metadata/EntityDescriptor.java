@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.Saml2Object;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.xml.SimpleKey;
 
 import static org.springframework.security.saml2.init.SpringSecuritySaml.durationToMillis;
@@ -43,6 +45,8 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     private List<XMLSignature> signatures;
     private List<SimpleKey> keys;
     private SimpleKey signingKey;
+    private AlgorithmMethod algorithm;
+    private DigestMethod digest;
 
     @SuppressWarnings("unchecked")
     protected T _this() {
@@ -158,10 +162,18 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
         return _this();
     }
 
-    public T setSigningKey(SimpleKey signingKey) {
+    public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
         this.signingKey = signingKey;
+        this.algorithm = algorithm;
+        this.digest = digest;
         return _this();
     }
 
+    public AlgorithmMethod getAlgorithm() {
+        return algorithm;
+    }
 
+    public DigestMethod getDigest() {
+        return digest;
+    }
 }

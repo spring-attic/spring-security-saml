@@ -32,7 +32,6 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.springframework.security.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.Namespace;
-import org.springframework.security.saml2.init.OpenSamlConfiguration;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;

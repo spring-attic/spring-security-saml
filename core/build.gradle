@@ -40,4 +40,6 @@ dependencies {
 	}
 
 	testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.5.1'
+
+	testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
 }

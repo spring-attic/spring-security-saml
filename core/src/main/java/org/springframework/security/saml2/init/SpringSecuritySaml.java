@@ -34,13 +34,15 @@ import javax.xml.datatype.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.springframework.security.saml2.Saml2Object;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.Metadata;
+import org.springframework.security.saml2.spi.opensaml.OpenSamlConfiguration;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.springframework.web.util.UriComponentsBuilder;
 
-public abstract class SpringSecuritySaml {
+public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     private static final SpringSecuritySaml INSTANCE = new OpenSamlConfiguration();
 
@@ -51,11 +53,12 @@ public abstract class SpringSecuritySaml {
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 
 
-    public SpringSecuritySaml init() {
+    @SuppressWarnings("checked")
+    public T init() {
         if (!hasInitCompleted.get()) {
             performInit();
         }
-        return this;
+        return (T) this;
     }
 
     protected synchronized void performInit() {
@@ -63,7 +66,7 @@ public abstract class SpringSecuritySaml {
             java.security.Security.addProvider(
                 new org.bouncycastle.jce.provider.BouncyCastleProvider()
             );
-            ((OpenSamlConfiguration)this).bootstrap();
+            bootstrap();
         }
     }
 
@@ -79,11 +82,15 @@ public abstract class SpringSecuritySaml {
             .toDuration(millis);
     }
 
+    protected abstract void bootstrap();
+
     public abstract Metadata resolveMetadata(String xml, List<SimpleKey> trustedKeys);
 
     public abstract long toMillis(Duration duration);
 
     public abstract Duration toDuration(long millis);
+
+    public abstract String toXml(Saml2Object saml2Object);
 
 
     public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {

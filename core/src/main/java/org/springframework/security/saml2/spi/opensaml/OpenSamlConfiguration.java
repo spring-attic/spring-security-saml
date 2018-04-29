@@ -13,9 +13,25 @@
  *
  */
 
-package org.springframework.security.saml2.init;
+/*
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package org.springframework.security.saml2.spi.opensaml;
 
 import javax.xml.datatype.Duration;
+import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -29,6 +45,7 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.DOMTypeSupport;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationException;
@@ -45,7 +62,10 @@ import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
@@ -71,6 +91,9 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
+import org.springframework.security.saml2.Saml2Object;
+import org.springframework.security.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.Metadata;
@@ -91,7 +114,7 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.hasText;
 
-public class OpenSamlConfiguration extends SpringSecuritySaml {
+public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
 
     private BasicParserPool parserPool;
 
@@ -103,7 +126,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         return parserPool;
     }
 
-    void bootstrap() {
+    protected void bootstrap() {
         //configure default values
         //maxPoolSize = 5;
         parserPool.setMaxPoolSize(50);
@@ -389,7 +412,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         } else if (descriptor instanceof IDPSSODescriptor) {
 
         } else {
-            return null;
+
         }
         throw new UnsupportedOperationException();
     }
@@ -446,5 +469,65 @@ public class OpenSamlConfiguration extends SpringSecuritySaml {
         } else {
             return DOMTypeSupport.getDataTypeFactory().newDuration(millis);
         }
+    }
+
+    @Override
+    public String toXml(Saml2Object saml2Object) {
+        if (saml2Object instanceof AuthenticationRequest) {
+            return internalToXml((AuthenticationRequest)saml2Object);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    protected String internalToXml(AuthenticationRequest request) {
+        AuthnRequest auth = buildSAMLObject(AuthnRequest.class);
+        auth.setID(request.getId());
+        auth.setVersion(SAMLVersion.VERSION_20);
+        auth.setIssueInstant(request.getIssueInstant());
+        auth.setForceAuthn(request.isForceAuth());
+        auth.setIsPassive(request.isPassive());
+        auth.setProtocolBinding(request.getBinding().toString());
+        auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
+        auth.setAssertionConsumerServiceURL(request.getAssertionConsumerService().getLocation());
+        auth.setDestination(request.getDestination().getLocation());
+        auth.setNameIDPolicy(getNameIDPolicy(request.getNameIDPolicy()));
+        if (request.getSigningKey()!=null) {
+            this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
+        }
+
+        try {
+            Element element = getMarshallerFactory()
+                .getMarshaller(auth)
+                .marshall(auth);
+            return SerializeSupport.nodeToString(element);
+        } catch (MarshallingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected NameIDPolicy getNameIDPolicy(org.springframework.security.saml2.authentication.NameIDPolicy nameIDPolicy) {
+        NameIDPolicy result = null;
+        if (nameIDPolicy!=null) {
+            result = buildSAMLObject(NameIDPolicy.class);
+            result.setAllowCreate(nameIDPolicy.getAllowCreate());
+            result.setFormat(nameIDPolicy.getFormat().toString());
+            result.setSPNameQualifier(nameIDPolicy.getSpNameQualifier());
+        }
+        return result;
+    }
+
+    public static <T> T buildSAMLObject(final Class<T> clazz) {
+        T object = null;
+        try {
+            XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+            QName defaultElementName = (QName)clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
+            object = (T)builderFactory.getBuilder(defaultElementName).buildObject(defaultElementName);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Could not create SAML object");
+        } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException("Could not create SAML object");
+        }
+
+        return object;
     }
 }

@@ -19,6 +19,7 @@ import javax.xml.crypto.dsig.XMLSignature;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml2.metadata.Endpoint;
 
 public class Request<T extends Request<T>> {
 
@@ -31,9 +32,8 @@ public class Request<T extends Request<T>> {
     private List<Object> extensions;
 
     private String id;
-    private String version;
     private DateTime issueInstant;
-    private String destination;
+    private Endpoint destination;
     private String consent;
 
     public List<String> getIssuers() {
@@ -52,15 +52,11 @@ public class Request<T extends Request<T>> {
         return id;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
     public DateTime getIssueInstant() {
         return issueInstant;
     }
 
-    public String getDestination() {
+    public Endpoint getDestination() {
         return destination;
     }
 
@@ -88,17 +84,12 @@ public class Request<T extends Request<T>> {
         return _this();
     }
 
-    public T setVersion(String version) {
-        this.version = version;
-        return _this();
-    }
-
     public T setIssueInstant(DateTime issueInstant) {
         this.issueInstant = issueInstant;
         return _this();
     }
 
-    public T setDestination(String destination) {
+    public T setDestination(Endpoint destination) {
         this.destination = destination;
         return _this();
     }

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xmlsec.signature.X509Certificate;
-import org.springframework.security.saml2.init.OpenSamlConfiguration;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Metadata;
 import org.springframework.security.saml2.metadata.NameID;

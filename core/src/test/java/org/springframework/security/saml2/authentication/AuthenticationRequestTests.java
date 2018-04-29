@@ -20,6 +20,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opensaml.saml.saml2.core.NameID;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
@@ -75,14 +76,22 @@ class AuthenticationRequestTests {
         AuthenticationRequest request = authenticationRequest(sp, idp);
         String xml = SpringSecuritySaml.getInstance().toXml(request);
 
-        assertNodeCount(xml, "//saml2p:AuthnRequest", 1);
-        Iterable<Node> nodes = getNodes(xml, "//saml2p:AuthnRequest");
+        assertNodeCount(xml, "//samlp:AuthnRequest", 1);
+        Iterable<Node> nodes = getNodes(xml, "//samlp:AuthnRequest");
         assertNodeAttribute(nodes.iterator().next(), "Version", equalTo("2.0"));
         assertNodeAttribute(nodes.iterator().next(), "IssueInstant", notNullValue(String.class));
         assertNodeAttribute(nodes.iterator().next(), "ForceAuthn", equalTo("false"));
         assertNodeAttribute(nodes.iterator().next(), "IsPassive", equalTo("false"));
         assertNodeAttribute(nodes.iterator().next(), "ProtocolBinding", equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
         assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://localhost:8080/uaa/saml/sp/SSO"));
+
+        assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
+        nodes = getNodes(xml, "//samlp:NameIDPolicy");
+        assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.PERSISTENT.toString()));
+
+        assertNodeCount(xml, "//samlp:RequestedAuthnContext", 1);
+        nodes = getNodes(xml, "//samlp:RequestedAuthnContext");
+        assertNodeAttribute(nodes.iterator().next(), "Comparison", equalTo("exact"));
 
 
     }

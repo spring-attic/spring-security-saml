@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.authentication.NameIDPolicy;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.IdentityProvider;
@@ -134,6 +135,21 @@ public class Defaults {
         if (sp.getServiceProvider().isAuthnRequestsSigned() ) {
             request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
         }
+        NameIDPolicy policy;
+        if (idp.getDefaultNameId()!=null) {
+            policy = new NameIDPolicy(
+                idp.getDefaultNameId(),
+                sp.getEntityAlias(),
+                true
+            );
+        } else {
+            policy = new NameIDPolicy(
+                idp.getIdentityProvider().getNameIDs().get(0),
+                sp.getEntityAlias(),
+                true
+            );
+        }
+        request.setNameIDPolicy(policy);
         return request;
     }
 

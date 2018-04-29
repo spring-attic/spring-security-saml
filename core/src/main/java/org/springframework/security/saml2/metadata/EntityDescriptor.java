@@ -39,6 +39,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
 
     private String id;
     private String entityId;
+    private String entityAlias;
     private DateTime validUntil;
     private Duration cacheDuration;
     private List<? extends Provider> providers;
@@ -175,5 +176,14 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
 
     public DigestMethod getDigest() {
         return digest;
+    }
+
+    public String getEntityAlias() {
+        return entityAlias;
+    }
+
+    public T setEntityAlias(String entityAlias) {
+        this.entityAlias = entityAlias;
+        return _this();
     }
 }

@@ -19,9 +19,9 @@ import org.springframework.security.saml2.metadata.NameID;
 
 public class NameIDPolicy {
 
-    private final NameID format;
-    private final String spNameQualifier;
-    private final Boolean allowCreate;
+    private NameID format;
+    private String spNameQualifier;
+    private Boolean allowCreate;
 
     public NameIDPolicy(NameID format, String spNameQualifier, Boolean allowCreate) {
         this.format = format;
@@ -29,15 +29,30 @@ public class NameIDPolicy {
         this.allowCreate = allowCreate;
     }
 
-    public NameID getFormat() {
-        return format;
-    }
-
     public String getSpNameQualifier() {
         return spNameQualifier;
     }
 
+    public NameIDPolicy setSpNameQualifier(String spNameQualifier) {
+        this.spNameQualifier = spNameQualifier;
+        return this;
+    }
+
     public Boolean getAllowCreate() {
         return allowCreate;
+    }
+
+    public NameIDPolicy setAllowCreate(Boolean allowCreate) {
+        this.allowCreate = allowCreate;
+        return this;
+    }
+
+    public NameID getFormat() {
+        return format;
+    }
+
+    public NameIDPolicy setFormat(NameID format) {
+        this.format = format;
+        return this;
     }
 }

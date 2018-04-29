@@ -64,8 +64,10 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
+import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
+import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
@@ -491,6 +493,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         auth.setAssertionConsumerServiceURL(request.getAssertionConsumerService().getLocation());
         auth.setDestination(request.getDestination().getLocation());
         auth.setNameIDPolicy(getNameIDPolicy(request.getNameIDPolicy()));
+        auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
         if (request.getSigningKey()!=null) {
             this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
         }
@@ -503,6 +506,31 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         } catch (MarshallingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected RequestedAuthnContext getRequestedAuthenticationContext(AuthenticationRequest request) {
+        RequestedAuthnContext result = null;
+        if (request.getRequestedAuthenticationContext() != null) {
+            result = buildSAMLObject(RequestedAuthnContext.class);
+            switch (request.getRequestedAuthenticationContext()) {
+                case exact:
+                    result.setComparison(AuthnContextComparisonTypeEnumeration.EXACT);
+                    break;
+                case better:
+                    result.setComparison(AuthnContextComparisonTypeEnumeration.BETTER);
+                    break;
+                case maximum:
+                    result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
+                    break;
+                case minimum:
+                    result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
+                    break;
+                default:
+                    result.setComparison(AuthnContextComparisonTypeEnumeration.EXACT);
+                    break;
+            }
+        }
+        return result;
     }
 
     protected NameIDPolicy getNameIDPolicy(org.springframework.security.saml2.authentication.NameIDPolicy nameIDPolicy) {

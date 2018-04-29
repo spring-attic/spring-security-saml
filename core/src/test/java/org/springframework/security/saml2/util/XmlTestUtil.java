@@ -39,7 +39,6 @@ public class XmlTestUtil {
         HashMap<String, String> nsContext = new HashMap<>();
         nsContext.put("md", Namespace.NS_METADATA);
         nsContext.put("ds", Namespace.NS_SIGNATURE);
-        nsContext.put("saml2p", Namespace.NS_PROTOCOL);
         nsContext.put("samlp", Namespace.NS_PROTOCOL);
         engine.setNamespaceContext(nsContext);
     }

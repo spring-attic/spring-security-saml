@@ -15,6 +15,8 @@
 
 package org.springframework.security.saml2.spi;
 
+import org.springframework.security.saml2.xml.SimpleKey;
+
 public enum ExamplePemKey {
     RSA_TEST_KEY(
         "-----BEGIN RSA PRIVATE KEY-----\n" +
@@ -76,5 +78,9 @@ public enum ExamplePemKey {
 
     public String getPassphrase() {
         return passphrase;
+    }
+
+    public SimpleKey getSimpleKey(String alias) {
+        return new SimpleKey(alias, getPrivate(), getPublic(), getPassphrase(), null);
     }
 }

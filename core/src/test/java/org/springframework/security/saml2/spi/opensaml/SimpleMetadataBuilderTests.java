@@ -15,9 +15,6 @@
 
 package org.springframework.security.saml2.spi.opensaml;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
@@ -29,6 +26,7 @@ import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Node;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.saml2.signature.AlgorithmMethod.RSA_SHA1;
@@ -95,7 +93,7 @@ public class SimpleMetadataBuilderTests {
     public void readMetaDataToJavaObject() {
         String baseUrl = "http://localhost:8080/uaa";
         String xml = getSampleServiceProviderMetadata(baseUrl);
-        Metadata metadata = (Metadata) config.resolve(xml, Collections.emptyList());
+        Metadata metadata = (Metadata) config.resolve(xml, asList(RSA_TEST_KEY.getSimpleKey("signing-key")));
         assertNotNull(metadata);
         assertNotNull(metadata.getSsoProviders());
         assertEquals(1, metadata.getSsoProviders().size());
@@ -106,7 +104,7 @@ public class SimpleMetadataBuilderTests {
         String baseUrl = "http://localhost:8080/uaa";
         String metadata = getSampleServiceProviderMetadata(baseUrl);
         EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
-        config.validateSignature(object, Arrays.asList(getPublicKey()));
+        config.validateSignature(object, asList(getPublicKey()));
 
         System.out.println("Entity Descriptor:"+object);
     }
@@ -122,7 +120,7 @@ public class SimpleMetadataBuilderTests {
             .getKeyInfo().getX509Datas().get(0)
             .getX509Certificates().get(0);
         String certValue = certificate.getValue();
-        config.validateSignature(object, Arrays.asList(getPublicKey(certValue)));
+        config.validateSignature(object, asList(getPublicKey(certValue)));
     }
 
 

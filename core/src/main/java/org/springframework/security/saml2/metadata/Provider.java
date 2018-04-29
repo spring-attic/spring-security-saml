@@ -26,7 +26,7 @@ import static org.springframework.security.saml2.init.SpringSecuritySaml.millisT
 
 public class Provider<T extends Provider<T>> {
 
-    private List<XMLSignature> signatures;
+    private XMLSignature signature;
     private List<SimpleKey> keys;
     private String id;
     private DateTime validUntil;
@@ -38,8 +38,8 @@ public class Provider<T extends Provider<T>> {
         return (T) this;
     }
 
-    public List<XMLSignature> getSignatures() {
-        return signatures;
+    public XMLSignature getSignature() {
+        return signature;
     }
 
     public List<SimpleKey> getKeys() {
@@ -65,8 +65,8 @@ public class Provider<T extends Provider<T>> {
         return protocolSupportEnumeration;
     }
 
-    public T setSignatures(List<XMLSignature> signatures) {
-        this.signatures = signatures;
+    public T setSignature(XMLSignature signature) {
+        this.signature = signature;
         return (T) this;
     }
 

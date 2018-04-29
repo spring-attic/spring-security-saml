@@ -15,15 +15,13 @@
 
 package org.springframework.security.saml2.authentication;
 
-import java.util.List;
-
 public class Subject {
 
     /**
      * BaseID, NameID or EncryptedID
      */
     private SubjectPrincipal principal;
-    private List<SubjectConfirmation> confirmations;
+    private SubjectConfirmation confirmations;
 
 
 

@@ -15,9 +15,5 @@
 
 package org.springframework.security.saml2.authentication;
 
-public class SubjectConfirmation {
-    private SubjectPrincipal principal;
-    private String method;
-
-
+public class AuthenticationStatement {
 }

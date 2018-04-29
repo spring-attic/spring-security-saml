@@ -15,5 +15,23 @@
 
 package org.springframework.security.saml2.authentication;
 
-public interface SubjectPrincipal {
+import java.util.List;
+
+public abstract class SubjectPrincipal<T extends SubjectPrincipal> {
+
+    @SuppressWarnings("checked")
+    protected T _this() {
+        return (T)this;
+    }
+
+    private List<SubjectConfirmationData> confirmationData;
+
+    public List<SubjectConfirmationData> getConfirmationData() {
+        return confirmationData;
+    }
+
+    public T setConfirmationData(List<SubjectConfirmationData> confirmationData) {
+        this.confirmationData = confirmationData;
+        return _this();
+    }
 }

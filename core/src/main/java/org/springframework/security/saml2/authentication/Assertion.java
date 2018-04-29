@@ -25,8 +25,12 @@ public class Assertion {
     private String version;
     private String id;
     private DateTime issueInstant;
-    private List<String> issuers;
-    private List<XMLSignature> signatures;
+    private String issuer;
+    private XMLSignature signature;
+    private Subject subject;
+    private Condition condition;
+    private Advice advice;
+    private List<AuthenticationStatement> authenticationStatements;
 
 
 }

@@ -129,7 +129,7 @@ public class Defaults {
             .setPassive(Boolean.FALSE)
             .setBinding(Binding.POST)
             .setAssertionConsumerService(getACSFromSp(sp))
-            .setIssuers(Arrays.asList(sp.getEntityId()))
+            .setIssuer(sp.getEntityId())
             .setRequestedAuthenticationContext(exact)
             .setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
         if (sp.getServiceProvider().isAuthnRequestsSigned() ) {

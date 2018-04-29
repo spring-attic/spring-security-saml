@@ -15,9 +15,12 @@
 
 package org.springframework.security.saml2.authentication;
 
-public class SubjectConfirmation {
-    private SubjectPrincipal principal;
-    private String method;
+import org.joda.time.DateTime;
 
+public class SubjectConfirmationData {
 
+    private DateTime notBefore;
+    private DateTime notOnOrAfter;
+    private String recipient;
+    private String inResponseTo;
 }

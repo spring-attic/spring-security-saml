@@ -50,7 +50,8 @@ import static org.springframework.security.saml2.xml.KeyType.SIGNING;
 class AuthenticationRequestTests {
 
     SimpleKey signing;
-    private String baseUrl;
+    private String spBaseUrl;
+    private String idpBaseUrl;
     private ServiceProviderMetadata serviceProviderMetadata;
     private IdentityProviderMetadata identityProviderMetadata;
 
@@ -68,14 +69,15 @@ class AuthenticationRequestTests {
             RSA_TEST_KEY.getPassphrase(),
             SIGNING
         );
-        baseUrl = "http://localhost:8080/uaa";
+        spBaseUrl = "http://sp.localhost:8080/uaa";
+        idpBaseUrl = "http://idp.localhost:8080/uaa";
         serviceProviderMetadata = serviceProviderMetadata(
-            baseUrl,
+            spBaseUrl,
             Arrays.asList(signing),
             signing
         );
         identityProviderMetadata = identityProviderMetadata(
-            baseUrl,
+            idpBaseUrl,
             Arrays.asList(signing),
             signing
         );
@@ -94,7 +96,8 @@ class AuthenticationRequestTests {
         assertNodeAttribute(nodes.iterator().next(), "ForceAuthn", equalTo("false"));
         assertNodeAttribute(nodes.iterator().next(), "IsPassive", equalTo("false"));
         assertNodeAttribute(nodes.iterator().next(), "ProtocolBinding", equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
-        assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://localhost:8080/uaa/saml/sp/SSO"));
+        assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO"));
+        assertNodeAttribute(nodes.iterator().next(), "Destination", equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO"));
 
         assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
         nodes = getNodes(xml, "//samlp:NameIDPolicy");
@@ -112,7 +115,7 @@ class AuthenticationRequestTests {
         AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(signing));
         assertNotNull(data);
         assertSame(Binding.POST, data.getBinding());
-        assertEquals("http://localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());
+        assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());
         assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
         assertSame(PERSISTENT, data.getNameIDPolicy().getFormat());
 
@@ -121,6 +124,6 @@ class AuthenticationRequestTests {
         assertThat(data.isForceAuth(), equalTo(FALSE));
         assertThat(data.isPassive(), equalTo(FALSE));
         assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
-        assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://localhost:8080/uaa/saml/sp/SSO"));
+        assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO"));
     }
 }

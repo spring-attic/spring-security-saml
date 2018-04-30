@@ -17,8 +17,10 @@ package org.springframework.security.saml;
 import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.security.BasicSecurityConfiguration;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
+import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -40,10 +42,26 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         try {
             PaosBootstrap.bootstrap();
+
+            BasicSecurityConfiguration xmlConfig = (BasicSecurityConfiguration) org.opensaml.xml.Configuration.getGlobalSecurityConfiguration();
+            setSignSHA256(xmlConfig);
+
+            BasicSecurityConfiguration config = (BasicSecurityConfiguration) org.opensaml.Configuration.getGlobalSecurityConfiguration();
+            setSignSHA256(config);
+
             setMetadataKeyInfoGenerator();
         } catch (ConfigurationException e) {
             throw new FatalBeanException("Error invoking OpenSAML bootstrap", e);
         }
+    }
+
+    private void setSignSHA256(BasicSecurityConfiguration config) {
+
+        String algorithmURI = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
+        String algorithmName = "RSA";
+
+        config.registerSignatureAlgorithmURI(algorithmName, algorithmURI);
+        config.setSignatureReferenceDigestMethod(SignatureConstants.ALGO_ID_DIGEST_SHA256);
     }
 
     /**

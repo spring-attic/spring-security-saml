@@ -17,6 +17,7 @@ package org.springframework.security.saml2.authentication;
 
 import javax.xml.crypto.dsig.XMLSignature;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -33,8 +34,8 @@ public class Assertion implements Saml2Object {
     private Subject subject;
     private Conditions conditions;
     private Advice advice;
-    private List<AuthenticationStatement> authenticationStatements;
-    private List<Attribute> attributes;
+    private List<AuthenticationStatement> authenticationStatements = new LinkedList<>();
+    private List<Attribute> attributes = new LinkedList<>();
 
     public String getVersion() {
         return version;
@@ -109,11 +110,17 @@ public class Assertion implements Saml2Object {
     }
 
     public List<AuthenticationStatement> getAuthenticationStatements() {
-        return authenticationStatements;
+        return Collections.unmodifiableList(authenticationStatements);
     }
 
     public Assertion setAuthenticationStatements(List<AuthenticationStatement> authenticationStatements) {
-        this.authenticationStatements = authenticationStatements;
+        this.authenticationStatements.clear();
+        this.authenticationStatements.addAll(authenticationStatements);
+        return this;
+    }
+
+    public Assertion addAuthenticationStatement(AuthenticationStatement statement) {
+        this.authenticationStatements.add(statement);
         return this;
     }
 

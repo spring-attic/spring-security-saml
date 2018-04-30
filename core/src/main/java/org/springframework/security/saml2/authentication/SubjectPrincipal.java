@@ -15,8 +15,6 @@
 
 package org.springframework.security.saml2.authentication;
 
-import java.util.List;
-
 /**
  * This is either a BaseID, NameID or EncryptedID
  * @param <T>
@@ -28,17 +26,7 @@ public abstract class SubjectPrincipal<T extends SubjectPrincipal> {
         return (T)this;
     }
 
-    private List<SubjectConfirmationData> confirmationData;
     private String value;
-
-    public List<SubjectConfirmationData> getConfirmationData() {
-        return confirmationData;
-    }
-
-    public T setConfirmationData(List<SubjectConfirmationData> confirmationData) {
-        this.confirmationData = confirmationData;
-        return _this();
-    }
 
     public String getValue() {
         return value;

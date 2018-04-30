@@ -15,9 +15,20 @@
 
 package org.springframework.security.saml2.authentication;
 
+import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
+
 public class AuthenticationContext {
 
-    private AuthenticationContextClassReference authenticationContextClassReference;
+    private AuthenticationContextClassReference classReference = UNSPECIFIED;
 
 
+
+    public AuthenticationContextClassReference getClassReference() {
+        return classReference;
+    }
+
+    public AuthenticationContext setClassReference(AuthenticationContextClassReference classReference) {
+        this.classReference = classReference;
+        return this;
+    }
 }

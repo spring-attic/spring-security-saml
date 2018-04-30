@@ -35,8 +35,18 @@ import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml2.authentication.Assertion;
+import org.springframework.security.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml2.authentication.Conditions;
 import org.springframework.security.saml2.authentication.NameIDPolicy;
+import org.springframework.security.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml2.authentication.OneTimeUse;
+import org.springframework.security.saml2.authentication.Subject;
+import org.springframework.security.saml2.authentication.SubjectConfirmation;
+import org.springframework.security.saml2.authentication.SubjectConfirmationData;
+import org.springframework.security.saml2.authentication.SubjectConfirmationMethod;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.IdentityProvider;
@@ -57,6 +67,9 @@ public class Defaults {
 
     public static AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
     public static DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
+    public static long NOT_BEFORE = 60000;
+    public static long NOT_AFTER = 120000;
+    public static long SESSION_NOT_AFTER = 30 * 60 * 1000;
 
     public static ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
                                                                   List<SimpleKey> keys,
@@ -70,18 +83,18 @@ public class Defaults {
                 Arrays.asList(
                     new ServiceProvider()
                         .setWantAssertionsSigned(true)
-                        .setAuthnRequestsSigned(signingKey!=null)
+                        .setAuthnRequestsSigned(signingKey != null)
                         .setAssertionConsumerService(
                             Arrays.asList(
                                 getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
-                                getInstance().init().getEndpoint(baseUrl,"saml/sp/SSO", Binding.REDIRECT, 1, false)
+                                getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
                         .setNameIDs(Arrays.asList(NameID.PERSISTENT, NameID.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             Arrays.asList(
-                                getInstance().init().getEndpoint(baseUrl,"saml/sp/logout", Binding.REDIRECT, 0, true)
+                                getInstance().init().getEndpoint(baseUrl, "saml/sp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
                 )
@@ -102,15 +115,15 @@ public class Defaults {
                         .setWantAuthnRequestsSigned(true)
                         .setSingleSignOnService(
                             Arrays.asList(
-                                getInstance().init().getEndpoint(baseUrl,"saml/idp/SSO", Binding.POST, 0, true),
-                                getInstance().init().getEndpoint(baseUrl,"saml/idp/SSO", Binding.REDIRECT, 1, false)
+                                getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
+                                getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
-                        .setNameIDs(Arrays.asList(NameID.PERSISTENT,NameID.EMAIL))
+                        .setNameIDs(Arrays.asList(NameID.PERSISTENT, NameID.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             Arrays.asList(
-                                getInstance().init().getEndpoint(baseUrl,"saml/idp/logout", Binding.REDIRECT, 0, true)
+                                getInstance().init().getEndpoint(baseUrl, "saml/idp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
                 )
@@ -132,11 +145,11 @@ public class Defaults {
             .setIssuer(sp.getEntityId())
             .setRequestedAuthenticationContext(exact)
             .setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
-        if (sp.getServiceProvider().isAuthnRequestsSigned() ) {
+        if (sp.getServiceProvider().isAuthnRequestsSigned()) {
             request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
         }
         NameIDPolicy policy;
-        if (idp.getDefaultNameId()!=null) {
+        if (idp.getDefaultNameId() != null) {
             policy = new NameIDPolicy(
                 idp.getDefaultNameId(),
                 sp.getEntityAlias(),
@@ -151,6 +164,62 @@ public class Defaults {
         }
         request.setNameIDPolicy(policy);
         return request;
+    }
+
+    public static Assertion assertion(
+        ServiceProviderMetadata sp,
+        IdentityProviderMetadata idp,
+        AuthenticationRequest request) {
+
+        long now = System.currentTimeMillis();
+        return new Assertion()
+            .setVersion("2.0")
+            .setIssueInstant(new DateTime(now))
+            .setId(UUID.randomUUID().toString())
+            .setIssuer(idp.getEntityId())
+            .setSubject(
+                new Subject()
+                    .setPrincipal(
+                        new NameIdPrincipal()
+                            .setFormat(NameID.UNSPECIFIED)
+                    )
+                    .setConfirmation(
+                        new SubjectConfirmation()
+                            .setMethod(SubjectConfirmationMethod.BEARER)
+                            .setConfirmationData(
+                                new SubjectConfirmationData()
+                                    .setInResponseTo(request != null ? request.getId() : null)
+                                    .setNotBefore(new DateTime(now - NOT_BEFORE))
+                                    .setNotOnOrAfter(new DateTime(now + NOT_AFTER))
+                                    .setRecipient(
+                                        request != null ?
+                                            request.getAssertionConsumerService().getLocation() :
+                                            getACSFromSp(sp).getLocation()
+                                    )
+                            )
+                    )
+
+
+            )
+            .setConditions(
+                new Conditions()
+                    .setNotBefore(new DateTime(now - NOT_BEFORE))
+                    .setNotOnOrAfter(new DateTime(now - NOT_AFTER))
+                    .addCondition(
+                        new AudienceRestriction()
+                            .setAudience(sp.getEntityId())
+
+                    )
+                    .addCondition(new OneTimeUse())
+            )
+            .addAuthenticationStatement(
+                new AuthenticationStatement()
+                    .setAuthInstant(new DateTime(now))
+                    .setSessionIndex(UUID.randomUUID().toString())
+                    .setSessionNotOnOrAfter(new DateTime(now + SESSION_NOT_AFTER))
+
+            );
+
     }
 
     private static Endpoint getACSFromSp(ServiceProviderMetadata sp) {

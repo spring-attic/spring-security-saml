@@ -22,7 +22,7 @@ public class AuthenticationStatement {
     private DateTime authInstant;
     private String sessionIndex;
     private DateTime sessionNotOnOrAfter;
-    private AuthenticationContext authenticationContext;
+    private AuthenticationContext authenticationContext = new AuthenticationContext();
 
 
     public DateTime getAuthInstant() {

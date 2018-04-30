@@ -16,9 +16,25 @@
 package org.springframework.security.saml2.authentication;
 
 public class SubjectConfirmation {
-    private SubjectPrincipal principal;
-    private String method;
+    private SubjectConfirmationMethod method;
     private SubjectConfirmationData data;
 
+    public SubjectConfirmationData getConfirmationData() {
+        return data;
+    }
 
+    public SubjectConfirmation setConfirmationData(SubjectConfirmationData confirmationData) {
+        this.data = confirmationData;
+        return this;
+    }
+
+
+    public SubjectConfirmationMethod getMethod() {
+        return method;
+    }
+
+    public SubjectConfirmation setMethod(SubjectConfirmationMethod method) {
+        this.method = method;
+        return this;
+    }
 }

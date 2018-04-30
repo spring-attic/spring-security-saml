@@ -20,7 +20,7 @@ import org.springframework.security.saml2.metadata.NameID;
 public class NameIdPrincipal extends SubjectPrincipal<NameIdPrincipal> {
     private String nameQualifier;
     private String spNameQualifier;
-    private NameID nameId;
+    private NameID format;
 
     private String spProvidedId;
 
@@ -42,12 +42,12 @@ public class NameIdPrincipal extends SubjectPrincipal<NameIdPrincipal> {
         return _this();
     }
 
-    public NameID getNameId() {
-        return nameId;
+    public NameID getFormat() {
+        return format;
     }
 
-    public NameIdPrincipal setNameId(NameID nameId) {
-        this.nameId = nameId;
+    public NameIdPrincipal setFormat(NameID format) {
+        this.format = format;
         return _this();
     }
 

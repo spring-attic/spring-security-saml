@@ -15,12 +15,17 @@
 
 package org.springframework.security.saml2.authentication;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.joda.time.DateTime;
 
 public class Conditions {
 
     private DateTime notBefore;
     private DateTime notOnOrAfter;
+    private List<Condition> conditions = new LinkedList<>();
 
     public DateTime getNotBefore() {
         return notBefore;
@@ -37,6 +42,21 @@ public class Conditions {
 
     public Conditions setNotOnOrAfter(DateTime notOnOrAfter) {
         this.notOnOrAfter = notOnOrAfter;
+        return this;
+    }
+
+    public List<Condition> getConditions() {
+        return Collections.unmodifiableList(conditions);
+    }
+
+    public Conditions setConditions(List<Condition> conditions) {
+        this.conditions.clear();
+        this.conditions.addAll(conditions);
+        return this;
+    }
+
+    public Conditions addCondition(Condition condition) {
+        this.conditions.add(condition);
         return this;
     }
 }

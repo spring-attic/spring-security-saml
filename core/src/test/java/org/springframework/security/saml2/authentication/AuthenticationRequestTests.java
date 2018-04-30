@@ -15,19 +15,12 @@
 
 package org.springframework.security.saml2.authentication;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.saml2.core.NameID;
 import org.springframework.security.saml2.metadata.Binding;
-import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.xml.KeyType;
-import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.FALSE;
@@ -38,53 +31,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.springframework.security.saml2.init.Defaults.authenticationRequest;
-import static org.springframework.security.saml2.init.Defaults.identityProviderMetadata;
-import static org.springframework.security.saml2.init.Defaults.serviceProviderMetadata;
 import static org.springframework.security.saml2.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml2.metadata.NameID.PERSISTENT;
-import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
-import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
-class AuthenticationRequestTests {
-
-    SimpleKey spSigning;
-    SimpleKey idpSigning;
-
-    SimpleKey spVerifying;
-    SimpleKey idpVerifying;
-
-    private String spBaseUrl;
-    private String idpBaseUrl;
-    private ServiceProviderMetadata serviceProviderMetadata;
-    private IdentityProviderMetadata identityProviderMetadata;
-
-    @BeforeAll
-    public static void init() {
-        getInstance().init();
-    }
-
-    @BeforeEach
-    public void setup() {
-        idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
-        idpVerifying = new SimpleKey("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
-        spSigning = SP_RSA_KEY.getSimpleKey("sp");
-        spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
-        spBaseUrl = "http://sp.localhost:8080/uaa";
-        idpBaseUrl = "http://idp.localhost:8080/uaa";
-        serviceProviderMetadata = serviceProviderMetadata(
-            spBaseUrl,
-            Arrays.asList(spSigning),
-            spSigning
-        );
-        identityProviderMetadata = identityProviderMetadata(
-            idpBaseUrl,
-            Arrays.asList(idpSigning),
-            idpSigning
-        );
-    }
+class AuthenticationRequestTests extends AuthenticationTests {
 
     @Test
     public void create() throws Exception {

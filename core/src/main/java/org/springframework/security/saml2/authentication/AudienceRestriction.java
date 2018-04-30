@@ -15,10 +15,21 @@
 
 package org.springframework.security.saml2.authentication;
 
-public class SubjectConfirmation {
-    private SubjectPrincipal principal;
-    private String method;
-    private SubjectConfirmationData data;
+public class AudienceRestriction extends Condition<AudienceRestriction, String> {
 
+    private String audience = null;
 
+    public AudienceRestriction setAudience(String audience) {
+        this.audience = audience;
+        return _this();
+    }
+
+    @Override
+    protected boolean internalEvaluate(String evaluationCriteria) {
+        if (audience != null) {
+            return audience.equals(evaluationCriteria);
+        } else {
+            return false;
+        }
+    }
 }

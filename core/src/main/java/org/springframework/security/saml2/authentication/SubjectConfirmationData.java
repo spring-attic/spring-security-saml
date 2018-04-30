@@ -23,4 +23,40 @@ public class SubjectConfirmationData {
     private DateTime notOnOrAfter;
     private String recipient;
     private String inResponseTo;
+
+    public DateTime getNotBefore() {
+        return notBefore;
+    }
+
+    public SubjectConfirmationData setNotBefore(DateTime notBefore) {
+        this.notBefore = notBefore;
+        return this;
+    }
+
+    public DateTime getNotOnOrAfter() {
+        return notOnOrAfter;
+    }
+
+    public SubjectConfirmationData setNotOnOrAfter(DateTime notOnOrAfter) {
+        this.notOnOrAfter = notOnOrAfter;
+        return this;
+    }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
+    public SubjectConfirmationData setRecipient(String recipient) {
+        this.recipient = recipient;
+        return this;
+    }
+
+    public String getInResponseTo() {
+        return inResponseTo;
+    }
+
+    public SubjectConfirmationData setInResponseTo(String inResponseTo) {
+        this.inResponseTo = inResponseTo;
+        return this;
+    }
 }

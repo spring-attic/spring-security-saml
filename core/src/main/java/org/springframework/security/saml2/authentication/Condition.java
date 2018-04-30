@@ -15,5 +15,44 @@
 
 package org.springframework.security.saml2.authentication;
 
-public class Condition {
+import org.joda.time.DateTime;
+
+public abstract class Condition<T extends Condition, EvaluationCritera> {
+
+    private boolean valid = false;
+    private boolean evaluated = false;
+    private DateTime evaluationTime = null;
+    private EvaluationCritera evaluationCriteria = null;
+
+    @SuppressWarnings("checked")
+    protected T _this() {
+        return (T)this;
+    }
+
+    public boolean evaluate(EvaluationCritera evaluationCriteria) {
+        this.valid = internalEvaluate(evaluationCriteria);
+        this.evaluated = true;
+        this.evaluationCriteria = evaluationCriteria;
+        this.evaluationTime = new DateTime(System.currentTimeMillis());
+        return valid;
+    }
+
+    protected abstract boolean internalEvaluate(EvaluationCritera evaluationCriteria);
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public boolean wasEvaluated() {
+        return evaluated;
+    }
+
+    public DateTime getEvaluationTime() {
+        return evaluationTime;
+    }
+
+    public EvaluationCritera getEvaluationCriteria() {
+        return evaluationCriteria;
+    }
+
 }

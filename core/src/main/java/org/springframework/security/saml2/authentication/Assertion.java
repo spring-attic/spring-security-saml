@@ -16,11 +16,14 @@
 package org.springframework.security.saml2.authentication;
 
 import javax.xml.crypto.dsig.XMLSignature;
+import java.util.Collections;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml2.Saml2Object;
+import org.springframework.security.saml2.attribute.Attribute;
 
-public class Assertion {
+public class Assertion implements Saml2Object {
 
     private String version;
     private String id;
@@ -28,9 +31,104 @@ public class Assertion {
     private String issuer;
     private XMLSignature signature;
     private Subject subject;
-    private Condition condition;
+    private Conditions conditions;
     private Advice advice;
     private List<AuthenticationStatement> authenticationStatements;
+    private List<Attribute> attributes;
 
+    public String getVersion() {
+        return version;
+    }
 
+    public Assertion setVersion(String version) {
+        this.version = version;
+        return this;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Assertion setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public DateTime getIssueInstant() {
+        return issueInstant;
+    }
+
+    public Assertion setIssueInstant(DateTime issueInstant) {
+        this.issueInstant = issueInstant;
+        return this;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public Assertion setIssuer(String issuer) {
+        this.issuer = issuer;
+        return this;
+    }
+
+    public XMLSignature getSignature() {
+        return signature;
+    }
+
+    public Assertion setSignature(XMLSignature signature) {
+        this.signature = signature;
+        return this;
+    }
+
+    public Subject getSubject() {
+        return subject;
+    }
+
+    public Assertion setSubject(Subject subject) {
+        this.subject = subject;
+        return this;
+    }
+
+    public Conditions getConditions() {
+        return conditions;
+    }
+
+    public Assertion setConditions(Conditions conditions) {
+        this.conditions = conditions;
+        return this;
+    }
+
+    public Advice getAdvice() {
+        return advice;
+    }
+
+    public Assertion setAdvice(Advice advice) {
+        this.advice = advice;
+        return this;
+    }
+
+    public List<AuthenticationStatement> getAuthenticationStatements() {
+        return authenticationStatements;
+    }
+
+    public Assertion setAuthenticationStatements(List<AuthenticationStatement> authenticationStatements) {
+        this.authenticationStatements = authenticationStatements;
+        return this;
+    }
+
+    public List<Attribute> getAttributes() {
+        return Collections.unmodifiableList(attributes);
+    }
+
+    public Assertion setAttributes(List<Attribute> attributes) {
+        this.attributes.clear();
+        this.attributes.addAll(attributes);
+        return this;
+    }
+
+    public Assertion addAttribute(Attribute attribute) {
+        this.attributes.add(attribute);
+        return this;
+    }
 }

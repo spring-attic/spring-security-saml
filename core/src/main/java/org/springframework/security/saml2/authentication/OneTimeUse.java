@@ -12,15 +12,16 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml2.metadata;
 
-import java.util.List;
+package org.springframework.security.saml2.authentication;
 
-import org.springframework.security.saml2.xml.SimpleKey;
+public class OneTimeUse extends Condition<OneTimeUse,Void> {
 
-public class MetadataResolver {
-
-    public Metadata resolve(String xml, List<SimpleKey> trustedKeys) {
-        throw new UnsupportedOperationException();
+    @Override
+    protected boolean internalEvaluate(Void evaluationCriteria) {
+        if (wasEvaluated()) {
+            return false;
+        }
+        return true;
     }
 }

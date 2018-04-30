@@ -15,5 +15,49 @@
 
 package org.springframework.security.saml2.authentication;
 
+import org.joda.time.DateTime;
+
 public class AuthenticationStatement {
+
+    private DateTime authInstant;
+    private String sessionIndex;
+    private DateTime sessionNotOnOrAfter;
+    private AuthenticationContext authenticationContext;
+
+
+    public DateTime getAuthInstant() {
+        return authInstant;
+    }
+
+    public AuthenticationStatement setAuthInstant(DateTime authInstant) {
+        this.authInstant = authInstant;
+        return this;
+    }
+
+    public String getSessionIndex() {
+        return sessionIndex;
+    }
+
+    public AuthenticationStatement setSessionIndex(String sessionIndex) {
+        this.sessionIndex = sessionIndex;
+        return this;
+    }
+
+    public DateTime getSessionNotOnOrAfter() {
+        return sessionNotOnOrAfter;
+    }
+
+    public AuthenticationStatement setSessionNotOnOrAfter(DateTime sessionNotOnOrAfter) {
+        this.sessionNotOnOrAfter = sessionNotOnOrAfter;
+        return this;
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public AuthenticationStatement setAuthenticationContext(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
+        return this;
+    }
 }

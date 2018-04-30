@@ -17,9 +17,46 @@ package org.springframework.security.saml2.attribute;
 
 import java.util.List;
 
-public interface Attribute {
-    List<AttributeValue> getValues();
-    String getName();
-    NameFormat getNameFormat();
-    String getFriendlyName();
+public class Attribute {
+
+    private String name;
+    private List<Object> values;
+    private String nameFormat;
+    private String friendlyName;
+
+    public String getName() {
+        return name;
+    }
+
+    public Attribute setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public List<Object> getValues() {
+        return values;
+    }
+
+    public Attribute setValues(List<Object> values) {
+        this.values = values;
+        return this;
+    }
+
+    public String getNameFormat() {
+        return nameFormat;
+    }
+
+    public Attribute setNameFormat(String nameFormat) {
+        this.nameFormat = nameFormat;
+        return this;
+    }
+
+    public String getFriendlyName() {
+        return friendlyName;
+    }
+
+    public Attribute setFriendlyName(String friendlyName) {
+        this.friendlyName = friendlyName;
+        return this;
+    }
 }

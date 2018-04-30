@@ -21,9 +21,23 @@ public class Subject {
      * BaseID, NameID or EncryptedID
      */
     private SubjectPrincipal principal;
-    private SubjectConfirmation confirmations;
+    private SubjectConfirmation confirmation;
 
+    public SubjectPrincipal getPrincipal() {
+        return principal;
+    }
 
+    public Subject setPrincipal(SubjectPrincipal principal) {
+        this.principal = principal;
+        return this;
+    }
 
+    public SubjectConfirmation getConfirmation() {
+        return confirmation;
+    }
 
+    public Subject setConfirmation(SubjectConfirmation confirmation) {
+        this.confirmation = confirmation;
+        return this;
+    }
 }

@@ -13,7 +13,11 @@
  *
  */
 
-package org.springframework.security.saml2.attribute;
+package org.springframework.security.saml2.authentication;
 
-public enum NameFormat {
+public class AuthenticationContext {
+
+    private AuthenticationContextClassReference authenticationContextClassReference;
+
+
 }

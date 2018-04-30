@@ -10,6 +10,10 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-tx"
 	}
 
+	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "$bcprovVersion"
+	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcpkixVersion"
+
+
 	compile(group: "org.opensaml", name: "opensaml-core", version: "$openSamlVersion")
 	compile(group: "org.opensaml", name: "opensaml-saml-api", version: "$openSamlVersion")
 	compile(group: "org.opensaml", name: "opensaml-saml-impl", version: "$openSamlVersion")

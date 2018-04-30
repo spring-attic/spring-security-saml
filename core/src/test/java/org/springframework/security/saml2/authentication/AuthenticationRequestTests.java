@@ -26,6 +26,7 @@ import org.opensaml.saml.saml2.core.NameID;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Node;
 
@@ -41,15 +42,20 @@ import static org.springframework.security.saml2.init.Defaults.identityProviderM
 import static org.springframework.security.saml2.init.Defaults.serviceProviderMetadata;
 import static org.springframework.security.saml2.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml2.metadata.NameID.PERSISTENT;
-import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
-import static org.springframework.security.saml2.xml.KeyType.SIGNING;
 
 class AuthenticationRequestTests {
 
-    SimpleKey signing;
+    SimpleKey spSigning;
+    SimpleKey idpSigning;
+
+    SimpleKey spVerifying;
+    SimpleKey idpVerifying;
+
     private String spBaseUrl;
     private String idpBaseUrl;
     private ServiceProviderMetadata serviceProviderMetadata;
@@ -62,24 +68,21 @@ class AuthenticationRequestTests {
 
     @BeforeEach
     public void setup() {
-        signing = new SimpleKey(
-            "rsa",
-            RSA_TEST_KEY.getPrivate(),
-            RSA_TEST_KEY.getPublic(),
-            RSA_TEST_KEY.getPassphrase(),
-            SIGNING
-        );
+        idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
+        idpVerifying = new SimpleKey("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
+        spSigning = SP_RSA_KEY.getSimpleKey("sp");
+        spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
         spBaseUrl = "http://sp.localhost:8080/uaa";
         idpBaseUrl = "http://idp.localhost:8080/uaa";
         serviceProviderMetadata = serviceProviderMetadata(
             spBaseUrl,
-            Arrays.asList(signing),
-            signing
+            Arrays.asList(spSigning),
+            spSigning
         );
         identityProviderMetadata = identityProviderMetadata(
             idpBaseUrl,
-            Arrays.asList(signing),
-            signing
+            Arrays.asList(idpSigning),
+            idpSigning
         );
     }
 
@@ -112,7 +115,7 @@ class AuthenticationRequestTests {
     public void parse() throws Exception {
         AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
         String xml = getInstance().toXml(request);
-        AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(signing));
+        AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);
         assertSame(Binding.POST, data.getBinding());
         assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());

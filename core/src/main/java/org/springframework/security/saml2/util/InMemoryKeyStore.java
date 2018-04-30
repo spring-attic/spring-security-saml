@@ -34,10 +34,9 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 import org.springframework.security.saml2.xml.SimpleKey;
@@ -58,13 +57,15 @@ public class InMemoryKeyStore {
             ks.setCertificateEntry(key.getAlias(), certificate);
 
             if (hasText(key.getPrivateKey())) {
-                byte[] keybytes = X509Utilities.getDER(key.getPrivateKey());
-                RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
-                ks.setKeyEntry(key.getAlias(), privateKey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+                PrivateKey pkey = X509Utilities.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
+
+                //RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
+
+                ks.setKeyEntry(key.getAlias(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
             }
 
             return new InMemoryKeyStore(ks);
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidKeySpecException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);

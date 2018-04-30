@@ -17,14 +17,25 @@ package org.springframework.security.saml2.util;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.io.IOException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 
 public class X509Utilities {
 
@@ -61,4 +72,32 @@ public class X509Utilities {
         KeyFactory factory = KeyFactory.getInstance(algorithm);
         return (RSAPrivateKey) factory.generatePrivate(spec);
     }
+
+    public static PrivateKey readPrivateKey(String pem, String passphrase) {
+
+        try {
+            PEMParser parser = new PEMParser(new CharArrayReader(pem.toCharArray()));
+            Object obj = parser.readObject();
+            parser.close();
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+            KeyPair kp;
+            if (obj == null) {
+                throw new IllegalArgumentException("Unable to decode PEM key:"+pem);
+            } else if (obj instanceof PEMEncryptedKeyPair ) {
+                // Encrypted key - we will use provided password
+                PEMEncryptedKeyPair ckp = (PEMEncryptedKeyPair) obj;
+                PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passphrase.toCharArray());
+                kp = converter.getKeyPair(ckp.decryptKeyPair(decProv));
+            } else {
+                // Unencrypted key - no password needed
+                PEMKeyPair ukp = (PEMKeyPair) obj;
+                kp = converter.getKeyPair(ukp);
+            }
+
+            return kp.getPrivate();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }

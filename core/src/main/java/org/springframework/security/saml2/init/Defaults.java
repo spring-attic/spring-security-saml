@@ -207,12 +207,12 @@ public class Defaults {
                 new Conditions()
                     .setNotBefore(new DateTime(now - NOT_BEFORE))
                     .setNotOnOrAfter(new DateTime(now - NOT_AFTER))
-                    .addCondition(
+                    .addCriteria(
                         new AudienceRestriction()
                             .addAudience(sp.getEntityId())
 
                     )
-                    .addCondition(new OneTimeUse())
+                    .addCriteria(new OneTimeUse())
             )
             .addAuthenticationStatement(
                 new AuthenticationStatement()

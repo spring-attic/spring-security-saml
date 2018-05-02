@@ -15,7 +15,7 @@
 
 package org.springframework.security.saml2.authentication;
 
-public class OneTimeUse extends Condition<OneTimeUse,Void> {
+public class OneTimeUse extends AssertionCondition<OneTimeUse,Void> {
 
     @Override
     protected boolean internalEvaluate(Void evaluationCriteria) {

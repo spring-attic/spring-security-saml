@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AudienceRestriction extends Condition<AudienceRestriction, String> {
+public class AudienceRestriction extends AssertionCondition<AudienceRestriction, String> {
 
     private List<String> audiences = new LinkedList<>();
 

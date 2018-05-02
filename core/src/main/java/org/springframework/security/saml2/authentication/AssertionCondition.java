@@ -17,7 +17,7 @@ package org.springframework.security.saml2.authentication;
 
 import org.joda.time.DateTime;
 
-public abstract class Condition<T extends Condition, EvaluationCritera> {
+public abstract class AssertionCondition<T extends AssertionCondition, EvaluationCritera> {
 
     private boolean valid = false;
     private boolean evaluated = false;

@@ -15,7 +15,7 @@
 
 package org.springframework.security.saml2.authentication;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,16 +25,25 @@ import java.util.List;
 import org.hamcrest.core.IsEqual;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml2.attribute.Attribute;
 import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.signature.SignatureException;
+import org.springframework.security.saml2.spi.ExamplePemKey;
+import org.springframework.util.StreamUtils;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
 import static org.springframework.security.saml2.authentication.SubjectConfirmationMethod.BEARER;
@@ -42,10 +51,12 @@ import static org.springframework.security.saml2.init.Defaults.assertion;
 import static org.springframework.security.saml2.init.Defaults.authenticationRequest;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
+import static org.springframework.security.saml2.util.XmlTestUtil.fromZuluTime;
 import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
-import static org.springframework.security.saml2.util.XmlTestUtil.toZulu;
+import static org.springframework.security.saml2.util.XmlTestUtil.toZuluTime;
 
 public class AssertionTests extends AuthenticationTests {
+
 
     @Test
     public void create_with_request() throws Exception {
@@ -65,13 +76,13 @@ public class AssertionTests extends AuthenticationTests {
         assertNotNull(assertion.getSubject());
         assertNotNull(assertion.getSubject().getPrincipal());
         assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
-        assertThat(((NameIdPrincipal)assertion.getSubject().getPrincipal()).getSpNameQualifier(), equalTo(serviceProviderMetadata.getEntityId()));
+        assertThat(((NameIdPrincipal) assertion.getSubject().getPrincipal()).getSpNameQualifier(), equalTo(serviceProviderMetadata.getEntityId()));
         assertNotNull(assertion.getSubject().getConfirmation());
         assertThat(assertion.getSubject().getConfirmation().getMethod(), equalTo(BEARER));
 
         SubjectConfirmationData confirmationData = assertion.getSubject().getConfirmation().getConfirmationData();
         assertNotNull(confirmationData);
-        assertThat(confirmationData.getInResponseTo(),equalTo(request.getId()));
+        assertThat(confirmationData.getInResponseTo(), equalTo(request.getId()));
         assertNotNull(confirmationData.getNotBefore());
         assertNotNull(confirmationData.getNotOnOrAfter());
         assertThat(confirmationData.getRecipient(), equalTo(request.getAssertionConsumerService().getLocation()));
@@ -80,10 +91,10 @@ public class AssertionTests extends AuthenticationTests {
         assertNotNull(conditions);
         assertNotNull(conditions.getNotBefore());
         assertNotNull(conditions.getNotOnOrAfter());
-        assertNotNull(conditions.getConditions());
-        assertThat(conditions.getConditions().size(), equalTo(2));
-        assertThat(conditions.getConditions().get(0).getClass(), equalTo(AudienceRestriction.class));
-        assertThat(conditions.getConditions().get(1).getClass(), equalTo(OneTimeUse.class));
+        assertNotNull(conditions.getCriteria());
+        assertThat(conditions.getCriteria().size(), equalTo(2));
+        assertThat(conditions.getCriteria().get(0).getClass(), equalTo(AudienceRestriction.class));
+        assertThat(conditions.getCriteria().get(1).getClass(), equalTo(OneTimeUse.class));
 
         List<AuthenticationStatement> statements = assertion.getAuthenticationStatements();
         assertNotNull(statements);
@@ -106,7 +117,7 @@ public class AssertionTests extends AuthenticationTests {
     }
 
     @Test
-    public void check_xml() throws URISyntaxException, MalformedURLException {
+    public void check_xml() throws URISyntaxException, IOException {
         AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
         Assertion assertion = assertion(serviceProviderMetadata, identityProviderMetadata, request);
@@ -124,18 +135,18 @@ public class AssertionTests extends AuthenticationTests {
         DateTime time = new DateTime(System.currentTimeMillis());
         assertion.addAttribute(
             new Attribute()
-            .setFriendlyName("Random Attributes")
-            .setName("rattr")
-            .addValues("Filip",
-                       TRUE,
-                       time,
-                       new Integer(54),
-                       new Double("33.3"),
-                       new URI("http://test.uri.com"),
-                       new URL("http://test.url.com"),
-                       NameID.ENTITY
+                .setFriendlyName("Random Attributes")
+                .setName("rattr")
+                .addValues("Filip",
+                           TRUE,
+                           time,
+                           new Integer(54),
+                           new Double("33.3"),
+                           new URI("http://test.uri.com"),
+                           new URL("http://test.url.com"),
+                           NameID.ENTITY
 
-            )
+                )
         );
 
         assertion.setSigningKey(
@@ -146,12 +157,13 @@ public class AssertionTests extends AuthenticationTests {
 
 
         String xml = config.toXml(assertion);
+
         assertNotNull(xml);
         assertThat(xml, not(isEmptyOrNullString()));
         assertNodeCount(xml, "//saml:Assertion", 1);
         Iterable<Node> nodes = getNodes(xml, "//saml:Assertion");
         assertNodeAttribute(nodes.iterator().next(), "Version", IsEqual.equalTo("2.0"));
-        assertNodeAttribute(nodes.iterator().next(), "IssueInstant", equalTo(toZulu(assertion.getIssueInstant())));
+        assertNodeAttribute(nodes.iterator().next(), "IssueInstant", equalTo(toZuluTime(assertion.getIssueInstant())));
         assertNodeAttribute(nodes.iterator().next(), "ID", equalTo(assertion.getId()));
 
         assertNodeCount(xml, "//saml:Issuer", 1);
@@ -171,13 +183,13 @@ public class AssertionTests extends AuthenticationTests {
 
         assertNodeCount(xml, "//saml:SubjectConfirmation/saml:SubjectConfirmationData", 1);
         nodes = getNodes(xml, "//saml:SubjectConfirmation/saml:SubjectConfirmationData");
-        assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZulu(assertion.getSubject().getConfirmation().getConfirmationData().getNotOnOrAfter())));
+        assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZuluTime(assertion.getSubject().getConfirmation().getConfirmationData().getNotOnOrAfter())));
         assertNodeAttribute(nodes.iterator().next(), "InResponseTo", equalTo(assertion.getSubject().getConfirmation().getConfirmationData().getInResponseTo()));
 
         assertNodeCount(xml, "//saml:Conditions", 1);
         nodes = getNodes(xml, "//saml:Conditions");
-        assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZulu(assertion.getConditions().getNotOnOrAfter())));
-        assertNodeAttribute(nodes.iterator().next(), "NotBefore", equalTo(toZulu(assertion.getConditions().getNotBefore())));
+        assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZuluTime(assertion.getConditions().getNotOnOrAfter())));
+        assertNodeAttribute(nodes.iterator().next(), "NotBefore", equalTo(toZuluTime(assertion.getConditions().getNotBefore())));
 
         assertNodeCount(xml, "//saml:Conditions/saml:AudienceRestriction/saml:Audience", 1);
         nodes = getNodes(xml, "//saml:Conditions/saml:AudienceRestriction/saml:Audience");
@@ -188,7 +200,7 @@ public class AssertionTests extends AuthenticationTests {
         assertNodeCount(xml, "//saml:AuthnStatement", 1);
         nodes = getNodes(xml, "//saml:AuthnStatement");
         AuthenticationStatement authnStatement = assertion.getAuthenticationStatements().get(0);
-        assertNodeAttribute(nodes.iterator().next(), "AuthnInstant", equalTo(toZulu(authnStatement.getAuthInstant())));
+        assertNodeAttribute(nodes.iterator().next(), "AuthnInstant", equalTo(toZuluTime(authnStatement.getAuthInstant())));
         assertNodeAttribute(nodes.iterator().next(), "SessionIndex", equalTo(authnStatement.getSessionIndex()));
         assertNodeCount(xml, "//saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef", 1);
         nodes = getNodes(xml, "//saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef");
@@ -206,7 +218,7 @@ public class AssertionTests extends AuthenticationTests {
         Iterator<Node> iterator = nodes.iterator();
         assertThat(iterator.next().getTextContent(), equalTo("Filip"));
         assertThat(iterator.next().getTextContent(), equalTo("true"));
-        assertThat(iterator.next().getTextContent(), equalTo(toZulu(time)));
+        assertThat(iterator.next().getTextContent(), equalTo(toZuluTime(time)));
         assertThat(iterator.next().getTextContent(), equalTo("54"));
         assertThat(iterator.next().getTextContent(), equalTo("33.3"));
         assertThat(iterator.next().getTextContent(), equalTo("http://test.uri.com"));
@@ -216,9 +228,100 @@ public class AssertionTests extends AuthenticationTests {
         assertNodeCount(xml, "//ds:SignatureValue", 1);
         assertNodeCount(xml, "//ds:X509Certificate", 1);
 
-        System.out.println("Assertion:\n"+xml);
     }
 
+    @Test
+    public void read_xml() throws Exception {
+        byte[] data = getAssertionBytes();
+        Assertion assertion = (Assertion) config.resolve(data, asList(identityProviderMetadata.getSigningKey()));
+
+        assertNotNull(assertion);
+        assertThat(assertion.getId(), equalTo("1aa4400b-d6f1-41d1-a80a-2331816b7876"));
+        assertThat(assertion.getIssueInstant(), equalTo(fromZuluTime("2018-05-02T20:07:06.785Z")));
+        assertThat(assertion.getVersion(), equalTo("2.0"));
+
+        assertNotNull(assertion.getIssuer());
+        assertThat(assertion.getIssuer().getValue(), equalTo("http://idp.localhost:8080/uaa"));
+
+        assertNotNull(assertion.getSubject());
+        assertNotNull(assertion.getSubject().getPrincipal());
+        assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
+        NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
+        assertThat(principal.getFormat(), equalTo(NameID.EMAIL));
+        assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
+        assertThat(principal.getValue(), equalTo("test@test.com"));
+
+        assertNotNull(assertion.getSubject().getConfirmation());
+        assertThat(assertion.getSubject().getConfirmation().getMethod(), equalTo(BEARER));
+        SubjectConfirmationData confirmationData = assertion.getSubject().getConfirmation().getConfirmationData();
+        assertNotNull(confirmationData);
+        assertThat(confirmationData.getInResponseTo(), equalTo("0ab65bc9-6ffc-4fce-a186-108ad42db073"));
+        assertThat(confirmationData.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-02T20:09:06.785Z")));
+        assertThat(confirmationData.getNotBefore(), equalTo(fromZuluTime("2018-05-02T20:06:06.785Z")));
+
+        assertNotNull(assertion.getConditions());
+        assertThat(assertion.getConditions().getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-02T20:05:06.785Z")));
+        assertThat(assertion.getConditions().getNotBefore(), equalTo(fromZuluTime("2018-05-02T20:06:06.785Z")));
+        assertNotNull(assertion.getConditions().getCriteria());
+        assertThat(assertion.getConditions().getCriteria().size(), equalTo(2));
+        assertThat(assertion.getConditions().getCriteria().get(0).getClass(), equalTo(AudienceRestriction.class));
+        AudienceRestriction aud = (AudienceRestriction) assertion.getConditions().getCriteria().get(0);
+        assertThat(aud.getAudiences(), containsInAnyOrder("http://sp.localhost:8080/uaa"));
+        assertNotNull(assertion.getSignature());
+        assertThat(assertion.getConditions().getCriteria().get(1).getClass(), equalTo(OneTimeUse.class));
+
+        assertNotNull(assertion.getAuthenticationStatements());
+        assertThat(assertion.getAuthenticationStatements().size(), equalTo(1));
+        AuthenticationStatement stmt = assertion.getAuthenticationStatements().get(0);
+        assertNotNull(stmt);
+        assertNotNull(stmt.getAuthInstant());
+        assertNotNull(stmt.getSessionNotOnOrAfter());
+        assertThat(toZuluTime(stmt.getAuthInstant()), equalTo("2018-05-02T17:43:01.444Z"));
+        assertThat(toZuluTime(stmt.getSessionNotOnOrAfter()), equalTo("2018-05-02T18:13:01.444Z"));
+        assertThat(stmt.getSessionIndex(), equalTo("882491d7-d96f-4ba0-ab49-9544d5ade2e5"));
+
+        assertNotNull(stmt.getAuthenticationContext());
+        assertThat(stmt.getAuthenticationContext().getClassReference(), equalTo(PASSWORD_PROTECTED_TRANSPORT));
+
+        assertNotNull(assertion.getAttributes());
+        assertThat(assertion.getAttributes().size(), equalTo(1));
+        Attribute attribute = assertion.getAttributes().get(0);
+        assertNotNull(attribute);
+        assertThat(attribute.getFriendlyName(), equalTo("Random Attributes"));
+        assertThat(attribute.getName(), equalTo("rattr"));
+        assertNotNull(attribute.getValues());
+        assertEquals(attribute.getValues().size(), 8);
+        assertThat(attribute.getValues().get(0), equalTo("Filip"));
+        assertThat(attribute.getValues().get(1), equalTo(TRUE));
+        assertThat(attribute.getValues().get(2), equalTo(fromZuluTime("2018-05-02T17:43:01.447Z")));
+        assertThat(attribute.getValues().get(3), equalTo(54));
+        assertThat(attribute.getValues().get(4), equalTo("33.3"));
+        assertThat(attribute.getValues().get(5), equalTo(new URI("http://test.uri.com")));
+        assertThat(attribute.getValues().get(6), equalTo(new URL("http://test.url.com")));
+        assertThat(attribute.getValues().get(7), equalTo(new URL("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")));
+
+
+
+    }
+
+    @Test
+    public void unable_to_verify_signature() throws Exception {
+        byte[] data = getAssertionBytes();
+        Exception expected =
+            assertThrows(
+                SignatureException.class,
+                //using the wrong key
+                () -> config.resolve(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")))
+            );
+        assertThat(expected.getMessage(), equalTo("Signature cryptographic validation not successful"));
+    }
+
+    protected byte[] getAssertionBytes() throws IOException {
+        String path = "/test-data/assertion/assertion-local-20180502.xml";
+        ClassPathResource resource = new ClassPathResource(path);
+        assertTrue(resource.exists(), path + " must exist.");
+        return StreamUtils.copyToByteArray(resource.getInputStream());
+    }
 
 
 }

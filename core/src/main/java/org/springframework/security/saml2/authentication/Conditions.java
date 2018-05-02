@@ -25,7 +25,7 @@ public class Conditions {
 
     private DateTime notBefore;
     private DateTime notOnOrAfter;
-    private List<Condition> conditions = new LinkedList<>();
+    private List<AssertionCondition> criteria = new LinkedList<>();
 
     public DateTime getNotBefore() {
         return notBefore;
@@ -45,18 +45,18 @@ public class Conditions {
         return this;
     }
 
-    public List<Condition> getConditions() {
-        return Collections.unmodifiableList(conditions);
+    public List<AssertionCondition> getCriteria() {
+        return Collections.unmodifiableList(criteria);
     }
 
-    public Conditions setConditions(List<Condition> conditions) {
-        this.conditions.clear();
-        this.conditions.addAll(conditions);
+    public Conditions setCriteria(List<AssertionCondition> criteria) {
+        this.criteria.clear();
+        this.criteria.addAll(criteria);
         return this;
     }
 
-    public Conditions addCondition(Condition condition) {
-        this.conditions.add(condition);
+    public Conditions addCriteria(AssertionCondition condition) {
+        this.criteria.add(condition);
         return this;
     }
 }

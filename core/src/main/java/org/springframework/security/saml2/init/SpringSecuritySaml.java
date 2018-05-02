@@ -91,6 +91,8 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     public abstract Saml2Object resolve(String xml, List<SimpleKey> trustedKeys);
 
+    public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
+
 
     public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);

@@ -52,8 +52,12 @@ public class XmlTestUtil {
         return ISODateTimeFormat.dateTime().withChronology(ISOChronology.getInstanceUTC());
     }
 
-    public static String toZulu(DateTime d) {
+    public static String toZuluTime(DateTime d) {
         return d.toString(zulu());
+    }
+
+    public static DateTime fromZuluTime(String instant) {
+        return zulu().parseDateTime(instant);
     }
 
     public static void assertNodeAttribute(Node node, String attribute, String expected) {

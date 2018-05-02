@@ -127,7 +127,7 @@ import org.springframework.security.saml2.authentication.Assertion;
 import org.springframework.security.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml2.authentication.AuthenticationStatement;
-import org.springframework.security.saml2.authentication.Condition;
+import org.springframework.security.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml2.authentication.OneTimeUse;
 import org.springframework.security.saml2.authentication.RequestedAuthenticationContext;
@@ -535,7 +535,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         conditions.setNotOnOrAfter(request.getConditions().getNotOnOrAfter());
         a.setConditions(conditions);
 
-        request.getConditions().getConditions().forEach(c -> addCondition(conditions, c));
+        request.getConditions().getCriteria().forEach(c -> addCondition(conditions, c));
 
 
         for (AuthenticationStatement stmt : request.getAuthenticationStatements()) {
@@ -571,7 +571,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return marshallToXml(a);
     }
 
-    protected void addCondition(Conditions conditions, Condition c) {
+    protected void addCondition(Conditions conditions, AssertionCondition c) {
         if (c instanceof AudienceRestriction) {
             org.opensaml.saml.saml2.core.AudienceRestriction ar = buildSAMLObject(org.opensaml.saml.saml2.core.AudienceRestriction.class);
             for (String audience : ((AudienceRestriction) c).getAudiences()) {
@@ -680,6 +680,10 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     @Override
     public Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
+        return resolve(xml.getBytes(StandardCharsets.UTF_8), trustedKeys);
+    }
+
+    public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {
         XMLObject parsed = parse(xml);
         if (trustedKeys != null) {
             validateSignature((SignableSAMLObject) parsed, trustedKeys);
@@ -689,6 +693,9 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
         if (parsed instanceof AuthnRequest) {
             return resolveAuthenticationRequest((AuthnRequest) parsed);
+        }
+        if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
+            return null;
         }
         throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
     }

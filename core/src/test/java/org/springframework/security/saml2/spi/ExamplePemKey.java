@@ -167,4 +167,8 @@ public enum ExamplePemKey {
     public SimpleKey getSimpleKey(String alias) {
         return new SimpleKey(alias, getPrivate(), getPublic(), getPassphrase(), null);
     }
+
+    public SimpleKey getPublicKey(String alias) {
+        return new SimpleKey(alias, null, getPublic(), null, null);
+    }
 }

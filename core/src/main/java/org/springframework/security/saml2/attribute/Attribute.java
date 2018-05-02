@@ -15,12 +15,15 @@
 
 package org.springframework.security.saml2.attribute;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Attribute {
 
     private String name;
-    private List<Object> values;
+    private List<Object> values = new LinkedList<>();
     private String nameFormat;
     private String friendlyName;
 
@@ -34,11 +37,17 @@ public class Attribute {
     }
 
     public List<Object> getValues() {
-        return values;
+        return Collections.unmodifiableList(values);
     }
 
     public Attribute setValues(List<Object> values) {
-        this.values = values;
+        this.values.clear();
+        this.values.addAll(values);
+        return this;
+    }
+
+    public Attribute addValues(Object... values) {
+        this.values.addAll(Arrays.asList(values));
         return this;
     }
 

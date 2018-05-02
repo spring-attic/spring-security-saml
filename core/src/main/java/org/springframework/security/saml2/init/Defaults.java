@@ -182,6 +182,8 @@ public class Defaults {
                     .setPrincipal(
                         new NameIdPrincipal()
                             .setFormat(NameID.UNSPECIFIED)
+                            .setNameQualifier(sp.getEntityAlias())
+                            .setSpNameQualifier(sp.getEntityId())
                     )
                     .setConfirmation(
                         new SubjectConfirmation()
@@ -207,7 +209,7 @@ public class Defaults {
                     .setNotOnOrAfter(new DateTime(now - NOT_AFTER))
                     .addCondition(
                         new AudienceRestriction()
-                            .setAudience(sp.getEntityId())
+                            .addAudience(sp.getEntityId())
 
                     )
                     .addCondition(new OneTimeUse())

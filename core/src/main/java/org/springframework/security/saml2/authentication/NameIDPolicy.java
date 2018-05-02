@@ -17,11 +17,16 @@ package org.springframework.security.saml2.authentication;
 
 import org.springframework.security.saml2.metadata.NameID;
 
-public class NameIDPolicy {
+public class NameIDPolicy<T extends NameIDPolicy> {
 
     private NameID format;
     private String spNameQualifier;
     private Boolean allowCreate;
+
+    @SuppressWarnings("checked")
+    protected T _this() {
+        return (T)this;
+    }
 
     public NameIDPolicy() {
     }
@@ -36,26 +41,26 @@ public class NameIDPolicy {
         return spNameQualifier;
     }
 
-    public NameIDPolicy setSpNameQualifier(String spNameQualifier) {
+    public T setSpNameQualifier(String spNameQualifier) {
         this.spNameQualifier = spNameQualifier;
-        return this;
+        return _this();
     }
 
     public Boolean getAllowCreate() {
         return allowCreate;
     }
 
-    public NameIDPolicy setAllowCreate(Boolean allowCreate) {
+    public T setAllowCreate(Boolean allowCreate) {
         this.allowCreate = allowCreate;
-        return this;
+        return _this();
     }
 
     public NameID getFormat() {
         return format;
     }
 
-    public NameIDPolicy setFormat(NameID format) {
+    public T setFormat(NameID format) {
         this.format = format;
-        return this;
+        return _this();
     }
 }

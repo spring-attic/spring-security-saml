@@ -29,7 +29,7 @@ public class Assertion implements Saml2Object {
     private String version;
     private String id;
     private DateTime issueInstant;
-    private String issuer;
+    private Issuer issuer;
     private XMLSignature signature;
     private Subject subject;
     private Conditions conditions;
@@ -64,12 +64,18 @@ public class Assertion implements Saml2Object {
         return this;
     }
 
-    public String getIssuer() {
+    public Issuer getIssuer() {
         return issuer;
     }
 
-    public Assertion setIssuer(String issuer) {
+
+    public Assertion setIssuer(Issuer issuer) {
         this.issuer = issuer;
+        return this;
+    }
+
+    public Assertion setIssuer(String issuer) {
+        this.issuer = new Issuer().setValue(issuer);
         return this;
     }
 

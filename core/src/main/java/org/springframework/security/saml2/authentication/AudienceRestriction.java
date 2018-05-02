@@ -15,21 +15,31 @@
 
 package org.springframework.security.saml2.authentication;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public class AudienceRestriction extends Condition<AudienceRestriction, String> {
 
-    private String audience = null;
+    private List<String> audiences = new LinkedList<>();
 
-    public AudienceRestriction setAudience(String audience) {
-        this.audience = audience;
+    public AudienceRestriction addAudience(String audience) {
+        this.audiences.add(audience);
         return _this();
+    }
+
+    public AudienceRestriction setAudiences(List<String> audiences) {
+        this.audiences.clear();
+        this.audiences.addAll(audiences);
+        return _this();
+    }
+
+    public List<String> getAudiences() {
+        return Collections.unmodifiableList(audiences);
     }
 
     @Override
     protected boolean internalEvaluate(String evaluationCriteria) {
-        if (audience != null) {
-            return audience.equals(evaluationCriteria);
-        } else {
-            return false;
-        }
+        return audiences.contains(evaluationCriteria);
     }
 }

@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.xml.KeyType;
@@ -42,6 +43,8 @@ public abstract class AuthenticationTests {
     ServiceProviderMetadata serviceProviderMetadata;
     IdentityProviderMetadata identityProviderMetadata;
 
+    SpringSecuritySaml config;
+
     @BeforeAll
     public static void init() {
         getInstance().init();
@@ -49,6 +52,7 @@ public abstract class AuthenticationTests {
 
     @BeforeEach
     public void setup() {
+        config = getInstance();
         idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
         idpVerifying = new SimpleKey("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
         spSigning = SP_RSA_KEY.getSimpleKey("sp");

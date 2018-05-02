@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hamcrest.Matcher;
+import org.joda.time.DateTime;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.security.saml2.Namespace;
 import org.w3c.dom.Node;
 import org.xmlunit.xpath.JAXPXPathEngine;
@@ -40,9 +44,17 @@ public class XmlTestUtil {
         nsContext.put("md", Namespace.NS_METADATA);
         nsContext.put("ds", Namespace.NS_SIGNATURE);
         nsContext.put("samlp", Namespace.NS_PROTOCOL);
+        nsContext.put("saml", Namespace.NS_ASSERTION);
         engine.setNamespaceContext(nsContext);
     }
 
+    public static DateTimeFormatter zulu() {
+        return ISODateTimeFormat.dateTime().withChronology(ISOChronology.getInstanceUTC());
+    }
+
+    public static String toZulu(DateTime d) {
+        return d.toString(zulu());
+    }
 
     public static void assertNodeAttribute(Node node, String attribute, String expected) {
         Node attr = node.getAttributes().getNamedItem(attribute);
@@ -51,7 +63,12 @@ public class XmlTestUtil {
 
     public static void assertNodeAttribute(Node node, String attribute, Matcher<String> matcher) {
         Node attr = node.getAttributes().getNamedItem(attribute);
-        assertThat(attr.getTextContent(), matcher);
+        if (attr == null) {
+            assertThat(null, matcher);
+        } else {
+            assertThat(attr.getTextContent(), matcher);
+        }
+
     }
 
     public static void assertNodeCount(String xml, String xPath, int expected) {

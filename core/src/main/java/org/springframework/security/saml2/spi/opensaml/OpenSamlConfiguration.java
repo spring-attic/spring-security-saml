@@ -33,6 +33,8 @@ package org.springframework.security.saml2.spi.opensaml;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.DOMTypeSupport;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.joda.time.DateTime;
 import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -61,13 +64,38 @@ import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSAny;
+import org.opensaml.core.xml.schema.XSBase64Binary;
+import org.opensaml.core.xml.schema.XSBoolean;
+import org.opensaml.core.xml.schema.XSBooleanValue;
+import org.opensaml.core.xml.schema.XSDateTime;
+import org.opensaml.core.xml.schema.XSInteger;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.XSURI;
+import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
+import org.opensaml.core.xml.schema.impl.XSBooleanBuilder;
+import org.opensaml.core.xml.schema.impl.XSDateTimeBuilder;
+import org.opensaml.core.xml.schema.impl.XSIntegerBuilder;
+import org.opensaml.core.xml.schema.impl.XSStringBuilder;
+import org.opensaml.core.xml.schema.impl.XSURIBuilder;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AttributeValue;
+import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AuthnContext;
+import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.Conditions;
+import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
@@ -94,7 +122,14 @@ import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.Saml2Object;
+import org.springframework.security.saml2.attribute.Attribute;
+import org.springframework.security.saml2.authentication.Assertion;
+import org.springframework.security.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml2.authentication.Condition;
+import org.springframework.security.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml2.authentication.OneTimeUse;
 import org.springframework.security.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
@@ -459,8 +494,91 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     public String toXml(Saml2Object saml2Object) {
         if (saml2Object instanceof AuthenticationRequest) {
             return internalToXml((AuthenticationRequest) saml2Object);
+        } else if (saml2Object instanceof Assertion) {
+            return internalToXml((Assertion)saml2Object);
         }
         throw new UnsupportedOperationException();
+    }
+
+    protected String internalToXml(Assertion request) {
+        org.opensaml.saml.saml2.core.Assertion a = buildSAMLObject(org.opensaml.saml.saml2.core.Assertion.class);
+        a.setVersion(SAMLVersion.VERSION_20);
+        a.setIssueInstant(request.getIssueInstant());
+        a.setID(request.getId());
+        Issuer issuer = buildSAMLObject(Issuer.class);
+        issuer.setValue(request.getIssuer().getValue());
+        a.setIssuer(issuer);
+
+        NameIdPrincipal principal = (NameIdPrincipal) request.getSubject().getPrincipal();
+
+        org.opensaml.saml.saml2.core.NameID nid = buildSAMLObject(org.opensaml.saml.saml2.core.NameID.class);
+        nid.setValue(request.getSubject().getPrincipal().getValue());
+        nid.setFormat(principal.getFormat().toString());
+        nid.setSPNameQualifier(principal.getSpNameQualifier());
+
+        SubjectConfirmationData confData = buildSAMLObject(SubjectConfirmationData.class);
+        confData.setInResponseTo(request.getSubject().getConfirmation().getConfirmationData().getInResponseTo());
+        confData.setNotBefore(request.getSubject().getConfirmation().getConfirmationData().getNotBefore());
+        confData.setNotOnOrAfter(request.getSubject().getConfirmation().getConfirmationData().getNotOnOrAfter());
+
+        SubjectConfirmation confirmation = buildSAMLObject(SubjectConfirmation.class);
+        confirmation.setMethod(request.getSubject().getConfirmation().getMethod().toString());
+        confirmation.setSubjectConfirmationData(confData);
+
+        Subject subject = buildSAMLObject(Subject.class);
+        a.setSubject(subject);
+        subject.setNameID(nid);
+        subject.getSubjectConfirmations().add(confirmation);
+
+        Conditions conditions = buildSAMLObject(Conditions.class);
+        conditions.setNotBefore(request.getConditions().getNotBefore());
+        conditions.setNotOnOrAfter(request.getConditions().getNotOnOrAfter());
+        a.setConditions(conditions);
+
+        request.getConditions().getConditions().forEach(c -> addCondition(conditions, c));
+
+
+        for (AuthenticationStatement stmt : request.getAuthenticationStatements()) {
+            AuthnStatement authnStatement = buildSAMLObject(AuthnStatement.class);
+            AuthnContext actx = buildSAMLObject(AuthnContext.class);
+            AuthnContextClassRef aref = buildSAMLObject(AuthnContextClassRef.class);
+            aref.setAuthnContextClassRef(stmt.getAuthenticationContext().getClassReference().toString());
+            actx.setAuthnContextClassRef(aref);
+            authnStatement.setAuthnContext(actx);
+            a.getAuthnStatements().add(authnStatement);
+            authnStatement.setSessionIndex(stmt.getSessionIndex());
+            authnStatement.setSessionNotOnOrAfter(stmt.getSessionNotOnOrAfter());
+            authnStatement.setAuthnInstant(stmt.getAuthInstant());
+        }
+
+        AttributeStatement astmt = buildSAMLObject(AttributeStatement.class);
+        for (Attribute attr : request.getAttributes()) {
+            org.opensaml.saml.saml2.core.Attribute attribute = buildSAMLObject(org.opensaml.saml.saml2.core.Attribute.class);
+            attribute.setName(attr.getName());
+            attribute.setFriendlyName(attr.getFriendlyName());
+            attribute.setNameFormat(attr.getNameFormat());
+            attr.getValues().stream().forEach(
+                av -> attribute.getAttributeValues().add(objectToXmlObject(av))
+            );
+            astmt.getAttributes().add(attribute);
+        }
+        a.getAttributeStatements().add(astmt);
+        return marshallToXml(a);
+    }
+
+    protected void addCondition(Conditions conditions, Condition c) {
+        if (c instanceof AudienceRestriction) {
+            org.opensaml.saml.saml2.core.AudienceRestriction ar = buildSAMLObject(org.opensaml.saml.saml2.core.AudienceRestriction.class);
+            for (String audience : ((AudienceRestriction) c).getAudiences()) {
+                Audience aud = buildSAMLObject(Audience.class);
+                aud.setAudienceURI(audience);
+                ar.getAudiences().add(aud);
+            }
+            conditions.getAudienceRestrictions().add(ar);
+        } else if (c instanceof OneTimeUse) {
+            org.opensaml.saml.saml2.core.OneTimeUse otu = buildSAMLObject(org.opensaml.saml.saml2.core.OneTimeUse.class);
+            conditions.getConditions().add(otu);
+        }
     }
 
     protected String internalToXml(AuthenticationRequest request) {
@@ -480,6 +598,10 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
         }
 
+        return marshallToXml(auth);
+    }
+
+    protected String marshallToXml(XMLObject auth) {
         try {
             Element element = getMarshallerFactory()
                 .getMarshaller(auth)
@@ -617,5 +739,71 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         desc.setValidUntil(descriptor.getValidUntil());
         desc.setProviders(getSsoProviders(descriptor));
         return desc;
+    }
+
+    protected XMLObject objectToXmlObject(Object o) {
+        if (o == null) {
+            return null;
+        } else if (o instanceof String) {
+            XSStringBuilder builder = (XSStringBuilder)XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
+            XSString s = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+            s.setValue((String)o);
+            return s;
+        } else if (o instanceof URI || o instanceof URL) {
+            XSURIBuilder builder = (XSURIBuilder)XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSURI.TYPE_NAME);
+            XSURI uri = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSURI.TYPE_NAME);
+            uri.setValue(o.toString());
+            return uri;
+        } else if (o instanceof Boolean) {
+            XSBooleanBuilder builder = (XSBooleanBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSBoolean.TYPE_NAME);
+            XSBoolean b = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSBoolean.TYPE_NAME);
+            XSBooleanValue v = XSBooleanValue.valueOf(o.toString());
+            b.setValue(v);
+            return b;
+        } else if (o instanceof DateTime) {
+            XSDateTimeBuilder builder = (XSDateTimeBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
+            XSDateTime dt = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
+            dt.setValue((DateTime) o);
+            return dt;
+        } else if (o instanceof Integer) {
+            XSIntegerBuilder builder = (XSIntegerBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
+            XSInteger i = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSInteger.TYPE_NAME);
+            i.setValue(((Integer)o).intValue());
+            return i;
+        } else {
+            XSAnyBuilder builder = (XSAnyBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSAny.TYPE_NAME);
+            XSAny any = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSAny.TYPE_NAME);
+            any.setTextContent(o.toString());
+            return any;
+        }
+    }
+
+    protected String xmlObjectToString(XMLObject o) {
+        String toMatch = null;
+        if (o instanceof XSString) {
+            toMatch = ((XSString) o).getValue();
+        } else if (o instanceof XSURI) {
+            toMatch = ((XSURI) o).getValue();
+        } else if (o instanceof XSBoolean) {
+            toMatch = ((XSBoolean) o).getValue().getValue() ? "1" : "0";
+        } else if (o instanceof XSInteger) {
+            toMatch = ((XSInteger) o).getValue().toString();
+        } else if (o instanceof XSDateTime) {
+            final DateTime dt = ((XSDateTime) o).getValue();
+            if (dt != null) {
+                toMatch = ((XSDateTime) o).getDateTimeFormatter().print(dt);
+            }
+        } else if (o instanceof XSBase64Binary) {
+            toMatch = ((XSBase64Binary) o).getValue();
+        } else if (o instanceof XSAny) {
+            final XSAny wc = (XSAny) o;
+            if (wc.getUnknownAttributes().isEmpty() && wc.getUnknownXMLObjects().isEmpty()) {
+                toMatch = wc.getTextContent();
+            }
+        }
+        if (toMatch != null) {
+            return toMatch;
+        }
+        return null;
     }
 }

@@ -138,6 +138,12 @@ public class AssertionTests extends AuthenticationTests {
             )
         );
 
+        assertion.setSigningKey(
+            identityProviderMetadata.getSigningKey(),
+            identityProviderMetadata.getAlgorithm(),
+            identityProviderMetadata.getDigest()
+        );
+
 
         String xml = config.toXml(assertion);
         assertNotNull(xml);
@@ -206,6 +212,9 @@ public class AssertionTests extends AuthenticationTests {
         assertThat(iterator.next().getTextContent(), equalTo("http://test.uri.com"));
         assertThat(iterator.next().getTextContent(), equalTo("http://test.url.com"));
         assertThat(iterator.next().getTextContent(), equalTo(NameID.ENTITY.toString()));
+
+        assertNodeCount(xml, "//ds:SignatureValue", 1);
+        assertNodeCount(xml, "//ds:X509Certificate", 1);
 
         System.out.println("Assertion:\n"+xml);
     }

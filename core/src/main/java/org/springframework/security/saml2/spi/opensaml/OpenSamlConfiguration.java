@@ -563,6 +563,11 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             astmt.getAttributes().add(attribute);
         }
         a.getAttributeStatements().add(astmt);
+
+        if (request.getSigningKey() != null) {
+            signObject(a, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
+        }
+
         return marshallToXml(a);
     }
 

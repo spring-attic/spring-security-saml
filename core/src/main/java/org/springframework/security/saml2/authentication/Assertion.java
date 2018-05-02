@@ -23,6 +23,9 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.security.saml2.Saml2Object;
 import org.springframework.security.saml2.attribute.Attribute;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
+import org.springframework.security.saml2.xml.SimpleKey;
 
 public class Assertion implements Saml2Object {
 
@@ -36,6 +39,9 @@ public class Assertion implements Saml2Object {
     private Advice advice;
     private List<AuthenticationStatement> authenticationStatements = new LinkedList<>();
     private List<Attribute> attributes = new LinkedList<>();
+    private SimpleKey signingKey;
+    private AlgorithmMethod algorithm;
+    private DigestMethod digest;
 
     public String getVersion() {
         return version;
@@ -143,5 +149,24 @@ public class Assertion implements Saml2Object {
     public Assertion addAttribute(Attribute attribute) {
         this.attributes.add(attribute);
         return this;
+    }
+
+    public SimpleKey getSigningKey() {
+        return signingKey;
+    }
+
+    public Assertion setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+        this.signingKey = signingKey;
+        this.algorithm = algorithm;
+        this.digest = digest;
+        return this;
+    }
+
+    public AlgorithmMethod getAlgorithm() {
+        return algorithm;
+    }
+
+    public DigestMethod getDigest() {
+        return digest;
     }
 }

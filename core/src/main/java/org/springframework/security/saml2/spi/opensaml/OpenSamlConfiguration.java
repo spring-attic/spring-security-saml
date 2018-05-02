@@ -662,9 +662,8 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     public <T> T buildSAMLObject(final Class<T> clazz) {
         T object = null;
         try {
-            XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
             QName defaultElementName = (QName) clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
-            object = (T) builderFactory.getBuilder(defaultElementName).buildObject(defaultElementName);
+            object = (T) getBuilderFactory().getBuilder(defaultElementName).buildObject(defaultElementName);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not create SAML object");
         } catch (NoSuchFieldException e) {
@@ -745,33 +744,33 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         if (o == null) {
             return null;
         } else if (o instanceof String) {
-            XSStringBuilder builder = (XSStringBuilder)XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
+            XSStringBuilder builder = (XSStringBuilder) getBuilderFactory().getBuilder(XSString.TYPE_NAME);
             XSString s = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
             s.setValue((String)o);
             return s;
         } else if (o instanceof URI || o instanceof URL) {
-            XSURIBuilder builder = (XSURIBuilder)XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSURI.TYPE_NAME);
+            XSURIBuilder builder = (XSURIBuilder) getBuilderFactory().getBuilder(XSURI.TYPE_NAME);
             XSURI uri = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSURI.TYPE_NAME);
             uri.setValue(o.toString());
             return uri;
         } else if (o instanceof Boolean) {
-            XSBooleanBuilder builder = (XSBooleanBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSBoolean.TYPE_NAME);
+            XSBooleanBuilder builder = (XSBooleanBuilder) getBuilderFactory().getBuilder(XSBoolean.TYPE_NAME);
             XSBoolean b = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSBoolean.TYPE_NAME);
             XSBooleanValue v = XSBooleanValue.valueOf(o.toString());
             b.setValue(v);
             return b;
         } else if (o instanceof DateTime) {
-            XSDateTimeBuilder builder = (XSDateTimeBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
+            XSDateTimeBuilder builder = (XSDateTimeBuilder) getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
             XSDateTime dt = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
             dt.setValue((DateTime) o);
             return dt;
         } else if (o instanceof Integer) {
-            XSIntegerBuilder builder = (XSIntegerBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
+            XSIntegerBuilder builder = (XSIntegerBuilder) getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
             XSInteger i = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSInteger.TYPE_NAME);
             i.setValue(((Integer)o).intValue());
             return i;
         } else {
-            XSAnyBuilder builder = (XSAnyBuilder) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(XSAny.TYPE_NAME);
+            XSAnyBuilder builder = (XSAnyBuilder) getBuilderFactory().getBuilder(XSAny.TYPE_NAME);
             XSAny any = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSAny.TYPE_NAME);
             any.setTextContent(o.toString());
             return any;

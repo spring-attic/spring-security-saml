@@ -15,13 +15,17 @@
 
 package org.springframework.security.saml2.authentication;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Subject {
 
     /**
      * BaseID, NameID or EncryptedID
      */
     private SubjectPrincipal principal;
-    private SubjectConfirmation confirmation;
+    private List<SubjectConfirmation> confirmations = new LinkedList<>();
 
     public SubjectPrincipal getPrincipal() {
         return principal;
@@ -32,12 +36,22 @@ public class Subject {
         return this;
     }
 
-    public SubjectConfirmation getConfirmation() {
-        return confirmation;
+    public List<SubjectConfirmation> getConfirmations() {
+        return Collections.unmodifiableList(confirmations);
     }
 
-    public Subject setConfirmation(SubjectConfirmation confirmation) {
-        this.confirmation = confirmation;
+    public Subject setConfirmations(List<SubjectConfirmation> confirmations) {
+        this.confirmations.clear();
+        if (confirmations!=null) {
+            this.confirmations.addAll(confirmations);
+        }
+        return this;
+    }
+
+    public Subject addConfirmation(SubjectConfirmation subjectConfirmation) {
+        if (subjectConfirmation!=null) {
+            this.confirmations.add(subjectConfirmation);
+        }
         return this;
     }
 }

@@ -37,4 +37,5 @@ public class SubjectConfirmation {
         this.method = method;
         return this;
     }
+
 }

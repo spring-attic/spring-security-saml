@@ -17,6 +17,7 @@ package org.springframework.security.saml2.authentication;
 
 public class Issuer extends NameIDPolicy<Issuer> {
     private String value;
+    private String nameQualifier;
 
     public String getValue() {
         return value;
@@ -24,6 +25,15 @@ public class Issuer extends NameIDPolicy<Issuer> {
 
     public Issuer setValue(String value) {
         this.value = value;
+        return this;
+    }
+
+    public String getNameQualifier() {
+        return nameQualifier;
+    }
+
+    public Issuer setNameQualifier(String nameQualifier) {
+        this.nameQualifier = nameQualifier;
         return this;
     }
 }

@@ -185,7 +185,7 @@ public class Defaults {
                             .setNameQualifier(sp.getEntityAlias())
                             .setSpNameQualifier(sp.getEntityId())
                     )
-                    .setConfirmation(
+                    .addConfirmation(
                         new SubjectConfirmation()
                             .setMethod(SubjectConfirmationMethod.BEARER)
                             .setConfirmationData(

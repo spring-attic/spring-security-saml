@@ -47,6 +47,6 @@ public enum NameID  {
                 return name;
             }
         }
-        throw new IllegalArgumentException("No enum for:"+other);
+        return null;
     }
 }

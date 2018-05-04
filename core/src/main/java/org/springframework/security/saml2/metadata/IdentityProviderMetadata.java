@@ -20,7 +20,7 @@ package org.springframework.security.saml2.metadata;
  */
 public class IdentityProviderMetadata extends Metadata<IdentityProviderMetadata> {
 
-    private NameID defaultNameId = null;
+    private NameId defaultNameId = null;
 
     public IdentityProvider getIdentityProvider() {
         return (IdentityProvider) getProviders()
@@ -31,11 +31,11 @@ public class IdentityProviderMetadata extends Metadata<IdentityProviderMetadata>
 
     }
 
-    public NameID getDefaultNameId() {
+    public NameId getDefaultNameId() {
         return defaultNameId;
     }
 
-    public IdentityProviderMetadata setDefaultNameId(NameID defaultNameId) {
+    public IdentityProviderMetadata setDefaultNameId(NameId defaultNameId) {
         this.defaultNameId = defaultNameId;
         return this;
     }

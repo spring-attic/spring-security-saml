@@ -13,37 +13,40 @@
  *
  */
 
-package org.springframework.security.saml2.authentication;
+package org.springframework.security.saml2.metadata;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
-import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
+import org.springframework.util.StreamUtils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.init.Defaults.identityProviderMetadata;
 import static org.springframework.security.saml2.init.Defaults.serviceProviderMetadata;
 import static org.springframework.security.saml2.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 
-public abstract class AuthenticationTests {
-    SimpleKey spSigning;
-    SimpleKey idpSigning;
+public abstract class MetadataBase {
 
-    SimpleKey spVerifying;
-    SimpleKey idpVerifying;
+    protected SimpleKey spSigning;
+    protected SimpleKey idpSigning;
 
-    String spBaseUrl;
-    String idpBaseUrl;
-    ServiceProviderMetadata serviceProviderMetadata;
-    IdentityProviderMetadata identityProviderMetadata;
+    protected SimpleKey spVerifying;
+    protected SimpleKey idpVerifying;
 
-    SpringSecuritySaml config;
+    protected String spBaseUrl;
+    protected String idpBaseUrl;
+    protected ServiceProviderMetadata serviceProviderMetadata;
+    protected IdentityProviderMetadata identityProviderMetadata;
+
+    protected SpringSecuritySaml config;
 
     @BeforeAll
     public static void init() {
@@ -69,5 +72,11 @@ public abstract class AuthenticationTests {
             Arrays.asList(idpSigning),
             idpSigning
         );
+    }
+
+    protected byte[] getFileBytes(String path) throws IOException {
+        ClassPathResource resource = new ClassPathResource(path);
+        assertTrue(resource.exists(), path + " must exist.");
+        return StreamUtils.copyToByteArray(resource.getInputStream());
     }
 }

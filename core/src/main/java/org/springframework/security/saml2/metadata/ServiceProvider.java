@@ -15,7 +15,10 @@
 
 package org.springframework.security.saml2.metadata;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.security.saml2.attribute.Attribute;
 
 /**
  * Represents an SPSSODescriptor
@@ -25,8 +28,9 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 
     private boolean authnRequestsSigned;
     private boolean wantAssertionsSigned;
-    private List<Endpoint> assertionConsumerService;
+    private List<Endpoint> assertionConsumerService = new LinkedList<>();
     private Endpoint configuredAssertionConsumerService;
+    private List<Attribute> requestedAttributes = new LinkedList<>();
 
     //private List<AttributeConsumingService> attributeConsumingService;
 
@@ -78,8 +82,12 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
         return _this();
     }
 
-    //    public ServiceProvider setAttributeConsumingService(List<Endpoint> attributeConsumingService) {
-//        this.attributeConsumingService = attributeConsumingService;
-//        return this;
-//    }
+    public List<Attribute> getRequestedAttributes() {
+        return requestedAttributes;
+    }
+
+    public ServiceProvider setRequestedAttributes(List<Attribute> requestedAttributes) {
+        this.requestedAttributes = requestedAttributes;
+        return this;
+    }
 }

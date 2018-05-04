@@ -36,7 +36,7 @@ import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.InvalidMetadataException;
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Element;
@@ -65,13 +65,13 @@ public class SimpleMetadataBuilder {
     private List<Endpoint> logoutEndpoints = new LinkedList<>();
     private List<Endpoint> assertionEndpoints = new LinkedList<>();
 
-    private Set<NameID> nameIDs = new HashSet<>(
+    private Set<NameId> nameIds = new HashSet<>(
         Arrays.asList(
-            NameID.EMAIL,
-            NameID.TRANSIENT,
-            NameID.PERSISTENT,
-            NameID.UNSPECIFIED,
-            NameID.X509_SUBJECT
+            NameId.EMAIL,
+            NameId.TRANSIENT,
+            NameId.PERSISTENT,
+            NameId.UNSPECIFIED,
+            NameId.X509_SUBJECT
         )
     );
 
@@ -116,27 +116,27 @@ public class SimpleMetadataBuilder {
     }
 
     public SimpleMetadataBuilder clearNameIDs() {
-        nameIDs.clear();
+        nameIds.clear();
         return this;
     }
 
-    public SimpleMetadataBuilder addNameID(NameID id) {
-        nameIDs.add(id);
+    public SimpleMetadataBuilder addNameID(NameId id) {
+        nameIds.add(id);
         return this;
     }
 
-    public SimpleMetadataBuilder addNameIDs(NameID... ids) {
-        nameIDs.addAll(Arrays.asList(ids));
+    public SimpleMetadataBuilder addNameIDs(NameId... ids) {
+        nameIds.addAll(Arrays.asList(ids));
         return this;
     }
 
-    public SimpleMetadataBuilder addNameIDs(Collection<NameID> ids) {
-        nameIDs.addAll(ids);
+    public SimpleMetadataBuilder addNameIDs(Collection<NameId> ids) {
+        nameIds.addAll(ids);
         return this;
     }
 
-    public SimpleMetadataBuilder removeNameID(NameID id) {
-        nameIDs.remove(id);
+    public SimpleMetadataBuilder removeNameID(NameId id) {
+        nameIds.remove(id);
         return this;
     }
 
@@ -227,7 +227,7 @@ public class SimpleMetadataBuilder {
         descriptor.setAuthnRequestsSigned(requestSigned);
         descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
 
-        nameIDs.forEach(n ->
+        nameIds.forEach(n ->
             descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
         );
 
@@ -281,7 +281,7 @@ public class SimpleMetadataBuilder {
         descriptor.setWantAuthnRequestsSigned(wantAuthnRequestsSigned);
         descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
 
-        nameIDs.forEach(n ->
+        nameIds.forEach(n ->
             descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
         );
 

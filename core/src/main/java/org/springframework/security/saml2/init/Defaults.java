@@ -51,7 +51,7 @@ import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.signature.AlgorithmMethod;
@@ -90,7 +90,7 @@ public class Defaults {
                                 getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
-                        .setNameIDs(Arrays.asList(NameID.PERSISTENT, NameID.EMAIL))
+                        .setNameIds(Arrays.asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             Arrays.asList(
@@ -119,7 +119,7 @@ public class Defaults {
                                 getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
-                        .setNameIDs(Arrays.asList(NameID.PERSISTENT, NameID.EMAIL))
+                        .setNameIds(Arrays.asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             Arrays.asList(
@@ -157,7 +157,7 @@ public class Defaults {
             );
         } else {
             policy = new NameIDPolicy(
-                idp.getIdentityProvider().getNameIDs().get(0),
+                idp.getIdentityProvider().getNameIds().get(0),
                 sp.getEntityAlias(),
                 true
             );
@@ -181,7 +181,7 @@ public class Defaults {
                 new Subject()
                     .setPrincipal(
                         new NameIdPrincipal()
-                            .setFormat(NameID.UNSPECIFIED)
+                            .setFormat(NameId.UNSPECIFIED)
                             .setNameQualifier(sp.getEntityAlias())
                             .setSpNameQualifier(sp.getEntityId())
                     )

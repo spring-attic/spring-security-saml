@@ -17,7 +17,7 @@ package org.springframework.security.saml2.metadata;
 
 import javax.annotation.Nonnull;
 
-public enum NameID  {
+public enum NameId {
 
     UNSPECIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"),
     EMAIL("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"),
@@ -29,9 +29,10 @@ public enum NameID  {
     ENTITY("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"),
     ENCRYPTED("urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted");
 
+
     private final String urn;
 
-    NameID(@Nonnull String urn) {
+    NameId(@Nonnull String urn) {
         this.urn = urn;
     }
 
@@ -41,8 +42,8 @@ public enum NameID  {
         return this.urn;
     }
 
-    public static NameID fromUrn(String other) {
-        for (NameID name : values()) {
+    public static NameId fromUrn(String other) {
+        for (NameId name : values()) {
             if (name.toString().equals(other)) {
                 return name;
             }

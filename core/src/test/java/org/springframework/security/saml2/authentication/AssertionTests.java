@@ -25,12 +25,11 @@ import java.util.List;
 import org.hamcrest.core.IsEqual;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml2.attribute.Attribute;
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.MetadataBase;
+import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.signature.SignatureException;
 import org.springframework.security.saml2.spi.ExamplePemKey;
-import org.springframework.util.StreamUtils;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.TRUE;
@@ -43,7 +42,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
 import static org.springframework.security.saml2.authentication.SubjectConfirmationMethod.BEARER;
@@ -55,7 +53,7 @@ import static org.springframework.security.saml2.util.XmlTestUtil.fromZuluTime;
 import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 import static org.springframework.security.saml2.util.XmlTestUtil.toZuluTime;
 
-public class AssertionTests extends AuthenticationTests {
+public class AssertionTests extends MetadataBase {
 
 
     @Test
@@ -126,7 +124,7 @@ public class AssertionTests extends AuthenticationTests {
         String username = "test@test.com";
 
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        principal.setFormat(NameID.EMAIL);
+        principal.setFormat(NameId.EMAIL);
         principal.setValue(username);
 
         assertion.getAuthenticationStatements().get(0).setAuthenticationContext(
@@ -145,7 +143,7 @@ public class AssertionTests extends AuthenticationTests {
                            new Double("33.3"),
                            new URI("http://test.uri.com"),
                            new URL("http://test.url.com"),
-                           NameID.ENTITY
+                           NameId.ENTITY
 
                 )
         );
@@ -174,7 +172,7 @@ public class AssertionTests extends AuthenticationTests {
         assertNodeCount(xml, "//saml:Subject", 1);
         assertNodeCount(xml, "//saml:Subject/saml:NameID", 1);
         nodes = getNodes(xml, "//saml:Subject/saml:NameID");
-        assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.EMAIL.toString()));
+        assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.EMAIL.toString()));
         assertNodeAttribute(nodes.iterator().next(), "SPNameQualifier", equalTo(principal.getSpNameQualifier()));
         assertThat(nodes.iterator().next().getTextContent(), equalTo(assertion.getSubject().getPrincipal().getValue()));
 
@@ -224,7 +222,7 @@ public class AssertionTests extends AuthenticationTests {
         assertThat(iterator.next().getTextContent(), equalTo("33.3"));
         assertThat(iterator.next().getTextContent(), equalTo("http://test.uri.com"));
         assertThat(iterator.next().getTextContent(), equalTo("http://test.url.com"));
-        assertThat(iterator.next().getTextContent(), equalTo(NameID.ENTITY.toString()));
+        assertThat(iterator.next().getTextContent(), equalTo(NameId.ENTITY.toString()));
 
         assertNodeCount(xml, "//ds:SignatureValue", 1);
         assertNodeCount(xml, "//ds:X509Certificate", 1);
@@ -248,7 +246,7 @@ public class AssertionTests extends AuthenticationTests {
         assertNotNull(assertion.getSubject().getPrincipal());
         assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        assertThat(principal.getFormat(), equalTo(NameID.EMAIL));
+        assertThat(principal.getFormat(), equalTo(NameId.EMAIL));
         assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
         assertThat(principal.getValue(), equalTo("test@test.com"));
 
@@ -319,10 +317,7 @@ public class AssertionTests extends AuthenticationTests {
     }
 
     protected byte[] getAssertionBytes() throws IOException {
-        String path = "/test-data/assertion/assertion-local-20180502.xml";
-        ClassPathResource resource = new ClassPathResource(path);
-        assertTrue(resource.exists(), path + " must exist.");
-        return StreamUtils.copyToByteArray(resource.getInputStream());
+        return getFileBytes("/test-data/assertion/assertion-local-20180502.xml");
     }
 
 

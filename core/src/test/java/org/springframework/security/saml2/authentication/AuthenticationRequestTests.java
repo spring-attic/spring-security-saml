@@ -21,6 +21,7 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.saml2.core.NameID;
 import org.springframework.security.saml2.metadata.Binding;
+import org.springframework.security.saml2.metadata.MetadataBase;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.FALSE;
@@ -32,12 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.springframework.security.saml2.init.Defaults.authenticationRequest;
 import static org.springframework.security.saml2.init.SpringSecuritySaml.getInstance;
-import static org.springframework.security.saml2.metadata.NameID.PERSISTENT;
+import static org.springframework.security.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
-class AuthenticationRequestTests extends AuthenticationTests {
+class AuthenticationRequestTests extends MetadataBase {
 
     @Test
     public void create() throws Exception {

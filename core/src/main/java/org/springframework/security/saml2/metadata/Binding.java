@@ -21,7 +21,14 @@ public enum Binding {
 
     POST("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"),
     REDIRECT("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"),
-    URI("urn:oasis:names:tc:SAML:2.0:bindings:URI");
+    URI("urn:oasis:names:tc:SAML:2.0:bindings:URI"),
+    ARTIFACT("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"),
+    POST_SIMPLE_SIGN("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"),
+    PAOS("urn:oasis:names:tc:SAML:2.0:bindings:PAOS"),
+    SOAP("urn:oasis:names:tc:SAML:2.0:bindings:SOAP"),
+    DISCOVERY("urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"),
+    REQUEST_INITIATOR("urn:oasis:names:tc:SAML:profiles:SSO:request-init");
+
 
     private final String urn;
 

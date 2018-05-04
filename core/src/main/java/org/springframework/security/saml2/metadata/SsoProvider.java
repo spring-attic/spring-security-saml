@@ -37,7 +37,9 @@ public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
     private List<Endpoint> artifactResolutionService;
     private List<Endpoint> singleLogoutService;
     private List<Endpoint> manageNameIDService;
-    private List<NameID> nameIDs;
+    private List<NameId> nameIds;
+    private Endpoint discovery;
+    private Endpoint requestInitiation;
 
     public List<Endpoint> getArtifactResolutionService() {
         return artifactResolutionService;
@@ -51,8 +53,8 @@ public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
         return manageNameIDService;
     }
 
-    public List<NameID> getNameIDs() {
-        return nameIDs;
+    public List<NameId> getNameIds() {
+        return nameIds;
     }
 
     public T setArtifactResolutionService(List<Endpoint> artifactResolutionService) {
@@ -70,8 +72,26 @@ public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
         return _this();
     }
 
-    public T setNameIDs(List<NameID> nameIDs) {
-        this.nameIDs = nameIDs;
+    public T setNameIds(List<NameId> nameIds) {
+        this.nameIds = nameIds;
+        return _this();
+    }
+
+    public Endpoint getDiscovery() {
+        return discovery;
+    }
+
+    public T setDiscovery(Endpoint discovery) {
+        this.discovery = discovery;
+        return _this();
+    }
+
+    public Endpoint getRequestInitiation() {
+        return requestInitiation;
+    }
+
+    public T setRequestInitiation(Endpoint requestInitiation) {
+        this.requestInitiation = requestInitiation;
         return _this();
     }
 }

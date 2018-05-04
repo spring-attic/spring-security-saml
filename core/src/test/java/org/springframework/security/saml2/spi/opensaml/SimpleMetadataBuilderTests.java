@@ -21,7 +21,7 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Metadata;
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Node;
@@ -136,8 +136,8 @@ public class SimpleMetadataBuilderTests {
                 .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
                 .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
                 .clearNameIDs()
-                .addNameID(NameID.EMAIL)
-                .addNameID(NameID.PERSISTENT)
+                .addNameID(NameId.EMAIL)
+                .addNameID(NameId.PERSISTENT)
                 .wantAssertionSigned(true)
                 .requestSigned(true)
                 .buildServiceProviderMetadata();
@@ -154,9 +154,9 @@ public class SimpleMetadataBuilderTests {
             .addSingleSignOnPath("saml/sp/SSO", Binding.POST)
             .addSingleSignOnPath("saml/sp/SSO", Binding.REDIRECT)
             .clearNameIDs()
-            .addNameID(NameID.EMAIL)
-            .addNameID(NameID.PERSISTENT)
-            .addNameID(NameID.WIN_DOMAIN_QUALIFIED)
+            .addNameID(NameId.EMAIL)
+            .addNameID(NameId.PERSISTENT)
+            .addNameID(NameId.WIN_DOMAIN_QUALIFIED)
             .wantAuthnRequestsSigned(true)
             .buildIdentityProviderMetadata();
     }

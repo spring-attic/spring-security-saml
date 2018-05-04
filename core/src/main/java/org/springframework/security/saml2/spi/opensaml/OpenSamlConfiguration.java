@@ -83,6 +83,8 @@ import org.opensaml.core.xml.schema.impl.XSURIBuilder;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
+import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
+import org.opensaml.saml.ext.saml2mdreqinit.RequestInitiator;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Audience;
@@ -95,12 +97,14 @@ import org.opensaml.saml.saml2.core.Condition;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.IndexedEndpoint;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml.saml2.metadata.NameIDFormat;
+import org.opensaml.saml.saml2.metadata.RequestedAttribute;
 import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleLogoutService;
@@ -115,12 +119,15 @@ import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
 import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.X509Certificate;
+import org.opensaml.xmlsec.signature.X509Data;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml2.Saml2Object;
 import org.springframework.security.saml2.attribute.Attribute;
+import org.springframework.security.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml2.authentication.Assertion;
 import org.springframework.security.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml2.authentication.AudienceRestriction;
@@ -141,15 +148,19 @@ import org.springframework.security.saml2.authentication.SubjectPrincipal;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
+import org.springframework.security.saml2.metadata.IdentityProvider;
+import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml2.metadata.Metadata;
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.metadata.Provider;
 import org.springframework.security.saml2.metadata.ServiceProvider;
+import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.metadata.SsoProvider;
 import org.springframework.security.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml2.signature.Canonicalization;
 import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.util.InMemoryKeyStore;
+import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -269,11 +280,11 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return builder.buildObject();
     }
 
-    public NameIDFormat getNameIDFormat(NameID nameID) {
+    public NameIDFormat getNameIDFormat(NameId nameId) {
         SAMLObjectBuilder<NameIDFormat> builder =
             (SAMLObjectBuilder<NameIDFormat>) getBuilderFactory().getBuilder(NameIDFormat.DEFAULT_ELEMENT_NAME);
         NameIDFormat format = builder.buildObject();
-        format.setFormat(nameID.toString());
+        format.setFormat(nameId.toString());
         return format;
     }
 
@@ -427,22 +438,120 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             provider.setId(desc.getID());
             provider.setValidUntil(desc.getValidUntil());
             provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
-            provider.setNameIDs(getNameIDs(desc.getNameIDFormats()));
+            provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
             provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
             provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutServices()));
             provider.setManageNameIDService(getEndpoints(desc.getManageNameIDServices()));
             provider.setAuthnRequestsSigned(desc.isAuthnRequestsSigned());
             provider.setWantAssertionsSigned(desc.getWantAssertionsSigned());
             provider.setAssertionConsumerService(getEndpoints(desc.getAssertionConsumerServices()));
+            provider.setRequestedAttributes(getRequestAttributes(desc));
+            provider.setKeys(getProviderKeys(descriptor));
+            provider.setDiscovery(getDiscovery(desc));
+            provider.setRequestInitiation(getRequestInitiation(desc));
             //TODO
             //provider.setAttributeConsumingService(getEndpoints(desc.getAttributeConsumingServices()));
             return provider;
         } else if (descriptor instanceof IDPSSODescriptor) {
-
+            IDPSSODescriptor desc = (IDPSSODescriptor) descriptor;
+            IdentityProvider provider = new IdentityProvider();
+            provider.setId(desc.getID());
+            provider.setValidUntil(desc.getValidUntil());
+            provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
+            provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
+            provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
+            provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutServices()));
+            provider.setManageNameIDService(getEndpoints(desc.getManageNameIDServices()));
+            provider.setWantAuthnRequestsSigned(desc.getWantAuthnRequestsSigned());
+            provider.setSingleSignOnService(getEndpoints(desc.getSingleSignOnServices()));
+            provider.setKeys(getProviderKeys(descriptor));
+            provider.setDiscovery(getDiscovery(desc));
+            provider.setRequestInitiation(getRequestInitiation(desc));
+            return provider;
         } else {
 
         }
         throw new UnsupportedOperationException();
+    }
+
+    protected List<Attribute> getRequestAttributes(SPSSODescriptor desc) {
+        List<Attribute> result = new LinkedList<>();
+        if (desc.getDefaultAttributeConsumingService() != null) {
+            result.addAll(getRequestedAttributes(desc.getDefaultAttributeConsumingService().getRequestAttributes()));
+        } else {
+            for (AttributeConsumingService s : ofNullable(desc.getAttributeConsumingServices()).orElse(emptyList())) {
+                if (s != null ) {
+                    //take the first one
+                    result.addAll(getRequestedAttributes(s.getRequestAttributes()));
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    protected Endpoint getRequestInitiation(RoleDescriptor desc) {
+        if (desc.getExtensions()==null) {
+            return null;
+        }
+        Endpoint result = null;
+        for (XMLObject obj : desc.getExtensions().getUnknownXMLObjects()) {
+            if (obj instanceof RequestInitiator) {
+                RequestInitiator req = (RequestInitiator) obj;
+                result = new Endpoint()
+                    .setIndex(0)
+                    .setDefault(false)
+                    .setBinding(Binding.fromUrn(req.getBinding()))
+                    .setLocation(req.getLocation())
+                    .setResponseLocation(req.getResponseLocation());
+            }
+        }
+        return result;
+    }
+
+    protected Endpoint getDiscovery(RoleDescriptor desc) {
+        if (desc.getExtensions()==null) {
+            return null;
+        }
+        Endpoint result = null;
+        for (XMLObject obj : desc.getExtensions().getUnknownXMLObjects()) {
+            if (obj instanceof DiscoveryResponse) {
+                DiscoveryResponse resp = (DiscoveryResponse) obj;
+                result = new Endpoint()
+                    .setDefault(resp.isDefault())
+                    .setIndex(resp.getIndex())
+                    .setBinding(Binding.fromUrn(resp.getBinding()))
+                    .setLocation(resp.getLocation())
+                    .setResponseLocation(resp.getResponseLocation());
+            }
+        }
+        return result;
+    }
+
+    protected List<SimpleKey> getProviderKeys(RoleDescriptor descriptor) {
+        List<SimpleKey> result = new LinkedList<>();
+        for (KeyDescriptor desc : ofNullable(descriptor.getKeyDescriptors()).orElse(emptyList())) {
+            if (desc != null) {
+                result.addAll(getKeyFromDescriptor(desc));
+            }
+        }
+        return result;
+    }
+
+    protected List<SimpleKey> getKeyFromDescriptor(KeyDescriptor desc) {
+        List<SimpleKey> result = new LinkedList<>();
+        if (desc.getKeyInfo() == null) {
+            return null;
+        }
+        KeyType type = desc.getUse() != null ? KeyType.valueOf(desc.getUse().name()) : KeyType.UNSPECIFIED;
+        int index = 0;
+        for (X509Data x509 : ofNullable(desc.getKeyInfo().getX509Datas()).orElse(emptyList())) {
+            for (X509Certificate cert : ofNullable(x509.getX509Certificates()).orElse(emptyList())) {
+                result.add(new SimpleKey(type.getTypeName() + "-" + (index++), null, cert.getValue(), null, type));
+            }
+        }
+
+        return result;
     }
 
     protected List<Endpoint> getEndpoints(List<? extends org.opensaml.saml.saml2.metadata.Endpoint> services) {
@@ -472,11 +581,11 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return result;
     }
 
-    protected List<NameID> getNameIDs(List<NameIDFormat> nameIDFormats) {
-        List<NameID> result = new LinkedList<>();
+    protected List<NameId> getNameIDs(List<NameIDFormat> nameIDFormats) {
+        List<NameId> result = new LinkedList<>();
         if (nameIDFormats != null) {
             nameIDFormats.stream()
-                .forEach(n -> result.add(NameID.fromUrn(n.getFormat())));
+                .forEach(n -> result.add(NameId.fromUrn(n.getFormat())));
         }
         return result;
     }
@@ -565,7 +674,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             org.opensaml.saml.saml2.core.Attribute attribute = buildSAMLObject(org.opensaml.saml.saml2.core.Attribute.class);
             attribute.setName(attr.getName());
             attribute.setFriendlyName(attr.getFriendlyName());
-            attribute.setNameFormat(attr.getNameFormat());
+            attribute.setNameFormat(attr.getNameFormat().toString());
             attr.getValues().stream().forEach(
                 av -> attribute.getAttributeValues().add(objectToXmlObject(av))
             );
@@ -667,7 +776,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         if (nameIDPolicy != null) {
             result = new org.springframework.security.saml2.authentication.NameIDPolicy()
                 .setAllowCreate(nameIDPolicy.getAllowCreate())
-                .setFormat(NameID.fromUrn(nameIDPolicy.getFormat()))
+                .setFormat(NameId.fromUrn(nameIDPolicy.getFormat()))
                 .setSpNameQualifier(nameIDPolicy.getSPNameQualifier());
         }
         return result;
@@ -722,16 +831,31 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             ;
     }
 
+    protected List<Attribute> getRequestedAttributes(List<RequestedAttribute> attributes) {
+        List<Attribute> result = new LinkedList<>();
+        for (RequestedAttribute a : ofNullable(attributes).orElse(emptyList())) {
+            result.add(
+                new Attribute()
+                    .setFriendlyName(a.getFriendlyName())
+                    .setName(a.getName())
+                    .setNameFormat(AttributeNameFormat.fromUrn(a.getNameFormat()))
+                    .setValues(getJavaValues(a.getAttributeValues()))
+                    .setRequired(a.isRequired())
+            );
+        }
+        return result;
+    }
+
     protected List<Attribute> getAttributes(List<AttributeStatement> attributeStatements) {
         List<Attribute> result = new LinkedList<>();
         for (AttributeStatement stmt : ofNullable(attributeStatements).orElse(emptyList())) {
             for (org.opensaml.saml.saml2.core.Attribute a : ofNullable(stmt.getAttributes()).orElse(emptyList())) {
                 result.add(
                     new Attribute()
-                    .setFriendlyName(a.getFriendlyName())
-                    .setName(a.getName())
-                    .setNameFormat(a.getNameFormat())
-                    .setValues(getJavaValues(a.getAttributeValues()))
+                        .setFriendlyName(a.getFriendlyName())
+                        .setName(a.getName())
+                        .setNameFormat(AttributeNameFormat.fromUrn(a.getNameFormat()))
+                        .setValues(getJavaValues(a.getAttributeValues()))
                 );
             }
         }
@@ -744,22 +868,22 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             if (o == null) {
 
             } else if (o instanceof XSString) {
-                result.add(((XSString)o).getValue());
+                result.add(((XSString) o).getValue());
             } else if (o instanceof XSURI) {
                 try {
-                    result.add(new URI(((XSURI)o).getValue()));
+                    result.add(new URI(((XSURI) o).getValue()));
                 } catch (URISyntaxException e) {
                     result.add(((XSURI) o).getValue());
                 }
             } else if (o instanceof XSBoolean) {
-                result.add(((XSBoolean)o).getValue().getValue());
+                result.add(((XSBoolean) o).getValue().getValue());
             } else if (o instanceof XSDateTime) {
-                result.add(((XSDateTime)o).getValue());
+                result.add(((XSDateTime) o).getValue());
             } else if (o instanceof XSInteger) {
-                result.add(((XSInteger)o).getValue());
+                result.add(((XSInteger) o).getValue());
             } else if (o instanceof XSAny) {
-                result.add(((XSAny)o).getTextContent());
-            }else {
+                result.add(((XSAny) o).getTextContent());
+            } else {
                 //we don't know the type.
                 result.add(o);
             }
@@ -857,7 +981,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             return new NameIdPrincipal()
                 .setSpNameQualifier(p.getSPNameQualifier())
                 .setNameQualifier(p.getNameQualifier())
-                .setFormat(NameID.fromUrn(p.getFormat()))
+                .setFormat(NameId.fromUrn(p.getFormat()))
                 .setSpProvidedId(p.getSPProvidedID())
                 .setValue(p.getValue());
         } else {
@@ -868,7 +992,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     protected Issuer getIssuer(org.opensaml.saml.saml2.core.Issuer issuer) {
         return new Issuer()
             .setValue(issuer.getValue())
-            .setFormat(NameID.fromUrn(issuer.getFormat()))
+            .setFormat(NameId.fromUrn(issuer.getFormat()))
             .setSpNameQualifier(issuer.getSPNameQualifier())
             .setNameQualifier(issuer.getNameQualifier());
     }
@@ -916,13 +1040,27 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     protected Saml2Object resolveMetadata(EntityDescriptor parsed) {
         EntityDescriptor descriptor = parsed;
-        Metadata desc = new Metadata();
+        List<? extends Provider> ssoProviders = getSsoProviders(descriptor);
+        Metadata desc = getMetadata(ssoProviders);
         desc.setCacheDurationMillis(descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1);
         desc.setEntityId(descriptor.getEntityID());
+        desc.setEntityAlias(descriptor.getEntityID());
         desc.setId(descriptor.getID());
         desc.setValidUntil(descriptor.getValidUntil());
-        desc.setProviders(getSsoProviders(descriptor));
         return desc;
+    }
+
+    protected Metadata getMetadata(List<? extends Provider> ssoProviders) {
+        Metadata result = new Metadata();
+        if (ssoProviders.size() == 1) {
+            if (ssoProviders.get(0) instanceof ServiceProvider) {
+                result = new ServiceProviderMetadata();
+            } else if (ssoProviders.get(0) instanceof IdentityProvider) {
+                result = new IdentityProviderMetadata();
+            }
+        }
+        result.setProviders(ssoProviders);
+        return result;
     }
 
     protected XMLObject objectToXmlObject(Object o) {

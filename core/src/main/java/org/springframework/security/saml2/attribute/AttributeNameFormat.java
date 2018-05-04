@@ -13,29 +13,32 @@
  *
  */
 
-package org.springframework.security.saml2.xml;
+package org.springframework.security.saml2.attribute;
 
-public enum KeyType {
-    SIGNING("signing"),
-    UNSPECIFIED("unspecified"),
-    ENCRYPTION("encryption");
+public enum AttributeNameFormat  {
 
-    private final String type;
+    UNSPECIFIED("urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified"),
+    URI("urn:oasis:names:tc:SAML:2.0:attrname-format:uri"),
+    BASIC("urn:oasis:names:tc:SAML:2.0:attrname-format:basic");
 
-    KeyType(String type) {
-        this.type = type;
+
+    private final String urn;
+
+    AttributeNameFormat(String urn) {
+        this.urn = urn;
     }
 
-    public String getTypeName() {
-        return type;
-    }
-
-    public static KeyType fromTypeName(String name) {
-        for (KeyType t : values()) {
-            if (t.getTypeName().equals(name)) {
+    public static AttributeNameFormat fromUrn(String name) {
+        for (AttributeNameFormat t : values()) {
+            if (t.urn.equals(name)) {
                 return t;
             }
         }
         return UNSPECIFIED;
+    }
+
+    @Override
+    public String toString() {
+        return urn;
     }
 }

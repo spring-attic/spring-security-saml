@@ -23,9 +23,11 @@ import java.util.List;
 public class Attribute {
 
     private String name;
-    private List<Object> values = new LinkedList<>();
-    private String nameFormat;
     private String friendlyName;
+    private List<Object> values = new LinkedList<>();
+    private AttributeNameFormat nameFormat = AttributeNameFormat.UNSPECIFIED;
+    private boolean required;
+
 
     public String getName() {
         return name;
@@ -51,11 +53,11 @@ public class Attribute {
         return this;
     }
 
-    public String getNameFormat() {
+    public AttributeNameFormat getNameFormat() {
         return nameFormat;
     }
 
-    public Attribute setNameFormat(String nameFormat) {
+    public Attribute setNameFormat(AttributeNameFormat nameFormat) {
         this.nameFormat = nameFormat;
         return this;
     }
@@ -66,6 +68,15 @@ public class Attribute {
 
     public Attribute setFriendlyName(String friendlyName) {
         this.friendlyName = friendlyName;
+        return this;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public Attribute setRequired(boolean required) {
+        this.required = required;
         return this;
     }
 }

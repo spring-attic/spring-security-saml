@@ -15,12 +15,12 @@
 
 package org.springframework.security.saml2.authentication;
 
-import org.springframework.security.saml2.metadata.NameID;
+import org.springframework.security.saml2.metadata.NameId;
 
 public class NameIdPrincipal extends SubjectPrincipal<NameIdPrincipal> {
     private String nameQualifier;
     private String spNameQualifier;
-    private NameID format;
+    private NameId format;
 
     private String spProvidedId;
 
@@ -42,11 +42,11 @@ public class NameIdPrincipal extends SubjectPrincipal<NameIdPrincipal> {
         return _this();
     }
 
-    public NameID getFormat() {
+    public NameId getFormat() {
         return format;
     }
 
-    public NameIdPrincipal setFormat(NameID format) {
+    public NameIdPrincipal setFormat(NameId format) {
         this.format = format;
         return _this();
     }

@@ -98,12 +98,17 @@ public enum AuthenticationContextClassReference {
         this.urn = urn;
     }
 
-    public AuthenticationContextClassReference fromString(String ctxRef) {
+    public static AuthenticationContextClassReference fromUrn(String ctxRef) {
         for (AuthenticationContextClassReference ref : values()) {
             if (ref.urn.equals(ctxRef)) {
                 return ref;
             }
         }
         return UNSPECIFIED;
+    }
+
+    @Override
+    public String toString() {
+        return urn;
     }
 }

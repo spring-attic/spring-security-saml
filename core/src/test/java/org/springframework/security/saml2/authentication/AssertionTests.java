@@ -39,14 +39,19 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.saml2.attribute.AttributeNameFormat.BASIC;
+import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.PASSWORD;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT;
 import static org.springframework.security.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
+import static org.springframework.security.saml2.authentication.StatusCode.SUCCESS;
 import static org.springframework.security.saml2.authentication.SubjectConfirmationMethod.BEARER;
 import static org.springframework.security.saml2.init.Defaults.assertion;
 import static org.springframework.security.saml2.init.Defaults.authenticationRequest;
+import static org.springframework.security.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml2.util.XmlTestUtil.fromZuluTime;
@@ -55,6 +60,97 @@ import static org.springframework.security.saml2.util.XmlTestUtil.toZuluTime;
 
 public class AssertionTests extends MetadataBase {
 
+
+    @Test
+    public void read_external() throws Exception {
+        Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null);
+        assertNotNull(response);
+        assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
+        assertThat(response.getDestination(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
+        assertThat(response.getInResponseTo(), equalTo("a77141543-a0b4-4720-9e64-b08814d2af86"));
+        assertThat(response.getIssueInstant(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+        assertThat(response.getIssuer().getValue(), equalTo("https://idp.saml.spring.io"));
+
+        Status status = response.getStatus();
+        assertNotNull(status);
+        assertThat(status.getCode(), equalTo(SUCCESS));
+        assertThat(status.getMessage(), equalTo("Authentication Successful"));
+        //assertThat(status.getDetail(), equalTo("Authentication of spring@idp.saml.spring.io was successful"));
+
+        assertNotNull(response.getAssertions());
+        assertThat(response.getAssertions().size(), equalTo(1));
+        Assertion assertion = response.getAssertions().get(0);
+        assertNotNull(assertion);
+        assertThat(assertion.getId(), equalTo("0d295a03-2f6f-4c6f-8ca2-6b456219ccd0"));
+        assertThat(assertion.getVersion(), equalTo("2.0"));
+        assertThat(assertion.getIssueInstant(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+
+        Subject subject = assertion.getSubject();
+        assertNotNull(subject);
+        assertNotNull(subject.getPrincipal());
+        assertThat(subject.getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
+        NameIdPrincipal principal = (NameIdPrincipal)subject.getPrincipal();
+        assertThat(principal.getValue(), equalTo("spring@idp.saml.spring.io"));
+        assertThat(principal.getFormat(), equalTo(EMAIL));
+
+        assertNotNull(assertion.getSubject().getConfirmations());
+        assertThat(assertion.getSubject().getConfirmations().size(), equalTo(1));
+        SubjectConfirmation confirmation = subject.getConfirmations().get(0);
+        assertNotNull(confirmation);
+        assertThat(confirmation.getMethod(), equalTo(BEARER));
+
+        SubjectConfirmationData data = confirmation.getConfirmationData();
+        assertNotNull(data);
+        assertThat(data.getInResponseTo(), equalTo("77141543-a0b4-4720-9e64-b08814d2af86"));
+        assertThat(data.getRecipient(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
+        assertThat(data.getNotOnOrAfter(),equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
+        assertThat(data.getNotBefore(),equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+
+        Conditions conditions = assertion.getConditions();
+        assertNotNull(conditions);
+        assertThat(conditions.getNotOnOrAfter(),equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
+        assertThat(conditions.getNotBefore(),equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+        List<AssertionCondition> criteria = conditions.getCriteria();
+        assertNotNull(criteria);
+        assertThat(criteria.size(), equalTo(1));
+        assertNotNull(criteria.get(0));
+        assertThat(criteria.get(0).getClass(), equalTo(AudienceRestriction.class));
+        AudienceRestriction aud = (AudienceRestriction) criteria.get(0);
+        assertNotNull(aud);
+        assertThat(aud.getAudiences(), containsInAnyOrder("https://sp.saml.spring.io/"));
+
+        List<AuthenticationStatement> statements = assertion.getAuthenticationStatements();
+        assertNotNull(statements);
+        assertThat(statements.size(), equalTo(1));
+        assertNotNull(statements.get(0).getAuthenticationContext());
+        assertThat(statements.get(0).getAuthenticationContext().getClassReference(), equalTo(PASSWORD));
+
+        List<Attribute> attributes = assertion.getAttributes();
+        assertNotNull(attributes);
+        assertThat(attributes.size(), equalTo(3));
+
+        Attribute a = attributes.get(0);
+        assertNotNull(a);
+        assertThat(a.getName(), equalTo("uuid"));
+        assertThat(a.getFriendlyName(), equalTo("Unique User ID"));
+        assertThat(a.getNameFormat(), equalTo(BASIC));
+        assertThat(a.getValues(), containsInAnyOrder("602cfe85-3ed1-4cea-be7d-55c36e642d83"));
+
+        a = attributes.get(1);
+        assertNotNull(a);
+        assertThat(a.getName(), equalTo("mail"));
+        assertThat(a.getFriendlyName(), equalTo("Email Address"));
+        assertThat(a.getNameFormat(), equalTo(BASIC));
+        assertThat(a.getValues(), containsInAnyOrder("spring@idp.saml.spring.io"));
+
+        a = attributes.get(2);
+        assertNotNull(a);
+        assertThat(a.getName(), equalTo("groups"));
+        assertThat(a.getFriendlyName(), nullValue());
+        assertThat(a.getNameFormat(), equalTo(BASIC));
+        assertThat(a.getValues(), containsInAnyOrder("developers","administrators","users"));
+
+    }
 
     @Test
     public void create_with_request() throws Exception {
@@ -124,7 +220,7 @@ public class AssertionTests extends MetadataBase {
         String username = "test@test.com";
 
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        principal.setFormat(NameId.EMAIL);
+        principal.setFormat(EMAIL);
         principal.setValue(username);
 
         assertion.getAuthenticationStatements().get(0).setAuthenticationContext(
@@ -172,7 +268,7 @@ public class AssertionTests extends MetadataBase {
         assertNodeCount(xml, "//saml:Subject", 1);
         assertNodeCount(xml, "//saml:Subject/saml:NameID", 1);
         nodes = getNodes(xml, "//saml:Subject/saml:NameID");
-        assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.EMAIL.toString()));
+        assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(EMAIL.toString()));
         assertNodeAttribute(nodes.iterator().next(), "SPNameQualifier", equalTo(principal.getSpNameQualifier()));
         assertThat(nodes.iterator().next().getTextContent(), equalTo(assertion.getSubject().getPrincipal().getValue()));
 
@@ -232,7 +328,7 @@ public class AssertionTests extends MetadataBase {
     @Test
     public void read_xml() throws Exception {
         byte[] data = getAssertionBytes();
-        Assertion assertion = (Assertion) config.resolve(data, asList(identityProviderMetadata.getSigningKey()));
+        Assertion assertion = (Assertion) config.resolve(data, asList(idpSigning));
 
         assertNotNull(assertion);
         assertThat(assertion.getId(), equalTo("1aa4400b-d6f1-41d1-a80a-2331816b7876"));
@@ -246,7 +342,7 @@ public class AssertionTests extends MetadataBase {
         assertNotNull(assertion.getSubject().getPrincipal());
         assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        assertThat(principal.getFormat(), equalTo(NameId.EMAIL));
+        assertThat(principal.getFormat(), equalTo(EMAIL));
         assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
         assertThat(principal.getValue(), equalTo("test@test.com"));
 

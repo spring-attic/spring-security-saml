@@ -146,6 +146,9 @@ import org.springframework.security.saml2.authentication.Issuer;
 import org.springframework.security.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml2.authentication.OneTimeUse;
 import org.springframework.security.saml2.authentication.RequestedAuthenticationContext;
+import org.springframework.security.saml2.authentication.Response;
+import org.springframework.security.saml2.authentication.Status;
+import org.springframework.security.saml2.authentication.StatusCode;
 import org.springframework.security.saml2.authentication.Subject;
 import org.springframework.security.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml2.authentication.SubjectConfirmationData;
@@ -967,7 +970,36 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
             return resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed);
         }
+        if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
+            return resolveResponse((org.opensaml.saml.saml2.core.Response)parsed);
+        }
         throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
+    }
+
+    protected Response resolveResponse(org.opensaml.saml.saml2.core.Response parsed) {
+        Response result = new Response()
+            .setConsent(parsed.getConsent())
+            .setDestination(parsed.getDestination())
+            .setId(parsed.getID())
+            .setInResponseTo(parsed.getInResponseTo())
+            .setIssueInstant(parsed.getIssueInstant())
+            .setIssuer(getIssuer(parsed.getIssuer()))
+            .setVersion(parsed.getVersion().toString())
+            .setStatus(getStatus(parsed.getStatus()))
+            .setAssertions(
+                parsed.getAssertions().stream().map(a -> resolveAssertion(a)).collect(Collectors.toList())
+            );
+
+        return result;
+
+    }
+
+    protected Status getStatus(org.opensaml.saml.saml2.core.Status status) {
+        return new Status()
+            .setCode(StatusCode.fromUrn(status.getStatusCode().getValue()))
+            .setMessage(status.getStatusMessage().getMessage());
+
+
     }
 
     protected Assertion resolveAssertion(org.opensaml.saml.saml2.core.Assertion parsed) {
@@ -1063,7 +1095,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     .setAuthenticationContext(
                         authnContext != null ?
                             new AuthenticationContext()
-                                .setClassReference(AuthenticationContextClassReference.valueOf(ref))
+                                .setClassReference(AuthenticationContextClassReference.fromUrn(ref))
                             : null
                     )
             );

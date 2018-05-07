@@ -45,6 +45,8 @@ public class XmlTestUtil {
         nsContext.put("ds", Namespace.NS_SIGNATURE);
         nsContext.put("samlp", Namespace.NS_PROTOCOL);
         nsContext.put("saml", Namespace.NS_ASSERTION);
+        nsContext.put("idpdisc", Namespace.NS_IDP_DISCOVERY);
+        nsContext.put("init", Namespace.NS_REQUEST_INIT);
         engine.setNamespaceContext(nsContext);
     }
 
@@ -75,7 +77,7 @@ public class XmlTestUtil {
 
     }
 
-    public static void assertNodeCount(String xml, String xPath, int expected) {
+    public static Iterable<Node> assertNodeCount(String xml, String xPath, int expected) {
         assertThat("XML cannot be null", xml, notNullValue(String.class));
         Iterable<Node> nodes = getNodes(xml, xPath);
         if (nodes == null) {
@@ -87,6 +89,7 @@ public class XmlTestUtil {
             expected,
             count.get()
         );
+        return nodes;
     }
 
     public static Iterable<Node> getNodes(String xml, String xPath) {

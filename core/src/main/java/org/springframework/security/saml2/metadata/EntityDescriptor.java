@@ -44,7 +44,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     private Duration cacheDuration;
     private List<? extends Provider> providers;
     private XMLSignature signature;
-    private List<SimpleKey> keys;
     private SimpleKey signingKey;
     private AlgorithmMethod algorithm;
     private DigestMethod digest;
@@ -116,10 +115,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
         return signature;
     }
 
-    public List<SimpleKey> getKeys() {
-        return keys;
-    }
-
     public SimpleKey getSigningKey() {
         return signingKey;
     }
@@ -155,11 +150,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
 
     public T setSignature(XMLSignature signature) {
         this.signature = signature;
-        return _this();
-    }
-
-    public T setKeys(List<SimpleKey> keys) {
-        this.keys = keys;
         return _this();
     }
 

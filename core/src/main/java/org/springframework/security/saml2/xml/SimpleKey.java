@@ -54,4 +54,9 @@ public class SimpleKey {
     public KeyType getType() {
         return type;
     }
+
+    public SimpleKey clone(String alias, KeyType type) {
+        return new SimpleKey(alias, getPrivateKey(), getCertificate(), getPassphrase(), type);
+    }
+
 }

@@ -16,14 +16,19 @@
 package org.springframework.security.saml2.metadata;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.saml2.attribute.Attribute;
 import org.springframework.security.saml2.attribute.AttributeNameFormat;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.signature.SignatureException;
 import org.springframework.security.saml2.xml.KeyType;
 import org.springframework.security.saml2.xml.SimpleKey;
+import org.w3c.dom.Node;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,6 +52,9 @@ import static org.springframework.security.saml2.metadata.NameId.TRANSIENT;
 import static org.springframework.security.saml2.metadata.NameId.UNSPECIFIED;
 import static org.springframework.security.saml2.metadata.NameId.X509_SUBJECT;
 import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml2.util.X509Utilities.keyCleanup;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 
 public class MetadataTests extends MetadataBase {
 
@@ -72,6 +80,87 @@ public class MetadataTests extends MetadataBase {
         null,
         KeyType.SIGNING
     );
+
+    @Test
+    public void sp_to_xml() throws Exception {
+        ServiceProviderMetadata spm = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null);
+
+        SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
+
+        spm.getServiceProvider().setKeys(Arrays.asList(key));
+        spm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);
+
+        String xml = config.toXml(spm);
+        Iterable<Node> nodes = assertNodeCount(xml, "//md:EntityDescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "entityID", equalTo("https://sp.saml.spring.io/sp"));
+
+        nodes = assertNodeCount(xml, "//md:SPSSODescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "protocolSupportEnumeration", equalTo(NS_PROTOCOL));
+        assertNodeAttribute(nodes.iterator().next(), "AuthnRequestsSigned", equalTo("true"));
+        assertNodeAttribute(nodes.iterator().next(), "WantAssertionsSigned", equalTo("true"));
+        assertNodeAttribute(nodes.iterator().next(), "ID", equalTo("sp.saml.spring.io"));
+
+        assertNodeCount(xml, "//ds:Signature", 1);
+        nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+
+        nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
+
+        assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions", 1);
+        assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions/idpdisc:DiscoveryResponse", 1);
+        assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions/init:RequestInitiator", 1);
+
+        nodes = assertNodeCount(xml, "//md:KeyDescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "use", KeyType.SIGNING.getTypeName());
+
+        nodes = assertNodeCount(xml, "//md:KeyDescriptor/ds:KeyInfo/ds:X509Data/ds:X509Certificate", 1);
+        String textContent = nodes.iterator().next().getTextContent();
+        assertNotNull(textContent);
+        assertThat(keyCleanup(textContent), equalTo(keyCleanup(key.getCertificate())));
+
+        nodes = assertNodeCount(xml, "//md:ArtifactResolutionService", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Binding", equalTo(SOAP.toString()));
+        assertNodeAttribute(nodes.iterator().next(), "index", equalTo("0"));
+        assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(spm.getServiceProvider().getArtifactResolutionService().get(0).getLocation()));
+
+        Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 4).iterator();
+        for (int i=0; i<4; i++) {
+            Node n = nodeIterator.next();
+            assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getLocation()));
+            assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getBinding().toString()));
+        }
+
+        nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 3).iterator();
+        assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.EMAIL.toString()));
+        assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
+        assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.UNSPECIFIED.toString()));
+
+        nodeIterator = assertNodeCount(xml, "//md:AssertionConsumerService", 4).iterator();
+        for (int i=0; i<4; i++) {
+            Node n = nodeIterator.next();
+            assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getLocation()));
+            assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getBinding().toString()));
+            assertNodeAttribute(n, "index", equalTo("" + i));
+            if (i==0) {
+                assertNodeAttribute(n, "isDefault", equalTo("true"));
+            }
+        }
+
+        nodes = assertNodeCount(xml, "//md:AttributeConsumingService", 1);
+        assertNodeAttribute(nodes.iterator().next(), "index", equalTo("0"));
+        assertNodeAttribute(nodes.iterator().next(), "isDefault", equalTo("true"));
+
+        nodeIterator = assertNodeCount(xml, "//md:RequestedAttribute", 2).iterator();
+        for (int i=0; i<2; i++) {
+            Node n = nodeIterator.next();
+            assertNodeAttribute(n, "FriendlyName", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getFriendlyName()));
+            assertNodeAttribute(n, "Name", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getName()));
+            assertNodeAttribute(n, "NameFormat", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getNameFormat().toString()));
+            assertNodeAttribute(n, "isRequired", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).isRequired()+""));
+        }
+
+    }
 
     @Test
     public void xml_to_sp_external() throws IOException {
@@ -250,6 +339,11 @@ public class MetadataTests extends MetadataBase {
     public void sp_invalid_verification_key() {
         assertThrows(SignatureException.class,
                      () -> config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias"))));
+    }
+
+    @Test
+    public void idp_to_xml() {
+        //fail("not implemented");
     }
 
     @Test

@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -84,7 +85,9 @@ import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
+import org.opensaml.saml.ext.idpdisco.impl.DiscoveryResponseBuilder;
 import org.opensaml.saml.ext.saml2mdreqinit.RequestInitiator;
+import org.opensaml.saml.ext.saml2mdreqinit.impl.RequestInitiatorBuilder;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Audience;
@@ -96,6 +99,7 @@ import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Condition;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
@@ -109,6 +113,7 @@ import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleLogoutService;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
+import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
@@ -150,6 +155,7 @@ import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml2.metadata.InvalidMetadataException;
 import org.springframework.security.saml2.metadata.Metadata;
 import org.springframework.security.saml2.metadata.NameId;
 import org.springframework.security.saml2.metadata.Provider;
@@ -171,6 +177,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
+import static org.springframework.security.saml2.Namespace.NS_PROTOCOL;
 import static org.springframework.util.StringUtils.hasText;
 
 public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
@@ -614,8 +621,124 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             return internalToXml((AuthenticationRequest) saml2Object);
         } else if (saml2Object instanceof Assertion) {
             return internalToXml((Assertion) saml2Object);
+        } else if (saml2Object instanceof Metadata) {
+            return internalToXml((Metadata) saml2Object);
         }
         throw new UnsupportedOperationException();
+    }
+
+    protected String internalToXml(Metadata<? extends Metadata> metadata) {
+        EntityDescriptor desc = getEntityDescriptor();
+        desc.setEntityID(metadata.getEntityId());
+        if (hasText(metadata.getId())) {
+            desc.setID(metadata.getId());
+        } else {
+            desc.setID(UUID.randomUUID().toString());
+        }
+        List<RoleDescriptor> descriptors = getRoleDescriptors(metadata);
+        desc.getRoleDescriptors().addAll(descriptors);
+        if (metadata.getSigningKey() != null) {
+            signObject(desc, metadata.getSigningKey(), metadata.getAlgorithm(), metadata.getDigest());
+        }
+        try {
+            return SerializeSupport.nodeToString(
+                getMarshallerFactory().getMarshaller(desc).marshall(desc)
+            );
+        } catch (MarshallingException e) {
+            throw new InvalidMetadataException("Unable to marshall into XML.", e);
+        }
+    }
+
+    protected List<RoleDescriptor> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
+        List<RoleDescriptor> result = new LinkedList<>();
+        for (Object p : metadata.getSsoProviders()) {
+            if (p instanceof ServiceProvider) {
+                ServiceProvider sp = (ServiceProvider)p;
+                SPSSODescriptor descriptor = getSPSSODescriptor();
+                descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
+                descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
+                descriptor.addSupportedProtocol(NS_PROTOCOL);
+                descriptor.setID(ofNullable(sp.getId()).orElse(UUID.randomUUID().toString()));
+                for (NameId id : sp.getNameIds()) {
+                    descriptor.getNameIDFormats().add(getNameIDFormat(id));
+                }
+                for (SimpleKey key : sp.getKeys()) {
+                    descriptor.getKeyDescriptors().add(getKeyDescriptor(key));
+                }
+                for (int i=0; i<sp.getAssertionConsumerService().size(); i++) {
+                    Endpoint ep = sp.getAssertionConsumerService().get(i);
+                    descriptor.getAssertionConsumerServices().add(getAssertionConsumerService(ep, i));
+                }
+                for (int i=0; i<sp.getArtifactResolutionService().size(); i++) {
+                    Endpoint ep = sp.getArtifactResolutionService().get(i);
+                    descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
+                }
+                for (int i=0; i<sp.getSingleLogoutService().size(); i++) {
+                    Endpoint ep = sp.getSingleLogoutService().get(i);
+                    descriptor.getSingleLogoutServices().add(getSingleLogoutService(ep));
+                }
+                descriptor.getAttributeConsumingServices().add(
+                    getAttributeConsumingService(sp.getRequestedAttributes())
+                );
+
+                ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder(Extensions.DEFAULT_ELEMENT_NAME);
+                descriptor.setExtensions(extensionsBuilder.buildObject());
+
+                Endpoint requestInitiation = sp.getRequestInitiation();
+                if (requestInitiation != null) {
+                    RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder(RequestInitiator.DEFAULT_ELEMENT_NAME);
+                    RequestInitiator init = builder.buildObject();
+                    init.setBinding(requestInitiation.getBinding().toString());
+                    init.setLocation(requestInitiation.getLocation());
+                    init.setResponseLocation(requestInitiation.getResponseLocation());
+                    descriptor.getExtensions().getUnknownXMLObjects().add(init);
+                }
+                Endpoint discovery = sp.getDiscovery();
+                if (discovery != null) {
+                    DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+                    DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+                    response.setBinding(discovery.getBinding().toString());
+                    response.setLocation(discovery.getLocation());
+                    response.setResponseLocation(discovery.getResponseLocation());
+                    response.setIsDefault(discovery.isDefault());
+                    response.setIndex(discovery.getIndex());
+                    descriptor.getExtensions().getUnknownXMLObjects().add(response);
+                }
+                result.add(descriptor);
+            } else if (p instanceof IdentityProvider) {
+
+            }
+        }
+
+        return result;
+    }
+
+    protected AttributeConsumingService getAttributeConsumingService(List<Attribute> attributes) {
+
+        AttributeConsumingService service = buildSAMLObject(AttributeConsumingService.class);
+        service.setIsDefault(true);
+        service.setIndex(0);
+        List<RequestedAttribute> attrs = new LinkedList<>();
+        for (Attribute a : attributes) {
+            RequestedAttribute ra = buildSAMLObject(RequestedAttribute.class);
+            ra.setIsRequired(a.isRequired());
+            ra.setFriendlyName(a.getFriendlyName());
+            ra.setName(a.getName());
+            ra.setNameFormat(a.getNameFormat().toString());
+            attrs.add(ra);
+        }
+        service.getRequestAttributes().addAll(attrs);
+        return service;
+    }
+
+    protected ArtifactResolutionService getArtifactResolutionService(Endpoint ep, int i) {
+        ArtifactResolutionService service = buildSAMLObject(ArtifactResolutionService.class);
+        service.setLocation(ep.getLocation());
+        service.setBinding(ep.getBinding().toString());
+        service.setIndex(i);
+        service.setIsDefault(ep.isDefault());
+        service.setResponseLocation(ep.getResponseLocation());
+        return service;
     }
 
     protected String internalToXml(Assertion request) {

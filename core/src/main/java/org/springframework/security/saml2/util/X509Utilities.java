@@ -53,13 +53,19 @@ public class X509Utilities {
     }
 
     public static byte[] getDER(String pem) {
-        String data = pem
+        String data = keyCleanup(pem);
+
+        return DatatypeConverter.parseBase64Binary(data);
+    }
+
+    public static String keyCleanup(String pem) {
+        return pem
             .replace(BEGIN_CERT, "")
             .replace(END_CERT, "")
             .replace(BEGIN_KEY, "")
-            .replace(END_KEY, "");
-
-        return DatatypeConverter.parseBase64Binary(data);
+            .replace(END_KEY, "")
+            .replace("\n", "")
+            .trim();
     }
 
     public static X509Certificate getCertificate(byte[] der) throws CertificateException {
@@ -67,7 +73,8 @@ public class X509Utilities {
         return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(der));
     }
 
-    public static RSAPrivateKey getPrivateKey(byte[] der, String algorithm) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public static RSAPrivateKey getPrivateKey(byte[] der, String algorithm)
+        throws InvalidKeySpecException, NoSuchAlgorithmException {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(der);
         KeyFactory factory = KeyFactory.getInstance(algorithm);
         return (RSAPrivateKey) factory.generatePrivate(spec);
@@ -82,8 +89,8 @@ public class X509Utilities {
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
             KeyPair kp;
             if (obj == null) {
-                throw new IllegalArgumentException("Unable to decode PEM key:"+pem);
-            } else if (obj instanceof PEMEncryptedKeyPair ) {
+                throw new IllegalArgumentException("Unable to decode PEM key:" + pem);
+            } else if (obj instanceof PEMEncryptedKeyPair) {
                 // Encrypted key - we will use provided password
                 PEMEncryptedKeyPair ckp = (PEMEncryptedKeyPair) obj;
                 PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passphrase.toCharArray());

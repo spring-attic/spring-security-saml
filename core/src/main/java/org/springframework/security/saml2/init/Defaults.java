@@ -78,10 +78,10 @@ public class Defaults {
             .setEntityId(baseUrl)
             .setId(UUID.randomUUID().toString())
             .setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
-            .setKeys(keys)
             .setProviders(
                 Arrays.asList(
                     new ServiceProvider()
+                        .setKeys(keys)
                         .setWantAssertionsSigned(true)
                         .setAuthnRequestsSigned(signingKey != null)
                         .setAssertionConsumerService(
@@ -108,7 +108,6 @@ public class Defaults {
             .setEntityId(baseUrl)
             .setId(UUID.randomUUID().toString())
             .setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
-            .setKeys(keys)
             .setProviders(
                 Arrays.asList(
                     new IdentityProvider()

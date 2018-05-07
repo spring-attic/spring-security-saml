@@ -17,6 +17,8 @@ package org.springframework.security.saml2.metadata;
 
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.datatype.Duration;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -27,7 +29,7 @@ import static org.springframework.security.saml2.init.SpringSecuritySaml.millisT
 public class Provider<T extends Provider<T>> {
 
     private XMLSignature signature;
-    private List<SimpleKey> keys;
+    private List<SimpleKey> keys = new LinkedList<>();
     private String id;
     private DateTime validUntil;
     private Duration cacheDuration;
@@ -43,8 +45,15 @@ public class Provider<T extends Provider<T>> {
     }
 
     public List<SimpleKey> getKeys() {
-        return keys;
+        return Collections.unmodifiableList(keys);
     }
+
+    public T setKeys(List<SimpleKey> keys) {
+        this.keys.clear();
+        this.keys.addAll(keys);
+        return _this();
+    }
+
 
 
 
@@ -67,11 +76,6 @@ public class Provider<T extends Provider<T>> {
 
     public T setSignature(XMLSignature signature) {
         this.signature = signature;
-        return (T) this;
-    }
-
-    public T setKeys(List<SimpleKey> keys) {
-        this.keys = keys;
         return (T) this;
     }
 

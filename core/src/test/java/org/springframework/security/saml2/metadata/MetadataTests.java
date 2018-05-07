@@ -51,10 +51,12 @@ import static org.springframework.security.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml2.metadata.NameId.TRANSIENT;
 import static org.springframework.security.saml2.metadata.NameId.UNSPECIFIED;
 import static org.springframework.security.saml2.metadata.NameId.X509_SUBJECT;
+import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml2.util.X509Utilities.keyCleanup;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
+import static org.springframework.security.saml2.util.XmlTestUtil.fromZuluTime;
 
 public class MetadataTests extends MetadataBase {
 
@@ -163,6 +165,69 @@ public class MetadataTests extends MetadataBase {
     }
 
     @Test
+    public void idp_to_xml() throws Exception {
+        IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null);
+
+        SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
+
+        ipm.getIdentityProvider().setKeys(Arrays.asList(key));
+        ipm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);
+
+        String xml = config.toXml(ipm);
+        Iterable<Node> nodes = assertNodeCount(xml, "//md:EntityDescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "entityID", equalTo("https://idp.saml.spring.io"));
+
+        nodes = assertNodeCount(xml, "//md:IDPSSODescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "protocolSupportEnumeration", equalTo(NS_PROTOCOL));
+        assertNodeAttribute(nodes.iterator().next(), "WantAuthnRequestsSigned", equalTo("true"));
+        assertNodeAttribute(nodes.iterator().next(), "ID", equalTo("idp.saml.spring.io"));
+
+        assertNodeCount(xml, "//ds:Signature", 1);
+        nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+
+        nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
+
+        assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions", 1);
+        assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions/idpdisc:DiscoveryResponse", 1);
+        assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions/init:RequestInitiator", 1);
+
+        nodes = assertNodeCount(xml, "//md:KeyDescriptor", 1);
+        assertNodeAttribute(nodes.iterator().next(), "use", KeyType.SIGNING.getTypeName());
+
+        nodes = assertNodeCount(xml, "//md:KeyDescriptor/ds:KeyInfo/ds:X509Data/ds:X509Certificate", 1);
+        String textContent = nodes.iterator().next().getTextContent();
+        assertNotNull(textContent);
+        assertThat(keyCleanup(textContent), equalTo(keyCleanup(key.getCertificate())));
+
+        nodes = assertNodeCount(xml, "//md:ArtifactResolutionService", 1);
+        assertNodeAttribute(nodes.iterator().next(), "Binding", equalTo(SOAP.toString()));
+        assertNodeAttribute(nodes.iterator().next(), "index", equalTo("0"));
+        assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(ipm.getIdentityProvider().getArtifactResolutionService().get(0).getLocation()));
+
+        Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 2).iterator();
+        for (int i=0; i<2; i++) {
+            Node n = nodeIterator.next();
+            assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getLocation()));
+            assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getBinding().toString()));
+        }
+
+        nodeIterator = assertNodeCount(xml, "//md:SingleSignOnService", 3).iterator();
+        for (int i=0; i<3; i++) {
+            Node n = nodeIterator.next();
+            assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getLocation()));
+            assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getBinding().toString()));
+        }
+
+        nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 2).iterator();
+        assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.TRANSIENT.toString()));
+        assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
+
+
+    }
+
+    @Test
     public void xml_to_sp_external() throws IOException {
         ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo));
         assertNotNull(sp);
@@ -237,6 +302,17 @@ public class MetadataTests extends MetadataBase {
         assertTrue(provider.isWantAssertionsSigned());
         assertTrue(provider.isAuthnRequestsSigned());
         assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
+        assertThat(provider.getId(), equalTo("sp.saml.spring.io"));
+        //OpenSAML 3 doesn't parse cacheDuration attribute
+        //        Duration cacheDuration = provider.getCacheDuration();
+//        assertNotNull(cacheDuration);
+//        assertThat(cacheDuration.getYears(), equalTo(2));
+//        assertThat(cacheDuration.getMonths(), equalTo(6));
+//        assertThat(cacheDuration.getDays(), equalTo(5));
+//        assertThat(cacheDuration.getHours(), equalTo(12));
+//        assertThat(cacheDuration.getMinutes(), equalTo(35));
+//        assertThat(cacheDuration.getSeconds(), equalTo(30));
+        assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
 
         Endpoint requestInitiation = provider.getRequestInitiation();
         assertNotNull(requestInitiation);
@@ -342,8 +418,73 @@ public class MetadataTests extends MetadataBase {
     }
 
     @Test
-    public void idp_to_xml() {
-        //fail("not implemented");
+    public void xml_to_idp_complete() throws Exception {
+        IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null);
+        assertNotNull(idp);
+        assertThat(idp.getEntityId(), equalTo("https://idp.saml.spring.io"));
+        assertThat(idp.getEntityAlias(), equalTo(idp.getEntityId()));
+        assertNotNull(idp.getProviders());
+        assertThat(idp.getProviders().size(), equalTo(1));
+
+        IdentityProvider provider = idp.getIdentityProvider();
+        assertNotNull(provider);
+        assertTrue(provider.getWantAuthnRequestsSigned());
+        assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
+        assertThat(provider.getId(), equalTo("idp.saml.spring.io"));
+//        Duration cacheDuration = provider.getCacheDuration();
+//        assertNotNull(cacheDuration);
+//        assertThat(cacheDuration.getYears(), equalTo(2));
+//        assertThat(cacheDuration.getMonths(), equalTo(6));
+//        assertThat(cacheDuration.getDays(), equalTo(5));
+//        assertThat(cacheDuration.getHours(), equalTo(12));
+//        assertThat(cacheDuration.getMinutes(), equalTo(35));
+//        assertThat(cacheDuration.getSeconds(), equalTo(30));
+        assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
+
+        Endpoint requestInitiation = provider.getRequestInitiation();
+        assertNotNull(requestInitiation);
+        assertThat(requestInitiation.isDefault(), equalTo(false));
+        assertThat(requestInitiation.getBinding(), equalTo(Binding.REQUEST_INITIATOR));
+        assertThat(requestInitiation.getIndex(), equalTo(0));
+        assertThat(requestInitiation.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/init"));
+
+        Endpoint discovery = provider.getDiscovery();
+        assertNotNull(discovery);
+        assertThat(discovery.isDefault(), equalTo(true));
+        assertThat(discovery.getBinding(), equalTo(Binding.DISCOVERY));
+        assertThat(discovery.getIndex(), equalTo(0));
+        assertThat(discovery.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/discovery"));
+
+        assertNotNull(provider.getKeys());
+        assertThat(provider.getKeys().size(), equalTo(2));
+        SimpleKey spSigning = provider.getKeys().get(0);
+        SimpleKey spEncryption = provider.getKeys().get(1);
+        assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
+        assertThat(spSigning.getCertificate(), equalTo(IDP_RSA_KEY.getSimpleKey("alias").getCertificate()));
+        assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
+        assertThat(spEncryption.getCertificate(), equalTo(IDP_RSA_KEY.getSimpleKey("alias").getCertificate()));
+
+        List<NameId> nameIds = provider.getNameIds();
+        assertNotNull(nameIds);
+        assertThat(nameIds, containsInAnyOrder(TRANSIENT, PERSISTENT));
+
+        List<Endpoint> singleSignOnServices = provider.getSingleSignOnService();
+        assertNotNull(singleSignOnServices);
+        assertThat(singleSignOnServices.size(), equalTo(3));
+        Endpoint sso0 = singleSignOnServices.get(0);
+        assertNotNull(sso0);
+        assertThat(sso0.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
+        assertThat(sso0.getBinding(), equalTo(POST));
+
+        Endpoint sso1 = singleSignOnServices.get(1);
+        assertNotNull(sso1);
+        assertThat(sso1.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
+        assertThat(sso1.getBinding(), equalTo(POST_SIMPLE_SIGN));
+
+        Endpoint sso2 = singleSignOnServices.get(2);
+        assertNotNull(sso2);
+        assertThat(sso2.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
+        assertThat(sso2.getBinding(), equalTo(REDIRECT));
     }
 
     @Test

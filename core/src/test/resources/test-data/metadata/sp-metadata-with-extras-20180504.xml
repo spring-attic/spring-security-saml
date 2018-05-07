@@ -22,6 +22,8 @@
     AuthnRequestsSigned="true"
     WantAssertionsSigned="true"
     ID="sp.saml.spring.io"
+    cacheDuration="P2Y6M5DT12H35M30S"
+    validUntil="2028-05-02T20:07:06.785Z"
   >
     <md:Extensions>
 

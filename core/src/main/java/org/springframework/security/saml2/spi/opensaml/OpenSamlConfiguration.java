@@ -38,6 +38,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -651,20 +652,19 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     protected List<RoleDescriptor> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
         List<RoleDescriptor> result = new LinkedList<>();
-        for (Object p : metadata.getSsoProviders()) {
+        for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
+            RoleDescriptor roleDescriptor = null;
             if (p instanceof ServiceProvider) {
                 ServiceProvider sp = (ServiceProvider)p;
                 SPSSODescriptor descriptor = getSPSSODescriptor();
+                roleDescriptor = descriptor;
                 descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
                 descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
-                descriptor.addSupportedProtocol(NS_PROTOCOL);
-                descriptor.setID(ofNullable(sp.getId()).orElse(UUID.randomUUID().toString()));
-                for (NameId id : sp.getNameIds()) {
+
+                for (NameId id : p.getNameIds()) {
                     descriptor.getNameIDFormats().add(getNameIDFormat(id));
                 }
-                for (SimpleKey key : sp.getKeys()) {
-                    descriptor.getKeyDescriptors().add(getKeyDescriptor(key));
-                }
+
                 for (int i=0; i<sp.getAssertionConsumerService().size(); i++) {
                     Endpoint ep = sp.getAssertionConsumerService().get(i);
                     descriptor.getAssertionConsumerServices().add(getAssertionConsumerService(ep, i));
@@ -681,35 +681,64 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     getAttributeConsumingService(sp.getRequestedAttributes())
                 );
 
-                ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder(Extensions.DEFAULT_ELEMENT_NAME);
-                descriptor.setExtensions(extensionsBuilder.buildObject());
-
-                Endpoint requestInitiation = sp.getRequestInitiation();
-                if (requestInitiation != null) {
-                    RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder(RequestInitiator.DEFAULT_ELEMENT_NAME);
-                    RequestInitiator init = builder.buildObject();
-                    init.setBinding(requestInitiation.getBinding().toString());
-                    init.setLocation(requestInitiation.getLocation());
-                    init.setResponseLocation(requestInitiation.getResponseLocation());
-                    descriptor.getExtensions().getUnknownXMLObjects().add(init);
-                }
-                Endpoint discovery = sp.getDiscovery();
-                if (discovery != null) {
-                    DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-                    DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-                    response.setBinding(discovery.getBinding().toString());
-                    response.setLocation(discovery.getLocation());
-                    response.setResponseLocation(discovery.getResponseLocation());
-                    response.setIsDefault(discovery.isDefault());
-                    response.setIndex(discovery.getIndex());
-                    descriptor.getExtensions().getUnknownXMLObjects().add(response);
-                }
-                result.add(descriptor);
             } else if (p instanceof IdentityProvider) {
-
+                IdentityProvider idp = (IdentityProvider)p;
+                IDPSSODescriptor descriptor = getIDPSSODescriptor();
+                roleDescriptor = descriptor;
+                descriptor.setWantAuthnRequestsSigned(idp.getWantAuthnRequestsSigned());
+                for (NameId id : p.getNameIds()) {
+                    descriptor.getNameIDFormats().add(getNameIDFormat(id));
+                }
+                for (int i=0; i<idp.getSingleSignOnService().size(); i++) {
+                    Endpoint ep = idp.getSingleSignOnService().get(i);
+                    descriptor.getSingleSignOnServices().add(getSingleSignOnService(ep,i));
+                }
+                for (int i=0; i<p.getSingleLogoutService().size(); i++) {
+                    Endpoint ep = p.getSingleLogoutService().get(i);
+                    descriptor.getSingleLogoutServices().add(getSingleLogoutService(ep));
+                }
+                for (int i=0; i<p.getArtifactResolutionService().size(); i++) {
+                    Endpoint ep = p.getArtifactResolutionService().get(i);
+                    descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
+                }
             }
-        }
+            long now = System.currentTimeMillis();
+            if (p.getCacheDuration() != null) {
+                roleDescriptor.setCacheDuration(p.getCacheDuration().getTimeInMillis(new Date(now)));
+            }
+            roleDescriptor.setValidUntil(p.getValidUntil());
+            roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
+            roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
 
+            for (SimpleKey key : p.getKeys()) {
+                roleDescriptor.getKeyDescriptors().add(getKeyDescriptor(key));
+            }
+
+            ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder(Extensions.DEFAULT_ELEMENT_NAME);
+            roleDescriptor.setExtensions(extensionsBuilder.buildObject());
+
+            Endpoint requestInitiation = p.getRequestInitiation();
+            if (requestInitiation != null) {
+                RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder(RequestInitiator.DEFAULT_ELEMENT_NAME);
+                RequestInitiator init = builder.buildObject();
+                init.setBinding(requestInitiation.getBinding().toString());
+                init.setLocation(requestInitiation.getLocation());
+                init.setResponseLocation(requestInitiation.getResponseLocation());
+                roleDescriptor.getExtensions().getUnknownXMLObjects().add(init);
+            }
+            Endpoint discovery = p.getDiscovery();
+            if (discovery != null) {
+                DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+                DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+                response.setBinding(discovery.getBinding().toString());
+                response.setLocation(discovery.getLocation());
+                response.setResponseLocation(discovery.getResponseLocation());
+                response.setIsDefault(discovery.isDefault());
+                response.setIndex(discovery.getIndex());
+                roleDescriptor.getExtensions().getUnknownXMLObjects().add(response);
+            }
+            result.add(roleDescriptor);
+        }
         return result;
     }
 

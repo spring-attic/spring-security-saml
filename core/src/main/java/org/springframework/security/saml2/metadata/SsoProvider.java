@@ -30,14 +30,15 @@
 
 package org.springframework.security.saml2.metadata;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
 
-    private List<Endpoint> artifactResolutionService;
-    private List<Endpoint> singleLogoutService;
-    private List<Endpoint> manageNameIDService;
-    private List<NameId> nameIds;
+    private List<Endpoint> artifactResolutionService = new LinkedList<>();
+    private List<Endpoint> singleLogoutService = new LinkedList<>();
+    private List<Endpoint> manageNameIDService = new LinkedList<>();
+    private List<NameId> nameIds = new LinkedList<>();
     private Endpoint discovery;
     private Endpoint requestInitiation;
 

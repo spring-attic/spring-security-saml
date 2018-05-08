@@ -50,7 +50,9 @@ public class Provider<T extends Provider<T>> {
 
     public T setKeys(List<SimpleKey> keys) {
         this.keys.clear();
-        this.keys.addAll(keys);
+        if (keys != null) {
+            this.keys.addAll(keys);
+        }
         return _this();
     }
 

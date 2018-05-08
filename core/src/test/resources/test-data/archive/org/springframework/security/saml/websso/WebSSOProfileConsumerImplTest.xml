@@ -1,0 +1,111 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <!-- Initialization of OpenSAML library-->
+    <bean class="org.springframework.security.saml.SAMLBootstrap"/>
+
+    <!-- Central storage of cryptographic keys -->
+    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+        <constructor-arg type="java.lang.String" value="nalle123"/>
+        <constructor-arg>
+            <map>
+                <entry key="apollo" value="nalle123"/>
+            </map>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String" value="apollo"/>
+    </bean>
+
+    <!-- Entry point to initialize authentication -->
+    <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
+
+    <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
+    <!-- Do no forget to call iniitalize method on providers -->
+    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager">
+        <constructor-arg index="0">
+            <list>
+                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                    <constructor-arg index="0">
+                        <bean class="org.springframework.core.io.ClassPathResource">
+                            <constructor-arg value="testIDP.xml"/>
+                        </bean>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                    <constructor-arg index="0">
+                        <bean class="org.springframework.core.io.ClassPathResource">
+                            <constructor-arg value="testSP.xml"/>
+                        </bean>
+                    </constructor-arg>
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <property name="hostedSPName" value="http://localhost:8081/spring-security-saml2-webapp"/>
+        <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
+        <property name="defaultIDP" value="http://localhost:8080/opensso"/>
+    </bean>
+
+    <!-- XML parser pool needed for OpenSAML parsing -->
+    <bean id="parserPool" class="org.opensaml.PaosBootstrap" factory-method="createParserPool" scope="singleton"/>
+
+    <!-- Class loading incoming SAML messages from httpRequest stream -->
+    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
+        <constructor-arg ref="bindings"/>
+    </bean>
+
+    <!-- Bindings, encoders and decoders used for creating and parsing messages -->
+    <util:list id="bindings">
+        <bean class="org.springframework.security.saml.processor.HTTPPostBinding">
+            <constructor-arg ref="parserPool"/>
+            <constructor-arg>
+                <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder">
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder">
+                    <property name="velocityEngine" ref="velocityEngine"/>
+                    <property name="velocityTemplateId" value="/templates/saml2-post-binding.vm"/>
+                </bean>
+            </constructor-arg>
+        </bean>
+        <bean class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
+            <constructor-arg>
+                <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder">
+                    <property name="parserPool" ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder"/>
+            </constructor-arg>
+        </bean>
+        <bean class="org.springframework.security.saml.processor.HTTPSOAP11Binding">
+            <constructor-arg>
+                <bean class="org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl">
+                    <constructor-arg ref="parserPool"/>
+                </bean>
+            </constructor-arg>
+            <constructor-arg>
+                <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder"/>
+            </constructor-arg>
+        </bean>
+    </util:list>
+
+    <!-- Provider of default SAML Context -->
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
+
+    <!-- Factory which disables message storage capabilities -->
+    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+
+    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
+          factory-method="getEngine"/>
+
+</beans>

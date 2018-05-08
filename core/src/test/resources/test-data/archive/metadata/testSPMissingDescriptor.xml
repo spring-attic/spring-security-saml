@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://localhost:8082/missingDescriptor">
+</md:EntityDescriptor>

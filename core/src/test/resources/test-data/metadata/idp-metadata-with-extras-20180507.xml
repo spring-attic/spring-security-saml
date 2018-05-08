@@ -1,0 +1,116 @@
+<!--
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<md:EntityDescriptor entityID="https://idp.saml.spring.io"
+                     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+
+  <md:IDPSSODescriptor
+    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
+    WantAuthnRequestsSigned="true"
+    ID="idp.saml.spring.io"
+    cacheDuration="P2Y6M5DT12H35M30S"
+    validUntil="2028-05-02T20:07:06.785Z"
+
+  >
+    <md:Extensions>
+      <init:RequestInitiator
+        xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
+        Binding="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
+        Location="https://idp.saml.spring.io/saml/idp/init"/>
+
+      <idpdisc:DiscoveryResponse
+        xmlns:idpdisc="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+        Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+        Location="https://idp.saml.spring.io/saml/idp/discovery"
+        index="0"
+        isDefault="true"
+      />
+    </md:Extensions>
+
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>-----BEGIN CERTIFICATE-----
+MIIChTCCAe4CCQCgBBgKZvR7JTANBgkqhkiG9w0BAQsFADCBhjELMAkGA1UEBhMC
+VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
+A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxDDAKBgNVBAsMA2lkcDEhMB8GA1UE
+AwwYaWRwLnNwcmluZy5zZWN1cml0eS5zYW1sMB4XDTE4MDQzMDIxMDYyNloXDTI4
+MDQyNzIxMDYyNlowgYYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApXYXNoaW5ndG9u
+MRIwEAYDVQQHDAlWYW5jb3V2ZXIxHTAbBgNVBAoMFFNwcmluZyBTZWN1cml0eSBT
+QU1MMQwwCgYDVQQLDANpZHAxITAfBgNVBAMMGGlkcC5zcHJpbmcuc2VjdXJpdHku
+c2FtbDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAno7/WHeU1HWOz7YVsp9x
+IGRy3Q09YmMGUdkF7z9pI7NGiwqV/Wgt7DAOW8CALtx5uCDJ+PCbZ0h+tRpo+fqS
+5ONC4UpDOf518Dr+Y5hMHN1j5T6lMFAQFfPdTNuGBZ0toA+zHpOZMR1/sLKnfnWk
+LkUOoZkO8MuvfqmthZVftG0CAwEAATANBgkqhkiG9w0BAQsFAAOBgQBwt/VCstC8
+PqbyRjSVQFl+n/NrAZK5m0J/OGraG8qTk+pouHLRMR6Xgov3waEHvaMKRWpSRiNF
+d0jihaQh/QTMZr8jCoKUaoV1XGWIxoKEvB7/xzixs2X2M85Ud790H7PT9GbDqZuS
+Nud1HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==
+-----END CERTIFICATE-----</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>-----BEGIN CERTIFICATE-----
+MIIChTCCAe4CCQCgBBgKZvR7JTANBgkqhkiG9w0BAQsFADCBhjELMAkGA1UEBhMC
+VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
+A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxDDAKBgNVBAsMA2lkcDEhMB8GA1UE
+AwwYaWRwLnNwcmluZy5zZWN1cml0eS5zYW1sMB4XDTE4MDQzMDIxMDYyNloXDTI4
+MDQyNzIxMDYyNlowgYYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApXYXNoaW5ndG9u
+MRIwEAYDVQQHDAlWYW5jb3V2ZXIxHTAbBgNVBAoMFFNwcmluZyBTZWN1cml0eSBT
+QU1MMQwwCgYDVQQLDANpZHAxITAfBgNVBAMMGGlkcC5zcHJpbmcuc2VjdXJpdHku
+c2FtbDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAno7/WHeU1HWOz7YVsp9x
+IGRy3Q09YmMGUdkF7z9pI7NGiwqV/Wgt7DAOW8CALtx5uCDJ+PCbZ0h+tRpo+fqS
+5ONC4UpDOf518Dr+Y5hMHN1j5T6lMFAQFfPdTNuGBZ0toA+zHpOZMR1/sLKnfnWk
+LkUOoZkO8MuvfqmthZVftG0CAwEAATANBgkqhkiG9w0BAQsFAAOBgQBwt/VCstC8
+PqbyRjSVQFl+n/NrAZK5m0J/OGraG8qTk+pouHLRMR6Xgov3waEHvaMKRWpSRiNF
+d0jihaQh/QTMZr8jCoKUaoV1XGWIxoKEvB7/xzixs2X2M85Ud790H7PT9GbDqZuS
+Nud1HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==
+-----END CERTIFICATE-----</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+
+    <md:ArtifactResolutionService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+      Location="https://idp.saml.spring.io/saml/idp/artifact"
+      index="0" />
+
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+
+    <md:SingleSignOnService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="https://idp.saml.spring.io/saml/idp/sso"/>
+    <md:SingleSignOnService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"
+      Location="https://idp.saml.spring.io/saml/idp/sso" />
+    <md:SingleSignOnService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+      Location="https://idp.saml.spring.io/saml/idp/sso" />
+
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+      Location="https://idp.saml.spring.io/saml/idp/sso/logout"/>
+
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="https://idp.saml.spring.io/saml/idp/sso/logout"/>
+
+  </md:IDPSSODescriptor>
+
+</md:EntityDescriptor>

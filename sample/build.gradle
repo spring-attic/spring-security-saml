@@ -15,7 +15,7 @@ description = "Spring Security SAML v2 sample webapp"
 
 dependencies {
 
-	compile project(":spring-security-saml2-core"),
+	compile project(":spring-security-saml-core"),
 		"org.springframework:spring-core:$springVersion",
 		"org.springframework:spring-beans:$springVersion",
 		"org.springframework:spring-context:$springVersion",

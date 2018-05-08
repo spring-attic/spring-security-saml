@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2:Assertion ID="1aa4400b-d6f1-41d1-a80a-2331816b7876" IssueInstant="2018-05-02T20:07:06.785Z" Version="2.0" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><saml2:Issuer>http://idp.localhost:8080/uaa</saml2:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<ds:Reference URI="#1aa4400b-d6f1-41d1-a80a-2331816b7876">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces PrefixList="xsd" xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transform>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<ds:DigestValue>VdIKWrrGoyt7mattk0XPSDqJrkE=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+jbjkki2HtzZAUOt+GaA0YT7r8XjR5CUrigJ+nhXC2jBFW/WN7pxivrFqaBIT+1+JsWg4rfDhhRtu
+ot/e3KWLgS1r6bivdtkg8b31HcgmzDd2FAmq5gCF8UqvKxVqByA9TCp7nPQIh5YO6jzM15mD3qi6
+a0dmw8l2nzjNtoryDnY=
+</ds:SignatureValue>
+<ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIChTCCAe4CCQCgBBgKZvR7JTANBgkqhkiG9w0BAQsFADCBhjELMAkGA1UEBhMCVVMxEzARBgNV
+BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy
+aXR5IFNBTUwxDDAKBgNVBAsMA2lkcDEhMB8GA1UEAwwYaWRwLnNwcmluZy5zZWN1cml0eS5zYW1s
+MB4XDTE4MDQzMDIxMDYyNloXDTI4MDQyNzIxMDYyNlowgYYxCzAJBgNVBAYTAlVTMRMwEQYDVQQI
+DApXYXNoaW5ndG9uMRIwEAYDVQQHDAlWYW5jb3V2ZXIxHTAbBgNVBAoMFFNwcmluZyBTZWN1cml0
+eSBTQU1MMQwwCgYDVQQLDANpZHAxITAfBgNVBAMMGGlkcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDCB
+nzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAno7/WHeU1HWOz7YVsp9xIGRy3Q09YmMGUdkF7z9p
+I7NGiwqV/Wgt7DAOW8CALtx5uCDJ+PCbZ0h+tRpo+fqS5ONC4UpDOf518Dr+Y5hMHN1j5T6lMFAQ
+FfPdTNuGBZ0toA+zHpOZMR1/sLKnfnWkLkUOoZkO8MuvfqmthZVftG0CAwEAATANBgkqhkiG9w0B
+AQsFAAOBgQBwt/VCstC8PqbyRjSVQFl+n/NrAZK5m0J/OGraG8qTk+pouHLRMR6Xgov3waEHvaMK
+RWpSRiNFd0jihaQh/QTMZr8jCoKUaoV1XGWIxoKEvB7/xzixs2X2M85Ud790H7PT9GbDqZuSNud1
+HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><saml2:Subject><saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" SPNameQualifier="http://sp.localhost:8080/uaa">test@test.com</saml2:NameID><saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml2:SubjectConfirmationData InResponseTo="0ab65bc9-6ffc-4fce-a186-108ad42db073" NotBefore="2018-05-02T20:06:06.785Z" NotOnOrAfter="2018-05-02T20:09:06.785Z"/></saml2:SubjectConfirmation></saml2:Subject><saml2:Conditions NotBefore="2018-05-02T20:06:06.785Z" NotOnOrAfter="2018-05-02T20:05:06.785Z"><saml2:AudienceRestriction><saml2:Audience>http://sp.localhost:8080/uaa</saml2:Audience></saml2:AudienceRestriction><saml2:OneTimeUse/></saml2:Conditions><saml2:AuthnStatement AuthnInstant="2018-05-02T20:07:06.785Z" SessionIndex="aeb9e771-c5dd-4b9d-a5bc-71e9e0e195a9" SessionNotOnOrAfter="2018-05-02T20:37:06.785Z"><saml2:AuthnContext><saml2:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml2:AuthnContextClassRef></saml2:AuthnContext></saml2:AuthnStatement><saml2:AttributeStatement><saml2:Attribute FriendlyName="Random Attributes" Name="rattr" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified"><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Filip</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:boolean">true</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:dateTime">2018-05-02T20:07:06.785Z</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:integer">54</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">33.3</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:anyURI">http://test.uri.com</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:anyURI">http://test.url.com</saml2:AttributeValue><saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">urn:oasis:names:tc:SAML:2.0:nameid-format:entity</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion>

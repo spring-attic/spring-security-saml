@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://localhost:8081/spring-security-saml2-webapp">
+   <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:KeyDescriptor use="signing">
+         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+               <ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
+LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
+FTATBgNVBAoTDFJNNSBTb2Z0d2FyZTEMMAoGA1UECxMDUiZEMQ8wDQYDVQQDEwZhcG9sbG8wHhcN
+MDgxMTI5MjIxNjA0WhcNMDkxMjI4MjIwMDAwWjCBhzEvMC0GCSqGSIb3DQEJARYgdmxhZGltaXIu
+c2NoYWZlckBybTVzb2Z0d2FyZS5jb20xCzAJBgNVBAYTAkZJMREwDwYDVQQHEwhIZWxzaW5raTEV
+MBMGA1UEChMMUk01IFNvZnR3YXJlMQwwCgYDVQQLEwNSJkQxDzANBgNVBAMTBmFwb2xsbzCBnzAN
+BgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArsoEvHts4n4EwloxJNueekYYF8xjoV1AtXHAAW0c+Qtb
+uEXR8wG1QzSlcasTua+iGsC+wK4T8l0IH9Y3+oVaDVbpzrWr2li9zhJB+htJYZ0t7m+3GEIeNlr1
+qkUum/uNxUthklrhg2zCVW0b4NFDP/jI4rARsAkGXa7z/AgonrUCAwEAATANBgkqhkiG9w0BAQUF
+AAOBgQArpq022JktjH3EHw0b4+CFrPzAXFuSd8WXWzoT6YZTgbcLR9K38383mMXoBjHdX3SYr0uF
+njEwP6gqo8KyzXxsqlvTkUSkGAAzxLuQ4rwnandQMr8H0Wq7x5Cwa7Z3NDT/Q4EE3xRJOpoRgjyH
+STdzW1akQ9dX2Et/8TiJe6SHuQ==</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:KeyDescriptor use="encryption">
+         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+               <ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
+LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
+FTATBgNVBAoTDFJNNSBTb2Z0d2FyZTEMMAoGA1UECxMDUiZEMQ8wDQYDVQQDEwZhcG9sbG8wHhcN
+MDgxMTI5MjIxNjA0WhcNMDkxMjI4MjIwMDAwWjCBhzEvMC0GCSqGSIb3DQEJARYgdmxhZGltaXIu
+c2NoYWZlckBybTVzb2Z0d2FyZS5jb20xCzAJBgNVBAYTAkZJMREwDwYDVQQHEwhIZWxzaW5raTEV
+MBMGA1UEChMMUk01IFNvZnR3YXJlMQwwCgYDVQQLEwNSJkQxDzANBgNVBAMTBmFwb2xsbzCBnzAN
+BgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArsoEvHts4n4EwloxJNueekYYF8xjoV1AtXHAAW0c+Qtb
+uEXR8wG1QzSlcasTua+iGsC+wK4T8l0IH9Y3+oVaDVbpzrWr2li9zhJB+htJYZ0t7m+3GEIeNlr1
+qkUum/uNxUthklrhg2zCVW0b4NFDP/jI4rARsAkGXa7z/AgonrUCAwEAATANBgkqhkiG9w0BAQUF
+AAOBgQArpq022JktjH3EHw0b4+CFrPzAXFuSd8WXWzoT6YZTgbcLR9K38383mMXoBjHdX3SYr0uF
+njEwP6gqo8KyzXxsqlvTkUSkGAAzxLuQ4rwnandQMr8H0Wq7x5Cwa7Z3NDT/Q4EE3xRJOpoRgjyH
+STdzW1akQ9dX2Et/8TiJe6SHuQ==</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:x509SubjectName</md:NameIDFormat>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8081/alternativeEndpoint/saml/SSO" index="0"/>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8081/spring-security-saml2-webapp/saml/SSO" index="1" isDefault="true"/>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser"
+                                   xmlns:hoksso="urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser"
+                                   hoksso:ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                   Location="http://localhost:8081/spring-security-saml2-webapp/saml/HoKSSO" index="2"/>
+   </md:SPSSODescriptor>
+</md:EntityDescriptor>

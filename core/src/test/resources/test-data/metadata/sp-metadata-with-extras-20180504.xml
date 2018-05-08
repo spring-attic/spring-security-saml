@@ -1,0 +1,130 @@
+<!--
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<md:EntityDescriptor entityID="https://sp.saml.spring.io/sp"
+                     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+
+  <md:SPSSODescriptor
+    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
+    AuthnRequestsSigned="true"
+    WantAssertionsSigned="true"
+    ID="sp.saml.spring.io"
+    cacheDuration="P2Y6M5DT12H35M30S"
+    validUntil="2028-05-02T20:07:06.785Z"
+  >
+    <md:Extensions>
+
+      <idpdisc:DiscoveryResponse
+        xmlns:idpdisc="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+        Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+        Location="https://sp.saml.spring.io/saml/sp/discovery"
+        index="0"
+        isDefault="true"
+      />
+      <init:RequestInitiator
+        xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
+        Binding="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
+        Location="https://sp.saml.spring.io/saml/sp/init"/>
+    </md:Extensions>
+
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>
+-----BEGIN CERTIFICATE-----
+MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEO
+MAwGA1UECBMFYXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEO
+MAwGA1UECxMFYXJ1YmExDjAMBgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5h
+cnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2MjdaFw0xNjExMTkyMjI2MjdaMHwx
+CzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAM
+BgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAb
+BgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GN
+ADCBiQKBgQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39W
+qS9u0hnA+O7MCA/KlrAR4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOw
+znoD66DDCnQVpbCjtDYWX+x6imxn8HCYxhMol6ZnTbSsFW6VZjFMjQIDAQABo4Ha
+MIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1syGDCBpwYDVR0jBIGfMIGc
+gBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3MQ4wDAYD
+VQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYD
+VQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJh
+QGFydWJhLmFyggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ
+0HOZbbHClXmGUjGs+GS+xC1FO/am2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxC
+KdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3oePe84k8jm3A7EvH5wi5hvCkK
+RpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=
+-----END CERTIFICATE-----
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+
+    <md:ArtifactResolutionService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+      Location="https://sp.saml.spring.io/saml/sp/artifact/soap"
+      index="1"/>
+
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+      Location="https://sp.saml.spring.io/saml/sp/logout"/>
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+      Location="https://sp.saml.spring.io/saml/sp/logout"/>
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="https://sp.saml.spring.io/saml/sp/logout"/>
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+      Location="https://sp.saml.spring.io/saml/sp/logout"/>
+
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+
+    <md:AssertionConsumerService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="https://sp.saml.spring.io/saml/sp/sso"
+      index="0"
+      isDefault="true"/>
+    <md:AssertionConsumerService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"
+      Location="https://sp.saml.spring.io/saml/sp/sso/simple"
+      index="1"/>
+    <md:AssertionConsumerService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+      Location="https://sp.saml.spring.io/saml/sp/sso/artifact"
+      index="2"/>
+    <md:AssertionConsumerService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS"
+      Location="https://sp.saml.spring.io/saml/sp/sso/ecp"
+      index="3"/>
+
+    <md:AttributeConsumingService index="0" isDefault="true">
+
+      <!-- example for the required attribute: mail -->
+      <md:RequestedAttribute FriendlyName="mail"
+                             Name="urn:oid:0.9.2342.19200300.100.1.3"
+                             NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                             isRequired="true"/>
+
+      <!-- example for the required attribute: eduPersonPrincipalName -->
+      <md:RequestedAttribute FriendlyName="eppn"
+                             Name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
+                             NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+                             isRequired="false"/>
+
+    </md:AttributeConsumingService>
+  </md:SPSSODescriptor>
+
+
+</md:EntityDescriptor>

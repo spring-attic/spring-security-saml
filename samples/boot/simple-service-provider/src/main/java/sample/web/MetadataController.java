@@ -31,7 +31,8 @@ public class MetadataController {
 	@GetMapping(value = "/saml/sp/metadata", produces = MediaType.TEXT_XML_VALUE)
 	public @ResponseBody()
 	String metadata(HttpServletRequest request) {
-		ServiceProviderMetadata metadata = Defaults.serviceProviderMetadata(request.getContextPath(), null, null);
+		String base = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+		ServiceProviderMetadata metadata = Defaults.serviceProviderMetadata(base, null, null);
 		return SpringSecuritySaml.getInstance().toXml(metadata);
 	}
 }

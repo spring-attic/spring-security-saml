@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.saml2.attribute.Attribute;
 import org.springframework.security.saml2.metadata.MetadataBase;
 import org.springframework.security.saml2.metadata.NameId;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.signature.SignatureException;
 import org.springframework.security.saml2.spi.ExamplePemKey;
 import org.w3c.dom.Node;
@@ -62,7 +64,41 @@ public class AssertionTests extends MetadataBase {
 
 
     @Test
-    public void read_external() throws Exception {
+    public void create_saml_response() throws Exception {
+        Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null);
+        response.setSigningKey(idpSigning, AlgorithmMethod.RSA_RIPEMD160, DigestMethod.SHA512);
+        response.getAssertions().get(0).setSigningKey(spSigning, AlgorithmMethod.RSA_SHA256, DigestMethod.SHA256);
+        String xml = config.toXml(response);
+        assertNotNull(xml);
+        Iterable<Node> nodes = assertNodeCount(xml, "//samlp:Response", 1);
+        assertNodeAttribute(nodes.iterator().next(), "ID", equalTo(response.getId()));
+        assertNodeAttribute(nodes.iterator().next(), "InResponseTo", equalTo(response.getInResponseTo()));
+        assertNodeAttribute(nodes.iterator().next(), "IssueInstant", equalTo(toZuluTime(response.getIssueInstant())));
+        assertNodeAttribute(nodes.iterator().next(), "Destination", equalTo(response.getDestination()));
+
+        //status
+        assertNodeCount(xml, "//samlp:Response/samlp:Status", 1);
+        assertNodeCount(xml, "//samlp:Response/samlp:Status/samlp:StatusCode", 1);
+        assertNodeCount(xml, "//samlp:Response/samlp:Status/samlp:StatusMessage", 1);
+
+        //one assertion
+        assertNodeCount(xml, "//samlp:Response/saml:Assertion", 1);
+
+        //one signature on the response
+        assertNodeCount(xml, "//samlp:Response/ds:Signature", 1);
+
+        //one signature on the assertion
+        assertNodeCount(xml, "//samlp:Response/saml:Assertion/ds:Signature", 1);
+
+        //fail to validate if only one key is passed in
+        assertThrows(SignatureException.class, () -> config.resolve(xml, asList(idpSigning)));
+        assertThrows(SignatureException.class, () -> config.resolve(xml, asList(spSigning)));
+
+        config.resolve(xml, asList(spSigning, idpSigning));
+    }
+
+    @Test
+    public void read_saml_response() throws Exception {
         Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null);
         assertNotNull(response);
         assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
@@ -326,7 +362,7 @@ public class AssertionTests extends MetadataBase {
     }
 
     @Test
-    public void read_xml() throws Exception {
+    public void read_assertion_xml() throws Exception {
         byte[] data = getAssertionBytes();
         Assertion assertion = (Assertion) config.resolve(data, asList(idpSigning));
 

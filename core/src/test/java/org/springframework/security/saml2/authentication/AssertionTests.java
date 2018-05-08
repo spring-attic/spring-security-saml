@@ -445,7 +445,7 @@ public class AssertionTests extends MetadataBase {
                 //using the wrong key
                 () -> config.resolve(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")))
             );
-        assertThat(expected.getMessage(), equalTo("Signature cryptographic validation not successful"));
+        assertThat(expected.getMessage(), equalTo("Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key."));
     }
 
     protected byte[] getAssertionBytes() throws IOException {

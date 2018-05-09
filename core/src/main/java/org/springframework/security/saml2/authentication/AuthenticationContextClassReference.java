@@ -16,79 +16,129 @@
 package org.springframework.security.saml2.authentication;
 
 public enum AuthenticationContextClassReference {
-    /** Internet Protocol */
+    /**
+     * Internet Protocol
+     */
     INTERNET_PROTOCOL("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol"),
 
-    /** Internet Protocol Password */
+    /**
+     * Internet Protocol Password
+     */
     INTERNET_PROTOCOL_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword"),
 
-    /** Kerberos */
+    /**
+     * Kerberos
+     */
     KERBEROS("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos"),
 
-    /** Mobile One Factor Unregistered */
+    /**
+     * Mobile One Factor Unregistered
+     */
     MOBILE_ONE_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered"),
 
-    /** Mobile Two Factor Unregistered */
+    /**
+     * Mobile Two Factor Unregistered
+     */
     MOBILE_TWO_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered"),
 
-    /** Mobile One Factor Contract */
+    /**
+     * Mobile One Factor Contract
+     */
     MOBILE_ONE_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract"),
 
-    /** Mobile Two Factor Contract */
+    /**
+     * Mobile Two Factor Contract
+     */
     MOBILE_TWO_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract"),
 
-    /** Password */
+    /**
+     * Password
+     */
     PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:Password"),
 
-    /** Password Protected Transport */
+    /**
+     * Password Protected Transport
+     */
     PASSWORD_PROTECTED_TRANSPORT("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"),
 
-    /** Previous Session */
+    /**
+     * Previous Session
+     */
     PREVIOUS_SESSION("urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession"),
 
-    /** X509 Public Key */
+    /**
+     * X509 Public Key
+     */
     X509_PUBLIC_KEY("urn:oasis:names:tc:SAML:2.0:ac:classes:X509"),
 
-    /** PGP */
+    /**
+     * PGP
+     */
     PGP("urn:oasis:names:tc:SAML:2.0:ac:classes:PGP"),
 
-    /** SPKI */
+    /**
+     * SPKI
+     */
     SPKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI"),
 
-    /** XML Digital Signature */
+    /**
+     * XML Digital Signature
+     */
     XML_DIGITAL_SIGNATURE("urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig"),
 
-    /** Smart Card */
+    /**
+     * Smart Card
+     */
     SMARTCARD("urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard"),
 
-    /** Smart Card PKI */
+    /**
+     * Smart Card PKI
+     */
     SMARTCARD_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
 
-    /** Software PKI */
+    /**
+     * Software PKI
+     */
     SOFTWARE_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI"),
 
-    /** Telephony */
+    /**
+     * Telephony
+     */
     TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony"),
 
-    /** Nomadic Telephony */
+    /**
+     * Nomadic Telephony
+     */
     NOMADIC_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony"),
 
-    /** Personalized Telephony */
+    /**
+     * Personalized Telephony
+     */
     PERSONAL_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony"),
 
-    /** Authenticated Telephony */
+    /**
+     * Authenticated Telephony
+     */
     AUTHENTICATED_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony"),
 
-    /** Secure Remote Password */
+    /**
+     * Secure Remote Password
+     */
     SECURE_REMOTE_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword"),
 
-    /** SSL/TLS Client */
+    /**
+     * SSL/TLS Client
+     */
     TLS_CLIENT("urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient"),
 
-    /** Time Synchornized Token */
+    /**
+     * Time Synchornized Token
+     */
     TIME_SYNC_TOKEN("urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken"),
 
-    /** unspecified */
+    /**
+     * unspecified
+     */
     UNSPECIFIED("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
 
 

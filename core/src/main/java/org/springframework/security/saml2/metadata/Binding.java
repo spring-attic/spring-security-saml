@@ -48,6 +48,6 @@ public enum Binding {
                 return binding;
             }
         }
-        throw new IllegalArgumentException("No enum for:"+other);
+        throw new IllegalArgumentException("No enum for:" + other);
     }
 }

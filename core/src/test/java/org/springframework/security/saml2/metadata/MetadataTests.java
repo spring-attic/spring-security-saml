@@ -127,7 +127,7 @@ public class MetadataTests extends MetadataBase {
         assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(spm.getServiceProvider().getArtifactResolutionService().get(0).getLocation()));
 
         Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 4).iterator();
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             Node n = nodeIterator.next();
             assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getLocation()));
             assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getBinding().toString()));
@@ -139,12 +139,12 @@ public class MetadataTests extends MetadataBase {
         assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.UNSPECIFIED.toString()));
 
         nodeIterator = assertNodeCount(xml, "//md:AssertionConsumerService", 4).iterator();
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             Node n = nodeIterator.next();
             assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getLocation()));
             assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getBinding().toString()));
             assertNodeAttribute(n, "index", equalTo("" + i));
-            if (i==0) {
+            if (i == 0) {
                 assertNodeAttribute(n, "isDefault", equalTo("true"));
             }
         }
@@ -154,12 +154,12 @@ public class MetadataTests extends MetadataBase {
         assertNodeAttribute(nodes.iterator().next(), "isDefault", equalTo("true"));
 
         nodeIterator = assertNodeCount(xml, "//md:RequestedAttribute", 2).iterator();
-        for (int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             Node n = nodeIterator.next();
             assertNodeAttribute(n, "FriendlyName", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getFriendlyName()));
             assertNodeAttribute(n, "Name", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getName()));
             assertNodeAttribute(n, "NameFormat", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getNameFormat().toString()));
-            assertNodeAttribute(n, "isRequired", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).isRequired()+""));
+            assertNodeAttribute(n, "isRequired", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).isRequired() + ""));
         }
 
     }
@@ -207,14 +207,14 @@ public class MetadataTests extends MetadataBase {
         assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(ipm.getIdentityProvider().getArtifactResolutionService().get(0).getLocation()));
 
         Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 2).iterator();
-        for (int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             Node n = nodeIterator.next();
             assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getLocation()));
             assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getBinding().toString()));
         }
 
         nodeIterator = assertNodeCount(xml, "//md:SingleSignOnService", 3).iterator();
-        for (int i=0; i<3; i++) {
+        for (int i = 0; i < 3; i++) {
             Node n = nodeIterator.next();
             assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getLocation()));
             assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getBinding().toString()));
@@ -338,16 +338,24 @@ public class MetadataTests extends MetadataBase {
         List<Endpoint> logoutServices = provider.getSingleLogoutService();
         assertNotNull(logoutServices);
         assertThat(logoutServices.size(), equalTo(4));
-        for (int i=0; i<logoutServices.size(); i++) {
+        for (int i = 0; i < logoutServices.size(); i++) {
             Endpoint logout = logoutServices.get(i);
             assertNotNull(logout);
             assertThat(logout.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/logout"));
             Binding b = null;
             switch (i) {
-                case 0: b = SOAP; break;
-                case 1: b = REDIRECT; break;
-                case 2: b = POST; break;
-                case 3: b = ARTIFACT; break;
+                case 0:
+                    b = SOAP;
+                    break;
+                case 1:
+                    b = REDIRECT;
+                    break;
+                case 2:
+                    b = POST;
+                    break;
+                case 3:
+                    b = ARTIFACT;
+                    break;
             }
             assertThat(logout.getBinding(), equalTo(b));
         }

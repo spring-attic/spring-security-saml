@@ -125,7 +125,7 @@ public class AssertionTests extends MetadataBase {
         assertNotNull(subject);
         assertNotNull(subject.getPrincipal());
         assertThat(subject.getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
-        NameIdPrincipal principal = (NameIdPrincipal)subject.getPrincipal();
+        NameIdPrincipal principal = (NameIdPrincipal) subject.getPrincipal();
         assertThat(principal.getValue(), equalTo("spring@idp.saml.spring.io"));
         assertThat(principal.getFormat(), equalTo(EMAIL));
 
@@ -139,13 +139,13 @@ public class AssertionTests extends MetadataBase {
         assertNotNull(data);
         assertThat(data.getInResponseTo(), equalTo("77141543-a0b4-4720-9e64-b08814d2af86"));
         assertThat(data.getRecipient(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
-        assertThat(data.getNotOnOrAfter(),equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
-        assertThat(data.getNotBefore(),equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+        assertThat(data.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
+        assertThat(data.getNotBefore(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
 
         Conditions conditions = assertion.getConditions();
         assertNotNull(conditions);
-        assertThat(conditions.getNotOnOrAfter(),equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
-        assertThat(conditions.getNotBefore(),equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+        assertThat(conditions.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
+        assertThat(conditions.getNotBefore(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
         List<AssertionCondition> criteria = conditions.getCriteria();
         assertNotNull(criteria);
         assertThat(criteria.size(), equalTo(1));
@@ -184,7 +184,7 @@ public class AssertionTests extends MetadataBase {
         assertThat(a.getName(), equalTo("groups"));
         assertThat(a.getFriendlyName(), nullValue());
         assertThat(a.getNameFormat(), equalTo(BASIC));
-        assertThat(a.getValues(), containsInAnyOrder("developers","administrators","users"));
+        assertThat(a.getValues(), containsInAnyOrder("developers", "administrators", "users"));
 
     }
 

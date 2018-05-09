@@ -20,15 +20,15 @@ import org.springframework.security.saml2.Saml2Object;
 /**
  * Represents metadata for a
  * <ul>
- *     <li>SSO Service Provider</li>
- *     <li>SSO Identity Provider</li>
+ * <li>SSO Service Provider</li>
+ * <li>SSO Identity Provider</li>
  * </ul>
  * Currently does <b>not support</b> metadata for
  * <ul>
- *     <li>Authentication Authority</li>
- *     <li>Attribute Authority</li>
- *     <li>Policy Decision Point</li>
- *     <li>Affiliation</li>
+ * <li>Authentication Authority</li>
+ * <li>Attribute Authority</li>
+ * <li>Policy Decision Point</li>
+ * <li>Affiliation</li>
  * </ul>
  */
 public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T> implements Saml2Object {

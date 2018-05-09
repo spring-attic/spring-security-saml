@@ -20,7 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SimpleIdentityProviderApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SimpleIdentityProviderApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SimpleIdentityProviderApplication.class, args);
+    }
 }

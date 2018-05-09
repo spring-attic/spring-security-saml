@@ -42,6 +42,6 @@ public enum SubjectConfirmationMethod {
                 return method;
             }
         }
-        throw new IllegalArgumentException("No enum for:"+other);
+        throw new IllegalArgumentException("No enum for:" + other);
     }
 }

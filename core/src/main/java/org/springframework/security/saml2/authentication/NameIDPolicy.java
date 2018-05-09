@@ -25,7 +25,7 @@ public class NameIDPolicy<T extends NameIDPolicy> {
 
     @SuppressWarnings("checked")
     protected T _this() {
-        return (T)this;
+        return (T) this;
     }
 
     public NameIDPolicy() {

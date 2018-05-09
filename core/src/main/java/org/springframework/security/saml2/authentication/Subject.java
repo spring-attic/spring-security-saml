@@ -42,14 +42,14 @@ public class Subject {
 
     public Subject setConfirmations(List<SubjectConfirmation> confirmations) {
         this.confirmations.clear();
-        if (confirmations!=null) {
+        if (confirmations != null) {
             this.confirmations.addAll(confirmations);
         }
         return this;
     }
 
     public Subject addConfirmation(SubjectConfirmation subjectConfirmation) {
-        if (subjectConfirmation!=null) {
+        if (subjectConfirmation != null) {
             this.confirmations.add(subjectConfirmation);
         }
         return this;

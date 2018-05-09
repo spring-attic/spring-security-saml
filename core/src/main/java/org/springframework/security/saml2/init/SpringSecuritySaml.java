@@ -61,7 +61,7 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 
-    private Base64 UNCHUNKED_ENCODER = new Base64(0, new byte[] { '\n' });
+    private Base64 UNCHUNKED_ENCODER = new Base64(0, new byte[]{'\n'});
 
     @SuppressWarnings("checked")
     public T init() {

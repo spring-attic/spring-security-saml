@@ -29,14 +29,14 @@ import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.springframework.security.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.Namespace;
 import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.Binding;
 import org.springframework.security.saml2.metadata.Endpoint;
 import org.springframework.security.saml2.metadata.InvalidMetadataException;
 import org.springframework.security.saml2.metadata.NameId;
+import org.springframework.security.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml2.signature.DigestMethod;
 import org.springframework.security.saml2.xml.SimpleKey;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Element;
@@ -228,7 +228,7 @@ public class SimpleMetadataBuilder {
         descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
 
         nameIds.forEach(n ->
-            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
+                            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
         );
 
         if (!keys.isEmpty()) {
@@ -238,20 +238,20 @@ public class SimpleMetadataBuilder {
         }
 
 
-        for (int i=0; i<assertionEndpoints.size(); i++) {
+        for (int i = 0; i < assertionEndpoints.size(); i++) {
             Endpoint ep = assertionEndpoints.get(i);
             descriptor.getAssertionConsumerServices()
                 .add(config.getAssertionConsumerService(ep, i));
         }
 
-        for (int i=0; i<logoutEndpoints.size(); i++) {
+        for (int i = 0; i < logoutEndpoints.size(); i++) {
             Endpoint ep = logoutEndpoints.get(i);
             descriptor.getSingleLogoutServices()
                 .add(config.getSingleLogoutService(ep));
         }
 
         try {
-            if (signingKey!=null) {
+            if (signingKey != null) {
                 config.signObject(entity, signingKey, signatureAlgorithm, signatureDigestMethod);
             }
 
@@ -282,7 +282,7 @@ public class SimpleMetadataBuilder {
         descriptor.addSupportedProtocol(Namespace.NS_PROTOCOL);
 
         nameIds.forEach(n ->
-            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
+                            descriptor.getNameIDFormats().add(config.getNameIDFormat(n))
         );
 
         if (!keys.isEmpty()) {
@@ -292,20 +292,20 @@ public class SimpleMetadataBuilder {
         }
 
 
-        for (int i=0; i<ssoEndpoints.size(); i++) {
+        for (int i = 0; i < ssoEndpoints.size(); i++) {
             Endpoint ep = ssoEndpoints.get(i);
             descriptor.getSingleSignOnServices()
                 .add(config.getSingleSignOnService(ep, i));
         }
 
-        for (int i=0; i<logoutEndpoints.size(); i++) {
+        for (int i = 0; i < logoutEndpoints.size(); i++) {
             Endpoint ep = logoutEndpoints.get(i);
             descriptor.getSingleLogoutServices()
                 .add(config.getSingleLogoutService(ep));
         }
 
         try {
-            if (signingKey!=null) {
+            if (signingKey != null) {
                 config.signObject(entity, signingKey, signatureAlgorithm, signatureDigestMethod);
             }
 

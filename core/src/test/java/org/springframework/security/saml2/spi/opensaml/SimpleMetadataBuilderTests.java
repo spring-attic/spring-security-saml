@@ -64,7 +64,7 @@ public class SimpleMetadataBuilderTests {
 
         assertNodeCount(metadata, "//ds:Signature", 1);
         assertNodeCount(metadata, "//ds:SignedInfo", 1);
-        System.out.println("metadata:\n"+metadata);
+        System.out.println("metadata:\n" + metadata);
 
     }
 
@@ -85,7 +85,7 @@ public class SimpleMetadataBuilderTests {
 
         assertNodeCount(metadata, "//ds:Signature", 1);
         assertNodeCount(metadata, "//ds:SignedInfo", 1);
-        System.out.println("metadata:\n"+metadata);
+        System.out.println("metadata:\n" + metadata);
 
     }
 
@@ -106,7 +106,7 @@ public class SimpleMetadataBuilderTests {
         EntityDescriptor object = (EntityDescriptor) config.parse(metadata);
         config.validateSignature(object, asList(getPublicKey()));
 
-        System.out.println("Entity Descriptor:"+object);
+        System.out.println("Entity Descriptor:" + object);
     }
 
     @Test
@@ -126,21 +126,21 @@ public class SimpleMetadataBuilderTests {
 
     public String getSampleServiceProviderMetadata(String baseUrl) {
         return builder(baseUrl)
-                .addKey(getDefaultKey())
-                .addSigningKey(
-                    getDefaultKey(),
-                    RSA_SHA1,
-                    SHA1
-                )
-                .addAssertionPath("saml/SSO", Binding.POST, true)
-                .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
-                .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
-                .clearNameIDs()
-                .addNameID(NameId.EMAIL)
-                .addNameID(NameId.PERSISTENT)
-                .wantAssertionSigned(true)
-                .requestSigned(true)
-                .buildServiceProviderMetadata();
+            .addKey(getDefaultKey())
+            .addSigningKey(
+                getDefaultKey(),
+                RSA_SHA1,
+                SHA1
+            )
+            .addAssertionPath("saml/SSO", Binding.POST, true)
+            .addAssertionPath("saml/SSO", Binding.REDIRECT, false)
+            .addLogoutPath("saml/SSO/logout", Binding.REDIRECT)
+            .clearNameIDs()
+            .addNameID(NameId.EMAIL)
+            .addNameID(NameId.PERSISTENT)
+            .wantAssertionSigned(true)
+            .requestSigned(true)
+            .buildServiceProviderMetadata();
     }
 
     public String getSampleIdentityProviderMetadata(String baseUrl) {
@@ -168,6 +168,7 @@ public class SimpleMetadataBuilderTests {
     private SimpleKey getPublicKey() {
         return getPublicKey(RSA_TEST_KEY.getPublic());
     }
+
     private SimpleKey getPublicKey(String cert) {
         return new SimpleKey("alias", null, cert, null, KeyType.SIGNING);
     }

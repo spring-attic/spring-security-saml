@@ -21,14 +21,18 @@ public interface AttributeValue {
     Object getValue();
 
     boolean isString();
+
     String getString();
 
     boolean isLong();
+
     long getLong();
 
     boolean isBoolean();
+
     boolean getBoolean();
 
     boolean isDate();
+
     DateTime getDateTime();
 }

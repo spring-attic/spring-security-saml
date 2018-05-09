@@ -28,16 +28,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class IdentityProviderController {
 
-	@GetMapping(value = "/saml/idp/metadata", produces = MediaType.TEXT_XML_VALUE)
-	public @ResponseBody()
-	String metadata(HttpServletRequest request) {
-		String base = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-		IdentityProviderMetadata metadata = Defaults.identityProviderMetadata(base, null, null);
-		return SpringSecuritySaml.getInstance().toXml(metadata);
-	}
+    @GetMapping(value = "/saml/idp/metadata", produces = MediaType.TEXT_XML_VALUE)
+    public @ResponseBody()
+    String metadata(HttpServletRequest request) {
+        String base = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        IdentityProviderMetadata metadata = Defaults.identityProviderMetadata(base, null, null);
+        return SpringSecuritySaml.getInstance().toXml(metadata);
+    }
 
-	@RequestMapping("/saml/sp/SSO")
-	public String sso(HttpServletRequest request) {
-		return null;
-	}
+    @RequestMapping("/saml/sp/SSO")
+    public String sso(HttpServletRequest request) {
+        return null;
+    }
 }

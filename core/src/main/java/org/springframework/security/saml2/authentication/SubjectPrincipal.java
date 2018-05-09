@@ -17,13 +17,14 @@ package org.springframework.security.saml2.authentication;
 
 /**
  * This is either a BaseID, NameID or EncryptedID
+ *
  * @param <T>
  */
 public abstract class SubjectPrincipal<T extends SubjectPrincipal> {
 
     @SuppressWarnings("checked")
     protected T _this() {
-        return (T)this;
+        return (T) this;
     }
 
     private String value;

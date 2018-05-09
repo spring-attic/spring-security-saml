@@ -34,7 +34,7 @@ public class StatusResponse<T extends StatusResponse> implements Saml2Object {
 
     @SuppressWarnings("checked")
     protected T _this() {
-        return (T)this;
+        return (T) this;
     }
 
     public String getId() {

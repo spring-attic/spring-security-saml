@@ -15,7 +15,7 @@
 
 package org.springframework.security.saml2.attribute;
 
-public enum AttributeNameFormat  {
+public enum AttributeNameFormat {
 
     UNSPECIFIED("urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified"),
     URI("urn:oasis:names:tc:SAML:2.0:attrname-format:uri"),

@@ -26,7 +26,7 @@ public abstract class AssertionCondition<T extends AssertionCondition, Evaluatio
 
     @SuppressWarnings("checked")
     protected T _this() {
-        return (T)this;
+        return (T) this;
     }
 
     public boolean evaluate(EvaluationCritera evaluationCriteria) {

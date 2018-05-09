@@ -32,20 +32,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SimpleTest {
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-	@Test
-	public void getIdentityProviderMetadata() throws Exception {
-		mockMvc.perform(get("/saml/idp/metadata"))
-			.andExpect(status().isOk())
-			.andReturn();
-	}
+    @Test
+    public void getIdentityProviderMetadata() throws Exception {
+        mockMvc.perform(get("/saml/idp/metadata"))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 
 
-	@SpringBootConfiguration
-	@EnableAutoConfiguration
-	@ComponentScan(basePackages = "sample")
-	public static class SpringBootApplicationTestConfig {
-	}
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @ComponentScan(basePackages = "sample")
+    public static class SpringBootApplicationTestConfig {
+    }
 }

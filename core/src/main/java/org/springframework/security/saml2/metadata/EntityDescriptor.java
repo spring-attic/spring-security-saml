@@ -32,7 +32,7 @@ import static org.springframework.security.saml2.init.SpringSecuritySaml.millisT
 /**
  * EntityDescriptor as defined in
  * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">
- *     Line 466-494
+ * Line 466-494
  * </a>
  */
 public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object {
@@ -62,7 +62,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     }
 
     /**
-     *
      * @return the timestamp of the metadata expiration date. null if this value has not been set.
      */
     public DateTime getValidUntil() {
@@ -72,15 +71,16 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     /**
      * The time interval in format "PnYnMnDTnHnMnS"
      * <ul>
-     *   <li>P indicates the period (required)</li>
-     *   <li>nY indicates the number of years</li>
-     *   <li>nM indicates the number of months</li>
-     *   <li>nD indicates the number of days</li>
-     *   <li>T indicates the start of a time section (required if you are going to specify hours, minutes, or seconds)</li>
-     *   <li>nH indicates the number of hours</li>
-     *   <li>nM indicates the number of minutes</li>
-     *   <li>nS indicates the number of seconds</li>
+     * <li>P indicates the period (required)</li>
+     * <li>nY indicates the number of years</li>
+     * <li>nM indicates the number of months</li>
+     * <li>nD indicates the number of days</li>
+     * <li>T indicates the start of a time section (required if you are going to specify hours, minutes, or seconds)</li>
+     * <li>nH indicates the number of hours</li>
+     * <li>nM indicates the number of minutes</li>
+     * <li>nS indicates the number of seconds</li>
      * </ul>
+     *
      * @return the cache duration for the metadata. null if no duration has been set.
      */
     public Duration getCacheDuration() {
@@ -89,6 +89,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
 
     /**
      * Transforms {@link #getCacheDuration()} into milli seconds.
+     *
      * @return returns the number of milli seconds this metadata should be cached for. -1 if the value is not set.
      */
     public long getCacheDurationMillis() {
@@ -102,7 +103,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
 
     public List<SsoProvider> getSsoProviders() {
         List<SsoProvider> result = new LinkedList<>();
-        if (getProviders()!=null) {
+        if (getProviders() != null) {
             getProviders()
                 .stream()
                 .filter(p -> p instanceof SsoProvider)

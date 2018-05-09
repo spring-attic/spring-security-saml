@@ -22,7 +22,6 @@ public class AuthenticationContext {
     private AuthenticationContextClassReference classReference = UNSPECIFIED;
 
 
-
     public AuthenticationContextClassReference getClassReference() {
         return classReference;
     }

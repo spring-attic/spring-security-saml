@@ -18,9 +18,9 @@ package sample.web;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.saml2.init.Defaults;
-import org.springframework.security.saml2.init.SpringSecuritySaml;
-import org.springframework.security.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.init.Defaults;
+import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

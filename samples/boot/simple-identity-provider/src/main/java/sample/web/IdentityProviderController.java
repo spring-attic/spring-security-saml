@@ -38,6 +38,7 @@ public class IdentityProviderController {
 
     @RequestMapping("/saml/sp/SSO")
     public String sso(HttpServletRequest request) {
+        //receive AuthnRequest
         return null;
     }
 }

@@ -5,22 +5,11 @@
 	<meta charset="utf-8" />
 </head>
 <body>
-<div style="float: right" th:fragment="logout" sec:authorize="isAuthenticated()">
-	<div style="float:left">
-		<span style="font-weight:bold">User: </span><span sec:authentication="name"></span>
-	</div>
-	<div style="float:none">&nbsp;</div>
-	<div style="float:right">
-		<form action="#" th:action="@{/logout}" method="post">
-			<input type="submit" value="Logout" />
-		</form>
-	</div>
-</div>
-<h1>GitHub Repositories</h1>
+<h1>Select an Identity Provider</h1>
 <div>
 	<ul>
-		<li th:each="repo : ${repos}">
-			<span style="font-weight:bold" th:text="${repo.name}"></span>: <span th:text="${repo.url}"></span>
+		<li th:each="idp : ${idps}">
+			<a th:href="${idp.redirect}"><span style="font-weight:bold" th:text="${idp.linkText}"/></a>
 		</li>
 	</ul>
 </div>

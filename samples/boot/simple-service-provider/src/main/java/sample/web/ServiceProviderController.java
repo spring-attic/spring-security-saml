@@ -16,29 +16,141 @@
 package sample.web;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.saml.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.config.SamlConfiguration;
 import org.springframework.security.saml.init.Defaults;
 import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
+import sample.config.AppConfig;
+
+import static org.springframework.security.saml.init.Defaults.authenticationRequest;
 
 @Controller
 public class ServiceProviderController {
 
+    private SpringSecuritySaml springSecuritySaml = SpringSecuritySaml.getInstance().init();
+    private SamlConfiguration configuration;
+    private Map<String, ExternalProviderConfiguration> byName = new HashMap();
+    private Map<String, IdentityProviderMetadata> byEntityId = new HashMap();
+    private Map<String, String> nameToEntityId = new HashMap();
+
+    @Autowired
+    public void setAppConfig(AppConfig config) {
+        this.configuration = config;
+        this.configuration.getServiceProvider().getIdentityProviders().stream().forEach(
+            p -> {
+                byName.put(p.getName(), p);
+                IdentityProviderMetadata m = (IdentityProviderMetadata) SpringSecuritySaml.getInstance().init().resolve(p.getMetadata(), null);
+                byEntityId.put(m.getEntityId(), m);
+                nameToEntityId.put(p.getName(), m.getEntityId());
+            }
+        );
+    }
+
+    @RequestMapping("/select")
+    public String selectProvider(HttpServletRequest request, Model model) {
+        List<Provider> providers =
+            configuration.getServiceProvider().getIdentityProviders().stream().map(
+                p -> new Provider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
+            )
+            .collect(Collectors.toList());
+        model.addAttribute("idps", providers);
+        return "select-provider";
+    }
+
+    protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
+        builder.pathSegment("saml/sp/discovery");
+        builder.queryParam("idp", nameToEntityId.get(p.getName()));
+        return builder.build().toUriString();
+    }
+
     @GetMapping(value = "/saml/sp/metadata", produces = MediaType.TEXT_XML_VALUE)
     public @ResponseBody()
     String metadata(HttpServletRequest request) {
-        String base = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-        ServiceProviderMetadata metadata = Defaults.serviceProviderMetadata(base, null, null);
+        ServiceProviderMetadata metadata = getServiceProviderMetadata(request);
         return SpringSecuritySaml.getInstance().toXml(metadata);
+    }
+
+    protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
+        String base = getBasePath(request);
+        return Defaults.serviceProviderMetadata(base, null, null);
+    }
+
+    protected String getBasePath(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    @RequestMapping("/saml/sp/discovery")
+    public View discovery(HttpServletRequest request,
+                          @RequestParam(name = "idp", required = true) String idp) {
+        //create authnrequest
+        IdentityProviderMetadata m = byEntityId.get(idp);
+        ServiceProviderMetadata local = getServiceProviderMetadata(request);
+        AuthenticationRequest authenticationRequest = authenticationRequest(local, m);
+        String url = getAuthnRequestRedirect(request, m, authenticationRequest);
+        return new RedirectView(url);
+    }
+
+    protected String getAuthnRequestRedirect(HttpServletRequest request,
+                                           IdentityProviderMetadata m,
+                                           AuthenticationRequest authenticationRequest) {
+        String xml = springSecuritySaml.toXml(authenticationRequest);
+        String deflated = springSecuritySaml.deflateAndEncode(xml);
+        Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
+        UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
+        url.queryParam("SAMLRequest", deflated);
+        return url.build().toUriString();
     }
 
     @RequestMapping("/saml/sp/SSO")
     public String sso(HttpServletRequest request) {
+        //receive assertion
+
         return null;
     }
+
+    public static class Provider {
+        private String linkText;
+        private String redirect;
+
+        public String getLinkText() {
+            return linkText;
+        }
+
+        public Provider setLinkText(String linkText) {
+            this.linkText = linkText;
+            return this;
+        }
+
+        public String getRedirect() {
+            return redirect;
+        }
+
+        public Provider setRedirect(String redirect) {
+            this.redirect = redirect;
+            return this;
+        }
+    }
+
+
 }

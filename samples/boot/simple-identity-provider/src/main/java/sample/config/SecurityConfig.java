@@ -30,18 +30,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+            .csrf().disable()
             .authorizeRequests()
-            .antMatchers("/saml/sp/metadata/**")
-            .permitAll()
-            .anyRequest().permitAll()
+            .antMatchers("/samlp/idp/**").permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .formLogin()
         ;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails userDetails = User.withDefaultPasswordEncoder()
-            .username("user")
-            .password("password")
+            .username("testuser")
+            .password("testpassword")
             .roles("USER")
             .build();
         return new InMemoryUserDetailsManager(userDetails);

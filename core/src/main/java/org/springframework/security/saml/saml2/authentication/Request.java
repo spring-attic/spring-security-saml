@@ -27,7 +27,7 @@ public class Request<T extends Request<T>> {
         return (T) this;
     }
 
-    private String issuer;
+    private Issuer issuer;
     private XMLSignature signature;
     private List<Object> extensions;
 
@@ -37,7 +37,7 @@ public class Request<T extends Request<T>> {
     private String consent;
     private String version;
 
-    public String getIssuer() {
+    public Issuer getIssuer() {
         return issuer;
     }
 
@@ -65,7 +65,7 @@ public class Request<T extends Request<T>> {
         return consent;
     }
 
-    public T setIssuer(String issuer) {
+    public T setIssuer(Issuer issuer) {
         this.issuer = issuer;
         return _this();
     }

@@ -30,19 +30,23 @@
 
 package org.springframework.security.saml.init;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
+import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIDPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.OneTimeUse;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Status;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
@@ -56,10 +60,10 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.key.SimpleKey;
 
-import static org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext.exact;
+import static java.util.Arrays.asList;
 import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
+import static org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext.exact;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 
@@ -79,21 +83,21 @@ public class Defaults {
             .setId(UUID.randomUUID().toString())
             .setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
             .setProviders(
-                Arrays.asList(
+                asList(
                     new ServiceProvider()
                         .setKeys(keys)
                         .setWantAssertionsSigned(true)
                         .setAuthnRequestsSigned(signingKey != null)
                         .setAssertionConsumerService(
-                            Arrays.asList(
+                            asList(
                                 getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
                                 getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
-                        .setNameIds(Arrays.asList(NameId.PERSISTENT, NameId.EMAIL))
+                        .setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
-                            Arrays.asList(
+                            asList(
                                 getInstance().init().getEndpoint(baseUrl, "saml/sp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
@@ -109,19 +113,19 @@ public class Defaults {
             .setId(UUID.randomUUID().toString())
             .setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
             .setProviders(
-                Arrays.asList(
+                asList(
                     new IdentityProvider()
                         .setWantAuthnRequestsSigned(true)
                         .setSingleSignOnService(
-                            Arrays.asList(
+                            asList(
                                 getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
                                 getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
-                        .setNameIds(Arrays.asList(NameId.PERSISTENT, NameId.EMAIL))
+                        .setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
-                            Arrays.asList(
+                            asList(
                                 getInstance().init().getEndpoint(baseUrl, "saml/idp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
@@ -141,7 +145,7 @@ public class Defaults {
             .setPassive(Boolean.FALSE)
             .setBinding(Binding.POST)
             .setAssertionConsumerService(getACSFromSp(sp))
-            .setIssuer(sp.getEntityId())
+            .setIssuer(new Issuer().setValue(sp.getEntityId()))
             .setRequestedAuthenticationContext(exact)
             .setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
         if (sp.getServiceProvider().isAuthnRequestsSigned()) {
@@ -234,4 +238,17 @@ public class Defaults {
     }
 
 
+    public static Response response(String inResponseTo,
+                                    Assertion assertion,
+                                    ServiceProviderMetadata sp,
+                                    IdentityProviderMetadata idp) {
+        return new Response()
+            .setAssertions(asList(assertion))
+            .setId(UUID.randomUUID().toString())
+            .setInResponseTo(inResponseTo)
+            .setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
+            .setIssuer(new Issuer().setValue(idp.getEntityId()))
+            .setIssueInstant(new DateTime())
+            .setVersion("2.0");
+    }
 }

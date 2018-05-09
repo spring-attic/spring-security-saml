@@ -916,6 +916,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         auth.setDestination(request.getDestination().getLocation());
         auth.setNameIDPolicy(getNameIDPolicy(request.getNameIDPolicy()));
         auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
+        auth.setIssuer(toIssuer(request.getIssuer()));
         if (request.getSigningKey() != null) {
             this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
         }
@@ -1039,9 +1040,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     protected Status getStatus(org.opensaml.saml.saml2.core.Status status) {
         return new Status()
             .setCode(StatusCode.fromUrn(status.getStatusCode().getValue()))
-            .setMessage(status.getStatusMessage().getMessage());
-
-
+            .setMessage(status.getStatusMessage()!=null ? status.getStatusMessage().getMessage() : null);
     }
 
     protected Assertion resolveAssertion(org.opensaml.saml.saml2.core.Assertion parsed, List<SimpleKey> trustedKeys) {
@@ -1253,6 +1252,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     false
                 )
             )
+            .setIssuer(getIssuer(request.getIssuer()))
             .setForceAuth(request.isForceAuthn())
             .setPassive(request.isPassive())
             .setId(request.getID())

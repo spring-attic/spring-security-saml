@@ -16,6 +16,8 @@
 package sample.web;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +25,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlConfiguration;
 import org.springframework.security.saml.init.Defaults;
 import org.springframework.security.saml.init.SpringSecuritySaml;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -59,14 +65,19 @@ public class ServiceProviderController {
         this.configuration.getServiceProvider().getIdentityProviders().stream().forEach(
             p -> {
                 byName.put(p.getName(), p);
-                IdentityProviderMetadata m = (IdentityProviderMetadata) SpringSecuritySaml.getInstance().init().resolve(p.getMetadata(), null);
+                IdentityProviderMetadata m = (IdentityProviderMetadata) springSecuritySaml.resolve(p.getMetadata(), null);
                 byEntityId.put(m.getEntityId(), m);
                 nameToEntityId.put(p.getName(), m.getEntityId());
             }
         );
     }
 
-    @RequestMapping("/select")
+    @RequestMapping(value = {"/", "/index", "logged-in"})
+    public String home() {
+        return "logged-in";
+    }
+
+    @RequestMapping("/saml/sp/select")
     public String selectProvider(HttpServletRequest request, Model model) {
         List<Provider> providers =
             configuration.getServiceProvider().getIdentityProviders().stream().map(
@@ -91,15 +102,6 @@ public class ServiceProviderController {
         return SpringSecuritySaml.getInstance().toXml(metadata);
     }
 
-    protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
-        String base = getBasePath(request);
-        return Defaults.serviceProviderMetadata(base, null, null);
-    }
-
-    protected String getBasePath(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-    }
-
     @RequestMapping("/saml/sp/discovery")
     public View discovery(HttpServletRequest request,
                           @RequestParam(name = "idp", required = true) String idp) {
@@ -118,15 +120,20 @@ public class ServiceProviderController {
         String deflated = springSecuritySaml.deflateAndEncode(xml);
         Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
         UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
-        url.queryParam("SAMLRequest", deflated);
-        return url.build().toUriString();
+        url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
+        return url.build(true).toUriString();
     }
 
     @RequestMapping("/saml/sp/SSO")
-    public String sso(HttpServletRequest request) {
+    public View sso(HttpServletRequest request,
+                      @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
-
-        return null;
+        String xml = springSecuritySaml.decodeAndInflate(response);
+        Response r = (Response) springSecuritySaml.resolve(xml, null);
+        NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(token);
+        return new RedirectView("/");
     }
 
     public static class Provider {
@@ -152,5 +159,13 @@ public class ServiceProviderController {
         }
     }
 
+    protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
+        String base = getBasePath(request);
+        return Defaults.serviceProviderMetadata(base, null, null);
+    }
+
+    protected String getBasePath(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
 
 }

@@ -22,10 +22,11 @@ import org.springframework.security.saml2.init.SpringSecuritySaml;
 import org.springframework.security.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-public class MetadataController {
+public class IdentityProviderController {
 
 	@GetMapping(value = "/saml/idp/metadata", produces = MediaType.TEXT_XML_VALUE)
 	public @ResponseBody()
@@ -33,5 +34,10 @@ public class MetadataController {
 		String base = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
 		IdentityProviderMetadata metadata = Defaults.identityProviderMetadata(base, null, null);
 		return SpringSecuritySaml.getInstance().toXml(metadata);
+	}
+
+	@RequestMapping("/saml/sp/SSO")
+	public String sso(HttpServletRequest request) {
+		return null;
 	}
 }

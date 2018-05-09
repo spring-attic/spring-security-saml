@@ -33,10 +33,11 @@ package org.springframework.security.saml2.spi.opensaml;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +46,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterOutputStream;
 
+import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
@@ -177,9 +183,12 @@ import org.w3c.dom.Element;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static java.util.zip.Deflater.DEFLATED;
+import static net.shibboleth.utilities.java.support.codec.Base64Support.UNCHUNKED;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
 import static org.springframework.security.saml2.Namespace.NS_PROTOCOL;
 import static org.springframework.util.StringUtils.hasText;
@@ -252,7 +261,6 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
         registry.setParserPool(parserPool);
     }
-
 
     public XMLObjectBuilderFactory getBuilderFactory() {
         return XMLObjectProviderRegistrySupport.getBuilderFactory();
@@ -431,7 +439,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     }
 
     protected XMLObject parse(String xml) {
-        return parse(xml.getBytes(StandardCharsets.UTF_8));
+        return parse(xml.getBytes(UTF_8));
     }
 
     protected XMLObject parse(byte[] xml) {
@@ -998,7 +1006,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     @Override
     public Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
-        return resolve(xml.getBytes(StandardCharsets.UTF_8), trustedKeys);
+        return resolve(xml.getBytes(UTF_8), trustedKeys);
     }
 
     public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {

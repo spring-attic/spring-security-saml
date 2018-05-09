@@ -30,18 +30,33 @@
 
 package org.springframework.security.saml2.init;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.security.saml2.init.SpringSecuritySaml.getInstance;
 
 public class SpringSecuritySamlTests {
 
     @Test
     public void init_works() {
-        SpringSecuritySaml.getInstance().init();
+        getInstance().init();
     }
 
     @Test
     public void multipe_calls_to_init_works() {
-        SpringSecuritySaml.getInstance().init();
-        SpringSecuritySaml.getInstance().init();
+        getInstance().init();
+        getInstance().init();
+    }
+
+    @Test
+    public void deflate_inflate() throws Exception {
+        SpringSecuritySaml saml = getInstance().init();
+        String s = UUID.randomUUID().toString();
+        String deflated = saml.deflateAndEncode(s);
+        String inflated = saml.decodeAndInflate(deflated);
+        assertThat(inflated, equalTo(s));
     }
 }

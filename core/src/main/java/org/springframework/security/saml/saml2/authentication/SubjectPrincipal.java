@@ -18,7 +18,6 @@ package org.springframework.security.saml.saml2.authentication;
 /**
  * This is either a BaseID, NameID or EncryptedID
  *
- * @param <T>
  */
 public abstract class SubjectPrincipal<T extends SubjectPrincipal> {
 

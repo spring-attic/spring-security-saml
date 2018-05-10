@@ -416,7 +416,8 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     Credential credential = getCredential(key, getCredentialsResolver(key));
                     SignatureValidator.validate(object.getSignature(), credential);
                     last = null;
-                    result = getSignature(object.getSignature());
+                    result = getSignature(object.getSignature())
+                        .setValidated(true);
                     break;
                 } catch (SignatureException e) {
                     last = e;
@@ -442,6 +443,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     .setCanonicalizationAlgorithm(CanonicalizationMethod.fromUrn(impl.getCanonicalizationAlgorithm()))
                     .setSignatureValue(org.apache.xml.security.utils.Base64.encode(impl.getXMLSignature().getSignatureValue()))
                     ;
+                //TODO extract the digest value
             } catch (XMLSignatureException e) {
                 //TODO - ignore for now
             }

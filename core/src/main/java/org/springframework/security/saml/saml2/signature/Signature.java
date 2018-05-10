@@ -22,6 +22,7 @@ public class Signature {
     private DigestMethod digestAlgorithm;
     private String digestValue;
     private String signatureValue;
+    private boolean validated = false;
 
     public CanonicalizationMethod getCanonicalizationAlgorithm() {
         return canonicalizationAlgorithm;
@@ -66,5 +67,14 @@ public class Signature {
     public Signature setSignatureValue(String signatureValue) {
         this.signatureValue = signatureValue;
         return this;
+    }
+
+    public Signature setValidated(boolean b) {
+        this.validated = true;
+        return this;
+    }
+
+    public boolean isValidated() {
+        return validated;
     }
 }

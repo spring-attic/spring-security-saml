@@ -31,6 +31,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml.init.Defaults.authenticationRequest;
 import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
@@ -66,13 +67,14 @@ class AuthenticationRequestTests extends MetadataBase {
     }
 
     @Test
-    public void parse() throws Exception {
+    public void parse() {
         AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
         String xml = getInstance().toXml(request);
         AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);
 
         assertNotNull(data.getSignature());
+        assertTrue(data.getSignature().isValidated());
 
 
         assertSame(Binding.POST, data.getBinding());

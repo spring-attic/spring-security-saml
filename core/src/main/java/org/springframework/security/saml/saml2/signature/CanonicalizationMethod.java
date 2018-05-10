@@ -15,7 +15,7 @@
 
 package org.springframework.security.saml.saml2.signature;
 
-public enum Canonicalization {
+public enum CanonicalizationMethod {
 
     ALGO_ID_C14N_OMIT_COMMENTS("http://www.w3.org/TR/2001/REC-xml-c14n-20010315"),
     ALGO_ID_C14N_WITH_COMMENTS(ALGO_ID_C14N_OMIT_COMMENTS.toString() + "#WithComments"),
@@ -26,12 +26,21 @@ public enum Canonicalization {
 
     private final String urn;
 
-    Canonicalization(String urn) {
+    CanonicalizationMethod(String urn) {
         this.urn = urn;
     }
 
     @Override
     public String toString() {
         return urn;
+    }
+
+    public static CanonicalizationMethod fromUrn(String urn) {
+        for (CanonicalizationMethod m : values()) {
+            if (m.urn.equalsIgnoreCase(urn)) {
+                return m;
+            }
+        }
+        return null;
     }
 }

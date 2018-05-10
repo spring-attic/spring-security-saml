@@ -30,7 +30,7 @@ public enum AttributeNameFormat {
 
     public static AttributeNameFormat fromUrn(String name) {
         for (AttributeNameFormat t : values()) {
-            if (t.urn.equals(name)) {
+            if (t.urn.equalsIgnoreCase(name)) {
                 return t;
             }
         }

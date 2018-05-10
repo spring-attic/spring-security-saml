@@ -52,6 +52,7 @@ import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.DOMTypeSupport;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.apache.xml.security.signature.XMLSignatureException;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationException;
@@ -124,13 +125,16 @@ import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
 import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xmlsec.signature.KeyInfo;
-import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.opensaml.xmlsec.signature.X509Data;
+import org.opensaml.xmlsec.signature.impl.SignatureImpl;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
+import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.key.KeyType;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
@@ -154,7 +158,6 @@ import org.springframework.security.saml.saml2.authentication.SubjectConfirmatio
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
 import org.springframework.security.saml.saml2.authentication.SubjectPrincipal;
-import org.springframework.security.saml.init.SpringSecuritySaml;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
@@ -166,11 +169,10 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.Canonicalization;
+import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.util.InMemoryKeyStore;
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -382,19 +384,18 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
         Credential credential = getCredential(key, resolver);
 
-        XMLObjectBuilder<Signature> signatureBuilder =
-            (XMLObjectBuilder<Signature>) getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME);
-        Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+        XMLObjectBuilder<org.opensaml.xmlsec.signature.Signature> signatureBuilder =
+            (XMLObjectBuilder<org.opensaml.xmlsec.signature.Signature>) getBuilderFactory().getBuilder(org.opensaml.xmlsec.signature.Signature.DEFAULT_ELEMENT_NAME);
+        org.opensaml.xmlsec.signature.Signature signature = signatureBuilder.buildObject(org.opensaml.xmlsec.signature.Signature.DEFAULT_ELEMENT_NAME);
 
         signable.setSignature(signature);
-
 
         SignatureSigningParameters parameters = new SignatureSigningParameters();
         parameters.setSigningCredential(credential);
         parameters.setKeyInfoGenerator(getKeyInfoGenerator(credential));
         parameters.setSignatureAlgorithm(algorithm.toString());
         parameters.setSignatureReferenceDigestMethod(digest.toString());
-        parameters.setSignatureCanonicalizationAlgorithm(Canonicalization.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString());
+        parameters.setSignatureCanonicalizationAlgorithm(CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString());
 
         try {
             SignatureSupport.prepareSignatureParams(signature, parameters);
@@ -406,15 +407,16 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
     }
 
-    public void validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
+    public Signature validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
+        Signature result = null;
         if (object.getSignature() != null && keys != null && !keys.isEmpty()) {
             SignatureException last = null;
             for (SimpleKey key : keys) {
                 try {
-                    KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
-                    Credential credential = getCredential(key, resolver);
+                    Credential credential = getCredential(key, getCredentialsResolver(key));
                     SignatureValidator.validate(object.getSignature(), credential);
                     last = null;
+                    result = getSignature(object.getSignature());
                     break;
                 } catch (SignatureException e) {
                     last = e;
@@ -427,6 +429,24 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     last);
             }
         }
+        return result;
+    }
+
+    protected Signature getSignature(org.opensaml.xmlsec.signature.Signature signature) {
+        Signature result = null;
+        if (signature != null && signature instanceof SignatureImpl) {
+            SignatureImpl impl = (SignatureImpl) signature;
+            try {
+                result = new Signature()
+                    .setSignatureAlgorithm(AlgorithmMethod.fromUrn(impl.getSignatureAlgorithm()))
+                    .setCanonicalizationAlgorithm(CanonicalizationMethod.fromUrn(impl.getCanonicalizationAlgorithm()))
+                    .setSignatureValue(org.apache.xml.security.utils.Base64.encode(impl.getXMLSignature().getSignatureValue()))
+                    ;
+            } catch (XMLSignatureException e) {
+                //TODO - ignore for now
+            }
+        }
+        return result;
     }
 
     protected XMLObject parse(String xml) {
@@ -1003,18 +1023,21 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {
         XMLObject parsed = parse(xml);
-        validateSignature((SignableSAMLObject) parsed, trustedKeys);
+        Signature signature = validateSignature((SignableSAMLObject) parsed, trustedKeys);
         if (parsed instanceof EntityDescriptor) {
-            return resolveMetadata((EntityDescriptor) parsed);
+            return resolveMetadata((EntityDescriptor) parsed)
+                .setSignature(signature);
         }
         if (parsed instanceof AuthnRequest) {
-            return resolveAuthenticationRequest((AuthnRequest) parsed);
+            return resolveAuthenticationRequest((AuthnRequest) parsed)
+                .setSignature(signature);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
             return resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, trustedKeys);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
-            return resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, trustedKeys);
+            return resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, trustedKeys)
+                .setSignature(signature);
         }
         throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
     }
@@ -1040,12 +1063,13 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     protected Status getStatus(org.opensaml.saml.saml2.core.Status status) {
         return new Status()
             .setCode(StatusCode.fromUrn(status.getStatusCode().getValue()))
-            .setMessage(status.getStatusMessage()!=null ? status.getStatusMessage().getMessage() : null);
+            .setMessage(status.getStatusMessage() != null ? status.getStatusMessage().getMessage() : null);
     }
 
     protected Assertion resolveAssertion(org.opensaml.saml.saml2.core.Assertion parsed, List<SimpleKey> trustedKeys) {
-        validateSignature(parsed, trustedKeys);
+        Signature signature = validateSignature(parsed, trustedKeys);
         return new Assertion()
+            .setSignature(signature)
             .setId(parsed.getID())
             .setIssueInstant(parsed.getIssueInstant())
             .setVersion(parsed.getVersion().toString())
@@ -1234,7 +1258,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             .setNameQualifier(issuer.getNameQualifier());
     }
 
-    protected Saml2Object resolveAuthenticationRequest(AuthnRequest parsed) {
+    protected AuthenticationRequest resolveAuthenticationRequest(AuthnRequest parsed) {
         AuthnRequest request = parsed;
         AuthenticationRequest result = new AuthenticationRequest()
             .setBinding(Binding.fromUrn(request.getProtocolBinding()))
@@ -1276,7 +1300,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return result;
     }
 
-    protected Saml2Object resolveMetadata(EntityDescriptor parsed) {
+    protected Metadata resolveMetadata(EntityDescriptor parsed) {
         EntityDescriptor descriptor = parsed;
         List<? extends Provider> ssoProviders = getSsoProviders(descriptor);
         Metadata desc = getMetadata(ssoProviders);

@@ -15,10 +15,9 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import javax.xml.crypto.dsig.XMLSignature;
-
 import org.joda.time.DateTime;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 public class StatusResponse<T extends StatusResponse> implements Saml2Object {
 
@@ -29,7 +28,7 @@ public class StatusResponse<T extends StatusResponse> implements Saml2Object {
     private String destination;
     private String consent;
     private Issuer issuer;
-    private XMLSignature signature;
+    private Signature signature;
     private Status status;
 
     @SuppressWarnings("checked")
@@ -100,11 +99,11 @@ public class StatusResponse<T extends StatusResponse> implements Saml2Object {
         return _this();
     }
 
-    public XMLSignature getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
-    public T setSignature(XMLSignature signature) {
+    public T setSignature(Signature signature) {
         this.signature = signature;
         return _this();
     }

@@ -31,4 +31,13 @@ public enum AlgorithmMethod {
     public String toString() {
         return urn;
     }
+
+    public static AlgorithmMethod fromUrn(String urn) {
+        for (AlgorithmMethod m : values()) {
+            if (m.urn.equalsIgnoreCase(urn)) {
+                return m;
+            }
+        }
+        return null;
+    }
 }

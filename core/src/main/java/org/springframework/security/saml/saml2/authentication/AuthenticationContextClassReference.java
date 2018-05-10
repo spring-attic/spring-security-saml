@@ -150,7 +150,7 @@ public enum AuthenticationContextClassReference {
 
     public static AuthenticationContextClassReference fromUrn(String ctxRef) {
         for (AuthenticationContextClassReference ref : values()) {
-            if (ref.urn.equals(ctxRef)) {
+            if (ref.urn.equalsIgnoreCase(ctxRef)) {
                 return ref;
             }
         }

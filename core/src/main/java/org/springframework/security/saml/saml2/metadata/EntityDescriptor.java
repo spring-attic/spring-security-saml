@@ -15,7 +15,6 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
-import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.datatype.Duration;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 import static org.springframework.security.saml.init.SpringSecuritySaml.durationToMillis;
 import static org.springframework.security.saml.init.SpringSecuritySaml.millisToDuration;
@@ -43,7 +43,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     private DateTime validUntil;
     private Duration cacheDuration;
     private List<? extends Provider> providers;
-    private XMLSignature signature;
+    private Signature signature;
     private SimpleKey signingKey;
     private AlgorithmMethod algorithm;
     private DigestMethod digest;
@@ -112,7 +112,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
         return result;
     }
 
-    public XMLSignature getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
@@ -149,7 +149,7 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
         return _this();
     }
 
-    public T setSignature(XMLSignature signature) {
+    public T setSignature(Signature signature) {
         this.signature = signature;
         return _this();
     }

@@ -48,6 +48,15 @@ public enum DigestMethod {
         this.urn = urn;
     }
 
+    public static DigestMethod fromUrn(String digestAlgorithm) {
+        for (DigestMethod m : values()) {
+            if (m.urn.equalsIgnoreCase(digestAlgorithm)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return urn;

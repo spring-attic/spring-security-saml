@@ -71,6 +71,10 @@ class AuthenticationRequestTests extends MetadataBase {
         String xml = getInstance().toXml(request);
         AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);
+
+        assertNotNull(data.getSignature());
+
+
         assertSame(Binding.POST, data.getBinding());
         assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());
         assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());

@@ -15,11 +15,11 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import javax.xml.crypto.dsig.XMLSignature;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 public class Request<T extends Request<T>> {
 
@@ -28,7 +28,7 @@ public class Request<T extends Request<T>> {
     }
 
     private Issuer issuer;
-    private XMLSignature signature;
+    private Signature signature;
     private List<Object> extensions;
 
     private String id;
@@ -41,7 +41,7 @@ public class Request<T extends Request<T>> {
         return issuer;
     }
 
-    public XMLSignature getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
@@ -70,7 +70,7 @@ public class Request<T extends Request<T>> {
         return _this();
     }
 
-    public T setSignature(XMLSignature signature) {
+    public T setSignature(Signature signature) {
         this.signature = signature;
         return _this();
     }

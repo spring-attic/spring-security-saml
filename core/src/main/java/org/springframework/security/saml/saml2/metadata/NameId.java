@@ -44,7 +44,7 @@ public enum NameId {
 
     public static NameId fromUrn(String other) {
         for (NameId name : values()) {
-            if (name.toString().equals(other)) {
+            if (name.urn.equalsIgnoreCase(other)) {
                 return name;
             }
         }

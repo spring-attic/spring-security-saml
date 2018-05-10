@@ -38,7 +38,7 @@ public enum SubjectConfirmationMethod {
 
     public static SubjectConfirmationMethod fromUrn(String other) {
         for (SubjectConfirmationMethod method : values()) {
-            if (method.toString().equals(other)) {
+            if (method.urn.equalsIgnoreCase(other)) {
                 return method;
             }
         }

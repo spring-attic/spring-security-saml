@@ -44,7 +44,7 @@ public enum Binding {
 
     public static Binding fromUrn(String other) {
         for (Binding binding : values()) {
-            if (binding.toString().equals(other)) {
+            if (binding.urn.equalsIgnoreCase(other)) {
                 return binding;
             }
         }

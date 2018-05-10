@@ -15,17 +15,17 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import javax.xml.crypto.dsig.XMLSignature;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 public class Assertion implements Saml2Object {
 
@@ -33,7 +33,7 @@ public class Assertion implements Saml2Object {
     private String id;
     private DateTime issueInstant;
     private Issuer issuer;
-    private XMLSignature signature;
+    private Signature signature;
     private Subject subject;
     private Conditions conditions;
     private Advice advice;
@@ -85,11 +85,11 @@ public class Assertion implements Saml2Object {
         return this;
     }
 
-    public XMLSignature getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
-    public Assertion setSignature(XMLSignature signature) {
+    public Assertion setSignature(Signature signature) {
         this.signature = signature;
         return this;
     }

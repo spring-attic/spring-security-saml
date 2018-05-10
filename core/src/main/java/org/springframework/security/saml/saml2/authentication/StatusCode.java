@@ -49,7 +49,7 @@ public enum StatusCode {
 
     public static StatusCode fromUrn(String urn) {
         for (StatusCode c : values()) {
-            if (c.urn.equals(urn)) {
+            if (c.urn.equalsIgnoreCase(urn)) {
                 return c;
             }
         }

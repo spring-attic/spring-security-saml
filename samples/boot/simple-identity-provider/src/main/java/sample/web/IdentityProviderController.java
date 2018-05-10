@@ -77,16 +77,11 @@ public class IdentityProviderController {
         return SpringSecuritySaml.getInstance().toXml(metadata);
     }
 
-    protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
-        String base = getBasePath(request);
-        return Defaults.identityProviderMetadata(base, null, null);
-    }
-
     @RequestMapping("/saml/idp/init")
     public String idpInitiate(HttpServletRequest request,
                               Model model,
                               @RequestParam(name = "sp", required = true) String entityId) {
-        //receive AuthnRequest
+        //no authnrequest provided
         ServiceProviderMetadata metadata = byEntityId.get(entityId);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = assertion(metadata, local, null);
@@ -140,4 +135,11 @@ public class IdentityProviderController {
         List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
         return acs.get(0).getLocation();
     }
+
+
+    protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
+        String base = getBasePath(request);
+        return Defaults.identityProviderMetadata(base, null, null);
+    }
+
 }

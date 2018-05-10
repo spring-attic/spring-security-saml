@@ -79,9 +79,9 @@ public class ServiceProviderController {
 
     @RequestMapping("/saml/sp/select")
     public String selectProvider(HttpServletRequest request, Model model) {
-        List<Provider> providers =
+        List<ModelProvider> providers =
             configuration.getServiceProvider().getIdentityProviders().stream().map(
-                p -> new Provider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
+                p -> new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
             )
             .collect(Collectors.toList());
         model.addAttribute("idps", providers);
@@ -113,17 +113,6 @@ public class ServiceProviderController {
         return new RedirectView(url);
     }
 
-    protected String getAuthnRequestRedirect(HttpServletRequest request,
-                                           IdentityProviderMetadata m,
-                                           AuthenticationRequest authenticationRequest) {
-        String xml = springSecuritySaml.toXml(authenticationRequest);
-        String deflated = springSecuritySaml.deflateAndEncode(xml);
-        Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
-        UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
-        url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
-        return url.build(true).toUriString();
-    }
-
     @RequestMapping("/saml/sp/SSO")
     public View sso(HttpServletRequest request,
                       @RequestParam(name = "SAMLResponse", required = true) String response) {
@@ -136,7 +125,7 @@ public class ServiceProviderController {
         return new RedirectView("/");
     }
 
-    public static class Provider {
+    public static class ModelProvider {
         private String linkText;
         private String redirect;
 
@@ -144,7 +133,7 @@ public class ServiceProviderController {
             return linkText;
         }
 
-        public Provider setLinkText(String linkText) {
+        public ModelProvider setLinkText(String linkText) {
             this.linkText = linkText;
             return this;
         }
@@ -153,10 +142,21 @@ public class ServiceProviderController {
             return redirect;
         }
 
-        public Provider setRedirect(String redirect) {
+        public ModelProvider setRedirect(String redirect) {
             this.redirect = redirect;
             return this;
         }
+    }
+
+    protected String getAuthnRequestRedirect(HttpServletRequest request,
+                                             IdentityProviderMetadata m,
+                                             AuthenticationRequest authenticationRequest) {
+        String xml = springSecuritySaml.toXml(authenticationRequest);
+        String deflated = springSecuritySaml.deflateAndEncode(xml);
+        Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
+        UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
+        url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
+        return url.build(true).toUriString();
     }
 
     protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {

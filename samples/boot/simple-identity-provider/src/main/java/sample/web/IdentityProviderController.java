@@ -16,6 +16,7 @@ package sample.web;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Status;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -78,6 +82,30 @@ public class IdentityProviderController {
         return Defaults.identityProviderMetadata(base, null, null);
     }
 
+    @RequestMapping("/saml/idp/init")
+    public String idpInitiate(HttpServletRequest request,
+                              Model model,
+                              @RequestParam(name = "sp", required = true) String entityId) {
+        //receive AuthnRequest
+        ServiceProviderMetadata metadata = byEntityId.get(entityId);
+        IdentityProviderMetadata local = getIdentityProviderMetadata(request);
+        Assertion assertion = assertion(metadata, local, null);
+        NameIdPrincipal principal = (NameIdPrincipal)assertion.getSubject().getPrincipal();
+        principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
+        principal.setFormat(NameId.PERSISTENT);
+        Response response = Defaults.response(null,
+                                              assertion,
+                                              metadata,
+                                              local
+        );
+        response.setStatus(new Status().setCode(StatusCode.SUCCESS));
+
+        String encoded = springSecuritySaml.deflateAndEncode(springSecuritySaml.toXml(response));
+        model.addAttribute("url", getAcs(metadata));
+        model.addAttribute("SAMLResponse", encoded);
+        return "saml-post";
+    }
+
     @RequestMapping("/saml/idp/SSO")
     public String authenticationRequest(HttpServletRequest request,
                                         Model model,
@@ -97,7 +125,7 @@ public class IdentityProviderController {
                                               metadata,
                                               local
         );
-
+        response.setStatus(new Status().setCode(StatusCode.SUCCESS));
         String encoded = springSecuritySaml.deflateAndEncode(springSecuritySaml.toXml(response));
         model.addAttribute("url", authenticationRequest.getAssertionConsumerService().getLocation());
         model.addAttribute("SAMLResponse", encoded);
@@ -106,5 +134,10 @@ public class IdentityProviderController {
 
     protected String getBasePath(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    protected String getAcs(ServiceProviderMetadata metadata) {
+        List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
+        return acs.get(0).getLocation();
     }
 }

@@ -70,7 +70,7 @@ public class Signature {
     }
 
     public Signature setValidated(boolean b) {
-        this.validated = true;
+        this.validated = b;
         return this;
     }
 

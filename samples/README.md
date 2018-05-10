@@ -8,13 +8,13 @@ How to run a simple sample of an Identity Provider (IDP) and Service Provider (S
 
 **Step 2 - Start the Service Provider**
 
-Service Provider runs on localhost:8000
+Service Provider runs on `http://localhost:8000`
 
     ./gradlew :spring-security-saml-samples/boot/simple-service-provider:bootRun &
 
 **Step 3 - Start the Identity Provider**
 
-Service Provider runs on localhost:8001
+Service Provider runs on `http://localhost:8001`
 
     ./gradlew :spring-security-saml-samples/boot/simple-identity-provider:bootRun &
     

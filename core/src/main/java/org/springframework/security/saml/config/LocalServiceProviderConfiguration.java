@@ -15,5 +15,8 @@
 
 package org.springframework.security.saml.config;
 
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class LocalServiceProviderConfiguration extends LocalProviderConfiguration<LocalServiceProviderConfiguration> {
 }

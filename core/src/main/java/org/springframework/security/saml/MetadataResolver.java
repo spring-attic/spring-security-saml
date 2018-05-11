@@ -16,15 +16,17 @@
 package org.springframework.security.saml;
 
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface MetadataResolver {
 
-     Object getLocalServiceProvider();
-     Object getLocalIdentityProvider();
+     ServiceProviderMetadata getLocalServiceProvider();
+     IdentityProviderMetadata getLocalIdentityProvider();
 
-     Object resolveIdentityProvider(AuthenticationRequest request);
+     IdentityProviderMetadata resolveIdentityProvider(AuthenticationRequest request);
 
-     Object resolveIdentityProvider(String entityId);
-     Object resolveServiceProvider(String entityId);
+     IdentityProviderMetadata resolveIdentityProvider(String entityId);
+     ServiceProviderMetadata resolveServiceProvider(String entityId);
 
 }

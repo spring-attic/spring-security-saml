@@ -58,18 +58,11 @@ import java.util.zip.InflaterOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
 
 public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
-
-    private static final SpringSecuritySaml INSTANCE = new OpenSamlConfiguration();
-
-    public static SpringSecuritySaml getInstance() {
-        return INSTANCE;
-    }
 
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 
@@ -93,15 +86,11 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
     }
 
     public long durationToMillis(Duration duration) {
-        return getInstance()
-            .init()
-            .toMillis(duration);
+        return toMillis(duration);
     }
 
     public Duration millisToDuration(long millis) {
-        return getInstance()
-            .init()
-            .toDuration(millis);
+        return toDuration(millis);
     }
 
     protected abstract void bootstrap();

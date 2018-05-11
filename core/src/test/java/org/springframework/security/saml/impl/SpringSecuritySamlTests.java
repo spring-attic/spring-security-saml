@@ -34,27 +34,29 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.security.saml.spi.SpringSecuritySaml.getInstance;
 
 public class SpringSecuritySamlTests {
 
+    private SpringSecuritySaml instance = new OpenSamlConfiguration();
+
     @Test
     public void init_works() {
-        getInstance().init();
+        instance.init();
     }
 
     @Test
     public void multipe_calls_to_init_works() {
-        getInstance().init();
-        getInstance().init();
+        instance.init();
+        instance.init();
     }
 
     @Test
     public void deflate_inflate() throws Exception {
-        SpringSecuritySaml saml = getInstance().init();
+        SpringSecuritySaml saml = instance.init();
         String s = UUID.randomUUID().toString();
         String deflated = saml.deflateAndEncode(s);
         String inflated = saml.decodeAndInflate(deflated);

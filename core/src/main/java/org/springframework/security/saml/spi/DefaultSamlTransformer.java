@@ -37,6 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
 public class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
 
@@ -48,7 +49,7 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        implementation = SpringSecuritySaml.getInstance().init();
+        implementation = new OpenSamlConfiguration().init();
         defaults = new Defaults();
     }
 
@@ -103,5 +104,15 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
     @Override
     public Defaults getDefaults() {
         return defaults;
+    }
+
+    public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
+        this.implementation = implementation;
+        return this;
+    }
+
+    public SamlTransformer setDefaults(Defaults defaults) {
+        this.defaults = defaults;
+        return this;
     }
 }

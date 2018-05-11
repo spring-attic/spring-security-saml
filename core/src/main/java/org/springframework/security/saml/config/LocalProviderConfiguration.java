@@ -19,26 +19,65 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.key.SimpleKey;
 
 @Configuration
-public class LocalProviderConfiguration {
+public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
-    private List<ExternalProviderConfiguration> identityProviders = new LinkedList<>();
-    private List<ExternalProviderConfiguration> serviceProviders = new LinkedList<>();
+    private String entityId;
+    private List<SimpleKey> active;
+    private List<SimpleKey> standby;
+    private boolean signMetadata;
 
-    public void setIdentityProviders(List<ExternalProviderConfiguration> idps) {
-        this.identityProviders = idps;
+    private List<ExternalProviderConfiguration> providers = new LinkedList<>();
+
+    @SuppressWarnings("checked")
+    protected T _this() {
+        return (T)this;
     }
 
-    public List<ExternalProviderConfiguration> getIdentityProviders() {
-        return identityProviders;
+    public T setProviders(List<ExternalProviderConfiguration> idps) {
+        this.providers = idps;
+        return _this();
     }
 
-    public List<ExternalProviderConfiguration> getServiceProviders() {
-        return serviceProviders;
+    public List<ExternalProviderConfiguration> getProviders() {
+        return providers;
     }
 
-    public void setServiceProviders(List<ExternalProviderConfiguration> serviceProviders) {
-        this.serviceProviders = serviceProviders;
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public T setEntityId(String entityId) {
+        this.entityId = entityId;
+        return _this();
+    }
+
+    public List<SimpleKey> getActive() {
+        return active;
+    }
+
+    public T setActive(List<SimpleKey> active) {
+        this.active = active;
+        return _this();
+    }
+
+    public List<SimpleKey> getStandby() {
+        return standby;
+    }
+
+    public T setStandby(List<SimpleKey> standby) {
+        this.standby = standby;
+        return _this();
+    }
+
+    public boolean isSignMetadata() {
+        return signMetadata;
+    }
+
+    public T setSignMetadata(boolean signMetadata) {
+        this.signMetadata = signMetadata;
+        return _this();
     }
 }

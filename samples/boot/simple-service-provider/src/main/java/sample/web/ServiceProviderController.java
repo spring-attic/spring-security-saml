@@ -62,7 +62,7 @@ public class ServiceProviderController {
     @Autowired
     public void setAppConfig(AppConfig config) {
         this.configuration = config;
-        this.configuration.getServiceProvider().getIdentityProviders().stream().forEach(
+        this.configuration.getServiceProvider().getProviders().stream().forEach(
             p -> {
                 byName.put(p.getName(), p);
                 IdentityProviderMetadata m = (IdentityProviderMetadata) springSecuritySaml.resolve(p.getMetadata(), null);
@@ -80,7 +80,7 @@ public class ServiceProviderController {
     @RequestMapping("/saml/sp/select")
     public String selectProvider(HttpServletRequest request, Model model) {
         List<ModelProvider> providers =
-            configuration.getServiceProvider().getIdentityProviders().stream().map(
+            configuration.getServiceProvider().getProviders().stream().map(
                 p -> new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
             )
             .collect(Collectors.toList());

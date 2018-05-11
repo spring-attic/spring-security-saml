@@ -17,10 +17,9 @@ package org.springframework.security.saml.config;
 
 public class ExternalProviderConfiguration {
     private String name;
-    private String url;
     private String metadata;
     private String linktext;
-    private boolean trustcheck;
+    private boolean skipSslValidation = false;
 
     public ExternalProviderConfiguration() {
     }
@@ -31,15 +30,6 @@ public class ExternalProviderConfiguration {
 
     public ExternalProviderConfiguration setName(String name) {
         this.name = name;
-        return this;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public ExternalProviderConfiguration setUrl(String url) {
-        this.url = url;
         return this;
     }
 
@@ -61,12 +51,14 @@ public class ExternalProviderConfiguration {
         return this;
     }
 
-    public boolean isTrustcheck() {
-        return trustcheck;
+    public boolean isSkipSslValidation() {
+        return skipSslValidation;
     }
 
-    public ExternalProviderConfiguration setTrustcheck(boolean trustcheck) {
-        this.trustcheck = trustcheck;
+    public ExternalProviderConfiguration setSkipSslValidation(boolean skipSslValidation) {
+        this.skipSslValidation = skipSslValidation;
         return this;
     }
+
+
 }

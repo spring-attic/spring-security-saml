@@ -14,7 +14,32 @@ spring:
   security:
     saml2:
       identity-provider:
-        service-providers:
+        entity-id: ~
+        sign-metadata: true
+        sign-assertions: true
+        want-requests-signed: true
+        keys:
+          active:
+            - id: key1
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+          standby:
+            - id: key2
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+            - id: key3
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+        providers:
         - name: spring-security-saml-sp
           metadata: |
             <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="http://localhost:8000"
@@ -34,5 +59,4 @@ spring:
               </md:SPSSODescriptor>
             </md:EntityDescriptor>
           linktext: Spring Security SAML SP
-          trustcheck: false
 

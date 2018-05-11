@@ -20,23 +20,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SamlConfiguration {
 
-    private LocalProviderConfiguration serviceProvider;
-    private LocalProviderConfiguration identityProvider;
+    private LocalServiceProviderConfiguration serviceProvider;
+    private LocalIdentityProviderConfiguration identityProvider;
 
-    public LocalProviderConfiguration getServiceProvider() {
+    public LocalServiceProviderConfiguration getServiceProvider() {
         return serviceProvider;
     }
 
-    public SamlConfiguration setServiceProvider(LocalProviderConfiguration serviceProvider) {
+    public SamlConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
         this.serviceProvider = serviceProvider;
         return this;
     }
 
-    public LocalProviderConfiguration getIdentityProvider() {
+    public LocalIdentityProviderConfiguration getIdentityProvider() {
         return identityProvider;
     }
 
-    public SamlConfiguration setIdentityProvider(LocalProviderConfiguration identityProvider) {
+    public SamlConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
         this.identityProvider = identityProvider;
         return this;
     }

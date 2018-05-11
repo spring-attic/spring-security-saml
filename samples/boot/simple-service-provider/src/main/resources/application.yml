@@ -14,7 +14,32 @@ spring:
   security:
     saml2:
       service-provider:
-        identity-providers:
+        keys:
+          entity-id: ~
+          sign-metadata: true
+          sign-requests: true
+          want-assertions-signed: true
+          active:
+            - id: key1
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+          standby:
+            - id: key2
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+            - id: key3
+              private: |
+                private pem key here
+              passphrase: password
+              certificate: |
+                x509 certificate here
+        providers:
         - name: spring-security-saml-idp
           metadata: |
             <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="1986fee3-517c-44d0-8e8d-b841a943396a"
@@ -32,5 +57,4 @@ spring:
                                         Location="http://localhost:8001/saml/idp/SSO"/>
               </md:IDPSSODescriptor>
             </md:EntityDescriptor>
-          linktext: Spring Security SAML IDP
-          trustcheck: false
+          link-text: Spring Security SAML IDP

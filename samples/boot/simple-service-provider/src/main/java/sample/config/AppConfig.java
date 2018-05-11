@@ -17,10 +17,10 @@ package sample.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.config.SamlConfiguration;
+import org.springframework.security.saml.config.SamlServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
 @Configuration
-public class AppConfig extends SamlConfiguration {
+public class AppConfig extends SamlServerConfiguration {
 
 }

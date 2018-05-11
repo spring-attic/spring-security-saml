@@ -18,7 +18,7 @@ package org.springframework.security.saml.config;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SamlConfiguration {
+public class SamlServerConfiguration {
 
     private LocalServiceProviderConfiguration serviceProvider;
     private LocalIdentityProviderConfiguration identityProvider;
@@ -27,7 +27,7 @@ public class SamlConfiguration {
         return serviceProvider;
     }
 
-    public SamlConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
+    public SamlServerConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
         this.serviceProvider = serviceProvider;
         return this;
     }
@@ -36,7 +36,7 @@ public class SamlConfiguration {
         return identityProvider;
     }
 
-    public SamlConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
+    public SamlServerConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
         this.identityProvider = identityProvider;
         return this;
     }

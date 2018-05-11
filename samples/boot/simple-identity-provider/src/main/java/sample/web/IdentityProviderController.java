@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.config.SamlConfiguration;
+import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
@@ -48,7 +48,7 @@ import sample.config.AppConfig;
 public class IdentityProviderController {
 
     private SamlTransformer transformer;
-    private SamlConfiguration configuration;
+    private SamlServerConfiguration configuration;
     private Map<String, ExternalProviderConfiguration> byName = new HashMap();
     private Map<String, ServiceProviderMetadata> byEntityId = new HashMap();
     private Map<String, String> nameToEntityId = new HashMap();

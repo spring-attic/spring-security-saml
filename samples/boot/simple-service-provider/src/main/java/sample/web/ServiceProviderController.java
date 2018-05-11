@@ -29,7 +29,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.config.SamlConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -50,7 +49,7 @@ import sample.config.AppConfig;
 @Controller
 public class ServiceProviderController {
 
-    private SamlConfiguration configuration;
+    private AppConfig configuration;
     private Map<String, ExternalProviderConfiguration> byName = new HashMap();
     private Map<String, IdentityProviderMetadata> byEntityId = new HashMap();
     private Map<String, String> nameToEntityId = new HashMap();

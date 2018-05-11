@@ -51,8 +51,6 @@ import static org.springframework.security.saml.saml2.authentication.Authenticat
 import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
 import static org.springframework.security.saml.saml2.authentication.StatusCode.SUCCESS;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
-import static org.springframework.security.saml.init.Defaults.assertion;
-import static org.springframework.security.saml.init.Defaults.authenticationRequest;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
@@ -61,7 +59,6 @@ import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
 import static org.springframework.security.saml.util.XmlTestUtil.toZuluTime;
 
 public class AssertionTests extends MetadataBase {
-
 
     @Test
     public void create_saml_response() throws Exception {
@@ -191,8 +188,8 @@ public class AssertionTests extends MetadataBase {
     @Test
     public void create_with_request() throws Exception {
 
-        AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-        Assertion assertion = assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        Assertion assertion = config.getDefaults().assertion(serviceProviderMetadata, identityProviderMetadata, request);
 
         assertNotNull(assertion);
 
@@ -249,9 +246,9 @@ public class AssertionTests extends MetadataBase {
 
     @Test
     public void check_xml() throws URISyntaxException, IOException {
-        AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-        Assertion assertion = assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        Assertion assertion = config.getDefaults().assertion(serviceProviderMetadata, identityProviderMetadata, request);
 
         String username = "test@test.com";
 

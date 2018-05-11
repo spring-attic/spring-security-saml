@@ -27,10 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlConfiguration;
-import org.springframework.security.saml.init.Defaults;
-import org.springframework.security.saml.init.SpringSecuritySaml;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -48,16 +47,19 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 import sample.config.AppConfig;
 
-import static org.springframework.security.saml.init.Defaults.authenticationRequest;
-
 @Controller
 public class ServiceProviderController {
 
-    private SpringSecuritySaml springSecuritySaml = SpringSecuritySaml.getInstance().init();
     private SamlConfiguration configuration;
     private Map<String, ExternalProviderConfiguration> byName = new HashMap();
     private Map<String, IdentityProviderMetadata> byEntityId = new HashMap();
     private Map<String, String> nameToEntityId = new HashMap();
+    private SamlTransformer transformer;
+
+    @Autowired
+    public void setTransformer(SamlTransformer transformer) {
+        this.transformer = transformer;
+    }
 
     @Autowired
     public void setAppConfig(AppConfig config) {
@@ -65,7 +67,7 @@ public class ServiceProviderController {
         this.configuration.getServiceProvider().getProviders().stream().forEach(
             p -> {
                 byName.put(p.getName(), p);
-                IdentityProviderMetadata m = (IdentityProviderMetadata) springSecuritySaml.resolve(p.getMetadata(), null);
+                IdentityProviderMetadata m = (IdentityProviderMetadata) transformer.resolve(p.getMetadata(), null);
                 byEntityId.put(m.getEntityId(), m);
                 nameToEntityId.put(p.getName(), m.getEntityId());
             }
@@ -99,7 +101,7 @@ public class ServiceProviderController {
     public @ResponseBody()
     String metadata(HttpServletRequest request) {
         ServiceProviderMetadata metadata = getServiceProviderMetadata(request);
-        return SpringSecuritySaml.getInstance().toXml(metadata);
+        return transformer.toXml(metadata);
     }
 
     @RequestMapping("/saml/sp/discovery")
@@ -108,7 +110,7 @@ public class ServiceProviderController {
         //create authnrequest
         IdentityProviderMetadata m = byEntityId.get(idp);
         ServiceProviderMetadata local = getServiceProviderMetadata(request);
-        AuthenticationRequest authenticationRequest = authenticationRequest(local, m);
+        AuthenticationRequest authenticationRequest = transformer.getDefaults().authenticationRequest(local, m);
         String url = getAuthnRequestRedirect(request, m, authenticationRequest);
         return new RedirectView(url);
     }
@@ -117,8 +119,8 @@ public class ServiceProviderController {
     public View sso(HttpServletRequest request,
                       @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
-        String xml = springSecuritySaml.decodeAndInflate(response);
-        Response r = (Response) springSecuritySaml.resolve(xml, null);
+        String xml = transformer.samlDecode(response);
+        Response r = (Response) transformer.resolve(xml, null);
         NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(token);
@@ -153,8 +155,8 @@ public class ServiceProviderController {
     protected String getAuthnRequestRedirect(HttpServletRequest request,
                                              IdentityProviderMetadata m,
                                              AuthenticationRequest authenticationRequest) {
-        String xml = springSecuritySaml.toXml(authenticationRequest);
-        String deflated = springSecuritySaml.deflateAndEncode(xml);
+        String xml = transformer.toXml(authenticationRequest);
+        String deflated = transformer.samlEncode(xml);
         Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
         UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
         url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
@@ -163,7 +165,7 @@ public class ServiceProviderController {
 
     protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
         String base = getBasePath(request);
-        return Defaults.serviceProviderMetadata(base, null, null);
+        return transformer.getDefaults().serviceProviderMetadata(base, null, null);
     }
 
     protected String getBasePath(HttpServletRequest request) {

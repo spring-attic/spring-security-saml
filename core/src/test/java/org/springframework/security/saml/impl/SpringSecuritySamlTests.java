@@ -28,15 +28,16 @@
  *
  */
 
-package org.springframework.security.saml.init;
+package org.springframework.security.saml.impl;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
+import static org.springframework.security.saml.spi.SpringSecuritySaml.getInstance;
 
 public class SpringSecuritySamlTests {
 

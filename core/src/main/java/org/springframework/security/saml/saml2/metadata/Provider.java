@@ -24,8 +24,6 @@ import org.joda.time.DateTime;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.signature.Signature;
 
-import static org.springframework.security.saml.init.SpringSecuritySaml.millisToDuration;
-
 public class Provider<T extends Provider<T>> {
 
     private Signature signature;
@@ -92,10 +90,6 @@ public class Provider<T extends Provider<T>> {
     public T setCacheDuration(Duration cacheDuration) {
         this.cacheDuration = cacheDuration;
         return (T) this;
-    }
-
-    public T setCacheDurationMillis(long millis) {
-        return setCacheDuration(millisToDuration(millis));
     }
 
     public T setProtocolSupportEnumeration(List<String> protocolSupportEnumeration) {

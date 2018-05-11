@@ -28,7 +28,22 @@
  *
  */
 
-package org.springframework.security.saml.init;
+/*
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package org.springframework.security.saml.spi;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,24 +75,28 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.util.Arrays.asList;
-import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext.exact;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 
 public class Defaults {
 
-    public static AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
-    public static DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
-    public static long NOT_BEFORE = 60000;
-    public static long NOT_AFTER = 120000;
-    public static long SESSION_NOT_AFTER = 30 * 60 * 1000;
+    public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
+    public DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
+    public long NOT_BEFORE = 60000;
+    public long NOT_AFTER = 120000;
+    public long SESSION_NOT_AFTER = 30 * 60 * 1000;
 
-    public static ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-                                                                  List<SimpleKey> keys,
-                                                                  SimpleKey signingKey) {
+
+    public Defaults() {
+    }
+
+    public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
+                                                           List<SimpleKey> keys,
+                                                           SimpleKey signingKey) {
         return new ServiceProviderMetadata()
             .setEntityId(baseUrl)
             .setId(UUID.randomUUID().toString())
@@ -90,24 +109,24 @@ public class Defaults {
                         .setAuthnRequestsSigned(signingKey != null)
                         .setAssertionConsumerService(
                             asList(
-                                getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
-                                getInstance().init().getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
+                                getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
+                                getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
                         .setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             asList(
-                                getInstance().init().getEndpoint(baseUrl, "saml/sp/logout", Binding.REDIRECT, 0, true)
+                                getEndpoint(baseUrl, "saml/sp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
                 )
             );
     }
 
-    public static IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-                                                                    List<SimpleKey> keys,
-                                                                    SimpleKey signingKey) {
+    public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+                                                             List<SimpleKey> keys,
+                                                             SimpleKey signingKey) {
         return new IdentityProviderMetadata()
             .setEntityId(baseUrl)
             .setId(UUID.randomUUID().toString())
@@ -118,15 +137,15 @@ public class Defaults {
                         .setWantAuthnRequestsSigned(true)
                         .setSingleSignOnService(
                             asList(
-                                getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
-                                getInstance().init().getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
+                                getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
+                                getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
                             )
                         )
                         .setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
                         .setKeys(keys)
                         .setSingleLogoutService(
                             asList(
-                                getInstance().init().getEndpoint(baseUrl, "saml/idp/logout", Binding.REDIRECT, 0, true)
+                                getEndpoint(baseUrl, "saml/idp/logout", Binding.REDIRECT, 0, true)
                             )
                         )
                 )
@@ -134,7 +153,7 @@ public class Defaults {
 
     }
 
-    public static AuthenticationRequest authenticationRequest(
+    public AuthenticationRequest authenticationRequest(
         ServiceProviderMetadata sp,
         IdentityProviderMetadata idp) {
 
@@ -169,7 +188,7 @@ public class Defaults {
         return request;
     }
 
-    public static Assertion assertion(
+    public Assertion assertion(
         ServiceProviderMetadata sp,
         IdentityProviderMetadata idp,
         AuthenticationRequest request) {
@@ -227,7 +246,7 @@ public class Defaults {
 
     }
 
-    private static Endpoint getACSFromSp(ServiceProviderMetadata sp) {
+    private Endpoint getACSFromSp(ServiceProviderMetadata sp) {
         Endpoint endpoint = sp.getServiceProvider().getAssertionConsumerService().get(0);
         for (Endpoint e : sp.getServiceProvider().getAssertionConsumerService()) {
             if (e.isDefault()) {
@@ -238,10 +257,10 @@ public class Defaults {
     }
 
 
-    public static Response response(String inResponseTo,
-                                    Assertion assertion,
-                                    ServiceProviderMetadata sp,
-                                    IdentityProviderMetadata idp) {
+    public Response response(String inResponseTo,
+                             Assertion assertion,
+                             ServiceProviderMetadata sp,
+                             IdentityProviderMetadata idp) {
         return new Response()
             .setAssertions(asList(assertion))
             .setId(UUID.randomUUID().toString())
@@ -250,5 +269,21 @@ public class Defaults {
             .setIssuer(new Issuer().setValue(idp.getEntityId()))
             .setIssueInstant(new DateTime())
             .setVersion("2.0");
+    }
+
+    public Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
+        return
+            new Endpoint()
+                .setIndex(index)
+                .setBinding(binding)
+                .setLocation(url)
+                .setDefault(isDefault)
+                .setIndex(index);
+    }
+
+    public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        builder.pathSegment(path);
+        return getEndpoint(builder.build().toUriString(), binding, index, isDefault);
     }
 }

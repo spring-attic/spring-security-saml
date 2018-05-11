@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,13 +42,16 @@ public class SimpleTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private SamlTransformer transformer;
+
     @Test
     public void getIdentityProviderMetadata() throws Exception {
         MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
             .andExpect(status().isOk())
             .andReturn();
         String xml = result.getResponse().getContentAsString();
-        Metadata m = (Metadata) SpringSecuritySaml.getInstance().init().resolve(xml, null);
+        Metadata m = (Metadata) transformer.resolve(xml, null);
         assertNotNull(m);
         assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
     }

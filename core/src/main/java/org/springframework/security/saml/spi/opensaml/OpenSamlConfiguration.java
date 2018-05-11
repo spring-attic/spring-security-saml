@@ -132,7 +132,6 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
-import org.springframework.security.saml.init.SpringSecuritySaml;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -172,6 +171,8 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -442,7 +443,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     .setSignatureAlgorithm(AlgorithmMethod.fromUrn(impl.getSignatureAlgorithm()))
                     .setCanonicalizationAlgorithm(CanonicalizationMethod.fromUrn(impl.getCanonicalizationAlgorithm()))
                     .setSignatureValue(org.apache.xml.security.utils.Base64.encode(impl.getXMLSignature().getSignatureValue()))
-                    ;
+                ;
                 //TODO extract the digest value
             } catch (XMLSignatureException e) {
                 //TODO - ignore for now
@@ -1265,13 +1266,15 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         AuthenticationRequest result = new AuthenticationRequest()
             .setBinding(Binding.fromUrn(request.getProtocolBinding()))
             .setAssertionConsumerService(
-                getEndpoint(request.getAssertionConsumerServiceURL(),
-                            Binding.fromUrn(request.getProtocolBinding()),
-                            request.getAssertionConsumerServiceIndex(),
-                            false)
+                new Defaults().getEndpoint(
+                    request.getAssertionConsumerServiceURL(),
+                    Binding.fromUrn(request.getProtocolBinding()),
+                    request.getAssertionConsumerServiceIndex(),
+                    false
+                )
             )
             .setDestination(
-                getEndpoint(
+                new Defaults().getEndpoint(
                     request.getDestination(),
                     Binding.fromUrn(request.getProtocolBinding()),
                     -1,
@@ -1306,7 +1309,8 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         EntityDescriptor descriptor = parsed;
         List<? extends Provider> ssoProviders = getSsoProviders(descriptor);
         Metadata desc = getMetadata(ssoProviders);
-        desc.setCacheDurationMillis(descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1);
+        long duration = descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1;
+        desc.setCacheDuration(toDuration(duration));
         desc.setEntityId(descriptor.getEntityID());
         desc.setEntityAlias(descriptor.getEntityID());
         desc.setId(descriptor.getID());

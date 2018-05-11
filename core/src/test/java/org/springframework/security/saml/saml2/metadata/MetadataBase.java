@@ -21,15 +21,13 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.init.Defaults.identityProviderMetadata;
-import static org.springframework.security.saml.init.Defaults.serviceProviderMetadata;
-import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 
@@ -46,28 +44,28 @@ public abstract class MetadataBase {
     protected ServiceProviderMetadata serviceProviderMetadata;
     protected IdentityProviderMetadata identityProviderMetadata;
 
-    protected SpringSecuritySaml config;
+    protected static SamlTransformer config;
 
     @BeforeAll
-    public static void init() {
-        getInstance().init();
+    public static void init() throws Exception {
+        config = new DefaultSamlTransformer();
+        ((DefaultSamlTransformer) config).afterPropertiesSet();
     }
 
     @BeforeEach
     public void setup() {
-        config = getInstance();
         idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
         idpVerifying = new SimpleKey("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
         spSigning = SP_RSA_KEY.getSimpleKey("sp");
         spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
         spBaseUrl = "http://sp.localhost:8080/uaa";
         idpBaseUrl = "http://idp.localhost:8080/uaa";
-        serviceProviderMetadata = serviceProviderMetadata(
+        serviceProviderMetadata = config.getDefaults().serviceProviderMetadata(
             spBaseUrl,
             Arrays.asList(spSigning),
             spSigning
         );
-        identityProviderMetadata = identityProviderMetadata(
+        identityProviderMetadata = config.getDefaults().identityProviderMetadata(
             idpBaseUrl,
             Arrays.asList(idpSigning),
             idpSigning

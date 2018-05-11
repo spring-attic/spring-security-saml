@@ -28,7 +28,22 @@
  *
  */
 
-package org.springframework.security.saml.init;
+/*
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package org.springframework.security.saml.spi;
 
 import javax.xml.datatype.Duration;
 import java.io.ByteArrayOutputStream;
@@ -41,12 +56,9 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
@@ -80,13 +92,13 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
         }
     }
 
-    public static long durationToMillis(Duration duration) {
+    public long durationToMillis(Duration duration) {
         return getInstance()
             .init()
             .toMillis(duration);
     }
 
-    public static Duration millisToDuration(long millis) {
+    public Duration millisToDuration(long millis) {
         return getInstance()
             .init()
             .toDuration(millis);
@@ -130,19 +142,4 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
     }
 
 
-    public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
-        builder.pathSegment(path);
-        return getEndpoint(builder.build().toUriString(), binding, index, isDefault);
-    }
-
-    public Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
-        return
-            new Endpoint()
-                .setIndex(index)
-                .setBinding(binding)
-                .setLocation(url)
-                .setDefault(isDefault)
-                .setIndex(index);
-    }
 }

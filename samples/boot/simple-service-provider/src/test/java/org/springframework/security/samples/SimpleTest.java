@@ -15,7 +15,6 @@
  */
 package org.springframework.security.samples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,12 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SimpleTest {
     @Autowired
     private MockMvc mockMvc;
-    private SpringSecuritySaml init;
-
-    @BeforeEach
-    void setUp() {
-        init = SpringSecuritySaml.getInstance().init();
-    }
+    @Autowired
+    private SamlTransformer transformer;
 
     @Test
     public void getServiceProviderMetadata() throws Exception {
@@ -57,7 +52,7 @@ public class SimpleTest {
             .getResponse()
             .getContentAsString();
         assertNotNull(xml);
-        Metadata m = (Metadata) init.resolve(xml, null);
+        Metadata m = (Metadata) transformer.resolve(xml, null);
         assertNotNull(m);
         assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
     }

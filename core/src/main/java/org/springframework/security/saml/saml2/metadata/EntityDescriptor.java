@@ -26,9 +26,6 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.signature.Signature;
 
-import static org.springframework.security.saml.init.SpringSecuritySaml.durationToMillis;
-import static org.springframework.security.saml.init.SpringSecuritySaml.millisToDuration;
-
 /**
  * EntityDescriptor as defined in
  * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">
@@ -87,16 +84,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
         return cacheDuration;
     }
 
-    /**
-     * Transforms {@link #getCacheDuration()} into milli seconds.
-     *
-     * @return returns the number of milli seconds this metadata should be cached for. -1 if the value is not set.
-     */
-    public long getCacheDurationMillis() {
-        return durationToMillis(getCacheDuration());
-
-    }
-
     public List<? extends Provider> getProviders() {
         return providers;
     }
@@ -138,10 +125,6 @@ public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object
     public T setCacheDuration(Duration cacheDuration) {
         this.cacheDuration = cacheDuration;
         return _this();
-    }
-
-    public T setCacheDurationMillis(long millis) {
-        return setCacheDuration(millisToDuration(millis));
     }
 
     public T setProviders(List<? extends Provider> providers) {

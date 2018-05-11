@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.init.Defaults.authenticationRequest;
-import static org.springframework.security.saml.init.SpringSecuritySaml.getInstance;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
@@ -44,8 +42,8 @@ class AuthenticationRequestTests extends MetadataBase {
     @Test
     public void create() throws Exception {
 
-        AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-        String xml = getInstance().toXml(request);
+        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        String xml = config.toXml(request);
 
         assertNodeCount(xml, "//samlp:AuthnRequest", 1);
         Iterable<Node> nodes = getNodes(xml, "//samlp:AuthnRequest");
@@ -68,9 +66,9 @@ class AuthenticationRequestTests extends MetadataBase {
 
     @Test
     public void parse() {
-        AuthenticationRequest request = authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-        String xml = getInstance().toXml(request);
-        AuthenticationRequest data = (AuthenticationRequest) getInstance().resolve(xml, Collections.singletonList(idpVerifying));
+        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        String xml = config.toXml(request);
+        AuthenticationRequest data = (AuthenticationRequest) config.resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);
 
         assertNotNull(data.getSignature());

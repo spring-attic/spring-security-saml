@@ -15,32 +15,46 @@
  */
 package org.springframework.security.samples;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.security.saml.init.SpringSecuritySaml;
+import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SimpleTest {
     @Autowired
     private MockMvc mockMvc;
+    private SpringSecuritySaml init;
+
+    @BeforeEach
+    void setUp() {
+        init = SpringSecuritySaml.getInstance().init();
+    }
 
     @Test
     public void getServiceProviderMetadata() throws Exception {
-        mockMvc.perform(get("/saml/sp/metadata"))
+        String xml = mockMvc.perform(get("/saml/sp/metadata"))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        assertNotNull(xml);
+        Metadata m = (Metadata) init.resolve(xml, null);
     }
 
 

@@ -30,10 +30,10 @@
 
 package org.springframework.security.saml.spi;
 
-import javax.xml.datatype.Duration;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -43,30 +43,24 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
 
     private SpringSecuritySaml implementation;
     private Defaults defaults;
+    private MetadataResolver metdataResolver;
+
+    public DefaultSamlTransformer() {
+        this(new OpenSamlConfiguration());
+    }
+
+    public DefaultSamlTransformer(SpringSecuritySaml implementation) {
+        this.implementation = implementation;
+        defaults = new Defaults();
+        metdataResolver = new DefaultMetadataResolver();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        implementation = new OpenSamlConfiguration().init();
-        defaults = new Defaults();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long durationToMillis(Duration duration) {
-        return implementation.toMillis(duration);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Duration millisToDuration(long millis) {
-        return implementation.toDuration(millis);
+        implementation.init();
     }
 
     /**
@@ -106,6 +100,11 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
         return defaults;
     }
 
+    @Override
+    public MetadataResolver getMetadataResolver() {
+        return metdataResolver;
+    }
+
     public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
         this.implementation = implementation;
         return this;
@@ -113,6 +112,11 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
 
     public SamlTransformer setDefaults(Defaults defaults) {
         this.defaults = defaults;
+        return this;
+    }
+
+    public SamlTransformer setMetadataResolver(MetadataResolver resolver) {
+        this.metdataResolver = resolver;
         return this;
     }
 }

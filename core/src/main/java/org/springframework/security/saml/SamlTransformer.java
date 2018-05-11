@@ -15,7 +15,6 @@
 
 package org.springframework.security.saml;
 
-import javax.xml.datatype.Duration;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -24,10 +23,6 @@ import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.spi.Defaults;
 
 public interface SamlTransformer {
-
-    long durationToMillis(Duration duration);
-
-    Duration millisToDuration(long millis);
 
     String toXml(Saml2Object saml2Object);
 
@@ -53,4 +48,6 @@ public interface SamlTransformer {
     String samlDecode(String s);
 
     Defaults getDefaults();
+
+    MetadataResolver getMetadataResolver();
 }

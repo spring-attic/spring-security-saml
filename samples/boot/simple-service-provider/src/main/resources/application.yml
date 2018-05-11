@@ -1,5 +1,9 @@
 server:
-  port: 8000
+  port: 8080
+  servlet:
+    context-path: /sample-sp
+
+
 
 logging:
   level:
@@ -43,18 +47,18 @@ spring:
         - name: spring-security-saml-idp
           metadata: |
             <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="1986fee3-517c-44d0-8e8d-b841a943396a"
-                                 entityID="http://localhost:8001">
+                                 entityID="http://localhost:8081/sample-idp">
               <md:IDPSSODescriptor ID="10c5e228-6531-4358-b983-dcc0087f1e81" WantAuthnRequestsSigned="true"
                                    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
                 <md:Extensions/>
                 <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                        Location="http://localhost:8001/saml/idp/logout"/>
+                                        Location="http://localhost:8081/sample-idp/saml/idp/logout"/>
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
                 <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                        Location="http://localhost:8001/saml/idp/SSO"/>
+                                        Location="http://localhost:8081/sample-idp/saml/idp/SSO"/>
                 <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                        Location="http://localhost:8001/saml/idp/SSO"/>
+                                        Location="http://localhost:8081/sample-idp/saml/idp/SSO"/>
               </md:IDPSSODescriptor>
             </md:EntityDescriptor>
           link-text: Spring Security SAML IDP

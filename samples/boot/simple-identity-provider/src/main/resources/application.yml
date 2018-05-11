@@ -1,5 +1,7 @@
 server:
-  port: 8001
+  port: 8081
+  servlet:
+    context-path: /sample-idp
 
 logging:
   level:
@@ -42,19 +44,19 @@ spring:
         providers:
         - name: spring-security-saml-sp
           metadata: |
-            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="http://localhost:8000"
+            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="http://localhost:8080/sample-sp"
                                  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
               <md:SPSSODescriptor AuthnRequestsSigned="false" ID="6af07992-f76b-478d-804a-bfcb0e0c0c97" WantAssertionsSigned="true"
                                   protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
                 <md:Extensions/>
                 <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                        Location="http://localhost:8000/saml/sp/logout"/>
+                                        Location="http://localhost:8080/sample-sp/saml/sp/logout"/>
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
                 <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                             Location="http://localhost:8000/saml/sp/SSO" index="0" isDefault="true"/>
+                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO" index="0" isDefault="true"/>
                 <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                             Location="http://localhost:8000/saml/sp/SSO" index="1" isDefault="false"/>
+                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO" index="1" isDefault="false"/>
                 <md:AttributeConsumingService index="0" isDefault="true"/>
               </md:SPSSODescriptor>
             </md:EntityDescriptor>

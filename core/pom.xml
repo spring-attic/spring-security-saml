@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.extensions</groupId>
   <artifactId>spring-security-saml2-core</artifactId>
-  <version>1.0.4.PATCH.BUILD-SNAPSHOT</version>
+  <version>1.0.4.BUILD-SNAPSHOT</version>
   <name>Spring Security SAML v2 library</name>
   <description>Spring Security SAML v2 library</description>
   <url>https://github.com/SpringSource/spring-security-saml</url>
@@ -247,17 +247,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <distributionManagement>
-    <repository>
-      <id>repository-releases</id>
-      <name>repository-releases</name>
-      <url>http://mvn-repo.kamodata.be/nexus/content/repositories/EVA-Maven2-Repository-Releases/</url>
-    </repository>
-    <snapshotRepository>
-      <id>repository-snapshots</id>
-      <name>repository-snapshots</name>
-      <url>http://mvn-repo.kamodata.be/nexus/content/repositories/EVA-Maven2-Repository-Snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
 </project>

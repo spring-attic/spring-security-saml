@@ -19,13 +19,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -34,6 +39,12 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
 
     private SamlServerConfiguration configuration;
     private Defaults defaults;
+    private SamlTransformer transformer;
+
+    @Autowired
+    public void setTransformer(SamlTransformer transformer) {
+        this.transformer = transformer;
+    }
 
     @Autowired
     public DefaultMetadataResolver setSamlServerConfiguration(SamlServerConfiguration configuration) {
@@ -75,7 +86,12 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     }
 
     @Override
-    public IdentityProviderMetadata resolveIdentityProvider(AuthenticationRequest request) {
+    public IdentityProviderMetadata resolveIdentityProvider(Assertion assertion) {
+        return null;
+    }
+
+    @Override
+    public IdentityProviderMetadata resolveIdentityProvider(Response response) {
         return null;
     }
 
@@ -86,6 +102,23 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
 
     @Override
     public ServiceProviderMetadata resolveServiceProvider(String entityId) {
+        LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
+        for (ExternalProviderConfiguration c : idp.getProviders()) {
+            String metadata = c.getMetadata();
+            Metadata m = resolve(metadata);
+            if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
+                return (ServiceProviderMetadata) m;
+            }
+        }
+        return null;
+    }
+
+    private Metadata resolve(String metadata) {
+        return (Metadata) transformer.resolve(metadata, null);
+    }
+
+    @Override
+    public ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request) {
         return null;
     }
 

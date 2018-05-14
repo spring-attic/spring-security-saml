@@ -14,6 +14,8 @@
  */
 package org.springframework.security.samples;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -30,8 +33,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,6 +59,21 @@ public class SimpleIdentityProviderTest {
         Metadata m = (Metadata) transformer.resolve(xml, null);
         assertNotNull(m);
         assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
+    }
+
+    @Test
+    public void idpInitiatedLogin() throws Exception {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
+        MvcResult result = mockMvc.perform(
+            get("/saml/idp/init")
+                .param("sp", "test-sp-entity-id")
+            .with(authentication(token))
+        )
+            .andExpect(status().isOk())
+            .andReturn();
+        String html = result.getResponse().getContentAsString();
+        assertThat(html, containsString("name=\"SAMLResponse\""));
+        System.out.println("html = " + html);
     }
 
 

@@ -139,7 +139,7 @@ spring:
         providers:
         - name: spring-security-saml-sp
           metadata: |
-            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="http://localhost:8080/sample-sp"
+            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="test-sp-entity-id"
                                  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
               <md:SPSSODescriptor AuthnRequestsSigned="false" ID="6af07992-f76b-478d-804a-bfcb0e0c0c97" WantAssertionsSigned="true"
                                   protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">

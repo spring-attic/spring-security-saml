@@ -15,20 +15,16 @@
 package sample.web;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Status;
@@ -50,9 +46,6 @@ import sample.config.AppConfig;
 public class IdentityProviderController {
 
     private SamlServerConfiguration configuration;
-    private Map<String, ExternalProviderConfiguration> byName = new HashMap();
-    private Map<String, ServiceProviderMetadata> byEntityId = new HashMap();
-    private Map<String, String> nameToEntityId = new HashMap();
     private SamlTransformer transformer;
     private Defaults defaults;
     private MetadataResolver resolver;
@@ -75,14 +68,14 @@ public class IdentityProviderController {
     @Autowired
     public void setAppConfig(AppConfig config) {
         this.configuration = config;
-        this.configuration.getIdentityProvider().getProviders().stream().forEach(
-            p -> {
-                byName.put(p.getName(), p);
-                ServiceProviderMetadata m = (ServiceProviderMetadata) transformer.resolve(p.getMetadata(), null);
-                byEntityId.put(m.getEntityId(), m);
-                nameToEntityId.put(p.getName(), m.getEntityId());
-            }
-        );
+//        this.configuration.getIdentityProvider().getProviders().stream().forEach(
+//            p -> {
+//                byName.put(p.getName(), p);
+//                ServiceProviderMetadata m = (ServiceProviderMetadata) transformer.resolve(p.getMetadata(), null);
+//                byEntityId.put(m.getEntityId(), m);
+//                nameToEntityId.put(p.getName(), m.getEntityId());
+//            }
+//        );
     }
 
 
@@ -98,7 +91,7 @@ public class IdentityProviderController {
                               Model model,
                               @RequestParam(name = "sp", required = true) String entityId) {
         //no authnrequest provided
-        ServiceProviderMetadata metadata = byEntityId.get(entityId);
+        ServiceProviderMetadata metadata = resolver.resolveServiceProvider(entityId);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = getDefaults().assertion(metadata, local, null);
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
@@ -124,8 +117,7 @@ public class IdentityProviderController {
         //receive AuthnRequest
         String xml = transformer.samlDecode(authn);
         AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
-        Issuer issuer = authenticationRequest.getIssuer();
-        ServiceProviderMetadata metadata = byEntityId.get(issuer.getValue());
+        ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest);
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();

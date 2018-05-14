@@ -50,9 +50,9 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
     }
 
     public DefaultSamlTransformer(SpringSecuritySaml implementation) {
-        this.implementation = implementation;
-        defaults = new Defaults();
-        metdataResolver = new DefaultMetadataResolver();
+        setImplementation(implementation);
+        setDefaults(new Defaults());
+        setMetadataResolver(new DefaultMetadataResolver());
     }
 
     /**

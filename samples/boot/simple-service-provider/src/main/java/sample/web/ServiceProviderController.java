@@ -103,21 +103,12 @@ public class ServiceProviderController {
         return "select-provider";
     }
 
-    protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
-        builder.pathSegment("saml/sp/discovery");
-        builder.queryParam("idp", nameToEntityId.get(p.getName()));
-        return builder.build().toUriString();
-    }
-
     @GetMapping(value = "/saml/sp/metadata", produces = MediaType.TEXT_XML_VALUE)
     public @ResponseBody()
     String metadata(HttpServletRequest request) {
         ServiceProviderMetadata metadata = getServiceProviderMetadata(request);
         return transformer.toXml(metadata);
     }
-
-
 
     @RequestMapping("/saml/sp/discovery")
     public View discovery(HttpServletRequest request,
@@ -144,29 +135,6 @@ public class ServiceProviderController {
         return view;
     }
 
-    public static class ModelProvider {
-        private String linkText;
-        private String redirect;
-
-        public String getLinkText() {
-            return linkText;
-        }
-
-        public ModelProvider setLinkText(String linkText) {
-            this.linkText = linkText;
-            return this;
-        }
-
-        public String getRedirect() {
-            return redirect;
-        }
-
-        public ModelProvider setRedirect(String redirect) {
-            this.redirect = redirect;
-            return this;
-        }
-    }
-
     protected String getAuthnRequestRedirect(HttpServletRequest request,
                                              IdentityProviderMetadata m,
                                              AuthenticationRequest authenticationRequest) {
@@ -176,6 +144,13 @@ public class ServiceProviderController {
         UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
         url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
         return url.build(true).toUriString();
+    }
+
+    protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
+        builder.pathSegment("saml/sp/discovery");
+        builder.queryParam("idp", nameToEntityId.get(p.getName()));
+        return builder.build().toUriString();
     }
 
     protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {

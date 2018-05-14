@@ -42,7 +42,7 @@ class AuthenticationRequestTests extends MetadataBase {
     @Test
     public void create() throws Exception {
 
-        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
         String xml = config.toXml(request);
 
         assertNodeCount(xml, "//samlp:AuthnRequest", 1);
@@ -66,7 +66,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
     @Test
     public void parse() {
-        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
         String xml = config.toXml(request);
         AuthenticationRequest data = (AuthenticationRequest) config.resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);

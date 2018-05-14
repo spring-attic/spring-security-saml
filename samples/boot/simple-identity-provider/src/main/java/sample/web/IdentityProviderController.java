@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
@@ -36,6 +37,7 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.Defaults;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,15 +49,27 @@ import sample.config.AppConfig;
 @Controller
 public class IdentityProviderController {
 
-    private SamlTransformer transformer;
     private SamlServerConfiguration configuration;
     private Map<String, ExternalProviderConfiguration> byName = new HashMap();
     private Map<String, ServiceProviderMetadata> byEntityId = new HashMap();
     private Map<String, String> nameToEntityId = new HashMap();
+    private SamlTransformer transformer;
+    private Defaults defaults;
+    private MetadataResolver resolver;
 
     @Autowired
     public void setTransformer(SamlTransformer transformer) {
         this.transformer = transformer;
+    }
+
+    @Autowired
+    public void setDefaults(Defaults defaults) {
+        this.defaults = defaults;
+    }
+
+    @Autowired
+    public void setMetadataResolver(MetadataResolver resolver) {
+        this.resolver = resolver;
     }
 
     @Autowired
@@ -86,11 +100,11 @@ public class IdentityProviderController {
         //no authnrequest provided
         ServiceProviderMetadata metadata = byEntityId.get(entityId);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
-        Assertion assertion = transformer.getDefaults().assertion(metadata, local, null);
+        Assertion assertion = getDefaults().assertion(metadata, local, null);
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
-        Response response = transformer.getDefaults().response(null,
+        Response response = getDefaults().response(null,
                                                                assertion,
                                                                metadata,
                                                                local
@@ -113,11 +127,11 @@ public class IdentityProviderController {
         Issuer issuer = authenticationRequest.getIssuer();
         ServiceProviderMetadata metadata = byEntityId.get(issuer.getValue());
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
-        Assertion assertion = transformer.getDefaults().assertion(metadata, local, authenticationRequest);
+        Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest);
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
-        Response response = transformer.getDefaults().response(authenticationRequest.getId(),
+        Response response = getDefaults().response(authenticationRequest.getId(),
                                                                assertion,
                                                                metadata,
                                                                local
@@ -141,7 +155,18 @@ public class IdentityProviderController {
 
     protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
         String base = getBasePath(request);
-        return transformer.getDefaults().identityProviderMetadata(base, null, null);
+        return getDefaults().identityProviderMetadata(base, null, null);
     }
 
+    public SamlTransformer getTransformer() {
+        return transformer;
+    }
+
+    public Defaults getDefaults() {
+        return defaults;
+    }
+
+    public MetadataResolver getMetadataResolver() {
+        return resolver;
+    }
 }

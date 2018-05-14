@@ -1,17 +1,16 @@
 /*
- * Copyright 2002-2018 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package org.springframework.security.samples;
 
@@ -24,10 +23,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,23 +38,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SimpleTest {
+public class SimpleIdentityProviderTest {
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private SamlTransformer transformer;
 
     @Test
-    public void getServiceProviderMetadata() throws Exception {
-        String xml = mockMvc.perform(get("/saml/sp/metadata"))
+    public void getIdentityProviderMetadata() throws Exception {
+        MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
             .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-        assertNotNull(xml);
+            .andReturn();
+        String xml = result.getResponse().getContentAsString();
         Metadata m = (Metadata) transformer.resolve(xml, null);
         assertNotNull(m);
-        assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+        assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
     }
 
 

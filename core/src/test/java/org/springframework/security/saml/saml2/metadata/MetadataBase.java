@@ -21,10 +21,13 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.spi.DefaultMetadataResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.Defaults;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,10 +48,14 @@ public abstract class MetadataBase {
     protected IdentityProviderMetadata identityProviderMetadata;
 
     protected static SamlTransformer config;
+    protected static MetadataResolver resolver;
+    protected static Defaults defaults;
 
     @BeforeAll
     public static void init() throws Exception {
         config = new DefaultSamlTransformer();
+        resolver = new DefaultMetadataResolver();
+        defaults = new Defaults();
         ((DefaultSamlTransformer) config).afterPropertiesSet();
     }
 
@@ -60,12 +67,12 @@ public abstract class MetadataBase {
         spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
         spBaseUrl = "http://sp.localhost:8080/uaa";
         idpBaseUrl = "http://idp.localhost:8080/uaa";
-        serviceProviderMetadata = config.getDefaults().serviceProviderMetadata(
+        serviceProviderMetadata = defaults.serviceProviderMetadata(
             spBaseUrl,
             Arrays.asList(spSigning),
             spSigning
         );
-        identityProviderMetadata = config.getDefaults().identityProviderMetadata(
+        identityProviderMetadata = defaults.identityProviderMetadata(
             idpBaseUrl,
             Arrays.asList(idpSigning),
             idpSigning

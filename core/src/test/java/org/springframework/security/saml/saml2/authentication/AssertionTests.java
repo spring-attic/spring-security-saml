@@ -188,8 +188,8 @@ public class AssertionTests extends MetadataBase {
     @Test
     public void create_with_request() throws Exception {
 
-        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-        Assertion assertion = config.getDefaults().assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        Assertion assertion = defaults.assertion(serviceProviderMetadata, identityProviderMetadata, request);
 
         assertNotNull(assertion);
 
@@ -246,9 +246,9 @@ public class AssertionTests extends MetadataBase {
 
     @Test
     public void check_xml() throws URISyntaxException, IOException {
-        AuthenticationRequest request = config.getDefaults().authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+        AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-        Assertion assertion = config.getDefaults().assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        Assertion assertion = defaults.assertion(serviceProviderMetadata, identityProviderMetadata, request);
 
         String username = "test@test.com";
 

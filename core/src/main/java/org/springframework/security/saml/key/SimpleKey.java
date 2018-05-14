@@ -17,11 +17,14 @@ package org.springframework.security.saml.key;
 
 public class SimpleKey {
 
-    private final String alias;
-    private final String privateKey;
-    private final String certificate;
-    private final String passphrase;
-    private final KeyType type;
+    private String alias;
+    private String privateKey;
+    private String certificate;
+    private String passphrase;
+    private KeyType type;
+
+    public SimpleKey() {
+    }
 
     public SimpleKey(String alias,
                      String privateKey,
@@ -53,6 +56,31 @@ public class SimpleKey {
 
     public KeyType getType() {
         return type;
+    }
+
+    public SimpleKey setAlias(String alias) {
+        this.alias = alias;
+        return this;
+    }
+
+    public SimpleKey setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+        return this;
+    }
+
+    public SimpleKey setCertificate(String certificate) {
+        this.certificate = certificate;
+        return this;
+    }
+
+    public SimpleKey setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+        return this;
+    }
+
+    public SimpleKey setType(KeyType type) {
+        this.type = type;
+        return this;
     }
 
     public SimpleKey clone(String alias, KeyType type) {

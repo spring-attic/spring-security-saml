@@ -15,19 +15,63 @@
 
 package org.springframework.security.saml.spi;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.config.LocalProviderConfiguration;
+import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class DefaultMetadataResolver implements org.springframework.security.saml.MetadataResolver {
-    @Override
-    public ServiceProviderMetadata getLocalServiceProvider() {
-        return null;
+
+    private SamlServerConfiguration configuration;
+    private Defaults defaults;
+
+    @Autowired
+    public DefaultMetadataResolver setSamlServerConfiguration(SamlServerConfiguration configuration) {
+        this.configuration = configuration;
+        return this;
+    }
+
+    @Autowired
+    public DefaultMetadataResolver setDefaults(Defaults defaults) {
+        this.defaults = defaults;
+        return this;
     }
 
     @Override
-    public IdentityProviderMetadata getLocalIdentityProvider() {
-        return null;
+    public ServiceProviderMetadata getLocalServiceProvider(String baseUrl) {
+        LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
+        List<SimpleKey> keys = getSimpleKeys(sp);
+        SimpleKey signing = sp.isSignMetadata() ? sp.getKeys().getActive().get(0) : null;
+        ServiceProviderMetadata metadata = defaults.serviceProviderMetadata(baseUrl, keys, signing);
+        if (hasText(sp.getEntityId())) {
+            metadata.setEntityId(sp.getEntityId());
+        }
+        metadata.getServiceProvider().setWantAssertionsSigned(sp.isWantAssertionsSigned());
+        metadata.getServiceProvider().setAuthnRequestsSigned(sp.isSignRequests());
+        return metadata;
+    }
+
+    @Override
+    public IdentityProviderMetadata getLocalIdentityProvider(String baseUrl) {
+        LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
+        List<SimpleKey> keys = getSimpleKeys(idp);
+        SimpleKey signing = idp.isSignMetadata() ? idp.getKeys().getActive().get(0) : null;
+        IdentityProviderMetadata metadata = defaults.identityProviderMetadata(baseUrl, keys, signing);
+        if (hasText(idp.getEntityId())) {
+            metadata.setEntityId(idp.getEntityId());
+        }
+        metadata.getIdentityProvider().setWantAuthnRequestsSigned(idp.isWantRequestsSigned());
+        return metadata;
     }
 
     @Override
@@ -44,4 +88,12 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     public ServiceProviderMetadata resolveServiceProvider(String entityId) {
         return null;
     }
+
+    protected List<SimpleKey> getSimpleKeys(LocalProviderConfiguration sp) {
+        List<SimpleKey> keys = new LinkedList<>();
+        keys.addAll(sp.getKeys().getActive());
+        keys.addAll(sp.getKeys().getStandBy());
+        return keys;
+    }
+
 }

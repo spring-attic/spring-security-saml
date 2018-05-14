@@ -19,4 +19,25 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LocalServiceProviderConfiguration extends LocalProviderConfiguration<LocalServiceProviderConfiguration> {
+
+    private boolean signRequests = false;
+    private boolean wantAssertionsSigned = false;
+
+    public boolean isSignRequests() {
+        return signRequests;
+    }
+
+    public LocalServiceProviderConfiguration setSignRequests(boolean signRequests) {
+        this.signRequests = signRequests;
+        return this;
+    }
+
+    public boolean isWantAssertionsSigned() {
+        return wantAssertionsSigned;
+    }
+
+    public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
+        this.wantAssertionsSigned = wantAssertionsSigned;
+        return this;
+    }
 }

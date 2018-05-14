@@ -666,7 +666,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         if (result != null) {
             return marshallToXml(result);
         }
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(saml2Object!=null?saml2Object.getClass().getName():"null");
     }
 
     protected org.opensaml.saml.saml2.core.Response internalToXml(Response response) {

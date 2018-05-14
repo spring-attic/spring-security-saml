@@ -21,8 +21,8 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface MetadataResolver {
 
-     ServiceProviderMetadata getLocalServiceProvider();
-     IdentityProviderMetadata getLocalIdentityProvider();
+     ServiceProviderMetadata getLocalServiceProvider(String baseUrl);
+     IdentityProviderMetadata getLocalIdentityProvider(String baseUrl);
 
      IdentityProviderMetadata resolveIdentityProvider(AuthenticationRequest request);
 

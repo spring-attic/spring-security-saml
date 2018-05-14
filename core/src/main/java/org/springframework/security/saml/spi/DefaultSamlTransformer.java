@@ -33,7 +33,6 @@ package org.springframework.security.saml.spi;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -42,8 +41,6 @@ import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 public class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
 
     private SpringSecuritySaml implementation;
-    private Defaults defaults;
-    private MetadataResolver metdataResolver;
 
     public DefaultSamlTransformer() {
         this(new OpenSamlConfiguration());
@@ -51,9 +48,9 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
 
     public DefaultSamlTransformer(SpringSecuritySaml implementation) {
         setImplementation(implementation);
-        setDefaults(new Defaults());
-        setMetadataResolver(new DefaultMetadataResolver());
     }
+
+
 
     /**
      * {@inheritDoc}
@@ -84,7 +81,7 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
      */
     @Override
     public String samlEncode(String s) {
-        return null;
+        return implementation.deflateAndEncode(s);
     }
 
     /**
@@ -92,17 +89,7 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
      */
     @Override
     public String samlDecode(String s) {
-        return null;
-    }
-
-    @Override
-    public Defaults getDefaults() {
-        return defaults;
-    }
-
-    @Override
-    public MetadataResolver getMetadataResolver() {
-        return metdataResolver;
+        return implementation.decodeAndInflate(s);
     }
 
     public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
@@ -110,13 +97,4 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
         return this;
     }
 
-    public SamlTransformer setDefaults(Defaults defaults) {
-        this.defaults = defaults;
-        return this;
-    }
-
-    public SamlTransformer setMetadataResolver(MetadataResolver resolver) {
-        this.metdataResolver = resolver;
-        return this;
-    }
 }

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -35,6 +36,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.Defaults;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,10 +56,22 @@ public class ServiceProviderController {
     private Map<String, IdentityProviderMetadata> byEntityId = new HashMap();
     private Map<String, String> nameToEntityId = new HashMap();
     private SamlTransformer transformer;
+    private Defaults defaults;
+    private MetadataResolver resolver;
 
     @Autowired
     public void setTransformer(SamlTransformer transformer) {
         this.transformer = transformer;
+    }
+
+    @Autowired
+    public void setDefaults(Defaults defaults) {
+        this.defaults = defaults;
+    }
+
+    @Autowired
+    public void setMetadataResolver(MetadataResolver resolver) {
+        this.resolver = resolver;
     }
 
     @Autowired
@@ -103,13 +117,15 @@ public class ServiceProviderController {
         return transformer.toXml(metadata);
     }
 
+
+
     @RequestMapping("/saml/sp/discovery")
     public View discovery(HttpServletRequest request,
                           @RequestParam(name = "idp", required = true) String idp) {
         //create authnrequest
         IdentityProviderMetadata m = byEntityId.get(idp);
         ServiceProviderMetadata local = getServiceProviderMetadata(request);
-        AuthenticationRequest authenticationRequest = transformer.getDefaults().authenticationRequest(local, m);
+        AuthenticationRequest authenticationRequest = getDefaults().authenticationRequest(local, m);
         String url = getAuthnRequestRedirect(request, m, authenticationRequest);
         return new RedirectView(url);
     }
@@ -163,12 +179,18 @@ public class ServiceProviderController {
     }
 
     protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
-        String base = getBasePath(request);
-        return transformer.getDefaults().serviceProviderMetadata(base, null, null);
+        return getMetadataResolver().getLocalServiceProvider(getBasePath(request));
     }
 
     protected String getBasePath(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
+    public Defaults getDefaults() {
+        return defaults;
+    }
+
+    public MetadataResolver getMetadataResolver() {
+        return resolver;
+    }
 }

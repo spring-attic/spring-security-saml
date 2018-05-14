@@ -15,18 +15,30 @@
 
 package org.springframework.security.saml.config;
 
-import org.springframework.context.annotation.Configuration;
+import java.util.LinkedList;
+import java.util.List;
 
-@Configuration
-public class LocalIdentityProviderConfiguration extends LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
-    private boolean wantRequestsSigned = false;
+import org.springframework.security.saml.key.SimpleKey;
 
-    public boolean isWantRequestsSigned() {
-        return wantRequestsSigned;
+public class RotatingKeys {
+    private List<SimpleKey> active = new LinkedList<>();
+    private List<SimpleKey> standBy = new LinkedList<>();
+
+    public List<SimpleKey> getActive() {
+        return active;
     }
 
-    public LocalIdentityProviderConfiguration setWantRequestsSigned(boolean wantRequestsSigned) {
-        this.wantRequestsSigned = wantRequestsSigned;
+    public RotatingKeys setActive(List<SimpleKey> active) {
+        this.active = active;
+        return this;
+    }
+
+    public List<SimpleKey> getStandBy() {
+        return standBy;
+    }
+
+    public RotatingKeys setStandBy(List<SimpleKey> standBy) {
+        this.standBy = standBy;
         return this;
     }
 }

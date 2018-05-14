@@ -19,17 +19,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.key.SimpleKey;
 
 @Configuration
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
     private String entityId;
-    private List<SimpleKey> active;
-    private List<SimpleKey> standby;
     private boolean signMetadata;
+    private String metadata;
+    private RotatingKeys keys;
 
     private List<ExternalProviderConfiguration> providers = new LinkedList<>();
+
+    public LocalProviderConfiguration() {
+    }
 
     @SuppressWarnings("checked")
     protected T _this() {
@@ -54,30 +56,30 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
         return _this();
     }
 
-    public List<SimpleKey> getActive() {
-        return active;
-    }
-
-    public T setActive(List<SimpleKey> active) {
-        this.active = active;
-        return _this();
-    }
-
-    public List<SimpleKey> getStandby() {
-        return standby;
-    }
-
-    public T setStandby(List<SimpleKey> standby) {
-        this.standby = standby;
-        return _this();
-    }
-
     public boolean isSignMetadata() {
         return signMetadata;
     }
 
     public T setSignMetadata(boolean signMetadata) {
         this.signMetadata = signMetadata;
+        return _this();
+    }
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public T setMetadata(String metadata) {
+        this.metadata = metadata;
+        return _this();
+    }
+
+    public RotatingKeys getKeys() {
+        return keys;
+    }
+
+    public T setKeys(RotatingKeys keys) {
+        this.keys = keys;
         return _this();
     }
 }

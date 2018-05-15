@@ -174,6 +174,7 @@ import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
+import org.springframework.security.saml.util.TimeProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -190,9 +191,20 @@ import static org.springframework.util.StringUtils.hasText;
 public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
 
     private BasicParserPool parserPool;
+    private TimeProvider time;
 
     public OpenSamlConfiguration() {
         this.parserPool = new BasicParserPool();
+        time = new TimeProvider();
+    }
+
+    public TimeProvider getTime() {
+        return time;
+    }
+
+    public OpenSamlConfiguration setTime(TimeProvider time) {
+        this.time = time;
+        return this;
     }
 
     public BasicParserPool getParserPool() {
@@ -772,7 +784,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
                 }
             }
-            long now = System.currentTimeMillis();
+            long now = getTime().currentTimeMillis();
             if (p.getCacheDuration() != null) {
                 roleDescriptor.setCacheDuration(p.getCacheDuration().getTimeInMillis(new Date(now)));
             }

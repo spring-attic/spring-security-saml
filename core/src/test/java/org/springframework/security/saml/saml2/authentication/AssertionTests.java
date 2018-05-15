@@ -32,6 +32,7 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.ExamplePemKey;
+import org.springframework.security.saml.util.TimeProvider;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.TRUE;
@@ -260,7 +261,7 @@ public class AssertionTests extends MetadataBase {
             new AuthenticationContext().setClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT)
         );
 
-        DateTime time = new DateTime(System.currentTimeMillis());
+        DateTime time = new DateTime(new TimeProvider().currentTimeMillis());
         assertion.addAttribute(
             new Attribute()
                 .setFriendlyName("Random Attributes")

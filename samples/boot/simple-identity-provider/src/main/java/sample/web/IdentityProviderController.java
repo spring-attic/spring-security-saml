@@ -90,9 +90,9 @@ public class IdentityProviderController {
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
         Response response = getDefaults().response(null,
-                                                               assertion,
-                                                               metadata,
-                                                               local
+                                                   assertion,
+                                                   metadata,
+                                                   local
         );
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
 
@@ -116,9 +116,9 @@ public class IdentityProviderController {
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
         Response response = getDefaults().response(authenticationRequest.getId(),
-                                                               assertion,
-                                                               metadata,
-                                                               local
+                                                   assertion,
+                                                   metadata,
+                                                   local
         );
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
         String encoded = transformer.samlEncode(transformer.toXml(response));

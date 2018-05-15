@@ -28,6 +28,7 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -119,7 +120,10 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
 
     @Override
     public ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request) {
-        return null;
+        ServiceProviderMetadata result = null;
+        Issuer issuer = request.getIssuer();
+        result = resolveServiceProvider(issuer.getValue());
+        return result;
     }
 
     protected List<SimpleKey> getSimpleKeys(LocalProviderConfiguration sp) {

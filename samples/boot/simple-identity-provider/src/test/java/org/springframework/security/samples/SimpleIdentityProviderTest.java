@@ -15,6 +15,8 @@
 package org.springframework.security.samples;
 
 import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -35,6 +38,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -73,7 +77,24 @@ public class SimpleIdentityProviderTest {
             .andReturn();
         String html = result.getResponse().getContentAsString();
         assertThat(html, containsString("name=\"SAMLResponse\""));
-        System.out.println("html = " + html);
+        String response = extractResponse(html, "SAMLResponse");
+        Response r = (Response) transformer.resolve(transformer.samlDecode(response), null);
+        assertNotNull(r);
+        assertThat(r.getAssertions(), notNullValue());
+        assertThat(r.getAssertions().size(), equalTo(1));
+    }
+
+    private String extractResponse(String html, String name) {
+        Pattern p = Pattern.compile(" name=\"(.*?)\" value=\"(.*?)\"" );
+        Matcher m = p.matcher(html);
+        while ( m.find() ) {
+            String pname = m.group(1);
+            String value = m.group(2);
+            if (name.equals(pname)) {
+                return value;
+            }
+        }
+        return null;
     }
 
 

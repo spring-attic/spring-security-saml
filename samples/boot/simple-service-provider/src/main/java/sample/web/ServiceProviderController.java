@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,7 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import sample.config.AppConfig;
 
 @Controller
-public class ServiceProviderController {
+public class ServiceProviderController implements InitializingBean  {
 
     private AppConfig configuration;
     private Map<String, ExternalProviderConfiguration> byName = new HashMap();
@@ -77,6 +78,10 @@ public class ServiceProviderController {
     @Autowired
     public void setAppConfig(AppConfig config) {
         this.configuration = config;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         this.configuration.getServiceProvider().getProviders().stream().forEach(
             p -> {
                 byName.put(p.getName(), p);

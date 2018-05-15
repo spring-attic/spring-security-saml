@@ -68,14 +68,6 @@ public class IdentityProviderController {
     @Autowired
     public void setAppConfig(AppConfig config) {
         this.configuration = config;
-//        this.configuration.getIdentityProvider().getProviders().stream().forEach(
-//            p -> {
-//                byName.put(p.getName(), p);
-//                ServiceProviderMetadata m = (ServiceProviderMetadata) transformer.resolve(p.getMetadata(), null);
-//                byEntityId.put(m.getEntityId(), m);
-//                nameToEntityId.put(p.getName(), m.getEntityId());
-//            }
-//        );
     }
 
 
@@ -147,7 +139,7 @@ public class IdentityProviderController {
 
     protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
         String base = getBasePath(request);
-        return getDefaults().identityProviderMetadata(base, null, null);
+        return getMetadataResolver().getLocalIdentityProvider(base);
     }
 
     public SamlTransformer getTransformer() {

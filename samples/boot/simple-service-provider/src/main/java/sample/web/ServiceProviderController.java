@@ -18,9 +18,7 @@ package sample.web;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -36,6 +34,7 @@ import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.stereotype.Controller;
@@ -50,12 +49,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import sample.config.AppConfig;
 
 @Controller
-public class ServiceProviderController implements InitializingBean  {
+public class ServiceProviderController implements InitializingBean {
 
     private AppConfig configuration;
-    private Map<String, ExternalProviderConfiguration> byName = new HashMap();
-    private Map<String, IdentityProviderMetadata> byEntityId = new HashMap();
-    private Map<String, String> nameToEntityId = new HashMap();
     private SamlTransformer transformer;
     private Defaults defaults;
     private MetadataResolver resolver;
@@ -82,14 +78,6 @@ public class ServiceProviderController implements InitializingBean  {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.configuration.getServiceProvider().getProviders().stream().forEach(
-            p -> {
-                byName.put(p.getName(), p);
-                IdentityProviderMetadata m = (IdentityProviderMetadata) transformer.resolve(p.getMetadata(), null);
-                byEntityId.put(m.getEntityId(), m);
-                nameToEntityId.put(p.getName(), m.getEntityId());
-            }
-        );
     }
 
     @RequestMapping(value = {"/", "/index", "logged-in"})
@@ -103,7 +91,7 @@ public class ServiceProviderController implements InitializingBean  {
             configuration.getServiceProvider().getProviders().stream().map(
                 p -> new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
             )
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         model.addAttribute("idps", providers);
         return "select-provider";
     }
@@ -117,9 +105,9 @@ public class ServiceProviderController implements InitializingBean  {
 
     @RequestMapping("/saml/sp/discovery")
     public View discovery(HttpServletRequest request,
-                          @RequestParam(name = "idp", required = true) String idp) {
+                          @RequestParam(name = "idp", required = true) String entityId) {
         //create authnrequest
-        IdentityProviderMetadata m = byEntityId.get(idp);
+        IdentityProviderMetadata m = resolver.resolveIdentityProvider(entityId);
         ServiceProviderMetadata local = getServiceProviderMetadata(request);
         AuthenticationRequest authenticationRequest = getDefaults().authenticationRequest(local, m);
         String url = getAuthnRequestRedirect(request, m, authenticationRequest);
@@ -128,7 +116,7 @@ public class ServiceProviderController implements InitializingBean  {
 
     @RequestMapping("/saml/sp/SSO")
     public View sso(HttpServletRequest request,
-                      @RequestParam(name = "SAMLResponse", required = true) String response) {
+                    @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
         String xml = transformer.samlDecode(response);
         Response r = (Response) transformer.resolve(xml, null);
@@ -154,7 +142,7 @@ public class ServiceProviderController implements InitializingBean  {
     protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
         builder.pathSegment("saml/sp/discovery");
-        builder.queryParam("idp", nameToEntityId.get(p.getName()));
+        builder.queryParam("idp", ((Metadata) transformer.resolve(p.getMetadata(), null)).getEntityId());
         return builder.build().toUriString();
     }
 

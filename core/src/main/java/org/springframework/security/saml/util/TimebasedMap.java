@@ -214,7 +214,7 @@ public class TimebasedMap<K, V> implements Map<K, V> {
         }
     }
 
-    protected static class MapEntry<V> {
+    protected class MapEntry<V> {
 
         private V value;
         private long creationTime;

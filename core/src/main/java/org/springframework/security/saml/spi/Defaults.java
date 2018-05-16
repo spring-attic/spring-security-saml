@@ -58,7 +58,6 @@ import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIDPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
-import org.springframework.security.saml.saml2.authentication.OneTimeUse;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Status;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
@@ -229,7 +228,8 @@ public class Defaults {
                             .setConfirmationData(
                                 new SubjectConfirmationData()
                                     .setInResponseTo(request != null ? request.getId() : null)
-                                    .setNotBefore(new DateTime(now - NOT_BEFORE))
+                                    //we don't set NotBefore. Gets rejected.
+                                    //.setNotBefore(new DateTime(now - NOT_BEFORE))
                                     .setNotOnOrAfter(new DateTime(now + NOT_AFTER))
                                     .setRecipient(
                                         request != null ?
@@ -244,13 +244,12 @@ public class Defaults {
             .setConditions(
                 new Conditions()
                     .setNotBefore(new DateTime(now - NOT_BEFORE))
-                    .setNotOnOrAfter(new DateTime(now - NOT_AFTER))
+                    .setNotOnOrAfter(new DateTime(now + NOT_AFTER))
                     .addCriteria(
                         new AudienceRestriction()
                             .addAudience(sp.getEntityId())
 
                     )
-                    .addCriteria(new OneTimeUse())
             )
             .addAuthenticationStatement(
                 new AuthenticationStatement()
@@ -273,14 +272,15 @@ public class Defaults {
     }
 
 
-    public Response response(String inResponseTo,
+    public Response response(AuthenticationRequest authn,
                              Assertion assertion,
                              ServiceProviderMetadata sp,
                              IdentityProviderMetadata idp) {
         return new Response()
             .setAssertions(asList(assertion))
             .setId(UUID.randomUUID().toString())
-            .setInResponseTo(inResponseTo)
+            .setInResponseTo(authn != null ? authn.getId() : null)
+            .setDestination(authn.getAssertionConsumerService().getLocation())
             .setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
             .setIssuer(new Issuer().setValue(idp.getEntityId()))
             .setIssueInstant(new DateTime())

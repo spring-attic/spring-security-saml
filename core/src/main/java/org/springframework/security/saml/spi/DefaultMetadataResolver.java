@@ -119,7 +119,7 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     public IdentityProviderMetadata resolveIdentityProvider(String entityId) {
         for (ExternalProviderConfiguration c : configuration.getServiceProvider().getProviders()) {
             IdentityProviderMetadata idp = resolveIdentityProvider(c);
-            if (entityId.equals(idp.getEntityId())) {
+            if (idp != null && entityId.equals(idp.getEntityId())) {
                 return idp;
             }
         }
@@ -128,12 +128,7 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
 
     @Override
     public IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp) {
-        if (isUri(idp.getMetadata())) {
-            byte[] metadata = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
-            return (IdentityProviderMetadata) transformer.resolve(metadata, null);
-        } else {
-            return (IdentityProviderMetadata) transformer.resolve(idp.getMetadata(), null);
-        }
+        return (IdentityProviderMetadata) resolve(idp.getMetadata(), idp.isSkipSslValidation());
     }
 
     @Override
@@ -179,12 +174,18 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     }
 
     protected Metadata resolve(String metadata, boolean skipSslValidation) {
+        Metadata result = null;
         if (isUri(metadata)) {
-            byte[] data = cache.getMetadata(metadata, skipSslValidation);
-            return (Metadata) transformer.resolve(data, null);
+            try {
+                byte[] data = cache.getMetadata(metadata, skipSslValidation);
+                result = (Metadata) transformer.resolve(data, null);
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
         } else {
-            return (Metadata) transformer.resolve(metadata, null);
+            result = (Metadata) transformer.resolve(metadata, null);
         }
+        return result;
     }
 
 

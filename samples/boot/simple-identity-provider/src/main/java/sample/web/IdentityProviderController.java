@@ -110,19 +110,26 @@ public class IdentityProviderController {
         String xml = transformer.samlDecode(authn);
         AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
+        //TODO - validate signature
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest);
+
+        assertion.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
-        Response response = getDefaults().response(authenticationRequest.getId(),
+        String destination = authenticationRequest.getAssertionConsumerService().getLocation();
+        Response response = getDefaults().response(authenticationRequest,
                                                    assertion,
                                                    metadata,
                                                    local
         );
+
+
+        response.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
         String encoded = transformer.samlEncode(transformer.toXml(response));
-        model.addAttribute("url", authenticationRequest.getAssertionConsumerService().getLocation());
+        model.addAttribute("url", destination);
         model.addAttribute("SAMLResponse", encoded);
         return "saml-post";
     }

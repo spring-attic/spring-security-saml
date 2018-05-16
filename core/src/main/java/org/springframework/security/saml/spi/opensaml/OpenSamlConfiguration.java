@@ -354,6 +354,8 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             descriptor.setKeyInfo(info);
             if (key.getType() != null) {
                 descriptor.setUse(UsageType.valueOf(key.getType().toString()));
+            } else {
+                descriptor.setUse(UsageType.SIGNING);
             }
             return descriptor;
         } catch (SecurityException e) {
@@ -872,6 +874,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         confData.setInResponseTo(request.getSubject().getConfirmations().get(0).getConfirmationData().getInResponseTo());
         confData.setNotBefore(request.getSubject().getConfirmations().get(0).getConfirmationData().getNotBefore());
         confData.setNotOnOrAfter(request.getSubject().getConfirmations().get(0).getConfirmationData().getNotOnOrAfter());
+        confData.setRecipient(request.getSubject().getConfirmations().get(0).getConfirmationData().getRecipient());
 
         org.opensaml.saml.saml2.core.SubjectConfirmation confirmation = buildSAMLObject(org.opensaml.saml.saml2.core.SubjectConfirmation.class);
         confirmation.setMethod(request.getSubject().getConfirmations().get(0).getMethod().toString());
@@ -1281,7 +1284,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                 new Defaults().getEndpoint(
                     request.getAssertionConsumerServiceURL(),
                     Binding.fromUrn(request.getProtocolBinding()),
-                    request.getAssertionConsumerServiceIndex(),
+                    ofNullable(request.getAssertionConsumerServiceIndex()).orElse(-1),
                     false
                 )
             )

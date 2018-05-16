@@ -54,6 +54,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
+import java.util.zip.ZipException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.saml.key.SimpleKey;
@@ -106,25 +107,29 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
     public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
 
     public String deflateAndEncode(String s) {
-        try {
-            ByteArrayOutputStream b = new ByteArrayOutputStream();
-            DeflaterOutputStream deflater = new DeflaterOutputStream(b, new Deflater(DEFLATED, true));
-            deflater.write(s.getBytes(UTF_8));
-            deflater.finish();
-            return UNCHUNKED_ENCODER.encodeToString(b.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to deflate and base64 encode string", e);
-        }
+//        try {
+//            ByteArrayOutputStream b = new ByteArrayOutputStream();
+//            DeflaterOutputStream deflater = new DeflaterOutputStream(b, new Deflater(DEFLATED, true));
+//            deflater.write(s.getBytes(UTF_8));
+//            deflater.finish();
+//            return UNCHUNKED_ENCODER.encodeToString(b.toByteArray());
+            return UNCHUNKED_ENCODER.encodeToString(s.getBytes(UTF_8));
+//        } catch (IOException e) {
+//            throw new RuntimeException("Unable to deflate and base64 encode string", e);
+//        }
     }
 
     public String decodeAndInflate(String s) {
+        byte[] b = UNCHUNKED_ENCODER.decode(s);
         try {
-            byte[] b = UNCHUNKED_ENCODER.decode(s);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             InflaterOutputStream iout = new InflaterOutputStream(out, new Inflater(true));
             iout.write(b);
             iout.finish();
             return new String(out.toByteArray(), UTF_8);
+        } catch (ZipException e) {
+            //no inflation/deflation used?
+            return new String(b, UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Unable to deflate and base64 encode string", e);
         }

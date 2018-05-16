@@ -137,6 +137,10 @@ spring:
                 PM//DZj/ijS9WNzrLV06T7iYpYeTKveR8TYaBaJoovrlfPaCadI7L7WatrlQaMZ2
                 HffnsgNZROW70P9KbBF/4ejcVX96drpXiA==
         providers:
+        - name: uaa
+          metadata: http://localhost:8082/uaa/saml/metadata
+          link-text: Cloud Foundry UAA SP
+
         - name: spring-security-saml-sp
           metadata: |
             <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="test-sp-entity-id"

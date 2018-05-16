@@ -18,8 +18,8 @@ package sample.web;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,11 +86,17 @@ public class ServiceProviderController implements InitializingBean {
 
     @RequestMapping("/saml/sp/select")
     public String selectProvider(HttpServletRequest request, Model model) {
-        List<ModelProvider> providers =
-            configuration.getServiceProvider().getProviders().stream().map(
-                p -> new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p))
-            )
-                .collect(Collectors.toList());
+        List<ModelProvider> providers = new LinkedList<>();
+            configuration.getServiceProvider().getProviders().stream().forEach(
+                p -> {
+                    try {
+                        ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p));
+                        providers.add(mp);
+                    } catch (Exception x) {
+                        x.printStackTrace();
+                    }
+                }
+            );
         model.addAttribute("idps", providers);
         return "select-provider";
     }

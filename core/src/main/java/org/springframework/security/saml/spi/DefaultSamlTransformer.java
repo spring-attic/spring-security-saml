@@ -38,6 +38,8 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
 
     private SpringSecuritySaml implementation;
@@ -80,16 +82,27 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
      * {@inheritDoc}
      */
     @Override
-    public String samlEncode(String s) {
-        return implementation.deflateAndEncode(s);
+    public String samlEncode(String s, boolean deflate) {
+        byte[] b;
+        if (deflate) {
+            b = implementation.deflate(s);
+        } else {
+            b = s.getBytes(UTF_8);
+        }
+        return implementation.encode(b);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String samlDecode(String s) {
-        return implementation.decodeAndInflate(s);
+    public String samlDecode(String s, boolean inflate) {
+        byte[] b = implementation.decode(s);
+        if (inflate) {
+            return implementation.inflate(b);
+        } else {
+            return new String(b, UTF_8);
+        }
     }
 
     public SamlTransformer setImplementation(SpringSecuritySaml implementation) {

@@ -35,14 +35,16 @@ public interface SamlTransformer {
      * Deflates and base64 encodes the SAML message readying it for transport.
      * If the result is used as a query parameter, it still has to be URL encoded.
      * @param s - original string
-     * @return deflated and base64 encoded string
+     * @param deflate - if set to true the DEFLATE encoding will be applied
+     * @return encoded string
      */
-    String samlEncode(String s);
+    String samlEncode(String s, boolean deflate);
 
     /**
      * base64 decodes and inflates the SAML message.
      * @param s base64 encoded deflated string
+     * @param inflate - if set to true the value will be deflated
      * @return the original string
      */
-    String samlDecode(String s);
+    String samlDecode(String s, boolean inflate);
 }

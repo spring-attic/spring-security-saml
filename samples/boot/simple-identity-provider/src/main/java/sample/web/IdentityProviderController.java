@@ -96,7 +96,7 @@ public class IdentityProviderController {
         );
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
 
-        String encoded = transformer.samlEncode(transformer.toXml(response));
+        String encoded = transformer.samlEncode(transformer.toXml(response), false);
         model.addAttribute("url", getAcs(metadata));
         model.addAttribute("SAMLResponse", encoded);
         return "saml-post";
@@ -107,7 +107,7 @@ public class IdentityProviderController {
                                         Model model,
                                         @RequestParam(name = "SAMLRequest", required = true) String authn) {
         //receive AuthnRequest
-        String xml = transformer.samlDecode(authn);
+        String xml = transformer.samlDecode(authn, false);
         AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
         //TODO - validate signature
@@ -128,7 +128,7 @@ public class IdentityProviderController {
 
         response.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
-        String encoded = transformer.samlEncode(transformer.toXml(response));
+        String encoded = transformer.samlEncode(transformer.toXml(response), false);
         model.addAttribute("url", destination);
         model.addAttribute("SAMLResponse", encoded);
         return "saml-post";

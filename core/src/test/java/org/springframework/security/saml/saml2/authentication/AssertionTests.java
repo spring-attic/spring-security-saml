@@ -45,6 +45,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.saml.saml2.attribute.AttributeNameFormat.BASIC;
 import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.PASSWORD;
@@ -212,7 +213,7 @@ public class AssertionTests extends MetadataBase {
         SubjectConfirmationData confirmationData = subjectConfirmation.getConfirmationData();
         assertNotNull(confirmationData);
         assertThat(confirmationData.getInResponseTo(), equalTo(request.getId()));
-        assertNotNull(confirmationData.getNotBefore());
+        assertNull(confirmationData.getNotBefore());
         assertNotNull(confirmationData.getNotOnOrAfter());
         assertThat(confirmationData.getRecipient(), equalTo(request.getAssertionConsumerService().getLocation()));
 
@@ -221,9 +222,8 @@ public class AssertionTests extends MetadataBase {
         assertNotNull(conditions.getNotBefore());
         assertNotNull(conditions.getNotOnOrAfter());
         assertNotNull(conditions.getCriteria());
-        assertThat(conditions.getCriteria().size(), equalTo(2));
+        assertThat(conditions.getCriteria().size(), equalTo(1));
         assertThat(conditions.getCriteria().get(0).getClass(), equalTo(AudienceRestriction.class));
-        assertThat(conditions.getCriteria().get(1).getClass(), equalTo(OneTimeUse.class));
 
         List<AuthenticationStatement> statements = assertion.getAuthenticationStatements();
         assertNotNull(statements);
@@ -324,7 +324,7 @@ public class AssertionTests extends MetadataBase {
         nodes = getNodes(xml, "//saml:Conditions/saml:AudienceRestriction/saml:Audience");
         assertThat(nodes.iterator().next().getTextContent(), equalTo(serviceProviderMetadata.getEntityId()));
 
-        assertNodeCount(xml, "//saml:Conditions/saml:OneTimeUse", 1);
+        assertNodeCount(xml, "//saml:Conditions/saml:OneTimeUse", 0);
 
         assertNodeCount(xml, "//saml:AuthnStatement", 1);
         nodes = getNodes(xml, "//saml:AuthnStatement");

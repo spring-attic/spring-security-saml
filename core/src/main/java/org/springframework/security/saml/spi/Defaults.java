@@ -280,7 +280,7 @@ public class Defaults {
             .setAssertions(asList(assertion))
             .setId(UUID.randomUUID().toString())
             .setInResponseTo(authn != null ? authn.getId() : null)
-            .setDestination(authn.getAssertionConsumerService().getLocation())
+            .setDestination(authn != null ? authn.getAssertionConsumerService().getLocation() : null)
             .setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
             .setIssuer(new Issuer().setValue(idp.getEntityId()))
             .setIssueInstant(new DateTime())

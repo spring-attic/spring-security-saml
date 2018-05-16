@@ -58,8 +58,8 @@ public class SpringSecuritySamlTests {
     public void deflate_inflate() throws Exception {
         SpringSecuritySaml saml = instance.init();
         String s = UUID.randomUUID().toString();
-        String deflated = saml.deflateAndEncode(s);
-        String inflated = saml.decodeAndInflate(deflated);
+        String deflated = saml.encode(saml.deflate(s));
+        String inflated = saml.inflate(saml.decode(deflated));
         assertThat(inflated, equalTo(s));
     }
 }

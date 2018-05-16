@@ -122,7 +122,7 @@ public class ServiceProviderController implements InitializingBean {
     public View sso(HttpServletRequest request,
                     @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
-        String xml = transformer.samlDecode(response);
+        String xml = transformer.samlDecode(response, true);
         //extract basic data
         Response r = (Response) transformer.resolve(xml, null);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
@@ -140,7 +140,7 @@ public class ServiceProviderController implements InitializingBean {
                                              IdentityProviderMetadata m,
                                              AuthenticationRequest authenticationRequest) {
         String xml = transformer.toXml(authenticationRequest);
-        String deflated = transformer.samlEncode(xml);
+        String deflated = transformer.samlEncode(xml, true);
         Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
         UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
         url.queryParam("SAMLRequest", URLEncoder.encode(deflated));

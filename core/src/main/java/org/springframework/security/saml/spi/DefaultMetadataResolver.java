@@ -15,6 +15,8 @@
 
 package org.springframework.security.saml.spi;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +35,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.util.Network;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -41,6 +44,8 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     private SamlServerConfiguration configuration;
     private Defaults defaults;
     private SamlTransformer transformer;
+    private Network network;
+    private DefaultMetadataCache cache;
 
     @Autowired
     public void setTransformer(SamlTransformer transformer) {
@@ -56,6 +61,18 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     @Autowired
     public DefaultMetadataResolver setDefaults(Defaults defaults) {
         this.defaults = defaults;
+        return this;
+    }
+
+    @Autowired
+    public DefaultMetadataResolver setNetwork(Network network) {
+        this.network = network;
+        return this;
+    }
+
+    @Autowired
+    public DefaultMetadataResolver setMetadataCache(DefaultMetadataCache cache) {
+        this.cache = cache;
         return this;
     }
 
@@ -88,17 +105,35 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
 
     @Override
     public IdentityProviderMetadata resolveIdentityProvider(Assertion assertion) {
-        return null;
+        Issuer issuer = assertion.getIssuer();
+        return resolveIdentityProvider(issuer.getValue());
     }
 
     @Override
     public IdentityProviderMetadata resolveIdentityProvider(Response response) {
-        return null;
+        Issuer issuer = response.getIssuer();
+        return resolveIdentityProvider(issuer.getValue());
     }
 
     @Override
     public IdentityProviderMetadata resolveIdentityProvider(String entityId) {
+        for (ExternalProviderConfiguration c : configuration.getServiceProvider().getProviders()) {
+            IdentityProviderMetadata idp = resolveIdentityProvider(c);
+            if (entityId.equals(idp.getEntityId())) {
+                return idp;
+            }
+        }
         return null;
+    }
+
+    @Override
+    public IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp) {
+        if (isUri(idp.getMetadata())) {
+            byte[] metadata = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
+            return (IdentityProviderMetadata) transformer.resolve(metadata, null);
+        } else {
+            return (IdentityProviderMetadata) transformer.resolve(idp.getMetadata(), null);
+        }
     }
 
     @Override
@@ -106,7 +141,7 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
         for (ExternalProviderConfiguration c : idp.getProviders()) {
             String metadata = c.getMetadata();
-            Metadata m = resolve(metadata);
+            Metadata m = resolve(metadata, c.isSkipSslValidation());
             if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
                 return (ServiceProviderMetadata) m;
             }
@@ -114,16 +149,26 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         return null;
     }
 
-    private Metadata resolve(String metadata) {
-        return (Metadata) transformer.resolve(metadata, null);
+    @Override
+    public ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request) {
+        Issuer issuer = request.getIssuer();
+        ServiceProviderMetadata result = resolveServiceProvider(issuer.getValue());
+        return result;
     }
 
     @Override
-    public ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request) {
-        ServiceProviderMetadata result = null;
-        Issuer issuer = request.getIssuer();
-        result = resolveServiceProvider(issuer.getValue());
-        return result;
+    public ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp) {
+        return (ServiceProviderMetadata) resolve(sp.getMetadata(), sp.isSkipSslValidation());
+    }
+
+    protected boolean isUri(String uri) {
+        boolean isUri = false;
+        try {
+            new URI(uri);
+            isUri = true;
+        } catch (URISyntaxException e) {
+        }
+        return isUri;
     }
 
     protected List<SimpleKey> getSimpleKeys(LocalProviderConfiguration sp) {
@@ -132,5 +177,15 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         keys.addAll(sp.getKeys().getStandBy());
         return keys;
     }
+
+    protected Metadata resolve(String metadata, boolean skipSslValidation) {
+        if (isUri(metadata)) {
+            byte[] data = cache.getMetadata(metadata, skipSslValidation);
+            return (Metadata) transformer.resolve(data, null);
+        } else {
+            return (Metadata) transformer.resolve(metadata, null);
+        }
+    }
+
 
 }

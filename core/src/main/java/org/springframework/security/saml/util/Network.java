@@ -28,14 +28,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 public class Network {
 
-    public static Network getInstance() {
-        return instance;
+    public byte[] get(String url, boolean skipSslValidation) {
+        RestTemplate template = new RestTemplate(createRequestFactory(skipSslValidation));
+        return template.getForObject(url, byte[].class);
     }
-
-    protected static Network instance = new Network();
 
     public ClientHttpRequestFactory createRequestFactory(boolean skipSslValidation) {
         return createRequestFactory(getClientBuilder(skipSslValidation));

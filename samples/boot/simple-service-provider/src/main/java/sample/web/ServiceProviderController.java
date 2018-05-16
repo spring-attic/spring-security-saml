@@ -34,7 +34,6 @@ import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.stereotype.Controller;
@@ -97,8 +96,7 @@ public class ServiceProviderController implements InitializingBean {
     }
 
     @GetMapping(value = "/saml/sp/metadata", produces = MediaType.TEXT_XML_VALUE)
-    public @ResponseBody()
-    String metadata(HttpServletRequest request) {
+    public @ResponseBody() String metadata(HttpServletRequest request) {
         ServiceProviderMetadata metadata = getServiceProviderMetadata(request);
         return transformer.toXml(metadata);
     }
@@ -119,7 +117,11 @@ public class ServiceProviderController implements InitializingBean {
                     @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
         String xml = transformer.samlDecode(response);
+        //extract basic data
         Response r = (Response) transformer.resolve(xml, null);
+        IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
+        //validate signature
+        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys());
         NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(token);
@@ -142,7 +144,8 @@ public class ServiceProviderController implements InitializingBean {
     protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
         builder.pathSegment("saml/sp/discovery");
-        builder.queryParam("idp", ((Metadata) transformer.resolve(p.getMetadata(), null)).getEntityId());
+        IdentityProviderMetadata metadata = resolver.resolveIdentityProvider(p);
+        builder.queryParam("idp", metadata.getEntityId());
         return builder.build().toUriString();
     }
 

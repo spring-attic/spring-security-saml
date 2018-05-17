@@ -442,7 +442,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     public Signature validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
         Signature result = null;
-        if (object.getSignature() != null && keys != null && !keys.isEmpty()) {
+        if (object.isSigned() && keys != null && !keys.isEmpty()) {
             SignatureException last = null;
             for (SimpleKey key : keys) {
                 try {

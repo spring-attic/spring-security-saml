@@ -16,10 +16,12 @@ spring:
   security:
     saml2:
       identity-provider:
-        entity-id: test-idp-entity-id
+        entity-id: spring.security.saml.idp.id
         sign-metadata: true
         sign-assertions: true
         want-requests-signed: true
+        signing-algorithm: RSA_SHA256
+        digest-method: SHA256
         keys:
           active:
             - alias: key1
@@ -143,7 +145,7 @@ spring:
 
         - name: spring-security-saml-sp
           metadata: |
-            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="test-sp-entity-id"
+            <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="spring.security.saml.sp.id"
                                  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
               <md:SPSSODescriptor AuthnRequestsSigned="false" ID="6af07992-f76b-478d-804a-bfcb0e0c0c97" WantAssertionsSigned="true"
                                   protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">

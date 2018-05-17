@@ -59,7 +59,7 @@ public class SimpleServiceProviderBootTest {
         assertNull(configuration.getIdentityProvider());
         LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
         assertNotNull(sp);
-        assertThat(sp.getEntityId(), equalTo("test-sp-entity-id"));
+        assertThat(sp.getEntityId(), equalTo("spring.security.saml.sp.id"));
         assertTrue(sp.isSignMetadata());
         assertTrue(sp.isSignRequests());
         List<SimpleKey> activeKeys = sp.getKeys().getActive();

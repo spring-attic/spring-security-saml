@@ -74,7 +74,7 @@ public class SimpleIdentityProviderTest {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
         MvcResult result = mockMvc.perform(
             get("/saml/idp/init")
-                .param("sp", "test-sp-entity-id")
+                .param("sp", "spring.security.saml.sp.id")
             .with(authentication(token))
         )
             .andExpect(status().isOk())
@@ -122,7 +122,7 @@ public class SimpleIdentityProviderTest {
                 @Override
                 public byte[] getMetadata(String uri, boolean skipSslValidation) {
                     return ("\n" +
-                        "<md:EntityDescriptor ID=\"dfc08e8f-ab6e-4682-aa34-6e7fcd812892\" entityID=\"test-sp-entity-id\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\"><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+                        "<md:EntityDescriptor ID=\"dfc08e8f-ab6e-4682-aa34-6e7fcd812892\" entityID=\"spring.security.saml.sp.id\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\"><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
                         "<ds:SignedInfo>\n" +
                         "<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
                         "<ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +

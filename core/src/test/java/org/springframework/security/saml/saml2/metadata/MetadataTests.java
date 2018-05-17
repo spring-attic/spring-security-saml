@@ -231,6 +231,7 @@ public class MetadataTests extends MetadataBase {
     public void xml_to_sp_external() throws IOException {
         ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo));
         assertNotNull(sp);
+        assertNotNull(sp.getImplementation());
         assertThat(sp.getEntityId(), equalTo("login.run.pivotal.io"));
         assertThat(sp.getEntityAlias(), equalTo("login.run.pivotal.io"));
         assertNotNull(sp.getProviders());
@@ -292,6 +293,7 @@ public class MetadataTests extends MetadataBase {
     public void xml_to_sp_complete() throws IOException {
         ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null);
         assertNotNull(sp);
+        assertNotNull(sp.getImplementation());
         assertThat(sp.getEntityId(), equalTo("https://sp.saml.spring.io/sp"));
         assertThat(sp.getEntityAlias(), equalTo(sp.getEntityId()));
         assertNotNull(sp.getProviders());
@@ -429,6 +431,7 @@ public class MetadataTests extends MetadataBase {
     public void xml_to_idp_complete() throws Exception {
         IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null);
         assertNotNull(idp);
+        assertNotNull(idp.getImplementation());
         assertThat(idp.getEntityId(), equalTo("https://idp.saml.spring.io"));
         assertThat(idp.getEntityAlias(), equalTo(idp.getEntityId()));
         assertNotNull(idp.getProviders());
@@ -499,6 +502,7 @@ public class MetadataTests extends MetadataBase {
     public void xml_to_idp_external() throws Exception {
         IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo));
         assertNotNull(idp);
+        assertNotNull(idp.getImplementation());
         assertThat(idp.getEntityId(), equalTo("login.run.pivotal.io"));
         assertThat(idp.getEntityAlias(), equalTo("login.run.pivotal.io"));
         assertNotNull(idp.getProviders());

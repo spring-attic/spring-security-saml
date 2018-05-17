@@ -100,6 +100,7 @@ public class AssertionTests extends MetadataBase {
     public void read_saml_response() throws Exception {
         Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null);
         assertNotNull(response);
+        assertNotNull(response.getImplementation());
         assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
         assertThat(response.getDestination(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
         assertThat(response.getInResponseTo(), equalTo("a77141543-a0b4-4720-9e64-b08814d2af86"));

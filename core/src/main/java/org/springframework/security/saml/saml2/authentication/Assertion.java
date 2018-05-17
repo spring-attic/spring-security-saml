@@ -21,13 +21,13 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 
-public class Assertion implements Saml2Object {
+public class Assertion extends ImplementationHolder {
 
     private String version;
     private String id;

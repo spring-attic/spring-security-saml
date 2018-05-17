@@ -18,10 +18,11 @@ package org.springframework.security.saml.saml2.authentication;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.Signature;
 
-public class Request<T extends Request<T>> {
+public class Request<T extends Request<T>> extends ImplementationHolder {
 
     protected T _this() {
         return (T) this;

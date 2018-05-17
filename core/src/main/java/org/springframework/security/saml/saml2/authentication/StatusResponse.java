@@ -16,10 +16,10 @@
 package org.springframework.security.saml.saml2.authentication;
 
 import org.joda.time.DateTime;
-import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.signature.Signature;
 
-public class StatusResponse<T extends StatusResponse> implements Saml2Object {
+public class StatusResponse<T extends StatusResponse> extends ImplementationHolder {
 
     private String id;
     private String inResponseTo;

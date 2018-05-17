@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
@@ -32,7 +32,7 @@ import org.springframework.security.saml.saml2.signature.Signature;
  * Line 466-494
  * </a>
  */
-public class EntityDescriptor<T extends EntityDescriptor> implements Saml2Object {
+public class EntityDescriptor<T extends EntityDescriptor> extends ImplementationHolder {
 
     private String id;
     private String entityId;

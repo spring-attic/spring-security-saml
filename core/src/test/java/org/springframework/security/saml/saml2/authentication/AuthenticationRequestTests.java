@@ -70,7 +70,7 @@ class AuthenticationRequestTests extends MetadataBase {
         String xml = config.toXml(request);
         AuthenticationRequest data = (AuthenticationRequest) config.resolve(xml, Collections.singletonList(idpVerifying));
         assertNotNull(data);
-
+        assertNotNull(data.getImplementation());
         assertNotNull(data.getSignature());
         assertTrue(data.getSignature().isValidated());
 

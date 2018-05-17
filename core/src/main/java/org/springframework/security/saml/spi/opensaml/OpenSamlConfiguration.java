@@ -134,6 +134,7 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
@@ -1042,20 +1043,27 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {
         XMLObject parsed = parse(xml);
         Signature signature = validateSignature((SignableSAMLObject) parsed, trustedKeys);
+        Saml2Object result = null;
         if (parsed instanceof EntityDescriptor) {
-            return resolveMetadata((EntityDescriptor) parsed)
+            result = resolveMetadata((EntityDescriptor) parsed)
                 .setSignature(signature);
         }
         if (parsed instanceof AuthnRequest) {
-            return resolveAuthenticationRequest((AuthnRequest) parsed)
+            result = resolveAuthenticationRequest((AuthnRequest) parsed)
                 .setSignature(signature);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
-            return resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, trustedKeys);
+            result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, trustedKeys);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
-            return resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, trustedKeys)
+            result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, trustedKeys)
                 .setSignature(signature);
+        }
+        if (result != null) {
+            if (result instanceof ImplementationHolder) {
+                ((ImplementationHolder)result).setImplementation(parsed);
+            }
+            return result;
         }
         throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
     }

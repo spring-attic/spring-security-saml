@@ -47,6 +47,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 import sample.config.AppConfig;
 
+import static org.springframework.http.HttpMethod.GET;
+
 @Controller
 public class ServiceProviderController implements InitializingBean {
 
@@ -122,7 +124,7 @@ public class ServiceProviderController implements InitializingBean {
     public View sso(HttpServletRequest request,
                     @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
-        String xml = transformer.samlDecode(response, true);
+        String xml = transformer.samlDecode(response, GET.matches(request.getMethod()));
         //extract basic data
         Response r = (Response) transformer.resolve(xml, null);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);

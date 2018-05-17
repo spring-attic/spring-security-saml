@@ -162,4 +162,7 @@ spring:
               </md:SPSSODescriptor>
             </md:EntityDescriptor>
           linktext: Spring Security SAML SP
+        - name: simplesamlphp
+          metadata: http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
+          link-text: Simple SAML PHP SP
 

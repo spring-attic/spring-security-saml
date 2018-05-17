@@ -27,7 +27,10 @@ public enum Binding {
     PAOS("urn:oasis:names:tc:SAML:2.0:bindings:PAOS"),
     SOAP("urn:oasis:names:tc:SAML:2.0:bindings:SOAP"),
     DISCOVERY("urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"),
-    REQUEST_INITIATOR("urn:oasis:names:tc:SAML:profiles:SSO:request-init");
+    REQUEST_INITIATOR("urn:oasis:names:tc:SAML:profiles:SSO:request-init"),
+    SAML_1_0_BROWSER_POST("urn:oasis:names:tc:SAML:1.0:profiles:browser-post"),
+    SAML_1_0_BROWSER_ARTIFACT("urn:oasis:names:tc:SAML:1.0:profiles:artifact-01"),
+    ;
 
 
     private final String urn;

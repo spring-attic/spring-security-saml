@@ -42,6 +42,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import sample.config.AppConfig;
 
+import static org.springframework.http.HttpMethod.GET;
+
 @Controller
 public class IdentityProviderController {
 
@@ -86,6 +88,7 @@ public class IdentityProviderController {
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(entityId);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = getDefaults().assertion(metadata, local, null);
+        assertion.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
         principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
         principal.setFormat(NameId.PERSISTENT);
@@ -94,8 +97,8 @@ public class IdentityProviderController {
                                                    metadata,
                                                    local
         );
+        response.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         response.setStatus(new Status().setCode(StatusCode.SUCCESS));
-
         String encoded = transformer.samlEncode(transformer.toXml(response), false);
         model.addAttribute("url", getAcs(metadata));
         model.addAttribute("SAMLResponse", encoded);
@@ -107,7 +110,7 @@ public class IdentityProviderController {
                                         Model model,
                                         @RequestParam(name = "SAMLRequest", required = true) String authn) {
         //receive AuthnRequest
-        String xml = transformer.samlDecode(authn, false);
+        String xml = transformer.samlDecode(authn, GET.matches(request.getMethod()));
         AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
         //TODO - validate signature

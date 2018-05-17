@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.signature.Signature;
 
 public interface SamlTransformer {
 
@@ -74,14 +73,4 @@ public interface SamlTransformer {
      */
     String samlDecode(String s, boolean inflate);
 
-    /**
-     * Validates a signature on a SAML object. Returns the key that validated the signature
-     * @param saml - a signed object to validate
-     * @param verificationKeys a list of keys to use for validation
-     * @return the key that successfully validated the signature
-     * @throws NullPointerException if the underlying implementation is null
-     * @throws IllegalArgumentException if the object was not signed
-     * @throws org.springframework.security.saml.saml2.signature.SignatureException if object failed signature validation
-     */
-    Signature validateSignature(Saml2Object saml, List<SimpleKey> verificationKeys);
 }

@@ -19,10 +19,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultMetadataResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.util.TimeProvider;
 
@@ -36,7 +40,12 @@ public class SamlConfiguration {
 
     @Bean
     public SamlTransformer transformer() {
-        return new DefaultSamlTransformer();
+        return new DefaultSamlTransformer(implementation());
+    }
+
+    @Bean
+    public SamlValidator validator() {
+        return new DefaultValidator(implementation());
     }
 
     @Bean
@@ -57,5 +66,10 @@ public class SamlConfiguration {
     @Bean
     public DefaultMetadataCache cache() {
         return new DefaultMetadataCache(time(), network());
+    }
+
+    @Bean
+    public SpringSecuritySaml implementation() {
+        return new OpenSamlConfiguration();
     }
 }

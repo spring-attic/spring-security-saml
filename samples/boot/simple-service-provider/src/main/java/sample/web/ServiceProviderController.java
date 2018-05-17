@@ -28,6 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
@@ -56,6 +57,12 @@ public class ServiceProviderController implements InitializingBean {
     private SamlTransformer transformer;
     private Defaults defaults;
     private MetadataResolver resolver;
+    private SamlValidator validator;
+
+    @Autowired
+    public void setValidator(SamlValidator validator) {
+        this.validator = validator;
+    }
 
     @Autowired
     public void setTransformer(SamlTransformer transformer) {
@@ -129,7 +136,7 @@ public class ServiceProviderController implements InitializingBean {
         Response r = (Response) transformer.resolve(xml, null);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
         //validate signature
-        transformer.validateSignature(r, identityProviderMetadata.getIdentityProvider().getKeys());
+        validator.validateSignature(r, identityProviderMetadata.getIdentityProvider().getKeys());
         NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(token);

@@ -15,29 +15,13 @@
 
 package org.springframework.security.saml.util;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
 
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 
 class InMemoryKeyStoreTests {
-
-    private static DefaultSamlTransformer samlTransformer;
-
-    @BeforeAll
-    public static void init() throws Exception {
-        samlTransformer = new DefaultSamlTransformer();
-        samlTransformer.afterPropertiesSet();
-    }
-
-    @BeforeEach
-    void setUp() {
-
-    }
 
     @Test
     public void test_example() {

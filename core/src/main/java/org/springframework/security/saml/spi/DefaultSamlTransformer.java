@@ -36,6 +36,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -103,6 +104,11 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
         } else {
             return new String(b, UTF_8);
         }
+    }
+
+    @Override
+    public Signature validateSignature(Saml2Object saml, List<SimpleKey> verificationKeys) {
+        return implementation.validateSignature(saml, verificationKeys);
     }
 
     public SamlTransformer setImplementation(SpringSecuritySaml implementation) {

@@ -30,5 +30,5 @@ public interface Saml2Object {
      *
      * @return the underlying implementation object
      */
-    //Object getImplementation();
+    Object getImplementation();
 }

@@ -58,6 +58,7 @@ import java.util.zip.InflaterOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
@@ -96,6 +97,8 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
     public abstract Saml2Object resolve(String xml, List<SimpleKey> trustedKeys);
 
     public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
+
+    public abstract Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys);
 
     public String encode(byte[] b) {
         return UNCHUNKED_ENCODER.encodeToString(b);

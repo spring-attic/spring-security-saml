@@ -20,15 +20,41 @@ import java.util.List;
 
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 public interface SamlTransformer {
 
+    /**
+     * Converts a SAML object into an XML string.
+     * If the object contains signing keys, the XML object will be signed prior to converting it
+     * to a string
+     * @param saml2Object - object to be converted to XML
+     * @return string representation of the XML object
+     */
     String toXml(Saml2Object saml2Object);
 
+    /**
+     * Converts an SAML/XML string into a Java object
+     * @param xml the XML representation of the object
+     * @param trustedKeys Nullable. If not null, object signature will be validated upon conversion.
+     *                    The implementation will attempt each key until one succeeds
+     * @return the Java object that was
+     * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
+     * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
+     */
     default Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
         return resolve(xml.getBytes(StandardCharsets.UTF_8), trustedKeys);
     }
 
+    /**
+     * Converts an SAML/XML string into a Java object
+     * @param xml the XML representation of the object
+     * @param trustedKeys Nullable. If not null, object signature will be validated upon conversion.
+     *                    The implementation will attempt each key until one succeeds
+     * @return the Java object that was
+     * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
+     * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
+     */
     Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
 
     /**
@@ -47,4 +73,15 @@ public interface SamlTransformer {
      * @return the original string
      */
     String samlDecode(String s, boolean inflate);
+
+    /**
+     * Validates a signature on a SAML object. Returns the key that validated the signature
+     * @param saml - a signed object to validate
+     * @param verificationKeys a list of keys to use for validation
+     * @return the key that successfully validated the signature
+     * @throws NullPointerException if the underlying implementation is null
+     * @throws IllegalArgumentException if the object was not signed
+     * @throws org.springframework.security.saml.saml2.signature.SignatureException if object failed signature validation
+     */
+    Signature validateSignature(Saml2Object saml, List<SimpleKey> verificationKeys);
 }

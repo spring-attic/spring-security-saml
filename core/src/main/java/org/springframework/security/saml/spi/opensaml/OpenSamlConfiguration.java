@@ -423,6 +423,23 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
     }
 
+    @Override
+    public Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys) {
+        if (saml2Object == null || saml2Object.getImplementation() == null) {
+            throw new NullPointerException("No object to validate signature against.");
+        }
+
+        if (trustedKeys == null || trustedKeys.isEmpty()) {
+            throw new IllegalArgumentException("At least one verification key has to be provided");
+        }
+
+        if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
+            return validateSignature((SignableSAMLObject)saml2Object.getImplementation(), trustedKeys);
+        } else {
+            throw new IllegalArgumentException("Unrecognized object type:"+saml2Object.getImplementation().getClass().getName());
+        }
+    }
+
     public Signature validateSignature(SignableSAMLObject object, List<SimpleKey> keys) {
         Signature result = null;
         if (object.getSignature() != null && keys != null && !keys.isEmpty()) {
@@ -433,7 +450,8 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     SignatureValidator.validate(object.getSignature(), credential);
                     last = null;
                     result = getSignature(object.getSignature())
-                        .setValidated(true);
+                        .setValidated(true)
+                        .setValidatingKey(key);
                     break;
                 } catch (SignatureException e) {
                     last = e;
@@ -465,10 +483,6 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             }
         }
         return result;
-    }
-
-    protected XMLObject parse(String xml) {
-        return parse(xml.getBytes(UTF_8));
     }
 
     protected XMLObject parse(byte[] xml) {

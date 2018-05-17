@@ -129,7 +129,7 @@ public class ServiceProviderController implements InitializingBean {
         Response r = (Response) transformer.resolve(xml, null);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
         //validate signature
-        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys());
+        transformer.validateSignature(r, identityProviderMetadata.getIdentityProvider().getKeys());
         NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(token);

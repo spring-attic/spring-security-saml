@@ -192,20 +192,10 @@ import static org.springframework.util.StringUtils.hasText;
 public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
 
     private BasicParserPool parserPool;
-    private TimeProvider time;
 
-    public OpenSamlConfiguration() {
+    public OpenSamlConfiguration(TimeProvider time) {
+        super(time);
         this.parserPool = new BasicParserPool();
-        time = new TimeProvider();
-    }
-
-    public TimeProvider getTime() {
-        return time;
-    }
-
-    public OpenSamlConfiguration setTime(TimeProvider time) {
-        this.time = time;
-        return this;
     }
 
     public BasicParserPool getParserPool() {

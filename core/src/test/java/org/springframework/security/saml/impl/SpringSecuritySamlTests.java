@@ -35,13 +35,14 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
+import org.springframework.security.saml.util.TimeProvider;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class SpringSecuritySamlTests {
 
-    private SpringSecuritySaml instance = new OpenSamlConfiguration();
+    private SpringSecuritySaml instance = new OpenSamlConfiguration(new TimeProvider());
 
     @Test
     public void init_works() {

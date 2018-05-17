@@ -70,6 +70,6 @@ public class SamlConfiguration {
 
     @Bean
     public SpringSecuritySaml implementation() {
-        return new OpenSamlConfiguration();
+        return new OpenSamlConfiguration(time());
     }
 }

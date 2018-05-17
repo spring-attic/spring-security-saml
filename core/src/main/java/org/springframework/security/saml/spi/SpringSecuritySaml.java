@@ -59,6 +59,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.util.TimeProvider;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
@@ -66,8 +67,18 @@ import static java.util.zip.Deflater.DEFLATED;
 public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
+    private TimeProvider time;
 
     private Base64 UNCHUNKED_ENCODER = new Base64(0, new byte[]{'\n'});
+
+    public SpringSecuritySaml(TimeProvider time) {
+        this.time = time;
+    }
+
+    public TimeProvider getTime() {
+        return time;
+    }
+
 
     @SuppressWarnings("checked")
     public T init() {

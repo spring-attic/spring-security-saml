@@ -29,6 +29,7 @@ import org.springframework.security.saml.spi.DefaultMetadataResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
+import org.springframework.security.saml.util.TimeProvider;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,10 +52,12 @@ public abstract class MetadataBase {
     protected static SamlTransformer config;
     protected static MetadataResolver resolver;
     protected static Defaults defaults;
+    protected static TimeProvider time;
 
     @BeforeAll
     public static void init() throws Exception {
-        config = new DefaultSamlTransformer(new OpenSamlConfiguration());
+        time = new TimeProvider();
+        config = new DefaultSamlTransformer(new OpenSamlConfiguration(time));
         resolver = new DefaultMetadataResolver();
         defaults = new Defaults();
         ((DefaultSamlTransformer) config).afterPropertiesSet();

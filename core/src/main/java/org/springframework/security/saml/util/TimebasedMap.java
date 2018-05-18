@@ -15,6 +15,7 @@
 
 package org.springframework.security.saml.util;
 
+import java.time.Clock;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,17 +34,17 @@ public class TimebasedMap<K, V> implements Map<K, V> {
     private long expirationTimeMills = 1000 * 60 * 10;
     private long frequencyIntervalMills = 1000 * 30;
     private AtomicLong lastScan = new AtomicLong(System.currentTimeMillis());
-    private TimeProvider time;
+    private Clock time;
 
-    public TimebasedMap(TimeProvider time) {
+    public TimebasedMap(Clock time) {
         this.time = time;
     }
 
-    public TimeProvider getTime() {
+    public Clock getTime() {
         return time;
     }
 
-    public TimebasedMap<K, V> setTime(TimeProvider time) {
+    public TimebasedMap<K, V> setTime(Clock time) {
         this.time = time;
         return this;
     }
@@ -184,12 +185,12 @@ public class TimebasedMap<K, V> implements Map<K, V> {
     }
 
     protected boolean isExpired(MapEntry<V> entry) {
-        long now = getTime().currentTimeMillis();
+        long now = getTime().millis();
         return (now - entry.getLastAccessTime()) > expirationTimeMills;
     }
 
     protected void scanAndRemove() {
-        long now = getTime().currentTimeMillis();
+        long now = getTime().millis();
         long last = lastScan.get();
         boolean remove = false;
         if ((now - last) > frequencyIntervalMills) {
@@ -221,7 +222,7 @@ public class TimebasedMap<K, V> implements Map<K, V> {
         private long lastAccessTime;
 
         public MapEntry(V value) {
-            long now = getTime().currentTimeMillis();
+            long now = getTime().millis();
             setValue(value);
             setCreationTime(now);
             setLastAccessTime(now);

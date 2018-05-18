@@ -48,6 +48,7 @@ package org.springframework.security.saml.spi;
 import javax.xml.datatype.Duration;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Clock;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
@@ -59,7 +60,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.util.TimeProvider;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
@@ -67,15 +67,15 @@ import static java.util.zip.Deflater.DEFLATED;
 public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
-    private TimeProvider time;
+    private Clock time;
 
     private Base64 UNCHUNKED_ENCODER = new Base64(0, new byte[]{'\n'});
 
-    public SpringSecuritySaml(TimeProvider time) {
+    public SpringSecuritySaml(Clock time) {
         this.time = time;
     }
 
-    public TimeProvider getTime() {
+    public Clock getTime() {
         return time;
     }
 

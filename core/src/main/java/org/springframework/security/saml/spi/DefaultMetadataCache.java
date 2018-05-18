@@ -15,8 +15,9 @@
 
 package org.springframework.security.saml.spi;
 
+import java.time.Clock;
+
 import org.springframework.security.saml.util.Network;
-import org.springframework.security.saml.util.TimeProvider;
 import org.springframework.security.saml.util.TimebasedMap;
 
 public class DefaultMetadataCache {
@@ -24,7 +25,7 @@ public class DefaultMetadataCache {
     private final Network network;
     private TimebasedMap<String, byte[]> cache;
 
-    public DefaultMetadataCache(TimeProvider time, Network network) {
+    public DefaultMetadataCache(Clock time, Network network) {
         cache = new TimebasedMap<>(time);
         this.network = network;
     }

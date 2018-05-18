@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -175,7 +176,6 @@ import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
-import org.springframework.security.saml.util.TimeProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -193,7 +193,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
 
     private BasicParserPool parserPool;
 
-    public OpenSamlConfiguration(TimeProvider time) {
+    public OpenSamlConfiguration(Clock time) {
         super(time);
         this.parserPool = new BasicParserPool();
     }
@@ -791,7 +791,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                     descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
                 }
             }
-            long now = getTime().currentTimeMillis();
+            long now = getTime().millis();
             if (p.getCacheDuration() != null) {
                 roleDescriptor.setCacheDuration(p.getCacheDuration().getTimeInMillis(new Date(now)));
             }
@@ -1293,7 +1293,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         AuthenticationRequest result = new AuthenticationRequest()
             .setBinding(Binding.fromUrn(request.getProtocolBinding()))
             .setAssertionConsumerService(
-                new Defaults().getEndpoint(
+                new Defaults(getTime()).getEndpoint(
                     request.getAssertionConsumerServiceURL(),
                     Binding.fromUrn(request.getProtocolBinding()),
                     ofNullable(request.getAssertionConsumerServiceIndex()).orElse(-1),
@@ -1301,7 +1301,7 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                 )
             )
             .setDestination(
-                new Defaults().getEndpoint(
+                new Defaults(getTime()).getEndpoint(
                     request.getDestination(),
                     Binding.fromUrn(request.getProtocolBinding()),
                     -1,

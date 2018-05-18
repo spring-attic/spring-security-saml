@@ -45,6 +45,7 @@
 
 package org.springframework.security.saml.spi;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,7 +75,6 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.util.TimeProvider;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.util.Arrays.asList;
@@ -90,21 +90,17 @@ public class Defaults {
     public long NOT_AFTER = 120000;
     public long SESSION_NOT_AFTER = 30 * 60 * 1000;
 
-    private TimeProvider time;
+    private Clock time;
 
-    public Defaults() {
-        this(new TimeProvider());
-    }
-
-    public Defaults(TimeProvider time) {
+    public Defaults(Clock time) {
         this.time = time;
     }
 
-    public TimeProvider getTime() {
+    public Clock getTime() {
         return time;
     }
 
-    public Defaults setTime(TimeProvider time) {
+    public Defaults setTime(Clock time) {
         this.time = time;
         return this;
     }
@@ -174,7 +170,7 @@ public class Defaults {
 
         AuthenticationRequest request = new AuthenticationRequest()
             .setId(UUID.randomUUID().toString())
-            .setIssueInstant(new DateTime(time.currentTimeMillis()))
+            .setIssueInstant(new DateTime(time.millis()))
             .setForceAuth(Boolean.FALSE)
             .setPassive(Boolean.FALSE)
             .setBinding(Binding.POST)
@@ -208,7 +204,7 @@ public class Defaults {
         IdentityProviderMetadata idp,
         AuthenticationRequest request) {
 
-        long now = time.currentTimeMillis();
+        long now = time.millis();
         return new Assertion()
             .setVersion("2.0")
             .setIssueInstant(new DateTime(now))

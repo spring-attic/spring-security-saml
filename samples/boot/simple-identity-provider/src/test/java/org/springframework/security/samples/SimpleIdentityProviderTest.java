@@ -14,6 +14,7 @@
  */
 package org.springframework.security.samples;
 
+import java.time.Clock;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +35,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.util.Network;
-import org.springframework.security.saml.util.TimeProvider;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -107,8 +107,8 @@ public class SimpleIdentityProviderTest {
     @ComponentScan(basePackages = "sample")
     public static class SpringBootApplicationTestConfig {
         @Bean
-        public TimeProvider time() {
-            return new TimeProvider();
+        public Clock time() {
+            return Clock.systemUTC();
         }
 
         @Bean

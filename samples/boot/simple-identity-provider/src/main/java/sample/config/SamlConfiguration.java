@@ -15,6 +15,8 @@
 
 package sample.config;
 
+import java.time.Clock;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.MetadataResolver;
@@ -28,14 +30,13 @@ import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
 import org.springframework.security.saml.util.Network;
-import org.springframework.security.saml.util.TimeProvider;
 
 @Configuration
 public class SamlConfiguration {
 
     @Bean
-    public TimeProvider time() {
-        return new TimeProvider();
+    public Clock time() {
+        return Clock.systemUTC();
     }
 
     @Bean
@@ -50,7 +51,7 @@ public class SamlConfiguration {
 
     @Bean
     public Defaults defaults() {
-        return new Defaults();
+        return new Defaults(time());
     }
 
     @Bean

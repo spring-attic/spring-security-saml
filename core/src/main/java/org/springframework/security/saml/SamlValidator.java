@@ -28,8 +28,6 @@ public interface SamlValidator {
      * @param saml2Object - a signed object to validate
      * @param verificationKeys a list of keys to use for validation
      * @return the key that successfully validated the signature
-     * @throws NullPointerException if the underlying implementation is null (no object that contains a signature)
-     * @throws IllegalArgumentException if the object was not signed
      * @throws SignatureException if object failed signature validation
      */
     Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> verificationKeys) throws SignatureException;

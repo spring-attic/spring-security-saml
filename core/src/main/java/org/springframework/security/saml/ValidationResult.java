@@ -21,16 +21,10 @@ import java.util.List;
 
 public class ValidationResult {
 
-    private boolean success = false;
     private List<ValidationError> errors = new LinkedList<>();
 
     public boolean isSuccess() {
-        return success;
-    }
-
-    public ValidationResult setSuccess(boolean success) {
-        this.success = success;
-        return this;
+        return errors.isEmpty();
     }
 
     public List<ValidationError> getErrors() {
@@ -49,12 +43,23 @@ public class ValidationResult {
     }
 
     public static class ValidationError {
-        private final int code;
-        private final String message;
+        private String message;
 
-        public ValidationError(int code, String message) {
-            this.code = code;
+        public ValidationError() {
+        }
+
+        public ValidationError(String message) {
             this.message = message;
+        }
+
+
+        public String getMessage() {
+            return message;
+        }
+
+        public ValidationError setMessage(String message) {
+            this.message = message;
+            return this;
         }
     }
 }

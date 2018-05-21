@@ -15,6 +15,8 @@
 
 package org.springframework.security.saml.validation;
 
+import java.util.Arrays;
+
 public class ValidationException extends RuntimeException {
 
     private ValidationResult errors;
@@ -31,5 +33,18 @@ public class ValidationException extends RuntimeException {
 
     public ValidationResult getErrors() {
         return errors;
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage() + toString();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer(" ValidationException{");
+        sb.append("errors=").append(Arrays.toString(errors.getErrors().toArray()));
+        sb.append('}');
+        return sb.toString();
     }
 }

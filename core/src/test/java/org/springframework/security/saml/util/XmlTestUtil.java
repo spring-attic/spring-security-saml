@@ -21,10 +21,6 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hamcrest.Matcher;
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.security.saml.saml2.Namespace;
 import org.w3c.dom.Node;
 import org.xmlunit.xpath.JAXPXPathEngine;
@@ -48,18 +44,6 @@ public class XmlTestUtil {
         nsContext.put("idpdisc", Namespace.NS_IDP_DISCOVERY);
         nsContext.put("init", Namespace.NS_REQUEST_INIT);
         engine.setNamespaceContext(nsContext);
-    }
-
-    public static DateTimeFormatter zulu() {
-        return ISODateTimeFormat.dateTime().withChronology(ISOChronology.getInstanceUTC());
-    }
-
-    public static String toZuluTime(DateTime d) {
-        return d.toString(zulu());
-    }
-
-    public static DateTime fromZuluTime(String instant) {
-        return zulu().parseDateTime(instant);
     }
 
     public static void assertNodeAttribute(Node node, String attribute, String expected) {

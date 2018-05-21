@@ -13,19 +13,24 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.util;
 
-import org.springframework.context.annotation.Configuration;
+import org.joda.time.DateTime;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
-@Configuration
-public class LocalIdentityProviderConfiguration extends LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
-    private boolean wantRequestsSigned = false;
-    public boolean isWantRequestsSigned() {
-        return wantRequestsSigned;
+public class DateUtils {
+
+    public static DateTimeFormatter zulu() {
+        return ISODateTimeFormat.dateTime().withChronology(ISOChronology.getInstanceUTC());
     }
 
-    public LocalIdentityProviderConfiguration setWantRequestsSigned(boolean wantRequestsSigned) {
-        this.wantRequestsSigned = wantRequestsSigned;
-        return this;
+    public static String toZuluTime(DateTime d) {
+        return d.toString(zulu());
+    }
+
+    public static DateTime fromZuluTime(String instant) {
+        return zulu().parseDateTime(instant);
     }
 }

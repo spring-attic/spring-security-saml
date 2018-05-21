@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
     private String entityId;
+    private String alias;
     private boolean signMetadata;
     private String metadata;
     private RotatingKeys keys;
@@ -81,5 +82,14 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
     public T setKeys(RotatingKeys keys) {
         this.keys = keys;
         return _this();
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public LocalProviderConfiguration<T> setAlias(String alias) {
+        this.alias = alias;
+        return this;
     }
 }

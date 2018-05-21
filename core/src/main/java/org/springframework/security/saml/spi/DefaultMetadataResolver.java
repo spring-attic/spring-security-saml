@@ -85,6 +85,9 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (hasText(sp.getEntityId())) {
             metadata.setEntityId(sp.getEntityId());
         }
+        if (hasText(sp.getAlias())) {
+            metadata.setEntityAlias(sp.getAlias());
+        }
         metadata.getServiceProvider().setWantAssertionsSigned(sp.isWantAssertionsSigned());
         metadata.getServiceProvider().setAuthnRequestsSigned(sp.isSignRequests());
         return metadata;
@@ -99,6 +102,10 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (hasText(idp.getEntityId())) {
             metadata.setEntityId(idp.getEntityId());
         }
+        if (hasText(idp.getAlias())) {
+            metadata.setEntityAlias(idp.getAlias());
+        }
+
         metadata.getIdentityProvider().setWantAuthnRequestsSigned(idp.isWantRequestsSigned());
         return metadata;
     }

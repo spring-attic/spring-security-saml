@@ -16,6 +16,7 @@
 package org.springframework.security.saml.util;
 
 import javax.net.ssl.SSLContext;
+import javax.servlet.http.HttpServletRequest;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -66,5 +67,9 @@ public class Network {
         } catch (KeyStoreException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getBasePath(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }

@@ -15,9 +15,11 @@
 
 package org.springframework.security.saml.spi;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -32,24 +34,27 @@ import org.springframework.security.saml.saml2.authentication.AudienceRestrictio
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.validation.ValidationException;
 import org.springframework.security.saml.validation.ValidationResult;
 import org.springframework.security.saml.validation.ValidationResult.ValidationError;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
 import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
+import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
 public class DefaultValidator implements SamlValidator {
@@ -59,9 +64,15 @@ public class DefaultValidator implements SamlValidator {
     private boolean allowUnsolicitedResponses = true;
     private int maxAuthenticationAgeMillis;
     private Clock time = Clock.systemUTC();
+    private Network network = new Network();
 
     public DefaultValidator(SpringSecuritySaml implementation) {
         setImplementation(implementation);
+    }
+
+    public DefaultValidator setNetwork(Network network) {
+        this.network = network;
+        return this;
     }
 
     private void setImplementation(SpringSecuritySaml implementation) {
@@ -101,8 +112,17 @@ public class DefaultValidator implements SamlValidator {
     }
 
     @Override
-    public void validate(Saml2Object saml2Object, MetadataResolver resolver) throws ValidationException {
-
+    public void validate(Saml2Object saml2Object, MetadataResolver resolver, HttpServletRequest request)
+        throws ValidationException {
+        if (saml2Object instanceof Response) {
+            Response r = (Response) saml2Object;
+            ServiceProviderMetadata requester = resolver.getLocalServiceProvider(network.getBasePath(request));
+            IdentityProviderMetadata responder = resolver.resolveIdentityProvider(r);
+            ValidationResult result = validate(r, null, requester, responder);
+            if (!result.isSuccess()) {
+                throw new ValidationException("Unable to validate SAML response.", result);
+            }
+        }
     }
 
 
@@ -135,7 +155,7 @@ public class DefaultValidator implements SamlValidator {
         //verify issue time
         DateTime issueInstant = response.getIssueInstant();
         if (!isDateTimeSkewValid(getResponseSkewTimeMillis(), 0, issueInstant)) {
-            return new ValidationResult().addError(new ValidationError("Issue time is either too old or in the future:"+issueInstant.toString()));
+            return new ValidationResult().addError(new ValidationError("Issue time is either too old or in the future:" + issueInstant.toString()));
         }
 
         //validate InResponseTo
@@ -144,8 +164,10 @@ public class DefaultValidator implements SamlValidator {
             return new ValidationResult().addError(new ValidationError("InResponseTo is missing and unsolicited responses are disabled"));
         }
 
-        if (hasText(replyTo) && !mustMatchInResponseTo.contains(replyTo)) {
-            return new ValidationResult().addError(new ValidationError("Invalid InResponseTo ID, not found in supplied list"));
+        if (hasText(replyTo)) {
+            if (!isAllowUnsolicitedResponses() && (mustMatchInResponseTo == null || !mustMatchInResponseTo.contains(replyTo))) {
+                return new ValidationResult().addError(new ValidationError("Invalid InResponseTo ID, not found in supplied list"));
+            }
         }
 
         //validate destination
@@ -156,7 +178,7 @@ public class DefaultValidator implements SamlValidator {
         //validate issuer
         //name id if not null should be "urn:oasis:names:tc:SAML:2.0:nameid-format:entity"
         //value should be the entity ID of the responder
-        ValidationResult result = verifyIssuer(response.getIssuer(), requester);
+        ValidationResult result = verifyIssuer(response.getIssuer(), responder);
         if (result != null) {
             return result;
         }
@@ -165,11 +187,13 @@ public class DefaultValidator implements SamlValidator {
         ValidationResult assertionValidation = new ValidationResult();
         //DECRYPT ENCRYPTED ASSERTIONS
         for (Assertion assertion : response.getAssertions()) {
+            assertionValidation.setErrors(emptyList());
             //verify assertion
             //issuer
             //signature
-            if (wantAssertionsSigned && (assertion.getSignature()==null || !assertion.getSignature().isValidated())) {
-                return new ValidationResult().addError(new ValidationError("Assertion is not signed"));
+            if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
+                assertionValidation = new ValidationResult().addError(new ValidationError("Assertion is not signed"));
+                continue;
             }
 
             for (SubjectConfirmation conf : assertion.getSubject().getConfirmations()) {
@@ -177,7 +201,7 @@ public class DefaultValidator implements SamlValidator {
 
                 //verify assertion subject for BEARER
                 if (!BEARER.equals(conf.getMethod())) {
-                    assertionValidation.addError(new ValidationError("Invalid confirmation method:"+conf.getMethod()));
+                    assertionValidation.addError(new ValidationError("Invalid confirmation method:" + conf.getMethod()));
                     continue;
                 }
 
@@ -205,7 +229,7 @@ public class DefaultValidator implements SamlValidator {
                 if (data.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
                     assertionValidation.addError(
                         new ValidationError(
-                            String.format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter())
+                            format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter())
                         )
                     );
                 }
@@ -215,7 +239,7 @@ public class DefaultValidator implements SamlValidator {
                         if (!mustMatchInResponseTo.contains(data.getInResponseTo())) {
                             assertionValidation.addError(
                                 new ValidationError(
-                                    String.format("No match for InResponseTo: %s found.", data.getInResponseTo())
+                                    format("No match for InResponseTo: %s found.", data.getInResponseTo())
                                 )
                             );
                             continue;
@@ -230,16 +254,16 @@ public class DefaultValidator implements SamlValidator {
                     assertionValidation.addError(new ValidationError("Assertion Recipient field missing"));
                     continue;
                 } else if (!compareURIs(requester.getServiceProvider().getAssertionConsumerService(), data.getRecipient())) {
-                    assertionValidation.addError(new ValidationError("Invalid assertion Recipient field: "+data.getRecipient()));
+                    assertionValidation.addError(new ValidationError("Invalid assertion Recipient field: " + data.getRecipient()));
                     continue;
                 }
-                //6. DECRYPT NAMEID if it is encrypted
-                //6b. Use regular NameID
-                if ( ((NameIdPrincipal) assertion.getSubject().getPrincipal()) != null) {
-                    //we have a valid assertion, that's the one we will be using
-                    validAssertion = assertion;
-                    break;
-                }
+            }
+            //6. DECRYPT NAMEID if it is encrypted
+            //6b. Use regular NameID
+            if ((assertion.getSubject().getPrincipal()) != null) {
+                //we have a valid assertion, that's the one we will be using
+                validAssertion = assertion;
+                break;
             }
         }
         if (validAssertion == null) {
@@ -251,12 +275,23 @@ public class DefaultValidator implements SamlValidator {
             //VERIFY authentication statements
             if (!isDateTimeSkewValid(getResponseSkewTimeMillis(), getMaxAuthenticationAgeMillis(), statement.getAuthInstant())) {
                 return new ValidationResult()
-                    .addError("Authentication statement is too old to be used with value " + statement.getAuthInstant());
+                    .addError(
+                        format(
+                            "Authentication statement is too old to be used with value: %s current time: %s",
+                            toZuluTime(statement.getAuthInstant()),
+                            toZuluTime(new DateTime())
+                        )
+                    );
             }
 
-            if (statement.getSessionNotOnOrAfter() != null && statement.getSessionNotOnOrAfter().isAfterNow()) {
+            if (statement.getSessionNotOnOrAfter() != null && statement.getSessionNotOnOrAfter().isBeforeNow()) {
                 return new ValidationResult()
-                    .addError("Authentication session expired on: " + statement.getSessionNotOnOrAfter());
+                    .addError(
+                        format("Authentication session expired on: %s, current time: %s",
+                               toZuluTime(statement.getSessionNotOnOrAfter()),
+                               toZuluTime(new DateTime())
+                        )
+                    );
             }
 
             //possibly check the
@@ -266,24 +301,24 @@ public class DefaultValidator implements SamlValidator {
         Conditions conditions = validAssertion.getConditions();
         if (conditions != null) {
             //VERIFY conditions
-            if (conditions.getNotBefore()!=null && conditions.getNotBefore().minusMillis(getResponseSkewTimeMillis()).isAfterNow()) {
+            if (conditions.getNotBefore() != null && conditions.getNotBefore().minusMillis(getResponseSkewTimeMillis()).isAfterNow()) {
                 return new ValidationResult()
                     .addError("Conditions expired (not before): " + conditions.getNotBefore());
             }
 
-            if (conditions.getNotOnOrAfter()!=null && conditions.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
+            if (conditions.getNotOnOrAfter() != null && conditions.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
                 return new ValidationResult()
                     .addError("Conditions expired (not on or after): " + conditions.getNotOnOrAfter());
             }
 
             for (AssertionCondition c : conditions.getCriteria()) {
                 if (c instanceof AudienceRestriction) {
-                    AudienceRestriction ac = (AudienceRestriction)c;
+                    AudienceRestriction ac = (AudienceRestriction) c;
                     ac.evaluate(entityId, time());
                     if (!ac.isValid()) {
                         return new ValidationResult()
                             .addError(
-                                String.format("Audience restriction evaluation failed for assertion condition. Expected %s Was %s",
+                                format("Audience restriction evaluation failed for assertion condition. Expected %s Was %s",
                                               entityId,
                                               ac.getAudiences()
                                 )
@@ -293,10 +328,8 @@ public class DefaultValidator implements SamlValidator {
             }
         }
 
-
-
-
-
+        //the only assertion that we validated - may not be the first one
+        response.setAssertions(Arrays.asList(validAssertion));
 
 
         return new ValidationResult();
@@ -304,7 +337,7 @@ public class DefaultValidator implements SamlValidator {
     }
 
     public Clock time() {
-        return null;
+        return time;
     }
 
     public DefaultValidator setTime(Clock time) {
@@ -312,14 +345,14 @@ public class DefaultValidator implements SamlValidator {
         return this;
     }
 
-    protected ValidationResult verifyIssuer(Issuer issuer, ServiceProviderMetadata requester) {
+    protected ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
         if (issuer != null) {
-            if (!requester.getEntityId().equals(issuer.getValue())) {
+            if (!entity.getEntityId().equals(issuer.getValue())) {
                 return new ValidationResult()
                     .addError(
                         new ValidationError(
-                            String.format("Issuer mismatch. Expected: %s Actual: %s",
-                                          requester.getEntityId(), issuer.getValue())
+                            format("Issuer mismatch. Expected: %s Actual: %s",
+                                          entity.getEntityId(), issuer.getValue())
                         )
                     );
             }
@@ -327,7 +360,7 @@ public class DefaultValidator implements SamlValidator {
                 return new ValidationResult()
                     .addError(
                         new ValidationError(
-                            String.format("Issuer name format mismatch. Expected: %s Actual: %s",
+                            format("Issuer name format mismatch. Expected: %s Actual: %s",
                                           ENTITY, issuer.getFormat())
                         )
                     );
@@ -385,4 +418,6 @@ public class DefaultValidator implements SamlValidator {
     public void setMaxAuthenticationAgeMillis(int maxAuthenticationAgeMillis) {
         this.maxAuthenticationAgeMillis = maxAuthenticationAgeMillis;
     }
+
+
 }

@@ -15,6 +15,7 @@
 
 package org.springframework.security.saml;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import org.springframework.security.saml.key.SimpleKey;
@@ -35,8 +36,10 @@ public interface SamlValidator {
 
     /**
      * Performs an object validation on the respective object
-     * @param saml2Object
-     * @return - the results of the validation
+     * @param saml2Object the object to be validated according to SAML specification rules
+     * @param request - the servlet request that this object came in on
+     * @throws ValidationException if validation failed. Details in the exception.
+     *
      */
-    void validate(Saml2Object saml2Object, MetadataResolver resolver) throws ValidationException;
+    void validate(Saml2Object saml2Object, MetadataResolver resolver, HttpServletRequest request) throws ValidationException;
 }

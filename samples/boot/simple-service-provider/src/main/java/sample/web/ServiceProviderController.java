@@ -37,6 +37,7 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,6 +59,13 @@ public class ServiceProviderController implements InitializingBean {
     private Defaults defaults;
     private MetadataResolver resolver;
     private SamlValidator validator;
+    private Network network;
+
+    @Autowired
+    public ServiceProviderController setNetwork(Network network) {
+        this.network = network;
+        return this;
+    }
 
     @Autowired
     public void setValidator(SamlValidator validator) {
@@ -132,11 +140,14 @@ public class ServiceProviderController implements InitializingBean {
                     @RequestParam(name = "SAMLResponse", required = true) String response) {
         //receive assertion
         String xml = transformer.samlDecode(response, GET.matches(request.getMethod()));
-        //extract basic data
+        //extract basic data so we can map it to an IDP
         Response r = (Response) transformer.resolve(xml, null);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
         //validate signature
-        validator.validateSignature(r, identityProviderMetadata.getIdentityProvider().getKeys());
+        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys());
+        //validate object
+        validator.validate(r, resolver, request);
+        //extract the assertion
         NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(token);
@@ -157,7 +168,7 @@ public class ServiceProviderController implements InitializingBean {
     }
 
     protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBasePath(request));
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
         builder.pathSegment("saml/sp/discovery");
         IdentityProviderMetadata metadata = resolver.resolveIdentityProvider(p);
         builder.queryParam("idp", metadata.getEntityId());
@@ -165,11 +176,7 @@ public class ServiceProviderController implements InitializingBean {
     }
 
     protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
-        return getMetadataResolver().getLocalServiceProvider(getBasePath(request));
-    }
-
-    protected String getBasePath(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return getMetadataResolver().getLocalServiceProvider(network.getBasePath(request));
     }
 
     public Defaults getDefaults() {

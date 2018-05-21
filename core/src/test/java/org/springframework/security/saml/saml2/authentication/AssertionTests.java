@@ -53,11 +53,11 @@ import static org.springframework.security.saml.saml2.authentication.Authenticat
 import static org.springframework.security.saml.saml2.authentication.StatusCode.SUCCESS;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
+import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
+import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
-import static org.springframework.security.saml.util.XmlTestUtil.fromZuluTime;
 import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
-import static org.springframework.security.saml.util.XmlTestUtil.toZuluTime;
 
 public class AssertionTests extends MetadataBase {
 

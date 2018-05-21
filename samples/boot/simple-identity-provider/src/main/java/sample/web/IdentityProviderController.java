@@ -34,6 +34,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,13 @@ public class IdentityProviderController {
     private SamlTransformer transformer;
     private Defaults defaults;
     private MetadataResolver resolver;
+    private Network network;
+
+    @Autowired
+    public IdentityProviderController setNetwork(Network network) {
+        this.network = network;
+        return this;
+    }
 
     @Autowired
     public void setTransformer(SamlTransformer transformer) {
@@ -137,10 +145,6 @@ public class IdentityProviderController {
         return "saml-post";
     }
 
-    protected String getBasePath(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-    }
-
     protected String getAcs(ServiceProviderMetadata metadata) {
         List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
         return acs.get(0).getLocation();
@@ -148,7 +152,7 @@ public class IdentityProviderController {
 
 
     protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
-        String base = getBasePath(request);
+        String base = network.getBasePath(request);
         return getMetadataResolver().getLocalIdentityProvider(base);
     }
 

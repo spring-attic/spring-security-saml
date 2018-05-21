@@ -21,6 +21,7 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.validation.ValidationException;
 
 public interface SamlValidator {
     /**
@@ -37,5 +38,5 @@ public interface SamlValidator {
      * @param saml2Object
      * @return - the results of the validation
      */
-    ValidationResult validate(Saml2Object saml2Object);
+    void validate(Saml2Object saml2Object, MetadataResolver resolver) throws ValidationException;
 }

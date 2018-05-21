@@ -60,9 +60,9 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultValidator implements SamlValidator {
 
     private SpringSecuritySaml implementation;
-    private int responseSkewTimeMillis = 120000;
+    private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
     private boolean allowUnsolicitedResponses = true;
-    private int maxAuthenticationAgeMillis;
+    private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
     private Clock time = Clock.systemUTC();
     private Network network = new Network();
 

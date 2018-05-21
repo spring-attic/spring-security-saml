@@ -27,7 +27,6 @@ import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Status;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
@@ -115,11 +114,9 @@ public class IdentityProviderController {
         //no authnrequest provided
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(entityId);
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
-        Assertion assertion = getDefaults().assertion(metadata, local, null);
+        String principal = SecurityContextHolder.getContext().getAuthentication().getName();
+        Assertion assertion = getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
         assertion.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-        NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
-        principal.setFormat(NameId.PERSISTENT);
         Response response = getDefaults().response(null,
                                                    assertion,
                                                    metadata,
@@ -145,23 +142,17 @@ public class IdentityProviderController {
         authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, metadata.getServiceProvider().getKeys());
 
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
-        Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest);
+        String principal = SecurityContextHolder.getContext().getAuthentication().getName();
+        Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest, principal, NameId.PERSISTENT);
 
-        assertion.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-        NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
-        principal.setValue(SecurityContextHolder.getContext().getAuthentication().getName());
-        principal.setFormat(NameId.PERSISTENT);
-        String destination = authenticationRequest.getAssertionConsumerService().getLocation();
         Response response = getDefaults().response(authenticationRequest,
                                                    assertion,
                                                    metadata,
                                                    local
         );
 
-
-        response.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-        response.setStatus(new Status().setCode(StatusCode.SUCCESS));
         String encoded = transformer.samlEncode(transformer.toXml(response), false);
+        String destination = authenticationRequest.getAssertionConsumerService().getLocation();
         model.addAttribute("url", destination);
         model.addAttribute("SAMLResponse", encoded);
         return "saml-post";

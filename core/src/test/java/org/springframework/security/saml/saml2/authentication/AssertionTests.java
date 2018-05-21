@@ -191,7 +191,11 @@ public class AssertionTests extends MetadataBase {
     public void create_with_request() throws Exception {
 
         AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-        Assertion assertion = defaults.assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        Assertion assertion = defaults.assertion(serviceProviderMetadata,
+                                                 identityProviderMetadata,
+                                                 request,
+                                                 "test-principal",
+                                                 NameId.PERSISTENT);
 
         assertNotNull(assertion);
 
@@ -205,6 +209,8 @@ public class AssertionTests extends MetadataBase {
         assertNotNull(assertion.getSubject());
         assertNotNull(assertion.getSubject().getPrincipal());
         assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
+        assertThat(assertion.getSubject().getPrincipal().getValue(), equalTo("test-principal"));
+        assertThat(((NameIdPrincipal) assertion.getSubject().getPrincipal()).getFormat(), equalTo(NameId.PERSISTENT));
         assertThat(((NameIdPrincipal) assertion.getSubject().getPrincipal()).getSpNameQualifier(), equalTo(serviceProviderMetadata.getEntityId()));
         assertNotNull(assertion.getSubject().getConfirmations());
         assertThat(assertion.getSubject().getConfirmations().size(), equalTo(1));
@@ -249,7 +255,11 @@ public class AssertionTests extends MetadataBase {
     public void check_xml() throws URISyntaxException, IOException {
         AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-        Assertion assertion = defaults.assertion(serviceProviderMetadata, identityProviderMetadata, request);
+        Assertion assertion = defaults.assertion(serviceProviderMetadata,
+                                                 identityProviderMetadata,
+                                                 request,
+                                                 "test-principal",
+                                                 NameId.PERSISTENT);
 
         String username = "test@test.com";
 

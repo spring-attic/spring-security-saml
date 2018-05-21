@@ -70,6 +70,7 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -202,10 +203,13 @@ public class Defaults {
     public Assertion assertion(
         ServiceProviderMetadata sp,
         IdentityProviderMetadata idp,
-        AuthenticationRequest request) {
+        AuthenticationRequest request,
+        String principal,
+        NameId principalFormat) {
 
         long now = time.millis();
         return new Assertion()
+            .setSigningKey(idp.getSigningKey(), idp.getAlgorithm(), idp.getDigest())
             .setVersion("2.0")
             .setIssueInstant(new DateTime(now))
             .setId(UUID.randomUUID().toString())
@@ -214,7 +218,8 @@ public class Defaults {
                 new Subject()
                     .setPrincipal(
                         new NameIdPrincipal()
-                            .setFormat(NameId.UNSPECIFIED)
+                            .setValue(principal)
+                            .setFormat(principalFormat)
                             .setNameQualifier(sp.getEntityAlias())
                             .setSpNameQualifier(sp.getEntityId())
                     )
@@ -270,16 +275,18 @@ public class Defaults {
 
     public Response response(AuthenticationRequest authn,
                              Assertion assertion,
-                             ServiceProviderMetadata sp,
-                             IdentityProviderMetadata idp) {
+                             Metadata recipient,
+                             Metadata local) {
         return new Response()
             .setAssertions(asList(assertion))
             .setId(UUID.randomUUID().toString())
             .setInResponseTo(authn != null ? authn.getId() : null)
             .setDestination(authn != null ? authn.getAssertionConsumerService().getLocation() : null)
             .setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
-            .setIssuer(new Issuer().setValue(idp.getEntityId()))
+            .setIssuer(new Issuer().setValue(local.getEntityId()))
+            .setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
             .setIssueInstant(new DateTime())
+            .setStatus(new Status().setCode(StatusCode.SUCCESS))
             .setVersion("2.0");
     }
 

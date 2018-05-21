@@ -28,8 +28,6 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.authentication.Status;
-import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -116,14 +114,11 @@ public class IdentityProviderController {
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         String principal = SecurityContextHolder.getContext().getAuthentication().getName();
         Assertion assertion = getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
-        assertion.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
         Response response = getDefaults().response(null,
                                                    assertion,
                                                    metadata,
                                                    local
         );
-        response.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-        response.setStatus(new Status().setCode(StatusCode.SUCCESS));
         String encoded = transformer.samlEncode(transformer.toXml(response), false);
         model.addAttribute("url", getAcs(metadata));
         model.addAttribute("SAMLResponse", encoded);

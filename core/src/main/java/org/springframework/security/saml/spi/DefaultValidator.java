@@ -171,7 +171,7 @@ public class DefaultValidator implements SamlValidator {
         }
 
         //validate destination
-        if (!compareURIs(requester.getServiceProvider().getAssertionConsumerService(), response.getDestination())) {
+        if (hasText(response.getDestination()) && !compareURIs(requester.getServiceProvider().getAssertionConsumerService(), response.getDestination())) {
             return new ValidationResult().addError(new ValidationError("Destination mismatch: " + response.getDestination()));
         }
 

@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .csrf().disable()
             .authorizeRequests()
-            .antMatchers("/saml/idp/metadata").permitAll()
+            .antMatchers("/saml/idp/metadata", "/", "/saml/idp/select").permitAll()
             .anyRequest().authenticated()
             .and()
             .formLogin()

@@ -15,6 +15,7 @@
 package sample.web;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
 import sample.config.AppConfig;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -88,7 +91,24 @@ public class IdentityProviderController {
         return transformer.toXml(metadata);
     }
 
-    @RequestMapping("/saml/idp/init")
+    @RequestMapping(value = {"/saml/idp/select", "/"})
+    public String selectProvider(HttpServletRequest request, Model model) {
+        List<ModelProvider> providers = new LinkedList<>();
+        configuration.getIdentityProvider().getProviders().stream().forEach(
+            p -> {
+                try {
+                    ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
+                    providers.add(mp);
+                } catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
+        );
+        model.addAttribute("sps", providers);
+        return "select-provider";
+    }
+
+    @RequestMapping(value = {"/saml/idp/init"})
     public String idpInitiate(HttpServletRequest request,
                               Model model,
                               @RequestParam(name = "sp", required = true) String entityId) {
@@ -121,7 +141,9 @@ public class IdentityProviderController {
         String xml = transformer.samlDecode(authn, GET.matches(request.getMethod()));
         AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
-        //TODO - validate signature
+        //validate the signatures
+        authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, metadata.getServiceProvider().getKeys());
+
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         Assertion assertion = getDefaults().assertion(metadata, local, authenticationRequest);
 
@@ -154,6 +176,14 @@ public class IdentityProviderController {
     protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
         String base = network.getBasePath(request);
         return getMetadataResolver().getLocalIdentityProvider(base);
+    }
+
+    protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
+        builder.pathSegment("saml/idp/init");
+        ServiceProviderMetadata metadata = resolver.resolveServiceProvider(p);
+        builder.queryParam("sp", metadata.getEntityId());
+        return builder.build().toUriString();
     }
 
     public SamlTransformer getTransformer() {

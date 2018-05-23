@@ -185,12 +185,12 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (isUri(metadata)) {
             try {
                 byte[] data = cache.getMetadata(metadata, skipSslValidation);
-                result = (Metadata) transformer.resolve(data, null);
+                result = (Metadata) transformer.resolve(data, null, null);
             } catch (Exception x) {
                 x.printStackTrace();
             }
         } else {
-            result = (Metadata) transformer.resolve(metadata, null);
+            result = (Metadata) transformer.resolve(metadata, null, null);
         }
         return result;
     }

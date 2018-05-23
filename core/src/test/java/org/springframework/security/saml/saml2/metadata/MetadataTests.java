@@ -85,7 +85,7 @@ public class MetadataTests extends MetadataBase {
 
     @Test
     public void sp_to_xml() throws Exception {
-        ServiceProviderMetadata spm = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null);
+        ServiceProviderMetadata spm = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
         SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
 
@@ -166,7 +166,7 @@ public class MetadataTests extends MetadataBase {
 
     @Test
     public void idp_to_xml() throws Exception {
-        IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null);
+        IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 
         SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
 
@@ -229,7 +229,7 @@ public class MetadataTests extends MetadataBase {
 
     @Test
     public void xml_to_sp_external() throws IOException {
-        ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo));
+        ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
         assertNotNull(sp);
         assertNotNull(sp.getImplementation());
         assertThat(sp.getEntityId(), equalTo("login.run.pivotal.io"));
@@ -291,7 +291,7 @@ public class MetadataTests extends MetadataBase {
 
     @Test
     public void xml_to_sp_complete() throws IOException {
-        ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null);
+        ServiceProviderMetadata sp = (ServiceProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
         assertNotNull(sp);
         assertNotNull(sp.getImplementation());
         assertThat(sp.getEntityId(), equalTo("https://sp.saml.spring.io/sp"));
@@ -424,12 +424,12 @@ public class MetadataTests extends MetadataBase {
     @Test
     public void sp_invalid_verification_key() {
         assertThrows(SignatureException.class,
-                     () -> config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias"))));
+                     () -> config.resolve(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias")), null));
     }
 
     @Test
     public void xml_to_idp_complete() throws Exception {
-        IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null);
+        IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
         assertNotNull(idp);
         assertNotNull(idp.getImplementation());
         assertThat(idp.getEntityId(), equalTo("https://idp.saml.spring.io"));
@@ -500,7 +500,7 @@ public class MetadataTests extends MetadataBase {
 
     @Test
     public void xml_to_idp_external() throws Exception {
-        IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo));
+        IdentityProviderMetadata idp = (IdentityProviderMetadata) config.resolve(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
         assertNotNull(idp);
         assertNotNull(idp.getImplementation());
         assertThat(idp.getEntityId(), equalTo("login.run.pivotal.io"));
@@ -543,6 +543,6 @@ public class MetadataTests extends MetadataBase {
     @Test
     public void idp_invalid_verification_key() {
         assertThrows(SignatureException.class,
-                     () -> config.resolve(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias"))));
+                     () -> config.resolve(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias")), null));
     }
 }

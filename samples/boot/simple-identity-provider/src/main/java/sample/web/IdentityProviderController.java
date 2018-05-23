@@ -25,6 +25,7 @@ import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -131,10 +132,11 @@ public class IdentityProviderController {
                                         @RequestParam(name = "SAMLRequest", required = true) String authn) {
         //receive AuthnRequest
         String xml = transformer.samlDecode(authn, GET.matches(request.getMethod()));
-        AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null);
+        List<SimpleKey> localKeys = resolver.getLocalIdentityProvider(network.getBasePath(request)).getIdentityProvider().getKeys();
+        AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null, localKeys);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
         //validate the signatures
-        authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, metadata.getServiceProvider().getKeys());
+        authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, metadata.getServiceProvider().getKeys(), localKeys);
 
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         String principal = SecurityContextHolder.getContext().getAuthentication().getName();

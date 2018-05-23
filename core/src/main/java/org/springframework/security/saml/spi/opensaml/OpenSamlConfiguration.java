@@ -1040,13 +1040,13 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
     }
 
     @Override
-    public Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
-        return resolve(xml.getBytes(UTF_8), trustedKeys);
+    public Saml2Object resolve(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+        return resolve(xml.getBytes(UTF_8), verificationKeys, localKeys);
     }
 
-    public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {
+    public Saml2Object resolve(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
         XMLObject parsed = parse(xml);
-        Signature signature = validateSignature((SignableSAMLObject) parsed, trustedKeys);
+        Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
         Saml2Object result = null;
         if (parsed instanceof EntityDescriptor) {
             result = resolveMetadata((EntityDescriptor) parsed)
@@ -1057,10 +1057,10 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                 .setSignature(signature);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
-            result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, trustedKeys);
+            result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
-            result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, trustedKeys)
+            result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys)
                 .setSignature(signature);
         }
         if (result != null) {

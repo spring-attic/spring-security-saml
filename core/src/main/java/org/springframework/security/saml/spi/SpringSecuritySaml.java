@@ -105,9 +105,9 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
     public abstract String toXml(Saml2Object saml2Object);
 
-    public abstract Saml2Object resolve(String xml, List<SimpleKey> trustedKeys);
+    public abstract Saml2Object resolve(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
 
-    public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
+    public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys, List<SimpleKey> localKeys);
 
     public abstract Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys);
 

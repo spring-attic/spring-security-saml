@@ -35,26 +35,28 @@ public interface SamlTransformer {
     /**
      * Converts an SAML/XML string into a Java object
      * @param xml the XML representation of the object
-     * @param trustedKeys Nullable. If not null, object signature will be validated upon conversion.
+     * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
      *                    The implementation will attempt each key until one succeeds
+     * @param localKeys
      * @return the Java object that was
      * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
      * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
      */
-    default Saml2Object resolve(String xml, List<SimpleKey> trustedKeys) {
-        return resolve(xml.getBytes(StandardCharsets.UTF_8), trustedKeys);
+    default Saml2Object resolve(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+        return resolve(xml.getBytes(StandardCharsets.UTF_8), verificationKeys, localKeys);
     }
 
     /**
      * Converts an SAML/XML string into a Java object
      * @param xml the XML representation of the object
-     * @param trustedKeys Nullable. If not null, object signature will be validated upon conversion.
+     * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
      *                    The implementation will attempt each key until one succeeds
+     * @param localKeys
      * @return the Java object that was
      * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
      * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
      */
-    Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys);
+    Saml2Object resolve(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
 
     /**
      * Deflates and base64 encodes the SAML message readying it for transport.

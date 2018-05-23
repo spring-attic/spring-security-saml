@@ -30,6 +30,7 @@ import org.springframework.security.saml.MetadataResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -141,10 +142,11 @@ public class ServiceProviderController implements InitializingBean {
         //receive assertion
         String xml = transformer.samlDecode(response, GET.matches(request.getMethod()));
         //extract basic data so we can map it to an IDP
-        Response r = (Response) transformer.resolve(xml, null);
+        List<SimpleKey> localKeys = resolver.getLocalServiceProvider(network.getBasePath(request)).getServiceProvider().getKeys();
+        Response r = (Response) transformer.resolve(xml, null, localKeys);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
         //validate signature
-        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys());
+        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
         //validate object
         validator.validate(r, resolver, request);
         //extract the assertion

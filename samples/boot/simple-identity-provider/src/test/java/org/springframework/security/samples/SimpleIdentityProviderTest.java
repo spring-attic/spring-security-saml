@@ -64,7 +64,7 @@ public class SimpleIdentityProviderTest {
             .andExpect(status().isOk())
             .andReturn();
         String xml = result.getResponse().getContentAsString();
-        Metadata m = (Metadata) transformer.resolve(xml, null);
+        Metadata m = (Metadata) transformer.resolve(xml, null, null);
         assertNotNull(m);
         assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
     }
@@ -82,7 +82,7 @@ public class SimpleIdentityProviderTest {
         String html = result.getResponse().getContentAsString();
         assertThat(html, containsString("name=\"SAMLResponse\""));
         String response = extractResponse(html, "SAMLResponse");
-        Response r = (Response) transformer.resolve(transformer.samlDecode(response, false), null);
+        Response r = (Response) transformer.resolve(transformer.samlDecode(response, false), null, null);
         assertNotNull(r);
         assertThat(r.getAssertions(), notNullValue());
         assertThat(r.getAssertions().size(), equalTo(1));

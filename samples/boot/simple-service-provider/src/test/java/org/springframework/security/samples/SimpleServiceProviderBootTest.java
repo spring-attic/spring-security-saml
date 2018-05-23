@@ -78,7 +78,7 @@ public class SimpleServiceProviderBootTest {
             .getResponse()
             .getContentAsString();
         assertNotNull(xml);
-        Metadata m = (Metadata) transformer.resolve(xml, null);
+        Metadata m = (Metadata) transformer.resolve(xml, null, null);
         assertNotNull(m);
         assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
     }

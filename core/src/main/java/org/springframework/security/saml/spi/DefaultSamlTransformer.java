@@ -69,8 +69,8 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
      * {@inheritDoc}
      */
     @Override
-    public Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys) {
-        return implementation.resolve(xml, trustedKeys);
+    public Saml2Object resolve(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+        return implementation.resolve(xml, verificationKeys, localKeys);
     }
 
     /**

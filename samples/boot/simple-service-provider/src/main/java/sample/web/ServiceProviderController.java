@@ -172,11 +172,13 @@ public class ServiceProviderController implements InitializingBean {
 
 	@RequestMapping("/saml/sp/SSO")
 	public View sso(HttpServletRequest request,
-					@RequestParam(name = "SAMLResponse", required = true) String response) {
+					@RequestParam(name = "SAMLResponse", required = true) String response,
+					@RequestParam(name = "RelayState", required = false) String relay) {
 		//receive assertion
 		String xml = transformer.samlDecode(response, GET.matches(request.getMethod()));
 		//extract basic data so we can map it to an IDP
-		List<SimpleKey> localKeys = resolver.getLocalServiceProvider(network.getBasePath(request)).getServiceProvider().getKeys();
+		List<SimpleKey> localKeys = resolver
+			.getLocalServiceProvider(network.getBasePath(request)).getServiceProvider().getKeys();
 		Response r = (Response) transformer.fromXml(xml, null, localKeys);
 		IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
 		//validate signature

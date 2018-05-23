@@ -68,7 +68,7 @@ class AuthenticationRequestTests extends MetadataBase {
     public void parse() {
         AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
         String xml = config.toXml(request);
-        AuthenticationRequest data = (AuthenticationRequest) config.resolve(xml, Collections.singletonList(idpVerifying), null);
+        AuthenticationRequest data = (AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
         assertNotNull(data);
         assertNotNull(data.getImplementation());
         assertNotNull(data.getSignature());

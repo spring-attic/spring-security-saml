@@ -39,4 +39,8 @@ public class DefaultMetadataCache {
         return data;
     }
 
+    public void clear() {
+        cache.clear();
+    }
+
 }

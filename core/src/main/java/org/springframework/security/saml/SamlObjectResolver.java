@@ -15,6 +15,8 @@
 
 package org.springframework.security.saml;
 
+import java.net.URI;
+
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -22,7 +24,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public interface MetadataResolver {
+public interface SamlObjectResolver {
 
      ServiceProviderMetadata getLocalServiceProvider(String baseUrl);
      IdentityProviderMetadata getLocalIdentityProvider(String baseUrl);
@@ -35,5 +37,9 @@ public interface MetadataResolver {
      ServiceProviderMetadata resolveServiceProvider(String entityId);
      ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request);
      ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
+
+     AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
+     URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
+
 
 }

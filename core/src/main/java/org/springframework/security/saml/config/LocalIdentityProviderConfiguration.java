@@ -15,6 +15,9 @@
 
 package org.springframework.security.saml.config;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -23,9 +26,20 @@ public class LocalIdentityProviderConfiguration extends LocalProviderConfigurati
     public boolean isWantRequestsSigned() {
         return wantRequestsSigned;
     }
+    private List<ExternalServiceProviderConfiguration> providers = new LinkedList<>();
+
 
     public LocalIdentityProviderConfiguration setWantRequestsSigned(boolean wantRequestsSigned) {
         this.wantRequestsSigned = wantRequestsSigned;
+        return this;
+    }
+
+    public List<ExternalServiceProviderConfiguration> getProviders() {
+        return providers;
+    }
+
+    public LocalIdentityProviderConfiguration setProviders(List<ExternalServiceProviderConfiguration> providers) {
+        this.providers = providers;
         return this;
     }
 }

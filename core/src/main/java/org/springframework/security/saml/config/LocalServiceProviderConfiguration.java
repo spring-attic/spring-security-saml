@@ -15,6 +15,9 @@
 
 package org.springframework.security.saml.config;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -22,6 +25,8 @@ public class LocalServiceProviderConfiguration extends LocalProviderConfiguratio
 
     private boolean signRequests = false;
     private boolean wantAssertionsSigned = false;
+    private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
+
 
     public boolean isSignRequests() {
         return signRequests;
@@ -38,6 +43,15 @@ public class LocalServiceProviderConfiguration extends LocalProviderConfiguratio
 
     public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
         this.wantAssertionsSigned = wantAssertionsSigned;
+        return this;
+    }
+
+    public List<ExternalIdentityProviderConfiguration> getProviders() {
+        return providers;
+    }
+
+    public LocalServiceProviderConfiguration setProviders(List<ExternalIdentityProviderConfiguration> providers) {
+        this.providers = providers;
         return this;
     }
 }

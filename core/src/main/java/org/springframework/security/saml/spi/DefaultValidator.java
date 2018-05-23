@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.springframework.security.saml.MetadataResolver;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -112,7 +112,7 @@ public class DefaultValidator implements SamlValidator {
     }
 
     @Override
-    public void validate(Saml2Object saml2Object, MetadataResolver resolver, HttpServletRequest request)
+    public void validate(Saml2Object saml2Object, SamlObjectResolver resolver, HttpServletRequest request)
         throws ValidationException {
         if (saml2Object instanceof Response) {
             Response r = (Response) saml2Object;

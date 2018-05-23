@@ -379,7 +379,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
     public Credential getCredential(SimpleKey key, KeyStoreCredentialResolver resolver) {
         try {
             CriteriaSet cs = new CriteriaSet();
-            EntityIdCriterion criteria = new EntityIdCriterion(key.getAlias());
+            EntityIdCriterion criteria = new EntityIdCriterion(key.getName());
             cs.add(criteria);
             return resolver.resolveSingle(cs);
         } catch (ResolverException e) {
@@ -390,7 +390,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
     public KeyStoreCredentialResolver getCredentialsResolver(SimpleKey key) {
         InMemoryKeyStore ks = InMemoryKeyStore.fromKey(key);
         Map<String, String> passwords = hasText(key.getPrivateKey()) ?
-            Collections.singletonMap(key.getAlias(), key.getPassphrase()) :
+            Collections.singletonMap(key.getName(), key.getPassphrase()) :
             Collections.emptyMap();
         KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(
             ks.getKeyStore(),

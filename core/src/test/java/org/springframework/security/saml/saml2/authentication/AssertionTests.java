@@ -66,7 +66,7 @@ public class AssertionTests extends MetadataBase {
 
     @Test
     public void create_saml_response() throws Exception {
-        Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+        Response response = (Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
         response.setSigningKey(idpSigning, AlgorithmMethod.RSA_RIPEMD160, DigestMethod.SHA512);
         response.getAssertions().get(0).setSigningKey(spSigning, AlgorithmMethod.RSA_SHA256, DigestMethod.SHA256);
         String xml = config.toXml(response);
@@ -92,15 +92,15 @@ public class AssertionTests extends MetadataBase {
         assertNodeCount(xml, "//samlp:Response/saml:Assertion/ds:Signature", 1);
 
         //fail to validate if only one key is passed in
-        assertThrows(SignatureException.class, () -> config.resolve(xml, asList(idpSigning), null));
-        assertThrows(SignatureException.class, () -> config.resolve(xml, asList(spSigning), null));
+        assertThrows(SignatureException.class, () -> config.fromXml(xml, asList(idpSigning), null));
+        assertThrows(SignatureException.class, () -> config.fromXml(xml, asList(spSigning), null));
 
-        config.resolve(xml, asList(spSigning, idpSigning), null);
+        config.fromXml(xml, asList(spSigning, idpSigning), null);
     }
 
     @Test
     public void read_saml_response() throws Exception {
-        Response response = (Response) config.resolve(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+        Response response = (Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
         assertNotNull(response);
         assertNotNull(response.getImplementation());
         assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
@@ -375,7 +375,7 @@ public class AssertionTests extends MetadataBase {
     @Test
     public void read_assertion_xml() throws Exception {
         byte[] data = getAssertionBytes();
-        Assertion assertion = (Assertion) config.resolve(data, asList(idpSigning), null);
+        Assertion assertion = (Assertion) config.fromXml(data, asList(idpSigning), null);
 
         assertNotNull(assertion);
         assertThat(assertion.getId(), equalTo("1aa4400b-d6f1-41d1-a80a-2331816b7876"));
@@ -454,7 +454,7 @@ public class AssertionTests extends MetadataBase {
             assertThrows(
                 SignatureException.class,
                 //using the wrong key
-                () -> config.resolve(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")), null)
+                () -> config.fromXml(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")), null)
             );
         assertThat(expected.getMessage(), equalTo("Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key."));
     }
@@ -464,7 +464,7 @@ public class AssertionTests extends MetadataBase {
         byte[] assertion = getFileBytes("/test-data/assertion/assertion-encrypted-external-20180523.xml");
         List<SimpleKey> verification = asList(decryptionVerificationKey);
         List<SimpleKey> local = asList(decryptionKey);
-        Saml2Object resolve = config.resolve(assertion, verification, local);
+        Saml2Object resolve = config.fromXml(assertion, verification, local);
         assertNotNull(resolve);
         assertThat(resolve.getClass(), equalTo(Response.class));
         Response r = (Response)resolve;

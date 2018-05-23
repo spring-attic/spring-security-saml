@@ -22,11 +22,11 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml.MetadataResolver;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.spi.DefaultMetadataResolver;
+import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
@@ -50,7 +50,7 @@ public abstract class MetadataBase {
     protected IdentityProviderMetadata identityProviderMetadata;
 
     protected static SamlTransformer config;
-    protected static MetadataResolver resolver;
+    protected static SamlObjectResolver resolver;
     protected static Defaults defaults;
     protected static Clock time;
 
@@ -58,7 +58,7 @@ public abstract class MetadataBase {
     public static void init() throws Exception {
         time = Clock.systemUTC();
         config = new DefaultSamlTransformer(new OpenSamlImplementation(time));
-        resolver = new DefaultMetadataResolver();
+        resolver = new DefaultSamlObjectResolver();
         defaults = new Defaults(time);
         ((DefaultSamlTransformer) config).afterPropertiesSet();
     }

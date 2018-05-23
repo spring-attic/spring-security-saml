@@ -15,6 +15,7 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
+import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
 public enum NameId {
@@ -34,6 +35,16 @@ public enum NameId {
 
     NameId(@Nonnull String urn) {
         this.urn = urn;
+        //Spring introspection calls valueOf(..) on enums
+        //so we have to overwrite the name
+        try {
+            Field fieldName = getClass().getSuperclass().getDeclaredField("name");
+            fieldName.setAccessible(true);
+            fieldName.set(this, urn);
+            fieldName.setAccessible(false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

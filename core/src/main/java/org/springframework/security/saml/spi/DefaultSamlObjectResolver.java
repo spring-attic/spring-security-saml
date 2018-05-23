@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
@@ -39,7 +40,7 @@ import org.springframework.security.saml.util.Network;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultMetadataResolver implements org.springframework.security.saml.MetadataResolver {
+public class DefaultSamlObjectResolver implements SamlObjectResolver {
 
     private SamlServerConfiguration configuration;
     private Defaults defaults;
@@ -53,25 +54,25 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
     }
 
     @Autowired
-    public DefaultMetadataResolver setSamlServerConfiguration(SamlServerConfiguration configuration) {
+    public DefaultSamlObjectResolver setSamlServerConfiguration(SamlServerConfiguration configuration) {
         this.configuration = configuration;
         return this;
     }
 
     @Autowired
-    public DefaultMetadataResolver setDefaults(Defaults defaults) {
+    public DefaultSamlObjectResolver setDefaults(Defaults defaults) {
         this.defaults = defaults;
         return this;
     }
 
     @Autowired
-    public DefaultMetadataResolver setNetwork(Network network) {
+    public DefaultSamlObjectResolver setNetwork(Network network) {
         this.network = network;
         return this;
     }
 
     @Autowired
-    public DefaultMetadataResolver setMetadataCache(DefaultMetadataCache cache) {
+    public DefaultSamlObjectResolver setMetadataCache(DefaultMetadataCache cache) {
         this.cache = cache;
         return this;
     }
@@ -85,8 +86,8 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (hasText(sp.getEntityId())) {
             metadata.setEntityId(sp.getEntityId());
         }
-        if (hasText(sp.getAlias())) {
-            metadata.setEntityAlias(sp.getAlias());
+        if (hasText(sp.getName())) {
+            metadata.setEntityAlias(sp.getName());
         }
         metadata.getServiceProvider().setWantAssertionsSigned(sp.isWantAssertionsSigned());
         metadata.getServiceProvider().setAuthnRequestsSigned(sp.isSignRequests());
@@ -102,8 +103,8 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (hasText(idp.getEntityId())) {
             metadata.setEntityId(idp.getEntityId());
         }
-        if (hasText(idp.getAlias())) {
-            metadata.setEntityAlias(idp.getAlias());
+        if (hasText(idp.getName())) {
+            metadata.setEntityAlias(idp.getName());
         }
 
         metadata.getIdentityProvider().setWantAuthnRequestsSigned(idp.isWantRequestsSigned());
@@ -185,15 +186,23 @@ public class DefaultMetadataResolver implements org.springframework.security.sam
         if (isUri(metadata)) {
             try {
                 byte[] data = cache.getMetadata(metadata, skipSslValidation);
-                result = (Metadata) transformer.resolve(data, null, null);
+                result = (Metadata) transformer.fromXml(data, null, null);
             } catch (Exception x) {
                 x.printStackTrace();
             }
         } else {
-            result = (Metadata) transformer.resolve(metadata, null, null);
+            result = (Metadata) transformer.fromXml(metadata, null, null);
         }
         return result;
     }
 
+    @Override
+    public AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
+        throw new UnsupportedOperationException();
+    }
 
+    @Override
+    public URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
+        throw new UnsupportedOperationException();
+    }
 }

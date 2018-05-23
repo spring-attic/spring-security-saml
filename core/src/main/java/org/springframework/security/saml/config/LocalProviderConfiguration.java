@@ -15,21 +15,16 @@
 
 package org.springframework.security.saml.config;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
     private String entityId;
-    private String alias;
+    private String name;
     private boolean signMetadata;
     private String metadata;
     private RotatingKeys keys;
-
-    private List<ExternalProviderConfiguration> providers = new LinkedList<>();
 
     public LocalProviderConfiguration() {
     }
@@ -37,15 +32,6 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
     @SuppressWarnings("checked")
     protected T _this() {
         return (T)this;
-    }
-
-    public T setProviders(List<ExternalProviderConfiguration> idps) {
-        this.providers = idps;
-        return _this();
-    }
-
-    public List<ExternalProviderConfiguration> getProviders() {
-        return providers;
     }
 
     public String getEntityId() {
@@ -84,12 +70,12 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
         return _this();
     }
 
-    public String getAlias() {
-        return alias;
+    public String getName() {
+        return name;
     }
 
-    public LocalProviderConfiguration<T> setAlias(String alias) {
-        this.alias = alias;
+    public LocalProviderConfiguration<T> setName(String name) {
+        this.name = name;
         return this;
     }
 }

@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.MetadataResolver;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
@@ -52,7 +52,7 @@ public class IdentityProviderController {
     private SamlServerConfiguration configuration;
     private SamlTransformer transformer;
     private Defaults defaults;
-    private MetadataResolver resolver;
+    private SamlObjectResolver resolver;
     private Network network;
 
     @Autowired
@@ -72,7 +72,7 @@ public class IdentityProviderController {
     }
 
     @Autowired
-    public void setMetadataResolver(MetadataResolver resolver) {
+    public void setMetadataResolver(SamlObjectResolver resolver) {
         this.resolver = resolver;
     }
 
@@ -133,10 +133,10 @@ public class IdentityProviderController {
         //receive AuthnRequest
         String xml = transformer.samlDecode(authn, GET.matches(request.getMethod()));
         List<SimpleKey> localKeys = resolver.getLocalIdentityProvider(network.getBasePath(request)).getIdentityProvider().getKeys();
-        AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, null, localKeys);
+        AuthenticationRequest authenticationRequest = (AuthenticationRequest) transformer.fromXml(xml, null, localKeys);
         ServiceProviderMetadata metadata = resolver.resolveServiceProvider(authenticationRequest);
         //validate the signatures
-        authenticationRequest = (AuthenticationRequest) transformer.resolve(xml, metadata.getServiceProvider().getKeys(), localKeys);
+        authenticationRequest = (AuthenticationRequest) transformer.fromXml(xml, metadata.getServiceProvider().getKeys(), localKeys);
 
         IdentityProviderMetadata local = getIdentityProviderMetadata(request);
         String principal = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -182,7 +182,7 @@ public class IdentityProviderController {
         return defaults;
     }
 
-    public MetadataResolver getMetadataResolver() {
+    public SamlObjectResolver getMetadataResolver() {
         return resolver;
     }
 }

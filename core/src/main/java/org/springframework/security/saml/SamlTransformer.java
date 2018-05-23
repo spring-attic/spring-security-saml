@@ -42,8 +42,8 @@ public interface SamlTransformer {
      * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
      * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
      */
-    default Saml2Object resolve(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
-        return resolve(xml.getBytes(StandardCharsets.UTF_8), verificationKeys, localKeys);
+    default Saml2Object fromXml(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+        return fromXml(xml.getBytes(StandardCharsets.UTF_8), verificationKeys, localKeys);
     }
 
     /**
@@ -56,7 +56,7 @@ public interface SamlTransformer {
      * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
      * @throws IllegalArgumentException if the XML object structure is not recognized or implemeted
      */
-    Saml2Object resolve(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
+    Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
 
     /**
      * Deflates and base64 encodes the SAML message readying it for transport.

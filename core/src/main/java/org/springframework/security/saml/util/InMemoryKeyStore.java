@@ -54,14 +54,14 @@ public class InMemoryKeyStore {
 
             byte[] certbytes = X509Utilities.getDER(key.getCertificate());
             Certificate certificate = X509Utilities.getCertificate(certbytes);
-            ks.setCertificateEntry(key.getAlias(), certificate);
+            ks.setCertificateEntry(key.getName(), certificate);
 
             if (hasText(key.getPrivateKey())) {
                 PrivateKey pkey = X509Utilities.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
 
                 //RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
 
-                ks.setKeyEntry(key.getAlias(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+                ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
             }
 
             return new InMemoryKeyStore(ks);

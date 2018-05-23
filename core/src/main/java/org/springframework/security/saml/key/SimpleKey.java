@@ -17,7 +17,7 @@ package org.springframework.security.saml.key;
 
 public class SimpleKey {
 
-    private String alias;
+    private String name;
     private String privateKey;
     private String certificate;
     private String passphrase;
@@ -26,12 +26,12 @@ public class SimpleKey {
     public SimpleKey() {
     }
 
-    public SimpleKey(String alias,
+    public SimpleKey(String name,
                      String privateKey,
                      String certificate,
                      String passphrase,
                      KeyType type) {
-        this.alias = alias;
+        this.name = name;
         this.privateKey = privateKey;
         this.certificate = certificate;
         this.passphrase = passphrase;
@@ -50,16 +50,16 @@ public class SimpleKey {
         return passphrase;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getName() {
+        return name;
     }
 
     public KeyType getType() {
         return type;
     }
 
-    public SimpleKey setAlias(String alias) {
-        this.alias = alias;
+    public SimpleKey setName(String name) {
+        this.name = name;
         return this;
     }
 

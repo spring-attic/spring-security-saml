@@ -24,7 +24,7 @@ spring:
         digest-method: SHA256
         keys:
           active:
-            - alias: key1
+            - name: key1
               private-key: |
                 -----BEGIN RSA PRIVATE KEY-----
                 Proc-Type: 4,ENCRYPTED
@@ -63,7 +63,7 @@ spring:
                 rafuutCq3RskTkHVZnbT5Xa6ITEZxSncow==
                 -----END CERTIFICATE-----
           stand-by:
-            - alias: key2
+            - name: key2
               private-key: |
                 -----BEGIN RSA PRIVATE KEY-----
                 Proc-Type: 4,ENCRYPTED
@@ -101,7 +101,7 @@ spring:
                 LcAPZJqxC5K1c2sO5/iEg3Yy9owUex+MY752MPJIoZQrp1jV2L5Sjz6+vBNPqROR
                 GSmwzTz4iOglRkEDPs6Xo0uDH/Hc5eidjQ==
                 -----END CERTIFICATE-----
-            - alias: key3
+            - name: key3
               private-key: |
                 -----BEGIN RSA PRIVATE KEY-----
                 Proc-Type: 4,ENCRYPTED

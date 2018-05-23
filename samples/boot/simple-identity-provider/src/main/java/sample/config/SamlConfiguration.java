@@ -19,11 +19,11 @@ import java.time.Clock;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.MetadataResolver;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.DefaultMetadataResolver;
+import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
@@ -55,8 +55,8 @@ public class SamlConfiguration {
     }
 
     @Bean
-    public MetadataResolver resolver() {
-        return new DefaultMetadataResolver();
+    public SamlObjectResolver resolver() {
+        return new DefaultSamlObjectResolver();
     }
 
     @Bean

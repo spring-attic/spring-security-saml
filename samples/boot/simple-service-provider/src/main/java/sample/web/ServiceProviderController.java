@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.MetadataResolver;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
@@ -58,7 +58,7 @@ public class ServiceProviderController implements InitializingBean {
     private AppConfig configuration;
     private SamlTransformer transformer;
     private Defaults defaults;
-    private MetadataResolver resolver;
+    private SamlObjectResolver resolver;
     private SamlValidator validator;
     private Network network;
 
@@ -84,7 +84,7 @@ public class ServiceProviderController implements InitializingBean {
     }
 
     @Autowired
-    public void setMetadataResolver(MetadataResolver resolver) {
+    public void setMetadataResolver(SamlObjectResolver resolver) {
         this.resolver = resolver;
     }
 
@@ -143,10 +143,10 @@ public class ServiceProviderController implements InitializingBean {
         String xml = transformer.samlDecode(response, GET.matches(request.getMethod()));
         //extract basic data so we can map it to an IDP
         List<SimpleKey> localKeys = resolver.getLocalServiceProvider(network.getBasePath(request)).getServiceProvider().getKeys();
-        Response r = (Response) transformer.resolve(xml, null, localKeys);
+        Response r = (Response) transformer.fromXml(xml, null, localKeys);
         IdentityProviderMetadata identityProviderMetadata = resolver.resolveIdentityProvider(r);
         //validate signature
-        r = (Response) transformer.resolve(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
+        r = (Response) transformer.fromXml(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
         //validate object
         validator.validate(r, resolver, request);
         //extract the assertion
@@ -185,7 +185,7 @@ public class ServiceProviderController implements InitializingBean {
         return defaults;
     }
 
-    public MetadataResolver getMetadataResolver() {
+    public SamlObjectResolver getMetadataResolver() {
         return resolver;
     }
 }

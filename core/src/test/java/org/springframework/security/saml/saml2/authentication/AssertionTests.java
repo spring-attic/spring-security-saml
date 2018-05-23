@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
@@ -513,5 +514,17 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(r.getImplementation());
 		assertNotNull(r.getAssertions());
 		assertThat(r.getAssertions().size(), equalTo(1));
+	}
+
+	@Test
+	public void originalXML() throws Exception {
+		byte[] assertion = getFileBytes("/test-data/assertion/assertion-encrypted-external-20180523.xml");
+		List<SimpleKey> verification = asList(decryptionVerificationKey);
+		List<SimpleKey> local = asList(decryptionKey);
+		Saml2Object resolve = config.fromXml(assertion, verification, local);
+		assertNotNull(resolve);
+		assertThat(resolve.getClass(), equalTo(Response.class));
+		assertNotNull(resolve.getOriginalXML());
+		assertThat(resolve.getOriginalXML(), equalTo(new String(assertion, StandardCharsets.UTF_8)));
 	}
 }

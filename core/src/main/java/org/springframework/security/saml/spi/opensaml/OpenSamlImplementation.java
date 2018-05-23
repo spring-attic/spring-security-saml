@@ -35,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -324,6 +325,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		if (result != null) {
 			if (result instanceof ImplementationHolder) {
 				((ImplementationHolder) result).setImplementation(parsed);
+				((ImplementationHolder) result).setOriginalXML(new String(xml, StandardCharsets.UTF_8));
 			}
 			return result;
 		}

@@ -33,4 +33,6 @@ public interface Saml2Object {
 	 * @return the underlying implementation object
 	 */
 	Object getImplementation();
+
+	String getOriginalXML();
 }

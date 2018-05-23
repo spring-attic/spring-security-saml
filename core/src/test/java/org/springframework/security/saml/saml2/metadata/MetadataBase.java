@@ -29,7 +29,7 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.spi.DefaultMetadataResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.Defaults;
-import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
+import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,7 +57,7 @@ public abstract class MetadataBase {
     @BeforeAll
     public static void init() throws Exception {
         time = Clock.systemUTC();
-        config = new DefaultSamlTransformer(new OpenSamlConfiguration(time));
+        config = new DefaultSamlTransformer(new OpenSamlImplementation(time));
         resolver = new DefaultMetadataResolver();
         defaults = new Defaults(time);
         ((DefaultSamlTransformer) config).afterPropertiesSet();

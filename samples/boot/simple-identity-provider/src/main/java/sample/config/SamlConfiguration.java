@@ -28,7 +28,7 @@ import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
-import org.springframework.security.saml.spi.opensaml.OpenSamlConfiguration;
+import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.util.Network;
 
 @Configuration
@@ -71,6 +71,6 @@ public class SamlConfiguration {
 
     @Bean
     public SpringSecuritySaml implementation() {
-        return new OpenSamlConfiguration(time());
+        return new OpenSamlImplementation(time());
     }
 }

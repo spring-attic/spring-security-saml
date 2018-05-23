@@ -37,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,6 +84,7 @@ import org.opensaml.core.xml.schema.impl.XSDateTimeBuilder;
 import org.opensaml.core.xml.schema.impl.XSIntegerBuilder;
 import org.opensaml.core.xml.schema.impl.XSStringBuilder;
 import org.opensaml.core.xml.schema.impl.XSURIBuilder;
+import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
@@ -99,9 +101,13 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Condition;
+import org.opensaml.saml.saml2.core.EncryptedElementType;
+import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.StatusMessage;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
@@ -123,8 +129,14 @@ import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
+import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
 import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.opensaml.xmlsec.signature.X509Data;
@@ -189,11 +201,12 @@ import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration
 import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
 import static org.springframework.util.StringUtils.hasText;
 
-public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfiguration> {
+public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplementation> {
 
     private BasicParserPool parserPool;
+    private ChainingEncryptedKeyResolver encryptedKeyResolver;
 
-    public OpenSamlConfiguration(Clock time) {
+    public OpenSamlImplementation(Clock time) {
         super(time);
         this.parserPool = new BasicParserPool();
     }
@@ -257,6 +270,13 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         }
 
         registry.setParserPool(parserPool);
+        encryptedKeyResolver = new ChainingEncryptedKeyResolver(
+            Arrays.asList(
+                new InlineEncryptedKeyResolver(),
+                new EncryptedElementTypeEncryptedKeyResolver(),
+                new SimpleRetrievalMethodEncryptedKeyResolver()
+            )
+        );
     }
 
     public XMLObjectBuilderFactory getBuilderFactory() {
@@ -375,6 +395,30 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             passwords
         );
         return resolver;
+    }
+
+    protected SAMLObject decrypt(EncryptedElementType encrypted, List<SimpleKey> keys) {
+        DecryptionException last = null;
+        for (SimpleKey key : keys) {
+            Decrypter decrypter = getDecrypter(key);
+            try {
+                return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
+            } catch (DecryptionException e) {
+                e.printStackTrace();
+            }
+        }
+        if (last != null) {
+            throw new RuntimeException("Unable to decrypt object.", last);
+        }
+        return null;
+    }
+
+    protected Decrypter getDecrypter(SimpleKey key) {
+        Credential credential = getCredential(key, getCredentialsResolver(key));
+        KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(credential);
+        Decrypter decrypter = new Decrypter(null, resolver, encryptedKeyResolver);
+        decrypter.setRootInNewDocument(true);
+        return decrypter;
     }
 
     public KeyInfoGenerator getKeyInfoGenerator(Credential credential) {
@@ -1057,10 +1101,10 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
                 .setSignature(signature);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
-            result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys);
+            result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys, localKeys);
         }
         if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
-            result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys)
+            result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys, localKeys)
                 .setSignature(signature);
         }
         if (result != null) {
@@ -1072,7 +1116,9 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
     }
 
-    protected Response resolveResponse(org.opensaml.saml.saml2.core.Response parsed, List<SimpleKey> trustedKeys) {
+    protected Response resolveResponse(org.opensaml.saml.saml2.core.Response parsed,
+                                       List<SimpleKey> verificationKeys,
+                                       List<SimpleKey> localKeys) {
         Response result = new Response()
             .setConsent(parsed.getConsent())
             .setDestination(parsed.getDestination())
@@ -1083,8 +1129,22 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             .setVersion(parsed.getVersion().toString())
             .setStatus(getStatus(parsed.getStatus()))
             .setAssertions(
-                parsed.getAssertions().stream().map(a -> resolveAssertion(a, trustedKeys)).collect(Collectors.toList())
+                parsed.getAssertions().stream().map(a -> resolveAssertion(a, verificationKeys, localKeys)).collect(Collectors.toList())
             );
+        if (parsed.getEncryptedAssertions()!=null && !parsed.getEncryptedAssertions().isEmpty()) {
+            parsed
+                .getEncryptedAssertions()
+                .stream()
+                .forEach(
+                    a -> result.addAssertion(
+                        resolveAssertion(
+                            (org.opensaml.saml.saml2.core.Assertion) decrypt(a, localKeys),
+                            verificationKeys,
+                            localKeys
+                        )
+                    )
+                );
+        }
 
         return result;
 
@@ -1096,15 +1156,17 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
             .setMessage(status.getStatusMessage() != null ? status.getStatusMessage().getMessage() : null);
     }
 
-    protected Assertion resolveAssertion(org.opensaml.saml.saml2.core.Assertion parsed, List<SimpleKey> trustedKeys) {
-        Signature signature = validateSignature(parsed, trustedKeys);
+    protected Assertion resolveAssertion(org.opensaml.saml.saml2.core.Assertion parsed,
+                                         List<SimpleKey> verificationKeys,
+                                         List<SimpleKey> localKeys) {
+        Signature signature = validateSignature(parsed, verificationKeys);
         return new Assertion()
             .setSignature(signature)
             .setId(parsed.getID())
             .setIssueInstant(parsed.getIssueInstant())
             .setVersion(parsed.getVersion().toString())
             .setIssuer(getIssuer(parsed.getIssuer()))
-            .setSubject(getSubject(parsed.getSubject()))
+            .setSubject(getSubject(parsed.getSubject(), localKeys))
             .setConditions(getConditions(parsed.getConditions()))
             .setAuthenticationStatements(getAuthenticationStatements(parsed.getAuthnStatements()))
             .setAttributes(getAttributes(parsed.getAttributeStatements()))
@@ -1229,10 +1291,10 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return result;
     }
 
-    protected Subject getSubject(org.opensaml.saml.saml2.core.Subject subject) {
+    protected Subject getSubject(org.opensaml.saml.saml2.core.Subject subject, List<SimpleKey> localKeys) {
 
         return new Subject()
-            .setPrincipal(getPrincipal(subject))
+            .setPrincipal(getPrincipal(subject, localKeys))
             .setConfirmations(getConfirmations(subject.getSubjectConfirmations()))
             ;
     }
@@ -1255,8 +1317,11 @@ public class OpenSamlConfiguration extends SpringSecuritySaml<OpenSamlConfigurat
         return result;
     }
 
-    protected SubjectPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject) {
+    protected SubjectPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<SimpleKey> localKeys) {
         org.opensaml.saml.saml2.core.NameID p = subject.getNameID();
+        if (p == null && subject.getEncryptedID() != null) {
+            p = (NameID) decrypt(subject.getEncryptedID(), localKeys);
+        }
         if (p != null) {
             return new NameIdPrincipal()
                 .setSpNameQualifier(p.getSPNameQualifier())

@@ -19,9 +19,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.key.SimpleKey;
 
 public class Response extends StatusResponse<Response> {
     private List<Assertion> assertions = new LinkedList<>();
@@ -59,5 +59,10 @@ public class Response extends StatusResponse<Response> {
 
     public DigestMethod getDigest() {
         return digest;
+    }
+
+    public Response addAssertion(Assertion assertion) {
+        this.assertions.add(assertion);
+        return this;
     }
 }

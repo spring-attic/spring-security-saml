@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,24 +23,24 @@ import java.util.List;
 import org.springframework.security.saml.key.SimpleKey;
 
 public class RotatingKeys {
-    private List<SimpleKey> active = new LinkedList<>();
-    private List<SimpleKey> standBy = new LinkedList<>();
+	private List<SimpleKey> active = new LinkedList<>();
+	private List<SimpleKey> standBy = new LinkedList<>();
 
-    public List<SimpleKey> getActive() {
-        return active;
-    }
+	public List<SimpleKey> getActive() {
+		return active;
+	}
 
-    public RotatingKeys setActive(List<SimpleKey> active) {
-        this.active = active;
-        return this;
-    }
+	public RotatingKeys setActive(List<SimpleKey> active) {
+		this.active = active;
+		return this;
+	}
 
-    public List<SimpleKey> getStandBy() {
-        return standBy;
-    }
+	public List<SimpleKey> getStandBy() {
+		return standBy;
+	}
 
-    public RotatingKeys setStandBy(List<SimpleKey> standBy) {
-        this.standBy = standBy;
-        return this;
-    }
+	public RotatingKeys setStandBy(List<SimpleKey> standBy) {
+		this.standBy = standBy;
+		return this;
+	}
 }

@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +21,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.attribute.Attribute;
@@ -27,146 +28,147 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 
+import org.joda.time.DateTime;
+
 public class Assertion extends ImplementationHolder {
 
-    private String version;
-    private String id;
-    private DateTime issueInstant;
-    private Issuer issuer;
-    private Signature signature;
-    private Subject subject;
-    private Conditions conditions;
-    private Advice advice;
-    private List<AuthenticationStatement> authenticationStatements = new LinkedList<>();
-    private List<Attribute> attributes = new LinkedList<>();
-    private SimpleKey signingKey;
-    private AlgorithmMethod algorithm;
-    private DigestMethod digest;
+	private String version;
+	private String id;
+	private DateTime issueInstant;
+	private Issuer issuer;
+	private Signature signature;
+	private Subject subject;
+	private Conditions conditions;
+	private Advice advice;
+	private List<AuthenticationStatement> authenticationStatements = new LinkedList<>();
+	private List<Attribute> attributes = new LinkedList<>();
+	private SimpleKey signingKey;
+	private AlgorithmMethod algorithm;
+	private DigestMethod digest;
 
-    public String getVersion() {
-        return version;
-    }
+	public String getVersion() {
+		return version;
+	}
 
-    public Assertion setVersion(String version) {
-        this.version = version;
-        return this;
-    }
+	public Assertion setVersion(String version) {
+		this.version = version;
+		return this;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public Assertion setId(String id) {
-        this.id = id;
-        return this;
-    }
+	public Assertion setId(String id) {
+		this.id = id;
+		return this;
+	}
 
-    public DateTime getIssueInstant() {
-        return issueInstant;
-    }
+	public DateTime getIssueInstant() {
+		return issueInstant;
+	}
 
-    public Assertion setIssueInstant(DateTime issueInstant) {
-        this.issueInstant = issueInstant;
-        return this;
-    }
+	public Assertion setIssueInstant(DateTime issueInstant) {
+		this.issueInstant = issueInstant;
+		return this;
+	}
 
-    public Issuer getIssuer() {
-        return issuer;
-    }
+	public Issuer getIssuer() {
+		return issuer;
+	}
 
+	public Assertion setIssuer(String issuer) {
+		this.issuer = new Issuer().setValue(issuer);
+		return this;
+	}
 
-    public Assertion setIssuer(Issuer issuer) {
-        this.issuer = issuer;
-        return this;
-    }
+	public Signature getSignature() {
+		return signature;
+	}
 
-    public Assertion setIssuer(String issuer) {
-        this.issuer = new Issuer().setValue(issuer);
-        return this;
-    }
+	public Assertion setSignature(Signature signature) {
+		this.signature = signature;
+		return this;
+	}
 
-    public Signature getSignature() {
-        return signature;
-    }
+	public Subject getSubject() {
+		return subject;
+	}
 
-    public Assertion setSignature(Signature signature) {
-        this.signature = signature;
-        return this;
-    }
+	public Assertion setSubject(Subject subject) {
+		this.subject = subject;
+		return this;
+	}
 
-    public Subject getSubject() {
-        return subject;
-    }
+	public Conditions getConditions() {
+		return conditions;
+	}
 
-    public Assertion setSubject(Subject subject) {
-        this.subject = subject;
-        return this;
-    }
+	public Assertion setConditions(Conditions conditions) {
+		this.conditions = conditions;
+		return this;
+	}
 
-    public Conditions getConditions() {
-        return conditions;
-    }
+	public Advice getAdvice() {
+		return advice;
+	}
 
-    public Assertion setConditions(Conditions conditions) {
-        this.conditions = conditions;
-        return this;
-    }
+	public Assertion setAdvice(Advice advice) {
+		this.advice = advice;
+		return this;
+	}
 
-    public Advice getAdvice() {
-        return advice;
-    }
+	public List<AuthenticationStatement> getAuthenticationStatements() {
+		return Collections.unmodifiableList(authenticationStatements);
+	}
 
-    public Assertion setAdvice(Advice advice) {
-        this.advice = advice;
-        return this;
-    }
+	public Assertion setAuthenticationStatements(List<AuthenticationStatement> authenticationStatements) {
+		this.authenticationStatements.clear();
+		this.authenticationStatements.addAll(authenticationStatements);
+		return this;
+	}
 
-    public List<AuthenticationStatement> getAuthenticationStatements() {
-        return Collections.unmodifiableList(authenticationStatements);
-    }
+	public List<Attribute> getAttributes() {
+		return Collections.unmodifiableList(attributes);
+	}
 
-    public Assertion setAuthenticationStatements(List<AuthenticationStatement> authenticationStatements) {
-        this.authenticationStatements.clear();
-        this.authenticationStatements.addAll(authenticationStatements);
-        return this;
-    }
+	public Assertion setAttributes(List<Attribute> attributes) {
+		this.attributes.clear();
+		this.attributes.addAll(attributes);
+		return this;
+	}
 
-    public Assertion addAuthenticationStatement(AuthenticationStatement statement) {
-        this.authenticationStatements.add(statement);
-        return this;
-    }
+	public SimpleKey getSigningKey() {
+		return signingKey;
+	}
 
-    public List<Attribute> getAttributes() {
-        return Collections.unmodifiableList(attributes);
-    }
+	public AlgorithmMethod getAlgorithm() {
+		return algorithm;
+	}
 
-    public Assertion setAttributes(List<Attribute> attributes) {
-        this.attributes.clear();
-        this.attributes.addAll(attributes);
-        return this;
-    }
+	public DigestMethod getDigest() {
+		return digest;
+	}
 
-    public Assertion addAttribute(Attribute attribute) {
-        this.attributes.add(attribute);
-        return this;
-    }
+	public Assertion setIssuer(Issuer issuer) {
+		this.issuer = issuer;
+		return this;
+	}
 
-    public SimpleKey getSigningKey() {
-        return signingKey;
-    }
+	public Assertion addAuthenticationStatement(AuthenticationStatement statement) {
+		this.authenticationStatements.add(statement);
+		return this;
+	}
 
-    public Assertion setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
-        this.signingKey = signingKey;
-        this.algorithm = algorithm;
-        this.digest = digest;
-        return this;
-    }
+	public Assertion addAttribute(Attribute attribute) {
+		this.attributes.add(attribute);
+		return this;
+	}
 
-    public AlgorithmMethod getAlgorithm() {
-        return algorithm;
-    }
-
-    public DigestMethod getDigest() {
-        return digest;
-    }
+	public Assertion setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+		this.signingKey = signingKey;
+		this.algorithm = algorithm;
+		this.digest = digest;
+		return this;
+	}
 }

@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,26 +18,26 @@
 package org.springframework.security.saml.key;
 
 public enum KeyType {
-    SIGNING("signing"),
-    UNSPECIFIED("unspecified"),
-    ENCRYPTION("encryption");
+	SIGNING("signing"),
+	UNSPECIFIED("unspecified"),
+	ENCRYPTION("encryption");
 
-    private final String type;
+	private final String type;
 
-    KeyType(String type) {
-        this.type = type;
-    }
+	KeyType(String type) {
+		this.type = type;
+	}
 
-    public String getTypeName() {
-        return type;
-    }
+	public static KeyType fromTypeName(String name) {
+		for (KeyType t : values()) {
+			if (t.getTypeName().equals(name)) {
+				return t;
+			}
+		}
+		return UNSPECIFIED;
+	}
 
-    public static KeyType fromTypeName(String name) {
-        for (KeyType t : values()) {
-            if (t.getTypeName().equals(name)) {
-                return t;
-            }
-        }
-        return UNSPECIFIED;
-    }
+	public String getTypeName() {
+		return type;
+	}
 }

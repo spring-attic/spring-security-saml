@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,21 +20,21 @@ package org.springframework.security.saml.saml2.attribute;
 import org.joda.time.DateTime;
 
 public interface AttributeValue {
-    Object getValue();
+	Object getValue();
 
-    boolean isString();
+	boolean isString();
 
-    String getString();
+	String getString();
 
-    boolean isLong();
+	boolean isLong();
 
-    long getLong();
+	long getLong();
 
-    boolean isBoolean();
+	boolean isBoolean();
 
-    boolean getBoolean();
+	boolean getBoolean();
 
-    boolean isDate();
+	boolean isDate();
 
-    DateTime getDateTime();
+	DateTime getDateTime();
 }

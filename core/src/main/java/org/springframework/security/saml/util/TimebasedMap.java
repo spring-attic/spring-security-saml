@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,17 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-
+*/
 package org.springframework.security.saml.util;
 
 import java.time.Clock;
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -30,229 +26,231 @@ import static java.util.stream.Collectors.toList;
 
 public class TimebasedMap<K, V> implements Map<K, V> {
 
-    private Map<K, MapEntry<V>> map = new ConcurrentHashMap<>();
-    private long expirationTimeMills = 1000 * 60 * 10;
-    private long frequencyIntervalMills = 1000 * 30;
-    private AtomicLong lastScan = new AtomicLong(System.currentTimeMillis());
-    private Clock time;
+	private Map<K, MapEntry<V>> map = new ConcurrentHashMap<>();
+	private long expirationTimeMills = 1000 * 60 * 10;
+	private long frequencyIntervalMills = 1000 * 30;
+	private AtomicLong lastScan = new AtomicLong(System.currentTimeMillis());
+	private Clock time;
 
-    public TimebasedMap(Clock time) {
-        this.time = time;
-    }
+	public TimebasedMap(Clock time) {
+		this.time = time;
+	}
 
-    public Clock getTime() {
-        return time;
-    }
+	public Clock getTime() {
+		return time;
+	}
 
-    public TimebasedMap<K, V> setTime(Clock time) {
-        this.time = time;
-        return this;
-    }
+	public TimebasedMap<K, V> setTime(Clock time) {
+		this.time = time;
+		return this;
+	}
 
-    public long getExpirationTimeMills() {
-        return expirationTimeMills;
-    }
+	public long getExpirationTimeMills() {
+		return expirationTimeMills;
+	}
 
-    public TimebasedMap<K, V> setExpirationTimeMills(long expirationTimeMills) {
-        this.expirationTimeMills = expirationTimeMills;
-        return this;
-    }
+	public TimebasedMap<K, V> setExpirationTimeMills(long expirationTimeMills) {
+		this.expirationTimeMills = expirationTimeMills;
+		return this;
+	}
 
-    public long getFrequencyIntervalMills() {
-        return frequencyIntervalMills;
-    }
+	public long getFrequencyIntervalMills() {
+		return frequencyIntervalMills;
+	}
 
-    public TimebasedMap<K, V> setFrequencyIntervalMills(long frequencyIntervalMills) {
-        this.frequencyIntervalMills = frequencyIntervalMills;
-        return this;
-    }
+	public TimebasedMap<K, V> setFrequencyIntervalMills(long frequencyIntervalMills) {
+		this.frequencyIntervalMills = frequencyIntervalMills;
+		return this;
+	}
 
-    @Override
-    public int size() {
-        scanAndRemove();
-        return map.size();
-    }
+	protected V access(MapEntry<V> value) {
+		V result = null;
+		if (value != null) {
+			value.setLastAccessTime(System.currentTimeMillis());
+			result = value.getValue();
+		}
+		return result;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        scanAndRemove();
-        return map.isEmpty();
-    }
+	protected boolean isExpired(MapEntry<V> entry) {
+		long now = getTime().millis();
+		return (now - entry.getLastAccessTime()) > expirationTimeMills;
+	}
 
-    @Override
-    public boolean containsKey(Object key) {
-        scanAndRemove();
-        return map.containsKey(key);
-    }
+	protected void scanAndRemove() {
+		long now = getTime().millis();
+		long last = lastScan.get();
+		boolean remove = false;
+		if ((now - last) > frequencyIntervalMills) {
+			remove = lastScan.compareAndSet(last, now);
+		}
+		if (remove) {
+			List<K> possibleRemovals = new LinkedList<>();
+			map.entrySet()
+				.stream()
+				.forEach(
+					e -> {
+						if (isExpired(e.getValue())) {
+							possibleRemovals.add(e.getKey());
+						}
+					}
+				);
+			possibleRemovals
+				.stream()
+				.forEach(
+					key -> remove(key)
+				);
+		}
+	}
 
-    @Override
-    public boolean containsValue(Object value) {
-        scanAndRemove();
-        if (value != null) {
-            for (Map.Entry<K, MapEntry<V>> entry : map.entrySet()) {
-                if (value.equals(entry.getValue().getValue())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	protected class MapEntry<V> {
 
-    @Override
-    public V get(Object key) {
-        scanAndRemove();
-        MapEntry<V> value = map.get(key);
-        V result = null;
-        if (value != null) {
-            result = access(value);
-        }
-        return result;
-    }
+		private V value;
+		private long creationTime;
+		private long lastAccessTime;
 
-    @Override
-    public V put(K key, V value) {
-        scanAndRemove();
-        MapEntry<V> entry = new MapEntry<>(value);
-        entry = map.put(key, entry);
-        if (entry != null) {
-            return entry.getValue();
-        } else {
-            return null;
-        }
-    }
+		public MapEntry(V value) {
+			long now = getTime().millis();
+			setValue(value);
+			setCreationTime(now);
+			setLastAccessTime(now);
+		}
 
-    @Override
-    public V remove(Object key) {
-        scanAndRemove();
-        MapEntry<V> entry = map.remove(key);
-        if (entry != null) {
-            return entry.getValue();
-        } else {
-            return null;
-        }
-    }
+		public V getValue() {
+			return value;
+		}
 
-    @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
-        scanAndRemove();
-        m.entrySet().stream().forEach(
-            e -> map.put(e.getKey(), new MapEntry<>(e.getValue()))
-        );
-    }
+		public MapEntry<V> setValue(V value) {
+			this.value = value;
+			return this;
+		}
 
-    @Override
-    public void clear() {
-        lastScan.set(System.currentTimeMillis());
-        map.clear();
-    }
+		public long getCreationTime() {
+			return creationTime;
+		}
 
-    @Override
-    public Set<K> keySet() {
-        scanAndRemove();
-        return map.keySet();
-    }
+		public MapEntry<V> setCreationTime(long creationTime) {
+			this.creationTime = creationTime;
+			return this;
+		}
 
-    @Override
-    public Collection<V> values() {
-        scanAndRemove();
-        return map
-            .entrySet()
-            .stream()
-            .map(
-                e -> e.getValue().getValue()
-            ).collect(toList());
-    }
+		public long getLastAccessTime() {
+			return lastAccessTime;
+		}
 
-    @Override
-    public Set<Entry<K, V>> entrySet() {
-        scanAndRemove();
-        return
-            map.entrySet()
-                .stream()
-                .map(
-                    e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().getValue())
-                )
-                .collect(Collectors.toSet());
-    }
+		public MapEntry<V> setLastAccessTime(long lastAccessTime) {
+			this.lastAccessTime = lastAccessTime;
+			return this;
+		}
+	}
 
-    protected V access(MapEntry<V> value) {
-        V result = null;
-        if (value != null) {
-            value.setLastAccessTime(System.currentTimeMillis());
-            result = value.getValue();
-        }
-        return result;
-    }
+	@Override
+	public int size() {
+		scanAndRemove();
+		return map.size();
+	}
 
-    protected boolean isExpired(MapEntry<V> entry) {
-        long now = getTime().millis();
-        return (now - entry.getLastAccessTime()) > expirationTimeMills;
-    }
+	@Override
+	public boolean isEmpty() {
+		scanAndRemove();
+		return map.isEmpty();
+	}
 
-    protected void scanAndRemove() {
-        long now = getTime().millis();
-        long last = lastScan.get();
-        boolean remove = false;
-        if ((now - last) > frequencyIntervalMills) {
-            remove = lastScan.compareAndSet(last, now);
-        }
-        if (remove) {
-            List<K> possibleRemovals = new LinkedList<>();
-            map.entrySet()
-                .stream()
-                .forEach(
-                    e -> {
-                        if (isExpired(e.getValue())) {
-                            possibleRemovals.add(e.getKey());
-                        }
-                    }
-                );
-            possibleRemovals
-                .stream()
-                .forEach(
-                    key -> remove(key)
-                );
-        }
-    }
+	@Override
+	public boolean containsKey(Object key) {
+		scanAndRemove();
+		return map.containsKey(key);
+	}
 
-    protected class MapEntry<V> {
+	@Override
+	public boolean containsValue(Object value) {
+		scanAndRemove();
+		if (value != null) {
+			for (Map.Entry<K, MapEntry<V>> entry : map.entrySet()) {
+				if (value.equals(entry.getValue().getValue())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-        private V value;
-        private long creationTime;
-        private long lastAccessTime;
+	@Override
+	public V get(Object key) {
+		scanAndRemove();
+		MapEntry<V> value = map.get(key);
+		V result = null;
+		if (value != null) {
+			result = access(value);
+		}
+		return result;
+	}
 
-        public MapEntry(V value) {
-            long now = getTime().millis();
-            setValue(value);
-            setCreationTime(now);
-            setLastAccessTime(now);
-        }
+	@Override
+	public V put(K key, V value) {
+		scanAndRemove();
+		MapEntry<V> entry = new MapEntry<>(value);
+		entry = map.put(key, entry);
+		if (entry != null) {
+			return entry.getValue();
+		}
+		else {
+			return null;
+		}
+	}
 
-        public V getValue() {
-            return value;
-        }
+	@Override
+	public V remove(Object key) {
+		scanAndRemove();
+		MapEntry<V> entry = map.remove(key);
+		if (entry != null) {
+			return entry.getValue();
+		}
+		else {
+			return null;
+		}
+	}
 
-        public MapEntry<V> setValue(V value) {
-            this.value = value;
-            return this;
-        }
+	@Override
+	public void putAll(Map<? extends K, ? extends V> m) {
+		scanAndRemove();
+		m.entrySet().stream().forEach(
+			e -> map.put(e.getKey(), new MapEntry<>(e.getValue()))
+		);
+	}
 
-        public long getCreationTime() {
-            return creationTime;
-        }
+	@Override
+	public void clear() {
+		lastScan.set(System.currentTimeMillis());
+		map.clear();
+	}
 
-        public MapEntry<V> setCreationTime(long creationTime) {
-            this.creationTime = creationTime;
-            return this;
-        }
+	@Override
+	public Set<K> keySet() {
+		scanAndRemove();
+		return map.keySet();
+	}
 
-        public long getLastAccessTime() {
-            return lastAccessTime;
-        }
+	@Override
+	public Collection<V> values() {
+		scanAndRemove();
+		return map
+			.entrySet()
+			.stream()
+			.map(
+				e -> e.getValue().getValue()
+			).collect(toList());
+	}
 
-        public MapEntry<V> setLastAccessTime(long lastAccessTime) {
-            this.lastAccessTime = lastAccessTime;
-            return this;
-        }
-    }
+	@Override
+	public Set<Entry<K, V>> entrySet() {
+		scanAndRemove();
+		return
+			map.entrySet()
+				.stream()
+				.map(
+					e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().getValue())
+				)
+				.collect(Collectors.toSet());
+	}
 }

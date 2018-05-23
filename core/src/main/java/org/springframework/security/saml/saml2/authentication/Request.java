@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,102 +13,101 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-
+*/
 package org.springframework.security.saml.saml2.authentication;
 
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.Signature;
 
+import org.joda.time.DateTime;
+
 public class Request<T extends Request<T>> extends ImplementationHolder {
 
-    protected T _this() {
-        return (T) this;
-    }
+	private Issuer issuer;
+	private Signature signature;
+	private List<Object> extensions;
+	private String id;
+	private DateTime issueInstant;
+	private Endpoint destination;
+	private String consent;
+	private String version;
 
-    private Issuer issuer;
-    private Signature signature;
-    private List<Object> extensions;
+	public Issuer getIssuer() {
+		return issuer;
+	}
 
-    private String id;
-    private DateTime issueInstant;
-    private Endpoint destination;
-    private String consent;
-    private String version;
+	public T setIssuer(Issuer issuer) {
+		this.issuer = issuer;
+		return _this();
+	}
 
-    public Issuer getIssuer() {
-        return issuer;
-    }
+	protected T _this() {
+		return (T) this;
+	}
 
-    public Signature getSignature() {
-        return signature;
-    }
+	public Signature getSignature() {
+		return signature;
+	}
 
-    public List<Object> getExtensions() {
-        return extensions;
-    }
+	public T setSignature(Signature signature) {
+		this.signature = signature;
+		return _this();
+	}
 
-    public String getId() {
-        return id;
-    }
+	public List<Object> getExtensions() {
+		return extensions;
+	}
 
-    public DateTime getIssueInstant() {
-        return issueInstant;
-    }
+	public T setExtensions(List<Object> extensions) {
+		this.extensions = extensions;
+		return _this();
+	}
 
-    public Endpoint getDestination() {
-        return destination;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public String getConsent() {
-        return consent;
-    }
+	public T setId(String id) {
+		this.id = id;
+		return _this();
+	}
 
-    public T setIssuer(Issuer issuer) {
-        this.issuer = issuer;
-        return _this();
-    }
+	public DateTime getIssueInstant() {
+		return issueInstant;
+	}
 
-    public T setSignature(Signature signature) {
-        this.signature = signature;
-        return _this();
-    }
+	public T setIssueInstant(DateTime issueInstant) {
+		this.issueInstant = issueInstant;
+		return _this();
+	}
 
-    public T setExtensions(List<Object> extensions) {
-        this.extensions = extensions;
-        return _this();
-    }
+	public Endpoint getDestination() {
+		return destination;
+	}
 
-    public T setId(String id) {
-        this.id = id;
-        return _this();
-    }
+	public T setDestination(Endpoint destination) {
+		this.destination = destination;
+		return _this();
+	}
 
-    public T setIssueInstant(DateTime issueInstant) {
-        this.issueInstant = issueInstant;
-        return _this();
-    }
+	public String getConsent() {
+		return consent;
+	}
 
-    public T setDestination(Endpoint destination) {
-        this.destination = destination;
-        return _this();
-    }
+	public T setConsent(String consent) {
+		this.consent = consent;
+		return _this();
+	}
 
-    public T setConsent(String consent) {
-        this.consent = consent;
-        return _this();
-    }
+	public String getVersion() {
+		return version;
+	}
 
-    public String getVersion() {
-        return version;
-    }
-
-    public T setVersion(String version) {
-        this.version = version;
-        return _this();
-    }
+	public T setVersion(String version) {
+		this.version = version;
+		return _this();
+	}
 }

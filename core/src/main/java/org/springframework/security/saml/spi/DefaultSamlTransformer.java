@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-
+*/
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -41,68 +42,68 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
 
-    private SpringSecuritySaml implementation;
+	private SpringSecuritySaml implementation;
 
-    public DefaultSamlTransformer(SpringSecuritySaml implementation) {
-        setImplementation(implementation);
-    }
+	public DefaultSamlTransformer(SpringSecuritySaml implementation) {
+		setImplementation(implementation);
+	}
 
+	public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
+		this.implementation = implementation;
+		return this;
+	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void afterPropertiesSet() {
+		implementation.init();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        implementation.init();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toXml(Saml2Object saml2Object) {
+		return implementation.toXml(saml2Object);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toXml(Saml2Object saml2Object) {
-        return implementation.toXml(saml2Object);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+		return implementation.resolve(xml, verificationKeys, localKeys);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
-        return implementation.resolve(xml, verificationKeys, localKeys);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String samlEncode(String s, boolean deflate) {
+		byte[] b;
+		if (deflate) {
+			b = implementation.deflate(s);
+		}
+		else {
+			b = s.getBytes(UTF_8);
+		}
+		return implementation.encode(b);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String samlEncode(String s, boolean deflate) {
-        byte[] b;
-        if (deflate) {
-            b = implementation.deflate(s);
-        } else {
-            b = s.getBytes(UTF_8);
-        }
-        return implementation.encode(b);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String samlDecode(String s, boolean inflate) {
-        byte[] b = implementation.decode(s);
-        if (inflate) {
-            return implementation.inflate(b);
-        } else {
-            return new String(b, UTF_8);
-        }
-    }
-
-    public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
-        this.implementation = implementation;
-        return this;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String samlDecode(String s, boolean inflate) {
+		byte[] b = implementation.decode(s);
+		if (inflate) {
+			return implementation.inflate(b);
+		}
+		else {
+			return new String(b, UTF_8);
+		}
+	}
 
 }

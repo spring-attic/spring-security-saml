@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,62 +22,62 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
-    private String entityId;
-    private String name;
-    private boolean signMetadata;
-    private String metadata;
-    private RotatingKeys keys;
+	private String entityId;
+	private String name;
+	private boolean signMetadata;
+	private String metadata;
+	private RotatingKeys keys;
 
-    public LocalProviderConfiguration() {
-    }
+	public LocalProviderConfiguration() {
+	}
 
-    @SuppressWarnings("checked")
-    protected T _this() {
-        return (T)this;
-    }
+	public String getEntityId() {
+		return entityId;
+	}
 
-    public String getEntityId() {
-        return entityId;
-    }
+	public T setEntityId(String entityId) {
+		this.entityId = entityId;
+		return _this();
+	}
 
-    public T setEntityId(String entityId) {
-        this.entityId = entityId;
-        return _this();
-    }
+	@SuppressWarnings("checked")
+	protected T _this() {
+		return (T) this;
+	}
 
-    public boolean isSignMetadata() {
-        return signMetadata;
-    }
+	public boolean isSignMetadata() {
+		return signMetadata;
+	}
 
-    public T setSignMetadata(boolean signMetadata) {
-        this.signMetadata = signMetadata;
-        return _this();
-    }
+	public T setSignMetadata(boolean signMetadata) {
+		this.signMetadata = signMetadata;
+		return _this();
+	}
 
-    public String getMetadata() {
-        return metadata;
-    }
+	public String getMetadata() {
+		return metadata;
+	}
 
-    public T setMetadata(String metadata) {
-        this.metadata = metadata;
-        return _this();
-    }
+	public T setMetadata(String metadata) {
+		this.metadata = metadata;
+		return _this();
+	}
 
-    public RotatingKeys getKeys() {
-        return keys;
-    }
+	public RotatingKeys getKeys() {
+		return keys;
+	}
 
-    public T setKeys(RotatingKeys keys) {
-        this.keys = keys;
-        return _this();
-    }
+	public T setKeys(RotatingKeys keys) {
+		this.keys = keys;
+		return _this();
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public LocalProviderConfiguration<T> setName(String name) {
-        this.name = name;
-        return this;
-    }
+	public LocalProviderConfiguration<T> setName(String name) {
+		this.name = name;
+		return this;
+	}
 }

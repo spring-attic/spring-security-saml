@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,24 +22,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SamlServerConfiguration {
 
-    private LocalServiceProviderConfiguration serviceProvider;
-    private LocalIdentityProviderConfiguration identityProvider;
+	private LocalServiceProviderConfiguration serviceProvider;
+	private LocalIdentityProviderConfiguration identityProvider;
 
-    public LocalServiceProviderConfiguration getServiceProvider() {
-        return serviceProvider;
-    }
+	public LocalServiceProviderConfiguration getServiceProvider() {
+		return serviceProvider;
+	}
 
-    public SamlServerConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
-        this.serviceProvider = serviceProvider;
-        return this;
-    }
+	public SamlServerConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
+		this.serviceProvider = serviceProvider;
+		return this;
+	}
 
-    public LocalIdentityProviderConfiguration getIdentityProvider() {
-        return identityProvider;
-    }
+	public LocalIdentityProviderConfiguration getIdentityProvider() {
+		return identityProvider;
+	}
 
-    public SamlServerConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
-        this.identityProvider = identityProvider;
-        return this;
-    }
+	public SamlServerConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
+		this.identityProvider = identityProvider;
+		return this;
+	}
 }

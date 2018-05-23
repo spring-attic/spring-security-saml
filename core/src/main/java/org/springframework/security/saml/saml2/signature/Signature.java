@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,82 +13,81 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-
+*/
 package org.springframework.security.saml.saml2.signature;
 
 import org.springframework.security.saml.key.SimpleKey;
 
 public class Signature {
 
-    private CanonicalizationMethod canonicalizationAlgorithm;
-    private AlgorithmMethod signatureAlgorithm;
-    private DigestMethod digestAlgorithm;
-    private String digestValue;
-    private String signatureValue;
-    private boolean validated = false;
-    private SimpleKey validatingKey;
+	private CanonicalizationMethod canonicalizationAlgorithm;
+	private AlgorithmMethod signatureAlgorithm;
+	private DigestMethod digestAlgorithm;
+	private String digestValue;
+	private String signatureValue;
+	private boolean validated = false;
+	private SimpleKey validatingKey;
 
-    public CanonicalizationMethod getCanonicalizationAlgorithm() {
-        return canonicalizationAlgorithm;
-    }
+	public CanonicalizationMethod getCanonicalizationAlgorithm() {
+		return canonicalizationAlgorithm;
+	}
 
-    public Signature setCanonicalizationAlgorithm(CanonicalizationMethod canonicalizationAlgorithm) {
-        this.canonicalizationAlgorithm = canonicalizationAlgorithm;
-        return this;
-    }
+	public Signature setCanonicalizationAlgorithm(CanonicalizationMethod canonicalizationAlgorithm) {
+		this.canonicalizationAlgorithm = canonicalizationAlgorithm;
+		return this;
+	}
 
-    public AlgorithmMethod getSignatureAlgorithm() {
-        return signatureAlgorithm;
-    }
+	public AlgorithmMethod getSignatureAlgorithm() {
+		return signatureAlgorithm;
+	}
 
-    public Signature setSignatureAlgorithm(AlgorithmMethod signatureAlgorithm) {
-        this.signatureAlgorithm = signatureAlgorithm;
-        return this;
-    }
+	public Signature setSignatureAlgorithm(AlgorithmMethod signatureAlgorithm) {
+		this.signatureAlgorithm = signatureAlgorithm;
+		return this;
+	}
 
-    public DigestMethod getDigestAlgorithm() {
-        return digestAlgorithm;
-    }
+	public DigestMethod getDigestAlgorithm() {
+		return digestAlgorithm;
+	}
 
-    public Signature setDigestAlgorithm(DigestMethod digestAlgorithm) {
-        this.digestAlgorithm = digestAlgorithm;
-        return this;
-    }
+	public Signature setDigestAlgorithm(DigestMethod digestAlgorithm) {
+		this.digestAlgorithm = digestAlgorithm;
+		return this;
+	}
 
-    public String getDigestValue() {
-        return digestValue;
-    }
+	public String getDigestValue() {
+		return digestValue;
+	}
 
-    public Signature setDigestValue(String digestValue) {
-        this.digestValue = digestValue;
-        return this;
-    }
+	public Signature setDigestValue(String digestValue) {
+		this.digestValue = digestValue;
+		return this;
+	}
 
-    public String getSignatureValue() {
-        return signatureValue;
-    }
+	public String getSignatureValue() {
+		return signatureValue;
+	}
 
-    public Signature setSignatureValue(String signatureValue) {
-        this.signatureValue = signatureValue;
-        return this;
-    }
+	public Signature setSignatureValue(String signatureValue) {
+		this.signatureValue = signatureValue;
+		return this;
+	}
 
-    public Signature setValidated(boolean b) {
-        this.validated = b;
-        return this;
-    }
+	public boolean isValidated() {
+		return validated;
+	}
 
-    public boolean isValidated() {
-        return validated;
-    }
+	public Signature setValidated(boolean b) {
+		this.validated = b;
+		return this;
+	}
 
-    public SimpleKey getValidatingKey() {
-        return validatingKey;
-    }
+	public SimpleKey getValidatingKey() {
+		return validatingKey;
+	}
 
-    public Signature setValidatingKey(SimpleKey validatingKey) {
-        this.validatingKey = validatingKey;
-        return this;
-    }
+	public Signature setValidatingKey(SimpleKey validatingKey) {
+		this.validatingKey = validatingKey;
+		return this;
+	}
 }

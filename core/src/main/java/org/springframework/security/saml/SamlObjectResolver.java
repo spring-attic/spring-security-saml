@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,20 +28,27 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface SamlObjectResolver {
 
-     ServiceProviderMetadata getLocalServiceProvider(String baseUrl);
-     IdentityProviderMetadata getLocalIdentityProvider(String baseUrl);
+	ServiceProviderMetadata getLocalServiceProvider(String baseUrl);
 
-     IdentityProviderMetadata resolveIdentityProvider(Assertion assertion);
-     IdentityProviderMetadata resolveIdentityProvider(Response response);
-     IdentityProviderMetadata resolveIdentityProvider(String entityId);
-     IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp);
+	IdentityProviderMetadata getLocalIdentityProvider(String baseUrl);
 
-     ServiceProviderMetadata resolveServiceProvider(String entityId);
-     ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request);
-     ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
+	IdentityProviderMetadata resolveIdentityProvider(Assertion assertion);
 
-     AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
-     URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
+	IdentityProviderMetadata resolveIdentityProvider(Response response);
+
+	IdentityProviderMetadata resolveIdentityProvider(String entityId);
+
+	IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp);
+
+	ServiceProviderMetadata resolveServiceProvider(String entityId);
+
+	ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request);
+
+	ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
+
+	AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
+
+	URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
 
 
 }

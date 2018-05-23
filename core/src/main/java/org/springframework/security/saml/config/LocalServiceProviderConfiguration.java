@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,35 +25,35 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LocalServiceProviderConfiguration extends LocalProviderConfiguration<LocalServiceProviderConfiguration> {
 
-    private boolean signRequests = false;
-    private boolean wantAssertionsSigned = false;
-    private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
+	private boolean signRequests = false;
+	private boolean wantAssertionsSigned = false;
+	private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
 
 
-    public boolean isSignRequests() {
-        return signRequests;
-    }
+	public boolean isSignRequests() {
+		return signRequests;
+	}
 
-    public LocalServiceProviderConfiguration setSignRequests(boolean signRequests) {
-        this.signRequests = signRequests;
-        return this;
-    }
+	public LocalServiceProviderConfiguration setSignRequests(boolean signRequests) {
+		this.signRequests = signRequests;
+		return this;
+	}
 
-    public boolean isWantAssertionsSigned() {
-        return wantAssertionsSigned;
-    }
+	public boolean isWantAssertionsSigned() {
+		return wantAssertionsSigned;
+	}
 
-    public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
-        this.wantAssertionsSigned = wantAssertionsSigned;
-        return this;
-    }
+	public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
+		this.wantAssertionsSigned = wantAssertionsSigned;
+		return this;
+	}
 
-    public List<ExternalIdentityProviderConfiguration> getProviders() {
-        return providers;
-    }
+	public List<ExternalIdentityProviderConfiguration> getProviders() {
+		return providers;
+	}
 
-    public LocalServiceProviderConfiguration setProviders(List<ExternalIdentityProviderConfiguration> providers) {
-        this.providers = providers;
-        return this;
-    }
+	public LocalServiceProviderConfiguration setProviders(List<ExternalIdentityProviderConfiguration> providers) {
+		this.providers = providers;
+		return this;
+	}
 }

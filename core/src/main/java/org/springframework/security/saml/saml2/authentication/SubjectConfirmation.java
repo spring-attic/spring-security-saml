@@ -1,9 +1,11 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2002-2018 the original author or authors.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,52 +13,51 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-
+*/
 package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
 public class SubjectConfirmation {
-    private SubjectConfirmationMethod method;
-    private SubjectConfirmationData data;
-    private String nameId;
-    private NameId format;
+	private SubjectConfirmationMethod method;
+	private SubjectConfirmationData data;
+	private String nameId;
+	private NameId format;
 
-    public SubjectConfirmationData getConfirmationData() {
-        return data;
-    }
+	public SubjectConfirmationData getConfirmationData() {
+		return data;
+	}
 
-    public SubjectConfirmation setConfirmationData(SubjectConfirmationData confirmationData) {
-        this.data = confirmationData;
-        return this;
-    }
+	public SubjectConfirmation setConfirmationData(SubjectConfirmationData confirmationData) {
+		this.data = confirmationData;
+		return this;
+	}
 
 
-    public SubjectConfirmationMethod getMethod() {
-        return method;
-    }
+	public SubjectConfirmationMethod getMethod() {
+		return method;
+	}
 
-    public SubjectConfirmation setMethod(SubjectConfirmationMethod method) {
-        this.method = method;
-        return this;
-    }
+	public SubjectConfirmation setMethod(SubjectConfirmationMethod method) {
+		this.method = method;
+		return this;
+	}
 
-    public String getNameId() {
-        return nameId;
-    }
+	public String getNameId() {
+		return nameId;
+	}
 
-    public SubjectConfirmation setNameId(String nameId) {
-        this.nameId = nameId;
-        return this;
-    }
+	public SubjectConfirmation setNameId(String nameId) {
+		this.nameId = nameId;
+		return this;
+	}
 
-    public NameId getFormat() {
-        return format;
-    }
+	public NameId getFormat() {
+		return format;
+	}
 
-    public SubjectConfirmation setFormat(NameId format) {
-        this.format = format;
-        return this;
-    }
+	public SubjectConfirmation setFormat(NameId format) {
+		this.format = format;
+		return this;
+	}
 }

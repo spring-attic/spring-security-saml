@@ -101,7 +101,9 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Condition;
+import org.opensaml.saml.saml2.core.EncryptedAttribute;
 import org.opensaml.saml.saml2.core.EncryptedElementType;
+import org.opensaml.saml.saml2.core.EncryptedID;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
@@ -1169,7 +1171,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
             .setSubject(getSubject(parsed.getSubject(), localKeys))
             .setConditions(getConditions(parsed.getConditions()))
             .setAuthenticationStatements(getAuthenticationStatements(parsed.getAuthnStatements()))
-            .setAttributes(getAttributes(parsed.getAttributeStatements()))
+            .setAttributes(getAttributes(parsed.getAttributeStatements(), localKeys))
             ;
     }
 
@@ -1188,10 +1190,20 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
         return result;
     }
 
-    protected List<Attribute> getAttributes(List<AttributeStatement> attributeStatements) {
+    protected List<Attribute> getAttributes(List<AttributeStatement> attributeStatements, List<SimpleKey> localKeys) {
         List<Attribute> result = new LinkedList<>();
         for (AttributeStatement stmt : ofNullable(attributeStatements).orElse(emptyList())) {
             for (org.opensaml.saml.saml2.core.Attribute a : ofNullable(stmt.getAttributes()).orElse(emptyList())) {
+                result.add(
+                    new Attribute()
+                        .setFriendlyName(a.getFriendlyName())
+                        .setName(a.getName())
+                        .setNameFormat(AttributeNameFormat.fromUrn(a.getNameFormat()))
+                        .setValues(getJavaValues(a.getAttributeValues()))
+                );
+            }
+            for (EncryptedAttribute encryptedAttribute : ofNullable(stmt.getEncryptedAttributes()).orElse(emptyList())) {
+                org.opensaml.saml.saml2.core.Attribute a = (org.opensaml.saml.saml2.core.Attribute) decrypt(encryptedAttribute, localKeys);
                 result.add(
                     new Attribute()
                         .setFriendlyName(a.getFriendlyName())
@@ -1295,15 +1307,18 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
         return new Subject()
             .setPrincipal(getPrincipal(subject, localKeys))
-            .setConfirmations(getConfirmations(subject.getSubjectConfirmations()))
+            .setConfirmations(getConfirmations(subject.getSubjectConfirmations(), localKeys))
             ;
     }
 
-    protected List<SubjectConfirmation> getConfirmations(List<org.opensaml.saml.saml2.core.SubjectConfirmation> subjectConfirmations) {
+    protected List<SubjectConfirmation> getConfirmations(List<org.opensaml.saml.saml2.core.SubjectConfirmation> subjectConfirmations, List<SimpleKey> localKeys) {
         List<SubjectConfirmation> result = new LinkedList<>();
         for (org.opensaml.saml.saml2.core.SubjectConfirmation s : subjectConfirmations) {
+            NameID nameID = getNameID(s.getNameID(), s.getEncryptedID(), localKeys);
             result.add(
                 new SubjectConfirmation()
+                    .setNameId(nameID != null ? nameID.getValue() : null)
+                    .setFormat(nameID != null ? NameId.fromUrn(nameID.getFormat()) : null)
                     .setMethod(SubjectConfirmationMethod.fromUrn(s.getMethod()))
                     .setConfirmationData(
                         new SubjectConfirmationData()
@@ -1317,11 +1332,16 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
         return result;
     }
 
-    protected SubjectPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<SimpleKey> localKeys) {
-        org.opensaml.saml.saml2.core.NameID p = subject.getNameID();
-        if (p == null && subject.getEncryptedID() != null) {
-            p = (NameID) decrypt(subject.getEncryptedID(), localKeys);
+    protected org.opensaml.saml.saml2.core.NameID getNameID(NameID id, EncryptedID eid, List<SimpleKey> localKeys) {
+        org.opensaml.saml.saml2.core.NameID result = id;
+        if (result == null && eid != null && eid.getEncryptedData() != null) {
+            result = (NameID) decrypt(eid, localKeys);
         }
+        return result;
+    }
+
+    protected SubjectPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<SimpleKey> localKeys) {
+        org.opensaml.saml.saml2.core.NameID p = getNameID(subject.getNameID(), subject.getEncryptedID(), localKeys);
         if (p != null) {
             return new NameIdPrincipal()
                 .setSpNameQualifier(p.getSPNameQualifier())

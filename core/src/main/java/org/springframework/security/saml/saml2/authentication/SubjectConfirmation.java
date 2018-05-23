@@ -15,9 +15,13 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import org.springframework.security.saml.saml2.metadata.NameId;
+
 public class SubjectConfirmation {
     private SubjectConfirmationMethod method;
     private SubjectConfirmationData data;
+    private String nameId;
+    private NameId format;
 
     public SubjectConfirmationData getConfirmationData() {
         return data;
@@ -38,4 +42,21 @@ public class SubjectConfirmation {
         return this;
     }
 
+    public String getNameId() {
+        return nameId;
+    }
+
+    public SubjectConfirmation setNameId(String nameId) {
+        this.nameId = nameId;
+        return this;
+    }
+
+    public NameId getFormat() {
+        return format;
+    }
+
+    public SubjectConfirmation setFormat(NameId format) {
+        this.format = format;
+        return this;
+    }
 }

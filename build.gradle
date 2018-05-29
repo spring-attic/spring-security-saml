@@ -25,8 +25,11 @@ buildscript {
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("org.gradle.api.plugins:gradle-tomcat-plugin:1.2.4")
 		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
+		classpath 'io.spring.gradle:spring-build-conventions:0.0.16.RELEASE'
 	}
 }
+
+apply plugin: 'io.spring.convention.root'
 
 def coreProjects = subprojects.findAll { !it.name.contains("sample") }
 

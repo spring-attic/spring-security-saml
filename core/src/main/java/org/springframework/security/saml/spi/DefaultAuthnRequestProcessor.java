@@ -68,12 +68,17 @@ public class DefaultAuthnRequestProcessor extends SamlProcessor<DefaultAuthnRequ
 
 	protected String getAuthnRequestRedirect(IdentityProviderMetadata m,
 											 AuthenticationRequest authenticationRequest) throws UnsupportedEncodingException {
-		String xml = getTransformer().toXml(authenticationRequest);
-		String deflated = getTransformer().samlEncode(xml, true);
+		String encoded = getEncodedAuthnRequestValue(authenticationRequest);
 		Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
 		UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
-		url.queryParam("SAMLRequest", UriUtils.encode(deflated, StandardCharsets.UTF_8.name()));
+		url.queryParam("SAMLRequest", encoded);
 		return url.build(true).toUriString();
+	}
+
+	protected String getEncodedAuthnRequestValue(AuthenticationRequest authenticationRequest) throws UnsupportedEncodingException {
+		String xml = getTransformer().toXml(authenticationRequest);
+		String deflated = getTransformer().samlEncode(xml, true);
+		return UriUtils.encode(deflated, StandardCharsets.UTF_8.name());
 	}
 
 

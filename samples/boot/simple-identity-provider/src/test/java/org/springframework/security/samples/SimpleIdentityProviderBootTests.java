@@ -28,11 +28,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
+import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,9 +44,12 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import sample.config.AppConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -57,6 +64,15 @@ public class SimpleIdentityProviderBootTests {
 
 	@Autowired
 	private SamlTransformer transformer;
+
+	@Autowired
+	private Defaults defaults;
+
+	@Autowired
+	private AppConfig configuration;
+
+	@Autowired
+	private SamlObjectResolver resolver;
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
@@ -175,6 +191,34 @@ public class SimpleIdentityProviderBootTests {
 		assertNotNull(r);
 		assertThat(r.getAssertions(), notNullValue());
 		assertThat(r.getAssertions().size(), equalTo(1));
+	}
+
+	@Test
+	public void receiveAuthenticationRequest() throws Exception {
+		IdentityProviderMetadata local = resolver.getLocalIdentityProvider("http://localhost");
+		ServiceProviderMetadata sp = resolver.resolveServiceProvider("spring.security.saml.sp.id");
+		assertNotNull(sp);
+
+		AuthenticationRequest authenticationRequest = defaults.authenticationRequest(sp, local);
+		String xml = transformer.toXml(authenticationRequest);
+		String deflated = transformer.samlEncode(xml, true);
+
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
+		MvcResult result = mockMvc.perform(
+			get("/saml/idp/SSO")
+				.param("SAMLRequest", deflated)
+				.with(authentication(token))
+		)
+			.andExpect(status().isOk())
+			.andReturn();
+		String html = result.getResponse().getContentAsString();
+		assertThat(html, containsString("name=\"SAMLResponse\""));
+		String response = extractResponse(html, "SAMLResponse");
+		Response r = (Response) transformer.fromXml(transformer.samlDecode(response, false), null, null);
+		assertNotNull(r);
+		assertThat(r.getAssertions(), notNullValue());
+		assertThat(r.getAssertions().size(), equalTo(1));
+
 	}
 
 	private String extractResponse(String html, String name) {

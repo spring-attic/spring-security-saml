@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SimpleIdentityProviderTest {
+public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private MockMvc mockMvc;
 

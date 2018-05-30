@@ -57,10 +57,6 @@ public class IdentityProviderController {
 	private SamlObjectResolver resolver;
 	private Network network;
 
-	public SamlTransformer getTransformer() {
-		return transformer;
-	}
-
 	@Autowired
 	public void setTransformer(SamlTransformer transformer) {
 		this.transformer = transformer;

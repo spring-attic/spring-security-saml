@@ -33,7 +33,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-public class DefaultAuthnRequestProcessor extends SamlProcessor {
+public class DefaultAuthnRequestProcessor extends SamlProcessor<DefaultAuthnRequestProcessor> {
 
 
 	@Override

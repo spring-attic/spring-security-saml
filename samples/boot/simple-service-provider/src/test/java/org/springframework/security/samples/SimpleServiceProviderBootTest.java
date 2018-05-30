@@ -28,13 +28,19 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.Defaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
@@ -49,7 +55,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -62,6 +70,10 @@ public class SimpleServiceProviderBootTest {
 	private MockMvc mockMvc;
 	@Autowired
 	private SamlTransformer transformer;
+	@Autowired
+	private SamlObjectResolver resolver;
+	@Autowired
+	private Defaults defaults;
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
@@ -101,6 +113,35 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void authnRequest() throws Exception {
+		AuthenticationRequest authn = getAuthenticationRequest();
+		assertNotNull(authn);
+	}
+
+	@Test
+	public void processResponse() throws Exception {
+		configuration.getServiceProvider().setWantAssertionsSigned(false);
+		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
+		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = defaults.response(authn,
+			assertion,
+			sp,
+			idp
+		);
+
+		String encoded = transformer.samlEncode(transformer.toXml(response), false);
+		mockMvc.perform(
+			post("/saml/sp/SSO")
+			.param("SAMLResponse", encoded)
+		)
+			.andExpect(status().isFound())
+			.andExpect(authenticated());
+	}
+
+
+	protected AuthenticationRequest getAuthenticationRequest() throws Exception {
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		String redirect = mockMvc.perform(
 			get("/saml/sp/discovery")
@@ -117,8 +158,7 @@ public class SimpleServiceProviderBootTest {
 		String request = params.get("SAMLRequest");
 		assertNotNull(request);
 		String xml = transformer.samlDecode(request, true);
-		AuthenticationRequest authn = (AuthenticationRequest) transformer.fromXml(xml, null, null);
-		assertNotNull(authn);
+		return (AuthenticationRequest) transformer.fromXml(xml, null, null);
 	}
 
 	public static Map<String, String> queryParams(URI url) throws UnsupportedEncodingException {

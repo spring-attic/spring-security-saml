@@ -33,6 +33,7 @@ import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultMetadataProcessor;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultSpResponseProcessor;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
@@ -51,7 +52,9 @@ public class SamlConfiguration {
 	@Bean
 	public List<SamlProcessor> processors(SamlServerConfiguration configuration) {
 		return Arrays.asList(
-			metadataProcessor(configuration)
+			metadataProcessor(configuration),
+			discoveryProcessor(configuration),
+			spResponseProcessor(configuration)
 		);
 	}
 
@@ -73,6 +76,17 @@ public class SamlConfiguration {
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration);
+	}
+
+	@Bean
+	public SamlProcessor spResponseProcessor(SamlServerConfiguration configuration) {
+		return new DefaultSpResponseProcessor()
+			.setDefaults(defaults())
+			.setNetwork(network())
+			.setResolver(resolver())
+			.setTransformer(transformer())
+			.setConfiguration(configuration)
+			.setValidator(validator());
 	}
 
 	@Bean

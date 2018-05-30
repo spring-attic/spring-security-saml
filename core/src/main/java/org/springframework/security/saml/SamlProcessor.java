@@ -27,7 +27,7 @@ import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-public abstract class SamlProcessor {
+public abstract class SamlProcessor<T extends SamlProcessor> {
 
 	private SamlServerConfiguration configuration;
 	private SamlObjectResolver resolver;
@@ -35,6 +35,11 @@ public abstract class SamlProcessor {
 	private Network network;
 	private Defaults defaults;
 	private String forwardUrl = null;
+
+	@SuppressWarnings("checked")
+	protected T _this() {
+		return (T)this;
+	}
 
 	public void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Saml2Object saml2Object = extract(request);
@@ -65,53 +70,53 @@ public abstract class SamlProcessor {
 		return configuration;
 	}
 
-	public SamlProcessor setConfiguration(SamlServerConfiguration configuration) {
+	public T setConfiguration(SamlServerConfiguration configuration) {
 		this.configuration = configuration;
-		return this;
+		return _this();
 	}
 
 	public SamlObjectResolver getResolver() {
 		return resolver;
 	}
 
-	public SamlProcessor setResolver(SamlObjectResolver resolver) {
+	public T setResolver(SamlObjectResolver resolver) {
 		this.resolver = resolver;
-		return this;
+		return _this();
 	}
 
 	public SamlTransformer getTransformer() {
 		return transformer;
 	}
 
-	public SamlProcessor setTransformer(SamlTransformer transformer) {
+	public T setTransformer(SamlTransformer transformer) {
 		this.transformer = transformer;
-		return this;
+		return _this();
 	}
 
 	public Network getNetwork() {
 		return network;
 	}
 
-	public SamlProcessor setNetwork(Network network) {
+	public T setNetwork(Network network) {
 		this.network = network;
-		return this;
-	}
-
-	public String getForwardUrl() {
-		return forwardUrl;
-	}
-
-	public SamlProcessor setForwardUrl(String forwardUrl) {
-		this.forwardUrl = forwardUrl;
-		return this;
+		return _this();
 	}
 
 	public Defaults getDefaults() {
 		return defaults;
 	}
 
-	public SamlProcessor setDefaults(Defaults defaults) {
+	public T setDefaults(Defaults defaults) {
 		this.defaults = defaults;
-		return this;
+		return _this();
+	}
+
+	public String getForwardUrl() {
+		return forwardUrl;
+	}
+
+	public T setForwardUrl(String forwardUrl) {
+		this.forwardUrl = forwardUrl;
+		return _this();
 	}
 }

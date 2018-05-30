@@ -28,7 +28,7 @@ import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 
-public class DefaultMetadataProcessor extends SamlProcessor {
+public class DefaultMetadataProcessor extends SamlProcessor<DefaultMetadataProcessor> {
 
 	protected final String LOCAL_PROVIDER = getClass().getName() + ".local.provider";
 

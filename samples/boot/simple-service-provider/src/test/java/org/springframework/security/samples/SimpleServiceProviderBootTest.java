@@ -16,7 +16,11 @@
  */
 package org.springframework.security.samples;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -28,17 +32,23 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.util.UriUtils;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,5 +97,38 @@ public class SimpleServiceProviderBootTest {
 		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
 		assertNotNull(m);
 		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+	}
+
+	@Test
+	public void authnRequest() throws Exception {
+		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		String redirect = mockMvc.perform(
+			get("/saml/sp/discovery")
+			.param("idp", idpEntityId)
+		)
+			.andExpect(status().isFound())
+			.andReturn()
+			.getResponse()
+			.getHeader("Location");
+		assertNotNull(redirect);
+		Map<String, String> params = queryParams(new URI(redirect));
+		assertNotNull(params);
+		assertFalse(params.isEmpty());
+		String request = params.get("SAMLRequest");
+		assertNotNull(request);
+		String xml = transformer.samlDecode(request, true);
+		AuthenticationRequest authn = (AuthenticationRequest) transformer.fromXml(xml, null, null);
+		assertNotNull(authn);
+	}
+
+	public static Map<String, String> queryParams(URI url) throws UnsupportedEncodingException {
+		Map<String, String> queryPairs = new LinkedHashMap<>();
+		String query = url.getQuery();
+		String[] pairs = query.split("&");
+		for (String pair : pairs) {
+			int idx = pair.indexOf("=");
+			queryPairs.put(UriUtils.decode(pair.substring(0, idx), UTF_8.name()), UriUtils.decode(pair.substring(idx + 1), UTF_8.name()));
+		}
+		return queryPairs;
 	}
 }

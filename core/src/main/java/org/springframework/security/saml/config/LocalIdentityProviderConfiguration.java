@@ -28,6 +28,10 @@ public class LocalIdentityProviderConfiguration extends LocalProviderConfigurati
 	private boolean wantRequestsSigned = false;
 	private List<ExternalServiceProviderConfiguration> providers = new LinkedList<>();
 
+	public LocalIdentityProviderConfiguration() {
+		super("/saml/idp");
+	}
+
 	public boolean isWantRequestsSigned() {
 		return wantRequestsSigned;
 	}

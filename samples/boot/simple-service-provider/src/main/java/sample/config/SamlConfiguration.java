@@ -17,18 +17,63 @@
 package sample.config;
 
 import java.time.Clock;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlObjectResolver;
+import org.springframework.security.saml.SamlProcessingFilter;
+import org.springframework.security.saml.SamlProcessor;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.spi.*;
+import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.spi.DefaultAuthnRequestProcessor;
+import org.springframework.security.saml.spi.DefaultMetadataCache;
+import org.springframework.security.saml.spi.DefaultMetadataProcessor;
+import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
+import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.util.Network;
 
 @Configuration
 public class SamlConfiguration {
+
+	@Bean
+	public SamlProcessingFilter samlFilter(List<SamlProcessor> processors) {
+		return new SamlProcessingFilter()
+			.setProcessors(processors);
+	}
+
+	@Bean
+	public List<SamlProcessor> processors(SamlServerConfiguration configuration) {
+		return Arrays.asList(
+			metadataProcessor(configuration)
+		);
+	}
+
+	@Bean
+	public SamlProcessor metadataProcessor(SamlServerConfiguration configuration) {
+		return new DefaultMetadataProcessor()
+			.setDefaults(defaults())
+			.setNetwork(network())
+			.setResolver(resolver())
+			.setTransformer(transformer())
+			.setConfiguration(configuration);
+	}
+
+	@Bean
+	public SamlProcessor discoveryProcessor(SamlServerConfiguration configuration) {
+		return new DefaultAuthnRequestProcessor()
+			.setDefaults(defaults())
+			.setNetwork(network())
+			.setResolver(resolver())
+			.setTransformer(transformer())
+			.setConfiguration(configuration);
+	}
 
 	@Bean
 	public SamlTransformer transformer() {

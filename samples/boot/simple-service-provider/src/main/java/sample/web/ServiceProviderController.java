@@ -16,7 +16,6 @@
  */
 package sample.web;
 
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlObjectResolver;
@@ -32,20 +30,15 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -59,7 +52,6 @@ public class ServiceProviderController implements InitializingBean {
 
 	private AppConfig configuration;
 	private SamlTransformer transformer;
-	private Defaults defaults;
 	private SamlObjectResolver resolver;
 	private SamlValidator validator;
 	private Network network;
@@ -119,13 +111,6 @@ public class ServiceProviderController implements InitializingBean {
 		return builder.build().toUriString();
 	}
 
-	@GetMapping(value = "/saml/sp/metadata", produces = MediaType.TEXT_XML_VALUE)
-	public @ResponseBody()
-	String metadata(HttpServletRequest request) {
-		ServiceProviderMetadata metadata = getServiceProviderMetadata(request);
-		return transformer.toXml(metadata);
-	}
-
 	protected ServiceProviderMetadata getServiceProviderMetadata(HttpServletRequest request) {
 		return getMetadataResolver().getLocalServiceProvider(network.getBasePath(request));
 	}
@@ -137,37 +122,6 @@ public class ServiceProviderController implements InitializingBean {
 	@Autowired
 	public void setMetadataResolver(SamlObjectResolver resolver) {
 		this.resolver = resolver;
-	}
-
-	@RequestMapping("/saml/sp/discovery")
-	public View discovery(HttpServletRequest request,
-						  @RequestParam(name = "idp", required = true) String entityId) {
-		//create authnrequest
-		IdentityProviderMetadata m = resolver.resolveIdentityProvider(entityId);
-		ServiceProviderMetadata local = getServiceProviderMetadata(request);
-		AuthenticationRequest authenticationRequest = getDefaults().authenticationRequest(local, m);
-		String url = getAuthnRequestRedirect(request, m, authenticationRequest);
-		return new RedirectView(url);
-	}
-
-	public Defaults getDefaults() {
-		return defaults;
-	}
-
-	@Autowired
-	public void setDefaults(Defaults defaults) {
-		this.defaults = defaults;
-	}
-
-	protected String getAuthnRequestRedirect(HttpServletRequest request,
-											 IdentityProviderMetadata m,
-											 AuthenticationRequest authenticationRequest) {
-		String xml = transformer.toXml(authenticationRequest);
-		String deflated = transformer.samlEncode(xml, true);
-		Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
-		UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
-		url.queryParam("SAMLRequest", URLEncoder.encode(deflated));
-		return url.build(true).toUriString();
 	}
 
 	@RequestMapping("/saml/sp/SSO")

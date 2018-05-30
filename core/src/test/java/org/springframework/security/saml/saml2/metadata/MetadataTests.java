@@ -295,7 +295,7 @@ public class MetadataTests extends MetadataBase {
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 		assertThat(provider.getId(), equalTo("sp.saml.spring.io"));
 		//OpenSAML 3 doesn't parse cacheDuration attribute
-		//        Duration cacheDuration = provider.getCacheDuration();
+//        Duration cacheDuration = provider.getCacheDuration();
 //        assertNotNull(cacheDuration);
 //        assertThat(cacheDuration.getYears(), equalTo(2));
 //        assertThat(cacheDuration.getMonths(), equalTo(6));

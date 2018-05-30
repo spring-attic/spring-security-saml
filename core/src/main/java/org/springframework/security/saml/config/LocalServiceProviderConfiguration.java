@@ -29,6 +29,9 @@ public class LocalServiceProviderConfiguration extends LocalProviderConfiguratio
 	private boolean wantAssertionsSigned = false;
 	private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
 
+	public LocalServiceProviderConfiguration() {
+		super("/saml/sp");
+	}
 
 	public boolean isSignRequests() {
 		return signRequests;

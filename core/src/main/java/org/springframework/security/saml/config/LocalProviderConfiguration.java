@@ -17,9 +17,6 @@
 
 package org.springframework.security.saml.config;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	private String entityId;
@@ -27,8 +24,11 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 	private boolean signMetadata;
 	private String metadata;
 	private RotatingKeys keys;
+	private String prefix;
 
-	public LocalProviderConfiguration() {
+
+	public LocalProviderConfiguration(String prefix) {
+		setPrefix(prefix);
 	}
 
 	public String getEntityId() {
@@ -78,6 +78,15 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	public LocalProviderConfiguration<T> setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public LocalProviderConfiguration<T> setPrefix(String prefix) {
+		this.prefix = prefix;
 		return this;
 	}
 }

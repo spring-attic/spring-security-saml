@@ -79,7 +79,7 @@ public class DefaultIdpRequestProcessor extends SamlMessageProcessor<DefaultIdpR
 		Map<String, String> model = new HashMap<>();
 		model.put("action", destination);
 		model.put("SAMLResponse", encoded);
-		processHtml(request, response, postBindingTemplate, model);
+		processHtml(request, response, getPostBindingTemplate(), model);
 		return ProcessingStatus.STOP;
 	}
 

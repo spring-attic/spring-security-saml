@@ -75,15 +75,13 @@ public class DefaultIdpInitiationProcessor extends SamlMessageProcessor<DefaultI
 		Map<String, String> model = new HashMap<>();
 		model.put("action", getAcs(metadata));
 		model.put("SAMLResponse", encoded);
-		processHtml(request, response, postBindingTemplate, model);
+		processHtml(request, response, getPostBindingTemplate(), model);
 		return ProcessingStatus.STOP;
 	}
 
-	protected Assertion getAssertion(
-		ServiceProviderMetadata metadata,
-		IdentityProviderMetadata local,
-		Authentication authentication
-	) {
+	protected Assertion getAssertion(ServiceProviderMetadata metadata,
+									 IdentityProviderMetadata local,
+									 Authentication authentication) {
 		String principal = authentication.getName();
 		return getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
 	}

@@ -108,10 +108,8 @@ public abstract class SamlMessageProcessor<T extends SamlMessageProcessor> {
 		return _this();
 	}
 
-	protected abstract ProcessingStatus process(
-		HttpServletRequest request,
-		HttpServletResponse response
-	) throws IOException;
+	protected abstract ProcessingStatus process(HttpServletRequest request, HttpServletResponse response)
+		throws IOException;
 
 	protected boolean isUrlMatch(HttpServletRequest request, String path) {
 		AntPathRequestMatcher matcher = new AntPathRequestMatcher(path);
@@ -122,12 +120,10 @@ public abstract class SamlMessageProcessor<T extends SamlMessageProcessor> {
 		return matcher.matches(request);
 	}
 
-	protected void processHtml(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String html,
-		Map<String, String> model
-	) {
+	protected void processHtml(HttpServletRequest request,
+							   HttpServletResponse response,
+							   String html,
+							   Map<String, String> model) {
 		response.setHeader(CACHE_CONTROL, "no-cache, no-store");
 		response.setHeader(PRAGMA, "no-cache");
 		response.setContentType(TEXT_HTML_VALUE);

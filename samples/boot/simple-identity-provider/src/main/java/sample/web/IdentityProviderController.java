@@ -15,6 +15,7 @@
  *
 */package sample.web;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import sample.config.AppConfig;
 
@@ -41,23 +42,13 @@ public class IdentityProviderController {
 	private Network network;
 
 	@Autowired
-	public IdentityProviderController setNetwork(Network network) {
+	public void setNetwork(Network network) {
 		this.network = network;
-		return this;
 	}
 
 	@Autowired
 	public void setAppConfig(AppConfig config) {
 		this.configuration = config;
-	}
-
-	protected IdentityProviderMetadata getIdentityProviderMetadata(HttpServletRequest request) {
-		String base = network.getBasePath(request);
-		return getMetadataResolver().getLocalIdentityProvider(base);
-	}
-
-	public SamlObjectResolver getMetadataResolver() {
-		return resolver;
 	}
 
 	@Autowired
@@ -86,7 +77,7 @@ public class IdentityProviderController {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/idp/init");
 		ServiceProviderMetadata metadata = resolver.resolveServiceProvider(p);
-		builder.queryParam("sp", metadata.getEntityId());
+		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8));
 		return builder.build().toUriString();
 	}
 }

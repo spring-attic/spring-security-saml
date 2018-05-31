@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
@@ -30,20 +29,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import sample.config.AppConfig;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 @Controller
-public class ServiceProviderController implements InitializingBean {
+public class ServiceProviderController {
 
 	private AppConfig configuration;
 	private SamlObjectResolver resolver;
 	private Network network;
 
 	@Autowired
-	public ServiceProviderController setNetwork(Network network) {
+	public void setNetwork(Network network) {
 		this.network = network;
-		return this;
 	}
 
 	@Autowired
@@ -54,10 +55,6 @@ public class ServiceProviderController implements InitializingBean {
 	@Autowired
 	public void setMetadataResolver(SamlObjectResolver resolver) {
 		this.resolver = resolver;
-	}
-
-	@Override
-	public void afterPropertiesSet() {
 	}
 
 	@RequestMapping(value = {"/", "/index", "logged-in"})
@@ -86,7 +83,7 @@ public class ServiceProviderController implements InitializingBean {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/sp/discovery");
 		IdentityProviderMetadata metadata = resolver.resolveIdentityProvider(p);
-		builder.queryParam("idp", metadata.getEntityId());
+		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8));
 		return builder.build().toUriString();
 	}
 }

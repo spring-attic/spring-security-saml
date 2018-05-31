@@ -57,26 +57,20 @@ public class DefaultIdpRequestProcessor extends SamlMessageProcessor<DefaultIdpR
 	protected ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 
-		IdentityProviderMetadata local = getResolver()
-			.getLocalIdentityProvider(getNetwork().getBasePath(request));
+		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
 		String resp = request.getParameter("SAMLRequest");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
 		//extract basic data so we can map it to an IDP
-		List<SimpleKey> localKeys = getResolver()
-			.getLocalIdentityProvider(getNetwork().getBasePath(request))
-			.getIdentityProvider()
-			.getKeys();
+		List<SimpleKey> localKeys = local.getIdentityProvider().getKeys();
 		AuthenticationRequest authn = (AuthenticationRequest) getTransformer().fromXml(xml, null, localKeys);
 		ServiceProviderMetadata sp = getResolver().resolveServiceProvider(authn);
 		//validate signature
-		authn = (AuthenticationRequest) getTransformer()
-			.fromXml(xml, local.getIdentityProvider().getKeys(),localKeys);
+		authn = (AuthenticationRequest) getTransformer().fromXml(xml, sp.getServiceProvider().getKeys(),localKeys);
 		getValidator().validate(authn, getResolver(), request);
 		//create the assertion
 
-		Assertion assertion =
-			getAssertion(local, authn, sp, SecurityContextHolder.getContext().getAuthentication());
+		Assertion assertion = getAssertion(local, authn, sp, SecurityContextHolder.getContext().getAuthentication());
 		Response result = getResponse(local, authn, sp, assertion);
 
 		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);

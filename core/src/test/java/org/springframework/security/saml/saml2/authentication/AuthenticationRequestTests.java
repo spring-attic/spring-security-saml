@@ -75,7 +75,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertSame(Binding.POST, data.getBinding());
 		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());
 		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
-		assertSame(PERSISTENT, data.getNameIDPolicy().getFormat());
+		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
 
 		assertThat(data.getVersion(), equalTo("2.0"));
 		assertThat(data.getIssueInstant(), notNullValue(DateTime.class));

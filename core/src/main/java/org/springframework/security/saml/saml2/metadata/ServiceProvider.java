@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.saml2.metadata;
 
 import java.util.LinkedList;
@@ -78,7 +78,10 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return configuredAssertionConsumerService;
 	}
 
-	public ServiceProvider setConfiguredAssertionConsumerService(Endpoint configuredAssertionConsumerService) {
+	public ServiceProvider setConfiguredAssertionConsumerService(
+		Endpoint
+			configuredAssertionConsumerService
+	) {
 		this.configuredAssertionConsumerService = configuredAssertionConsumerService;
 		return _this();
 	}

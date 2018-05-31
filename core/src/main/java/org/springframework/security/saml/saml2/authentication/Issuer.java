@@ -13,10 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.saml2.authentication;
 
-public class Issuer extends NameIDPolicy<Issuer> {
+public class Issuer extends NameIdPolicy<Issuer> {
 	private String value;
 	private String nameQualifier;
 

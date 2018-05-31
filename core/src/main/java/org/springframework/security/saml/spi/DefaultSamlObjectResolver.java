@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.spi;
 
 import java.net.URI;
@@ -24,7 +24,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.config.*;
+import org.springframework.security.saml.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.config.LocalProviderConfiguration;
+import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -159,16 +163,6 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp) {
 		return (ServiceProviderMetadata) resolve(sp.getMetadata(), sp.isSkipSslValidation());
-	}
-
-	@Override
-	public AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
-		throw new UnsupportedOperationException();
 	}
 
 	protected Metadata resolve(String metadata, boolean skipSslValidation) {

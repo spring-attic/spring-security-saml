@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.spi;
 
 import java.io.ByteArrayOutputStream;
@@ -91,7 +91,10 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
 	public abstract String toXml(Saml2Object saml2Object);
 
-	public abstract Saml2Object resolve(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
+	public abstract Saml2Object resolve(
+		String xml, List<SimpleKey> verificationKeys, List<SimpleKey>
+		localKeys
+	);
 
 	public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys, List<SimpleKey> localKeys);
 

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.util;
 
 import java.security.KeyManagementException;
@@ -72,6 +72,11 @@ public class Network {
 	}
 
 	public String getBasePath(HttpServletRequest request) {
-		return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+		return request.getScheme() +
+			"://" +
+			request.getServerName() +
+			":" +
+			request.getServerPort() +
+			request.getContextPath();
 	}
 }

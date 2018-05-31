@@ -24,11 +24,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -36,62 +36,10 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public class DefaultIdpInitiationProcessor extends SamlProcessor<DefaultIdpInitiationProcessor> {
+public class DefaultIdpInitiationProcessor extends SamlMessageProcessor<DefaultIdpInitiationProcessor> {
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
-
-	@Override
-	protected void doProcess(HttpServletRequest request,
-							 HttpServletResponse response,
-							 Saml2Object saml2Object) throws IOException {
-
-		String entityId = request.getParameter("sp");
-		//no authnrequest provided
-		ServiceProviderMetadata metadata = getResolver().resolveServiceProvider(entityId);
-		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
-		String principal = SecurityContextHolder.getContext().getAuthentication().getName();
-		Assertion assertion = getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
-		Response result = getDefaults().response(null,
-			assertion,
-			metadata,
-			local
-		);
-		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
-		Map<String,String> model = new HashMap<>();
-		model.put("action", getAcs(metadata));
-		model.put("SAMLResponse", encoded);
-		processHtml(request, response, postBindingTemplate, model);
-	}
-
-	protected String getAcs(ServiceProviderMetadata metadata) {
-		List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
-		Endpoint result = acs.stream().filter(e -> e.isDefault()).findFirst().orElse(null);
-		if (result == null) {
-			result = acs.get(0);
-		}
-		return result.getLocation();
-	}
-
-	@Override
-	protected void validate(Saml2Object saml2Object) {
-		//no op
-	}
-
-	@Override
-	protected Saml2Object extract(HttpServletRequest request) {
-		//no op
-		return null;
-	}
-
-	@Override
-	public boolean supports(HttpServletRequest request) {
-		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
-		String prefix = idp.getPrefix();
-		String path = prefix + "/init";
-		return isUrlMatch(request, path) && request.getParameter("sp")!=null;
-	}
-
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -109,5 +57,63 @@ public class DefaultIdpInitiationProcessor extends SamlProcessor<DefaultIdpIniti
 	public DefaultIdpInitiationProcessor setPostBindingTemplate(String postBindingTemplate) {
 		this.postBindingTemplate = postBindingTemplate;
 		return this;
+	}
+
+	@Override
+	protected ProcessingStatus process(HttpServletRequest request,
+									   HttpServletResponse response) throws IOException {
+
+		String entityId = request.getParameter("sp");
+		//no authnrequest provided
+		ServiceProviderMetadata metadata = getResolver().resolveServiceProvider(entityId);
+		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath
+			(request));
+		Assertion assertion = getAssertion(metadata, local, SecurityContextHolder.getContext()
+			.getAuthentication());
+		Response result = getResponse(metadata, local, assertion);
+		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
+		Map<String, String> model = new HashMap<>();
+		model.put("action", getAcs(metadata));
+		model.put("SAMLResponse", encoded);
+		processHtml(request, response, postBindingTemplate, model);
+		return ProcessingStatus.STOP;
+	}
+
+	protected Assertion getAssertion(
+		ServiceProviderMetadata metadata,
+		IdentityProviderMetadata local,
+		Authentication authentication
+	) {
+		String principal = authentication.getName();
+		return getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
+	}
+
+	protected Response getResponse(
+		ServiceProviderMetadata metadata, IdentityProviderMetadata local,
+		Assertion assertion
+	) {
+		return getDefaults().response(
+			null,
+			assertion,
+			metadata,
+			local
+		);
+	}
+
+	protected String getAcs(ServiceProviderMetadata metadata) {
+		List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
+		Endpoint result = acs.stream().filter(e -> e.isDefault()).findFirst().orElse(null);
+		if (result == null) {
+			result = acs.get(0);
+		}
+		return result.getLocation();
+	}
+
+	@Override
+	public boolean supports(HttpServletRequest request) {
+		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
+		String prefix = idp.getPrefix();
+		String path = prefix + "/init";
+		return isUrlMatch(request, path) && request.getParameter("sp") != null;
 	}
 }

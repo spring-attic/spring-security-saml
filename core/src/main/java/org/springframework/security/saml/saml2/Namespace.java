@@ -37,7 +37,8 @@ public class Namespace {
 	public static final String NS_SCHEMA_PREFIX = "xs:";
 	public static final String NS_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
-	public static final String NS_IDP_DISCOVERY = "urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol";
+	public static final String NS_IDP_DISCOVERY =
+		"urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol";
 	public static final String NS_REQUEST_INIT = "urn:oasis:names:tc:SAML:profiles:SSO:request-init";
 
 }

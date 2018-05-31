@@ -29,10 +29,23 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus;
+
+import static org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus.STOP;
+import static org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus.STOP_PROCESSORS;
+
 public class SamlProcessingFilter implements Filter {
 
-	private List<SamlProcessor> processors = new LinkedList<>();
+	private List<SamlMessageProcessor> processors = new LinkedList<>();
 
+	public List<SamlMessageProcessor> getProcessors() {
+		return processors;
+	}
+
+	public SamlProcessingFilter setProcessors(List<SamlMessageProcessor> processors) {
+		this.processors = processors;
+		return this;
+	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -40,12 +53,19 @@ public class SamlProcessingFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest req, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest request = (HttpServletRequest)req;
-		for (SamlProcessor p : processors) {
+	public void doFilter(ServletRequest req, ServletResponse response, FilterChain chain) throws
+																						  IOException,
+																						  ServletException {
+		HttpServletRequest request = (HttpServletRequest) req;
+		for (SamlMessageProcessor p : processors) {
 			if (p.supports(request)) {
-				p.process(request, (HttpServletResponse) response);
-				return;
+				ProcessingStatus status = p.process(request, (HttpServletResponse) response);
+				if (status == STOP) {
+					return;
+				}
+				else if (status == STOP_PROCESSORS) {
+					break;
+				}
 			}
 		}
 		chain.doFilter(request, response);
@@ -54,14 +74,5 @@ public class SamlProcessingFilter implements Filter {
 	@Override
 	public void destroy() {
 
-	}
-
-	public List<SamlProcessor> getProcessors() {
-		return processors;
-	}
-
-	public SamlProcessingFilter setProcessors(List<SamlProcessor> processors) {
-		this.processors = processors;
-		return this;
 	}
 }

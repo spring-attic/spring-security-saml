@@ -24,12 +24,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -39,17 +39,26 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.http.HttpMethod.GET;
 
-public class DefaultIdpRequestProcessor extends SamlProcessor<DefaultIdpRequestProcessor> {
+public class DefaultIdpRequestProcessor extends SamlMessageProcessor<DefaultIdpRequestProcessor> {
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
 
-	@Override
-	protected void doProcess(HttpServletRequest request,
-							 HttpServletResponse response,
-							 Saml2Object saml2Object) throws IOException {
+	public String getPostBindingTemplate() {
+		return postBindingTemplate;
+	}
 
-		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
+	public DefaultIdpRequestProcessor setPostBindingTemplate(String postBindingTemplate) {
+		this.postBindingTemplate = postBindingTemplate;
+		return this;
+	}
+
+	@Override
+	protected ProcessingStatus process(HttpServletRequest request,
+									   HttpServletResponse response) throws IOException {
+
+		IdentityProviderMetadata local = getResolver()
+			.getLocalIdentityProvider(getNetwork().getBasePath(request));
 		String resp = request.getParameter("SAMLRequest");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
@@ -61,33 +70,23 @@ public class DefaultIdpRequestProcessor extends SamlProcessor<DefaultIdpRequestP
 		AuthenticationRequest authn = (AuthenticationRequest) getTransformer().fromXml(xml, null, localKeys);
 		ServiceProviderMetadata sp = getResolver().resolveServiceProvider(authn);
 		//validate signature
-		authn = (AuthenticationRequest) getTransformer().fromXml(xml, local.getIdentityProvider().getKeys(), localKeys);
+		authn = (AuthenticationRequest) getTransformer()
+			.fromXml(xml, local.getIdentityProvider().getKeys(),localKeys);
 		getValidator().validate(authn, getResolver(), request);
 		//create the assertion
 
-		String principal = SecurityContextHolder.getContext().getAuthentication().getName();
-		Assertion assertion = getDefaults().assertion(sp, local, authn, principal, NameId.PERSISTENT);
-
-		Response result = getDefaults().response(authn,assertion,sp,local);
+		Assertion assertion =
+			getAssertion(local, authn, sp, SecurityContextHolder.getContext().getAuthentication());
+		Response result = getResponse(local, authn, sp, assertion);
 
 		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
 		String destination = authn.getAssertionConsumerService().getLocation();
 
-		Map<String,String> model = new HashMap<>();
+		Map<String, String> model = new HashMap<>();
 		model.put("action", destination);
 		model.put("SAMLResponse", encoded);
 		processHtml(request, response, postBindingTemplate, model);
-	}
-
-	@Override
-	protected void validate(Saml2Object saml2Object) {
-		//no op
-	}
-
-	@Override
-	protected Saml2Object extract(HttpServletRequest request) {
-		//no op
-		return null;
+		return ProcessingStatus.STOP;
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class DefaultIdpRequestProcessor extends SamlProcessor<DefaultIdpRequestP
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
 		String prefix = idp.getPrefix();
 		String path = prefix + "/SSO";
-		return isUrlMatch(request, path) && request.getParameter("SAMLRequest")!=null;
+		return isUrlMatch(request, path) && request.getParameter("SAMLRequest") != null;
 	}
 
 
@@ -103,17 +102,23 @@ public class DefaultIdpRequestProcessor extends SamlProcessor<DefaultIdpRequestP
 		return validator;
 	}
 
+	protected Assertion getAssertion(IdentityProviderMetadata local,
+									 AuthenticationRequest authn,
+									 ServiceProviderMetadata sp,
+									 Authentication authentication) {
+		String principal = authentication.getName();
+		return getDefaults().assertion(sp, local, authn, principal, NameId.PERSISTENT);
+	}
+
+	protected Response getResponse(IdentityProviderMetadata local,
+								   AuthenticationRequest authn,
+								   ServiceProviderMetadata sp,
+								   Assertion assertion) {
+		return getDefaults().response(authn, assertion, sp, local);
+	}
+
 	public DefaultIdpRequestProcessor setValidator(SamlValidator validator) {
 		this.validator = validator;
-		return this;
-	}
-
-	public String getPostBindingTemplate() {
-		return postBindingTemplate;
-	}
-
-	public DefaultIdpRequestProcessor setPostBindingTemplate(String postBindingTemplate) {
-		this.postBindingTemplate = postBindingTemplate;
 		return this;
 	}
 }

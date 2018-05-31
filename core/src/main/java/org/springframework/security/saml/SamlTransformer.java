@@ -42,8 +42,11 @@ public interface SamlTransformer {
 	 * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
 	 *                         The implementation will attempt each key until one succeeds
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
-	 * @throws IllegalArgumentException                                             if the XML object structure is not
+	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
+	 *                                                                              fails
+	 * @throws IllegalArgumentException                                             if the XML object
+	 *                                                                              structure
+	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
 	default Saml2Object fromXml(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
@@ -57,8 +60,11 @@ public interface SamlTransformer {
 	 * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
 	 *                         The implementation will attempt each key until one succeeds
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation fails
-	 * @throws IllegalArgumentException                                             if the XML object structure is not
+	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
+	 *                                                                              fails
+	 * @throws IllegalArgumentException                                             if the XML object
+	 *                                                                              structure
+	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
 	Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);

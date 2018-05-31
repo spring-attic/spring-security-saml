@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlProcessingFilter;
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.SamlServerConfiguration;
@@ -44,13 +44,13 @@ import org.springframework.security.saml.util.Network;
 public class SamlConfiguration {
 
 	@Bean
-	public SamlProcessingFilter samlFilter(List<SamlProcessor> processors) {
+	public SamlProcessingFilter samlFilter(List<SamlMessageProcessor> processors) {
 		return new SamlProcessingFilter()
 			.setProcessors(processors);
 	}
 
 	@Bean
-	public List<SamlProcessor> processors(SamlServerConfiguration configuration) {
+	public List<SamlMessageProcessor> processors(SamlServerConfiguration configuration) {
 		return Arrays.asList(
 			metadataProcessor(configuration),
 			discoveryProcessor(configuration),
@@ -59,7 +59,7 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlProcessor metadataProcessor(SamlServerConfiguration configuration) {
+	public SamlMessageProcessor metadataProcessor(SamlServerConfiguration configuration) {
 		return new DefaultMetadataProcessor()
 			.setDefaults(defaults())
 			.setNetwork(network())
@@ -69,7 +69,7 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlProcessor discoveryProcessor(SamlServerConfiguration configuration) {
+	public SamlMessageProcessor discoveryProcessor(SamlServerConfiguration configuration) {
 		return new DefaultAuthnRequestProcessor()
 			.setDefaults(defaults())
 			.setNetwork(network())
@@ -79,7 +79,7 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlProcessor spResponseProcessor(SamlServerConfiguration configuration) {
+	public SamlMessageProcessor spResponseProcessor(SamlServerConfiguration configuration) {
 		return new DefaultSpResponseProcessor()
 			.setDefaults(defaults())
 			.setNetwork(network())

@@ -25,11 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -37,45 +36,29 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.http.HttpMethod.GET;
 
-public class DefaultSpResponseProcessor extends SamlProcessor<DefaultSpResponseProcessor> {
+public class DefaultSpResponseProcessor extends SamlMessageProcessor<DefaultSpResponseProcessor> {
 
 	private SamlValidator validator;
 
 	@Override
-	protected void doProcess(HttpServletRequest request,
-							 HttpServletResponse response,
-							 Saml2Object saml2Object) throws IOException {
+	protected ProcessingStatus process(HttpServletRequest request,
+									   HttpServletResponse response) throws IOException {
 
 		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 		String resp = request.getParameter("SAMLResponse");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
 		//extract basic data so we can map it to an IDP
-		List<SimpleKey> localKeys = getResolver()
-			.getLocalServiceProvider(getNetwork().getBasePath(request))
-			.getServiceProvider()
-			.getKeys();
+		List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
 		Response r = (Response) getTransformer().fromXml(xml, null, localKeys);
 		IdentityProviderMetadata identityProviderMetadata = getResolver().resolveIdentityProvider(r);
 		//validate signature
-		r = (Response) getTransformer().fromXml(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
+		r = (Response) getTransformer()
+			.fromXml(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
 		getValidator().validate(r, getResolver(), request);
 		//extract the assertion
-		NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
-		SecurityContextHolder.getContext().setAuthentication(token);
-		response.sendRedirect(request.getContextPath()+"/");
-	}
-
-	@Override
-	protected void validate(Saml2Object saml2Object) {
-		//no op
-	}
-
-	@Override
-	protected Saml2Object extract(HttpServletRequest request) {
-		//no op
-		return null;
+		authenticate(r);
+		return postAuthentication(request, response);
 	}
 
 	@Override
@@ -83,12 +66,24 @@ public class DefaultSpResponseProcessor extends SamlProcessor<DefaultSpResponseP
 		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
 		String prefix = sp.getPrefix();
 		String path = prefix + "/SSO";
-		return isUrlMatch(request, path) && request.getParameter("SAMLResponse")!=null;
+		return isUrlMatch(request, path) && request.getParameter("SAMLResponse") != null;
 	}
-
 
 	public SamlValidator getValidator() {
 		return validator;
+	}
+
+	protected void authenticate(Response r) {
+		NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
+		UsernamePasswordAuthenticationToken token =
+			new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
+		SecurityContextHolder.getContext().setAuthentication(token);
+	}
+
+	protected ProcessingStatus postAuthentication(HttpServletRequest request, HttpServletResponse response)
+		throws IOException {
+		response.sendRedirect(request.getContextPath() + "/");
+		return ProcessingStatus.STOP;
 	}
 
 	public DefaultSpResponseProcessor setValidator(SamlValidator validator) {

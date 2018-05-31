@@ -24,7 +24,9 @@ import java.util.List;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class LocalIdentityProviderConfiguration extends LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
+public class LocalIdentityProviderConfiguration extends
+	LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
+
 	private boolean wantRequestsSigned = false;
 	private List<ExternalServiceProviderConfiguration> providers = new LinkedList<>();
 

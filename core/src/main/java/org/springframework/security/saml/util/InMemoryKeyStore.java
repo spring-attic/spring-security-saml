@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -67,7 +67,8 @@ public class InMemoryKeyStore {
 
 				//RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
 
-				ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+				ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new
+					Certificate[]{certificate});
 			}
 
 			return new InMemoryKeyStore(ks);

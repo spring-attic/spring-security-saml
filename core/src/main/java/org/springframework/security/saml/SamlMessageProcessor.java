@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.config.SamlServerConfiguration;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -34,7 +33,13 @@ import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.HttpHeaders.PRAGMA;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract class SamlProcessor<T extends SamlProcessor> {
+public abstract class SamlMessageProcessor<T extends SamlMessageProcessor> {
+
+	public enum ProcessingStatus {
+		STOP,
+		STOP_PROCESSORS,
+		CONTINUE
+	}
 
 	private SamlServerConfiguration configuration;
 	private SamlObjectResolver resolver;
@@ -44,59 +49,6 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 	private SamlTemplateEngine samlTemplateEngine;
 	private String forwardUrl = null;
 
-	@SuppressWarnings("checked")
-	protected T _this() {
-		return (T)this;
-	}
-
-	public void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		Saml2Object saml2Object = extract(request);
-		validate(saml2Object);
-		doProcess(request, response, saml2Object);
-	}
-
-	protected boolean isUrlMatch(HttpServletRequest request, String path) {
-		AntPathRequestMatcher matcher = new AntPathRequestMatcher(path);
-		return isUrlMatch(request, matcher);
-	}
-
-	protected boolean isUrlMatch(HttpServletRequest request, AntPathRequestMatcher matcher) {
-		return matcher.matches(request);
-	}
-
-	protected abstract void doProcess(HttpServletRequest request,
-									  HttpServletResponse response,
-									  Saml2Object saml2Object) throws IOException;
-
-	protected abstract void validate(Saml2Object saml2Object);
-
-	protected abstract Saml2Object extract(HttpServletRequest request);
-
-	public abstract boolean supports(HttpServletRequest request);
-
-	protected void processHtml(HttpServletRequest request,
-							   HttpServletResponse response,
-							   String html,
-							   Map<String, String> model) {
-		response.setHeader(CACHE_CONTROL, "no-cache, no-store");
-		response.setHeader(PRAGMA, "no-cache");
-		response.setContentType(TEXT_HTML_VALUE);
-		response.setCharacterEncoding(UTF_8.name());
-		StringWriter out = new StringWriter();
-		getSamlTemplateEngine().process(
-			request,
-			response,
-			html,
-			model,
-			out
-		);
-		try {
-			response.getWriter().write(out.toString());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public SamlServerConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -104,6 +56,11 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 	public T setConfiguration(SamlServerConfiguration configuration) {
 		this.configuration = configuration;
 		return _this();
+	}
+
+	@SuppressWarnings("checked")
+	protected T _this() {
+		return (T) this;
 	}
 
 	public SamlObjectResolver getResolver() {
@@ -151,6 +108,45 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 		return _this();
 	}
 
+	protected abstract ProcessingStatus process(
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws IOException;
+
+	protected boolean isUrlMatch(HttpServletRequest request, String path) {
+		AntPathRequestMatcher matcher = new AntPathRequestMatcher(path);
+		return isUrlMatch(request, matcher);
+	}
+
+	protected boolean isUrlMatch(HttpServletRequest request, AntPathRequestMatcher matcher) {
+		return matcher.matches(request);
+	}
+
+	protected void processHtml(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String html,
+		Map<String, String> model
+	) {
+		response.setHeader(CACHE_CONTROL, "no-cache, no-store");
+		response.setHeader(PRAGMA, "no-cache");
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		StringWriter out = new StringWriter();
+		getSamlTemplateEngine().process(
+			request,
+			response,
+			html,
+			model,
+			out
+		);
+		try {
+			response.getWriter().write(out.toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public SamlTemplateEngine getSamlTemplateEngine() {
 		return samlTemplateEngine;
 	}
@@ -159,4 +155,6 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return _this();
 	}
+
+	public abstract boolean supports(HttpServletRequest request);
 }

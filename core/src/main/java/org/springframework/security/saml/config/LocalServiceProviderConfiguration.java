@@ -23,7 +23,8 @@ import java.util.List;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class LocalServiceProviderConfiguration extends LocalProviderConfiguration<LocalServiceProviderConfiguration> {
+public class LocalServiceProviderConfiguration extends
+	LocalProviderConfiguration<LocalServiceProviderConfiguration> {
 
 	private boolean signRequests = false;
 	private boolean wantAssertionsSigned = false;

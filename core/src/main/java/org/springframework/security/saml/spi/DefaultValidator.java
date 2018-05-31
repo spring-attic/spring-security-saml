@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.spi;
 
 import java.net.URI;
@@ -27,7 +27,16 @@ import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.authentication.*;
+import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.authentication.AssertionCondition;
+import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
+import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml.saml2.authentication.Conditions;
+import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -135,24 +144,34 @@ public class DefaultValidator implements SamlValidator {
 		//verify issue time
 		DateTime issueInstant = response.getIssueInstant();
 		if (!isDateTimeSkewValid(getResponseSkewTimeMillis(), 0, issueInstant)) {
-			return new ValidationResult().addError(new ValidationError("Issue time is either too old or in the future:" + issueInstant.toString()));
+			return new ValidationResult().addError(
+				new ValidationError("Issue time is either too old or in the future:" + issueInstant.toString())
+			);
 		}
 
 		//validate InResponseTo
 		String replyTo = response.getInResponseTo();
 		if (!isAllowUnsolicitedResponses() && !hasText(replyTo)) {
-			return new ValidationResult().addError(new ValidationError("InResponseTo is missing and unsolicited responses are disabled"));
+			return new ValidationResult().addError(
+				new ValidationError("InResponseTo is missing and unsolicited responses are disabled")
+			);
 		}
 
 		if (hasText(replyTo)) {
-			if (!isAllowUnsolicitedResponses() && (mustMatchInResponseTo == null || !mustMatchInResponseTo.contains(replyTo))) {
-				return new ValidationResult().addError(new ValidationError("Invalid InResponseTo ID, not found in supplied list"));
+			if (!isAllowUnsolicitedResponses() && (mustMatchInResponseTo == null || !mustMatchInResponseTo
+				.contains(replyTo))) {
+				return new ValidationResult().addError(
+					new ValidationError("Invalid InResponseTo ID, not found in supplied list")
+				);
 			}
 		}
 
 		//validate destination
-		if (hasText(response.getDestination()) && !compareURIs(requester.getServiceProvider().getAssertionConsumerService(), response.getDestination())) {
-			return new ValidationResult().addError(new ValidationError("Destination mismatch: " + response.getDestination()));
+		if (hasText(response.getDestination()) && !compareURIs(requester.getServiceProvider()
+			.getAssertionConsumerService(), response.getDestination())) {
+			return new ValidationResult().addError(
+				new ValidationError("Destination mismatch: " + response.getDestination())
+			);
 		}
 
 		//validate issuer
@@ -181,7 +200,9 @@ public class DefaultValidator implements SamlValidator {
 
 				//verify assertion subject for BEARER
 				if (!BEARER.equals(conf.getMethod())) {
-					assertionValidation.addError(new ValidationError("Invalid confirmation method:" + conf.getMethod()));
+					assertionValidation.addError(
+						new ValidationError("Invalid confirmation method:" + conf.getMethod())
+					);
 					continue;
 				}
 
@@ -197,20 +218,22 @@ public class DefaultValidator implements SamlValidator {
 				//2. NotBefore must be null (saml-profiles-2.0-os 558)
 				// Not before forbidden by saml-profiles-2.0-os 558
 				if (data.getNotBefore() != null) {
-					assertionValidation.addError(new ValidationError("Subject confirmation data should not have NotBefore date."));
+					assertionValidation.addError(
+						new ValidationError("Subject confirmation data should not have NotBefore date.")
+					);
 					continue;
 				}
 				//3. NotOnOfAfter must not be null and within skew
 				if (data.getNotOnOrAfter() == null) {
-					assertionValidation.addError(new ValidationError("Subject confirmation data is missing NotOnOfAfter date."));
+					assertionValidation.addError(
+						new ValidationError("Subject confirmation data is missing NotOnOfAfter date.")
+					);
 					continue;
 				}
 
 				if (data.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
 					assertionValidation.addError(
-						new ValidationError(
-							format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter())
-						)
+						new ValidationError(format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter()))
 					);
 				}
 				//4. InResponseTo if it exists
@@ -226,7 +249,9 @@ public class DefaultValidator implements SamlValidator {
 						}
 					}
 					else if (!isAllowUnsolicitedResponses()) {
-						assertionValidation.addError(new ValidationError("InResponseTo missing and system not configured to allow unsolicited messages"));
+						assertionValidation.addError(
+							new ValidationError("InResponseTo missing and system not configured to allow unsolicited messages")
+						);
 						continue;
 					}
 				}
@@ -235,8 +260,11 @@ public class DefaultValidator implements SamlValidator {
 					assertionValidation.addError(new ValidationError("Assertion Recipient field missing"));
 					continue;
 				}
-				else if (!compareURIs(requester.getServiceProvider().getAssertionConsumerService(), data.getRecipient())) {
-					assertionValidation.addError(new ValidationError("Invalid assertion Recipient field: " + data.getRecipient()));
+				else if (!compareURIs(requester.getServiceProvider().getAssertionConsumerService(),
+					data.getRecipient())) {
+					assertionValidation.addError(
+						new ValidationError("Invalid assertion Recipient field: " + data.getRecipient())
+					);
 					continue;
 				}
 			}
@@ -253,9 +281,12 @@ public class DefaultValidator implements SamlValidator {
 			return assertionValidation;
 		}
 
-		for (AuthenticationStatement statement : ofNullable(validAssertion.getAuthenticationStatements()).orElse(emptyList())) {
+		for (AuthenticationStatement statement : ofNullable(validAssertion.getAuthenticationStatements())
+			.orElse(emptyList())) {
 			//VERIFY authentication statements
-			if (!isDateTimeSkewValid(getResponseSkewTimeMillis(), getMaxAuthenticationAgeMillis(), statement.getAuthInstant())) {
+			if (!isDateTimeSkewValid(getResponseSkewTimeMillis(),
+									 getMaxAuthenticationAgeMillis(),
+									 statement.getAuthInstant())) {
 				return new ValidationResult()
 					.addError(
 						format(
@@ -266,10 +297,12 @@ public class DefaultValidator implements SamlValidator {
 					);
 			}
 
-			if (statement.getSessionNotOnOrAfter() != null && statement.getSessionNotOnOrAfter().isBeforeNow()) {
+			if (statement.getSessionNotOnOrAfter() != null && statement.getSessionNotOnOrAfter().isBeforeNow
+				()) {
 				return new ValidationResult()
 					.addError(
-						format("Authentication session expired on: %s, current time: %s",
+						format(
+							"Authentication session expired on: %s, current time: %s",
 							toZuluTime(statement.getSessionNotOnOrAfter()),
 							toZuluTime(new DateTime())
 						)
@@ -283,12 +316,14 @@ public class DefaultValidator implements SamlValidator {
 		Conditions conditions = validAssertion.getConditions();
 		if (conditions != null) {
 			//VERIFY conditions
-			if (conditions.getNotBefore() != null && conditions.getNotBefore().minusMillis(getResponseSkewTimeMillis()).isAfterNow()) {
+			if (conditions.getNotBefore() != null && conditions.getNotBefore().minusMillis
+				(getResponseSkewTimeMillis()).isAfterNow()) {
 				return new ValidationResult()
 					.addError("Conditions expired (not before): " + conditions.getNotBefore());
 			}
 
-			if (conditions.getNotOnOrAfter() != null && conditions.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
+			if (conditions.getNotOnOrAfter() != null && conditions.getNotOnOrAfter().plusMillis
+				(getResponseSkewTimeMillis()).isBeforeNow()) {
 				return new ValidationResult()
 					.addError("Conditions expired (not on or after): " + conditions.getNotOnOrAfter());
 			}
@@ -300,7 +335,8 @@ public class DefaultValidator implements SamlValidator {
 					if (!ac.isValid()) {
 						return new ValidationResult()
 							.addError(
-								format("Audience restriction evaluation failed for assertion condition. Expected %s Was %s",
+								format(
+									"Audience restriction evaluation failed for assertion condition. Expected %s Was %s",
 									entityId,
 									ac.getAudiences()
 								)
@@ -312,10 +348,7 @@ public class DefaultValidator implements SamlValidator {
 
 		//the only assertion that we validated - may not be the first one
 		response.setAssertions(Arrays.asList(validAssertion));
-
-
 		return new ValidationResult();
-
 	}
 
 	protected boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
@@ -363,8 +396,11 @@ public class DefaultValidator implements SamlValidator {
 				return new ValidationResult()
 					.addError(
 						new ValidationError(
-							format("Issuer mismatch. Expected: %s Actual: %s",
-								entity.getEntityId(), issuer.getValue())
+							format(
+								"Issuer mismatch. Expected: %s Actual: %s",
+								entity.getEntityId(),
+								issuer.getValue()
+							)
 						)
 					);
 			}
@@ -372,8 +408,11 @@ public class DefaultValidator implements SamlValidator {
 				return new ValidationResult()
 					.addError(
 						new ValidationError(
-							format("Issuer name format mismatch. Expected: %s Actual: %s",
-								ENTITY, issuer.getFormat())
+							format(
+								"Issuer name format mismatch. Expected: %s Actual: %s",
+								ENTITY,
+								issuer.getFormat()
+							)
 						)
 					);
 			}

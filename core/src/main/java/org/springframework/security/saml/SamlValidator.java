@@ -35,7 +35,8 @@ public interface SamlValidator {
 	 * @return the key that successfully validated the signature
 	 * @throws SignatureException if object failed signature validation
 	 */
-	Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> verificationKeys) throws SignatureException;
+	Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> verificationKeys)
+		throws SignatureException;
 
 	/**
 	 * Performs an object validation on the respective object

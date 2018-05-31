@@ -22,38 +22,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 
-public class DefaultMetadataProcessor extends SamlProcessor<DefaultMetadataProcessor> {
+public class DefaultMetadataProcessor extends SamlMessageProcessor<DefaultMetadataProcessor> {
 
 	protected final String LOCAL_PROVIDER = getClass().getName() + ".local.provider";
 
 	@Override
-	protected void doProcess(HttpServletRequest request,
-							 HttpServletResponse response,
-							 Saml2Object saml2Object) throws IOException {
-		LocalProviderConfiguration provider = (LocalProviderConfiguration) request.getAttribute(LOCAL_PROVIDER);
-		Metadata metadata = provider instanceof LocalIdentityProviderConfiguration ?
-			getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request)) :
-			getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
+	protected ProcessingStatus process(HttpServletRequest request,HttpServletResponse response) throws IOException {
+		LocalProviderConfiguration provider =
+			(LocalProviderConfiguration) request.getAttribute(LOCAL_PROVIDER);
+		Metadata metadata = getMetadata(request, provider);
 		response.setContentType(MediaType.TEXT_XML_VALUE);
 		String xml = getTransformer().toXml(metadata);
 		response.getWriter().write(xml);
+		return ProcessingStatus.STOP;
 	}
 
-	@Override
-	protected void validate(Saml2Object saml2Object) {
-		//no op
-	}
-
-	@Override
-	protected Saml2Object extract(HttpServletRequest request) {
-		//no op
-		return null;
+	protected Metadata getMetadata(HttpServletRequest request, LocalProviderConfiguration provider) {
+		return provider instanceof LocalIdentityProviderConfiguration ?
+			getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request)) :
+			getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 	}
 
 	@Override
@@ -71,7 +63,7 @@ public class DefaultMetadataProcessor extends SamlProcessor<DefaultMetadataProce
 			if (isUrlMatch(request, path)) {
 				result = true;
 				request.setAttribute(LOCAL_PROVIDER, provider);
-			};
+			}
 		}
 		return result;
 	}

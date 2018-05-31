@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.util;
 
 import java.io.ByteArrayInputStream;
@@ -45,9 +45,11 @@ public class X509Utilities {
 	public static final String BEGIN_KEY = "-----BEGIN RSA PRIVATE KEY-----\n";
 	public static final String END_KEY = "-----END RSA PRIVATE KEY-----";
 
-	public static byte[] getDER(String combinedKeyAndCertPem,
-								String begin,
-								String end) {
+	public static byte[] getDER(
+		String combinedKeyAndCertPem,
+		String begin,
+		String end
+	) {
 		String[] tokens = combinedKeyAndCertPem.split(begin);
 		tokens = tokens[0].split(end);
 		return getDER(tokens[0]);
@@ -95,7 +97,8 @@ public class X509Utilities {
 			else if (obj instanceof PEMEncryptedKeyPair) {
 				// Encrypted key - we will use provided password
 				PEMEncryptedKeyPair ckp = (PEMEncryptedKeyPair) obj;
-				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passphrase.toCharArray());
+				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passphrase
+					.toCharArray());
 				kp = converter.getKeyPair(ckp.decryptKeyPair(decProv));
 			}
 			else {

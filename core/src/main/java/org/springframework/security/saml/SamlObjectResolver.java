@@ -17,8 +17,6 @@
 
 package org.springframework.security.saml;
 
-import java.net.URI;
-
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -45,10 +43,5 @@ public interface SamlObjectResolver {
 	ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request);
 
 	ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
-
-	AuthenticationRequest createAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
-
-	URI buildAuthenticationRequestUri(ServiceProviderMetadata sp, IdentityProviderMetadata idp);
-
 
 }

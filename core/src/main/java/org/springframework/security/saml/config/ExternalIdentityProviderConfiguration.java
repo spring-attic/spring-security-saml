@@ -19,7 +19,8 @@ package org.springframework.security.saml.config;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
-public class ExternalIdentityProviderConfiguration extends ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
+public class ExternalIdentityProviderConfiguration extends
+	ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
 
 	private NameId nameId;
 	private int assertionConsumerServiceIndex;

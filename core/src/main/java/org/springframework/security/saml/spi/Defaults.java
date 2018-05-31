@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.spi;
 
 import java.time.Clock;
@@ -35,8 +35,29 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.authentication.*;
-import org.springframework.security.saml.saml2.metadata.*;
+import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml.saml2.authentication.Conditions;
+import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Status;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
+import org.springframework.security.saml.saml2.authentication.Subject;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
+import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.IdentityProvider;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.metadata.ServiceProvider;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -146,9 +167,7 @@ public class Defaults {
 
 	}
 
-	public AuthenticationRequest authenticationRequest(
-		ServiceProviderMetadata sp,
-		IdentityProviderMetadata idp) {
+	public AuthenticationRequest authenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
 
 		AuthenticationRequest request = new AuthenticationRequest()
 			.setId(UUID.randomUUID().toString())
@@ -163,22 +182,22 @@ public class Defaults {
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
-		NameIDPolicy policy;
+		NameIdPolicy policy;
 		if (idp.getDefaultNameId() != null) {
-			policy = new NameIDPolicy(
+			policy = new NameIdPolicy(
 				idp.getDefaultNameId(),
 				sp.getEntityAlias(),
 				true
 			);
 		}
 		else {
-			policy = new NameIDPolicy(
+			policy = new NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
 				sp.getEntityAlias(),
 				true
 			);
 		}
-		request.setNameIDPolicy(policy);
+		request.setNameIdPolicy(policy);
 		return request;
 	}
 
@@ -192,12 +211,11 @@ public class Defaults {
 		return endpoint;
 	}
 
-	public Assertion assertion(
-		ServiceProviderMetadata sp,
-		IdentityProviderMetadata idp,
-		AuthenticationRequest request,
-		String principal,
-		NameId principalFormat) {
+	public Assertion assertion(ServiceProviderMetadata sp,
+							   IdentityProviderMetadata idp,
+							   AuthenticationRequest request,
+							   String principal,
+							   NameId principalFormat) {
 
 		long now = time.millis();
 		return new Assertion()

@@ -13,21 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
-public class NameIDPolicy<T extends NameIDPolicy> {
+public class NameIdPolicy<T extends NameIdPolicy> {
 
 	private NameId format;
 	private String spNameQualifier;
 	private Boolean allowCreate;
 
-	public NameIDPolicy() {
+	public NameIdPolicy() {
 	}
 
-	public NameIDPolicy(NameId format, String spNameQualifier, Boolean allowCreate) {
+	public NameIdPolicy(NameId format, String spNameQualifier, Boolean allowCreate) {
 		this.format = format;
 		this.spNameQualifier = spNameQualifier;
 		this.allowCreate = allowCreate;

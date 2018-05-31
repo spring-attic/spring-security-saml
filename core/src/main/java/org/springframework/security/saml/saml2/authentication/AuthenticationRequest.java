@@ -37,7 +37,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
-	private NameIDPolicy nameIDPolicy;
+	private NameIdPolicy nameIdPolicy;
 
 	public String getProviderName() {
 		return providerName;
@@ -70,7 +70,9 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return requestedAuthenticationContext;
 	}
 
-	public AuthenticationRequest setRequestedAuthenticationContext(RequestedAuthenticationContext requestedAuthenticationContext) {
+	public AuthenticationRequest setRequestedAuthenticationContext(
+		RequestedAuthenticationContext requestedAuthenticationContext
+	) {
 		this.requestedAuthenticationContext = requestedAuthenticationContext;
 		return _this();
 	}
@@ -79,7 +81,9 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return authenticationContextClassReference;
 	}
 
-	public AuthenticationRequest setAuthenticationContextClassReference(AuthenticationContextClassReference authenticationContextClassReference) {
+	public AuthenticationRequest setAuthenticationContextClassReference(
+		AuthenticationContextClassReference authenticationContextClassReference
+	) {
 		this.authenticationContextClassReference = authenticationContextClassReference;
 		return _this();
 	}
@@ -96,12 +100,12 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return digest;
 	}
 
-	public NameIDPolicy getNameIDPolicy() {
-		return nameIDPolicy;
+	public NameIdPolicy getNameIdPolicy() {
+		return nameIdPolicy;
 	}
 
-	public AuthenticationRequest setNameIDPolicy(NameIDPolicy nameIDPolicy) {
-		this.nameIDPolicy = nameIDPolicy;
+	public AuthenticationRequest setNameIdPolicy(NameIdPolicy nameIdPolicy) {
+		this.nameIdPolicy = nameIdPolicy;
 		return _this();
 	}
 

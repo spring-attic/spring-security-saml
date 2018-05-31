@@ -23,9 +23,8 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlProcessor;
+import org.springframework.security.saml.SamlMessageProcessor;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -33,41 +32,30 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-public class DefaultAuthnRequestProcessor extends SamlProcessor<DefaultAuthnRequestProcessor> {
+public class DefaultAuthnRequestProcessor extends SamlMessageProcessor<DefaultAuthnRequestProcessor> {
 
 
 	@Override
-	protected void doProcess(HttpServletRequest request,
-							 HttpServletResponse response,
-							 Saml2Object saml2Object) throws IOException {
+	protected ProcessingStatus process(HttpServletRequest request,
+									   HttpServletResponse response) throws IOException {
 		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(request.getParameter("idp"));
-		AuthenticationRequest authenticationRequest = getDefaults().authenticationRequest(local, idp);
+		AuthenticationRequest authenticationRequest = getAuthenticationRequest(local, idp);
 		String url = getAuthnRequestRedirect(idp, authenticationRequest);
 		response.sendRedirect(url);
+		return ProcessingStatus.STOP;
 	}
 
-	@Override
-	protected void validate(Saml2Object saml2Object) {
-		//no op
+	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata local,
+															 IdentityProviderMetadata idp) {
+		return getDefaults().authenticationRequest(local, idp);
 	}
 
-	@Override
-	protected Saml2Object extract(HttpServletRequest request) {
-		//no op
-		return null;
-	}
-
-	@Override
-	public boolean supports(HttpServletRequest request) {
-		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
-		String prefix = sp.getPrefix();
-		String path = prefix + "/discovery";
-		return isUrlMatch(request, path) && request.getParameter("idp")!=null;
-	}
-
-	protected String getAuthnRequestRedirect(IdentityProviderMetadata m,
-											 AuthenticationRequest authenticationRequest) throws UnsupportedEncodingException {
+	protected String getAuthnRequestRedirect(
+		IdentityProviderMetadata m,
+		AuthenticationRequest authenticationRequest
+	) throws
+	  UnsupportedEncodingException {
 		String encoded = getEncodedAuthnRequestValue(authenticationRequest);
 		Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
 		UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());
@@ -75,10 +63,19 @@ public class DefaultAuthnRequestProcessor extends SamlProcessor<DefaultAuthnRequ
 		return url.build(true).toUriString();
 	}
 
-	protected String getEncodedAuthnRequestValue(AuthenticationRequest authenticationRequest) throws UnsupportedEncodingException {
+	protected String getEncodedAuthnRequestValue(AuthenticationRequest authenticationRequest)
+		throws UnsupportedEncodingException {
 		String xml = getTransformer().toXml(authenticationRequest);
 		String deflated = getTransformer().samlEncode(xml, true);
 		return UriUtils.encode(deflated, StandardCharsets.UTF_8.name());
+	}
+
+	@Override
+	public boolean supports(HttpServletRequest request) {
+		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
+		String prefix = sp.getPrefix();
+		String path = prefix + "/discovery";
+		return isUrlMatch(request, path) && request.getParameter("idp") != null;
 	}
 
 

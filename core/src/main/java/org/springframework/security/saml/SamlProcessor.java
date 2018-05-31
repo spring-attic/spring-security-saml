@@ -18,6 +18,8 @@
 package org.springframework.security.saml;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,6 +29,11 @@ import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
+import static org.springframework.http.HttpHeaders.PRAGMA;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
+
 public abstract class SamlProcessor<T extends SamlProcessor> {
 
 	private SamlServerConfiguration configuration;
@@ -34,6 +41,7 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 	private SamlTransformer transformer;
 	private Network network;
 	private Defaults defaults;
+	private SamlTemplateEngine samlTemplateEngine;
 	private String forwardUrl = null;
 
 	@SuppressWarnings("checked")
@@ -65,6 +73,29 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 	protected abstract Saml2Object extract(HttpServletRequest request);
 
 	public abstract boolean supports(HttpServletRequest request);
+
+	protected void processHtml(HttpServletRequest request,
+							   HttpServletResponse response,
+							   String html,
+							   Map<String, String> model) {
+		response.setHeader(CACHE_CONTROL, "no-cache, no-store");
+		response.setHeader(PRAGMA, "no-cache");
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		StringWriter out = new StringWriter();
+		getSamlTemplateEngine().process(
+			request,
+			response,
+			html,
+			model,
+			out
+		);
+		try {
+			response.getWriter().write(out.toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public SamlServerConfiguration getConfiguration() {
 		return configuration;
@@ -117,6 +148,15 @@ public abstract class SamlProcessor<T extends SamlProcessor> {
 
 	public T setForwardUrl(String forwardUrl) {
 		this.forwardUrl = forwardUrl;
+		return _this();
+	}
+
+	public SamlTemplateEngine getSamlTemplateEngine() {
+		return samlTemplateEngine;
+	}
+
+	public T setSamlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
+		this.samlTemplateEngine = samlTemplateEngine;
 		return _this();
 	}
 }

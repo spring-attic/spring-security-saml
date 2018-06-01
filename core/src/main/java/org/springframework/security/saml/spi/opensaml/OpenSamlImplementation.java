@@ -64,6 +64,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.OneTimeUse;
@@ -362,6 +363,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 		else if (saml2Object instanceof Response) {
 			result = internalToXml((Response) saml2Object);
+		}
+		else if (saml2Object instanceof LogoutRequest) {
+			result = internalToXml((LogoutRequest) saml2Object);
 		}
 		if (result != null) {
 			return marshallToXml(result);
@@ -879,6 +883,31 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		service.setIsDefault(ep.isDefault());
 		service.setResponseLocation(ep.getResponseLocation());
 		return service;
+	}
+
+	protected org.opensaml.saml.saml2.core.LogoutRequest internalToXml(LogoutRequest request) {
+		org.opensaml.saml.saml2.core.LogoutRequest lr =
+			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutRequest.class);
+		lr.setDestination(request.getDestination().getLocation());
+		lr.setID(request.getId());
+		lr.setVersion(SAMLVersion.VERSION_20);
+		org.opensaml.saml.saml2.core.Issuer issuer = buildSAMLObject(org.opensaml.saml.saml2.core.Issuer.class);
+		issuer.setValue(request.getIssuer().getValue());
+		issuer.setNameQualifier(request.getIssuer().getNameQualifier());
+		issuer.setSPNameQualifier(request.getIssuer().getSpNameQualifier());
+		lr.setIssuer(issuer);
+		lr.setIssueInstant(request.getIssueInstant());
+		lr.setNotOnOrAfter(request.getNotOnOrAfter());
+		NameID nameID = buildSAMLObject(NameID.class);
+		nameID.setFormat(request.getNameId().getFormat().toString());
+		nameID.setValue(request.getNameId().getValue());
+		nameID.setSPNameQualifier(request.getNameId().getSpNameQualifier());
+		nameID.setNameQualifier(request.getNameId().getNameQualifier());
+		lr.setNameID(nameID);
+		if (request.getSigningKey() != null) {
+			signObject(lr, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
+		}
+		return lr;
 	}
 
 	protected org.opensaml.saml.saml2.core.Assertion internalToXml(Assertion request) {

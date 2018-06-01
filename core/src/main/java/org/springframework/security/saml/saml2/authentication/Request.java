@@ -33,7 +33,7 @@ public class Request<T extends Request<T>> extends ImplementationHolder {
 	private DateTime issueInstant;
 	private Endpoint destination;
 	private String consent;
-	private String version;
+	private String version = "2.0";
 
 	public Issuer getIssuer() {
 		return issuer;

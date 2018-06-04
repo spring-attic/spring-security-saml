@@ -64,6 +64,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutReason;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
@@ -387,17 +388,21 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			result = resolveMetadata((EntityDescriptor) parsed)
 				.setSignature(signature);
 		}
-		if (parsed instanceof AuthnRequest) {
+		else if (parsed instanceof AuthnRequest) {
 			result = resolveAuthenticationRequest((AuthnRequest) parsed)
 				.setSignature(signature);
 		}
-		if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
-			result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys,
-				localKeys
-			);
+		else if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
+			result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys,localKeys);
 		}
-		if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
-			result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys,
+		else if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
+			result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys,localKeys)
+				.setSignature(signature);
+		}
+		else if (parsed instanceof org.opensaml.saml.saml2.core.LogoutRequest) {
+			result = resolveLogoutRequest(
+				(org.opensaml.saml.saml2.core.LogoutRequest)parsed,
+				verificationKeys,
 				localKeys
 			)
 				.setSignature(signature);
@@ -923,7 +928,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		NameIdPrincipal principal = (NameIdPrincipal) request.getSubject().getPrincipal();
 
-		org.opensaml.saml.saml2.core.NameID nid = buildSAMLObject(org.opensaml.saml.saml2.core.NameID.class);
+		NameID nid = buildSAMLObject(NameID.class);
 		nid.setValue(request.getSubject().getPrincipal().getValue());
 		nid.setFormat(principal.getFormat().toString());
 		nid.setSPNameQualifier(principal.getSpNameQualifier());
@@ -1129,6 +1134,23 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 	}
 
+	protected LogoutRequest resolveLogoutRequest(org.opensaml.saml.saml2.core.LogoutRequest request,
+												 List<SimpleKey> verificationKeys,
+												 List<SimpleKey> localKeys) {
+		LogoutRequest result = new LogoutRequest()
+			.setId(request.getID())
+			.setConsent(request.getConsent())
+			.setVersion(request.getVersion().toString())
+			.setNotOnOrAfter(request.getNotOnOrAfter())
+			.setIssueInstant(request.getIssueInstant())
+			.setReason(LogoutReason.fromUrn(request.getReason()))
+			.setIssuer(getIssuer(request.getIssuer()))
+			.setDestination(new Endpoint().setLocation(request.getDestination()));
+		NameID nameID = getNameID(request.getNameID(), request.getEncryptedID(), localKeys);
+		result.setNameId(getNameIdPrincipal(nameID));
+		return result;
+	}
+
 	protected Status getStatus(org.opensaml.saml.saml2.core.Status status) {
 		return new Status()
 			.setCode(StatusCode.fromUrn(status.getStatusCode().getValue()))
@@ -1330,10 +1352,10 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected org.opensaml.saml.saml2.core.NameID getNameID(NameID id,
+	protected NameID getNameID(NameID id,
 															EncryptedID eid,
 															List<SimpleKey> localKeys) {
-		org.opensaml.saml.saml2.core.NameID result = id;
+		NameID result = id;
 		if (result == null && eid != null && eid.getEncryptedData() != null) {
 			result = (NameID) decrypt(eid, localKeys);
 		}
@@ -1341,23 +1363,27 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	protected SubjectPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<SimpleKey> localKeys) {
-		org.opensaml.saml.saml2.core.NameID p =
+		NameID p =
 			getNameID(
 				subject.getNameID(),
 				subject.getEncryptedID(),
 				localKeys
 			);
 		if (p != null) {
-			return new NameIdPrincipal()
-				.setSpNameQualifier(p.getSPNameQualifier())
-				.setNameQualifier(p.getNameQualifier())
-				.setFormat(NameId.fromUrn(p.getFormat()))
-				.setSpProvidedId(p.getSPProvidedID())
-				.setValue(p.getValue());
+			return getNameIdPrincipal(p);
 		}
 		else {
 			throw new UnsupportedOperationException("Currently only supporting NameID subject principals");
 		}
+	}
+
+	protected NameIdPrincipal getNameIdPrincipal(NameID p) {
+		return new NameIdPrincipal()
+			.setSpNameQualifier(p.getSPNameQualifier())
+			.setNameQualifier(p.getNameQualifier())
+			.setFormat(NameId.fromUrn(p.getFormat()))
+			.setSpProvidedId(p.getSPProvidedID())
+			.setValue(p.getValue());
 	}
 
 	protected org.opensaml.saml.saml2.core.Issuer toIssuer(Issuer issuer) {
@@ -1373,11 +1399,12 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	protected Issuer getIssuer(org.opensaml.saml.saml2.core.Issuer issuer) {
-		return new Issuer()
-			.setValue(issuer.getValue())
-			.setFormat(NameId.fromUrn(issuer.getFormat()))
-			.setSpNameQualifier(issuer.getSPNameQualifier())
-			.setNameQualifier(issuer.getNameQualifier());
+		return issuer == null ? null :
+			new Issuer()
+				.setValue(issuer.getValue())
+				.setFormat(NameId.fromUrn(issuer.getFormat()))
+				.setSpNameQualifier(issuer.getSPNameQualifier())
+				.setNameQualifier(issuer.getNameQualifier());
 	}
 
 	protected AuthenticationRequest resolveAuthenticationRequest(AuthnRequest parsed) {

@@ -21,7 +21,6 @@ import java.time.Clock;
 import java.util.Arrays;
 
 import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
@@ -35,10 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
+import static org.springframework.security.saml.saml2.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA512;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
-import static org.springframework.security.saml.util.DateUtils.toZuluTime;
+import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
@@ -54,8 +54,22 @@ class LogoutRequestTests {
 	public void fromXml() {
 		LogoutRequest request = (LogoutRequest) saml.resolve(EXAMPLE, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")), null);
 		assertThat(request.getId(), equalTo("request-id"));
-		assertNotNull(request.getDestination(), equalTo("request-id"));
-		assertThat(request.getDestination(), equalTo("request-id"));
+		assertNotNull(request.getDestination());
+		assertThat(request.getDestination().getLocation(), equalTo("http://idp.test.org"));
+		assertThat(request.getIssueInstant(), equalTo(fromZuluTime("2018-06-04T14:53:16.712Z")));
+		assertNotNull(request.getIssuer());
+		assertThat(request.getIssuer().getValue(), equalTo("http://sp.test.org"));
+		assertNotNull(request.getSignature());
+//		assertThat(request.getSignature().getDigestAlgorithm(), equalTo(SHA512));
+		assertThat(request.getSignature().getCanonicalizationAlgorithm(), equalTo(ALGO_ID_C14N_EXCL_OMIT_COMMENTS));
+		assertThat(request.getSignature().getSignatureAlgorithm(), equalTo(RSA_SHA256));
+
+		NameIdPrincipal nameId = request.getNameId();
+		assertNotNull(nameId);
+		assertThat(nameId.getFormat(), equalTo(EMAIL));
+		assertThat(nameId.getNameQualifier(), equalTo("http://sp.test.org"));
+		assertThat(nameId.getSpNameQualifier(), equalTo("http://sp.test.org"));
+		assertThat(nameId.getValue(), equalTo("test@test.org"));
 	}
 
 	@Test
@@ -112,37 +126,51 @@ class LogoutRequestTests {
 				//using the wrong key
 				() -> saml.validateSignature(saml.resolve(xml, null, null), Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong")))
 			);
-		assertThat(expected.getMessage(), equalTo("Signature validation against a  object failed using 1 key."));
+		assertThat(expected.getMessage(), equalTo("Signature validation against a org.opensaml.saml.saml2.core.impl.LogoutRequestImpl object failed using 1 key."));
 
 	}
 
-	private String EXAMPLE  = "<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" " +
-		"xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"request-id\" " +
-		"Version=\"2.0\" IssueInstant=\""+toZuluTime(instant)+"\" Destination=\"http://idp.example" +
-		".com/SingleLogoutService.php\">\n" +
-		"  <saml:Issuer>http://sp.example.com/demo1/metadata.php</saml:Issuer>\n" +
-		"  <ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-		"    <ds:SignedInfo>\n" +
-		"      <ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"      <ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
-		"      <ds:Reference URI=\"#request-id\">\n" +
-		"        <ds:Transforms>\n" +
-		"          <ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"          <ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"        </ds:Transforms>\n" +
-		"        <ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
-		"        <ds:DigestValue>dig-value</ds:DigestValue>\n" +
-		"      </ds:Reference>\n" +
-		"    </ds:SignedInfo>\n" +
-		"    <ds:SignatureValue>sig-value</ds:SignatureValue>\n" +
-		"    <ds:KeyInfo>\n" +
-		"      <ds:X509Data>\n" +
-		"        <ds:X509Certificate>certificate value</ds:X509Certificate>\n" +
-		"      </ds:X509Data>\n" +
-		"    </ds:KeyInfo>\n" +
-		"  </ds:Signature>\n" +
-		"  <saml:NameID SPNameQualifier=\""+issuer+"\" " +
-		"Format=\"" + NameId.EMAIL.toString() +
-		"\">test@test.org</saml:NameID>\n" +
-		"</samlp:LogoutRequest>";
+	private String EXAMPLE  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<saml2p:LogoutRequest Destination=\"http://idp.test.org\" ID=\"request-id\" " +
+		"IssueInstant=\"2018-06-04T14:53:16.712Z\" NotOnOrAfter=\"2018-06-04T15:53:16.712Z\" Version=\"2.0\" " +
+		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer " +
+		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test.org</saml2:Issuer><ds:Signature " +
+		"xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"<ds:SignedInfo>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/>\n" +
+		"<ds:Reference URI=\"#request-id\">\n" +
+		"<ds:Transforms>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"</ds:Transforms>\n" +
+		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"/>\n" +
+		"<ds:DigestValue>zEvGcnSA/2RwlBDayoKKmLIt/QfpBZc/76ticiNNvP2ldbnXZ9ibNcyoWbeioBhh9L4eMxWCjJFC\n" +
+		"BrVXibxQTg==</ds:DigestValue>\n" +
+		"</ds:Reference>\n" +
+		"</ds:SignedInfo>\n" +
+		"<ds:SignatureValue>\n" +
+		"Vmlrlk45qBbrDLRsMNWXgdTp1XLNutnrag7PW6BEGoG9LcQccnwOBCxsIdbbHWJL5RbuG80C4C2j\n" +
+		"FKMOAzu8sGmiw2InNLAWamaOs4tzrzWgmkud93oJL5DFdC8jjCZz6USUcoKvr1dNprSV45s4wFwC\n" +
+		"MkAYpfhh2JsL7m094Po=\n" +
+		"</ds:SignatureValue>\n" +
+		"<ds:KeyInfo><ds:X509Data><ds:X509Certificate" +
+		">MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEOMAwGA1UECBMF\n" +
+		"YXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEOMAwGA1UECxMFYXJ1YmExDjAM\n" +
+		"BgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5hcnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2\n" +
+		"MjdaFw0xNjExMTkyMjI2MjdaMHwxCzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UE\n" +
+		"ChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmEx\n" +
+		"HTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
+		"gQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39WqS9u0hnA+O7MCA/KlrAR\n" +
+		"4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCY\n" +
+		"xhMol6ZnTbSsFW6VZjFMjQIDAQABo4HaMIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1sy\n" +
+		"GDCBpwYDVR0jBIGfMIGcgBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3\n" +
+		"MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQL\n" +
+		"EwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyggEA\n" +
+		"MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ0HOZbbHClXmGUjGs+GS+xC1FO/am\n" +
+		"2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxCKdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3o\n" +
+		"ePe84k8jm3A7EvH5wi5hvCkKRpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=</ds:X509Certificate></ds:X509Data></ds" +
+		":KeyInfo></ds:Signature><saml2:NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\" " +
+		"NameQualifier=\"http://sp.test.org\" SPNameQualifier=\"http://sp.test.org\" " +
+		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">test@test.org</saml2:NameID></saml2p:LogoutRequest>";
 }

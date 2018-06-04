@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlMessageProcessor;
+import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -32,7 +32,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-public class DefaultAuthnRequestProcessor extends SamlMessageProcessor<DefaultAuthnRequestProcessor> {
+public class DefaultAuthnRequestHandler extends SamlMessageHandler<DefaultAuthnRequestHandler> {
 
 
 	@Override

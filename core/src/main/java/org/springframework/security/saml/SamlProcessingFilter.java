@@ -29,21 +29,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus;
+import org.springframework.security.saml.SamlMessageHandler.ProcessingStatus;
 
-import static org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus.STOP;
-import static org.springframework.security.saml.SamlMessageProcessor.ProcessingStatus.STOP_PROCESSORS;
+import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP;
+import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP_HANDLERS;
 
 public class SamlProcessingFilter implements Filter {
 
-	private List<SamlMessageProcessor> processors = new LinkedList<>();
+	private List<SamlMessageHandler> handlers = new LinkedList<>();
 
-	public List<SamlMessageProcessor> getProcessors() {
-		return processors;
+	public List<SamlMessageHandler> getHandlers() {
+		return handlers;
 	}
 
-	public SamlProcessingFilter setProcessors(List<SamlMessageProcessor> processors) {
-		this.processors = processors;
+	public SamlProcessingFilter setHandlers(List<SamlMessageHandler> handlers) {
+		this.handlers = handlers;
 		return this;
 	}
 
@@ -57,13 +57,13 @@ public class SamlProcessingFilter implements Filter {
 																						  IOException,
 																						  ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
-		for (SamlMessageProcessor p : processors) {
+		for (SamlMessageHandler p : handlers) {
 			if (p.supports(request)) {
 				ProcessingStatus status = p.process(request, (HttpServletResponse) response);
 				if (status == STOP) {
 					return;
 				}
-				else if (status == STOP_PROCESSORS) {
+				else if (status == STOP_HANDLERS) {
 					break;
 				}
 			}

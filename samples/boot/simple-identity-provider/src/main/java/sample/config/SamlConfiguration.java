@@ -24,15 +24,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlProcessingFilter;
-import org.springframework.security.saml.SamlMessageProcessor;
+import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.config.SamlServerConfiguration;
-import org.springframework.security.saml.spi.DefaultIdpInitiationProcessor;
-import org.springframework.security.saml.spi.DefaultIdpRequestProcessor;
+import org.springframework.security.saml.spi.DefaultIdpInitiationHandler;
+import org.springframework.security.saml.spi.DefaultIdpRequestHandler;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.DefaultMetadataProcessor;
+import org.springframework.security.saml.spi.DefaultMetadataHandler;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
@@ -46,23 +46,23 @@ import org.springframework.security.saml.util.Network;
 public class SamlConfiguration {
 
 	@Bean
-	public SamlProcessingFilter samlFilter(List<SamlMessageProcessor> processors) {
+	public SamlProcessingFilter samlFilter(List<SamlMessageHandler> handlers) {
 		return new SamlProcessingFilter()
-			.setProcessors(processors);
+			.setHandlers(handlers);
 	}
 
 	@Bean
-	public List<SamlMessageProcessor> processors(SamlServerConfiguration configuration) {
+	public List<SamlMessageHandler> handlers(SamlServerConfiguration configuration) {
 		return Arrays.asList(
-			metadataProcessor(configuration),
-			idpRequestProcessor(configuration),
-			idpInitiationProcessor(configuration)
+			metadataHandler(configuration),
+			idpRequestHandler(configuration),
+			idpInitiationHandler(configuration)
 		);
 	}
 
 	@Bean
-	public SamlMessageProcessor metadataProcessor(SamlServerConfiguration configuration) {
-		return new DefaultMetadataProcessor()
+	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
+		return new DefaultMetadataHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())
@@ -71,8 +71,8 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlMessageProcessor idpRequestProcessor(SamlServerConfiguration configuration) {
-		return new DefaultIdpRequestProcessor()
+	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
+		return new DefaultIdpRequestHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())
@@ -85,8 +85,8 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlMessageProcessor idpInitiationProcessor(SamlServerConfiguration configuration) {
-		return new DefaultIdpInitiationProcessor()
+	public SamlMessageHandler idpInitiationHandler(SamlServerConfiguration configuration) {
+		return new DefaultIdpInitiationHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())

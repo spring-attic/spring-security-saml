@@ -33,11 +33,11 @@ import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.HttpHeaders.PRAGMA;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract class SamlMessageProcessor<T extends SamlMessageProcessor> {
+public abstract class SamlMessageHandler<T extends SamlMessageHandler> {
 
 	public enum ProcessingStatus {
 		STOP,
-		STOP_PROCESSORS,
+		STOP_HANDLERS,
 		CONTINUE
 	}
 

@@ -21,7 +21,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
-import org.springframework.security.saml.spi.DefaultMetadataProcessor;
+import org.springframework.security.saml.spi.DefaultMetadataHandler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,18 +30,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpMethod.GET;
 
-public class DefaultMetadataProcessorTests extends MetadataBase {
+public class DefaultMetadataHandlerTests extends MetadataBase {
 
-	private DefaultMetadataProcessor processor;
+	private DefaultMetadataHandler handler;
 	private SamlServerConfiguration configuration;
 
 	@BeforeEach
 	public void setup() {
-		processor = new DefaultMetadataProcessor();
+		handler = new DefaultMetadataHandler();
 		configuration = new SamlServerConfiguration();
 		configuration.setIdentityProvider(new LocalIdentityProviderConfiguration());
 		configuration.setServiceProvider(new LocalServiceProviderConfiguration());
-		processor.setConfiguration(configuration);
+		handler.setConfiguration(configuration);
 	}
 
 	@Test
@@ -51,10 +51,10 @@ public class DefaultMetadataProcessorTests extends MetadataBase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setPathInfo("/saml/idp/metadata");
 		request.setMethod(GET.name());
-		assertTrue(processor.supports(request));
+		assertTrue(handler.supports(request));
 
 		request.setPathInfo("/saml/sp/metadata");
-		assertFalse(processor.supports(request));
+		assertFalse(handler.supports(request));
 	}
 
 	@Test
@@ -64,9 +64,9 @@ public class DefaultMetadataProcessorTests extends MetadataBase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setPathInfo("/saml/sp/metadata");
 		request.setMethod(GET.name());
-		assertTrue(processor.supports(request));
+		assertTrue(handler.supports(request));
 
 		request.setPathInfo("/saml/idp/metadata");
-		assertFalse(processor.supports(request));
+		assertFalse(handler.supports(request));
 	}
 }

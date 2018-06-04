@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlMessageProcessor;
+import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -36,7 +36,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public class DefaultIdpInitiationProcessor extends SamlMessageProcessor<DefaultIdpInitiationProcessor> {
+public class DefaultIdpInitiationHandler extends SamlMessageHandler<DefaultIdpInitiationHandler> {
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
@@ -45,7 +45,7 @@ public class DefaultIdpInitiationProcessor extends SamlMessageProcessor<DefaultI
 		return validator;
 	}
 
-	public DefaultIdpInitiationProcessor setValidator(SamlValidator validator) {
+	public DefaultIdpInitiationHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
 		return this;
 	}
@@ -54,7 +54,7 @@ public class DefaultIdpInitiationProcessor extends SamlMessageProcessor<DefaultI
 		return postBindingTemplate;
 	}
 
-	public DefaultIdpInitiationProcessor setPostBindingTemplate(String postBindingTemplate) {
+	public DefaultIdpInitiationHandler setPostBindingTemplate(String postBindingTemplate) {
 		this.postBindingTemplate = postBindingTemplate;
 		return this;
 	}

@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlMessageProcessor;
+import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
@@ -36,7 +36,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.http.HttpMethod.GET;
 
-public class DefaultSpResponseProcessor extends SamlMessageProcessor<DefaultSpResponseProcessor> {
+public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpResponseHandler> {
 
 	private SamlValidator validator;
 
@@ -86,7 +86,7 @@ public class DefaultSpResponseProcessor extends SamlMessageProcessor<DefaultSpRe
 		return ProcessingStatus.STOP;
 	}
 
-	public DefaultSpResponseProcessor setValidator(SamlValidator validator) {
+	public DefaultSpResponseHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
 		return this;
 	}

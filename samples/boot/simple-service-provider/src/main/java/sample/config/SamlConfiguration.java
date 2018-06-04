@@ -24,16 +24,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlProcessingFilter;
-import org.springframework.security.saml.SamlMessageProcessor;
+import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.SamlServerConfiguration;
-import org.springframework.security.saml.spi.DefaultAuthnRequestProcessor;
+import org.springframework.security.saml.spi.DefaultAuthnRequestHandler;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.DefaultMetadataProcessor;
+import org.springframework.security.saml.spi.DefaultMetadataHandler;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.DefaultSpResponseProcessor;
+import org.springframework.security.saml.spi.DefaultSpResponseHandler;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
@@ -44,23 +44,23 @@ import org.springframework.security.saml.util.Network;
 public class SamlConfiguration {
 
 	@Bean
-	public SamlProcessingFilter samlFilter(List<SamlMessageProcessor> processors) {
+	public SamlProcessingFilter samlFilter(List<SamlMessageHandler> handlers) {
 		return new SamlProcessingFilter()
-			.setProcessors(processors);
+			.setHandlers(handlers);
 	}
 
 	@Bean
-	public List<SamlMessageProcessor> processors(SamlServerConfiguration configuration) {
+	public List<SamlMessageHandler> handlers(SamlServerConfiguration configuration) {
 		return Arrays.asList(
-			metadataProcessor(configuration),
-			discoveryProcessor(configuration),
-			spResponseProcessor(configuration)
+			metadataHandler(configuration),
+			discoveryHandler(configuration),
+			spResponseHandler(configuration)
 		);
 	}
 
 	@Bean
-	public SamlMessageProcessor metadataProcessor(SamlServerConfiguration configuration) {
-		return new DefaultMetadataProcessor()
+	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
+		return new DefaultMetadataHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())
@@ -69,8 +69,8 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlMessageProcessor discoveryProcessor(SamlServerConfiguration configuration) {
-		return new DefaultAuthnRequestProcessor()
+	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
+		return new DefaultAuthnRequestHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())
@@ -79,8 +79,8 @@ public class SamlConfiguration {
 	}
 
 	@Bean
-	public SamlMessageProcessor spResponseProcessor(SamlServerConfiguration configuration) {
-		return new DefaultSpResponseProcessor()
+	public SamlMessageHandler spResponseHandler(SamlServerConfiguration configuration) {
+		return new DefaultSpResponseHandler()
 			.setDefaults(defaults())
 			.setNetwork(network())
 			.setResolver(resolver())

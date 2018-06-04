@@ -66,6 +66,7 @@ import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutReason;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.OneTimeUse;
@@ -370,6 +371,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		else if (saml2Object instanceof LogoutRequest) {
 			result = internalToXml((LogoutRequest) saml2Object);
 		}
+		else if (saml2Object instanceof LogoutResponse) {
+			result = internalToXml((LogoutResponse) saml2Object);
+		}
 		if (result != null) {
 			return marshallToXml(result);
 		}
@@ -404,6 +408,14 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		else if (parsed instanceof org.opensaml.saml.saml2.core.LogoutRequest) {
 			result = resolveLogoutRequest(
 				(org.opensaml.saml.saml2.core.LogoutRequest)parsed,
+				verificationKeys,
+				localKeys
+			)
+				.setSignature(signature);
+		}
+		else if (parsed instanceof org.opensaml.saml.saml2.core.LogoutResponse) {
+			result = resolveLogoutResponse(
+				(org.opensaml.saml.saml2.core.LogoutResponse)parsed,
 				verificationKeys,
 				localKeys
 			)
@@ -903,6 +915,38 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return service;
 	}
 
+	protected org.opensaml.saml.saml2.core.LogoutResponse internalToXml(LogoutResponse response) {
+		org.opensaml.saml.saml2.core.LogoutResponse result =
+			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutResponse.class);
+		result.setInResponseTo(response.getInResponseTo());
+		result.setID(response.getId());
+		result.setIssueInstant(response.getIssueInstant());
+		result.setDestination(response.getDestination());
+
+		org.opensaml.saml.saml2.core.Issuer issuer = buildSAMLObject(org.opensaml.saml.saml2.core.Issuer.class);
+		issuer.setValue(response.getIssuer().getValue());
+		issuer.setNameQualifier(response.getIssuer().getNameQualifier());
+		issuer.setSPNameQualifier(response.getIssuer().getSpNameQualifier());
+		result.setIssuer(issuer);
+
+		org.opensaml.saml.saml2.core.Status status = buildSAMLObject(org.opensaml.saml.saml2.core.Status.class);
+		org.opensaml.saml.saml2.core.StatusCode code = buildSAMLObject(org.opensaml.saml.saml2.core.StatusCode.class);
+		code.setValue(response.getStatus().getCode().toString());
+		status.setStatusCode(code);
+		if (hasText(response.getStatus().getMessage())) {
+			StatusMessage message = buildSAMLObject(StatusMessage.class);
+			message.setMessage(response.getStatus().getMessage());
+			status.setStatusMessage(message);
+		}
+		result.setStatus(status);
+
+		if (response.getSigningKey() != null) {
+			this.signObject(result, response.getSigningKey(), response.getAlgorithm(), response.getDigest());
+		}
+
+		return result;
+	}
+
 	protected org.opensaml.saml.saml2.core.LogoutRequest internalToXml(LogoutRequest request) {
 		org.opensaml.saml.saml2.core.LogoutRequest lr =
 			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutRequest.class);
@@ -1145,6 +1189,22 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		return result;
 
+	}
+
+	protected LogoutResponse resolveLogoutResponse(org.opensaml.saml.saml2.core.LogoutResponse response,
+												 List<SimpleKey> verificationKeys,
+												 List<SimpleKey> localKeys) {
+		LogoutResponse result = new LogoutResponse()
+			.setId(response.getID())
+			.setInResponseTo(response.getInResponseTo())
+			.setConsent(response.getConsent())
+			.setVersion(response.getVersion().toString())
+			.setIssueInstant(response.getIssueInstant())
+			.setIssuer(getIssuer(response.getIssuer()))
+			.setDestination(response.getDestination())
+			.setStatus(getStatus(response.getStatus()));
+
+		return result;
 	}
 
 	protected LogoutRequest resolveLogoutRequest(org.opensaml.saml.saml2.core.LogoutRequest request,

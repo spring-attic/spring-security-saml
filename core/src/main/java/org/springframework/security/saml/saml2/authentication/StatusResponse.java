@@ -16,7 +16,10 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
@@ -32,6 +35,9 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 	private Issuer issuer;
 	private Signature signature;
 	private Status status;
+	private SimpleKey signingKey;
+	private AlgorithmMethod algorithm;
+	private DigestMethod digest;
 
 	public String getId() {
 		return id;
@@ -117,5 +123,24 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 	public T setStatus(Status status) {
 		this.status = status;
 		return _this();
+	}
+
+	public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+		this.signingKey = signingKey;
+		this.algorithm = algorithm;
+		this.digest = digest;
+		return _this();
+	}
+
+	public SimpleKey getSigningKey() {
+		return signingKey;
+	}
+
+	public AlgorithmMethod getAlgorithm() {
+		return algorithm;
+	}
+
+	public DigestMethod getDigest() {
+		return digest;
 	}
 }

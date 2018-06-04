@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
 import static org.springframework.security.saml.saml2.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
@@ -60,7 +61,9 @@ class LogoutRequestTests {
 		assertNotNull(request.getIssuer());
 		assertThat(request.getIssuer().getValue(), equalTo("http://sp.test.org"));
 		assertNotNull(request.getSignature());
-//		assertThat(request.getSignature().getDigestAlgorithm(), equalTo(SHA512));
+		assertTrue(request.getSignature().isValidated());
+		//OpenSAML doesn't set this value
+		//assertThat(request.getSignature().getDigestAlgorithm(), equalTo(SHA512));
 		assertThat(request.getSignature().getCanonicalizationAlgorithm(), equalTo(ALGO_ID_C14N_EXCL_OMIT_COMMENTS));
 		assertThat(request.getSignature().getSignatureAlgorithm(), equalTo(RSA_SHA256));
 

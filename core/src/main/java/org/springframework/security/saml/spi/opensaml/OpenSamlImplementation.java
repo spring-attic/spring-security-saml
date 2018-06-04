@@ -135,6 +135,7 @@ import org.opensaml.core.xml.schema.impl.XSStringBuilder;
 import org.opensaml.core.xml.schema.impl.XSURIBuilder;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SAMLObjectContentReference;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
@@ -192,6 +193,7 @@ import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.opensaml.xmlsec.signature.X509Data;
 import org.opensaml.xmlsec.signature.impl.SignatureImpl;
+import org.opensaml.xmlsec.signature.support.ContentReference;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
@@ -445,7 +447,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 					Credential credential = getCredential(key, getCredentialsResolver(key));
 					SignatureValidator.validate(object.getSignature(), credential);
 					last = null;
-					result = getSignature(object.getSignature())
+					result = getSignature(object)
 						.setValidated(true)
 						.setValidatingKey(key);
 					break;
@@ -487,7 +489,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return resolver;
 	}
 
-	protected Signature getSignature(org.opensaml.xmlsec.signature.Signature signature) {
+	protected Signature getSignature(SignableSAMLObject target) {
+		org.opensaml.xmlsec.signature.Signature signature = target.getSignature();
 		Signature result = null;
 		if (signature != null && signature instanceof SignatureImpl) {
 			SignatureImpl impl = (SignatureImpl) signature;
@@ -500,6 +503,16 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 						.getSignatureValue()))
 				;
 				//TODO extract the digest value
+				for (ContentReference ref :
+					ofNullable(
+						signature.getContentReferences())
+						.orElse(emptyList())) {
+					if (ref instanceof SAMLObjectContentReference) {
+						SAMLObjectContentReference sref = (SAMLObjectContentReference)ref;
+						result.setDigestAlgorithm(DigestMethod.fromUrn(sref.getDigestAlgorithm()));
+					}
+				}
+
 			} catch (XMLSignatureException e) {
 				//TODO - ignore for now
 			}

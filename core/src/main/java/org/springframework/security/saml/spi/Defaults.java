@@ -31,6 +31,7 @@
 package org.springframework.security.saml.spi;
 
 import java.time.Clock;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +42,8 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -66,6 +69,8 @@ import org.joda.time.DateTime;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext.exact;
+import static org.springframework.security.saml.saml2.metadata.Binding.POST;
+import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 
@@ -108,14 +113,14 @@ public class Defaults {
 						.setAssertionConsumerService(
 							asList(
 								getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
-								getEndpoint(baseUrl, "saml/sp/SSO", Binding.REDIRECT, 1, false)
+								getEndpoint(baseUrl, "saml/sp/SSO", REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, "saml/sp/logout", Binding.REDIRECT, 0, true)
+								getEndpoint(baseUrl, "saml/sp/logout", REDIRECT, 0, true)
 							)
 						)
 				)
@@ -152,14 +157,14 @@ public class Defaults {
 						.setSingleSignOnService(
 							asList(
 								getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
-								getEndpoint(baseUrl, "saml/idp/SSO", Binding.REDIRECT, 1, false)
+								getEndpoint(baseUrl, "saml/idp/SSO", REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, "saml/idp/logout", Binding.REDIRECT, 0, true)
+								getEndpoint(baseUrl, "saml/idp/logout", REDIRECT, 0, true)
 							)
 						)
 				)
@@ -274,18 +279,129 @@ public class Defaults {
 
 	public Response response(AuthenticationRequest authn,
 							 Assertion assertion,
-							 Metadata recipient,
-							 Metadata local) {
-		return new Response()
+							 ServiceProviderMetadata recipient,
+							 IdentityProviderMetadata local) {
+		Response result = new Response()
 			.setAssertions(asList(assertion))
 			.setId(UUID.randomUUID().toString())
 			.setInResponseTo(authn != null ? authn.getId() : null)
-			.setDestination(authn != null ? authn.getAssertionConsumerService().getLocation() : null)
 			.setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
 			.setIssueInstant(new DateTime())
 			.setStatus(new Status().setCode(StatusCode.SUCCESS))
 			.setVersion("2.0");
+		Endpoint acs = (authn != null ? authn.getAssertionConsumerService() : null);
+		if (acs == null) {
+			acs = getPreferredACS(recipient.getServiceProvider().getAssertionConsumerService(), asList(POST));
+		}
+		if (acs != null) {
+			result.setDestination(acs.getLocation());
+		}
+		return result;
+	}
+
+	public LogoutRequest logoutRequest(Metadata<? extends Metadata> recipient,
+									   Metadata<? extends Metadata> local,
+									   NameIdPrincipal principal) {
+
+
+		LogoutRequest result = new LogoutRequest()
+			.setId(UUID.randomUUID().toString())
+			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
+			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setNameId(principal)
+			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
+
+		return result;
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 IdentityProviderMetadata recipient,
+										 ServiceProviderMetadata  local) {
+		return logoutResponse(
+			request,
+			recipient,
+			local,
+			getSingleLogout(recipient.getIdentityProvider().getSingleLogoutService())
+		);
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 ServiceProviderMetadata recipient,
+										 IdentityProviderMetadata local) {
+		return logoutResponse(
+			request,
+			recipient,
+			local,
+			getSingleLogout(recipient.getServiceProvider().getSingleLogoutService())
+		);
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 Metadata<? extends Metadata> recipient,
+										 Metadata<? extends Metadata> local,
+										 Endpoint destination) {
+
+		return new LogoutResponse()
+			.setId(UUID.randomUUID().toString())
+			.setInResponseTo(request != null ? request.getId() : null)
+			.setDestination(destination != null ? destination.getLocation() : null)
+			.setStatus(new Status().setCode(StatusCode.SUCCESS))
+			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
+			.setIssueInstant(new DateTime())
+			.setVersion("2.0");
+	}
+
+	public Endpoint getSingleLogout(List<Endpoint> logoutService) {
+		if (logoutService == null || logoutService.isEmpty()) {
+			return null;
+		}
+		List<Endpoint> eps = logoutService;
+		Endpoint result = null;
+		for (Endpoint e : eps) {
+			if (e.isDefault()) {
+				result = e;
+				break;
+			} else if (REDIRECT.equals(e.getBinding())) {
+				result = e;
+				break;
+			}
+		}
+		if (result == null ) {
+			result = eps.get(0);
+		}
+		return result;
+	}
+
+	public Endpoint getPreferredACS(List<Endpoint> eps,
+									List<Binding> preferred) {
+		if (eps == null || eps.isEmpty()) {
+			return null;
+		}
+		Endpoint result = null;
+		for (Endpoint e : eps) {
+			if (e.isDefault() && preferred.contains(e.getBinding())) {
+				result = e;
+				break;
+			}
+		}
+		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
+			if (e.isDefault()) {
+				result = e;
+				break;
+			}
+		}
+		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
+			if (preferred.contains(e.getBinding())) {
+				result = e;
+				break;
+			}
+		}
+		if (result == null ) {
+			result = eps.get(0);
+		}
+		return result;
 	}
 }

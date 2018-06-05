@@ -33,5 +33,4 @@ import org.springframework.security.saml.saml2.Saml2Object;
  * </ul>
  */
 public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T> implements Saml2Object {
-
 }

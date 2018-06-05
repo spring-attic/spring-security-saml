@@ -16,7 +16,6 @@
  */
 package org.springframework.security.samples;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -161,13 +160,16 @@ public class SimpleServiceProviderBootTest {
 		return (AuthenticationRequest) transformer.fromXml(xml, null, null);
 	}
 
-	public static Map<String, String> queryParams(URI url) throws UnsupportedEncodingException {
+	public static Map<String, String> queryParams(URI url) {
 		Map<String, String> queryPairs = new LinkedHashMap<>();
 		String query = url.getQuery();
 		String[] pairs = query.split("&");
 		for (String pair : pairs) {
 			int idx = pair.indexOf("=");
-			queryPairs.put(UriUtils.decode(pair.substring(0, idx), UTF_8.name()), UriUtils.decode(pair.substring(idx + 1), UTF_8.name()));
+			queryPairs.put(
+				UriUtils.decode(pair.substring(0, idx), UTF_8.name()),
+				UriUtils.decode(pair.substring(idx + 1), UTF_8.name())
+			);
 		}
 		return queryPairs;
 	}

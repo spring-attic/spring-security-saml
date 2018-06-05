@@ -53,18 +53,24 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 	}
 
 
-
 	@Override
 	protected ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 		String prequest = request.getParameter("SAMLRequest");
 		String presponse = request.getParameter("SAMLResponse");
 		if (hasText(prequest)) {
+			//we received a request
 			LogoutRequest logoutRequest = (LogoutRequest) getTransformer().fromXml(prequest, null, null);
 			return logoutRequested(logoutRequest, request, response);
-		} else if (hasText(presponse)) {
-			LogoutResponse logoutResponse = (LogoutResponse)getTransformer().fromXml(presponse, null, null);
+		}
+		else if (hasText(presponse)) {
+			//we received a response
+			LogoutResponse logoutResponse = (LogoutResponse) getTransformer().fromXml(presponse, null, null);
 			return logoutCompleted(logoutResponse, request, response);
+		}
+		else {
+			//the /logout URL was set, create request
+
 		}
 		return ProcessingStatus.STOP;
 	}
@@ -87,9 +93,6 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
 		String prefix = idp.getPrefix();
 		String path = prefix + "/logout";
-		return isUrlMatch(request, path) && (
-			hasText(request.getParameter("SAMLRequest"))  ||
-				hasText(request.getParameter("SAMLResponse"))
-		);
+		return isUrlMatch(request, path);
 	}
 }

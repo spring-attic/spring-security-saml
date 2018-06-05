@@ -18,18 +18,15 @@
 package org.springframework.security.saml.spi;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -57,7 +54,7 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 			.fromXml(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
 		getValidator().validate(r, getResolver(), request);
 		//extract the assertion
-		authenticate(r);
+		authenticate(r, local.getEntityId(), identityProviderMetadata.getEntityId());
 		return postAuthentication(request, response);
 	}
 
@@ -73,11 +70,14 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 		return validator;
 	}
 
-	protected void authenticate(Response r) {
-		NameIdPrincipal principal = (NameIdPrincipal) r.getAssertions().get(0).getSubject().getPrincipal();
-		UsernamePasswordAuthenticationToken token =
-			new UsernamePasswordAuthenticationToken(principal.getValue(), null, Collections.emptyList());
-		SecurityContextHolder.getContext().setAuthentication(token);
+	protected void authenticate(Response r, String spEntityId, String idpEntityId) {
+		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+			true,
+			r.getAssertions().get(0),
+			idpEntityId,
+			spEntityId
+		);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
 	protected ProcessingStatus postAuthentication(HttpServletRequest request, HttpServletResponse response)

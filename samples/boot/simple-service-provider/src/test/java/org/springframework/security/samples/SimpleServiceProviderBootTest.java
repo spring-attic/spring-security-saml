@@ -34,11 +34,13 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -137,6 +140,40 @@ public class SimpleServiceProviderBootTest {
 		)
 			.andExpect(status().isFound())
 			.andExpect(authenticated());
+	}
+
+	@Test
+	public void initiateLogout() throws Exception {
+		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
+		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+			true,
+			assertion,
+			idpEntityId,
+			sp.getEntityId()
+		);
+
+		String redirect = mockMvc.perform(
+			get(sp.getServiceProvider().getSingleLogoutService().get(0).getLocation())
+				.with(authentication(authentication))
+		)
+			.andExpect(status().isFound())
+			.andReturn()
+			.getResponse()
+			.getHeader("Location");
+
+		Map<String, String> params = queryParams(new URI(redirect));
+		String request = params.get("SAMLRequest");
+		assertNotNull(request);
+		LogoutRequest lr = (LogoutRequest) transformer.fromXml(
+			transformer.samlDecode(request, true),
+			null,
+			null
+		);
+
 	}
 
 

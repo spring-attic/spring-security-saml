@@ -21,6 +21,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
@@ -56,32 +58,42 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 	@Override
 	protected ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String prequest = request.getParameter("SAMLRequest");
 		String presponse = request.getParameter("SAMLResponse");
 		if (hasText(prequest)) {
 			//we received a request
 			LogoutRequest logoutRequest = (LogoutRequest) getTransformer().fromXml(prequest, null, null);
-			return logoutRequested(logoutRequest, request, response);
+			return logoutRequested(authentication, logoutRequest, request, response);
 		}
 		else if (hasText(presponse)) {
 			//we received a response
 			LogoutResponse logoutResponse = (LogoutResponse) getTransformer().fromXml(presponse, null, null);
-			return logoutCompleted(logoutResponse, request, response);
+			return logoutCompleted(authentication, logoutResponse, request, response);
 		}
-		else {
+		else if (authentication != null){
 			//the /logout URL was set, create request
-
 		}
 		return ProcessingStatus.STOP;
 	}
 
-	protected ProcessingStatus logoutCompleted(LogoutResponse logoutResponse,
+	protected ProcessingStatus logoutInitiated(Authentication authentication,
+											   LogoutResponse logoutResponse,
+											   HttpServletRequest request,
+											   HttpServletResponse response) {
+		return ProcessingStatus.STOP;
+	}
+
+
+	protected ProcessingStatus logoutCompleted(Authentication authentication,
+											   LogoutResponse logoutResponse,
 											   HttpServletRequest request,
 											   HttpServletResponse response) {
 		return ProcessingStatus.CONTINUE;
 	}
 
-	protected ProcessingStatus logoutRequested(LogoutRequest logoutRequest,
+	protected ProcessingStatus logoutRequested(Authentication authentication,
+											   LogoutRequest logoutRequest,
 											   HttpServletRequest request,
 											   HttpServletResponse response) {
 

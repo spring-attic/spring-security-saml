@@ -33,6 +33,7 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -136,6 +137,11 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	}
 
 	@Override
+	public IdentityProviderMetadata resolveIdentityProvider(LogoutRequest logoutRequest) {
+		return resolveIdentityProvider(logoutRequest.getIssuer().getValue());
+	}
+
+	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp) {
 		return (IdentityProviderMetadata) resolve(idp.getMetadata(), idp.isSkipSslValidation());
 	}
@@ -163,6 +169,11 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp) {
 		return (ServiceProviderMetadata) resolve(sp.getMetadata(), sp.isSkipSslValidation());
+	}
+
+	@Override
+	public ServiceProviderMetadata resolveServiceProvider(LogoutRequest logoutRequest) {
+		return resolveServiceProvider(logoutRequest.getIssuer().getValue());
 	}
 
 	protected Metadata resolve(String metadata, boolean skipSslValidation) {

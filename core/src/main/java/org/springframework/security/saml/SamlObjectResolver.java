@@ -20,6 +20,7 @@ package org.springframework.security.saml;
 import org.springframework.security.saml.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -38,10 +39,13 @@ public interface SamlObjectResolver {
 
 	IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp);
 
+	IdentityProviderMetadata resolveIdentityProvider(LogoutRequest logoutRequest);
+
 	ServiceProviderMetadata resolveServiceProvider(String entityId);
 
 	ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request);
 
 	ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
 
+	ServiceProviderMetadata resolveServiceProvider(LogoutRequest logoutRequest);
 }

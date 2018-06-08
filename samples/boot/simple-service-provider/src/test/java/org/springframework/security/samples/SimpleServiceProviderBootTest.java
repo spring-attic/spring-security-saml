@@ -35,7 +35,10 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -46,6 +49,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -58,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,11 +81,19 @@ public class SimpleServiceProviderBootTest {
 	private SamlObjectResolver resolver;
 	@Autowired
 	private Defaults defaults;
+	private String idpEntityId;
+	private String spBaseUrl;
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
 	public static class SpringBootApplicationTestConfig {
+	}
+
+	@BeforeEach
+	void setUp() {
+		idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		spBaseUrl = "http://localhost";
 	}
 
 	@Test
@@ -144,10 +157,9 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void initiateLogout() throws Exception {
-		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
-		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider(spBaseUrl);
 		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
@@ -173,9 +185,58 @@ public class SimpleServiceProviderBootTest {
 			null,
 			null
 		);
+		assertNotNull(lr);
+	}
+
+	@Test
+	public void receiveLogoutRequest() throws Exception {
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider(spBaseUrl);
+		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+			true,
+			assertion,
+			idpEntityId,
+			sp.getEntityId()
+		);
+		LogoutRequest request = defaults.logoutRequest(
+			sp,
+			idp,
+			(NameIdPrincipal) assertion.getSubject().getPrincipal()
+		);
+
+		String xml = transformer.toXml(request);
+		String param = transformer.samlEncode(xml, true);
+
+		String redirect = mockMvc.perform(
+			get(sp.getServiceProvider().getSingleLogoutService().get(0).getLocation())
+				.param("SAMLRequest", param)
+				.with(authentication(authentication))
+		)
+			.andExpect(status().isFound())
+			.andExpect(unauthenticated())
+			.andReturn()
+			.getResponse()
+			.getHeader("Location");
+
+		Map<String, String> params = queryParams(new URI(redirect));
+		String response = params.get("SAMLResponse");
+		assertNotNull(response);
+		LogoutResponse lr = (LogoutResponse) transformer.fromXml(
+			transformer.samlDecode(response, true),
+			null,
+			null
+		);
+		assertNotNull(lr);
+		assertThat(lr.getStatus().getCode(), equalTo(StatusCode.SUCCESS));
 
 	}
 
+	@Test
+	public void receiveLogoutResponse() throws Exception {
+
+	}
 
 	protected AuthenticationRequest getAuthenticationRequest() throws Exception {
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";

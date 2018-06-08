@@ -20,6 +20,7 @@ package org.springframework.security.saml;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -109,7 +110,7 @@ public abstract class SamlMessageHandler<T extends SamlMessageHandler> {
 	}
 
 	protected abstract ProcessingStatus process(HttpServletRequest request, HttpServletResponse response)
-		throws IOException;
+		throws IOException, ServletException;
 
 	protected boolean isUrlMatch(HttpServletRequest request, String path) {
 		AntPathRequestMatcher matcher = new AntPathRequestMatcher(path);

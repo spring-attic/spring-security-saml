@@ -50,6 +50,7 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
+	private DefaultSessionAssertionStore assertionStore;
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -57,6 +58,15 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 
 	public DefaultLogoutHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
+		return this;
+	}
+
+	public DefaultSessionAssertionStore getAssertionStore() {
+		return assertionStore;
+	}
+
+	public DefaultLogoutHandler setAssertionStore(DefaultSessionAssertionStore assertionStore) {
+		this.assertionStore = assertionStore;
 		return this;
 	}
 
@@ -111,8 +121,6 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 	protected boolean logoutIdpInitiated(HttpServletRequest request,
 										 HttpServletResponse response,
 										 SamlAuthentication sa) throws IOException {
-		//the IDP is also an SP?
-		//but then the request is against the wrong URL
 		return false;
 	}
 

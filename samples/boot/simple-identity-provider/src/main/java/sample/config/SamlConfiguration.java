@@ -35,6 +35,7 @@ import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultMetadataHandler;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
@@ -71,6 +72,11 @@ public class SamlConfiguration {
 	}
 
 	@Bean
+	public DefaultSessionAssertionStore assertionStore() {
+		return new DefaultSessionAssertionStore();
+	}
+
+	@Bean
 	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
 		return new DefaultIdpRequestHandler()
 			.setDefaults(defaults())
@@ -81,7 +87,7 @@ public class SamlConfiguration {
 			.setValidator(validator())
 			.setSamlTemplateEngine(samlTemplateEngine())
 			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
-			;
+			.setStore(assertionStore());
 	}
 
 	@Bean
@@ -95,7 +101,7 @@ public class SamlConfiguration {
 			.setValidator(validator())
 			.setSamlTemplateEngine(samlTemplateEngine())
 			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
-			;
+			.setStore(assertionStore());
 	}
 
 	@Bean

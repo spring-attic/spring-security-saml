@@ -24,22 +24,20 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public class DefaultIdpInitiationHandler extends SamlMessageHandler<DefaultIdpInitiationHandler> {
+public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpInitiationHandler> {
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
+	private DefaultSessionAssertionStore store;
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -47,6 +45,15 @@ public class DefaultIdpInitiationHandler extends SamlMessageHandler<DefaultIdpIn
 
 	public DefaultIdpInitiationHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
+		return this;
+	}
+
+	public DefaultSessionAssertionStore getStore() {
+		return store;
+	}
+
+	public DefaultIdpInitiationHandler setStore(DefaultSessionAssertionStore store) {
+		this.store = store;
 		return this;
 	}
 
@@ -68,8 +75,14 @@ public class DefaultIdpInitiationHandler extends SamlMessageHandler<DefaultIdpIn
 		ServiceProviderMetadata metadata = getResolver().resolveServiceProvider(entityId);
 		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath
 			(request));
-		Assertion assertion = getAssertion(metadata, local, SecurityContextHolder.getContext()
-			.getAuthentication());
+		Assertion assertion = getAssertion(
+			local,
+			null,
+			metadata,
+			SecurityContextHolder.getContext().getAuthentication(),
+			request,
+			store
+		);
 		Response result = getResponse(metadata, local, assertion);
 		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
 		Map<String, String> model = new HashMap<>();
@@ -77,13 +90,6 @@ public class DefaultIdpInitiationHandler extends SamlMessageHandler<DefaultIdpIn
 		model.put("SAMLResponse", encoded);
 		processHtml(request, response, getPostBindingTemplate(), model);
 		return ProcessingStatus.STOP;
-	}
-
-	protected Assertion getAssertion(ServiceProviderMetadata metadata,
-									 IdentityProviderMetadata local,
-									 Authentication authentication) {
-		String principal = authentication.getName();
-		return getDefaults().assertion(metadata, local, null, principal, NameId.PERSISTENT);
 	}
 
 	protected Response getResponse(

@@ -34,7 +34,9 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -174,6 +176,17 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(LogoutRequest logoutRequest) {
 		return resolveServiceProvider(logoutRequest.getIssuer().getValue());
+	}
+
+	@Override
+	public ServiceProviderMetadata resolveServiceProvider(Assertion localAssertion) {
+		if (localAssertion == null) {
+			return null;
+		}
+
+		Subject subject = localAssertion.getSubject();
+		NameIdPrincipal principal = (NameIdPrincipal) subject.getPrincipal();
+		return resolveServiceProvider(principal.getSpNameQualifier());
 	}
 
 	protected Metadata resolve(String metadata, boolean skipSslValidation) {

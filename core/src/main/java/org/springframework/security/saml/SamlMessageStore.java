@@ -28,6 +28,6 @@ public interface SamlMessageStore<T extends Saml2Object, Holder> {
 	T getMessage(Holder holder, String id);
 	T removeMessage(Holder holder, String id);
 	T addMessage(Holder holder, String id, Assertion assertion);
-
+	T removeFirst(Holder holder);
 
 }

@@ -48,4 +48,6 @@ public interface SamlObjectResolver {
 	ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp);
 
 	ServiceProviderMetadata resolveServiceProvider(LogoutRequest logoutRequest);
+
+	ServiceProviderMetadata resolveServiceProvider(Assertion localAssertion);
 }

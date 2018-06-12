@@ -25,14 +25,14 @@ public class Subject {
 	/**
 	 * BaseID, NameID or EncryptedID
 	 */
-	private SubjectPrincipal principal;
+	private NameIdPrincipal principal;
 	private List<SubjectConfirmation> confirmations = new LinkedList<>();
 
-	public SubjectPrincipal getPrincipal() {
+	public NameIdPrincipal getPrincipal() {
 		return principal;
 	}
 
-	public Subject setPrincipal(SubjectPrincipal principal) {
+	public Subject setPrincipal(NameIdPrincipal principal) {
 		this.principal = principal;
 		return this;
 	}

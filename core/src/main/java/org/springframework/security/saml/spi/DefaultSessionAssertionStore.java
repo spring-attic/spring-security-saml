@@ -17,10 +17,12 @@
 
 package org.springframework.security.saml.spi;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -29,7 +31,7 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 
 public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion, HttpServletRequest> {
 
-	private String ATTRIBUTE_NAME = getClass().getName() + ".assertions";
+	private final String ATTRIBUTE_NAME = getClass().getName() + ".assertions";
 
 	protected Map<String, Assertion> getDataMap(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
@@ -40,7 +42,7 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 		synchronized (session) {
 			data = (Map<String, Assertion>) session.getAttribute(ATTRIBUTE_NAME);
 			if (data == null) {
-				data = new ConcurrentHashMap<>();
+				data = new LinkedHashMap<>();
 				session.setAttribute(ATTRIBUTE_NAME, data);
 			}
 		}
@@ -49,7 +51,7 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 
 	@Override
 	public List<Assertion> getMessages(HttpServletRequest request) {
-		return (List<Assertion>) getDataMap(request).values();
+		return getDataMap(request).values().stream().collect(Collectors.toList());
 	}
 
 	@Override
@@ -67,5 +69,16 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 								String id,
 								Assertion assertion) {
 		return getDataMap(request).put(id, assertion);
+	}
+
+	@Override
+	public synchronized Assertion removeFirst(HttpServletRequest request) {
+		Collection<Assertion> values = getDataMap(request).values();
+		Assertion first = null;
+		if (values!=null && !values.isEmpty()) {
+			first = values.stream().findFirst().get();
+			removeMessage(request, first.getId());
+		}
+		return first;
 	}
 }

@@ -31,6 +31,7 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.spi.DefaultIdpInitiationHandler;
 import org.springframework.security.saml.spi.DefaultIdpRequestHandler;
+import org.springframework.security.saml.spi.DefaultLogoutHandler;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultMetadataHandler;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
@@ -57,8 +58,21 @@ public class SamlConfiguration {
 		return Arrays.asList(
 			metadataHandler(configuration),
 			idpRequestHandler(configuration),
-			idpInitiationHandler(configuration)
+			idpInitiationHandler(configuration),
+			logoutHandler(configuration)
 		);
+	}
+
+	@Bean
+	public SamlMessageHandler<? extends SamlMessageHandler> logoutHandler(SamlServerConfiguration configuration) {
+		return new DefaultLogoutHandler()
+			.setDefaults(defaults())
+			.setNetwork(network())
+			.setResolver(resolver())
+			.setTransformer(transformer())
+			.setConfiguration(configuration)
+			.setValidator(validator())
+			.setAssertionStore(assertionStore());
 	}
 
 	@Bean

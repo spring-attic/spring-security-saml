@@ -34,6 +34,7 @@ import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultMetadataHandler;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 import org.springframework.security.saml.spi.DefaultSpResponseHandler;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.Defaults;
@@ -61,6 +62,11 @@ public class SamlConfiguration {
 	}
 
 	@Bean
+	public DefaultSessionAssertionStore assertionStore() {
+		return new DefaultSessionAssertionStore();
+	}
+
+	@Bean
 	public SamlMessageHandler<? extends SamlMessageHandler> logoutHandler(SamlServerConfiguration configuration) {
 		return new DefaultLogoutHandler()
 			.setDefaults(defaults())
@@ -68,7 +74,8 @@ public class SamlConfiguration {
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration)
-			.setValidator(validator());
+			.setValidator(validator())
+			.setAssertionStore(assertionStore());
 	}
 
 	@Bean

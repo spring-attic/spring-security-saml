@@ -95,12 +95,14 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 			//we received a request
 			prequest = getTransformer().samlDecode(prequest, HttpMethod.GET.matches(request.getMethod()));
 			LogoutRequest logoutRequest = (LogoutRequest) getTransformer().fromXml(prequest, null, null);
+			getValidator().validate(logoutRequest, getResolver(), request);
 			return logoutRequested(authentication, logoutRequest, request, response);
 		}
 		else if (hasText(presponse)) {
 			//we received a response
 			presponse = getTransformer().samlDecode(presponse, HttpMethod.GET.matches(request.getMethod()));
 			LogoutResponse logoutResponse = (LogoutResponse) getTransformer().fromXml(presponse, null, null);
+			getValidator().validate(logoutResponse, getResolver(), request);
 			return logoutCompleted(authentication, logoutResponse, request, response);
 		}
 		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);

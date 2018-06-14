@@ -1,7 +1,7 @@
 
 How to run a simple sample of an Identity Provider (IDP) and Service Provider (SP)
 
-**Step 1 - Get the Source** 
+**Step 1 - Get the Source**
 
     git clone https://github.com/spring-projects/spring-security-saml.git
     cd spring-security-saml
@@ -17,7 +17,7 @@ Service Provider runs on `http://localhost:8080/sample-sp`
 Service Provider runs on `http://localhost:8081/sample-idp`
 
     ./gradlew :spring-security-saml-samples/boot/simple-identity-provider:bootRun &
-    
+
 **Try it out**
 
 ***Local to local***
@@ -34,6 +34,5 @@ and [IDP initiated login](http://localhost:8081/sample-idp/saml/idp/init?sp=http
 
 Please use
 
-    username: testuser
-    password: testpassword
-
+    username: user
+    password: password

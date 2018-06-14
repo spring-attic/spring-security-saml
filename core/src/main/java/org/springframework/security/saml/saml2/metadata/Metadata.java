@@ -33,4 +33,19 @@ import org.springframework.security.saml.saml2.Saml2Object;
  * </ul>
  */
 public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T> implements Saml2Object {
+	private Metadata next = null;
+
+
+	public boolean hasNext() {
+		return next != null;
+	}
+
+	public Metadata getNext() {
+		return next;
+	}
+
+	public Metadata<T> setNext(Metadata next) {
+		this.next = next;
+		return this;
+	}
 }

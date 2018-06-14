@@ -13,13 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.saml2.metadata;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import javax.xml.datatype.Duration;
 
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
@@ -36,10 +37,23 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
-import static org.springframework.security.saml.saml2.metadata.Binding.*;
-import static org.springframework.security.saml.saml2.metadata.NameId.*;
+import static org.springframework.security.saml.saml2.metadata.Binding.ARTIFACT;
+import static org.springframework.security.saml.saml2.metadata.Binding.PAOS;
+import static org.springframework.security.saml.saml2.metadata.Binding.POST;
+import static org.springframework.security.saml.saml2.metadata.Binding.POST_SIMPLE_SIGN;
+import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
+import static org.springframework.security.saml.saml2.metadata.Binding.SOAP;
+import static org.springframework.security.saml.saml2.metadata.Binding.URI;
+import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
+import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
+import static org.springframework.security.saml.saml2.metadata.NameId.TRANSIENT;
+import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
+import static org.springframework.security.saml.saml2.metadata.NameId.X509_SUBJECT;
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
@@ -74,7 +88,8 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void sp_to_xml() throws Exception {
-		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
+		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
 		SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
 
@@ -113,13 +128,25 @@ public class MetadataTests extends MetadataBase {
 		nodes = assertNodeCount(xml, "//md:ArtifactResolutionService", 1);
 		assertNodeAttribute(nodes.iterator().next(), "Binding", equalTo(SOAP.toString()));
 		assertNodeAttribute(nodes.iterator().next(), "index", equalTo("0"));
-		assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(spm.getServiceProvider().getArtifactResolutionService().get(0).getLocation()));
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"Location",
+			equalTo(spm.getServiceProvider().getArtifactResolutionService().get(0).getLocation())
+		);
 
 		Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 4).iterator();
 		for (int i = 0; i < 4; i++) {
 			Node n = nodeIterator.next();
-			assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getLocation()));
-			assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getBinding().toString()));
+			assertNodeAttribute(
+				n,
+				"Location",
+				equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getLocation())
+			);
+			assertNodeAttribute(
+				n,
+				"Binding",
+				equalTo(spm.getServiceProvider().getSingleLogoutService().get(i).getBinding().toString())
+			);
 		}
 
 		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 3).iterator();
@@ -130,8 +157,16 @@ public class MetadataTests extends MetadataBase {
 		nodeIterator = assertNodeCount(xml, "//md:AssertionConsumerService", 4).iterator();
 		for (int i = 0; i < 4; i++) {
 			Node n = nodeIterator.next();
-			assertNodeAttribute(n, "Location", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getLocation()));
-			assertNodeAttribute(n, "Binding", equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getBinding().toString()));
+			assertNodeAttribute(
+				n,
+				"Location",
+				equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getLocation())
+			);
+			assertNodeAttribute(
+				n,
+				"Binding",
+				equalTo(spm.getServiceProvider().getAssertionConsumerService().get(i).getBinding().toString())
+			);
 			assertNodeAttribute(n, "index", equalTo("" + i));
 			if (i == 0) {
 				assertNodeAttribute(n, "isDefault", equalTo("true"));
@@ -145,17 +180,30 @@ public class MetadataTests extends MetadataBase {
 		nodeIterator = assertNodeCount(xml, "//md:RequestedAttribute", 2).iterator();
 		for (int i = 0; i < 2; i++) {
 			Node n = nodeIterator.next();
-			assertNodeAttribute(n, "FriendlyName", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getFriendlyName()));
+			assertNodeAttribute(
+				n,
+				"FriendlyName",
+				equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getFriendlyName())
+			);
 			assertNodeAttribute(n, "Name", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getName()));
-			assertNodeAttribute(n, "NameFormat", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getNameFormat().toString()));
-			assertNodeAttribute(n, "isRequired", equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).isRequired() + ""));
+			assertNodeAttribute(
+				n,
+				"NameFormat",
+				equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).getNameFormat().toString())
+			);
+			assertNodeAttribute(
+				n,
+				"isRequired",
+				equalTo(spm.getServiceProvider().getRequestedAttributes().get(i).isRequired() + "")
+			);
 		}
 
 	}
 
 	@Test
 	public void idp_to_xml() throws Exception {
-		IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
+		IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 
 		SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
 
@@ -193,20 +241,40 @@ public class MetadataTests extends MetadataBase {
 		nodes = assertNodeCount(xml, "//md:ArtifactResolutionService", 1);
 		assertNodeAttribute(nodes.iterator().next(), "Binding", equalTo(SOAP.toString()));
 		assertNodeAttribute(nodes.iterator().next(), "index", equalTo("0"));
-		assertNodeAttribute(nodes.iterator().next(), "Location", equalTo(ipm.getIdentityProvider().getArtifactResolutionService().get(0).getLocation()));
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"Location",
+			equalTo(ipm.getIdentityProvider().getArtifactResolutionService().get(0).getLocation())
+		);
 
 		Iterator<Node> nodeIterator = assertNodeCount(xml, "//md:SingleLogoutService", 2).iterator();
 		for (int i = 0; i < 2; i++) {
 			Node n = nodeIterator.next();
-			assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getLocation()));
-			assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getBinding().toString()));
+			assertNodeAttribute(
+				n,
+				"Location",
+				equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getLocation())
+			);
+			assertNodeAttribute(
+				n,
+				"Binding",
+				equalTo(ipm.getIdentityProvider().getSingleLogoutService().get(i).getBinding().toString())
+			);
 		}
 
 		nodeIterator = assertNodeCount(xml, "//md:SingleSignOnService", 3).iterator();
 		for (int i = 0; i < 3; i++) {
 			Node n = nodeIterator.next();
-			assertNodeAttribute(n, "Location", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getLocation()));
-			assertNodeAttribute(n, "Binding", equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getBinding().toString()));
+			assertNodeAttribute(
+				n,
+				"Location",
+				equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getLocation())
+			);
+			assertNodeAttribute(
+				n,
+				"Binding",
+				equalTo(ipm.getIdentityProvider().getSingleSignOnService().get(i).getBinding().toString())
+			);
 		}
 
 		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 2).iterator();
@@ -218,7 +286,8 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_sp_external() throws IOException {
-		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
+		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
 		assertThat(sp.getEntityId(), equalTo("login.run.pivotal.io"));
@@ -246,12 +315,18 @@ public class MetadataTests extends MetadataBase {
 		assertThat(logoutServices.size(), equalTo(2));
 		Endpoint logout1 = logoutServices.get(0);
 		assertNotNull(logout1);
-		assertThat(logout1.getLocation(), equalTo("https://login.run.pivotal.io/saml/SingleLogout/alias/login.run.pivotal.io"));
+		assertThat(
+			logout1.getLocation(),
+			equalTo("https://login.run.pivotal.io/saml/SingleLogout/alias/login.run.pivotal.io")
+		);
 		assertThat(logout1.getBinding(), equalTo(POST));
 
 		Endpoint logout2 = logoutServices.get(1);
 		assertNotNull(logout2);
-		assertThat(logout2.getLocation(), equalTo("https://login.run.pivotal.io/saml/SingleLogout/alias/login.run.pivotal.io"));
+		assertThat(
+			logout2.getLocation(),
+			equalTo("https://login.run.pivotal.io/saml/SingleLogout/alias/login.run.pivotal.io")
+		);
 		assertThat(logout2.getBinding(), equalTo(Binding.REDIRECT));
 
 		List<NameId> nameIds = provider.getNameIds();
@@ -280,7 +355,8 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_sp_complete() throws IOException {
-		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
+		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
 		assertThat(sp.getEntityId(), equalTo("https://sp.saml.spring.io/sp"));
@@ -294,15 +370,14 @@ public class MetadataTests extends MetadataBase {
 		assertTrue(provider.isAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 		assertThat(provider.getId(), equalTo("sp.saml.spring.io"));
-		//OpenSAML 3 doesn't parse cacheDuration attribute
-//        Duration cacheDuration = provider.getCacheDuration();
-//        assertNotNull(cacheDuration);
-//        assertThat(cacheDuration.getYears(), equalTo(2));
-//        assertThat(cacheDuration.getMonths(), equalTo(6));
-//        assertThat(cacheDuration.getDays(), equalTo(5));
-//        assertThat(cacheDuration.getHours(), equalTo(12));
-//        assertThat(cacheDuration.getMinutes(), equalTo(35));
-//        assertThat(cacheDuration.getSeconds(), equalTo(30));
+        Duration cacheDuration = provider.getCacheDuration();
+        assertNotNull(cacheDuration);
+        assertThat(cacheDuration.getYears(), equalTo(2));
+        assertThat(cacheDuration.getMonths(), equalTo(6));
+        assertThat(cacheDuration.getDays(), equalTo(5));
+        assertThat(cacheDuration.getHours(), equalTo(12));
+        assertThat(cacheDuration.getMinutes(), equalTo(35));
+        assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
 
 		Endpoint requestInitiation = provider.getRequestInitiation();
@@ -412,13 +487,20 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void sp_invalid_verification_key() {
-		assertThrows(SignatureException.class,
-			() -> config.fromXml(getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias")), null));
+		assertThrows(
+			SignatureException.class,
+			() -> config.fromXml(
+				getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"),
+				asList(RSA_TEST_KEY.getSimpleKey("alias")),
+				null
+			)
+		);
 	}
 
 	@Test
 	public void xml_to_idp_complete() throws Exception {
-		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
+		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 		assertNotNull(idp);
 		assertNotNull(idp.getImplementation());
 		assertThat(idp.getEntityId(), equalTo("https://idp.saml.spring.io"));
@@ -431,14 +513,14 @@ public class MetadataTests extends MetadataBase {
 		assertTrue(provider.getWantAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 		assertThat(provider.getId(), equalTo("idp.saml.spring.io"));
-//        Duration cacheDuration = provider.getCacheDuration();
-//        assertNotNull(cacheDuration);
-//        assertThat(cacheDuration.getYears(), equalTo(2));
-//        assertThat(cacheDuration.getMonths(), equalTo(6));
-//        assertThat(cacheDuration.getDays(), equalTo(5));
-//        assertThat(cacheDuration.getHours(), equalTo(12));
-//        assertThat(cacheDuration.getMinutes(), equalTo(35));
-//        assertThat(cacheDuration.getSeconds(), equalTo(30));
+        Duration cacheDuration = provider.getCacheDuration();
+        assertNotNull(cacheDuration);
+        assertThat(cacheDuration.getYears(), equalTo(2));
+        assertThat(cacheDuration.getMonths(), equalTo(6));
+        assertThat(cacheDuration.getDays(), equalTo(5));
+        assertThat(cacheDuration.getHours(), equalTo(12));
+        assertThat(cacheDuration.getMinutes(), equalTo(35));
+        assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
 
 		Endpoint requestInitiation = provider.getRequestInitiation();
@@ -489,7 +571,8 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_idp_external() throws Exception {
-		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
+		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+			"/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
 		assertNotNull(idp);
 		assertNotNull(idp.getImplementation());
 		assertThat(idp.getEntityId(), equalTo("login.run.pivotal.io"));
@@ -531,7 +614,29 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void idp_invalid_verification_key() {
-		assertThrows(SignatureException.class,
-			() -> config.fromXml(getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(RSA_TEST_KEY.getSimpleKey("alias")), null));
+		assertThrows(
+			SignatureException.class,
+			() -> config.fromXml(
+				getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"),
+				asList(RSA_TEST_KEY.getSimpleKey("alias")),
+				null
+			)
+		);
 	}
+
+	@Test
+	public void entities_descriptor() throws IOException {
+		Metadata entities =
+			(Metadata) config.fromXml(
+				getFileBytes("/test-data/metadata/entities-descriptor-example.xml"),
+				asList(), //no verification here yet
+				null
+			);
+		assertNotNull(entities);
+		assertThat(entities.getClass(), equalTo(IdentityProviderMetadata.class));
+		assertTrue(entities.hasNext());
+		assertThat(entities.getNext().getClass(), equalTo(ServiceProviderMetadata.class));
+	}
+
+
 }

@@ -163,6 +163,7 @@ import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolv
 import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
+import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
@@ -393,6 +394,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			result = resolveMetadata((EntityDescriptor) parsed)
 				.setSignature(signature);
 		}
+		else if (parsed instanceof EntitiesDescriptor) {
+			result = resolveMetadata((EntitiesDescriptor) parsed, verificationKeys, localKeys);
+		}
 		else if (parsed instanceof AuthnRequest) {
 			result = resolveAuthenticationRequest((AuthnRequest) parsed)
 				.setSignature(signature);
@@ -579,6 +583,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			ServiceProvider provider = new ServiceProvider();
 			provider.setId(desc.getID());
 			provider.setValidUntil(desc.getValidUntil());
+			if (desc.getCacheDuration()!=null) {
+				provider.setCacheDuration(toDuration(desc.getCacheDuration()));
+			}
 			provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
 			provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
 			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
@@ -600,6 +607,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			IdentityProvider provider = new IdentityProvider();
 			provider.setId(desc.getID());
 			provider.setValidUntil(desc.getValidUntil());
+			if (desc.getCacheDuration()!=null) {
+				provider.setCacheDuration(toDuration(desc.getCacheDuration()));
+			}
 			provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
 			provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
 			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
@@ -1519,6 +1529,25 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			if (null != comparison) {
 				result = RequestedAuthenticationContext.valueOf(comparison.toString());
 			}
+		}
+		return result;
+	}
+
+	protected Metadata resolveMetadata(EntitiesDescriptor parsed,
+									   List<SimpleKey> verificationKeys,
+									   List<SimpleKey> localKeys) {
+		Metadata result = null, current = null;
+		for (EntityDescriptor desc : parsed.getEntityDescriptors()) {
+			if (result == null) {
+				result = resolveMetadata(desc);
+				current = result;
+			} else {
+				Metadata m = resolveMetadata(desc);
+				current.setNext(m);
+				current = m;
+			}
+			Signature signature = validateSignature(desc, verificationKeys);
+			current.setSignature(signature);
 		}
 		return result;
 	}

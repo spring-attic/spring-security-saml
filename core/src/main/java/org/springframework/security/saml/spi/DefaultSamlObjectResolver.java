@@ -53,8 +53,9 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	private DefaultMetadataCache cache;
 
 	@Autowired
-	public void setTransformer(SamlTransformer transformer) {
+	public DefaultSamlObjectResolver setTransformer(SamlTransformer transformer) {
 		this.transformer = transformer;
+		return this;
 	}
 
 	@Autowired
@@ -129,10 +130,15 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 
 	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(String entityId) {
-		for (ExternalProviderConfiguration c : configuration.getServiceProvider().getProviders()) {
-			IdentityProviderMetadata idp = resolveIdentityProvider(c);
-			if (idp != null && entityId.equals(idp.getEntityId())) {
-				return idp;
+		LocalServiceProviderConfiguration idp = configuration.getServiceProvider();
+		for (ExternalProviderConfiguration c : idp.getProviders()) {
+			String metadata = c.getMetadata();
+			Metadata m = resolve(metadata, c.isSkipSslValidation());
+			while (m != null) {
+				if (m instanceof IdentityProviderMetadata && entityId.equals(m.getEntityId())) {
+					return (IdentityProviderMetadata) m;
+				}
+				m = m.hasNext() ? m.getNext() : null;
 			}
 		}
 		return null;
@@ -154,8 +160,11 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		for (ExternalProviderConfiguration c : idp.getProviders()) {
 			String metadata = c.getMetadata();
 			Metadata m = resolve(metadata, c.isSkipSslValidation());
-			if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
-				return (ServiceProviderMetadata) m;
+			while (m != null) {
+				if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
+					return (ServiceProviderMetadata) m;
+				}
+				m = m.hasNext() ? m.getNext() : null;
 			}
 		}
 		return null;

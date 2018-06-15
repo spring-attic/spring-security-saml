@@ -24,6 +24,7 @@ public class SamlServerConfiguration {
 
 	private LocalServiceProviderConfiguration serviceProvider;
 	private LocalIdentityProviderConfiguration identityProvider;
+	private NetworkConfiguration network;
 
 	public LocalServiceProviderConfiguration getServiceProvider() {
 		return serviceProvider;
@@ -40,6 +41,15 @@ public class SamlServerConfiguration {
 
 	public SamlServerConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
 		this.identityProvider = identityProvider;
+		return this;
+	}
+
+	public NetworkConfiguration getNetwork() {
+		return network;
+	}
+
+	public SamlServerConfiguration setNetwork(NetworkConfiguration network) {
+		this.network = network;
 		return this;
 	}
 }

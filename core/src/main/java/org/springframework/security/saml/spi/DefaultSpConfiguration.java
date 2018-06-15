@@ -40,7 +40,7 @@ public class DefaultSpConfiguration extends AbstractProviderConfiguration {
 	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
 		return new DefaultAuthnRequestHandler()
 			.setDefaults(defaults())
-			.setNetwork(network())
+			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration);
@@ -50,7 +50,7 @@ public class DefaultSpConfiguration extends AbstractProviderConfiguration {
 	public SamlMessageHandler spResponseHandler(SamlServerConfiguration configuration) {
 		return new DefaultSpResponseHandler()
 			.setDefaults(defaults())
-			.setNetwork(network())
+			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration)

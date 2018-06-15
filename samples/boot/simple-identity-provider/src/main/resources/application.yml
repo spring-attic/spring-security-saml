@@ -15,6 +15,9 @@ spring:
     cache: false
   security:
     saml2:
+      network:
+        read-timeout: 8000
+        connect-timeout: 4000
       identity-provider:
         entity-id: spring.security.saml.idp.id
         sign-metadata: true

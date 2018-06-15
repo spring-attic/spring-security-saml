@@ -26,6 +26,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
@@ -34,6 +35,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
 public class Network {
+
+	private int connectTimeoutMillis = 5000;
+	private int readTimeoutMillis = 10000;
 
 	public byte[] get(String url, boolean skipSslValidation) {
 		RestTemplate template = new RestTemplate(createRequestFactory(skipSslValidation));
@@ -56,6 +60,12 @@ public class Network {
 			builder.setSslcontext(getNonValidatingSslContext());
 		}
 		builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
+		RequestConfig config = RequestConfig.custom()
+			.setConnectTimeout(getConnectTimeoutMillis())
+			.setConnectionRequestTimeout(getConnectTimeoutMillis())
+			.setSocketTimeout(getReadTimeoutMillis())
+			.build();
+		builder.setDefaultRequestConfig(config);
 		return builder;
 	}
 
@@ -78,5 +88,23 @@ public class Network {
 			":" +
 			request.getServerPort() +
 			request.getContextPath();
+	}
+
+	public int getConnectTimeoutMillis() {
+		return connectTimeoutMillis;
+	}
+
+	public Network setConnectTimeoutMillis(int connectTimeoutMillis) {
+		this.connectTimeoutMillis = connectTimeoutMillis;
+		return this;
+	}
+
+	public int getReadTimeoutMillis() {
+		return readTimeoutMillis;
+	}
+
+	public Network setReadTimeoutMillis(int readTimeoutMillis) {
+		this.readTimeoutMillis = readTimeoutMillis;
+		return this;
 	}
 }

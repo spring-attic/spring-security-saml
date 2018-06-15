@@ -24,6 +24,9 @@ import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
 
+/**
+ * Base class for responses samlp:StatusResponseType as defined by
+ */
 public class StatusResponse<T extends StatusResponse> extends ImplementationHolder {
 
 	private String id;

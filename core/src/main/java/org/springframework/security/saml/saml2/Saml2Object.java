@@ -30,7 +30,7 @@ public interface Saml2Object {
 	 * When using this method, please open a github issue so that we can supplement the feature
 	 * in a future release.  https://github.com/spring-projects/spring-security-saml
 	 *
-	 * @return the underlying implementation object
+	 * @return the underlying implementation object. Currently an OpenSAML v3 object
 	 */
 	Object getImplementation();
 

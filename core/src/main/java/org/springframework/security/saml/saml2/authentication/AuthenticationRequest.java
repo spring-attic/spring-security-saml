@@ -15,7 +15,6 @@
  *
  */
 
-
 package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.key.SimpleKey;
@@ -24,6 +23,11 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
+/**
+ * Implementation samlp:AuthnRequestType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 50, Line 2147
+ */
 public class AuthenticationRequest extends Request<AuthenticationRequest> {
 
 	private String providerName;

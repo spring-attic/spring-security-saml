@@ -26,6 +26,10 @@ import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
 
+/**
+ * Base class for SAML providers
+ * @param <T> return class for builder pattern
+ */
 public class Provider<T extends Provider<T>> {
 
 	private Signature signature;

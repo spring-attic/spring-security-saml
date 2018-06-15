@@ -21,6 +21,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Implementation saml:AudienceRestrictionType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 24, Line 976
+ */
 public class AudienceRestriction extends AssertionCondition<AudienceRestriction, String> {
 
 	private List<String> audiences = new LinkedList<>();

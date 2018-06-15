@@ -14,8 +14,14 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
+/**
+ * Implementation samlp:RequestedAuthnContextType comparison values as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 44, Line 1871
+ */
 public enum RequestedAuthenticationContext {
 	exact,
 	minimum,

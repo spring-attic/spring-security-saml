@@ -29,10 +29,9 @@ import org.springframework.security.saml.saml2.signature.Signature;
 import org.joda.time.DateTime;
 
 /**
- * EntityDescriptor as defined in
- * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">
- * Line 466-494
- * </a>
+ * Defines EntityDescriptor as defined by
+ * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
+ * Page 13, Line 268
  */
 public class EntityDescriptor<T extends EntityDescriptor> extends ImplementationHolder {
 

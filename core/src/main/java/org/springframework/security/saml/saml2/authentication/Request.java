@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 import java.util.List;
@@ -24,6 +25,10 @@ import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
 
+/**
+ * Base class for requests
+ * @param <T> - subclass to be returned as part of Builder pattern
+ */
 public class Request<T extends Request<T>> extends ImplementationHolder {
 
 	private Issuer issuer;

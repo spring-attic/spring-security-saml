@@ -24,6 +24,8 @@ import org.springframework.security.saml.saml2.Saml2Object;
  * <li>SSO Service Provider</li>
  * <li>SSO Identity Provider</li>
  * </ul>
+ * May be chained if read from EntitiesDescriptor element.
+ * <br/>
  * Currently does <b>not support</b> metadata for
  * <ul>
  * <li>Authentication Authority</li>
@@ -33,6 +35,9 @@ import org.springframework.security.saml.saml2.Saml2Object;
  * </ul>
  */
 public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T> implements Saml2Object {
+	/*
+	 * In case of parsing EntitiesDescriptor, we can have more than one provider
+	 */
 	private Metadata next = null;
 
 

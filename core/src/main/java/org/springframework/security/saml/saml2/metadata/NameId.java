@@ -14,11 +14,17 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.metadata;
 
 import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
+/**
+ * Attribute Name Format Identifiers
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 82, Line 3528
+ */
 public enum NameId {
 
 	UNSPECIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"),
@@ -30,7 +36,6 @@ public enum NameId {
 	KERBEROS("urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos"),
 	ENTITY("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"),
 	ENCRYPTED("urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted");
-
 
 	private final String urn;
 

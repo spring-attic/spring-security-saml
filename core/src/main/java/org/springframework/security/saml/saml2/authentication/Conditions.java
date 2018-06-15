@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 import java.util.Collections;
@@ -22,6 +23,11 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation saml:ConditionsType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 22, Line 897
+ */
 public class Conditions {
 
 	private DateTime notBefore;

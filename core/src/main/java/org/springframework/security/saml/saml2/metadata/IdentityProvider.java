@@ -21,8 +21,9 @@ import java.util.List;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 
 /**
- * Represents an IDPSSODescriptor
+ * Defines md:IDPSSODescriptorType as defined by
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
+ * Page 19, Line 792
  */
 public class IdentityProvider extends SsoProvider<IdentityProvider> {
 

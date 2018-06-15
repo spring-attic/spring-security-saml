@@ -16,6 +16,11 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
+/**
+ * Implementation saml:Issuer as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 15, Line 564
+ */
 public class Issuer extends NameIdPolicy<Issuer> {
 	private String value;
 	private String nameQualifier;

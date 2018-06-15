@@ -14,8 +14,14 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
+/**
+ * Implementation samlp:OneTimeUseType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 25, Line 1013
+ */
 public class OneTimeUse extends AssertionCondition<OneTimeUse, Void> {
 
 	@Override

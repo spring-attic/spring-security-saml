@@ -34,6 +34,10 @@ package org.springframework.security.saml.saml2.metadata;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Base class for SAML providers
+ * @param <T> return class for builder pattern
+ */
 public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
 
 	private List<Endpoint> artifactResolutionService = new LinkedList<>();

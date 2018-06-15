@@ -14,10 +14,16 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation saml:AuthnStatementType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 27, Line 1137
+ */
 public class AuthenticationStatement {
 
 	private DateTime authInstant;

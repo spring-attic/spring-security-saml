@@ -14,10 +14,16 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
+/**
+ * Implementation samlp:LogoutRequestType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 52, Line 2248
+ */
 public class NameIdPolicy<T extends NameIdPolicy> {
 
 	private NameId format;

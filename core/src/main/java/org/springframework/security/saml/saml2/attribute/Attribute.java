@@ -22,12 +22,19 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.springframework.security.saml.saml2.attribute.AttributeNameFormat.UNSPECIFIED;
+
+/**
+ * Implementation saml:AttributeType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 30, Line 1284
+ */
 public class Attribute {
 
 	private String name;
 	private String friendlyName;
 	private List<Object> values = new LinkedList<>();
-	private AttributeNameFormat nameFormat = AttributeNameFormat.UNSPECIFIED;
+	private AttributeNameFormat nameFormat = UNSPECIFIED;
 	private boolean required;
 
 

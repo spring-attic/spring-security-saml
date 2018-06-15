@@ -14,10 +14,16 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.metadata;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Defines binding type as part of an Endpoint as defined by
+ * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
+ * Page 8, Line 271
+ */
 public enum Binding {
 
 	POST("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"),

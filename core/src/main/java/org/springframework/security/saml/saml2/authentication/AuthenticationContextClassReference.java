@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 public enum AuthenticationContextClassReference {

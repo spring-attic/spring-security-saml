@@ -19,6 +19,11 @@ package org.springframework.security.saml.saml2.authentication;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation saml:SubjectConfirmationDataType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 20, Line 810
+ */
 public class SubjectConfirmationData {
 
 	private DateTime notBefore;

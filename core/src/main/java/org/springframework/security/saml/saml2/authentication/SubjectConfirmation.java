@@ -14,10 +14,16 @@
  *  limitations under the License.
  *
  */
+
 package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
+/**
+ * Implementation saml:SubjectConfirmationType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 19, Line 748
+ */
 public class SubjectConfirmation {
 	private SubjectConfirmationMethod method;
 	private SubjectConfirmationData data;

@@ -17,5 +17,10 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+/**
+ * Implementation saml:AdviceType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 26, Line 1076
+ */
 public class Advice {
 }

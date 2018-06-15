@@ -22,8 +22,9 @@ import java.util.List;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 
 /**
- * Represents an SPSSODescriptor
+ * Defines md:SPSSODescriptorType as defined by
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
+ * Page 20, Line 846
  */
 public class ServiceProvider extends SsoProvider<ServiceProvider> {
 

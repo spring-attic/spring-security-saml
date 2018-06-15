@@ -17,9 +17,9 @@
 package org.springframework.security.saml.saml2.metadata;
 
 /**
- * Defined on
- * <a href="https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf">lines
- * 295-305</a>
+ * Defines EndpointType as defined by
+ * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
+ * Page 9, Line 294
  */
 public class Endpoint {
 

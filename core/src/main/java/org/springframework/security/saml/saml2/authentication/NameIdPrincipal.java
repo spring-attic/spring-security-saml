@@ -18,6 +18,12 @@ package org.springframework.security.saml.saml2.authentication;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 
+/**
+ * Value inside a Subject holding the asserted entity, such as username
+ * See saml:SubjectType
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 18, Line 707
+ */
 public class NameIdPrincipal extends SubjectPrincipal<NameIdPrincipal> {
 	private String nameQualifier;
 	private String spNameQualifier;

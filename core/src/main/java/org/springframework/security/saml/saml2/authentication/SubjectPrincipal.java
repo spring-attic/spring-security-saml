@@ -18,6 +18,9 @@ package org.springframework.security.saml.saml2.authentication;
 
 /**
  * This is either a BaseID, NameID or EncryptedID
+ * See saml:SubjectType as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 18, Line 708
  */
 public abstract class SubjectPrincipal<T extends SubjectPrincipal> {
 

@@ -182,7 +182,6 @@ public class Defaults {
 			.setBinding(Binding.POST)
 			.setAssertionConsumerService(getACSFromSp(sp))
 			.setIssuer(new Issuer().setValue(sp.getEntityId()))
-			.setRequestedAuthenticationContext(exact)
 			.setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());

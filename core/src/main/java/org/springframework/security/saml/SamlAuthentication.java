@@ -18,6 +18,7 @@
 package org.springframework.security.saml;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.SubjectPrincipal;
 
 public interface SamlAuthentication extends Authentication {
@@ -26,4 +27,5 @@ public interface SamlAuthentication extends Authentication {
 	String getHoldingEntityId();
 
 	SubjectPrincipal<? extends SubjectPrincipal> getSamlPrincipal();
+	Assertion getAssertion();
 }

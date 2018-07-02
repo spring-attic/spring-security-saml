@@ -22,6 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
@@ -36,6 +38,7 @@ import static org.springframework.http.HttpMethod.GET;
 public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpResponseHandler> {
 
 	private SamlValidator validator;
+	private AuthenticationManager authenticationManager;
 
 	@Override
 	protected ProcessingStatus process(HttpServletRequest request,
@@ -45,6 +48,9 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 		String resp = request.getParameter("SAMLResponse");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Received SAMLResponse:"+xml);
+		}
 		//extract basic data so we can map it to an IDP
 		List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
 		Response r = (Response) getTransformer().fromXml(xml, null, localKeys);
@@ -71,12 +77,15 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 	}
 
 	protected void authenticate(Response r, String spEntityId, String idpEntityId) {
-		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+		Authentication authentication = new DefaultSamlAuthentication(
 			true,
 			r.getAssertions().get(0),
 			idpEntityId,
 			spEntityId
 		);
+		if (authenticationManager != null) {
+			authentication = authenticationManager.authenticate(authentication);
+		}
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
@@ -88,6 +97,15 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 
 	public DefaultSpResponseHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
+		return this;
+	}
+
+	public AuthenticationManager getAuthenticationManager() {
+		return authenticationManager;
+	}
+
+	public DefaultSpResponseHandler setAuthenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
 		return this;
 	}
 }

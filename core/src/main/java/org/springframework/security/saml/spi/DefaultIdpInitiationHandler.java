@@ -33,6 +33,8 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
+import static java.lang.String.format;
+
 public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpInitiationHandler> {
 
 	private SamlValidator validator;
@@ -71,6 +73,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 									   HttpServletResponse response) throws IOException {
 
 		String entityId = request.getParameter("sp");
+		logger.debug(format("Creating assertion for SP:%s", entityId));
 		//no authnrequest provided
 		ServiceProviderMetadata metadata = getResolver().resolveServiceProvider(entityId);
 		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath
@@ -86,7 +89,9 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 		Response result = getResponse(metadata, local, assertion);
 		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
 		Map<String, String> model = new HashMap<>();
-		model.put("action", getAcs(metadata));
+		String acsUrl = getAcs(metadata);
+		logger.debug(format("Sending assertion for SP:%s to URL:%s", entityId, acsUrl));
+		model.put("action", acsUrl);
 		model.put("SAMLResponse", encoded);
 		processHtml(request, response, getPostBindingTemplate(), model);
 		return ProcessingStatus.STOP;

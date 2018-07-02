@@ -74,6 +74,9 @@ import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 
+/**
+ * Simple class that creates SAML objects with sensible defaults
+ */
 public class Defaults {
 
 	public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;

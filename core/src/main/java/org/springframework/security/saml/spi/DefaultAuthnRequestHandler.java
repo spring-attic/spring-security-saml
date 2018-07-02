@@ -32,6 +32,8 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import static java.lang.String.format;
+
 public class DefaultAuthnRequestHandler extends SamlMessageHandler<DefaultAuthnRequestHandler> {
 
 
@@ -41,7 +43,9 @@ public class DefaultAuthnRequestHandler extends SamlMessageHandler<DefaultAuthnR
 		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(request.getParameter("idp"));
 		AuthenticationRequest authenticationRequest = getAuthenticationRequest(local, idp);
+		logger.debug(format("Processing AuthnRequest for SP:%s and IDP:%s", local.getEntityId(), idp.getEntityId()));
 		String url = getAuthnRequestRedirect(idp, authenticationRequest);
+		logger.debug(format("Sending AuthnRequest to:%s", url));
 		response.sendRedirect(url);
 		return ProcessingStatus.STOP;
 	}
@@ -54,8 +58,7 @@ public class DefaultAuthnRequestHandler extends SamlMessageHandler<DefaultAuthnR
 	protected String getAuthnRequestRedirect(
 		IdentityProviderMetadata m,
 		AuthenticationRequest authenticationRequest
-	) throws
-	  UnsupportedEncodingException {
+	) throws UnsupportedEncodingException {
 		String encoded = getEncodedAuthnRequestValue(authenticationRequest);
 		Endpoint endpoint = m.getIdentityProvider().getSingleSignOnService().get(0);
 		UriComponentsBuilder url = UriComponentsBuilder.fromUriString(endpoint.getLocation());

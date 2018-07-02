@@ -29,12 +29,17 @@ import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.HttpHeaders.PRAGMA;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 public abstract class SamlMessageHandler<T extends SamlMessageHandler> {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	public enum ProcessingStatus {
 		STOP,

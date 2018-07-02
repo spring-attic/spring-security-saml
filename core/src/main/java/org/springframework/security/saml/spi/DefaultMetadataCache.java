@@ -21,6 +21,10 @@ import java.time.Clock;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.util.TimebasedMap;
 
+/**
+ * Caches metadata that has been retrieved over the network
+ * @author fhanik
+ */
 public class DefaultMetadataCache {
 
 	private final Network network;

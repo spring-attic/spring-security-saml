@@ -34,6 +34,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
+import static java.lang.String.format;
 import static org.springframework.http.HttpMethod.GET;
 
 public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequestHandler> {
@@ -76,17 +77,18 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 
 		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
 		String resp = request.getParameter("SAMLRequest");
-		//receive assertion
+		logger.debug(format("Local IDP(%s) received SAMLRequest", local.getEntityId()));
+		//receive authentication request
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
 		//extract basic data so we can map it to an IDP
 		List<SimpleKey> localKeys = local.getIdentityProvider().getKeys();
 		AuthenticationRequest authn = (AuthenticationRequest) getTransformer().fromXml(xml, null, localKeys);
 		ServiceProviderMetadata sp = getResolver().resolveServiceProvider(authn);
+		logger.debug(format("Resolved AuthnRequest to SP:%s", sp.getEntityId()));
 		//validate signature
 		authn = (AuthenticationRequest) getTransformer().fromXml(xml, sp.getServiceProvider().getKeys(),localKeys);
 		getValidator().validate(authn, getResolver(), request);
 		//create the assertion
-
 		Assertion assertion = getAssertion(
 			local,
 			authn,
@@ -101,6 +103,7 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 		String destination = authn.getAssertionConsumerService().getLocation();
 
 		Map<String, String> model = new HashMap<>();
+		logger.debug(format("Submitting assertion for SP:%s to URL:%s", sp.getEntityId(), destination));
 		model.put("action", destination);
 		model.put("SAMLResponse", encoded);
 		processHtml(request, response, getPostBindingTemplate(), model);

@@ -18,6 +18,7 @@
 package org.springframework.security.saml;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.Filter;
@@ -39,11 +40,11 @@ public class SamlProcessingFilter implements Filter {
 	private List<SamlMessageHandler> handlers = new LinkedList<>();
 
 	public List<SamlMessageHandler> getHandlers() {
-		return handlers;
+		return Collections.unmodifiableList(handlers);
 	}
 
 	public SamlProcessingFilter setHandlers(List<SamlMessageHandler> handlers) {
-		this.handlers = handlers;
+		this.handlers = new LinkedList<>(handlers);
 		return this;
 	}
 
@@ -53,9 +54,8 @@ public class SamlProcessingFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest req, ServletResponse response, FilterChain chain) throws
-																						  IOException,
-																						  ServletException {
+	public void doFilter(ServletRequest req, ServletResponse response, FilterChain chain)
+		throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		for (SamlMessageHandler p : handlers) {
 			if (p.supports(request)) {
@@ -73,6 +73,5 @@ public class SamlProcessingFilter implements Filter {
 
 	@Override
 	public void destroy() {
-
 	}
 }

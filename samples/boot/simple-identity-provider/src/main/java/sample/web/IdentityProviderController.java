@@ -32,11 +32,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import sample.config.AppConfig;
+
+import static java.lang.String.format;
 
 @Controller
 public class IdentityProviderController {
-
+	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
 	private SamlServerConfiguration configuration;
 	private SamlObjectResolver resolver;
 	private Network network;
@@ -65,7 +69,11 @@ public class IdentityProviderController {
 					ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
 					providers.add(mp);
 				} catch (Exception x) {
-					x.printStackTrace();
+					logger.debug(format(
+						"Unable to retrieve metadata for provider:%s with message:",
+						p.getMetadata(),
+						x.getMessage())
+					);
 				}
 			}
 		);

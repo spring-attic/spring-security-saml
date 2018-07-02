@@ -103,6 +103,8 @@ import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import net.shibboleth.utilities.java.support.xml.DOMTypeSupport;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.signature.XMLSignatureException;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.ConfigurationService;
@@ -204,6 +206,7 @@ import org.w3c.dom.Element;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
@@ -214,6 +217,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplementation> {
 
+	private static final Log logger =LogFactory.getLog(OpenSamlImplementation.class);
 	private BasicParserPool parserPool;
 	private ChainingEncryptedKeyResolver encryptedKeyResolver;
 
@@ -542,7 +546,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			try {
 				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
 			} catch (DecryptionException e) {
-				e.printStackTrace();
+				logger.debug(format("Unable to decrypt element:%s",encrypted), e);
 			}
 		}
 		if (last != null) {

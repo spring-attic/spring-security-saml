@@ -42,9 +42,15 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import static java.lang.String.format;
 import static org.springframework.util.StringUtils.hasText;
 
 public class DefaultSamlObjectResolver implements SamlObjectResolver {
+
+	private static final Log logger = LogFactory.getLog(DefaultSamlObjectResolver.class);
 
 	private SamlServerConfiguration configuration;
 	private Defaults defaults;
@@ -205,7 +211,13 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 				byte[] data = cache.getMetadata(metadata, skipSslValidation);
 				result = (Metadata) transformer.fromXml(data, null, null);
 			} catch (Exception x) {
-				x.printStackTrace();
+				String message = format("Unable to fetch metadata from: %s with message: %s",metadata, x.getMessage());
+				if (logger.isDebugEnabled()) {
+					logger.debug(message, x);
+				}
+				else {
+					logger.info(message);
+				}
 			}
 		}
 		else {

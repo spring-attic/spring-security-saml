@@ -31,8 +31,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import sample.config.AppConfig;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Controller
@@ -41,6 +44,7 @@ public class ServiceProviderController {
 	private AppConfig configuration;
 	private SamlObjectResolver resolver;
 	private Network network;
+	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
 
 	@Autowired
 	public void setNetwork(Network network) {
@@ -68,10 +72,16 @@ public class ServiceProviderController {
 		configuration.getServiceProvider().getProviders().stream().forEach(
 			p -> {
 				try {
-					ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getDiscoveryRedirect(request, p));
+					ModelProvider mp = new ModelProvider()
+						.setLinkText(p.getLinktext())
+						.setRedirect(getDiscoveryRedirect(request, p));
 					providers.add(mp);
 				} catch (Exception x) {
-					x.printStackTrace();
+					logger.debug(format(
+						"Unable to retrieve metadata for provider:%s with message:",
+						p.getMetadata(),
+						x.getMessage())
+					);
 				}
 			}
 		);

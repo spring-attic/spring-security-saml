@@ -25,7 +25,7 @@ import org.springframework.security.saml.saml2.Saml2Object;
  * <li>SSO Identity Provider</li>
  * </ul>
  * May be chained if read from EntitiesDescriptor element.
- * <br/>
+ *
  * Currently does <b>not support</b> metadata for
  * <ul>
  * <li>Authentication Authority</li>

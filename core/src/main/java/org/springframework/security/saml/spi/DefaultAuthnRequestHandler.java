@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -34,11 +33,11 @@ import org.springframework.web.util.UriUtils;
 
 import static java.lang.String.format;
 
-public class DefaultAuthnRequestHandler extends SamlMessageHandler<DefaultAuthnRequestHandler> {
+public class DefaultAuthnRequestHandler extends DefaultSamlMessageHandler<DefaultAuthnRequestHandler> {
 
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,
+	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(request.getParameter("idp"));

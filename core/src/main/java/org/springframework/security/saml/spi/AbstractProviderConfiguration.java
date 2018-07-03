@@ -54,7 +54,7 @@ public abstract class AbstractProviderConfiguration {
 	}
 
 	@Bean
-	public SamlMessageHandler<? extends SamlMessageHandler> logoutHandler(SamlServerConfiguration configuration) {
+	public SamlMessageHandler logoutHandler(SamlServerConfiguration configuration) {
 		return new DefaultLogoutHandler()
 			.setDefaults(defaults())
 			.setNetwork(network(configuration))

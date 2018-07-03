@@ -20,14 +20,55 @@ package org.springframework.security.saml;
 import java.util.List;
 
 import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.authentication.Assertion;
 
+/**
+ * Interface to implement a message store.
+ * A message store can be used to hold assertions for the purpose of tracking single logout functionality.
+ * It can also be used to store AuthnRequest objects for the purpose of tracking responses
+ * @param <T> - the type of object stored
+ * @param <Holder> - the specific implementation of the store
+ */
 public interface SamlMessageStore<T extends Saml2Object, Holder> {
 
+	/**
+	 * Returns a list of messages currently stored by the holder
+	 * @param holder - the message store implementation
+	 * @return a list of messages, empty if none exist
+	 */
 	List<T> getMessages(Holder holder);
+
+	/**
+	 * Retrieves a message using its unique message id.
+	 * Will return null if no message with that id is stored.
+	 * @param holder - the message store implementation
+	 * @param id - the unique identifier for the message to be retrieved
+	 * @return a message or null if none exist
+	 */
 	T getMessage(Holder holder, String id);
+
+	/**
+	 * Removes a message from the store and returns it if found.
+	 * @param holder - the message store implementation
+	 * @param id - the unique identifier for the message to be removed
+	 * @return the message that was removed or null if none exist
+	 */
 	T removeMessage(Holder holder, String id);
-	T addMessage(Holder holder, String id, Assertion assertion);
+
+	/**
+	 *
+	 * @param holder - the message store implementation
+	 * @param id - the unique identifier for the message to be added
+	 * @param message - the message to be added
+	 * @return the message that was added
+	 */
+	T addMessage(Holder holder, String id, T message);
+
+	/**
+	 * Removes and returns the first available message in the store
+	 * @param holder - the message store implementation
+	 * @return the message that was added
+	 * @return the first message in the store that was removed or null if none exist
+	 */
 	T removeFirst(Holder holder);
 
 }

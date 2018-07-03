@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
@@ -35,21 +34,20 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import static org.springframework.http.HttpMethod.GET;
 
-public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpResponseHandler> {
+public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultSpResponseHandler> {
 
 	private SamlValidator validator;
 	private AuthenticationManager authenticationManager;
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,
-									   HttpServletResponse response) throws IOException {
-
+	public ProcessingStatus process(HttpServletRequest request,
+									HttpServletResponse response) throws IOException {
 		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
 		String resp = request.getParameter("SAMLResponse");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
 		if (logger.isTraceEnabled()) {
-			logger.trace("Received SAMLResponse:"+xml);
+			logger.trace("Received SAMLResponse:" + xml);
 		}
 		//extract basic data so we can map it to an IDP
 		List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
@@ -70,10 +68,6 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 		String prefix = sp.getPrefix();
 		String path = prefix + "/SSO";
 		return isUrlMatch(request, path) && request.getParameter("SAMLResponse") != null;
-	}
-
-	public SamlValidator getValidator() {
-		return validator;
 	}
 
 	protected void authenticate(Response r, String spEntityId, String idpEntityId) {
@@ -100,6 +94,10 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 		return this;
 	}
 
+	public SamlValidator getValidator() {
+		return validator;
+	}
+
 	public AuthenticationManager getAuthenticationManager() {
 		return authenticationManager;
 	}
@@ -108,4 +106,5 @@ public class DefaultSpResponseHandler extends SamlMessageHandler<DefaultSpRespon
 		this.authenticationManager = authenticationManager;
 		return this;
 	}
+
 }

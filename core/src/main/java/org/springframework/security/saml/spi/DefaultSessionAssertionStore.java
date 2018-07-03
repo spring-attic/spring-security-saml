@@ -29,12 +29,21 @@ import javax.servlet.http.HttpSession;
 import org.springframework.security.saml.SamlMessageStore;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 
+/**
+ * Manages assertion objects stored in the HTTP session object.
+ * Used for handling Single Logout functionality.
+ * This store tracks all assertions that were issued under one identity provider session.
+ */
 public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion, HttpServletRequest> {
 
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".assertions";
 
 	protected Map<String, Assertion> getDataMap(HttpServletRequest request) {
-		HttpSession session = request.getSession(false);
+		return getDataMap(request, false);
+	}
+
+	protected Map<String, Assertion> getDataMap(HttpServletRequest request, boolean createSession) {
+		HttpSession session = request.getSession(createSession);
 		if (session == null) {
 			return Collections.emptyMap();
 		}
@@ -49,28 +58,43 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 		return data;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Assertion> getMessages(HttpServletRequest request) {
 		return getDataMap(request).values().stream().collect(Collectors.toList());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Assertion getMessage(HttpServletRequest request, String id) {
 		return getDataMap(request).get(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Assertion removeMessage(HttpServletRequest request, String id) {
 		return getDataMap(request).remove(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Assertion addMessage(HttpServletRequest request,
 								String id,
 								Assertion assertion) {
-		return getDataMap(request).put(id, assertion);
+		return getDataMap(request, true).put(id, assertion);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public synchronized Assertion removeFirst(HttpServletRequest request) {
 		Collection<Assertion> values = getDataMap(request).values();

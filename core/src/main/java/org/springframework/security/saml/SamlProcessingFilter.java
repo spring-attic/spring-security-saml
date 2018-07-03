@@ -35,6 +35,13 @@ import org.springframework.security.saml.SamlMessageHandler.ProcessingStatus;
 import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP;
 import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP_HANDLERS;
 
+/**
+ * Simple filter that handles all SAML messages.
+ * No filter mapping is required as each handler will determine if the message
+ * is a SAML message based on metadata preferences.
+ * For performance optimization under default configurations it's wise to configure this filter
+ * with the <code>/saml</code> mapping.
+ */
 public class SamlProcessingFilter implements Filter {
 
 	private List<SamlMessageHandler> handlers = new LinkedList<>();
@@ -50,7 +57,6 @@ public class SamlProcessingFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-
 	}
 
 	@Override

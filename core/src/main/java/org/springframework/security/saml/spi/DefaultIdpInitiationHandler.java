@@ -69,7 +69,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 	}
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,
+	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 
 		String entityId = request.getParameter("sp");

@@ -20,14 +20,13 @@ package org.springframework.security.saml.spi;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public abstract class IdpAssertionHandler<T extends IdpAssertionHandler> extends SamlMessageHandler<T> {
+public abstract class IdpAssertionHandler<T extends IdpAssertionHandler> extends DefaultSamlMessageHandler<T> {
 
 	protected Assertion getAssertion(IdentityProviderMetadata local,
 									 AuthenticationRequest authn,

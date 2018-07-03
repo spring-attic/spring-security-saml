@@ -31,9 +31,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class OpenSamlVelocityEngine implements SamlTemplateEngine {
 	@Override
-	public void process(
-		HttpServletRequest request, HttpServletResponse response, String templateId,
-		Map<String, String> model, Writer out
+	public void process(HttpServletRequest request,
+						String templateId,
+						Map<String, String> model,
+						Writer out
 	) {
 		org.apache.velocity.app.VelocityEngine velocityEngine = VelocityEngine.newVelocityEngine();
 		velocityEngine.init();

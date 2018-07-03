@@ -22,17 +22,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 
-public class DefaultMetadataHandler extends SamlMessageHandler<DefaultMetadataHandler> {
+public class DefaultMetadataHandler extends DefaultSamlMessageHandler<DefaultMetadataHandler> {
 
 	protected final String LOCAL_PROVIDER = getClass().getName() + ".local.provider";
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,HttpServletResponse response) throws IOException {
+	public ProcessingStatus process(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		LocalProviderConfiguration provider =
 			(LocalProviderConfiguration) request.getAttribute(LOCAL_PROVIDER);
 		Metadata metadata = getMetadata(request, provider);

@@ -72,7 +72,7 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,
+	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 
 		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));

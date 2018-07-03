@@ -20,13 +20,25 @@ package org.springframework.security.saml;
 import java.io.Writer;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Saml messages are often delivered using browser redirects.
+ * This can be via 302 Location responses or via forms that are delivered
+ * to the browser using HTML and Javascript.
+ * A SamlTemplateEngine can help process HTML/Javascript templates
+ */
 public interface SamlTemplateEngine {
 
+	/**
+	 * Process a template and deliver the response
+	 * @param request the incoming HTTP request
+	 * @param templateId the template to use
+	 * @param model the model with the data inputs
+	 * @param out a writer where the processed template will be written to
+	 */
 	void process(HttpServletRequest request,
-				 HttpServletResponse response,
-				 String templateId, Map<String, String> model,
+				 String templateId,
+				 Map<String, String> model,
 				 Writer out);
 
 }

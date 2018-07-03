@@ -42,6 +42,7 @@ public interface SamlValidator {
 	 * Performs an object validation on the respective object
 	 *
 	 * @param saml2Object the object to be validated according to SAML specification rules
+	 * @param resolver the object used to resolve metadata
 	 * @param request     - the servlet request that this object came in on
 	 * @throws ValidationException if validation failed. Details in the exception.
 	 */

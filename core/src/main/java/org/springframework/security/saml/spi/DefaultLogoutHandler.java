@@ -30,7 +30,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlAuthentication;
-import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
@@ -51,7 +50,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandler> {
+public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogoutHandler> {
 
 	private SamlValidator validator;
 	private String postBindingTemplate;
@@ -87,7 +86,7 @@ public class DefaultLogoutHandler extends SamlMessageHandler<DefaultLogoutHandle
 
 
 	@Override
-	protected ProcessingStatus process(HttpServletRequest request,
+	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException, ServletException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String prequest = request.getParameter("SAMLRequest");

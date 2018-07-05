@@ -25,6 +25,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 	private String metadata;
 	private RotatingKeys keys;
 	private String prefix;
+	private boolean singleLogoutEnabled = true;
 
 
 	public LocalProviderConfiguration(String prefix) {
@@ -87,6 +88,15 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	public LocalProviderConfiguration<T> setPrefix(String prefix) {
 		this.prefix = prefix;
+		return this;
+	}
+
+	public boolean isSingleLogoutEnabled() {
+		return singleLogoutEnabled;
+	}
+
+	public LocalProviderConfiguration<T> setSingleLogoutEnabled(boolean singleLogoutEnabled) {
+		this.singleLogoutEnabled = singleLogoutEnabled;
 		return this;
 	}
 }

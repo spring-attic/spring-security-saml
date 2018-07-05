@@ -43,6 +43,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import sample.config.AppConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -75,6 +76,9 @@ public class SimpleIdentityProviderBootTests {
 	@MockBean
 	private DefaultMetadataCache cache;
 
+	@Autowired
+	private AppConfig config;
+
 	@BeforeEach
 	public void mockCache() {
 		given(cache.getMetadata(anyString(), anyBoolean())).willReturn(CACHED_META_DATA.getBytes());
@@ -87,14 +91,16 @@ public class SimpleIdentityProviderBootTests {
 	}
 
 	@Test
-	public void getIdentityProviderMetadata() throws Exception {
-		MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
-			.andExpect(status().isOk())
-			.andReturn();
-		String xml = result.getResponse().getContentAsString();
-		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
-		assertNotNull(m);
-		assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
+	public void testIdentityProviderMetadata() throws Exception {
+		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
+		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(false));
+	}
+
+	@Test
+	public void singleLogoutDisabledMetadata() throws Exception {
+		config.getIdentityProvider().setSignMetadata(false);
+		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
+		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(true));
 	}
 
 	@Test
@@ -142,6 +148,17 @@ public class SimpleIdentityProviderBootTests {
 		assertThat(r.getAssertions(), notNullValue());
 		assertThat(r.getAssertions().size(), equalTo(1));
 
+	}
+
+	protected IdentityProviderMetadata getIdentityProviderMetadata() throws Exception {
+		MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
+			.andExpect(status().isOk())
+			.andReturn();
+		String xml = result.getResponse().getContentAsString();
+		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
+		assertNotNull(m);
+		assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
+		return (IdentityProviderMetadata)m;
 	}
 
 	private String extractResponse(String html, String name) {

@@ -15,7 +15,6 @@
  *
 */package org.springframework.security.samples;
 
-import java.time.Clock;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +24,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlObjectResolver;
@@ -37,11 +36,11 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.Defaults;
-import org.springframework.security.saml.util.Network;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -50,6 +49,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,20 +72,18 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private SamlObjectResolver resolver;
 
+	@MockBean
+	private DefaultMetadataCache cache;
+
+	@BeforeEach
+	public void mockCache() {
+		given(cache.getMetadata(anyString(), anyBoolean())).willReturn(CACHED_META_DATA.getBytes());
+	}
+
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
 	public static class SpringBootApplicationTestConfig {
-
-		@Bean
-		public DefaultMetadataCache cache(Clock time, Network network) {
-			return new DefaultMetadataCache(time, network) {
-				@Override
-				public byte[] getMetadata(String uri, boolean skipSslValidation) {
-					return CACHED_META_DATA.getBytes();
-				}
-			};
-		}
 	}
 
 	@Test

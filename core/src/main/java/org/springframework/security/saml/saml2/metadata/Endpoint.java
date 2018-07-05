@@ -73,4 +73,15 @@ public class Endpoint {
 		this.responseLocation = responseLocation;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Endpoint{");
+		sb.append("index=").append(index);
+		sb.append(", isDefault=").append(isDefault);
+		sb.append(", binding=").append(binding);
+		sb.append(", location='").append(location).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }

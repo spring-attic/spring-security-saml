@@ -86,17 +86,17 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return prefix;
 	}
 
-	public LocalProviderConfiguration<T> setPrefix(String prefix) {
+	public T setPrefix(String prefix) {
 		this.prefix = prefix;
-		return this;
+		return _this();
 	}
 
 	public boolean isSingleLogoutEnabled() {
 		return singleLogoutEnabled;
 	}
 
-	public LocalProviderConfiguration<T> setSingleLogoutEnabled(boolean singleLogoutEnabled) {
+	public T setSingleLogoutEnabled(boolean singleLogoutEnabled) {
 		this.singleLogoutEnabled = singleLogoutEnabled;
-		return this;
+		return _this();
 	}
 }

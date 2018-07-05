@@ -36,7 +36,6 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -49,12 +48,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import sample.config.AppConfig;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -84,16 +86,24 @@ public class SimpleServiceProviderBootTest {
 	private String idpEntityId;
 	private String spBaseUrl;
 
-	@SpringBootConfiguration
-	@EnableAutoConfiguration
-	@ComponentScan(basePackages = "sample")
-	public static class SpringBootApplicationTestConfig {
-	}
+	@Autowired
+	private AppConfig config;
 
 	@BeforeEach
 	void setUp() {
 		idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		spBaseUrl = "http://localhost";
+	}
+
+	@AfterEach
+	public void reset() {
+		config.getServiceProvider().setSingleLogoutEnabled(true);
+	}
+
+	@SpringBootConfiguration
+	@EnableAutoConfiguration
+	@ComponentScan(basePackages = "sample")
+	public static class SpringBootApplicationTestConfig {
 	}
 
 	@Test
@@ -114,17 +124,18 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@Test
-	public void getServiceProviderMetadata() throws Exception {
-		String xml = mockMvc.perform(get("/saml/sp/metadata"))
-			.andExpect(status().isOk())
-			.andReturn()
-			.getResponse()
-			.getContentAsString();
-		assertNotNull(xml);
-		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
-		assertNotNull(m);
-		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+	public void testServiceProviderMetadata() throws Exception {
+		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		assertThat(spm.getServiceProvider().getSingleLogoutService().isEmpty(), equalTo(false));
 	}
+
+	@Test
+	public void singleLogoutDisabledMetadata() throws Exception {
+		config.getServiceProvider().setSingleLogoutEnabled(false);
+		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
+	}
+
 
 	@Test
 	public void authnRequest() throws Exception {
@@ -140,7 +151,8 @@ public class SimpleServiceProviderBootTest {
 		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
 		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
 		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
-		Response response = defaults.response(authn,
+		Response response = defaults.response(
+			authn,
 			assertion,
 			sp,
 			idp
@@ -149,7 +161,7 @@ public class SimpleServiceProviderBootTest {
 		String encoded = transformer.samlEncode(transformer.toXml(response), false);
 		mockMvc.perform(
 			post("/saml/sp/SSO")
-			.param("SAMLResponse", encoded)
+				.param("SAMLResponse", encoded)
 		)
 			.andExpect(status().isFound())
 			.andExpect(authenticated());
@@ -203,7 +215,7 @@ public class SimpleServiceProviderBootTest {
 		LogoutRequest request = defaults.logoutRequest(
 			sp,
 			idp,
-			(NameIdPrincipal) assertion.getSubject().getPrincipal()
+			assertion.getSubject().getPrincipal()
 		);
 
 		String xml = transformer.toXml(request);
@@ -242,7 +254,7 @@ public class SimpleServiceProviderBootTest {
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		String redirect = mockMvc.perform(
 			get("/saml/sp/discovery")
-			.param("idp", idpEntityId)
+				.param("idp", idpEntityId)
 		)
 			.andExpect(status().isFound())
 			.andReturn()
@@ -270,5 +282,18 @@ public class SimpleServiceProviderBootTest {
 			);
 		}
 		return queryPairs;
+	}
+
+	protected ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
+		String xml = mockMvc.perform(get("/saml/sp/metadata"))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+		assertNotNull(xml);
+		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
+		assertNotNull(m);
+		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+		return (ServiceProviderMetadata)m;
 	}
 }

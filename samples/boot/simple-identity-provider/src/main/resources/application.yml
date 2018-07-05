@@ -25,6 +25,7 @@ spring:
         want-requests-signed: true
         signing-algorithm: RSA_SHA256
         digest-method: SHA256
+        single-logout-enabled: true
         keys:
           active:
             - name: key1

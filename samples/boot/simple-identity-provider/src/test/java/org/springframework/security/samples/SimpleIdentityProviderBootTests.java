@@ -40,12 +40,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import sample.config.AppConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -84,6 +86,11 @@ public class SimpleIdentityProviderBootTests {
 		given(cache.getMetadata(anyString(), anyBoolean())).willReturn(CACHED_META_DATA.getBytes());
 	}
 
+	@AfterEach
+	public void reset() {
+		config.getIdentityProvider().setSingleLogoutEnabled(true);
+	}
+
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
@@ -98,9 +105,9 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void singleLogoutDisabledMetadata() throws Exception {
-		config.getIdentityProvider().setSignMetadata(false);
+		config.getIdentityProvider().setSingleLogoutEnabled(false);
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(true));
+		assertThat(idpm.getIdentityProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
 
 	@Test

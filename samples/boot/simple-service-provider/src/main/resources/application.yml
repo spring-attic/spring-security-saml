@@ -25,6 +25,7 @@ spring:
         sign-metadata: true
         sign-requests: true
         want-assertions-signed: true
+        single-logout-enabled: true
         keys:
           active:
             - name: key1

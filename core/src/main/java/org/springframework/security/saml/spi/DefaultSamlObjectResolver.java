@@ -18,6 +18,7 @@ package org.springframework.security.saml.spi;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,6 +95,9 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		List<SimpleKey> keys = getSimpleKeys(sp);
 		SimpleKey signing = sp.isSignMetadata() ? sp.getKeys().getActive().get(0) : null;
 		ServiceProviderMetadata metadata = defaults.serviceProviderMetadata(baseUrl, keys, signing);
+		if (!sp.isSingleLogoutEnabled()) {
+			metadata.getServiceProvider().setSingleLogoutService(Collections.emptyList());
+		}
 		if (hasText(sp.getEntityId())) {
 			metadata.setEntityId(sp.getEntityId());
 		}
@@ -111,6 +115,9 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		List<SimpleKey> keys = getSimpleKeys(idp);
 		SimpleKey signing = idp.isSignMetadata() ? idp.getKeys().getActive().get(0) : null;
 		IdentityProviderMetadata metadata = defaults.identityProviderMetadata(baseUrl, keys, signing);
+		if (!idp.isSingleLogoutEnabled()) {
+			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
+		}
 		if (hasText(idp.getEntityId())) {
 			metadata.setEntityId(idp.getEntityId());
 		}

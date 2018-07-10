@@ -20,7 +20,7 @@ package org.springframework.security.saml.config;
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	private String entityId;
-	private String name;
+	private String alias;
 	private boolean signMetadata;
 	private String metadata;
 	private RotatingKeys keys;
@@ -73,12 +73,12 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return _this();
 	}
 
-	public String getName() {
-		return name;
+	public String getAlias() {
+		return alias;
 	}
 
-	public LocalProviderConfiguration<T> setName(String name) {
-		this.name = name;
+	public LocalProviderConfiguration<T> setAlias(String alias) {
+		this.alias = alias;
 		return this;
 	}
 

@@ -20,6 +20,7 @@ spring:
         connect-timeout: 4000
       identity-provider:
         entity-id: spring.security.saml.idp.id
+        alias: spring.security.saml.idp.id
         sign-metadata: true
         sign-assertions: true
         want-requests-signed: true
@@ -143,11 +144,11 @@ spring:
                 PM//DZj/ijS9WNzrLV06T7iYpYeTKveR8TYaBaJoovrlfPaCadI7L7WatrlQaMZ2
                 HffnsgNZROW70P9KbBF/4ejcVX96drpXiA==
         providers:
-        - name: uaa
+        - alias: uaa
           metadata: http://localhost:8082/uaa/saml/metadata
           link-text: Cloud Foundry UAA SP
 
-        - name: spring-security-saml-sp
+        - alias: spring-security-saml-sp
           metadata: |
             <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="spring.security.saml.sp.id"
                                  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
@@ -166,7 +167,7 @@ spring:
               </md:SPSSODescriptor>
             </md:EntityDescriptor>
           linktext: Spring Security SAML SP
-        - name: simplesamlphp
+        - alias: simplesamlphp
           metadata: http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
           link-text: Simple SAML PHP SP
 

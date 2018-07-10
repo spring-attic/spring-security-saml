@@ -101,8 +101,8 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		if (hasText(sp.getEntityId())) {
 			metadata.setEntityId(sp.getEntityId());
 		}
-		if (hasText(sp.getName())) {
-			metadata.setEntityAlias(sp.getName());
+		if (hasText(sp.getAlias())) {
+			metadata.setEntityAlias(sp.getAlias());
 		}
 		metadata.getServiceProvider().setWantAssertionsSigned(sp.isWantAssertionsSigned());
 		metadata.getServiceProvider().setAuthnRequestsSigned(sp.isSignRequests());
@@ -121,8 +121,8 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		if (hasText(idp.getEntityId())) {
 			metadata.setEntityId(idp.getEntityId());
 		}
-		if (hasText(idp.getName())) {
-			metadata.setEntityAlias(idp.getName());
+		if (hasText(idp.getAlias())) {
+			metadata.setEntityAlias(idp.getAlias());
 		}
 
 		metadata.getIdentityProvider().setWantAuthnRequestsSigned(idp.isWantRequestsSigned());

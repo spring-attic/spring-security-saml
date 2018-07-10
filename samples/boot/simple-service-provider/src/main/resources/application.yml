@@ -144,14 +144,14 @@ spring:
                 z/AkxsRNN9VXNHewjQO605umiAKJ
                 -----END CERTIFICATE-----
         providers:
-        - name: spring-security-saml-idp
+        - alias: spring-security-saml-idp
           metadata: http://localhost:8081/sample-idp/saml/idp/metadata
           link-text: Spring Security SAML IDP
           name-id: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
           assertion-consumer-service-index: 0
-        - name: uaa
+        - alias: uaa
           metadata: http://localhost:8082/uaa/saml/idp/metadata
           link-text: Cloud Foundry UAA IDP
-        - name: simplesamlphp
+        - alias: simplesamlphp
           metadata: http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php
           link-text: Simple SAML PHP IDP

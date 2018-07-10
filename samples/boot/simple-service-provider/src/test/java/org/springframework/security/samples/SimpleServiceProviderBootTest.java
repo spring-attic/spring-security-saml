@@ -38,6 +38,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -89,6 +90,7 @@ public class SimpleServiceProviderBootTest {
 	@Autowired
 	private AppConfig config;
 
+
 	@BeforeEach
 	void setUp() {
 		idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
@@ -115,9 +117,8 @@ public class SimpleServiceProviderBootTest {
 		assertThat(sp.getEntityId(), equalTo("spring.security.saml.sp.id"));
 		assertTrue(sp.isSignMetadata());
 		assertTrue(sp.isSignRequests());
-		List<SimpleKey> activeKeys = sp.getKeys().getActive();
-		assertNotNull(activeKeys);
-		assertThat(activeKeys.size(), equalTo(1));
+		SimpleKey activeKey = sp.getKeys().getActive();
+		assertNotNull(activeKey);
 		List<SimpleKey> standByKeys = sp.getKeys().getStandBy();
 		assertNotNull(standByKeys);
 		assertThat(standByKeys.size(), equalTo(2));
@@ -127,6 +128,11 @@ public class SimpleServiceProviderBootTest {
 	public void testServiceProviderMetadata() throws Exception {
 		ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService().isEmpty(), equalTo(false));
+		//this gets created automatically when deserializing
+		assertThat(spm.getEntityAlias(), equalTo("spring.security.saml.sp.id"));
+		for (Endpoint ep : spm.getServiceProvider().getAssertionConsumerService()) {
+			assertThat(ep.getLocation(), equalTo("http://localhost:80/saml/sp/SSO/alias/boot-sample-sp"));
+		}
 	}
 
 	@Test
@@ -160,7 +166,7 @@ public class SimpleServiceProviderBootTest {
 
 		String encoded = transformer.samlEncode(transformer.toXml(response), false);
 		mockMvc.perform(
-			post("/saml/sp/SSO")
+			post("/saml/sp/SSO/alias/boot-sample-sp")
 				.param("SAMLResponse", encoded)
 		)
 			.andExpect(status().isFound())
@@ -253,7 +259,7 @@ public class SimpleServiceProviderBootTest {
 	protected AuthenticationRequest getAuthenticationRequest() throws Exception {
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		String redirect = mockMvc.perform(
-			get("/saml/sp/discovery")
+			get("/saml/sp/discovery/alias/"+configuration.getServiceProvider().getAlias())
 				.param("idp", idpEntityId)
 		)
 			.andExpect(status().isFound())

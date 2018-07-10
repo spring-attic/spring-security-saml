@@ -113,8 +113,7 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 	@Override
 	public boolean supports(HttpServletRequest request) {
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
-		String prefix = idp.getPrefix();
-		String path = prefix + "/SSO";
+		String path = getExpectedPath(idp,"SSO");
 		return isUrlMatch(request, path) && request.getParameter("SAMLRequest") != null;
 	}
 

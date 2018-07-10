@@ -35,14 +35,29 @@ class DefaultLogoutHandlerTests {
 	@BeforeEach
 	public void setup() {
 		idp = new LocalIdentityProviderConfiguration()
-			.setPrefix("");
+			.setPrefix("")
+			.setAlias("idp-alias");
 		handler = new DefaultLogoutHandler();
 		request = new MockHttpServletRequest();
-		request.setPathInfo("/logout");
+		request.setPathInfo("/logout/alias/idp-alias");
 	}
 
 	@Test
 	public void singleLogoutEnabled() {
+		request.setPathInfo("/logout");
+		assertTrue(handler.internalSupports(request, idp));
+	}
+
+	@Test
+	public void singleLogoutEnabledAliasEnabled() {
+		request.setPathInfo("/logout");
+		handler.setMatchAgainstAliasPath(true);
+		assertFalse(handler.internalSupports(request, idp));
+	}
+
+	@Test
+	public void singleLogoutEnabledWithAlias() {
+		request.setPathInfo("/logout/alias/idp-alias");
 		assertTrue(handler.internalSupports(request, idp));
 	}
 

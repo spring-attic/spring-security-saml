@@ -17,6 +17,8 @@
 
 package org.springframework.security.saml.config;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	private String entityId;
@@ -77,9 +79,9 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return alias;
 	}
 
-	public LocalProviderConfiguration<T> setAlias(String alias) {
+	public T setAlias(String alias) {
 		this.alias = alias;
-		return this;
+		return _this();
 	}
 
 	public String getPrefix() {
@@ -87,8 +89,20 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 	}
 
 	public T setPrefix(String prefix) {
+		prefix = cleanPrefix(prefix);
 		this.prefix = prefix;
+
 		return _this();
+	}
+
+	protected String cleanPrefix(String prefix) {
+		if (hasText(prefix) && prefix.startsWith("/")) {
+			prefix = prefix.substring(1);
+		}
+		if (hasText(prefix) && !prefix.endsWith("/")) {
+			prefix = prefix + "/";
+		}
+		return prefix;
 	}
 
 	public boolean isSingleLogoutEnabled() {

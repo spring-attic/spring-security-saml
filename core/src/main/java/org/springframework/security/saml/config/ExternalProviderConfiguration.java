@@ -18,7 +18,7 @@
 package org.springframework.security.saml.config;
 
 public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
-	private String name;
+	private String alias;
 	private String metadata;
 	private String linktext;
 	private boolean skipSslValidation = false;
@@ -26,12 +26,12 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 	public ExternalProviderConfiguration() {
 	}
 
-	public String getName() {
-		return name;
+	public String getAlias() {
+		return alias;
 	}
 
-	public T setName(String name) {
-		this.name = name;
+	public T setAlias(String alias) {
+		this.alias = alias;
 		return _this();
 	}
 

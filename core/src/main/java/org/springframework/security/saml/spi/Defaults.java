@@ -30,11 +30,17 @@
  */
 package org.springframework.security.saml.spi;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.config.LocalProviderConfiguration;
+import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
@@ -64,6 +70,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import org.joda.time.DateTime;
 
@@ -73,6 +80,7 @@ import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * Simple class that creates SAML objects with sensible defaults
@@ -101,8 +109,23 @@ public class Defaults {
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
+														   LocalServiceProviderConfiguration configuration) {
+		List<SimpleKey> keys = new LinkedList<>();
+		keys.add(configuration.getKeys().getActive());
+		keys.addAll(configuration.getKeys().getStandBy());
+		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+
+		String aliasPath = getAliasPath(configuration);
+		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
+		return serviceProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+	}
+
+	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
+														   SimpleKey signingKey,
 														   List<SimpleKey> keys,
-														   SimpleKey signingKey) {
+														   String prefix,
+														   String aliasPath) {
+
 		return new ServiceProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId(UUID.randomUUID().toString())
@@ -115,19 +138,29 @@ public class Defaults {
 						.setAuthnRequestsSigned(signingKey != null)
 						.setAssertionConsumerService(
 							asList(
-								getEndpoint(baseUrl, "saml/sp/SSO", Binding.POST, 0, true),
-								getEndpoint(baseUrl, "saml/sp/SSO", REDIRECT, 1, false)
+								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, "saml/sp/logout", REDIRECT, 0, true)
+								getEndpoint(baseUrl, prefix + "logout/alias/"+aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)
 			);
+	}
+
+	protected String getAliasPath(LocalProviderConfiguration configuration) {
+		try {
+			return hasText(configuration.getAlias()) ?
+				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
+				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
@@ -147,8 +180,22 @@ public class Defaults {
 	}
 
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+															 LocalIdentityProviderConfiguration configuration) {
+		List<SimpleKey> keys = new LinkedList<>();
+		keys.add(configuration.getKeys().getActive());
+		keys.addAll(configuration.getKeys().getStandBy());
+		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+
+		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
+		String aliasPath = getAliasPath(configuration);
+		return identityProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+	}
+	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+															 SimpleKey signingKey,
 															 List<SimpleKey> keys,
-															 SimpleKey signingKey) {
+															 String prefix,
+															 String aliasPath) {
+
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId(UUID.randomUUID().toString())
@@ -159,15 +206,15 @@ public class Defaults {
 						.setWantAuthnRequestsSigned(true)
 						.setSingleSignOnService(
 							asList(
-								getEndpoint(baseUrl, "saml/idp/SSO", Binding.POST, 0, true),
-								getEndpoint(baseUrl, "saml/idp/SSO", REDIRECT, 1, false)
+								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, "saml/idp/logout", REDIRECT, 0, true)
+								getEndpoint(baseUrl, prefix + "logout/alias/"+aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)

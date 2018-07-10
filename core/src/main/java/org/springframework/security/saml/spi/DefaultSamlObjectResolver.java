@@ -92,9 +92,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata getLocalServiceProvider(String baseUrl) {
 		LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
-		List<SimpleKey> keys = getSimpleKeys(sp);
-		SimpleKey signing = sp.isSignMetadata() ? sp.getKeys().getActive().get(0) : null;
-		ServiceProviderMetadata metadata = defaults.serviceProviderMetadata(baseUrl, keys, signing);
+		ServiceProviderMetadata metadata = defaults.serviceProviderMetadata(baseUrl, sp);
 		if (!sp.isSingleLogoutEnabled()) {
 			metadata.getServiceProvider().setSingleLogoutService(Collections.emptyList());
 		}
@@ -112,9 +110,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public IdentityProviderMetadata getLocalIdentityProvider(String baseUrl) {
 		LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
-		List<SimpleKey> keys = getSimpleKeys(idp);
-		SimpleKey signing = idp.isSignMetadata() ? idp.getKeys().getActive().get(0) : null;
-		IdentityProviderMetadata metadata = defaults.identityProviderMetadata(baseUrl, keys, signing);
+		IdentityProviderMetadata metadata = defaults.identityProviderMetadata(baseUrl, idp);
 		if (!idp.isSingleLogoutEnabled()) {
 			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
 		}
@@ -245,7 +241,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 
 	protected List<SimpleKey> getSimpleKeys(LocalProviderConfiguration sp) {
 		List<SimpleKey> keys = new LinkedList<>();
-		keys.addAll(sp.getKeys().getActive());
+		keys.add(sp.getKeys().getActive());
 		keys.addAll(sp.getKeys().getStandBy());
 		return keys;
 	}

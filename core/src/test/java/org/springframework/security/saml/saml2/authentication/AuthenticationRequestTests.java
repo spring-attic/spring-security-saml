@@ -49,8 +49,8 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "ForceAuthn", equalTo("false"));
 		assertNodeAttribute(nodes.iterator().next(), "IsPassive", equalTo("false"));
 		assertNodeAttribute(nodes.iterator().next(), "ProtocolBinding", equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
-		assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO"));
-		assertNodeAttribute(nodes.iterator().next(), "Destination", equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO"));
+		assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias"));
+		assertNodeAttribute(nodes.iterator().next(), "Destination", equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias"));
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
@@ -73,7 +73,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 
 		assertSame(Binding.POST, data.getBinding());
-		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO", data.getAssertionConsumerService().getLocation());
+		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias", data.getAssertionConsumerService().getLocation());
 		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
 
@@ -82,6 +82,6 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.isForceAuth(), equalTo(FALSE));
 		assertThat(data.isPassive(), equalTo(FALSE));
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
-		assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO"));
+		assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias"));
 	}
 }

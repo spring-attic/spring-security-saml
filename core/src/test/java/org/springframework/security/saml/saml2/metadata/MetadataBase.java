@@ -78,13 +78,17 @@ public abstract class MetadataBase {
 		idpBaseUrl = "http://idp.localhost:8080/uaa";
 		serviceProviderMetadata = defaults.serviceProviderMetadata(
 			spBaseUrl,
+			spSigning,
 			Arrays.asList(spSigning),
-			spSigning
+			"saml/sp/",
+			"sp-alias"
 		);
 		identityProviderMetadata = defaults.identityProviderMetadata(
 			idpBaseUrl,
+			idpSigning,
 			Arrays.asList(idpSigning),
-			idpSigning
+			"saml/idp/",
+			"idp-alias"
 		);
 	}
 }

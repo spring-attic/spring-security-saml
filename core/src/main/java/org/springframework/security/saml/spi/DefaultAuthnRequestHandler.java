@@ -75,10 +75,8 @@ public class DefaultAuthnRequestHandler extends DefaultSamlMessageHandler<Defaul
 	@Override
 	public boolean supports(HttpServletRequest request) {
 		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
-		String prefix = sp.getPrefix();
-		String path = prefix + "/discovery";
+		String path = getExpectedPath(sp, "discovery");
 		return isUrlMatch(request, path) && request.getParameter("idp") != null;
 	}
-
 
 }

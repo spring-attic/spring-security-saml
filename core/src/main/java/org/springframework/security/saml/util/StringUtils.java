@@ -41,4 +41,42 @@ public class StringUtils {
 		}
 	}
 
+	public static String addAliasPath(String path, String alias) {
+		return stripEndingSlases(path) + "/alias/" + alias;
+	}
+
+	public static String appendSlash(String path) {
+		if (!path.endsWith("/")) {
+			path = path + "/";
+		}
+		return path;
+	}
+
+	public static String prependSlash(String result) {
+		if (!result.startsWith("/")) {
+			result = "/" + result;
+		}
+		return result;
+	}
+
+	public static String stripSlashes(String path) {
+		path = stripStartingSlashes(path);
+		path = stripEndingSlases(path);
+		return path;
+	}
+
+	public static String stripEndingSlases(String path) {
+		while (path.endsWith("/")) {
+			path = path.substring(0,path.length()-1);
+		}
+		return path;
+	}
+
+	public static String stripStartingSlashes(String path) {
+		while (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		return path;
+	}
+
 }

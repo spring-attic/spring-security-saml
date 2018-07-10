@@ -13,7 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/package org.springframework.security.samples;
+*/
+
+package org.springframework.security.samples;
 
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -31,6 +33,7 @@ import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -101,6 +104,11 @@ public class SimpleIdentityProviderBootTests {
 	public void testIdentityProviderMetadata() throws Exception {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(false));
+		assertThat(idpm.getEntityAlias(), equalTo("spring.security.saml.idp.id"));
+		for (Endpoint ep : idpm.getIdentityProvider().getSingleSignOnService()) {
+			assertThat(ep.getLocation(), equalTo("http://localhost:80/saml/idp/SSO/alias/boot-sample-idp"));
+		}
+
 	}
 
 	@Test
@@ -141,7 +149,7 @@ public class SimpleIdentityProviderBootTests {
 
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
 		MvcResult result = mockMvc.perform(
-			get("/saml/idp/SSO")
+			get("/saml/idp/SSO/alias/boot-sample-idp")
 				.param("SAMLRequest", deflated)
 				.with(authentication(token))
 		)

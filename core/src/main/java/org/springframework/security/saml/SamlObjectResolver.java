@@ -42,6 +42,8 @@ public interface SamlObjectResolver {
 	 */
 	ServiceProviderMetadata getLocalServiceProvider(String baseUrl);
 
+//	ServiceProviderMetadata resolveLocalServiceProvider(HttpServletRequest request);
+
 	/**
 	 * Returns the Identity Provider metadata for a locally hosted IDP
 	 *
@@ -52,6 +54,8 @@ public interface SamlObjectResolver {
 	 * @return IdentityProviderMetadata for a local IDP
 	 */
 	IdentityProviderMetadata getLocalIdentityProvider(String baseUrl);
+
+//	IdentityProviderMetadata resolveLocalIdentityProvider(HttpServletRequest request);
 
 	/**
 	 * Under the assumption that the Response originated from an Identity Provider

@@ -30,6 +30,10 @@ public class DefaultMetadataHandler extends DefaultSamlMessageHandler<DefaultMet
 
 	protected final String LOCAL_PROVIDER = getClass().getName() + ".local.provider";
 
+	public DefaultMetadataHandler() {
+		setMatchAgainstAliasPath(false);
+	}
+
 	@Override
 	public ProcessingStatus process(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		LocalProviderConfiguration provider =
@@ -57,8 +61,7 @@ public class DefaultMetadataHandler extends DefaultSamlMessageHandler<DefaultMet
 	protected boolean internalSupports(HttpServletRequest request, LocalProviderConfiguration provider) {
 		boolean result = false;
 		if (provider != null) {
-			String prefix = provider.getPrefix();
-			String path = prefix + "/metadata";
+			String path = getExpectedPath(provider,"metadata");
 			if (isUrlMatch(request, path)) {
 				result = true;
 				request.setAttribute(LOCAL_PROVIDER, provider);

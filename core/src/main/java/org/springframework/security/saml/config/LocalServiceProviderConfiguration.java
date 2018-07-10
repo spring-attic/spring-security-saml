@@ -31,7 +31,7 @@ public class LocalServiceProviderConfiguration extends
 	private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
 
 	public LocalServiceProviderConfiguration() {
-		super("/saml/sp");
+		super("saml/sp");
 	}
 
 	public boolean isSignRequests() {

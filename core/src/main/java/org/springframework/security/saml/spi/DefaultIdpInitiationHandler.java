@@ -41,6 +41,10 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 	private String postBindingTemplate;
 	private DefaultSessionAssertionStore store;
 
+	public DefaultIdpInitiationHandler() {
+		setMatchAgainstAliasPath(false);
+	}
+
 	public SamlValidator getValidator() {
 		return validator;
 	}
@@ -121,8 +125,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 	@Override
 	public boolean supports(HttpServletRequest request) {
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
-		String prefix = idp.getPrefix();
-		String path = prefix + "/init";
+		String path = getExpectedPath(idp,"init");
 		return isUrlMatch(request, path) && request.getParameter("sp") != null;
 	}
 }

@@ -22,16 +22,21 @@ import java.util.List;
 
 import org.springframework.security.saml.key.SimpleKey;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class RotatingKeys {
-	private List<SimpleKey> active = new LinkedList<>();
+	private SimpleKey active = null;
 	private List<SimpleKey> standBy = new LinkedList<>();
 
-	public List<SimpleKey> getActive() {
+	public SimpleKey getActive() {
 		return active;
 	}
 
-	public RotatingKeys setActive(List<SimpleKey> active) {
+	public RotatingKeys setActive(SimpleKey active) {
 		this.active = active;
+		if (!hasText(active.getName())) {
+			active.setName("active-signing-key");
+		}
 		return this;
 	}
 

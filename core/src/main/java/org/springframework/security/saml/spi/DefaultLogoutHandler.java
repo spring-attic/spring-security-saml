@@ -296,8 +296,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	protected boolean internalSupports(HttpServletRequest request, LocalProviderConfiguration provider) {
 		boolean result = false;
 		if (provider != null && provider.isSingleLogoutEnabled()) {
-			String prefix = provider.getPrefix();
-			String path = prefix + "/logout";
+			String path = getExpectedPath(provider,"logout");
 			result = isUrlMatch(request, path);
 		}
 		return result;

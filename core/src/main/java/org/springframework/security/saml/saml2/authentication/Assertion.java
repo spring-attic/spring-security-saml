@@ -20,6 +20,7 @@ package org.springframework.security.saml.saml2.authentication;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
@@ -29,6 +30,8 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Implementation saml:AssertionType as defined by
@@ -141,6 +144,21 @@ public class Assertion extends ImplementationHolder {
 		this.attributes.clear();
 		this.attributes.addAll(attributes);
 		return this;
+	}
+
+	public List<Attribute> getAttributes(String name) {
+		return attributes
+			.stream()
+			.filter(a -> name.equals(a.getName()))
+			.collect(toList());
+	}
+
+	public Attribute getFirstAttribute(String name) {
+		Optional<Attribute> first = attributes
+			.stream()
+			.filter(a -> name.equals(a.getName()))
+			.findFirst();
+		return first.isPresent() ? first.get() : null;
 	}
 
 	public SimpleKey getSigningKey() {

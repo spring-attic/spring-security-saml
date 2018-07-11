@@ -145,6 +145,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 			Metadata m = resolve(metadata, c.isSkipSslValidation());
 			while (m != null) {
 				if (m instanceof IdentityProviderMetadata && entityId.equals(m.getEntityId())) {
+					m.setEntityAlias(c.getAlias());
 					return (IdentityProviderMetadata) m;
 				}
 				m = m.hasNext() ? m.getNext() : null;
@@ -171,6 +172,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 			Metadata m = resolve(metadata, c.isSkipSslValidation());
 			while (m != null) {
 				if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
+					m.setEntityAlias(c.getAlias());
 					return (ServiceProviderMetadata) m;
 				}
 				m = m.hasNext() ? m.getNext() : null;

@@ -34,6 +34,5 @@ and [IDP initiated login](http://localhost:8081/sample-idp/saml/idp/init?sp=http
 
 Please use
 
-    username: testuser
-    password: testpassword
-
+    username: user
+    password: password

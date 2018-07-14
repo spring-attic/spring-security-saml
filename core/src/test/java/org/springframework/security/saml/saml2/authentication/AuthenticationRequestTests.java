@@ -37,9 +37,58 @@ import static org.springframework.security.saml.util.XmlTestUtil.*;
 class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
-	public void create() {
+	public void createWithDefaults() {
 
 		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		String xml = config.toXml(request);
+
+		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
+		Iterable<Node> nodes = getNodes(xml, "//samlp:AuthnRequest");
+		assertNodeAttribute(nodes.iterator().next(), "Version", equalTo("2.0"));
+		assertNodeAttribute(nodes.iterator().next(), "IssueInstant", notNullValue(String.class));
+		assertNodeAttribute(nodes.iterator().next(), "ForceAuthn", equalTo("false"));
+		assertNodeAttribute(nodes.iterator().next(), "IsPassive", equalTo("false"));
+		assertNodeAttribute(nodes.iterator().next(), "ProtocolBinding", equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
+		assertNodeAttribute(nodes.iterator().next(), "AssertionConsumerServiceURL", equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias"));
+		assertNodeAttribute(nodes.iterator().next(), "Destination", equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias"));
+
+		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
+		nodes = getNodes(xml, "//samlp:NameIDPolicy");
+		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.PERSISTENT));
+
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 0);
+	}
+
+	@Test
+	public void parseWithDefaults() {
+		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		String xml = config.toXml(request);
+		AuthenticationRequest data = (AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+		assertNotNull(data);
+		assertNotNull(data.getImplementation());
+		assertNotNull(data.getSignature());
+		assertTrue(data.getSignature().isValidated());
+
+
+		assertSame(Binding.POST, data.getBinding());
+		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias", data.getAssertionConsumerService().getLocation());
+		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
+
+		assertThat(data.getVersion(), equalTo("2.0"));
+		assertThat(data.getIssueInstant(), notNullValue(DateTime.class));
+		assertThat(data.isForceAuth(), equalTo(FALSE));
+		assertThat(data.isPassive(), equalTo(FALSE));
+		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
+		assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias"));
+	}
+
+	@Test
+	public void createWithAutContext() {
+
+		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
+		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+
 		String xml = config.toXml(request);
 
 		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
@@ -59,11 +108,20 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 1);
 		nodes = getNodes(xml, "//samlp:RequestedAuthnContext");
 		assertNodeAttribute(nodes.iterator().next(), "Comparison", equalTo("exact"));
+
+		// AuthnContextClassRef must be direct child of RequestedAuthnContext
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef", 1);
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()", 1);
+		nodes = getNodes(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()");
+		assertTextNodeValue(nodes.iterator().next(), equalTo("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"));
 	}
 
 	@Test
-	public void parse() {
+	public void parseWithAutContext() {
 		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
+		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+
 		String xml = config.toXml(request);
 		AuthenticationRequest data = (AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
@@ -74,8 +132,9 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Binding.POST, data.getBinding());
 		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias", data.getAssertionConsumerService().getLocation());
-		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
+		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
+		assertSame(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT, data.getAuthenticationContextClassReference());
 
 		assertThat(data.getVersion(), equalTo("2.0"));
 		assertThat(data.getIssueInstant(), notNullValue(DateTime.class));
@@ -84,4 +143,5 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
 		assertThat(data.getAssertionConsumerService().getLocation(), equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias"));
 	}
+
 }

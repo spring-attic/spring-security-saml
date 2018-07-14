@@ -95,6 +95,7 @@ import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.Defaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
+import org.springframework.util.CollectionUtils;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -1139,6 +1140,11 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 					result.setComparison(EXACT);
 					break;
 			}
+			if (request.getAuthenticationContextClassReference() != null) {
+				final AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
+				authnContextClassRef.setAuthnContextClassRef(request.getAuthenticationContextClassReference().toString());
+				result.getAuthnContextClassRefs().add(authnContextClassRef);
+			}
 		}
 		return result;
 	}
@@ -1520,8 +1526,19 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setIssueInstant(request.getIssueInstant())
 			.setVersion(request.getVersion().toString())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
+			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
 			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
 
+		return result;
+	}
+
+	protected AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
+		AuthenticationContextClassReference result = null;
+		final RequestedAuthnContext context = request.getRequestedAuthnContext();
+		if (context != null && !CollectionUtils.isEmpty(context.getAuthnContextClassRefs())) {
+			final String urn = context.getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
+			result = AuthenticationContextClassReference.fromUrn(urn);
+		}
 		return result;
 	}
 

@@ -56,9 +56,6 @@ class AuthenticationRequestTests extends MetadataBase {
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
 		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.PERSISTENT));
 
-		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 1);
-		nodes = getNodes(xml, "//samlp:RequestedAuthnContext");
-		assertNodeAttribute(nodes.iterator().next(), "Comparison", equalTo("exact"));
 	}
 
 	@Test
@@ -74,7 +71,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Binding.POST, data.getBinding());
 		assertEquals("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias", data.getAssertionConsumerService().getLocation());
-		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
+		assertNull(data.getRequestedAuthenticationContext());
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
 
 		assertThat(data.getVersion(), equalTo("2.0"));

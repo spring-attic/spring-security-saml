@@ -23,7 +23,8 @@ import java.util.List;
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
 
-	private boolean wantRequestsSigned = false;
+	private boolean wantRequestsSigned = true;
+	private boolean signAssertions = true;
 	private List<ExternalServiceProviderConfiguration> providers = new LinkedList<>();
 
 	public LocalIdentityProviderConfiguration() {
@@ -45,6 +46,15 @@ public class LocalIdentityProviderConfiguration extends
 
 	public LocalIdentityProviderConfiguration setProviders(List<ExternalServiceProviderConfiguration> providers) {
 		this.providers = providers;
+		return this;
+	}
+
+	public boolean isSignAssertions() {
+		return signAssertions;
+	}
+
+	public LocalIdentityProviderConfiguration setSignAssertions(boolean signAssertions) {
+		this.signAssertions = signAssertions;
 		return this;
 	}
 }

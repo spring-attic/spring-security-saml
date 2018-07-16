@@ -64,6 +64,10 @@ public class XmlTestUtil {
 
 	}
 
+	public static void assertTextNodeValue(Node node, Matcher<String> matcher) {
+		assertThat(node.getNodeValue(), matcher);
+	}
+
 	public static Iterable<Node> assertNodeCount(String xml, String xPath, int expected) {
 		assertThat("XML cannot be null", xml, notNullValue(String.class));
 		Iterable<Node> nodes = getNodes(xml, xPath);

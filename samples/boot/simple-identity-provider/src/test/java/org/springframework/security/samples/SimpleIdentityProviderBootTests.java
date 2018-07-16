@@ -36,6 +36,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.SamlDefaults;
@@ -108,6 +109,10 @@ public class SimpleIdentityProviderBootTests {
 		for (Endpoint ep : idpm.getIdentityProvider().getSingleSignOnService()) {
 			assertThat(ep.getLocation(), equalTo("http://localhost:80/saml/idp/SSO/alias/boot-sample-idp"));
 		}
+		assertThat(
+			idpm.getIdentityProvider().getNameIds(),
+			containsInAnyOrder(NameId.UNSPECIFIED, NameId.PERSISTENT, NameId.EMAIL)
+		);
 
 	}
 

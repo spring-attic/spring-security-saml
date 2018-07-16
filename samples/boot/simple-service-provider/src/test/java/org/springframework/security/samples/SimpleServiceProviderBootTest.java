@@ -133,6 +133,10 @@ public class SimpleServiceProviderBootTest {
 		for (Endpoint ep : spm.getServiceProvider().getAssertionConsumerService()) {
 			assertThat(ep.getLocation(), equalTo("http://localhost:80/saml/sp/SSO/alias/boot-sample-sp"));
 		}
+		assertThat(
+			spm.getServiceProvider().getNameIds(),
+			containsInAnyOrder(NameId.UNSPECIFIED, NameId.PERSISTENT, NameId.EMAIL)
+		);
 	}
 
 	@Test

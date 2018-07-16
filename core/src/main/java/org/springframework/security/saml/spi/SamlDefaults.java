@@ -116,7 +116,15 @@ public class SamlDefaults {
 
 		String aliasPath = getAliasPath(configuration);
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
-		return serviceProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+
+		ServiceProviderMetadata metadata =
+			serviceProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+
+		if (!configuration.getNameIds().isEmpty()) {
+			metadata.getServiceProvider().setNameIds(configuration.getNameIds());
+		}
+
+		return metadata;
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
@@ -187,7 +195,11 @@ public class SamlDefaults {
 
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);
-		return identityProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+		IdentityProviderMetadata metadata = identityProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+		if (!configuration.getNameIds().isEmpty()) {
+			metadata.getIdentityProvider().setNameIds(configuration.getNameIds());
+		}
+		return metadata;
 	}
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
 															 SimpleKey signingKey,

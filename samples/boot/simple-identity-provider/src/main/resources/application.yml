@@ -27,6 +27,11 @@ spring:
         signing-algorithm: RSA_SHA256
         digest-method: SHA256
         single-logout-enabled: true
+        name-ids:
+          - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+
         keys:
           active:
             name: active-idp-key

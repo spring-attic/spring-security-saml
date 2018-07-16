@@ -17,6 +17,11 @@
 
 package org.springframework.security.saml.config;
 
+import java.util.List;
+
+import org.springframework.security.saml.saml2.metadata.NameId;
+
+import static java.util.Collections.emptyList;
 import static org.springframework.util.StringUtils.hasText;
 
 public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
@@ -28,6 +33,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 	private RotatingKeys keys;
 	private String prefix;
 	private boolean singleLogoutEnabled = true;
+	private List<NameId> nameIds = emptyList();
 
 
 	public LocalProviderConfiguration(String prefix) {
@@ -111,6 +117,15 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 
 	public T setSingleLogoutEnabled(boolean singleLogoutEnabled) {
 		this.singleLogoutEnabled = singleLogoutEnabled;
+		return _this();
+	}
+
+	public List<NameId> getNameIds() {
+		return nameIds;
+	}
+
+	public T setNameIds(List<NameId> nameIds) {
+		this.nameIds = nameIds;
 		return _this();
 	}
 }

@@ -39,7 +39,7 @@ public class DefaultIdpConfiguration extends AbstractProviderConfiguration {
 	@Bean
 	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
 		return new DefaultIdpRequestHandler()
-			.setDefaults(defaults())
+			.setSamlDefaults(defaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
@@ -53,7 +53,7 @@ public class DefaultIdpConfiguration extends AbstractProviderConfiguration {
 	@Bean
 	public SamlMessageHandler idpInitiationHandler(SamlServerConfiguration configuration) {
 		return new DefaultIdpInitiationHandler()
-			.setDefaults(defaults())
+			.setSamlDefaults(defaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())

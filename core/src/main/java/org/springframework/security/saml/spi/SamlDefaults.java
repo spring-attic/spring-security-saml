@@ -75,7 +75,6 @@ import org.springframework.web.util.UriUtils;
 import org.joda.time.DateTime;
 
 import static java.util.Arrays.asList;
-import static org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext.exact;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
@@ -85,7 +84,7 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * Simple class that creates SAML objects with sensible defaults
  */
-public class Defaults {
+public class SamlDefaults {
 
 	public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
 	public DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
@@ -95,7 +94,7 @@ public class Defaults {
 
 	private Clock time;
 
-	public Defaults(Clock time) {
+	public SamlDefaults(Clock time) {
 		this.time = time;
 	}
 
@@ -103,7 +102,7 @@ public class Defaults {
 		return time;
 	}
 
-	public Defaults setTime(Clock time) {
+	public SamlDefaults setTime(Clock time) {
 		this.time = time;
 		return this;
 	}

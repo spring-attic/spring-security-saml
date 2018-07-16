@@ -17,9 +17,6 @@
 
 package org.springframework.security.saml.config;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
 public class SamlServerConfiguration {
 
 	private LocalServiceProviderConfiguration serviceProvider;

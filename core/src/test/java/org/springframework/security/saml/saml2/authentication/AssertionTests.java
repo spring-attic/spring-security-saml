@@ -232,8 +232,8 @@ public class AssertionTests extends MetadataBase {
 	@Test
 	public void create_with_request() {
 
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		Assertion assertion = defaults.assertion(serviceProviderMetadata,
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		Assertion assertion = samlDefaults.assertion(serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",
@@ -295,9 +295,9 @@ public class AssertionTests extends MetadataBase {
 
 	@Test
 	public void check_xml() throws URISyntaxException, IOException {
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-		Assertion assertion = defaults.assertion(serviceProviderMetadata,
+		Assertion assertion = samlDefaults.assertion(serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",

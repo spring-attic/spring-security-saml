@@ -39,7 +39,7 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithDefaults() {
 
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
 
 		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
@@ -61,7 +61,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithDefaults() {
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
 		AuthenticationRequest data = (AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
@@ -85,7 +85,7 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithAutContext() {
 
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
 
@@ -118,7 +118,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithAutContext() {
-		AuthenticationRequest request = defaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
 

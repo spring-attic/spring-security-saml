@@ -54,7 +54,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	private static final Log logger = LogFactory.getLog(DefaultSamlObjectResolver.class);
 
 	private SamlServerConfiguration configuration;
-	private Defaults defaults;
+	private SamlDefaults samlDefaults;
 	private SamlTransformer transformer;
 	private Network network;
 	private DefaultMetadataCache cache;
@@ -72,8 +72,8 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	}
 
 	@Autowired
-	public DefaultSamlObjectResolver setDefaults(Defaults defaults) {
-		this.defaults = defaults;
+	public DefaultSamlObjectResolver setSamlDefaults(SamlDefaults samlDefaults) {
+		this.samlDefaults = samlDefaults;
 		return this;
 	}
 
@@ -92,7 +92,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata getLocalServiceProvider(String baseUrl) {
 		LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
-		ServiceProviderMetadata metadata = defaults.serviceProviderMetadata(baseUrl, sp);
+		ServiceProviderMetadata metadata = samlDefaults.serviceProviderMetadata(baseUrl, sp);
 		if (!sp.isSingleLogoutEnabled()) {
 			metadata.getServiceProvider().setSingleLogoutService(Collections.emptyList());
 		}
@@ -110,7 +110,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public IdentityProviderMetadata getLocalIdentityProvider(String baseUrl) {
 		LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
-		IdentityProviderMetadata metadata = defaults.identityProviderMetadata(baseUrl, idp);
+		IdentityProviderMetadata metadata = samlDefaults.identityProviderMetadata(baseUrl, idp);
 		if (!idp.isSingleLogoutEnabled()) {
 			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
 		}

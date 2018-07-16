@@ -105,7 +105,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 		ServiceProviderMetadata metadata, IdentityProviderMetadata local,
 		Assertion assertion
 	) {
-		return getDefaults().response(
+		return getSamlDefaults().response(
 			null,
 			assertion,
 			metadata,

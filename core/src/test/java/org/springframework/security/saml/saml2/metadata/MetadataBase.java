@@ -27,7 +27,7 @@ import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SamlDefaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.util.StreamUtils;
 
@@ -42,7 +42,7 @@ public abstract class MetadataBase {
 
 	protected static SamlTransformer config;
 	protected static SamlObjectResolver resolver;
-	protected static Defaults defaults;
+	protected static SamlDefaults samlDefaults;
 	protected static Clock time;
 	protected SimpleKey spSigning;
 	protected SimpleKey idpSigning;
@@ -58,7 +58,7 @@ public abstract class MetadataBase {
 		time = Clock.systemUTC();
 		config = new DefaultSamlTransformer(new OpenSamlImplementation(time));
 		resolver = new DefaultSamlObjectResolver();
-		defaults = new Defaults(time);
+		samlDefaults = new SamlDefaults(time);
 		((DefaultSamlTransformer) config).afterPropertiesSet();
 	}
 
@@ -76,14 +76,14 @@ public abstract class MetadataBase {
 		spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
 		spBaseUrl = "http://sp.localhost:8080/uaa";
 		idpBaseUrl = "http://idp.localhost:8080/uaa";
-		serviceProviderMetadata = defaults.serviceProviderMetadata(
+		serviceProviderMetadata = samlDefaults.serviceProviderMetadata(
 			spBaseUrl,
 			spSigning,
 			Arrays.asList(spSigning),
 			"saml/sp/",
 			"sp-alias"
 		);
-		identityProviderMetadata = defaults.identityProviderMetadata(
+		identityProviderMetadata = samlDefaults.identityProviderMetadata(
 			idpBaseUrl,
 			idpSigning,
 			Arrays.asList(idpSigning),

@@ -51,7 +51,7 @@ public class DefaultAuthnRequestHandler extends DefaultSamlMessageHandler<Defaul
 
 	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata local,
 															 IdentityProviderMetadata idp) {
-		return getDefaults().authenticationRequest(local, idp);
+		return getSamlDefaults().authenticationRequest(local, idp);
 	}
 
 	protected String getAuthnRequestRedirect(

@@ -92,7 +92,7 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SamlDefaults;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.springframework.util.CollectionUtils;
@@ -1504,7 +1504,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		AuthenticationRequest result = new AuthenticationRequest()
 			.setBinding(Binding.fromUrn(request.getProtocolBinding()))
 			.setAssertionConsumerService(
-				new Defaults(getTime()).getEndpoint(
+				new SamlDefaults(getTime()).getEndpoint(
 					request.getAssertionConsumerServiceURL(),
 					Binding.fromUrn(request.getProtocolBinding()),
 					ofNullable(request.getAssertionConsumerServiceIndex()).orElse(-1),
@@ -1512,7 +1512,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				)
 			)
 			.setDestination(
-				new Defaults(getTime()).getEndpoint(
+				new SamlDefaults(getTime()).getEndpoint(
 					request.getDestination(),
 					Binding.fromUrn(request.getProtocolBinding()),
 					-1,

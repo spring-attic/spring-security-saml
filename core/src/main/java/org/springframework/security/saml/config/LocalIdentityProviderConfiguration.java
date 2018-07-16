@@ -20,9 +20,6 @@ package org.springframework.security.saml.config;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
 

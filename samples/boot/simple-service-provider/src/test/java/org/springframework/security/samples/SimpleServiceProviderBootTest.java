@@ -44,7 +44,7 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
-import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SamlDefaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
@@ -83,7 +83,7 @@ public class SimpleServiceProviderBootTest {
 	@Autowired
 	private SamlObjectResolver resolver;
 	@Autowired
-	private Defaults defaults;
+	private SamlDefaults samlDefaults;
 	private String idpEntityId;
 	private String spBaseUrl;
 
@@ -156,8 +156,8 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
 		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
-		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
-		Response response = defaults.response(
+		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = samlDefaults.response(
 			authn,
 			assertion,
 			sp,
@@ -178,7 +178,7 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
 		ServiceProviderMetadata sp = resolver.getLocalServiceProvider(spBaseUrl);
-		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -211,14 +211,14 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
 		ServiceProviderMetadata sp = resolver.getLocalServiceProvider(spBaseUrl);
-		Assertion assertion = defaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
 			idpEntityId,
 			sp.getEntityId()
 		);
-		LogoutRequest request = defaults.logoutRequest(
+		LogoutRequest request = samlDefaults.logoutRequest(
 			sp,
 			idp,
 			assertion.getSubject().getPrincipal()

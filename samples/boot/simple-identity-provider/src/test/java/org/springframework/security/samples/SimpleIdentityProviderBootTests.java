@@ -38,7 +38,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.Defaults;
+import org.springframework.security.saml.spi.SamlDefaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -73,7 +73,7 @@ public class SimpleIdentityProviderBootTests {
 	private SamlTransformer transformer;
 
 	@Autowired
-	private Defaults defaults;
+	private SamlDefaults samlDefaults;
 
 	@Autowired
 	private SamlObjectResolver resolver;
@@ -143,7 +143,7 @@ public class SimpleIdentityProviderBootTests {
 		ServiceProviderMetadata sp = resolver.resolveServiceProvider("spring.security.saml.sp.id");
 		assertNotNull(sp);
 
-		AuthenticationRequest authenticationRequest = defaults.authenticationRequest(sp, local);
+		AuthenticationRequest authenticationRequest = samlDefaults.authenticationRequest(sp, local);
 		String xml = transformer.toXml(authenticationRequest);
 		String deflated = transformer.samlEncode(xml, true);
 

@@ -160,7 +160,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 				new NameIdPrincipal()
 					.setValue(sa.getPrincipal().toString())
 					.setFormat(NameId.UNSPECIFIED);
-			LogoutRequest lr = getDefaults().logoutRequest(
+			LogoutRequest lr = getSamlDefaults().logoutRequest(
 				sp,
 				idp,
 				principal
@@ -201,7 +201,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			getNetwork().getBasePath(request)
 		);
 		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(sa.getAssertingEntityId());
-		LogoutRequest lr = getDefaults().logoutRequest(
+		LogoutRequest lr = getSamlDefaults().logoutRequest(
 			idp,
 			sp,
 			(NameIdPrincipal) sa.getSamlPrincipal()
@@ -244,7 +244,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			logger.debug(
 				format("Processing logout request for local SP:%s to IDP:%s",localSp.getEntityId(),idp.getEntityId())
 			);
-			LogoutResponse lr = getDefaults().logoutResponse(logoutRequest, idp, localSp);
+			LogoutResponse lr = getSamlDefaults().logoutResponse(logoutRequest, idp, localSp);
 			String url = getRedirectUrl(lr, lr.getDestination(), "SAMLResponse");
 			sessionLogout(request, response, authentication);
 			logger.debug(format("Local SP logout complete. Redirecting to:%s", url));
@@ -264,7 +264,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 				IdentityProviderMetadata local =
 					getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
 				ServiceProviderMetadata sp = getResolver().resolveServiceProvider(logoutRequest);
-				LogoutResponse lr = getDefaults().logoutResponse(logoutRequest, sp, local);
+				LogoutResponse lr = getSamlDefaults().logoutResponse(logoutRequest, sp, local);
 				String url = getRedirectUrl(lr, lr.getDestination(), "SAMLResponse");
 				sessionLogout(request, response, authentication);
 				response.sendRedirect(url);

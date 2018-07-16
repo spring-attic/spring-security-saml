@@ -55,7 +55,7 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 	private SamlObjectResolver resolver;
 	private SamlTransformer transformer;
 	private Network network;
-	private Defaults defaults;
+	private SamlDefaults samlDefaults;
 	private SamlTemplateEngine samlTemplateEngine;
 	private String forwardUrl = null;
 	private boolean matchAgainstAliasPath;
@@ -110,12 +110,12 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 		return _this();
 	}
 
-	public Defaults getDefaults() {
-		return defaults;
+	public SamlDefaults getSamlDefaults() {
+		return samlDefaults;
 	}
 
-	public T setDefaults(Defaults defaults) {
-		this.defaults = defaults;
+	public T setSamlDefaults(SamlDefaults samlDefaults) {
+		this.samlDefaults = samlDefaults;
 		return _this();
 	}
 

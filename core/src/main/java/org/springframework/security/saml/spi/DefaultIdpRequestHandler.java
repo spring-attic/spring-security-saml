@@ -122,7 +122,7 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 								   AuthenticationRequest authn,
 								   ServiceProviderMetadata sp,
 								   Assertion assertion) {
-		return getDefaults().response(authn, assertion, sp, local);
+		return getSamlDefaults().response(authn, assertion, sp, local);
 	}
 
 }

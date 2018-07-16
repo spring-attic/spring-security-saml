@@ -46,7 +46,7 @@ public abstract class AbstractProviderConfiguration {
 	@Bean
 	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
 		return new DefaultMetadataHandler()
-			.setDefaults(defaults())
+			.setSamlDefaults(defaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
@@ -56,7 +56,7 @@ public abstract class AbstractProviderConfiguration {
 	@Bean
 	public SamlMessageHandler logoutHandler(SamlServerConfiguration configuration) {
 		return new DefaultLogoutHandler()
-			.setDefaults(defaults())
+			.setSamlDefaults(defaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
@@ -97,8 +97,8 @@ public abstract class AbstractProviderConfiguration {
 	}
 
 	@Bean
-	public Defaults defaults() {
-		return new Defaults(time());
+	public SamlDefaults defaults() {
+		return new SamlDefaults(time());
 	}
 
 	@Bean

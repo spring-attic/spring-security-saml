@@ -82,7 +82,7 @@ import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA
 import static org.springframework.util.StringUtils.hasText;
 
 /**
- * Simple class that creates SAML objects with sensible defaults
+ * Simple class that creates SAML objects with sensible samlDefaults
  */
 public class SamlDefaults {
 

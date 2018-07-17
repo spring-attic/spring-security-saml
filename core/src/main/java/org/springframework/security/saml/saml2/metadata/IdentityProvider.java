@@ -27,7 +27,7 @@ import org.springframework.security.saml.saml2.attribute.Attribute;
  */
 public class IdentityProvider extends SsoProvider<IdentityProvider> {
 
-	private boolean wantAuthnRequestsSigned;
+	private boolean wantAuthnRequestsSigned = true;
 	private List<Endpoint> singleSignOnService;
 	private List<Endpoint> nameIDMappingService;
 	private List<Endpoint> assertionIDRequestService;

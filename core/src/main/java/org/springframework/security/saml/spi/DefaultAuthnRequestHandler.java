@@ -39,8 +39,8 @@ public class DefaultAuthnRequestHandler extends DefaultSamlMessageHandler<Defaul
 	@Override
 	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
-		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
-		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(request.getParameter("idp"));
+		ServiceProviderMetadata local = getLocalServiceProvider(request);
+		IdentityProviderMetadata idp = getIdentityProvider(request);
 		AuthenticationRequest authenticationRequest = getAuthenticationRequest(local, idp);
 		logger.debug(format("Processing AuthnRequest for SP:%s and IDP:%s", local.getEntityId(), idp.getEntityId()));
 		String url = getAuthnRequestRedirect(idp, authenticationRequest);

@@ -42,7 +42,7 @@ public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultS
 	@Override
 	public ProcessingStatus process(HttpServletRequest request,
 									HttpServletResponse response) throws IOException {
-		ServiceProviderMetadata local = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
+		ServiceProviderMetadata local = getLocalServiceProvider(request);
 		String resp = request.getParameter("SAMLResponse");
 		//receive assertion
 		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));

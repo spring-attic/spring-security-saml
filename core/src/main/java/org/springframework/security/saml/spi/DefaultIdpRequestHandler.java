@@ -75,7 +75,7 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 	public ProcessingStatus process(HttpServletRequest request,
 									   HttpServletResponse response) throws IOException {
 
-		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
+		IdentityProviderMetadata local = getLocalIdentityProvider(request);
 		String resp = request.getParameter("SAMLRequest");
 		logger.debug(format("Local IDP(%s) received SAMLRequest", local.getEntityId()));
 		//receive authentication request

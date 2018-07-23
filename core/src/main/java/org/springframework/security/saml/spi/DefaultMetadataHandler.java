@@ -47,8 +47,8 @@ public class DefaultMetadataHandler extends DefaultSamlMessageHandler<DefaultMet
 
 	protected Metadata getMetadata(HttpServletRequest request, LocalProviderConfiguration provider) {
 		return provider instanceof LocalIdentityProviderConfiguration ?
-			getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request)) :
-			getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
+			getLocalIdentityProvider(request) :
+			getLocalServiceProvider(request);
 	}
 
 	@Override

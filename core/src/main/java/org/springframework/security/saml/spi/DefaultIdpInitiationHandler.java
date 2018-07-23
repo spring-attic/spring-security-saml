@@ -74,14 +74,15 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 
 	@Override
 	public ProcessingStatus process(HttpServletRequest request,
-									   HttpServletResponse response) throws IOException {
+									HttpServletResponse response) throws IOException {
 
-		String entityId = request.getParameter("sp");
-		logger.debug(format("Creating assertion for SP:%s", entityId));
+
 		//no authnrequest provided
-		ServiceProviderMetadata metadata = getResolver().resolveServiceProvider(entityId);
-		IdentityProviderMetadata local = getResolver().getLocalIdentityProvider(getNetwork().getBasePath
-			(request));
+		ServiceProviderMetadata metadata = getServiceProvider(request);
+		String entityId = metadata.getEntityId();
+		logger.debug(format("Creating assertion for SP:%s", entityId));
+
+		IdentityProviderMetadata local = getLocalIdentityProvider(request);
 		Assertion assertion = getAssertion(
 			local,
 			null,
@@ -125,7 +126,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 	@Override
 	public boolean supports(HttpServletRequest request) {
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
-		String path = getExpectedPath(idp,"init");
+		String path = getExpectedPath(idp, "init");
 		return isUrlMatch(request, path) && request.getParameter("sp") != null;
 	}
 }

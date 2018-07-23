@@ -29,6 +29,8 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -182,6 +184,23 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 		result = result + "/**";
 		return result;
 	}
+
+	protected IdentityProviderMetadata getIdentityProvider(HttpServletRequest request) {
+		return getResolver().resolveIdentityProvider(request.getParameter("idp"));
+	}
+
+	protected ServiceProviderMetadata getServiceProvider(HttpServletRequest request) {
+		return getResolver().resolveServiceProvider(request.getParameter("sp"));
+	}
+
+	protected ServiceProviderMetadata getLocalServiceProvider(HttpServletRequest request) {
+		return getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
+	}
+
+	protected IdentityProviderMetadata getLocalIdentityProvider(HttpServletRequest request) {
+		return getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
+	}
+
 
 
 }

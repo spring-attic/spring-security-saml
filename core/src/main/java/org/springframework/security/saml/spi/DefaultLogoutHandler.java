@@ -152,8 +152,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			}
 		}
 		else if (sa != null) {
-			IdentityProviderMetadata idp = getResolver()
-				.getLocalIdentityProvider(getNetwork().getBasePath(request));
+			IdentityProviderMetadata idp = getLocalIdentityProvider(request);
 			ServiceProviderMetadata sp = getResolver().resolveServiceProvider(issuedAssertion);
 			NameIdPrincipal principal = sa instanceof SamlAuthentication ?
 				(NameIdPrincipal) ((SamlAuthentication) sa).getSamlPrincipal() :
@@ -197,9 +196,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	protected boolean logoutSpInitiated(HttpServletRequest request,
 										HttpServletResponse response,
 										SamlAuthentication sa) throws IOException {
-		ServiceProviderMetadata sp = getResolver().getLocalServiceProvider(
-			getNetwork().getBasePath(request)
-		);
+		ServiceProviderMetadata sp = getLocalServiceProvider(request);
 		IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(sa.getAssertingEntityId());
 		LogoutRequest lr = getSamlDefaults().logoutRequest(
 			idp,
@@ -239,7 +236,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 											   HttpServletResponse response) throws IOException, ServletException {
 		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
-			ServiceProviderMetadata localSp = getResolver().getLocalServiceProvider(getNetwork().getBasePath(request));
+			ServiceProviderMetadata localSp = getLocalServiceProvider(request);
 			IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(logoutRequest);
 			logger.debug(
 				format("Processing logout request for local SP:%s to IDP:%s",localSp.getEntityId(),idp.getEntityId())
@@ -261,8 +258,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 				}
 			} else {
 				logger.debug("No SP sessions found, returning logout response");
-				IdentityProviderMetadata local =
-					getResolver().getLocalIdentityProvider(getNetwork().getBasePath(request));
+				IdentityProviderMetadata local = getLocalIdentityProvider(request);
 				ServiceProviderMetadata sp = getResolver().resolveServiceProvider(logoutRequest);
 				LogoutResponse lr = getSamlDefaults().logoutResponse(logoutRequest, sp, local);
 				String url = getRedirectUrl(lr, lr.getDestination(), "SAMLResponse");

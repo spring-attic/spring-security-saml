@@ -34,10 +34,18 @@ public abstract class IdpAssertionHandler<T extends IdpAssertionHandler> extends
 									 Authentication authentication,
 									 HttpServletRequest request,
 									 DefaultSessionAssertionStore assertionStore) {
-		String principal = authentication.getName();
-		Assertion assertion = getSamlDefaults().assertion(sp, local, authn, principal, NameId.PERSISTENT);
+
+		Assertion assertion = createAssertion(local, authn, sp, authentication);
 		assertionStore.addMessage(request, assertion.getId(), assertion);
 		return assertion;
+	}
+
+	private Assertion createAssertion(IdentityProviderMetadata local,
+									  AuthenticationRequest authn,
+									  ServiceProviderMetadata sp,
+									  Authentication authentication) {
+		String principal = authentication.getName();
+		return getSamlDefaults().assertion(sp, local, authn, principal, NameId.PERSISTENT);
 	}
 
 

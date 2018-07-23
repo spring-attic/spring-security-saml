@@ -76,17 +76,17 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 									   HttpServletResponse response) throws IOException {
 
 		IdentityProviderMetadata local = getLocalIdentityProvider(request);
-		String resp = request.getParameter("SAMLRequest");
+		String resp = getSamlRequest(request);
 		logger.debug(format("Local IDP(%s) received SAMLRequest", local.getEntityId()));
 		//receive authentication request
-		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+		String xml = decodeXml(request, resp);
 		//extract basic data so we can map it to an IDP
 		List<SimpleKey> localKeys = local.getIdentityProvider().getKeys();
-		AuthenticationRequest authn = (AuthenticationRequest) getTransformer().fromXml(xml, null, localKeys);
-		ServiceProviderMetadata sp = getResolver().resolveServiceProvider(authn);
+		AuthenticationRequest authn = getAuthenticationRequest(xml, localKeys, null);
+		ServiceProviderMetadata sp = getServiceProvider(authn);
 		logger.debug(format("Resolved AuthnRequest to SP:%s", sp.getEntityId()));
 		//validate signature
-		authn = (AuthenticationRequest) getTransformer().fromXml(xml, sp.getServiceProvider().getKeys(),localKeys);
+		authn = getAuthenticationRequest(xml, localKeys, sp.getServiceProvider().getKeys());
 		getValidator().validate(authn, getResolver(), request);
 		//create the assertion
 		Assertion assertion = getAssertion(
@@ -98,9 +98,8 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 			store
 		);
 		Response result = getResponse(local, authn, sp, assertion);
-
-		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
-		String destination = authn.getAssertionConsumerService().getLocation();
+		String encoded = encodeResponse(result);
+		String destination = getACS(authn, local, sp);
 
 		Map<String, String> model = new HashMap<>();
 		logger.debug(format("Submitting assertion for SP:%s to URL:%s", sp.getEntityId(), destination));
@@ -110,11 +109,37 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 		return ProcessingStatus.STOP;
 	}
 
+	protected ServiceProviderMetadata getServiceProvider(AuthenticationRequest authn) {
+		return getResolver().resolveServiceProvider(authn);
+	}
+
+	protected String getACS(AuthenticationRequest authn, IdentityProviderMetadata idp, ServiceProviderMetadata sp) {
+		return authn.getAssertionConsumerService().getLocation();
+	}
+
+	protected String encodeResponse(Response result) {
+		return getTransformer().samlEncode(getTransformer().toXml(result), false);
+	}
+
+	protected AuthenticationRequest getAuthenticationRequest(String xml,
+															 List<SimpleKey> localKeys,
+															 List<SimpleKey> verificationKeys) {
+		return (AuthenticationRequest) getTransformer().fromXml(xml, verificationKeys, localKeys);
+	}
+
+	protected String decodeXml(HttpServletRequest request, String resp) {
+		return getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+	}
+
+	protected String getSamlRequest(HttpServletRequest request) {
+		return request.getParameter("SAMLRequest");
+	}
+
 	@Override
 	public boolean supports(HttpServletRequest request) {
 		LocalIdentityProviderConfiguration idp = getConfiguration().getIdentityProvider();
 		String path = getExpectedPath(idp,"SSO");
-		return isUrlMatch(request, path) && request.getParameter("SAMLRequest") != null;
+		return isUrlMatch(request, path) && getSamlRequest(request) != null;
 	}
 
 

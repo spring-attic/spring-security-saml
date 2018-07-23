@@ -42,6 +42,7 @@ import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -56,6 +57,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	private String postBindingTemplate;
 	private DefaultSessionAssertionStore assertionStore;
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".logout.request";
+	private LogoutSuccessHandler successHandler;
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -63,6 +65,15 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 
 	public DefaultLogoutHandler setValidator(SamlValidator validator) {
 		this.validator = validator;
+		return this;
+	}
+
+	public LogoutSuccessHandler getSuccessHandler() {
+		return successHandler;
+	}
+
+	public DefaultLogoutHandler setSuccessHandler(LogoutSuccessHandler successHandler) {
+		this.successHandler = successHandler;
 		return this;
 	}
 
@@ -93,19 +104,11 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		String presponse = request.getParameter("SAMLResponse");
 		if (hasText(prequest)) {
 			//we received a request
-			logger.debug(format("Received logout request:%s", prequest));
-			prequest = getTransformer().samlDecode(prequest, HttpMethod.GET.matches(request.getMethod()));
-			LogoutRequest logoutRequest = (LogoutRequest) getTransformer().fromXml(prequest, null, null);
-			getValidator().validate(logoutRequest, getResolver(), request);
-			return logoutRequested(authentication, logoutRequest, request, response);
+			return processLogoutRequest(request, response, authentication, prequest);
 		}
 		else if (hasText(presponse)) {
 			//we received a response
-			logger.debug(format("Received logout response:%s", presponse));
-			presponse = getTransformer().samlDecode(presponse, HttpMethod.GET.matches(request.getMethod()));
-			LogoutResponse logoutResponse = (LogoutResponse) getTransformer().fromXml(presponse, null, null);
-			getValidator().validate(logoutResponse, getResolver(), request);
-			return logoutCompleted(authentication, logoutResponse, request, response);
+			return processLogoutResponse(request, response, authentication, presponse);
 		}
 		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
@@ -129,6 +132,28 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			}
 		}
 		return ProcessingStatus.CONTINUE;
+	}
+
+	protected ProcessingStatus processLogoutResponse(HttpServletRequest request,
+													 HttpServletResponse response,
+													 Authentication authentication, String presponse)
+		throws IOException, ServletException {
+		logger.debug(format("Received logout response:%s", presponse));
+		presponse = getTransformer().samlDecode(presponse, HttpMethod.GET.matches(request.getMethod()));
+		LogoutResponse logoutResponse = (LogoutResponse) getTransformer().fromXml(presponse, null, null);
+		getValidator().validate(logoutResponse, getResolver(), request);
+		return logoutCompleted(authentication, logoutResponse, request, response);
+	}
+
+	protected ProcessingStatus processLogoutRequest(HttpServletRequest request,
+													HttpServletResponse response,
+													Authentication authentication, String prequest)
+		throws IOException, ServletException {
+		logger.debug(format("Received logout request:%s", prequest));
+		prequest = getTransformer().samlDecode(prequest, HttpMethod.GET.matches(request.getMethod()));
+		LogoutRequest logoutRequest = (LogoutRequest) getTransformer().fromXml(prequest, null, null);
+		getValidator().validate(logoutRequest, getResolver(), request);
+		return logoutRequested(authentication, logoutRequest, request, response);
 	}
 
 	protected boolean logoutIdpInitiated(HttpServletRequest request,
@@ -237,11 +262,11 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
 			ServiceProviderMetadata localSp = getLocalServiceProvider(request);
-			IdentityProviderMetadata idp = getResolver().resolveIdentityProvider(logoutRequest);
+			IdentityProviderMetadata idp = getIdentityProvider(logoutRequest);
 			logger.debug(
 				format("Processing logout request for local SP:%s to IDP:%s",localSp.getEntityId(),idp.getEntityId())
 			);
-			LogoutResponse lr = getSamlDefaults().logoutResponse(logoutRequest, idp, localSp);
+			LogoutResponse lr = createLogoutResponse(logoutRequest, localSp, idp);
 			String url = getRedirectUrl(lr, lr.getDestination(), "SAMLResponse");
 			sessionLogout(request, response, authentication);
 			logger.debug(format("Local SP logout complete. Redirecting to:%s", url));
@@ -259,8 +284,8 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			} else {
 				logger.debug("No SP sessions found, returning logout response");
 				IdentityProviderMetadata local = getLocalIdentityProvider(request);
-				ServiceProviderMetadata sp = getResolver().resolveServiceProvider(logoutRequest);
-				LogoutResponse lr = getSamlDefaults().logoutResponse(logoutRequest, sp, local);
+				ServiceProviderMetadata sp = getServiceProvider(logoutRequest);
+				LogoutResponse lr = createLogoutResponse(logoutRequest, local, sp);
 				String url = getRedirectUrl(lr, lr.getDestination(), "SAMLResponse");
 				sessionLogout(request, response, authentication);
 				response.sendRedirect(url);
@@ -269,6 +294,26 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		}
 		logger.warn(format("Unable to process logout request:%s",logoutRequest));
 		return ProcessingStatus.CONTINUE;
+	}
+
+	protected LogoutResponse createLogoutResponse(LogoutRequest logoutRequest,
+												  IdentityProviderMetadata local,
+												  ServiceProviderMetadata sp) {
+		return getSamlDefaults().logoutResponse(logoutRequest, sp, local);
+	}
+
+	protected ServiceProviderMetadata getServiceProvider(LogoutRequest logoutRequest) {
+		return getResolver().resolveServiceProvider(logoutRequest);
+	}
+
+	protected IdentityProviderMetadata getIdentityProvider(LogoutRequest logoutRequest) {
+		return getResolver().resolveIdentityProvider(logoutRequest);
+	}
+
+	protected LogoutResponse createLogoutResponse(LogoutRequest logoutRequest,
+												  ServiceProviderMetadata localSp,
+												  IdentityProviderMetadata idp) {
+		return getSamlDefaults().logoutResponse(logoutRequest, idp, localSp);
 	}
 
 	protected boolean idpHasOtherSessions(HttpServletRequest request, LogoutRequest lr) {

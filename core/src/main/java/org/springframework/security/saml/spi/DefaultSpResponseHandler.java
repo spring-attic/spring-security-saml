@@ -43,23 +43,38 @@ public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultS
 	public ProcessingStatus process(HttpServletRequest request,
 									HttpServletResponse response) throws IOException {
 		ServiceProviderMetadata local = getLocalServiceProvider(request);
-		String resp = request.getParameter("SAMLResponse");
+		String resp = getResponseParameter(request);
 		//receive assertion
-		String xml = getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+		String xml = getResponseXml(request, resp);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Received SAMLResponse:" + xml);
 		}
 		//extract basic data so we can map it to an IDP
 		List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
-		Response r = (Response) getTransformer().fromXml(xml, null, localKeys);
+		Response r = getResponse(xml, localKeys, null);
 		IdentityProviderMetadata identityProviderMetadata = getResolver().resolveIdentityProvider(r);
 		//validate signature
-		r = (Response) getTransformer()
-			.fromXml(xml, identityProviderMetadata.getIdentityProvider().getKeys(), localKeys);
-		getValidator().validate(r, getResolver(), request);
+		r = getResponse(xml, localKeys, identityProviderMetadata.getIdentityProvider().getKeys());
+		validateResponse(request, r);
 		//extract the assertion
 		authenticate(r, local.getEntityId(), identityProviderMetadata.getEntityId());
 		return postAuthentication(request, response);
+	}
+
+	protected void validateResponse(HttpServletRequest request, Response r) {
+		getValidator().validate(r, getResolver(), request);
+	}
+
+	protected Response getResponse(String xml, List<SimpleKey> localKeys, List<SimpleKey> verificationKKeys) {
+		return (Response) getTransformer().fromXml(xml, verificationKKeys, localKeys);
+	}
+
+	protected String getResponseXml(HttpServletRequest request, String resp) {
+		return getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+	}
+
+	protected String getResponseParameter(HttpServletRequest request) {
+		return request.getParameter("SAMLResponse");
 	}
 
 	@Override
@@ -67,7 +82,7 @@ public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultS
 		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
 
 		String path = getExpectedPath(sp,"SSO");
-		return isUrlMatch(request, path) && request.getParameter("SAMLResponse") != null;
+		return isUrlMatch(request, path) && getResponseParameter(request) != null;
 	}
 
 	protected void authenticate(Response r, String spEntityId, String idpEntityId) {

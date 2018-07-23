@@ -92,7 +92,7 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 			store
 		);
 		Response result = getResponse(metadata, local, assertion);
-		String encoded = getTransformer().samlEncode(getTransformer().toXml(result), false);
+		String encoded = encodeResponse(result);
 		Map<String, String> model = new HashMap<>();
 		String acsUrl = getAcs(metadata);
 		logger.debug(format("Sending assertion for SP:%s to URL:%s", entityId, acsUrl));
@@ -100,6 +100,10 @@ public class DefaultIdpInitiationHandler extends IdpAssertionHandler<DefaultIdpI
 		model.put("SAMLResponse", encoded);
 		processHtml(request, response, getPostBindingTemplate(), model);
 		return ProcessingStatus.STOP;
+	}
+
+	protected String encodeResponse(Response result) {
+		return getTransformer().samlEncode(getTransformer().toXml(result), false);
 	}
 
 	protected Response getResponse(

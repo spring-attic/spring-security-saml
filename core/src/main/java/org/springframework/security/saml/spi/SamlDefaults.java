@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.SamlException;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
@@ -166,7 +167,7 @@ public class SamlDefaults {
 				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
 				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 

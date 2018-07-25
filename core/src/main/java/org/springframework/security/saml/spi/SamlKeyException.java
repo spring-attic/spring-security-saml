@@ -14,21 +14,21 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saml2.signature;
+
+package org.springframework.security.saml.spi;
 
 import org.springframework.SamlException;
 
-public class SignatureException extends SamlException {
-
-	public SignatureException(String message) {
+public class SamlKeyException extends SamlException {
+	public SamlKeyException(String message) {
 		super(message);
 	}
 
-	public SignatureException(String message, Throwable cause) {
+	public SamlKeyException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public SignatureException(Throwable cause) {
+	public SamlKeyException(Throwable cause) {
 		super(cause);
 	}
 }

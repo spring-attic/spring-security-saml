@@ -18,7 +18,9 @@ package org.springframework.security.saml.validation;
 
 import java.util.Arrays;
 
-public class ValidationException extends RuntimeException {
+import org.springframework.SamlException;
+
+public class ValidationException extends SamlException {
 
 	private ValidationResult errors;
 

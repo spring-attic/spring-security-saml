@@ -20,6 +20,8 @@ package org.springframework.security.saml.saml2.metadata;
 import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
+import org.springframework.SamlException;
+
 /**
  * Attribute Name Format Identifiers
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
@@ -49,7 +51,7 @@ public enum NameId {
 			fieldName.set(this, urn);
 			fieldName.setAccessible(false);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 

@@ -19,6 +19,8 @@ package org.springframework.security.saml.saml2.authentication;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.SamlException;
+
 public enum SubjectConfirmationMethod {
 
 	HOLDER_OF_KEY("urn:oasis:names:tc:SAML:2.0:cm:holder-of-key"),
@@ -38,7 +40,7 @@ public enum SubjectConfirmationMethod {
 				return method;
 			}
 		}
-		throw new IllegalArgumentException("No enum for:" + other);
+		throw new SamlException("No SubjectConfirmationMethod enum for:" + other);
 	}
 
 	@Override

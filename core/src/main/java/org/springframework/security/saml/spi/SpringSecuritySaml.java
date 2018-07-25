@@ -41,6 +41,7 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 import javax.xml.datatype.Duration;
 
+import org.springframework.SamlException;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
@@ -120,7 +121,7 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 			deflater.finish();
 			return b.toByteArray();
 		} catch (IOException e) {
-			throw new RuntimeException("Unable to deflate string", e);
+			throw new SamlException("Unable to deflate string", e);
 		}
 	}
 
@@ -132,7 +133,7 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 			iout.finish();
 			return new String(out.toByteArray(), UTF_8);
 		} catch (IOException e) {
-			throw new RuntimeException("Unable to inflate string", e);
+			throw new SamlException("Unable to inflate string", e);
 		}
 	}
 

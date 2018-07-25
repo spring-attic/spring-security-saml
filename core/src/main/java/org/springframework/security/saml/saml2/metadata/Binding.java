@@ -19,6 +19,8 @@ package org.springframework.security.saml.saml2.metadata;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.SamlException;
+
 /**
  * Defines binding type as part of an Endpoint as defined by
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
@@ -51,7 +53,7 @@ public enum Binding {
 				return binding;
 			}
 		}
-		throw new IllegalArgumentException("No enum for:" + other);
+		throw new SamlException("No Binding enum for:" + other);
 	}
 
 	@Override

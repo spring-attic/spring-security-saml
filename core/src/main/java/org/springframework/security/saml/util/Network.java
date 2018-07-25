@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.saml.spi.SamlKeyException;
 import org.springframework.web.client.RestTemplate;
 
 import org.apache.http.client.config.RequestConfig;
@@ -73,11 +74,11 @@ public class Network {
 		try {
 			return new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
 		} catch (KeyManagementException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		} catch (KeyStoreException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		}
 	}
 

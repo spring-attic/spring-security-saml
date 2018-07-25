@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 
+import org.springframework.SamlException;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
@@ -93,6 +94,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.SamlDefaults;
+import org.springframework.security.saml.spi.SamlKeyException;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.springframework.util.CollectionUtils;
@@ -309,14 +311,14 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		try {
 			parserPool.initialize();
 		} catch (ComponentInitializationException x) {
-			throw new RuntimeException("Unable to initialize OpenSaml v3 ParserPool", x);
+			throw new SamlException("Unable to initialize OpenSaml v3 ParserPool", x);
 		}
 
 
 		try {
 			InitializationService.initialize();
 		} catch (InitializationException e) {
-			throw new RuntimeException("Unable to initialize OpenSaml v3", e);
+			throw new SamlException("Unable to initialize OpenSaml v3", e);
 		}
 
 		XMLObjectProviderRegistry registry;
@@ -382,8 +384,11 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		if (result != null) {
 			return marshallToXml(result);
 		}
-		throw new UnsupportedOperationException(saml2Object != null ? saml2Object.getClass().getName() :
-			"null");
+		throw new SamlException("To xml transformation not supported for: "+
+			saml2Object != null ?
+				saml2Object.getClass().getName() :
+				"null"
+		);
 	}
 
 	@Override
@@ -436,25 +441,26 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			}
 			return result;
 		}
-		throw new IllegalArgumentException("not yet implemented class parsing:" + parsed.getClass());
+		throw new SamlException("Deserialization not yet supported for class: " + parsed.getClass());
 	}
 
 	@Override
 	public Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
-			throw new NullPointerException("No object to validate signature against.");
+			throw new SamlException("No object to validate signature against.");
 		}
 
 		if (trustedKeys == null || trustedKeys.isEmpty()) {
-			throw new IllegalArgumentException("At least one verification key has to be provided");
+			throw new SamlKeyException("At least one verification key has to be provided");
 		}
 
 		if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
 			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
 		}
 		else {
-			throw new IllegalArgumentException("Unrecognized object type:" + saml2Object.getImplementation()
-				.getClass().getName());
+			throw new SamlException(
+				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
+			);
 		}
 	}
 
@@ -493,7 +499,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			cs.add(criteria);
 			return resolver.resolveSingle(cs);
 		} catch (ResolverException e) {
-			throw new RuntimeException("Can't obtain SP private key", e);
+			throw new SamlKeyException("Can't obtain SP private key", e);
 		}
 	}
 
@@ -551,7 +557,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			}
 		}
 		if (last != null) {
-			throw new RuntimeException("Unable to decrypt object.", last);
+			throw new SamlKeyException("Unable to decrypt object.", last);
 		}
 		return null;
 	}
@@ -570,7 +576,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			Element element = document.getDocumentElement();
 			return getUnmarshallerFactory().getUnmarshaller(element).unmarshall(element);
 		} catch (UnmarshallingException | XMLParserException e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 
@@ -630,7 +636,11 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		else {
 
 		}
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+			descriptor == null ?
+				null :
+				descriptor.getClass().getName()
+		);
 	}
 
 	protected List<Attribute> getRequestAttributes(SPSSODescriptor desc) {
@@ -764,7 +774,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		result.setIssuer(toIssuer(response.getIssuer()));
 
 		if (response.getStatus() == null || response.getStatus().getCode() == null) {
-			throw new IllegalArgumentException("Status cannot be null on a response");
+			throw new SamlException("Status cannot be null on a response");
 		}
 		org.opensaml.saml.saml2.core.Status status = buildSAMLObject(org.opensaml.saml.saml2.core.Status.class);
 		org.opensaml.saml.saml2.core.StatusCode code = buildSAMLObject(org.opensaml.saml.saml2.core.StatusCode.class);
@@ -1115,7 +1125,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.marshall(auth);
 			return SerializeSupport.nodeToString(element);
 		} catch (MarshallingException e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 
@@ -1737,7 +1747,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			}
 			return descriptor;
 		} catch (SecurityException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		}
 	}
 
@@ -1778,7 +1788,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			marshaller.marshall(signable);
 			Signer.signObject(signature);
 		} catch (SecurityException | MarshallingException | SignatureException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		}
 	}
 
@@ -1788,9 +1798,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			QName defaultElementName = (QName) clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
 			object = (T) getBuilderFactory().getBuilder(defaultElementName).buildObject(defaultElementName);
 		} catch (IllegalAccessException e) {
-			throw new IllegalArgumentException("Could not create SAML object");
+			throw new SamlException("Could not create SAML object", e);
 		} catch (NoSuchFieldException e) {
-			throw new IllegalArgumentException("Could not create SAML object");
+			throw new SamlException("Could not create SAML object", e);
 		}
 
 		return object;

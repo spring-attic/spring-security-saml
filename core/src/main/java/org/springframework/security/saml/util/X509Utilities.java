@@ -31,6 +31,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import org.springframework.security.saml.spi.SamlKeyException;
+
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -92,7 +94,7 @@ public class X509Utilities {
 			JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
 			KeyPair kp;
 			if (obj == null) {
-				throw new IllegalArgumentException("Unable to decode PEM key:" + pem);
+				throw new SamlKeyException("Unable to decode PEM key:" + pem);
 			}
 			else if (obj instanceof PEMEncryptedKeyPair) {
 				// Encrypted key - we will use provided password
@@ -109,7 +111,7 @@ public class X509Utilities {
 
 			return kp.getPrivate();
 		} catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new SamlKeyException(e);
 		}
 	}
 

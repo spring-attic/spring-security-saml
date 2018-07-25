@@ -18,6 +18,8 @@ package org.springframework.security.saml.util;
 
 import java.net.URISyntaxException;
 
+import org.springframework.SamlException;
+
 import org.apache.http.client.utils.URIBuilder;
 
 public class StringUtils {
@@ -37,7 +39,7 @@ public class StringUtils {
 		try {
 			return new URIBuilder(url);
 		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 

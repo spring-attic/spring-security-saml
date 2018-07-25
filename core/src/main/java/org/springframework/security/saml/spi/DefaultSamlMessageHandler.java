@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.SamlException;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTemplateEngine;
@@ -158,7 +159,7 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 		try {
 			response.getWriter().write(out.toString());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SamlException(e);
 		}
 	}
 

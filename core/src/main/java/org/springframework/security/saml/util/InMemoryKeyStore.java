@@ -41,6 +41,7 @@ import java.security.cert.CertificateException;
 import java.util.UUID;
 
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.spi.SamlKeyException;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -73,9 +74,9 @@ public class InMemoryKeyStore {
 
 			return new InMemoryKeyStore(ks);
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SamlKeyException(e);
 		}
 	}
 

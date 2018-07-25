@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.SamlException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
@@ -33,7 +34,6 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -92,6 +92,9 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public ServiceProviderMetadata getLocalServiceProvider(String baseUrl) {
 		LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
+		if (sp == null) {
+			throw new SamlProviderNotFoundException("No local service provider configured.");
+		}
 		ServiceProviderMetadata metadata = samlDefaults.serviceProviderMetadata(baseUrl, sp);
 		if (!sp.isSingleLogoutEnabled()) {
 			metadata.getServiceProvider().setSingleLogoutService(Collections.emptyList());
@@ -110,6 +113,9 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	@Override
 	public IdentityProviderMetadata getLocalIdentityProvider(String baseUrl) {
 		LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
+		if (idp == null) {
+			throw new SamlProviderNotFoundException("No local identity provider configured.");
+		}
 		IdentityProviderMetadata metadata = samlDefaults.identityProviderMetadata(baseUrl, idp);
 		if (!idp.isSingleLogoutEnabled()) {
 			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
@@ -125,16 +131,42 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		return metadata;
 	}
 
+	protected <T extends Metadata> T throwIfNull(T metadata, String key, String value) {
+		if (metadata == null) {
+			String message = "Provider for key '%s' with value '%s' not found.";
+			throw new SamlProviderNotFoundException(
+				String.format(message, key, value)
+			);
+		}
+		else {
+			return metadata;
+		}
+	}
+
 	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(Assertion assertion) {
-		Issuer issuer = assertion.getIssuer();
-		return resolveIdentityProvider(issuer.getValue());
+		String issuer = assertion.getIssuer() != null ?
+			assertion.getIssuer().getValue() :
+			null;
+		return
+			throwIfNull(
+				resolveIdentityProvider(issuer),
+				"assertion issuer",
+				issuer
+			);
 	}
 
 	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(Response response) {
-		Issuer issuer = response.getIssuer();
-		return resolveIdentityProvider(issuer.getValue());
+		String issuer = response.getIssuer() != null ?
+			response.getIssuer().getValue() :
+			null;
+		return
+			throwIfNull(
+				resolveIdentityProvider(issuer),
+				"response issuer",
+				issuer
+			);
 	}
 
 	@Override
@@ -142,26 +174,53 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		LocalServiceProviderConfiguration idp = configuration.getServiceProvider();
 		for (ExternalProviderConfiguration c : idp.getProviders()) {
 			String metadata = c.getMetadata();
-			Metadata m = resolve(metadata, c.isSkipSslValidation());
-			while (m != null) {
-				if (m instanceof IdentityProviderMetadata && entityId.equals(m.getEntityId())) {
-					m.setEntityAlias(c.getAlias());
-					return (IdentityProviderMetadata) m;
+			try {
+				Metadata m = resolve(metadata, c.isSkipSslValidation());
+				while (m != null) {
+					if (m instanceof IdentityProviderMetadata && entityId.equals(m.getEntityId())) {
+						m.setEntityAlias(c.getAlias());
+						return (IdentityProviderMetadata) m;
+					}
+					m = m.hasNext() ? m.getNext() : null;
 				}
-				m = m.hasNext() ? m.getNext() : null;
+			} catch (SamlException x) {
+				logger.debug("Unable to resolve identity provider metadata.", x);
 			}
+
 		}
-		return null;
+		return
+			throwIfNull(
+				null,
+				"identity provider entityId",
+				entityId
+			);
 	}
 
 	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(LogoutRequest logoutRequest) {
-		return resolveIdentityProvider(logoutRequest.getIssuer().getValue());
+		String issuer = logoutRequest.getIssuer() != null ?
+			logoutRequest.getIssuer().getValue() :
+			null;
+		return
+			throwIfNull(
+				resolveIdentityProvider(issuer),
+				"logout request issuer",
+				issuer
+			);
+
 	}
 
 	@Override
 	public IdentityProviderMetadata resolveIdentityProvider(ExternalProviderConfiguration idp) {
-		return (IdentityProviderMetadata) resolve(idp.getMetadata(), idp.isSkipSslValidation());
+		if (idp == null) {
+			throw new SamlProviderNotFoundException("Identity provider configuration must not be null");
+		}
+		return
+			throwIfNull(
+				(IdentityProviderMetadata) resolve(idp.getMetadata(), idp.isSkipSslValidation()),
+				"identity provider configuration metadata",
+				idp.getMetadata()
+			);
 	}
 
 	@Override
@@ -169,66 +228,118 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 		LocalIdentityProviderConfiguration idp = configuration.getIdentityProvider();
 		for (ExternalProviderConfiguration c : idp.getProviders()) {
 			String metadata = c.getMetadata();
-			Metadata m = resolve(metadata, c.isSkipSslValidation());
-			while (m != null) {
-				if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
-					m.setEntityAlias(c.getAlias());
-					return (ServiceProviderMetadata) m;
+			try {
+				Metadata m = resolve(metadata, c.isSkipSslValidation());
+				while (m != null) {
+					if (m instanceof ServiceProviderMetadata && entityId.equals(m.getEntityId())) {
+						m.setEntityAlias(c.getAlias());
+						return (ServiceProviderMetadata) m;
+					}
+					m = m.hasNext() ? m.getNext() : null;
 				}
-				m = m.hasNext() ? m.getNext() : null;
+			} catch (SamlException x) {
+				logger.debug("Unable to resolve service provider metadata.", x);
 			}
 		}
-		return null;
+		return
+			throwIfNull(
+				null,
+				"service provider entityId",
+				entityId
+			);
 	}
 
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(AuthenticationRequest request) {
-		Issuer issuer = request.getIssuer();
-		ServiceProviderMetadata result = resolveServiceProvider(issuer.getValue());
-		return result;
+		String issuer = request.getIssuer() != null ?
+			request.getIssuer().getValue() :
+			null;
+		ServiceProviderMetadata result = resolveServiceProvider(issuer);
+		return
+			throwIfNull(
+				result,
+				"authentication request issuer",
+				issuer
+			);
 	}
 
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(ExternalProviderConfiguration sp) {
-		return (ServiceProviderMetadata) resolve(sp.getMetadata(), sp.isSkipSslValidation());
+		if (sp == null) {
+			throw new SamlProviderNotFoundException("Service Provider configuration must not be null");
+		}
+		return
+			throwIfNull(
+				(ServiceProviderMetadata) resolve(sp.getMetadata(), sp.isSkipSslValidation()),
+				"service provider configuration metadata",
+				sp.getMetadata()
+			);
+
+
 	}
 
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(LogoutRequest logoutRequest) {
-		return resolveServiceProvider(logoutRequest.getIssuer().getValue());
+		String issuer = logoutRequest.getIssuer() != null ?
+			logoutRequest.getIssuer().getValue() :
+			null;
+		ServiceProviderMetadata result = resolveServiceProvider(issuer);
+		return
+			throwIfNull(
+				result,
+				"logout request issuer",
+				issuer
+			);
 	}
 
 	@Override
 	public ServiceProviderMetadata resolveServiceProvider(Assertion localAssertion) {
-		if (localAssertion == null) {
-			return null;
+		if (localAssertion == null || localAssertion.getSubject() == null) {
+			throw new SamlProviderNotFoundException("Assertion must not be null");
 		}
 
 		Subject subject = localAssertion.getSubject();
-		NameIdPrincipal principal = (NameIdPrincipal) subject.getPrincipal();
-		return resolveServiceProvider(principal.getSpNameQualifier());
+		NameIdPrincipal principal = subject.getPrincipal();
+
+		String spNameQualifier = principal != null ?
+			principal.getSpNameQualifier() :
+			null;
+
+		return throwIfNull(
+			resolveServiceProvider(spNameQualifier),
+			"assertion sp name qualifier",
+			spNameQualifier
+		);
+
 	}
 
 	protected Metadata resolve(String metadata, boolean skipSslValidation) {
-		Metadata result = null;
+		Metadata result;
 		if (isUri(metadata)) {
 			try {
 				byte[] data = cache.getMetadata(metadata, skipSslValidation);
 				result = (Metadata) transformer.fromXml(data, null, null);
+			} catch (SamlException x) {
+				throw x;
 			} catch (Exception x) {
-				String message = format("Unable to fetch metadata from: %s with message: %s",metadata, x.getMessage());
+				String message = format("Unable to fetch metadata from: %s with message: %s", metadata, x.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.debug(message, x);
 				}
 				else {
 					logger.info(message);
 				}
+				throw new SamlMetadataException("Unable to successfully get metadata from:" + metadata, x);
 			}
 		}
 		else {
 			result = (Metadata) transformer.fromXml(metadata, null, null);
 		}
-		return result;
+		return throwIfNull(
+			result,
+			"metadata",
+			metadata
+		);
 	}
 
 	protected boolean isUri(String uri) {

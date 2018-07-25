@@ -30,6 +30,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.SamlException;
 import org.springframework.security.saml.SamlMessageHandler.ProcessingStatus;
 
 import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP;
@@ -45,6 +46,7 @@ import static org.springframework.security.saml.SamlMessageHandler.ProcessingSta
 public class SamlProcessingFilter implements Filter {
 
 	private List<SamlMessageHandler> handlers = new LinkedList<>();
+	private SamlErrorHandler errorHandler = null;
 
 	public List<SamlMessageHandler> getHandlers() {
 		return Collections.unmodifiableList(handlers);
@@ -55,26 +57,56 @@ public class SamlProcessingFilter implements Filter {
 		return this;
 	}
 
+	public SamlErrorHandler getErrorHandler() {
+		return errorHandler;
+	}
+
+	public SamlProcessingFilter setErrorHandler(SamlErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
+		return this;
+	}
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
 	@Override
-	public void doFilter(ServletRequest req, ServletResponse response, FilterChain chain)
+	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 		throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse)resp;
 		for (SamlMessageHandler p : handlers) {
 			if (p.supports(request)) {
-				ProcessingStatus status = p.process(request, (HttpServletResponse) response);
-				if (status == STOP) {
-					return;
-				}
-				else if (status == STOP_HANDLERS) {
-					break;
+				try {
+					ProcessingStatus status = p.process(request, response);
+					if (status == STOP) {
+						return;
+					}
+					else if (status == STOP_HANDLERS) {
+						break;
+					}
+				} catch (Exception x) {
+					SamlException root = x instanceof SamlException ?
+						(SamlException)x :
+						new SamlException(x);
+					handleError(root, p, request, response);
+					return; //stop everything
 				}
 			}
 		}
 		chain.doFilter(request, response);
+	}
+
+	protected void handleError(SamlException x,
+							   SamlMessageHandler p,
+							   HttpServletRequest request,
+							   HttpServletResponse response) {
+		if (getErrorHandler() != null ) {
+			getErrorHandler().handle(x, p, request, response);
+		}
+		else {
+			throw x;
+		}
 	}
 
 	@Override

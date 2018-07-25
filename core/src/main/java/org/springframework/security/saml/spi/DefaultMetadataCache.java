@@ -38,8 +38,12 @@ public class DefaultMetadataCache {
 	public byte[] getMetadata(String uri, boolean skipSslValidation) {
 		byte[] data = cache.get(uri);
 		if (data == null) {
-			data = network.get(uri, skipSslValidation);
-			cache.put(uri, data);
+			try {
+				data = network.get(uri, skipSslValidation);
+				cache.put(uri, data);
+			} catch (Exception x) {
+				throw new SamlMetadataException("Unable to download SAML metadata.", x);
+			}
 		}
 		return data;
 	}

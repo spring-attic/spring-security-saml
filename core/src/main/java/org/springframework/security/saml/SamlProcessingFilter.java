@@ -30,7 +30,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.SamlException;
 import org.springframework.security.saml.SamlMessageHandler.ProcessingStatus;
 
 import static org.springframework.security.saml.SamlMessageHandler.ProcessingStatus.STOP;

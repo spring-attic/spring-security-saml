@@ -20,7 +20,7 @@ package org.springframework.security.saml.saml2.metadata;
 import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 
 /**
  * Attribute Name Format Identifiers

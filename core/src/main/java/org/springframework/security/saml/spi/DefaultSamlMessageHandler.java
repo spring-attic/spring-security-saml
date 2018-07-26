@@ -19,11 +19,13 @@ package org.springframework.security.saml.spi;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.SamlException;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTemplateEngine;
@@ -162,6 +164,18 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 			throw new SamlException(e);
 		}
 	}
+
+	protected ProcessingStatus handleError(Exception exception,
+										   HttpServletRequest request,
+										   HttpServletResponse response) {
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		Map<String, String> model = new HashMap<>();
+		model.put("message", exception.getMessage());
+		processHtml(request, response, "/templates/spi/generic-error.vm", model);
+		return ProcessingStatus.STOP;
+	}
+
+
 
 	public SamlTemplateEngine getSamlTemplateEngine() {
 		return samlTemplateEngine;

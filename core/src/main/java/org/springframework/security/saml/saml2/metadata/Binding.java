@@ -19,7 +19,7 @@ package org.springframework.security.saml.saml2.metadata;
 
 import javax.annotation.Nonnull;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 
 /**
  * Defines binding type as part of an Endpoint as defined by

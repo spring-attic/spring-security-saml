@@ -18,7 +18,7 @@ package org.springframework.security.saml.validation;
 
 import java.util.Arrays;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 
 public class ValidationException extends SamlException {
 
@@ -40,7 +40,13 @@ public class ValidationException extends SamlException {
 
 	@Override
 	public String getMessage() {
-		return super.getMessage() + toString();
+		StringBuffer sb = new StringBuffer("SAML Validation Errors:");
+		for (ValidationResult.ValidationError error : errors.getErrors()) {
+			sb.append(" ");
+			sb.append(error.getMessage());
+			sb.append(";");
+		}
+		return sb.toString();
 	}
 
 	@Override

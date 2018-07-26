@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;

@@ -19,7 +19,7 @@ package org.springframework.security.saml.saml2.authentication;
 
 import javax.annotation.Nonnull;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 
 public enum SubjectConfirmationMethod {
 

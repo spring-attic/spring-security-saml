@@ -20,8 +20,6 @@ package org.springframework.security.saml;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.SamlException;
-
 public interface SamlErrorHandler {
 
 	void handle(

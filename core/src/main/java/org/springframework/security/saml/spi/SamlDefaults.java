@@ -38,7 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;

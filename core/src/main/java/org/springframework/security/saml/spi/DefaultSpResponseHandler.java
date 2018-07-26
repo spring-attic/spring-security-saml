@@ -17,13 +17,18 @@
 
 package org.springframework.security.saml.spi;
 
-import java.io.IOException;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.springframework.http.HttpMethod.GET;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
@@ -31,95 +36,109 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-
-import static org.springframework.http.HttpMethod.GET;
+import org.springframework.security.saml.validation.ValidationException;
 
 public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultSpResponseHandler> {
 
-	private SamlValidator validator;
-	private AuthenticationManager authenticationManager;
+    private SamlValidator validator;
+    private AuthenticationManager authenticationManager;
 
-	@Override
-	public ProcessingStatus process(HttpServletRequest request,
-									HttpServletResponse response) throws IOException {
-		ServiceProviderMetadata local = getLocalServiceProvider(request);
-		String resp = getResponseParameter(request);
-		//receive assertion
-		String xml = getResponseXml(request, resp);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Received SAMLResponse:" + xml);
-		}
-		//extract basic data so we can map it to an IDP
-		List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
-		Response r = getResponse(xml, localKeys, null);
-		IdentityProviderMetadata identityProviderMetadata = getResolver().resolveIdentityProvider(r);
-		//validate signature
-		r = getResponse(xml, localKeys, identityProviderMetadata.getIdentityProvider().getKeys());
-		validateResponse(request, r);
-		//extract the assertion
-		authenticate(r, local.getEntityId(), identityProviderMetadata.getEntityId());
-		return postAuthentication(request, response);
-	}
+    @Override
+    public ProcessingStatus process(HttpServletRequest request,
+                                    HttpServletResponse response) throws IOException {
+        ServiceProviderMetadata local = getLocalServiceProvider(request);
+        String resp = getResponseParameter(request);
+        //receive assertion
+        String xml = getResponseXml(request, resp);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Received SAMLResponse:" + xml);
+        }
+        //extract basic data so we can map it to an IDP
+        List<SimpleKey> localKeys = local.getServiceProvider().getKeys();
+        Response r = getResponse(xml, localKeys, null);
+        IdentityProviderMetadata identityProviderMetadata = getResolver().resolveIdentityProvider(r);
+        //validate signature
+        r = getResponse(xml, localKeys, identityProviderMetadata.getIdentityProvider().getKeys());
 
-	protected void validateResponse(HttpServletRequest request, Response r) {
-		getValidator().validate(r, getResolver(), request);
-	}
+        ValidationException validation = validateResponse(request, r);
+        if (validation != null) {
+            return handleError(validation, request, response);
+        } else {
+            //extract the assertion
+            try {
+                authenticate(r, local.getEntityId(), identityProviderMetadata.getEntityId());
+                return postAuthentication(request, response);
+            } catch (AuthenticationException x) {
+                return handleError(x, request, response);
+            }
+        }
 
-	protected Response getResponse(String xml, List<SimpleKey> localKeys, List<SimpleKey> verificationKKeys) {
-		return (Response) getTransformer().fromXml(xml, verificationKKeys, localKeys);
-	}
+    }
 
-	protected String getResponseXml(HttpServletRequest request, String resp) {
-		return getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
-	}
+    protected ValidationException validateResponse(HttpServletRequest request, Response r) {
+        try {
+            getValidator().validate(r, getResolver(), request);
+            return null;
+        } catch (ValidationException x) {
+            return x;
+        }
+    }
 
-	protected String getResponseParameter(HttpServletRequest request) {
-		return request.getParameter("SAMLResponse");
-	}
+    protected Response getResponse(String xml, List<SimpleKey> localKeys, List<SimpleKey> verificationKKeys) {
+        return (Response) getTransformer().fromXml(xml, verificationKKeys, localKeys);
+    }
 
-	@Override
-	public boolean supports(HttpServletRequest request) {
-		LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
+    protected String getResponseXml(HttpServletRequest request, String resp) {
+        return getTransformer().samlDecode(resp, GET.matches(request.getMethod()));
+    }
 
-		String path = getExpectedPath(sp,"SSO");
-		return isUrlMatch(request, path) && getResponseParameter(request) != null;
-	}
+    protected String getResponseParameter(HttpServletRequest request) {
+        return request.getParameter("SAMLResponse");
+    }
 
-	protected void authenticate(Response r, String spEntityId, String idpEntityId) {
-		Authentication authentication = new DefaultSamlAuthentication(
-			true,
-			r.getAssertions().get(0),
-			idpEntityId,
-			spEntityId
-		);
-		if (authenticationManager != null) {
-			authentication = authenticationManager.authenticate(authentication);
-		}
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
+    @Override
+    public boolean supports(HttpServletRequest request) {
+        LocalServiceProviderConfiguration sp = getConfiguration().getServiceProvider();
 
-	protected ProcessingStatus postAuthentication(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
-		response.sendRedirect(request.getContextPath() + "/");
-		return ProcessingStatus.STOP;
-	}
+        String path = getExpectedPath(sp, "SSO");
+        return isUrlMatch(request, path) && getResponseParameter(request) != null;
+    }
 
-	public DefaultSpResponseHandler setValidator(SamlValidator validator) {
-		this.validator = validator;
-		return this;
-	}
+    protected void authenticate(Response r, String spEntityId, String idpEntityId) {
+        Authentication authentication = new DefaultSamlAuthentication(
+            true,
+            r.getAssertions().get(0),
+            idpEntityId,
+            spEntityId
+        );
+        if (authenticationManager != null) {
+            authentication = authenticationManager.authenticate(authentication);
+        }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
-	public SamlValidator getValidator() {
-		return validator;
-	}
+    protected ProcessingStatus postAuthentication(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+        response.sendRedirect(request.getContextPath() + "/");
+        return ProcessingStatus.STOP;
+    }
 
-	public AuthenticationManager getAuthenticationManager() {
-		return authenticationManager;
-	}
+    public DefaultSpResponseHandler setValidator(SamlValidator validator) {
+        this.validator = validator;
+        return this;
+    }
 
-	public DefaultSpResponseHandler setAuthenticationManager(AuthenticationManager authenticationManager) {
-		this.authenticationManager = authenticationManager;
-		return this;
-	}
+    public SamlValidator getValidator() {
+        return validator;
+    }
+
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
+    }
+
+    public DefaultSpResponseHandler setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+        return this;
+    }
 
 }

@@ -41,7 +41,7 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 import javax.xml.datatype.Duration;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;

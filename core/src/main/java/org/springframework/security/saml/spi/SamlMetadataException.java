@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.spi;
 
-import org.springframework.SamlException;
+import org.springframework.security.saml.SamlException;
 
 public class SamlMetadataException extends SamlException {
 	public SamlMetadataException(String message) {

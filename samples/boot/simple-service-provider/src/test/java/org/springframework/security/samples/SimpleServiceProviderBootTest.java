@@ -34,6 +34,7 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -58,6 +59,7 @@ import sample.config.AppConfig;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,6 +70,7 @@ import static org.springframework.security.test.web.servlet.response.SecurityMoc
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -175,6 +178,31 @@ public class SimpleServiceProviderBootTest {
 		)
 			.andExpect(status().isFound())
 			.andExpect(authenticated());
+	}
+
+	@Test
+	public void invalidResponse() throws Exception {
+		configuration.getServiceProvider().setWantAssertionsSigned(false);
+		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider("http://localhost");
+		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = samlDefaults.response(
+			authn,
+			assertion,
+			sp,
+			idp
+		);
+		response.setDestination("invalid SP");
+
+		String encoded = transformer.samlEncode(transformer.toXml(response), false);
+		mockMvc.perform(
+			post("/saml/sp/SSO/alias/boot-sample-sp")
+				.param("SAMLResponse", encoded)
+		)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().string(containsString("Destination mismatch: invalid SP")));
 	}
 
 	@Test

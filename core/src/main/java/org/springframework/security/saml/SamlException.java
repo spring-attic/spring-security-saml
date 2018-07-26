@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework;
+package org.springframework.security.saml;
 
 public class SamlException extends RuntimeException {
 

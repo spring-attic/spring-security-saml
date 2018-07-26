@@ -54,6 +54,7 @@ public class DefaultSpConfiguration extends AbstractProviderConfiguration {
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration)
+			.setSamlTemplateEngine(samlTemplateEngine())
 			.setValidator(validator());
 	}
 }

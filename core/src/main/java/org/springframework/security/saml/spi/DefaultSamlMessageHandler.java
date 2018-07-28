@@ -64,6 +64,7 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 	private SamlTemplateEngine samlTemplateEngine;
 	private String forwardUrl = null;
 	private boolean matchAgainstAliasPath;
+	private String errorTemplate = "/templates/spi/generic-error.vm";;
 
 	public SamlServerConfiguration getConfiguration() {
 		return configuration;
@@ -133,6 +134,15 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 		return _this();
 	}
 
+	public String getErrorTemplate() {
+		return errorTemplate;
+	}
+
+	public T setErrorTemplate(String errorTemplate) {
+		this.errorTemplate = errorTemplate;
+		return _this();
+	}
+
 	protected boolean isUrlMatch(HttpServletRequest request, String path) {
 		path = prependSlash(path);
 		AntPathRequestMatcher matcher = new AntPathRequestMatcher(path);
@@ -170,11 +180,20 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 										   HttpServletResponse response) {
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		Map<String, String> model = new HashMap<>();
-		model.put("message", exception.getMessage());
-		processHtml(request, response, "/templates/spi/generic-error.vm", model);
+		model.put("message", getErrorMessage(exception));
+		processHtml(request, response, errorTemplate, model);
+		return getErrorStatus(exception, request, response);
+	}
+
+	protected ProcessingStatus getErrorStatus(Exception exception,
+											HttpServletRequest request,
+											HttpServletResponse response) {
 		return ProcessingStatus.STOP;
 	}
 
+	protected String getErrorMessage(Exception exception) {
+		return exception.getMessage();
+	}
 
 
 	public SamlTemplateEngine getSamlTemplateEngine() {

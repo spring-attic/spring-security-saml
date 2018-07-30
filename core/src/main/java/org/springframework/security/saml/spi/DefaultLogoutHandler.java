@@ -30,6 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlAuthentication;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.config.LocalProviderConfiguration;
@@ -57,7 +58,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	private String postBindingTemplate;
 	private DefaultSessionAssertionStore assertionStore;
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".logout.request";
-	private LogoutSuccessHandler successHandler;
+	private LogoutSuccessHandler logoutSuccessHandler;
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -68,12 +69,12 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		return this;
 	}
 
-	public LogoutSuccessHandler getSuccessHandler() {
-		return successHandler;
+	public LogoutSuccessHandler getLogoutSuccessHandler() {
+		return logoutSuccessHandler;
 	}
 
-	public DefaultLogoutHandler setSuccessHandler(LogoutSuccessHandler successHandler) {
-		this.successHandler = successHandler;
+	public DefaultLogoutHandler setLogoutSuccessHandler(LogoutSuccessHandler logoutSuccessHandler) {
+		this.logoutSuccessHandler = logoutSuccessHandler;
 		return this;
 	}
 
@@ -358,10 +359,20 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 								 Authentication authentication) {
 		logger.debug(format("Performing local session logout for authentication:%s", authentication));
 		if (authentication != null) {
-			new SecurityContextLogoutHandler()
-				.logout(request, response, authentication);
+			new SecurityContextLogoutHandler().logout(request, response, authentication);
+			SecurityContextHolder.getContext().setAuthentication(null);
+			if (getLogoutSuccessHandler() != null) {
+				try {
+					getLogoutSuccessHandler().onLogoutSuccess(request,response, authentication);
+				} catch (IOException | ServletException e) {
+					throw new SamlException(e);
+				}
+			}
 		}
-		SecurityContextHolder.getContext().setAuthentication(null);
+		else {
+			SecurityContextHolder.getContext().setAuthentication(null);
+		}
+
 	}
 
 	protected String getRedirectUrl(Saml2Object lr, String location, String paramName)

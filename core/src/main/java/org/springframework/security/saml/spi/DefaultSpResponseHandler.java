@@ -85,8 +85,6 @@ implements ApplicationEventPublisherAware {
 					identityProviderMetadata.getEntityId()
 				);
 				return ProcessingStatus.STOP;
-			} catch (AuthenticationException x) {
-				return handleError(x, request, response);
 			} catch (ServletException x) {
 				throw new IOException(x);
 			}

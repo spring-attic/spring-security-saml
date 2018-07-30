@@ -49,4 +49,10 @@ public interface SamlAuthentication extends Authentication {
 	 * @return assertion representing authentication
 	 */
 	Assertion getAssertion();
+
+	/**
+	 * If the POST or REDIRECT contained a RelayState parameter this will be the value of it
+	 * @return the RelayState parameter value, or null
+	 */
+	String getRelayState();
 }

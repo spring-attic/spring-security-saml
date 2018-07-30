@@ -30,13 +30,18 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	private Assertion assertion;
 	private String assertingEntityId;
 	private String holdingEntityId;
+	private String relayState;
 
 	public DefaultSamlAuthentication(boolean authenticated,
-									 Assertion assertion, String assertingEntityId, String holdingEntityId) {
+									 Assertion assertion,
+									 String assertingEntityId,
+									 String holdingEntityId,
+									 String relayState) {
 		this.authenticated = authenticated;
 		this.assertion = assertion;
 		this.assertingEntityId = assertingEntityId;
 		this.holdingEntityId = holdingEntityId;
+		this.relayState = relayState;
 	}
 
 	@Override
@@ -105,5 +110,14 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 
 	protected void setHoldingEntityId(String holdingEntityId) {
 		this.holdingEntityId = holdingEntityId;
+	}
+
+	@Override
+	public String getRelayState() {
+		return relayState;
+	}
+
+	public void setRelayState(String relayState) {
+		this.relayState = relayState;
 	}
 }

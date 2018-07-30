@@ -34,7 +34,6 @@ import org.springframework.security.saml.config.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -215,7 +214,8 @@ public class SimpleServiceProviderBootTest {
 			true,
 			assertion,
 			idpEntityId,
-			sp.getEntityId()
+			sp.getEntityId(),
+			null
 		);
 
 		String redirect = mockMvc.perform(
@@ -248,7 +248,8 @@ public class SimpleServiceProviderBootTest {
 			true,
 			assertion,
 			idpEntityId,
-			sp.getEntityId()
+			sp.getEntityId(),
+			null
 		);
 		LogoutRequest request = samlDefaults.logoutRequest(
 			sp,

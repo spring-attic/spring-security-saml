@@ -17,15 +17,11 @@
 
 package org.springframework.security.saml.spi;
 
+import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import static org.springframework.http.HttpMethod.GET;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -37,6 +33,8 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.validation.ValidationException;
+
+import static org.springframework.http.HttpMethod.GET;
 
 public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultSpResponseHandler> {
 
@@ -66,7 +64,13 @@ public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultS
         } else {
             //extract the assertion
             try {
-                authenticate(r, local.getEntityId(), identityProviderMetadata.getEntityId());
+                authenticate(
+                    request,
+                    response,
+                    r,
+                    local.getEntityId(),
+                    identityProviderMetadata.getEntityId()
+                );
                 return postAuthentication(request, response);
             } catch (AuthenticationException x) {
                 return handleError(x, request, response);
@@ -104,12 +108,17 @@ public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultS
         return isUrlMatch(request, path) && getResponseParameter(request) != null;
     }
 
-    protected void authenticate(Response r, String spEntityId, String idpEntityId) {
+    protected void authenticate(HttpServletRequest request,
+                                HttpServletResponse response,
+                                Response samlResponse,
+                                String spEntityId,
+                                String idpEntityId) {
         Authentication authentication = new DefaultSamlAuthentication(
             true,
-            r.getAssertions().get(0),
+            samlResponse.getAssertions().get(0),
             idpEntityId,
-            spEntityId
+            spEntityId,
+            request.getParameter("RelayState")
         );
         if (authenticationManager != null) {
             authentication = authenticationManager.authenticate(authentication);

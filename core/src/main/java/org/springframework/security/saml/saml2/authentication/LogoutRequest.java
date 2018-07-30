@@ -49,7 +49,7 @@ public class LogoutRequest extends Request<LogoutRequest> {
 	public DigestMethod getDigest() {
 		return digest;
 	}
-DateTime instant = new DateTime();
+
 	public LogoutRequest setDigest(DigestMethod digest) {
 		this.digest = digest;
 		return this;

@@ -371,6 +371,7 @@ public class SamlDefaults {
 			.setId(UUID.randomUUID().toString())
 			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setIssueInstant(DateTime.now())
 			.setNameId(principal)
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
 

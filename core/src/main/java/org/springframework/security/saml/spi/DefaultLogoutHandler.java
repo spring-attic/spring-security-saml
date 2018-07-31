@@ -245,7 +245,10 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
 			sessionLogout(request, response, authentication);
-			response.sendRedirect(getLocalLogoutRedirect(request));
+			String redirect = getLocalLogoutRedirect(request);
+			if (!response.isCommitted() && hasText(redirect)) {
+				response.sendRedirect(redirect);
+			}
 			return ProcessingStatus.STOP;
 		}
 		else if (provider instanceof LocalIdentityProviderConfiguration) {

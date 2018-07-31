@@ -59,6 +59,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	private DefaultSessionAssertionStore assertionStore;
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".logout.request";
 	private LogoutSuccessHandler logoutSuccessHandler;
+	private String logoutPath = "logout";
 
 	public SamlValidator getValidator() {
 		return validator;
@@ -338,7 +339,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 	protected boolean internalSupports(HttpServletRequest request, LocalProviderConfiguration provider) {
 		boolean result = false;
 		if (provider != null && provider.isSingleLogoutEnabled()) {
-			String path = getExpectedPath(provider,"logout");
+			String path = getExpectedPath(provider, logoutPath);
 			result = isUrlMatch(request, path);
 		}
 		return result;
@@ -385,4 +386,12 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			.toUriString();
 	}
 
+	public String getLogoutPath() {
+		return logoutPath;
+	}
+
+	public DefaultLogoutHandler setLogoutPath(String logoutPath) {
+		this.logoutPath = logoutPath;
+		return this;
+	}
 }

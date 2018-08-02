@@ -22,6 +22,7 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 	private String metadata;
 	private String linktext;
 	private boolean skipSslValidation = false;
+	private boolean metadataTrustCheck = false;
 
 	public ExternalProviderConfiguration() {
 	}
@@ -64,6 +65,15 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 
 	public T setSkipSslValidation(boolean skipSslValidation) {
 		this.skipSslValidation = skipSslValidation;
+		return _this();
+	}
+
+	public boolean isMetadataTrustCheck() {
+		return metadataTrustCheck;
+	}
+
+	public T setMetadataTrustCheck(boolean metadataTrustCheck) {
+		this.metadataTrustCheck = metadataTrustCheck;
 		return _this();
 	}
 }

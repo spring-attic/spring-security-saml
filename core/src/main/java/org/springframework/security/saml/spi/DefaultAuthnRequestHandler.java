@@ -38,7 +38,7 @@ public class DefaultAuthnRequestHandler extends DefaultSamlMessageHandler<Defaul
 
 	@Override
 	public ProcessingStatus process(HttpServletRequest request,
-									   HttpServletResponse response) throws IOException {
+									HttpServletResponse response) throws IOException {
 		ServiceProviderMetadata local = getLocalServiceProvider(request);
 		IdentityProviderMetadata idp = getIdentityProvider(request);
 		AuthenticationRequest authenticationRequest = getAuthenticationRequest(local, idp);

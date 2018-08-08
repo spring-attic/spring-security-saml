@@ -18,9 +18,9 @@
 package org.springframework.security.saml.saml2.metadata;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.spi.DefaultMetadataHandler;
 
 import org.junit.jupiter.api.BeforeEach;

@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.SamlMessageHandler;
-import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 
 public class DefaultIdpConfiguration extends AbstractProviderConfiguration {
 	@Bean

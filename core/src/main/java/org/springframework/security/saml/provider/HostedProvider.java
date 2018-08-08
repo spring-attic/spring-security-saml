@@ -17,7 +17,9 @@
 
 package org.springframework.security.saml.provider;
 
-import org.springframework.security.saml.config.LocalProviderConfiguration;
+import java.util.List;
+
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
@@ -40,10 +42,19 @@ public interface HostedProvider<
 	LogoutResponse logoutResponse(LogoutRequest request,
 								  RemoteMetadata recipient);
 
-	RemoteMetadata mapToProvider(Saml2Object saml2Object);
+	RemoteMetadata getRemoteProvider(Saml2Object saml2Object);
+
+	RemoteMetadata getRemoteProvider(String entityId);
+
+	List<RemoteMetadata> getRemoteProviders();
 
 	ValidationResult validate(Saml2Object saml2Object);
 
 	<T extends Saml2Object> T fromXml(String xml, boolean encoded, boolean deflated, Class<T> type);
 
+	String toXml(Saml2Object saml2Object);
+
+	String toEncodedXml(Saml2Object saml2Object, boolean deflate);
+
+	String toEncodedXml(String xml, boolean deflate);
 }

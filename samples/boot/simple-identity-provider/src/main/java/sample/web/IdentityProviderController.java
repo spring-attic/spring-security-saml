@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlObjectResolver;
-import org.springframework.security.saml.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;

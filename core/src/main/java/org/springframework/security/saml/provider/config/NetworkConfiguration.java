@@ -15,12 +15,27 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.config;
 
-import javax.servlet.http.HttpServletRequest;
+public class NetworkConfiguration {
+	private int readTimeout;
+	private int connectTimeout;
 
-import org.springframework.security.saml.config.SamlServerConfiguration;
+	public int getReadTimeout() {
+		return readTimeout;
+	}
 
-public interface ConfigurationRepository {
-	SamlServerConfiguration getServerConfiguration(HttpServletRequest request);
+	public NetworkConfiguration setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
+		return this;
+	}
+
+	public int getConnectTimeout() {
+		return connectTimeout;
+	}
+
+	public NetworkConfiguration setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+		return this;
+	}
 }

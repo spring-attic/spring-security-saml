@@ -15,10 +15,12 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.provider.identity.config;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<LocalIdentityProviderConfiguration> {

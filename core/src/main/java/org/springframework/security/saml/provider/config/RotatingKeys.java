@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.provider.config;
 
 import java.util.LinkedList;
 import java.util.List;

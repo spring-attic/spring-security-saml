@@ -20,7 +20,7 @@ package org.springframework.security.saml;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.provider.ProviderProvisioning;
+import org.springframework.security.saml.provider.SamlProviderProvisioning;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -31,15 +31,15 @@ import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public class SamlRequestMatcher implements RequestMatcher {
 
-	private ProviderProvisioning provisioning;
+	private SamlProviderProvisioning provisioning;
 	private boolean matchAgainstAliasPath;
 	private String path;
 
-	public SamlRequestMatcher(ProviderProvisioning provisioning, String path) {
+	public SamlRequestMatcher(SamlProviderProvisioning provisioning, String path) {
 		this(provisioning, path, false);
 	}
 
-	public SamlRequestMatcher(ProviderProvisioning provisioning, String path, boolean matchAgainstAliasPath) {
+	public SamlRequestMatcher(SamlProviderProvisioning provisioning, String path, boolean matchAgainstAliasPath) {
 		this.matchAgainstAliasPath = matchAgainstAliasPath;
 		this.provisioning = provisioning;
 		this.path = path;

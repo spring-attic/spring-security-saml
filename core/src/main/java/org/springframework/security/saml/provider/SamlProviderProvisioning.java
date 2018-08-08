@@ -19,6 +19,6 @@ package org.springframework.security.saml.provider;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface ProviderProvisioning<T extends HostedProvider> {
+public interface SamlProviderProvisioning<T extends HostedProvider> {
 	T getHostedProvider(HttpServletRequest request);
 }

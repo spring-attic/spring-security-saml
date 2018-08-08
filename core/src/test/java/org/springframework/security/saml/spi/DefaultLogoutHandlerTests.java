@@ -18,7 +18,7 @@
 package org.springframework.security.saml.spi;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

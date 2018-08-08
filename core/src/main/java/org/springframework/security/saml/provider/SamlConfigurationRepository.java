@@ -15,8 +15,14 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.provider;
 
-public class ExternalServiceProviderConfiguration extends
-	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * Adds support for multi tenancy based on the context of an HTTP request
+ * Returns the server configuration based on a HTTP request.
+ */
+public interface SamlConfigurationRepository {
+	SamlServerConfiguration getServerConfiguration(HttpServletRequest request);
 }

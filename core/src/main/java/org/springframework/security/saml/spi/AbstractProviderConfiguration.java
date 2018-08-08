@@ -27,7 +27,7 @@ import org.springframework.security.saml.SamlProcessingFilter;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.saml.util.Network;

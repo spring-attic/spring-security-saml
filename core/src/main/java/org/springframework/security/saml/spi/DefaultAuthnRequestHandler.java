@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;

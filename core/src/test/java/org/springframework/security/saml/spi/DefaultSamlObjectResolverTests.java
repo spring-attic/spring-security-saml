@@ -20,11 +20,11 @@ package org.springframework.security.saml.spi;
 import java.io.IOException;
 import java.time.Clock;
 
-import org.springframework.security.saml.config.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.config.ExternalServiceProviderConfiguration;
-import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.config.SamlServerConfiguration;
+import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.ExternalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.MetadataBase;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;

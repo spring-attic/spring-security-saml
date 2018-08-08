@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml;
 
-import org.springframework.security.saml.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;

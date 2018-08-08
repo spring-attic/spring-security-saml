@@ -15,8 +15,16 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.provider;
 
+import org.springframework.security.saml.provider.config.NetworkConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+
+/**
+ * Represents a configuration for a hosted or domain.
+ * A hosted domain can have one local service provider, or one local identity provider, or both.
+ */
 public class SamlServerConfiguration {
 
 	private LocalServiceProviderConfiguration serviceProvider;

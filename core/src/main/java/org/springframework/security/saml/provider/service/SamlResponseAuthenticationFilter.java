@@ -27,7 +27,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlRequestMatcher;
-import org.springframework.security.saml.provider.ProviderProvisioning;
+import org.springframework.security.saml.provider.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
@@ -45,14 +45,14 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 
 	private static Log logger = LogFactory.getLog(SamlResponseAuthenticationFilter.class);
 
-	private final ProviderProvisioning<ServiceProvider> provisioning;
+	private final SamlProviderProvisioning<ServiceProvider> provisioning;
 
-	public SamlResponseAuthenticationFilter(ProviderProvisioning<ServiceProvider> provisioning) {
+	public SamlResponseAuthenticationFilter(SamlProviderProvisioning<ServiceProvider> provisioning) {
 		this(new SamlRequestMatcher(provisioning, "SSO"), provisioning);
 	}
 
 	private SamlResponseAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
-											 ProviderProvisioning<ServiceProvider> provisioning) {
+											 SamlProviderProvisioning<ServiceProvider> provisioning) {
 		super(requiresAuthenticationRequestMatcher);
 		this.provisioning = provisioning;
 	}
@@ -80,7 +80,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 			);
 		}
 
-		IdentityProviderMetadata remote = provider.mapToProvider(r);
+		IdentityProviderMetadata remote = provider.getRemoteProvider(r);
 		Authentication authentication = new DefaultSamlAuthentication(
 			true,
 			r.getAssertions().get(0),
@@ -100,7 +100,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 				super.requiresAuthentication(request, response);
 	}
 
-	private ProviderProvisioning<ServiceProvider> getProvisioning() {
+	private SamlProviderProvisioning<ServiceProvider> getProvisioning() {
 		return provisioning;
 	}
 

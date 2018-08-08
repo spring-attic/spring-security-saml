@@ -18,8 +18,9 @@
 package org.springframework.security.saml.provider.service;
 
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
@@ -27,4 +28,6 @@ public interface ServiceProvider extends
 	HostedProvider<LocalServiceProviderConfiguration, ServiceProviderMetadata, IdentityProviderMetadata> {
 
 	AuthenticationRequest authenticationRequest(IdentityProviderMetadata idp);
+
+	Endpoint getSingleSignOnEndpoint();
 }

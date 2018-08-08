@@ -31,7 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;

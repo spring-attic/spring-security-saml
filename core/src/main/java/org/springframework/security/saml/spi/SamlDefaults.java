@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.config.LocalProviderConfiguration;
-import org.springframework.security.saml.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;

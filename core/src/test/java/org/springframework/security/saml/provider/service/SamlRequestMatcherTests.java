@@ -22,9 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.provider.ProviderProvisioning;
+import org.springframework.security.saml.provider.SamlProviderProvisioning;
 import org.springframework.security.saml.SamlRequestMatcher;
-import org.springframework.security.saml.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 
 class SamlRequestMatcherTests {
 
-	private ProviderProvisioning provisioning = mock(ProviderProvisioning.class);
+	private SamlProviderProvisioning provisioning = mock(SamlProviderProvisioning.class);
 	private LocalProviderConfiguration configuration = mock(LocalProviderConfiguration.class);
 	private HostedProvider provider = mock(HostedProvider.class);
 	private String prefix;
@@ -88,7 +88,7 @@ class SamlRequestMatcherTests {
 		return contextPath;
 	}
 
-	private ProviderProvisioning getProvisioning() {
+	private SamlProviderProvisioning getProvisioning() {
 		return provisioning;
 	}
 

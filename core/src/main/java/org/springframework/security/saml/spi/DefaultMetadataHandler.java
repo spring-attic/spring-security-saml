@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.saml.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 
 public class DefaultMetadataHandler extends DefaultSamlMessageHandler<DefaultMetadataHandler> {

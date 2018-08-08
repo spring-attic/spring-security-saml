@@ -15,27 +15,10 @@
  *
  */
 
-package org.springframework.security.saml.config;
+package org.springframework.security.saml.provider.identity.config;
 
-public class NetworkConfiguration {
-	private int readTimeout;
-	private int connectTimeout;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 
-	public int getReadTimeout() {
-		return readTimeout;
-	}
-
-	public NetworkConfiguration setReadTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-		return this;
-	}
-
-	public int getConnectTimeout() {
-		return connectTimeout;
-	}
-
-	public NetworkConfiguration setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-		return this;
-	}
+public class ExternalServiceProviderConfiguration extends
+	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
 }

@@ -43,6 +43,10 @@ public class ValidationResult {
 		return errors.isEmpty();
 	}
 
+	public boolean hasErrors() {
+		return !isSuccess();
+	}
+
 	public List<ValidationError> getErrors() {
 		return Collections.unmodifiableList(errors);
 	}
@@ -51,6 +55,25 @@ public class ValidationResult {
 		this.errors.clear();
 		this.errors.addAll(errors);
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Validation Errors: ");
+		if (hasErrors()) {
+			for (int i=0; i<getErrors().size(); i++) {
+				sb.append("\n");
+				ValidationError error = getErrors().get(i);
+				sb.append(i+1);
+				sb.append(". ");
+				sb.append(error.getMessage());
+			}
+		}
+		else {
+			sb.append("None");
+		}
+
+		return sb.toString();
 	}
 
 	public static class ValidationError {

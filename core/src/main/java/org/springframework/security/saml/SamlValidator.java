@@ -47,4 +47,5 @@ public interface SamlValidator {
 	 * @throws ValidationException if validation failed. Details in the exception.
 	 */
 	void validate(Saml2Object saml2Object, SamlObjectResolver resolver, HttpServletRequest request) throws ValidationException;
+
 }

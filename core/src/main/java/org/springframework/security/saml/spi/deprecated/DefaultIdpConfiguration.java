@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,37 +24,43 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 
-public class DefaultSpConfiguration extends AbstractProviderConfiguration {
+public class DefaultIdpConfiguration extends AbstractProviderConfiguration {
 	@Bean
 	@Override
 	public List<SamlMessageHandler> handlers(SamlServerConfiguration configuration) {
 		return Arrays.asList(
 			metadataHandler(configuration),
-			discoveryHandler(configuration),
-			logoutHandler(configuration),
-			spResponseHandler(configuration)
+			idpRequestHandler(configuration),
+			idpInitiationHandler(configuration),
+			logoutHandler(configuration)
 		);
 	}
 
 	@Bean
-	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
-		return new DefaultAuthnRequestHandler()
-			.setSamlDefaults(samlDefaults())
-			.setNetwork(network(configuration))
-			.setResolver(resolver())
-			.setTransformer(transformer())
-			.setConfiguration(configuration);
-	}
-
-	@Bean
-	public SamlMessageHandler spResponseHandler(SamlServerConfiguration configuration) {
-		return new DefaultSpResponseHandler()
+	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
+		return new DefaultIdpRequestHandler()
 			.setSamlDefaults(samlDefaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration)
+			.setValidator(validator())
 			.setSamlTemplateEngine(samlTemplateEngine())
-			.setValidator(validator());
+			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
+			.setStore(assertionStore());
+	}
+
+	@Bean
+	public SamlMessageHandler idpInitiationHandler(SamlServerConfiguration configuration) {
+		return new DefaultIdpInitiationHandler()
+			.setSamlDefaults(samlDefaults())
+			.setNetwork(network(configuration))
+			.setResolver(resolver())
+			.setTransformer(transformer())
+			.setConfiguration(configuration)
+			.setValidator(validator())
+			.setSamlTemplateEngine(samlTemplateEngine())
+			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
+			.setStore(assertionStore());
 	}
 }

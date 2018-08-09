@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;

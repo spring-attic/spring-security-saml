@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
@@ -41,6 +42,7 @@ import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.security.saml.util.Network;
 
 import org.apache.commons.logging.Log;
@@ -57,7 +59,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	private SamlDefaults samlDefaults;
 	private SamlTransformer transformer;
 	private Network network;
-	private DefaultMetadataCache cache;
+	private SamlMetadataCache cache;
 
 	@Autowired
 	public DefaultSamlObjectResolver setTransformer(SamlTransformer transformer) {
@@ -84,7 +86,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 	}
 
 	@Autowired
-	public DefaultSamlObjectResolver setMetadataCache(DefaultMetadataCache cache) {
+	public DefaultSamlObjectResolver setMetadataCache(SamlMetadataCache cache) {
 		this.cache = cache;
 		return this;
 	}

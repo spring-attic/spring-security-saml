@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,6 +33,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpMethod.GET;

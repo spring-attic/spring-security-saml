@@ -27,7 +27,7 @@ import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.SamlDefaults;
+import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.util.StreamUtils;
 

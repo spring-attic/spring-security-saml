@@ -15,19 +15,26 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.time.Clock;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.SamlMessageHandler;
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlProcessingFilter;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.spi.DefaultMetadataCache;
+import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
+import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.saml.util.Network;
@@ -107,7 +114,7 @@ public abstract class AbstractProviderConfiguration {
 	}
 
 	@Bean
-	public DefaultMetadataCache cache(Network network) {
+	public SamlMetadataCache cache(Network network) {
 		return new DefaultMetadataCache(time(), network);
 	}
 

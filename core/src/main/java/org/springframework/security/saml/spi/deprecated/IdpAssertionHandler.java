@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,6 +25,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 
 public abstract class IdpAssertionHandler<T extends IdpAssertionHandler> extends DefaultSamlMessageHandler<T> {
 

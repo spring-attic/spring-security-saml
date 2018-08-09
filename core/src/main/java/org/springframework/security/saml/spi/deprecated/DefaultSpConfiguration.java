@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,43 +24,37 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 
-public class DefaultIdpConfiguration extends AbstractProviderConfiguration {
+public class DefaultSpConfiguration extends AbstractProviderConfiguration {
 	@Bean
 	@Override
 	public List<SamlMessageHandler> handlers(SamlServerConfiguration configuration) {
 		return Arrays.asList(
 			metadataHandler(configuration),
-			idpRequestHandler(configuration),
-			idpInitiationHandler(configuration),
-			logoutHandler(configuration)
+			discoveryHandler(configuration),
+			logoutHandler(configuration),
+			spResponseHandler(configuration)
 		);
 	}
 
 	@Bean
-	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
-		return new DefaultIdpRequestHandler()
+	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
+		return new DefaultAuthnRequestHandler()
 			.setSamlDefaults(samlDefaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
-			.setConfiguration(configuration)
-			.setValidator(validator())
-			.setSamlTemplateEngine(samlTemplateEngine())
-			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
-			.setStore(assertionStore());
+			.setConfiguration(configuration);
 	}
 
 	@Bean
-	public SamlMessageHandler idpInitiationHandler(SamlServerConfiguration configuration) {
-		return new DefaultIdpInitiationHandler()
+	public SamlMessageHandler spResponseHandler(SamlServerConfiguration configuration) {
+		return new DefaultSpResponseHandler()
 			.setSamlDefaults(samlDefaults())
 			.setNetwork(network(configuration))
 			.setResolver(resolver())
 			.setTransformer(transformer())
 			.setConfiguration(configuration)
-			.setValidator(validator())
 			.setSamlTemplateEngine(samlTemplateEngine())
-			.setPostBindingTemplate("/templates/saml2-post-binding.vm")
-			.setStore(assertionStore());
+			.setValidator(validator());
 	}
 }

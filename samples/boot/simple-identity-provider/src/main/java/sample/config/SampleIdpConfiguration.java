@@ -17,7 +17,7 @@
 package sample.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.spi.DefaultIdpConfiguration;
+import org.springframework.security.saml.spi.deprecated.DefaultIdpConfiguration;
 
 @Configuration
 public class SampleIdpConfiguration extends DefaultIdpConfiguration {

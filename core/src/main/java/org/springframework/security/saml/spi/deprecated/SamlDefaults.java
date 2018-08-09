@@ -28,7 +28,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;

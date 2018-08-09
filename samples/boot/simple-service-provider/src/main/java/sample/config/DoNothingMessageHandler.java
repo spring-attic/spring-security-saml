@@ -14,17 +14,25 @@
  *  limitations under the License.
  *
  */
+
 package sample.config;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-@Configuration
-public class SampleSpConfiguration extends DefaultSpConfiguration {
+import org.springframework.security.saml.SamlMessageHandler;
 
-//	@Override
-//	@Bean
-//	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
-//		return new DoNothingMessageHandler();
-//	}
+public class DoNothingMessageHandler implements SamlMessageHandler {
+	@Override
+	public ProcessingStatus process(HttpServletRequest request, HttpServletResponse response)
+		throws IOException, ServletException {
+		return ProcessingStatus.CONTINUE;
+	}
+
+	@Override
+	public boolean supports(HttpServletRequest request) {
+		return false;
+	}
 }

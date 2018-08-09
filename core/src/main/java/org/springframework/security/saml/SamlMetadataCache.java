@@ -14,17 +14,14 @@
  *  limitations under the License.
  *
  */
-package sample.config;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
+package org.springframework.security.saml;
 
-@Configuration
-public class SampleSpConfiguration extends DefaultSpConfiguration {
+public interface SamlMetadataCache {
 
-//	@Override
-//	@Bean
-//	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
-//		return new DoNothingMessageHandler();
-//	}
+	byte[] getMetadata(String uri, boolean skipSslValidation);
+
+	void clear();
+
+	byte[] remove(String uri);
 }

@@ -20,6 +20,7 @@ package org.springframework.security.saml.spi;
 import java.io.IOException;
 import java.time.Clock;
 
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.identity.config.ExternalServiceProviderConfiguration;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
 class DefaultSamlObjectResolverTests extends MetadataBase {
 
 	private DefaultSamlObjectResolver resolver;
-	private DefaultMetadataCache cache;
+	private SamlMetadataCache cache;
 	private DefaultSamlTransformer transformer;
 
 
@@ -51,7 +52,7 @@ class DefaultSamlObjectResolverTests extends MetadataBase {
 	void populateCache() throws IOException {
 		transformer = new DefaultSamlTransformer(new OpenSamlImplementation(Clock.systemUTC()).init());
 
-		cache = Mockito.mock(DefaultMetadataCache.class);
+		cache = Mockito.mock(SamlMetadataCache.class);
 
 		ExternalServiceProviderConfiguration extSp = new ExternalServiceProviderConfiguration()
 			.setMetadata("http://test.test.test");

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.spi.deprecated;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;

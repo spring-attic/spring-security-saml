@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -38,8 +39,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.SamlDefaults;
+import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -80,7 +80,7 @@ public class SimpleIdentityProviderBootTests {
 	private SamlObjectResolver resolver;
 
 	@MockBean
-	private DefaultMetadataCache cache;
+	private SamlMetadataCache cache;
 
 	@Autowired
 	private AppConfig config;

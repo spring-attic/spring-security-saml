@@ -25,22 +25,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml.spi.DefaultValidator;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpMethod.GET;
 
 public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequestHandler> {
 
-	private SamlValidator validator;
+	private DefaultValidator validator;
 	private String postBindingTemplate;
 	private DefaultSessionAssertionStore store;
 
@@ -62,11 +62,11 @@ public class DefaultIdpRequestHandler extends IdpAssertionHandler<DefaultIdpRequ
 		return this;
 	}
 
-	public SamlValidator getValidator() {
+	public DefaultValidator getValidator() {
 		return validator;
 	}
 
-	public DefaultIdpRequestHandler setValidator(SamlValidator validator) {
+	public DefaultIdpRequestHandler setValidator(DefaultValidator validator) {
 		this.validator = validator;
 		return this;
 	}

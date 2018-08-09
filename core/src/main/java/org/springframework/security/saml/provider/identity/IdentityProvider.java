@@ -27,7 +27,10 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface IdentityProvider extends
-	HostedProvider<LocalIdentityProviderConfiguration, IdentityProviderMetadata, ServiceProviderMetadata> {
+	HostedProvider<
+		LocalIdentityProviderConfiguration,
+		IdentityProviderMetadata,
+		ServiceProviderMetadata> {
 
 	Assertion assertion(ServiceProviderMetadata sp,
 						String principal,

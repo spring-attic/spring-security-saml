@@ -94,7 +94,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.deprecated.SamlDefaults;
-import org.springframework.security.saml.spi.SamlKeyException;
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.springframework.util.CollectionUtils;

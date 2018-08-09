@@ -38,18 +38,18 @@ public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T>
 	/*
 	 * In case of parsing EntitiesDescriptor, we can have more than one provider
 	 */
-	private Metadata next = null;
+	private T next = null;
 
 
 	public boolean hasNext() {
 		return next != null;
 	}
 
-	public Metadata getNext() {
+	public T getNext() {
 		return next;
 	}
 
-	public Metadata<T> setNext(Metadata next) {
+	public Metadata<T> setNext(T next) {
 		this.next = next;
 		return this;
 	}

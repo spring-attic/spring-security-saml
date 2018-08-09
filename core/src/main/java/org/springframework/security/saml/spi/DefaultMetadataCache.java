@@ -19,6 +19,7 @@ package org.springframework.security.saml.spi;
 import java.time.Clock;
 
 import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.util.TimebasedMap;
 

@@ -48,4 +48,11 @@ public class RotatingKeys {
 		this.standBy = standBy;
 		return this;
 	}
+
+	public List<SimpleKey> toList() {
+		LinkedList<SimpleKey> result = new LinkedList<>();
+		result.add(getActive());
+		result.addAll(getStandBy());
+		return result;
+	}
 }

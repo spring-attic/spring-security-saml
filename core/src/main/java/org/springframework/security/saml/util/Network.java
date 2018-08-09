@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.saml.spi.SamlKeyException;
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.web.client.RestTemplate;
 
 import org.apache.http.client.config.RequestConfig;

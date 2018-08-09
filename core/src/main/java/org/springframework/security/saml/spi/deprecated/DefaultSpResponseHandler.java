@@ -30,13 +30,13 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
+import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.validation.ValidationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -48,7 +48,7 @@ import static org.springframework.http.HttpMethod.GET;
 public class DefaultSpResponseHandler extends DefaultSamlMessageHandler<DefaultSpResponseHandler>
 implements ApplicationEventPublisherAware {
 
-	private SamlValidator validator;
+	private DefaultValidator validator;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
 	private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
@@ -151,12 +151,12 @@ implements ApplicationEventPublisherAware {
 
 	}
 
-	public DefaultSpResponseHandler setValidator(SamlValidator validator) {
+	public DefaultSpResponseHandler setValidator(DefaultValidator validator) {
 		this.validator = validator;
 		return this;
 	}
 
-	public SamlValidator getValidator() {
+	public DefaultValidator getValidator() {
 		return validator;
 	}
 

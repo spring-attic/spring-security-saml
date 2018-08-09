@@ -15,9 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
-
-import org.springframework.security.saml.SamlException;
+package org.springframework.security.saml;
 
 public class SamlKeyException extends SamlException {
 	public SamlKeyException(String message) {

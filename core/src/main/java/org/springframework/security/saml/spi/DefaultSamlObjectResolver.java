@@ -25,7 +25,9 @@ import java.util.List;
 import org.springframework.security.saml.SamlException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.SamlObjectResolver;
+import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
@@ -183,7 +185,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 						m.setEntityAlias(c.getAlias());
 						return (IdentityProviderMetadata) m;
 					}
-					m = m.hasNext() ? m.getNext() : null;
+					m = m.hasNext() ? (IdentityProviderMetadata) m.getNext() : null;
 				}
 			} catch (SamlException x) {
 				logger.debug("Unable to resolve identity provider metadata.", x);
@@ -237,7 +239,7 @@ public class DefaultSamlObjectResolver implements SamlObjectResolver {
 						m.setEntityAlias(c.getAlias());
 						return (ServiceProviderMetadata) m;
 					}
-					m = m.hasNext() ? m.getNext() : null;
+					m = m.hasNext() ? (ServiceProviderMetadata)m.getNext() : null;
 				}
 			} catch (SamlException x) {
 				logger.debug("Unable to resolve service provider metadata.", x);

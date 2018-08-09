@@ -17,17 +17,16 @@
 
 package org.springframework.security.saml.provider.identity.config;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 
 public class LocalIdentityProviderConfiguration extends
-	LocalProviderConfiguration<LocalIdentityProviderConfiguration> {
+	LocalProviderConfiguration<LocalIdentityProviderConfiguration, ExternalServiceProviderConfiguration> {
 
 	private boolean wantRequestsSigned = true;
 	private boolean signAssertions = true;
-	private List<ExternalServiceProviderConfiguration> providers = new LinkedList<>();
+	private long notOnOrAfter = 120000;
+	private long notBefore = 60000;
+	private long sessionNotOnOrAfter = 30 * 60 * 1000;
 
 	public LocalIdentityProviderConfiguration() {
 		super("saml/idp/");
@@ -42,21 +41,39 @@ public class LocalIdentityProviderConfiguration extends
 		return this;
 	}
 
-	public List<ExternalServiceProviderConfiguration> getProviders() {
-		return providers;
-	}
-
-	public LocalIdentityProviderConfiguration setProviders(List<ExternalServiceProviderConfiguration> providers) {
-		this.providers = providers;
-		return this;
-	}
-
 	public boolean isSignAssertions() {
 		return signAssertions;
 	}
 
 	public LocalIdentityProviderConfiguration setSignAssertions(boolean signAssertions) {
 		this.signAssertions = signAssertions;
+		return this;
+	}
+
+	public long getNotOnOrAfter() {
+		return notOnOrAfter;
+	}
+
+	public LocalIdentityProviderConfiguration setNotOnOrAfter(long notOnOrAfter) {
+		this.notOnOrAfter = notOnOrAfter;
+		return this;
+	}
+
+	public long getNotBefore() {
+		return notBefore;
+	}
+
+	public LocalIdentityProviderConfiguration setNotBefore(long notBefore) {
+		this.notBefore = notBefore;
+		return this;
+	}
+
+	public long getSessionNotOnOrAfter() {
+		return sessionNotOnOrAfter;
+	}
+
+	public LocalIdentityProviderConfiguration setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
+		this.sessionNotOnOrAfter = sessionNotOnOrAfter;
 		return this;
 	}
 }

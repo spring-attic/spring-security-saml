@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
@@ -101,13 +102,18 @@ public class DefaultValidator implements SamlValidator {
 		}
 	}
 
+	@Deprecated
+	public void validate(Saml2Object saml2Object, SamlObjectResolver resolver, HttpServletRequest request) {
+
+	}
+
 	@Override
-	public void validate(Saml2Object saml2Object, SamlObjectResolver resolver, HttpServletRequest request)
+	public void validate(Saml2Object saml2Object, HostedProvider provider)
 		throws ValidationException {
 		if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;
-			ServiceProviderMetadata requester = resolver.getLocalServiceProvider(network.getBasePath(request));
-			IdentityProviderMetadata responder = resolver.resolveIdentityProvider(r);
+			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
+			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(r);
 			ValidationResult result = validate(r, null, requester, responder);
 			if (!result.isSuccess()) {
 				throw new ValidationException("Unable to validate SAML response.", result);

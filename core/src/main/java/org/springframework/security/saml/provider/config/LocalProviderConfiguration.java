@@ -17,14 +17,19 @@
 
 package org.springframework.security.saml.provider.config;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.StringUtils.hasText;
 
-public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
+public class LocalProviderConfiguration<
+	LocalConfiguration extends LocalProviderConfiguration,
+	ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> {
 
 	private String entityId;
 	private String alias;
@@ -34,6 +39,9 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 	private String prefix;
 	private boolean singleLogoutEnabled = true;
 	private List<NameId> nameIds = emptyList();
+	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
+	private DigestMethod defaultDigest = DigestMethod.SHA256;
+	private List<ExternalConfiguration> providers = new LinkedList<>();
 
 
 	public LocalProviderConfiguration(String prefix) {
@@ -44,21 +52,21 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return entityId;
 	}
 
-	public T setEntityId(String entityId) {
+	public LocalConfiguration setEntityId(String entityId) {
 		this.entityId = entityId;
 		return _this();
 	}
 
 	@SuppressWarnings("checked")
-	protected T _this() {
-		return (T) this;
+	protected LocalConfiguration _this() {
+		return (LocalConfiguration) this;
 	}
 
 	public boolean isSignMetadata() {
 		return signMetadata;
 	}
 
-	public T setSignMetadata(boolean signMetadata) {
+	public LocalConfiguration setSignMetadata(boolean signMetadata) {
 		this.signMetadata = signMetadata;
 		return _this();
 	}
@@ -67,7 +75,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return metadata;
 	}
 
-	public T setMetadata(String metadata) {
+	public LocalConfiguration setMetadata(String metadata) {
 		this.metadata = metadata;
 		return _this();
 	}
@@ -76,7 +84,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return keys;
 	}
 
-	public T setKeys(RotatingKeys keys) {
+	public LocalConfiguration setKeys(RotatingKeys keys) {
 		this.keys = keys;
 		return _this();
 	}
@@ -85,7 +93,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return alias;
 	}
 
-	public T setAlias(String alias) {
+	public LocalConfiguration setAlias(String alias) {
 		this.alias = alias;
 		return _this();
 	}
@@ -94,7 +102,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return prefix;
 	}
 
-	public T setPrefix(String prefix) {
+	public LocalConfiguration setPrefix(String prefix) {
 		prefix = cleanPrefix(prefix);
 		this.prefix = prefix;
 
@@ -115,7 +123,7 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return singleLogoutEnabled;
 	}
 
-	public T setSingleLogoutEnabled(boolean singleLogoutEnabled) {
+	public LocalConfiguration setSingleLogoutEnabled(boolean singleLogoutEnabled) {
 		this.singleLogoutEnabled = singleLogoutEnabled;
 		return _this();
 	}
@@ -124,8 +132,35 @@ public class LocalProviderConfiguration<T extends LocalProviderConfiguration> {
 		return nameIds;
 	}
 
-	public T setNameIds(List<NameId> nameIds) {
+	public LocalConfiguration setNameIds(List<NameId> nameIds) {
 		this.nameIds = nameIds;
+		return _this();
+	}
+
+	public AlgorithmMethod getDefaultSigningAlgorithm() {
+		return defaultSigningAlgorithm;
+	}
+
+	public LocalConfiguration setDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+		this.defaultSigningAlgorithm = defaultSigningAlgorithm;
+		return _this();
+	}
+
+	public DigestMethod getDefaultDigest() {
+		return defaultDigest;
+	}
+
+	public LocalConfiguration setDefaultDigest(DigestMethod defaultDigest) {
+		this.defaultDigest = defaultDigest;
+		return _this();
+	}
+
+	public List<ExternalConfiguration> getProviders() {
+		return providers;
+	}
+
+	public LocalConfiguration setProviders(List<ExternalConfiguration> providers) {
+		this.providers = providers;
 		return _this();
 	}
 }

@@ -15,20 +15,20 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.provider;
 
-import org.springframework.security.saml.SamlException;
+import javax.servlet.http.HttpServletRequest;
 
-public class SamlMetadataException extends SamlException {
-	public SamlMetadataException(String message) {
-		super(message);
+public class StaticSamlConfigurationRepository implements SamlConfigurationRepository{
+
+	private final SamlServerConfiguration configuration;
+
+	public StaticSamlConfigurationRepository(SamlServerConfiguration configuration) {
+		this.configuration = configuration;
 	}
 
-	public SamlMetadataException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public SamlMetadataException(Throwable cause) {
-		super(cause);
+	@Override
+	public SamlServerConfiguration getServerConfiguration(HttpServletRequest request) {
+		return configuration;
 	}
 }

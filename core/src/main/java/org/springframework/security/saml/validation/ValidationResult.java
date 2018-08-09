@@ -35,9 +35,23 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.security.saml.saml2.Saml2Object;
+
 public class ValidationResult {
 
 	private List<ValidationError> errors = new LinkedList<>();
+
+	private final Saml2Object saml2Object;
+
+	/**
+	 * @deprecated Use constructor that contains the actual object that was validated
+	 */
+	public ValidationResult() {
+		this(null);
+	}
+	public ValidationResult(Saml2Object saml2Object) {
+		this.saml2Object = saml2Object;
+	}
 
 	public boolean isSuccess() {
 		return errors.isEmpty();
@@ -110,5 +124,9 @@ public class ValidationResult {
 	public ValidationResult addError(ValidationError error) {
 		this.errors.add(error);
 		return this;
+	}
+
+	public Saml2Object getSaml2Object() {
+		return saml2Object;
 	}
 }

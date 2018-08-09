@@ -27,7 +27,6 @@ import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlProcessingFilter;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
@@ -99,7 +98,7 @@ public abstract class AbstractProviderConfiguration {
 	}
 
 	@Bean
-	public SamlValidator validator() {
+	public DefaultValidator validator() {
 		return new DefaultValidator(implementation());
 	}
 

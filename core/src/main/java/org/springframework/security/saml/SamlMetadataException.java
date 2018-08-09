@@ -15,12 +15,18 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml;
 
-import javax.servlet.http.HttpServletRequest;
+public class SamlMetadataException extends SamlException {
+	public SamlMetadataException(String message) {
+		super(message);
+	}
 
-public interface SamlProviderProvisioning<T extends HostedProvider> {
-	T getHostedProvider(HttpServletRequest request);
+	public SamlMetadataException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public SamlMetadataException(Throwable cause) {
+		super(cause);
+	}
 }
-
-

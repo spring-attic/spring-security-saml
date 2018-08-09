@@ -23,7 +23,7 @@ import java.util.List;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 
 public class LocalServiceProviderConfiguration extends
-	LocalProviderConfiguration<LocalServiceProviderConfiguration> {
+	LocalProviderConfiguration<LocalServiceProviderConfiguration, ExternalIdentityProviderConfiguration> {
 
 	private boolean signRequests = false;
 	private boolean wantAssertionsSigned = false;

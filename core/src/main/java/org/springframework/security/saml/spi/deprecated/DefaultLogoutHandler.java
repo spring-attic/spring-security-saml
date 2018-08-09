@@ -31,9 +31,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlAuthentication;
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -44,6 +44,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -55,18 +56,18 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogoutHandler> {
 
-	private SamlValidator validator;
+	private DefaultValidator validator;
 	private String postBindingTemplate;
 	private DefaultSessionAssertionStore assertionStore;
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".logout.request";
 	private LogoutSuccessHandler logoutSuccessHandler;
 	private String logoutPath = "logout";
 
-	public SamlValidator getValidator() {
+	public DefaultValidator getValidator() {
 		return validator;
 	}
 
-	public DefaultLogoutHandler setValidator(SamlValidator validator) {
+	public DefaultLogoutHandler setValidator(DefaultValidator validator) {
 		this.validator = validator;
 		return this;
 	}
@@ -113,7 +114,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 			//we received a response
 			return processLogoutResponse(request, response, authentication, presponse);
 		}
-		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
+		LocalProviderConfiguration<? extends LocalProviderConfiguration,? extends ExternalProviderConfiguration<?>> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
 			logger.debug(format("Logout initiated without a target for the local service provider."));
 			if (authentication instanceof SamlAuthentication) {
@@ -243,7 +244,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 											   LogoutResponse logoutResponse,
 											   HttpServletRequest request,
 											   HttpServletResponse response) throws IOException, ServletException {
-		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
+		LocalProviderConfiguration<? extends LocalProviderConfiguration, ? extends ExternalProviderConfiguration<?>> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
 			sessionLogout(request, response, authentication);
 			String redirect = getLocalLogoutRedirect(request);
@@ -265,7 +266,7 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 											   LogoutRequest logoutRequest,
 											   HttpServletRequest request,
 											   HttpServletResponse response) throws IOException, ServletException {
-		LocalProviderConfiguration<? extends LocalProviderConfiguration> provider = getTargetProvider(request);
+		LocalProviderConfiguration<? extends LocalProviderConfiguration, ? extends ExternalProviderConfiguration<?>> provider = getTargetProvider(request);
 		if (provider instanceof LocalServiceProviderConfiguration) {
 			ServiceProviderMetadata localSp = getLocalServiceProvider(request);
 			IdentityProviderMetadata idp = getIdentityProvider(logoutRequest);
@@ -349,8 +350,8 @@ public class DefaultLogoutHandler extends DefaultSamlMessageHandler<DefaultLogou
 		return result;
 	}
 
-	protected LocalProviderConfiguration<? extends LocalProviderConfiguration> getTargetProvider(HttpServletRequest request) {
-		for (LocalProviderConfiguration<? extends LocalProviderConfiguration> provider :
+	protected LocalProviderConfiguration<? extends LocalProviderConfiguration, ? extends ExternalProviderConfiguration<?>> getTargetProvider(HttpServletRequest request) {
+		for (LocalProviderConfiguration<? extends LocalProviderConfiguration, ? extends ExternalProviderConfiguration<?>> provider :
 			asList(getConfiguration().getServiceProvider(), getConfiguration().getIdentityProvider())) {
 			if (internalSupports(request, provider)) {
 				return provider;

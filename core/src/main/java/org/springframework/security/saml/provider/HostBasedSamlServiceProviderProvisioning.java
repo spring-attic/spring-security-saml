@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.provider;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -54,16 +55,16 @@ public class HostBasedSamlServiceProviderProvisioning
 	@Override
 	public ServiceProvider getHostedProvider(HttpServletRequest request) {
 		String basePath = getBasePath(request);
-		LocalServiceProviderConfiguration configuration =
+		LocalServiceProviderConfiguration spConfig =
 			getConfiguration().getServerConfiguration(request).getServiceProvider();
 
 		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(configuration.getKeys().getActive());
-		keys.addAll(configuration.getKeys().getStandBy());
-		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+		keys.add(spConfig.getKeys().getActive());
+		keys.addAll(spConfig.getKeys().getStandBy());
+		SimpleKey signingKey = spConfig.isSignMetadata() ? spConfig.getKeys().getActive() : null;
 
-		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
-		String aliasPath = getAliasPath(configuration);
+		String prefix = hasText(spConfig.getPrefix()) ? spConfig.getPrefix() : "saml/sp/";
+		String aliasPath = getAliasPath(spConfig);
 		ServiceProviderMetadata metadata =
 			serviceProviderMetadata(
 				basePath,
@@ -71,15 +72,27 @@ public class HostBasedSamlServiceProviderProvisioning
 				keys,
 				prefix,
 				aliasPath,
-				configuration.getDefaultSigningAlgorithm(),
-				configuration.getDefaultDigest()
+				spConfig.getDefaultSigningAlgorithm(),
+				spConfig.getDefaultDigest()
 			);
-		if (!configuration.getNameIds().isEmpty()) {
-			metadata.getServiceProvider().setNameIds(configuration.getNameIds());
+		if (!spConfig.getNameIds().isEmpty()) {
+			metadata.getServiceProvider().setNameIds(spConfig.getNameIds());
 		}
 
+		if (!spConfig.isSingleLogoutEnabled()) {
+			metadata.getServiceProvider().setSingleLogoutService(Collections.emptyList());
+		}
+		if (hasText(spConfig.getEntityId())) {
+			metadata.setEntityId(spConfig.getEntityId());
+		}
+		if (hasText(spConfig.getAlias())) {
+			metadata.setEntityAlias(spConfig.getAlias());
+		}
+		metadata.getServiceProvider().setWantAssertionsSigned(spConfig.isWantAssertionsSigned());
+		metadata.getServiceProvider().setAuthnRequestsSigned(spConfig.isSignRequests());
+
 		return new HostedServiceProvider(
-			configuration,
+			spConfig,
 			metadata,
 			getTransformer(),
 			getValidator(),

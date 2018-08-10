@@ -16,15 +16,42 @@
  */
 package sample.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.SamlMessageHandler;
+import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.provider.HostBasedSamlServiceProviderProvisioning;
+import org.springframework.security.saml.provider.SamlConfigurationRepository;
+import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.StaticSamlConfigurationRepository;
+import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
 
 @Configuration
 public class SampleSpConfiguration extends DefaultSpConfiguration {
 
-//	@Override
-//	@Bean
-//	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
-//		return new DoNothingMessageHandler();
-//	}
+	@Bean
+	SamlConfigurationRepository configurationRepository(AppConfig config) {
+		return new StaticSamlConfigurationRepository(config);
+	}
+
+	@Bean
+	public SamlProviderProvisioning<ServiceProvider> samlProviderProvisioning(
+		SamlConfigurationRepository repository,
+		SamlMetadataCache cache
+	) {
+		return new HostBasedSamlServiceProviderProvisioning(
+			repository,
+			transformer(),
+			validator(),
+			cache
+		);
+	}
+
+	@Override
+	@Bean
+	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
+		return new DoNothingMessageHandler();
+	}
 }

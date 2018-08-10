@@ -17,9 +17,6 @@
 
 package org.springframework.security.saml.provider.service.config;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 
 public class LocalServiceProviderConfiguration extends
@@ -27,7 +24,6 @@ public class LocalServiceProviderConfiguration extends
 
 	private boolean signRequests = false;
 	private boolean wantAssertionsSigned = false;
-	private List<ExternalIdentityProviderConfiguration> providers = new LinkedList<>();
 
 	public LocalServiceProviderConfiguration() {
 		super("saml/sp");
@@ -51,12 +47,4 @@ public class LocalServiceProviderConfiguration extends
 		return this;
 	}
 
-	public List<ExternalIdentityProviderConfiguration> getProviders() {
-		return providers;
-	}
-
-	public LocalServiceProviderConfiguration setProviders(List<ExternalIdentityProviderConfiguration> providers) {
-		this.providers = providers;
-		return this;
-	}
 }

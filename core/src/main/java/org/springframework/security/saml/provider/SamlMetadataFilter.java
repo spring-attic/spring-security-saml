@@ -18,6 +18,7 @@
 package org.springframework.security.saml.provider;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -68,9 +69,10 @@ public class SamlMetadataFilter<ProviderType extends HostedProvider> extends Onc
 			ProviderType provider = provisioning.getHostedProvider(request);
 			Metadata metadata = provider.getMetadata();
 			String xml = provider.toXml(metadata);
-			response.setContentType(TEXT_XML_VALUE);
-			response.addHeader(CONTENT_DISPOSITION, getFilename());
 			getCacheHeaderWriter().writeHeaders(request, response);
+			response.setContentType(TEXT_XML_VALUE);
+			String safeFilename = URLEncoder.encode(getFilename()+";", "ISO-8859-1");
+			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename+ "\"");
 			response.getWriter().write(xml);
 		}
 		else {

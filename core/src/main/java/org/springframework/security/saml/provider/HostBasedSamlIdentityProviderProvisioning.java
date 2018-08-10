@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.provider;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -55,16 +56,16 @@ public class HostBasedSamlIdentityProviderProvisioning
 	@Override
 	public IdentityProvider getHostedProvider(HttpServletRequest request) {
 		String basePath = getBasePath(request);
-		LocalIdentityProviderConfiguration configuration =
+		LocalIdentityProviderConfiguration idpConfig =
 			getConfiguration().getServerConfiguration(request).getIdentityProvider();
 
 		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(configuration.getKeys().getActive());
-		keys.addAll(configuration.getKeys().getStandBy());
-		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+		keys.add(idpConfig.getKeys().getActive());
+		keys.addAll(idpConfig.getKeys().getStandBy());
+		SimpleKey signingKey = idpConfig.isSignMetadata() ? idpConfig.getKeys().getActive() : null;
 
-		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
-		String aliasPath = getAliasPath(configuration);
+		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
+		String aliasPath = getAliasPath(idpConfig);
 		IdentityProviderMetadata metadata =
 			identityProviderMetadata(
 				basePath,
@@ -72,16 +73,28 @@ public class HostBasedSamlIdentityProviderProvisioning
 				keys,
 				prefix,
 				aliasPath,
-				configuration.getDefaultSigningAlgorithm(),
-				configuration.getDefaultDigest()
+				idpConfig.getDefaultSigningAlgorithm(),
+				idpConfig.getDefaultDigest()
 			);
 
-		if (!configuration.getNameIds().isEmpty()) {
-			metadata.getIdentityProvider().setNameIds(configuration.getNameIds());
+		if (!idpConfig.getNameIds().isEmpty()) {
+			metadata.getIdentityProvider().setNameIds(idpConfig.getNameIds());
 		}
 
+		if (!idpConfig.isSingleLogoutEnabled()) {
+			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
+		}
+		if (hasText(idpConfig.getEntityId())) {
+			metadata.setEntityId(idpConfig.getEntityId());
+		}
+		if (hasText(idpConfig.getAlias())) {
+			metadata.setEntityAlias(idpConfig.getAlias());
+		}
+
+		metadata.getIdentityProvider().setWantAuthnRequestsSigned(idpConfig.isWantRequestsSigned());
+
 		return new HostedIdentityProvider(
-			configuration,
+			idpConfig,
 			metadata,
 			getTransformer(),
 			getValidator(),

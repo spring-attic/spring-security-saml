@@ -19,7 +19,7 @@ package sample.config;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.provisioning;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +26,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;

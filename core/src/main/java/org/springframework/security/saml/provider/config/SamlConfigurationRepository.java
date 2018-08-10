@@ -15,20 +15,16 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.config;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class StaticSamlConfigurationRepository implements SamlConfigurationRepository{
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 
-	private final SamlServerConfiguration configuration;
-
-	public StaticSamlConfigurationRepository(SamlServerConfiguration configuration) {
-		this.configuration = configuration;
-	}
-
-	@Override
-	public SamlServerConfiguration getServerConfiguration(HttpServletRequest request) {
-		return configuration;
-	}
+/**
+ * Adds support for multi tenancy based on the context of an HTTP request
+ * Returns the server configuration based on a HTTP request.
+ */
+public interface SamlConfigurationRepository {
+	SamlServerConfiguration getServerConfiguration(HttpServletRequest request);
 }

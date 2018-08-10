@@ -18,7 +18,7 @@
 package org.springframework.security.saml.provider.identity;
 
 import org.springframework.security.saml.provider.SamlMetadataFilter;
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 public class IdentityProviderMetadataFilter extends SamlMetadataFilter<IdentityProvider> {

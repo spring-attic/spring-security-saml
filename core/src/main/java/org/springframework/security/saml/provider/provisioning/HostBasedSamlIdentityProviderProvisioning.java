@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.provisioning;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -27,6 +27,7 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.HostedIdentityProvider;
 import org.springframework.security.saml.provider.identity.IdentityProvider;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;

@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.provider.service;
 
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 

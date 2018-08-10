@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 

@@ -20,7 +20,7 @@ package org.springframework.security.saml;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 

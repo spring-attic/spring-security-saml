@@ -20,11 +20,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlMessageHandler;
 import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.provider.HostBasedSamlServiceProviderProvisioning;
-import org.springframework.security.saml.provider.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.StaticSamlConfigurationRepository;
+import org.springframework.security.saml.provider.config.StaticSamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
 

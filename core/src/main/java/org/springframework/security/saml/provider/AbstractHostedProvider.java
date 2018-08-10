@@ -294,7 +294,7 @@ public abstract class AbstractHostedProvider<
 		}
 	}
 
-	private Endpoint getSingleLogout(List<Endpoint> logoutService) {
+	protected Endpoint getSingleLogout(List<Endpoint> logoutService) {
 		if (logoutService == null || logoutService.isEmpty()) {
 			return null;
 		}

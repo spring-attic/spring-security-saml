@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.provider.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlMetadataCache;
@@ -106,6 +107,7 @@ public class HostedServiceProvider extends AbstractHostedProvider<
 
 	@Override
 	public Endpoint getSingleSignOnEndpoint() {
-		return null;
+		List<Endpoint> endpoints = getMetadata().getServiceProvider().getSingleLogoutService();
+		return getSingleLogout(endpoints);
 	}
 }

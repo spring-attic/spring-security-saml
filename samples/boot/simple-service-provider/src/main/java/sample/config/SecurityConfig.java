@@ -16,10 +16,14 @@
  */
 package sample.config;
 
+import javax.servlet.Filter;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -33,16 +37,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		this.provisioning = provisioning;
 	}
 
+	@Bean
+	public Filter metadataFilter() {
+		return new ServiceProviderMetadataFilter(provisioning);
+	}
+
+	@Bean
+	public Filter authenticationRequestFilter() {
+		return new SamlAuthenticationRequestFilter(provisioning);
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.addFilterBefore(new ServiceProviderMetadataFilter(provisioning), BasicAuthenticationFilter.class)
+			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(authenticationRequestFilter(), metadataFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
-			.antMatchers("/saml/sp/**").permitAll()
+			.antMatchers("/saml/sp/**").permitAll() //TODO - based on configuration
 			.anyRequest().authenticated()
 			.and()
-			.formLogin().loginPage("/saml/sp/select")
+			.formLogin().loginPage("/saml/sp/select") //TODO - based on configuration
 		;
 	}
 }

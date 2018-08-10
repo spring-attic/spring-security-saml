@@ -29,6 +29,7 @@ import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
 
 @Configuration
+@Deprecated
 public class SampleSpConfiguration extends DefaultSpConfiguration {
 
 	@Bean
@@ -52,6 +53,11 @@ public class SampleSpConfiguration extends DefaultSpConfiguration {
 	@Override
 	@Bean
 	public SamlMessageHandler metadataHandler(SamlServerConfiguration configuration) {
+		return new DoNothingMessageHandler();
+	}
+
+	@Override
+	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
 		return new DoNothingMessageHandler();
 	}
 }

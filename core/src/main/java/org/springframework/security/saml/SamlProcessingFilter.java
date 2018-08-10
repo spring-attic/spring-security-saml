@@ -41,7 +41,9 @@ import static org.springframework.security.saml.SamlMessageHandler.ProcessingSta
  * is a SAML message based on metadata preferences.
  * For performance optimization under default configurations it's wise to configure this filter
  * with the <code>/saml</code> mapping.
+ * @deprecated - will be moving to a spring security filterchain
  */
+
 public class SamlProcessingFilter implements Filter {
 
 	private List<SamlMessageHandler> handlers = new LinkedList<>();

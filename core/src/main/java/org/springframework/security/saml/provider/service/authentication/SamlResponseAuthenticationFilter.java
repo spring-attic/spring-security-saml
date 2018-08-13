@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.provider.service;
+package org.springframework.security.saml.provider.service.authentication;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;

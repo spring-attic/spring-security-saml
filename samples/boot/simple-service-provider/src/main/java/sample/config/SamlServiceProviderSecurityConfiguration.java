@@ -26,14 +26,21 @@ import org.springframework.security.saml.provider.provisioning.SamlProviderProvi
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
+import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
+import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
+import org.springframework.security.saml.provider.service.authentication.SamlServiceProviderLogoutFilter;
+import org.springframework.security.saml.provider.service.authentication.SimpleAuthenticationManager;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	private final SamlProviderProvisioning<ServiceProvider> provisioning;
 
-	public SecurityConfig(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public SamlServiceProviderSecurityConfiguration(SamlProviderProvisioning<ServiceProvider> provisioning) {
 		this.provisioning = provisioning;
 	}
 
@@ -47,11 +54,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new SamlAuthenticationRequestFilter(provisioning);
 	}
 
+	@Bean
+	public Filter authenticationResponseFilter() {
+		SamlResponseAuthenticationFilter authenticationFilter =
+			new SamlResponseAuthenticationFilter(provisioning);
+		authenticationFilter.setAuthenticationManager(new SimpleAuthenticationManager());
+		authenticationFilter.setAuthenticationSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
+		authenticationFilter.setAuthenticationFailureHandler(new GenericErrorAuthenticationFailureHandler());
+		return authenticationFilter;
+	}
+
+	@Bean
+	public Filter samlLogoutFilter() {
+		return new SamlServiceProviderLogoutFilter(
+			provisioning,
+			new SimpleUrlLogoutSuccessHandler(),
+			new SecurityContextLogoutHandler()
+		);
+	}
+
+
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
 			.addFilterAfter(authenticationRequestFilter(), metadataFilter().getClass())
+			.addFilterAfter(authenticationResponseFilter(), authenticationRequestFilter().getClass())
+			.addFilterAfter(samlLogoutFilter(), authenticationResponseFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers("/saml/sp/**").permitAll() //TODO - based on configuration

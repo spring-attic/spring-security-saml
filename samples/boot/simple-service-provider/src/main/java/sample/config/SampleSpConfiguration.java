@@ -60,4 +60,14 @@ public class SampleSpConfiguration extends DefaultSpConfiguration {
 	public SamlMessageHandler discoveryHandler(SamlServerConfiguration configuration) {
 		return new DoNothingMessageHandler();
 	}
+
+	@Override
+	public SamlMessageHandler spResponseHandler(SamlServerConfiguration configuration) {
+		return new DoNothingMessageHandler();
+	}
+
+	@Override
+	public SamlMessageHandler logoutHandler(SamlServerConfiguration configuration) {
+		return new DoNothingMessageHandler();
+	}
 }

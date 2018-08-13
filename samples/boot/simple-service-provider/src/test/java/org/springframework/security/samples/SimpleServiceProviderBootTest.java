@@ -29,9 +29,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -49,7 +49,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
 
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -62,6 +61,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -290,6 +290,39 @@ public class SimpleServiceProviderBootTest {
 	@Test
 	public void receiveLogoutResponse() throws Exception {
 
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = resolver.resolveIdentityProvider(idpEntityId);
+		ServiceProviderMetadata sp = resolver.getLocalServiceProvider(spBaseUrl);
+		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+			true,
+			assertion,
+			idpEntityId,
+			sp.getEntityId(),
+			null
+		);
+		LogoutRequest request = samlDefaults.logoutRequest(
+			idp,
+			sp,
+			assertion.getSubject().getPrincipal()
+		);
+
+		LogoutResponse response = samlDefaults.logoutResponse(request, sp, idp);
+
+		String xml = transformer.toXml(response);
+		String param = transformer.samlEncode(xml, true);
+
+		String redirect = mockMvc.perform(
+			get(sp.getServiceProvider().getSingleLogoutService().get(0).getLocation())
+				.param("SAMLResponse", param)
+				.with(authentication(authentication))
+		)
+			.andExpect(status().isFound())
+			.andExpect(unauthenticated())
+			.andReturn()
+			.getResponse()
+			.getHeader("Location");
+		assertEquals(redirect, "/");
 	}
 
 	protected AuthenticationRequest getAuthenticationRequest() throws Exception {

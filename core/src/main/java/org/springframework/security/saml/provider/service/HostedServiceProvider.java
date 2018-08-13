@@ -29,6 +29,8 @@ import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
@@ -52,11 +54,6 @@ public class HostedServiceProvider extends AbstractHostedProvider<
 		super(configuration, metadata, transformer, validator, cache);
 	}
 
-	@Override
-	public IdentityProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
-		return null;
-	}
-
 	public IdentityProviderMetadata getRemoteProvider(Assertion assertion) {
 		String issuer = assertion.getIssuer() != null ?
 			assertion.getIssuer().getValue() :
@@ -69,6 +66,25 @@ public class HostedServiceProvider extends AbstractHostedProvider<
 			response.getIssuer().getValue() :
 			null;
 		return getRemoteProvider(issuer);
+	}
+
+	@Override
+	public IdentityProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
+		if (saml2Object instanceof Assertion) {
+			return getRemoteProvider((Assertion)saml2Object);
+		}
+		else if (saml2Object instanceof Response) {
+			return getRemoteProvider((Response)saml2Object);
+		}
+		else if (saml2Object instanceof LogoutRequest) {
+			return getRemoteProvider((LogoutRequest)saml2Object);
+		}
+		else if (saml2Object instanceof LogoutResponse) {
+			return getRemoteProvider((LogoutResponse)saml2Object);
+		}
+		else {
+			throw new UnsupportedOperationException("Class:"+saml2Object.getClass().getName()+" not yet implemented");
+		}
 	}
 
 	@Override

@@ -148,6 +148,29 @@ public abstract class AbstractHostedProvider<
 	}
 
 
+	protected RemoteMetadata getRemoteProvider(Issuer issuer) {
+		if (issuer == null) {
+			return null;
+		}
+		else return getRemoteProvider(issuer.getValue());
+	}
+
+	protected RemoteMetadata getRemoteProvider(LogoutResponse response) {
+		String issuer = response.getIssuer() != null ?
+			response.getIssuer().getValue() :
+			null;
+		return getRemoteProvider(issuer);
+	}
+
+	protected RemoteMetadata getRemoteProvider(LogoutRequest request) {
+		String issuer = request.getIssuer() != null ?
+			request.getIssuer().getValue() :
+			null;
+		return getRemoteProvider(issuer);
+	}
+
+
+
 	@Override
 	public RemoteMetadata getRemoteProvider(String entityId) {
 		for (RemoteMetadata m : getRemoteProviders()) {

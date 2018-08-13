@@ -64,7 +64,7 @@ public abstract class DefaultSamlMessageHandler<T extends DefaultSamlMessageHand
 	private SamlTemplateEngine samlTemplateEngine;
 	private String forwardUrl = null;
 	private boolean matchAgainstAliasPath;
-	private String errorTemplate = "/templates/spi/generic-error.vm";;
+	private String errorTemplate = "/templates/spi/generic-error.vm";
 
 	public SamlServerConfiguration getConfiguration() {
 		return configuration;

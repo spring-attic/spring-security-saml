@@ -27,6 +27,7 @@ import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.StaticSamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.spi.deprecated.DefaultSpConfiguration;
+import org.springframework.security.saml.spi.deprecated.DoNothingMessageHandler;
 
 @Configuration
 @Deprecated

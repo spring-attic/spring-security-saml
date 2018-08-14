@@ -29,12 +29,17 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
-import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
 public class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
+
+	public enum LogoutStatus {
+		SUCCESS,
+		REDIRECT,
+		NOT_COMPLETE
+	}
 
 	public static final String RUN_SUCCESS = SamlLogoutSuccessHandler.class.getName()+".logout.success";
 
@@ -55,7 +60,12 @@ public class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
 	public void onLogoutSuccess(HttpServletRequest request,
 								HttpServletResponse response,
 								Authentication authentication) throws IOException, ServletException {
-		if (TRUE.equals(request.getAttribute(RUN_SUCCESS))) {
+		if (LogoutStatus.REDIRECT.equals(request.getAttribute(RUN_SUCCESS))) {
+			for (LogoutHandler handler : ofNullable(delegates).orElse(emptyList())) {
+				handler.logout(request, response, authentication);
+			}
+		}
+		else if (LogoutStatus.SUCCESS.equals(request.getAttribute(RUN_SUCCESS))) {
 			for (LogoutHandler handler : ofNullable(delegates).orElse(emptyList())) {
 				handler.logout(request, response, authentication);
 			}
@@ -63,5 +73,6 @@ public class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
 				successHandler.onLogoutSuccess(request, response, authentication);
 			}
 		}
+
 	}
 }

@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMessageStore;
+import org.springframework.security.saml.provider.SamlLogoutSuccessHandler;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -39,7 +40,6 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.validation.ValidationResult;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -102,10 +102,17 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		}
 
 		logger.debug("Local IDP received logout request.");
+		//remove any assertions matching the sender from the store
+		//so that the sender is not included in the intermediate messages
+		removeAssertionFromStore(request, logoutRequest);
+
 		if (idpHasOtherSessions(request, logoutRequest)) {
+			//this IDP is holding onto more than one SP session
 			logger.debug("Multiple SP sessions present, starting logout sequence.");
+			//save the original request, this will be the
+			//last message we respond to
 			setInitialSpRequest(request, logoutRequest);
-			removeAssertionFromStore(request, logoutRequest);
+			//send the first message
 			idpInitiatedLogout(request, response, authentication);
 		}
 		else {
@@ -113,8 +120,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 			ServiceProviderMetadata sp = provider.getRemoteProvider(logoutRequest);
 			LogoutResponse lr = provider.logoutResponse(logoutRequest, sp);
 			String url = getRedirectUrl(provider, lr, lr.getDestination(), "SAMLResponse");
-			//TODO - what do we need to do?
-			new SecurityContextLogoutHandler().logout(request, response, authentication);
+			request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 			response.sendRedirect(url);
 		}
 	}
@@ -161,12 +167,12 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 					logoutResponse.getDestination(),
 					"SAMLResponse"
 				);
-				new SecurityContextLogoutHandler().logout(request, response, authentication);
+				request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 				response.sendRedirect(redirect);
 			}
 			else {
 				//let the other handlers finish
-				request.setAttribute(RUN_SUCCESS, TRUE);
+				request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.SUCCESS);
 			}
 		}
 	}

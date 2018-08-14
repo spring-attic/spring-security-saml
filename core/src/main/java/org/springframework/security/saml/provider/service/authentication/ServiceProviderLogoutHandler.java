@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlAuthentication;
 import org.springframework.security.saml.SamlException;
+import org.springframework.security.saml.provider.SamlLogoutSuccessHandler;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -45,7 +46,6 @@ import org.springframework.web.util.UriUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static org.springframework.security.saml.provider.SamlLogoutSuccessHandler.RUN_SUCCESS;
 import static org.springframework.util.StringUtils.hasText;
@@ -108,7 +108,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 										HttpServletResponse response,
 										Authentication authentication,
 										String logoutResponse) {
-		request.setAttribute(RUN_SUCCESS, TRUE);
+		request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.SUCCESS);
 	}
 
 	protected void spInitiatedLogout(HttpServletRequest request,

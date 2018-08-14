@@ -105,4 +105,12 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 		}
 		return first;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int size(HttpServletRequest request) {
+		return getDataMap(request).size();
+	}
 }

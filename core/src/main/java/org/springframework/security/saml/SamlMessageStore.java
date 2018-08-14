@@ -71,4 +71,11 @@ public interface SamlMessageStore<T extends Saml2Object, Holder> {
 	 */
 	T removeFirst(Holder holder);
 
+	/**
+	 * Returns the number of messages for a holder
+	 * @param holder the message store implementation
+	 * @return the number of messages for that implementation
+	 */
+	int size(Holder holder);
+
 }

@@ -70,6 +70,15 @@ public class HostedIdentityProvider extends AbstractHostedProvider<
 
 	@Override
 	public ServiceProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
+		if (saml2Object instanceof AuthenticationRequest) {
+			return getRemoteProvider((AuthenticationRequest)saml2Object);
+		}
+		else if (saml2Object instanceof LogoutRequest) {
+			return getRemoteProvider((LogoutRequest)saml2Object);
+		}
+		else if (saml2Object instanceof Assertion) {
+			return getRemoteProvider((Assertion)saml2Object);
+		}
 		throw new IllegalArgumentException("Unable to resolve class:"+saml2Object.getClass().getName());
 	}
 

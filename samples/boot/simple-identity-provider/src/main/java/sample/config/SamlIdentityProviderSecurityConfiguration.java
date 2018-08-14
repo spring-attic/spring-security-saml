@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.provider.identity.IdentityProvider;
 import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
+import org.springframework.security.saml.provider.identity.IdpAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.identity.IdpInitiatedLoginFilter;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
@@ -67,10 +68,17 @@ public class SamlIdentityProviderSecurityConfiguration extends WebSecurityConfig
 		return new IdpInitiatedLoginFilter(provisioning, assertionStore());
 	}
 
+
+	@Bean
+	public Filter idpAuthnRequestFilter() {
+		return new IdpAuthenticationRequestFilter(provisioning, assertionStore());
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(idpInitatedLoginFilter(), metadataFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers("/saml/idp/metadata").permitAll()

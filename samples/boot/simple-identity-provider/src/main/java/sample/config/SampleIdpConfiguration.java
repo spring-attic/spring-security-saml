@@ -61,4 +61,9 @@ public class SampleIdpConfiguration extends DefaultIdpConfiguration {
 	public SamlMessageHandler idpInitiationHandler(SamlServerConfiguration configuration) {
 		return new DoNothingMessageHandler();
 	}
+
+	@Override
+	public SamlMessageHandler idpRequestHandler(SamlServerConfiguration configuration) {
+		return new DoNothingMessageHandler();
+	}
 }

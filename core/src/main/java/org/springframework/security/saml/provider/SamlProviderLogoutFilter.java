@@ -25,6 +25,7 @@ import org.springframework.security.saml.provider.provisioning.SamlProviderProvi
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 public class SamlProviderLogoutFilter<T extends HostedProvider> extends LogoutFilter {
 
@@ -32,6 +33,7 @@ public class SamlProviderLogoutFilter<T extends HostedProvider> extends LogoutFi
 
 	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
 									LogoutHandler samlLogoutHandler,
+									RequestMatcher requestMatcher,
 									LogoutSuccessHandler logoutSuccessHandler,
 									LogoutHandler... handlers) {
 		super(
@@ -39,7 +41,20 @@ public class SamlProviderLogoutFilter<T extends HostedProvider> extends LogoutFi
 			samlLogoutHandler
 		);
 		this.provisioning = provisioning;
-		setLogoutRequestMatcher(new SamlRequestMatcher(provisioning, "logout"));
+		setLogoutRequestMatcher(requestMatcher);
+	}
+
+	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
+									LogoutHandler samlLogoutHandler,
+									LogoutSuccessHandler logoutSuccessHandler,
+									LogoutHandler... handlers) {
+		this(
+			provisioning,
+			samlLogoutHandler,
+			new SamlRequestMatcher(provisioning, "logout"),
+			logoutSuccessHandler,
+			handlers
+		);
 	}
 
 	@Override

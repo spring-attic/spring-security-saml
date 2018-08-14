@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlAuthentication;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.provider.SamlLogoutSuccessHandler;
@@ -39,7 +38,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.validation.ValidationResult;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -99,9 +97,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 		LogoutResponse logoutResponse = provider.logoutResponse(lr, idp);
 		String url = getRedirectUrl(provider, logoutResponse, logoutResponse.getDestination(), "SAMLResponse");
 		response.sendRedirect(url);
-		//TODO should we invoke other handlers?
-		new SecurityContextLogoutHandler().logout(request, response, authentication);
-		SecurityContextHolder.getContext().setAuthentication(null);
+		request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 	}
 
 	protected void receivedLogoutResponse(HttpServletRequest request,

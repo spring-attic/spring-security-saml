@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -49,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.security.saml.provider.SamlLogoutSuccessHandler.RUN_SUCCESS;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -122,13 +122,11 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 	private void removeAssertionFromStore(HttpServletRequest request, LogoutRequest logoutRequest) {
 		List<Assertion> messages = getAssertionStore().getMessages(request);
 		String issuer = logoutRequest.getIssuer().getValue();
-		Optional<Assertion> assertion = messages.stream().filter(
+		List<Assertion> assertion = messages.stream().filter(
 			a -> issuer.equals(a.getIssuer().getValue())
 		)
-			.findFirst();
-		if (assertion.isPresent()) {
-			getAssertionStore().removeMessage(request, assertion.get().getId());
-		}
+			.collect(toList());
+		assertion.stream().forEach( a -> getAssertionStore().removeMessage(request, a.getId()));
 	}
 
 	protected void receivedLogoutResponse(HttpServletRequest request,

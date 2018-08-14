@@ -16,6 +16,8 @@
  */
 package sample.config;
 
+import javax.servlet.Filter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,9 +26,19 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SamlIdentityProviderSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+	private final SamlProviderProvisioning<IdentityProvider> provisioning;
+
+	public SamlIdentityProviderSecurityConfiguration(SamlProviderProvisioning<IdentityProvider> provisioning) {
+		this.provisioning = provisioning;
+	}
 
 	@Bean
 	public UserDetailsService userDetailsService() {
@@ -38,9 +50,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new InMemoryUserDetailsManager(userDetails);
 	}
 
+	@Bean
+	public Filter metadataFilter() {
+		return new IdentityProviderMetadataFilter(provisioning);
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
+			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers("/saml/idp/metadata").permitAll()

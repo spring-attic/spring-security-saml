@@ -342,7 +342,7 @@ public class SimpleIdentityProviderBootTests {
 		assertNull(session);
 		location = mvcResult.getResponse().getHeader("Location");
 
-		assertThat(location, equalTo("http://localhost:80/"));
+		assertThat(location, equalTo("/"));
 
 	}
 

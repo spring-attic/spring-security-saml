@@ -169,8 +169,6 @@ public abstract class AbstractHostedProvider<
 		return getRemoteProvider(issuer);
 	}
 
-
-
 	@Override
 	public RemoteMetadata getRemoteProvider(String entityId) {
 		for (RemoteMetadata m : getRemoteProviders()) {
@@ -233,7 +231,9 @@ public abstract class AbstractHostedProvider<
 		RemoteMetadata remote = getRemoteProvider(saml2Object);
 		List<SimpleKey> verificationKeys = getVerificationKeys(remote);
 		try {
-			getValidator().validateSignature(saml2Object, verificationKeys);
+			if (verificationKeys!=null && !verificationKeys.isEmpty()) {
+				getValidator().validateSignature(saml2Object, verificationKeys);
+			}
 		} catch (SignatureException x) {
 			return new ValidationResult(saml2Object).addError(
 				new ValidationResult.ValidationError(x.getMessage())

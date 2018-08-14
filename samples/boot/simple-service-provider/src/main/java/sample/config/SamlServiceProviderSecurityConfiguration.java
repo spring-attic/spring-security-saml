@@ -28,7 +28,8 @@ import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
 import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
-import org.springframework.security.saml.provider.service.authentication.SamlServiceProviderLogoutFilter;
+import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
+import org.springframework.security.saml.provider.service.authentication.ServiceProviderLogoutHandler;
 import org.springframework.security.saml.provider.service.authentication.SimpleAuthenticationManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -45,17 +46,17 @@ public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigu
 	}
 
 	@Bean
-	public Filter metadataFilter() {
+	public Filter spMetadataFilter() {
 		return new ServiceProviderMetadataFilter(provisioning);
 	}
 
 	@Bean
-	public Filter authenticationRequestFilter() {
+	public Filter spAuthenticationRequestFilter() {
 		return new SamlAuthenticationRequestFilter(provisioning);
 	}
 
 	@Bean
-	public Filter authenticationResponseFilter() {
+	public Filter spAuthenticationResponseFilter() {
 		SamlResponseAuthenticationFilter authenticationFilter =
 			new SamlResponseAuthenticationFilter(provisioning);
 		authenticationFilter.setAuthenticationManager(new SimpleAuthenticationManager());
@@ -65,9 +66,10 @@ public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigu
 	}
 
 	@Bean
-	public Filter samlLogoutFilter() {
-		return new SamlServiceProviderLogoutFilter(
+	public Filter spSamlLogoutFilter() {
+		return new SamlProviderLogoutFilter<>(
 			provisioning,
+			new ServiceProviderLogoutHandler(provisioning),
 			new SimpleUrlLogoutSuccessHandler(),
 			new SecurityContextLogoutHandler()
 		);
@@ -78,10 +80,11 @@ public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigu
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
-			.addFilterAfter(authenticationRequestFilter(), metadataFilter().getClass())
-			.addFilterAfter(authenticationResponseFilter(), authenticationRequestFilter().getClass())
-			.addFilterAfter(samlLogoutFilter(), authenticationResponseFilter().getClass())
+			.antMatcher("/saml/sp/**") //TODO - based on configuration
+			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
+			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
+			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers("/saml/sp/**").permitAll() //TODO - based on configuration

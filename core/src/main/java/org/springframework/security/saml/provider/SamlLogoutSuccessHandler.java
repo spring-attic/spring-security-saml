@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.provider.service.authentication;
+package org.springframework.security.saml.provider;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -34,9 +34,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
-class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
+public class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	static final String RUN_SUCCESS = SamlLogoutSuccessHandler.class.getName()+".logout.success";
+	public static final String RUN_SUCCESS = SamlLogoutSuccessHandler.class.getName()+".logout.success";
 
 	private final List<LogoutHandler> delegates;
 	private final LogoutSuccessHandler successHandler;

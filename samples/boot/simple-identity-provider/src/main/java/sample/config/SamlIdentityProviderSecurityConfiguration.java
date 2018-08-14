@@ -26,12 +26,16 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
 import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.identity.IdentityProviderLogoutHandler;
 import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
 import org.springframework.security.saml.provider.identity.IdpAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.identity.IdpInitiatedLoginFilter;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
@@ -59,7 +63,7 @@ public class SamlIdentityProviderSecurityConfiguration extends WebSecurityConfig
 	}
 
 	@Bean
-	public Filter metadataFilter() {
+	public Filter idpMetadataFilter() {
 		return new IdentityProviderMetadataFilter(provisioning);
 	}
 
@@ -74,11 +78,23 @@ public class SamlIdentityProviderSecurityConfiguration extends WebSecurityConfig
 		return new IdpAuthenticationRequestFilter(provisioning, assertionStore());
 	}
 
+	@Bean
+	public Filter idpLogoutFilter() {
+		return new SamlProviderLogoutFilter<>(
+			provisioning,
+			new IdentityProviderLogoutHandler(provisioning, assertionStore()),
+			new SimpleUrlLogoutSuccessHandler(),
+			new SecurityContextLogoutHandler()
+		);
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.addFilterAfter(metadataFilter(), BasicAuthenticationFilter.class)
-			.addFilterAfter(idpInitatedLoginFilter(), metadataFilter().getClass())
+			.antMatcher("/saml/idp/**")
+			.addFilterAfter(idpMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
+			.addFilterAfter(idpLogoutFilter(), idpInitatedLoginFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers("/saml/idp/metadata").permitAll()

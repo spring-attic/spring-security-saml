@@ -38,6 +38,13 @@ public interface SamlMessageStore<T extends Saml2Object, Holder> {
 	List<T> getMessages(Holder holder);
 
 	/**
+	 * Returns true if there are messages in the store for this holder
+	 * @param holder - the message store implementation
+	 * @return true if there are messages in the store
+	 */
+	boolean hasMessages(Holder holder);
+
+	/**
 	 * Retrieves a message using its unique message id.
 	 * Will return null if no message with that id is stored.
 	 * @param holder - the message store implementation

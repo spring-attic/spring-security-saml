@@ -47,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static org.springframework.security.saml.provider.service.authentication.SamlLogoutSuccessHandler.RUN_SUCCESS;
+import static org.springframework.security.saml.provider.SamlLogoutSuccessHandler.RUN_SUCCESS;
 import static org.springframework.util.StringUtils.hasText;
 
 public class ServiceProviderLogoutHandler implements LogoutHandler {

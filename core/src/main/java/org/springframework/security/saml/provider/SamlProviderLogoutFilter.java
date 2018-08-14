@@ -15,28 +15,28 @@
  *
  */
 
-package org.springframework.security.saml.provider.service.authentication;
+package org.springframework.security.saml.provider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
-public class SamlServiceProviderLogoutFilter extends LogoutFilter {
+public class SamlProviderLogoutFilter<T extends HostedProvider> extends LogoutFilter {
 
-	private final SamlProviderProvisioning<ServiceProvider> provisioning;
+	private final SamlProviderProvisioning<T> provisioning;
 
-	public SamlServiceProviderLogoutFilter(SamlProviderProvisioning<ServiceProvider> provisioning,
-										LogoutSuccessHandler logoutSuccessHandler,
-										   LogoutHandler... handlers) {
+	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
+									LogoutHandler samlLogoutHandler,
+									LogoutSuccessHandler logoutSuccessHandler,
+									LogoutHandler... handlers) {
 		super(
 			new SamlLogoutSuccessHandler(logoutSuccessHandler, handlers),
-			new ServiceProviderLogoutHandler(provisioning)
+			samlLogoutHandler
 		);
 		this.provisioning = provisioning;
 		setLogoutRequestMatcher(new SamlRequestMatcher(provisioning, "logout"));

@@ -35,6 +35,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationStat
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Status;
@@ -76,6 +77,9 @@ public class HostedIdentityProvider extends AbstractHostedProvider<
 		else if (saml2Object instanceof LogoutRequest) {
 			return getRemoteProvider((LogoutRequest)saml2Object);
 		}
+		else if (saml2Object instanceof LogoutResponse) {
+			return getRemoteProvider((LogoutResponse)saml2Object);
+		}
 		else if (saml2Object instanceof Assertion) {
 			return getRemoteProvider((Assertion)saml2Object);
 		}
@@ -83,13 +87,6 @@ public class HostedIdentityProvider extends AbstractHostedProvider<
 	}
 
 	public ServiceProviderMetadata getRemoteProvider(AuthenticationRequest request) {
-		String issuer = request.getIssuer() != null ?
-			request.getIssuer().getValue() :
-			null;
-		return getRemoteProvider(issuer);
-	}
-
-	public ServiceProviderMetadata getRemoteProvider(LogoutRequest request) {
 		String issuer = request.getIssuer() != null ?
 			request.getIssuer().getValue() :
 			null;

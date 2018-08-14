@@ -70,6 +70,14 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean hasMessages(HttpServletRequest request) {
+		return !getDataMap(request).values().isEmpty();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Assertion getMessage(HttpServletRequest request, String id) {
 		return getDataMap(request).get(id);
 	}

@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
@@ -36,13 +37,19 @@ import org.apache.commons.logging.LogFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract  class SamlFilter extends OncePerRequestFilter {
+public abstract  class SamlFilter<T extends HostedProvider> extends OncePerRequestFilter {
+
+	private final SamlProviderProvisioning<T> provisioning;
 
 	private static Log logger = LogFactory.getLog(SamlFilter.class);
 
 	private String errorTemplate = "/templates/spi/generic-error.vm";
 	private SamlTemplateEngine samlTemplateEngine = new OpenSamlVelocityEngine();
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
+
+	protected SamlFilter(SamlProviderProvisioning<T> provisioning) {
+		this.provisioning = provisioning;
+	}
 
 	protected void processHtml(HttpServletRequest request,
 							   HttpServletResponse response,
@@ -81,5 +88,13 @@ public abstract  class SamlFilter extends OncePerRequestFilter {
 	public SamlFilter setSamlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return this;
+	}
+
+	public SamlProviderProvisioning<T> getProvisioning() {
+		return provisioning;
+	}
+
+	public HeaderWriter getCacheHeaderWriter() {
+		return cacheHeaderWriter;
 	}
 }

@@ -44,7 +44,7 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * TODO - Error handling
  */
-public class SamlAuthenticationRequestFilter extends SamlFilter {
+public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProvider> {
 	private final SamlProviderProvisioning<ServiceProvider> provisioning;
 	private final RequestMatcher requestMatcher;
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
@@ -57,6 +57,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 
 	public SamlAuthenticationRequestFilter(SamlProviderProvisioning<ServiceProvider> provisioning,
 										   RequestMatcher requestMatcher) {
+		super(provisioning);
 		this.provisioning = provisioning;
 		this.requestMatcher = requestMatcher;
 	}
@@ -131,15 +132,8 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 		return xml;
 	}
 
-	private SamlProviderProvisioning<ServiceProvider> getProvisioning() {
-		return provisioning;
-	}
-
 	private RequestMatcher getRequestMatcher() {
 		return requestMatcher;
 	}
 
-	private HeaderWriter getCacheHeaderWriter() {
-		return cacheHeaderWriter;
-	}
 }

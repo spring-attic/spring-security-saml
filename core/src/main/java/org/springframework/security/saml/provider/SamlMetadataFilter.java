@@ -27,20 +27,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.web.header.HeaderWriter;
-import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlMetadataFilter<ProviderType extends HostedProvider> extends OncePerRequestFilter {
+public class SamlMetadataFilter<ProviderType extends HostedProvider> extends SamlFilter<ProviderType> {
 
-	private final SamlProviderProvisioning<ProviderType> provisioning;
 	private final RequestMatcher requestMatcher;
 	private final String filename;
-	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
 	public SamlMetadataFilter(SamlProviderProvisioning<ProviderType> provisioning) {
 		this(provisioning, "saml-metadata.xml");
@@ -58,7 +53,7 @@ public class SamlMetadataFilter<ProviderType extends HostedProvider> extends Onc
 	public SamlMetadataFilter(SamlProviderProvisioning<ProviderType> provisioning,
 							  RequestMatcher requestMatcher,
 							  String filename) {
-		this.provisioning = provisioning;
+		super(provisioning);
 		this.requestMatcher = requestMatcher;
 		this.filename = filename;
 	}
@@ -67,7 +62,7 @@ public class SamlMetadataFilter<ProviderType extends HostedProvider> extends Onc
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (getRequestMatcher().matches(request)) {
-			ProviderType provider = provisioning.getHostedProvider(request);
+			ProviderType provider = getProvisioning().getHostedProvider(request);
 			Metadata metadata = provider.getMetadata();
 			String xml = provider.toXml(metadata);
 			getCacheHeaderWriter().writeHeaders(request, response);
@@ -81,10 +76,6 @@ public class SamlMetadataFilter<ProviderType extends HostedProvider> extends Onc
 		}
 	}
 
-	private SamlProviderProvisioning<ProviderType> getProvisioning() {
-		return provisioning;
-	}
-
 	private RequestMatcher getRequestMatcher() {
 		return requestMatcher;
 	}
@@ -93,7 +84,4 @@ public class SamlMetadataFilter<ProviderType extends HostedProvider> extends Onc
 		return filename;
 	}
 
-	private HeaderWriter getCacheHeaderWriter() {
-		return cacheHeaderWriter;
-	}
 }

@@ -50,6 +50,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
@@ -93,8 +94,6 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.spi.deprecated.SamlDefaults;
-import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.springframework.util.CollectionUtils;
@@ -1514,7 +1513,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		AuthenticationRequest result = new AuthenticationRequest()
 			.setBinding(Binding.fromUrn(request.getProtocolBinding()))
 			.setAssertionConsumerService(
-				new SamlDefaults(getTime()).getEndpoint(
+				getEndpoint(
 					request.getAssertionConsumerServiceURL(),
 					Binding.fromUrn(request.getProtocolBinding()),
 					ofNullable(request.getAssertionConsumerServiceIndex()).orElse(-1),
@@ -1522,7 +1521,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				)
 			)
 			.setDestination(
-				new SamlDefaults(getTime()).getEndpoint(
+				getEndpoint(
 					request.getDestination(),
 					Binding.fromUrn(request.getProtocolBinding()),
 					-1,
@@ -1805,4 +1804,15 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		return object;
 	}
+
+	protected Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
+		return
+			new Endpoint()
+				.setIndex(index)
+				.setBinding(binding)
+				.setLocation(url)
+				.setDefault(isDefault)
+				.setIndex(index);
+	}
+
 }

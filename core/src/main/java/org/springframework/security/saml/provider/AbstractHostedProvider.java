@@ -133,9 +133,8 @@ public abstract class AbstractHostedProvider<
 		List<RemoteMetadata> result = new LinkedList<>();
 		List<ExternalProviderConfiguration> providers = getConfiguration().getProviders();
 		for (ExternalProviderConfiguration c : providers) {
-			String metadata = c.getMetadata();
 			try {
-				RemoteMetadata m = resolve(metadata, c.isSkipSslValidation());
+				RemoteMetadata m = getRemoteProvider(c);
 				if (m != null) {
 					m.setEntityAlias(c.getAlias());
 					result.add(m);
@@ -145,6 +144,12 @@ public abstract class AbstractHostedProvider<
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c) {
+		String metadata = c.getMetadata();
+		return resolve(metadata, c.isSkipSslValidation());
 	}
 
 

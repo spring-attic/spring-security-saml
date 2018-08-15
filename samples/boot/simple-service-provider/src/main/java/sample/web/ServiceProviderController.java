@@ -21,8 +21,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
@@ -42,9 +43,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ServiceProviderController {
 
 	private AppConfig configuration;
-	private SamlObjectResolver resolver;
 	private Network network;
 	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
+	private SamlProviderProvisioning<ServiceProvider> provisioning;
 
 	@Autowired
 	public void setNetwork(Network network) {
@@ -57,8 +58,8 @@ public class ServiceProviderController {
 	}
 
 	@Autowired
-	public void setMetadataResolver(SamlObjectResolver resolver) {
-		this.resolver = resolver;
+	public void setSamlService(SamlProviderProvisioning<ServiceProvider> provisioning) {
+		this.provisioning = provisioning;
 	}
 
 	@RequestMapping(value = {"/", "/index", "logged-in"})
@@ -92,7 +93,8 @@ public class ServiceProviderController {
 	protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/sp/discovery");
-		IdentityProviderMetadata metadata = resolver.resolveIdentityProvider(p);
+		ServiceProvider provider = provisioning.getHostedProvider(request);
+		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8));
 		return builder.build().toUriString();
 	}

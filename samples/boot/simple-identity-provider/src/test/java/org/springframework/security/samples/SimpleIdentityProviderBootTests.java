@@ -35,8 +35,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
@@ -91,9 +92,6 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private SamlDefaults samlDefaults;
 
-	@Autowired
-	private SamlObjectResolver resolver;
-
 	@MockBean
 	private SamlMetadataCache cache;
 
@@ -103,6 +101,11 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private DefaultSessionAssertionStore sessionAssertionStore;
 
+	@Autowired
+	private SamlProviderProvisioning<IdentityProvider> provisioning;
+
+	private String baseUrl = "http://localhost";
+	private MockHttpServletRequest defaultRequest;
 
 	@BeforeEach
 	public void mockCache() {
@@ -119,6 +122,8 @@ public class SimpleIdentityProviderBootTests {
 				anyBoolean()
 			)
 		).willReturn(CACHED_SSS_META_DATA.getBytes());
+
+		defaultRequest = new MockHttpServletRequest("GET", baseUrl);
 	}
 
 	@AfterEach
@@ -135,7 +140,8 @@ public class SimpleIdentityProviderBootTests {
 	@Test
 	public void idpInitiateLogout() throws Exception {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		ServiceProviderMetadata spm = resolver.resolveServiceProvider("spring.security.saml.sp.id");
+		IdentityProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderMetadata spm = provider.getRemoteProvider("spring.security.saml.sp.id");
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
 		MvcResult mvcResult = idpToSpLogin(token, "spring.security.saml.sp.id");
@@ -175,7 +181,8 @@ public class SimpleIdentityProviderBootTests {
 
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		String spm1EntityId = "spring.security.saml.sp.id";
-		ServiceProviderMetadata spm1 = resolver.resolveServiceProvider(spm1EntityId);
+		IdentityProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken(
 				"user",
@@ -238,8 +245,9 @@ public class SimpleIdentityProviderBootTests {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		String spm1EntityId = "spring.security.saml.sp.id";
 		String spm2EntityId = "http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp";
-		ServiceProviderMetadata spm1 = resolver.resolveServiceProvider(spm1EntityId);
-		ServiceProviderMetadata spm2 = resolver.resolveServiceProvider(spm2EntityId);
+		IdentityProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
+		ServiceProviderMetadata spm2 = provider.getRemoteProvider(spm2EntityId);
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken(
 				"user",
@@ -384,8 +392,9 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void receiveAuthenticationRequest() throws Exception {
-		IdentityProviderMetadata local = resolver.getLocalIdentityProvider("http://localhost");
-		ServiceProviderMetadata sp = resolver.resolveServiceProvider("spring.security.saml.sp.id");
+		IdentityProvider provider = provisioning.getHostedProvider(defaultRequest);
+		IdentityProviderMetadata local = provider.getMetadata();
+		ServiceProviderMetadata sp = provider.getRemoteProvider("spring.security.saml.sp.id");
 		assertNotNull(sp);
 
 		AuthenticationRequest authenticationRequest = samlDefaults.authenticationRequest(sp, local);

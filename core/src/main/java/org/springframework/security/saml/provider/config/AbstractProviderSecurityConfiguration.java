@@ -22,7 +22,6 @@ import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
@@ -30,7 +29,6 @@ import org.springframework.security.saml.provider.HostedProvider;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 import org.springframework.security.saml.spi.DefaultValidator;
@@ -67,11 +65,6 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	@Bean
 	public SamlValidator samlValidator() {
 		return new DefaultValidator(samlImplementation());
-	}
-
-	@Bean
-	public SamlObjectResolver samlObjectResolver() {
-		return new DefaultSamlObjectResolver();
 	}
 
 	@Bean

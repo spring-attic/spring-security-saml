@@ -19,6 +19,7 @@ package org.springframework.security.saml.provider;
 
 import java.util.List;
 
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -45,6 +46,8 @@ public interface HostedProvider<
 	RemoteMetadata getRemoteProvider(Saml2Object saml2Object);
 
 	RemoteMetadata getRemoteProvider(String entityId);
+
+	RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c);
 
 	List<RemoteMetadata> getRemoteProviders();
 

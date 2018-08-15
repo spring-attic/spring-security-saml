@@ -21,11 +21,9 @@ import java.time.Clock;
 import java.util.Arrays;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.spi.DefaultSamlObjectResolver;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
@@ -41,7 +39,6 @@ import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 public abstract class MetadataBase {
 
 	protected static SamlTransformer config;
-	protected static SamlObjectResolver resolver;
 	protected static SamlDefaults samlDefaults;
 	protected static Clock time;
 	protected SimpleKey spSigning;
@@ -57,7 +54,6 @@ public abstract class MetadataBase {
 	public static void init() throws Exception {
 		time = Clock.systemUTC();
 		config = new DefaultSamlTransformer(new OpenSamlImplementation(time));
-		resolver = new DefaultSamlObjectResolver();
 		samlDefaults = new SamlDefaults(time);
 		((DefaultSamlTransformer) config).afterPropertiesSet();
 	}

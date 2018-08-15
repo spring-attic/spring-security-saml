@@ -21,9 +21,7 @@ import java.net.URISyntaxException;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.SamlObjectResolver;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.HostedProvider;
@@ -100,11 +98,6 @@ public class DefaultValidator implements SamlValidator {
 				throw new SignatureException(x.getMessage(), x);
 			}
 		}
-	}
-
-	@Deprecated
-	public void validate(Saml2Object saml2Object, SamlObjectResolver resolver, HttpServletRequest request) {
-
 	}
 
 	@Override

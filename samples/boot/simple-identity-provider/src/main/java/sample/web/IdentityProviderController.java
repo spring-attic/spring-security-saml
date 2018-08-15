@@ -21,9 +21,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.SamlObjectResolver;
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
@@ -42,8 +43,8 @@ import static java.lang.String.format;
 public class IdentityProviderController {
 	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
 	private SamlServerConfiguration configuration;
-	private SamlObjectResolver resolver;
 	private Network network;
+	private SamlProviderProvisioning<IdentityProvider> provisioning;
 
 	@Autowired
 	public void setNetwork(Network network) {
@@ -56,14 +57,15 @@ public class IdentityProviderController {
 	}
 
 	@Autowired
-	public void setMetadataResolver(SamlObjectResolver resolver) {
-		this.resolver = resolver;
+	public void setSamlPRoviderProvisioning(SamlProviderProvisioning<IdentityProvider> provisioning) {
+		this.provisioning = provisioning;
 	}
 
 	@RequestMapping(value = {"/saml/idp/select", "/"})
 	public String selectProvider(HttpServletRequest request, Model model) {
+
 		List<ModelProvider> providers = new LinkedList<>();
-		configuration.getIdentityProvider().getProviders().stream().forEach(
+		this.configuration.getIdentityProvider().getProviders().stream().forEach(
 			p -> {
 				try {
 					ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
@@ -84,7 +86,8 @@ public class IdentityProviderController {
 	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/idp/init");
-		ServiceProviderMetadata metadata = resolver.resolveServiceProvider(p);
+		IdentityProvider provider = provisioning.getHostedProvider(request);
+		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8));
 		return builder.build().toUriString();
 	}

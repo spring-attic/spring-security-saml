@@ -31,6 +31,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -76,6 +77,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -207,7 +209,8 @@ public class SimpleIdentityProviderBootTests {
 		mvcResult = mockMvc.perform(
 			get("/saml/idp/logout")
 				.session(session)
-				.param("SAMLRequest",
+				.param(
+					"SAMLRequest",
 					transformer.samlEncode(
 						transformer.toXml(logoutRequest),
 						true
@@ -420,7 +423,21 @@ public class SimpleIdentityProviderBootTests {
 
 	}
 
-
+	@Test
+	public void selectServiceProvider() throws Exception {
+		UsernamePasswordAuthenticationToken token =
+			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
+		mockMvc.perform(
+			get("/saml/idp/select")
+				.accept(MediaType.TEXT_HTML)
+				.with(authentication(token))
+		)
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("<h1>Select a Service Provider</h1>")))
+			.andExpect(content().string(containsString("Simple SAML PHP SP")))
+			.andExpect(content().string(containsString("Example SP Config Using XML")))
+			.andReturn();
+	}
 
 	protected IdentityProviderMetadata getIdentityProviderMetadata() throws Exception {
 		MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))

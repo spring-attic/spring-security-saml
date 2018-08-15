@@ -15,29 +15,15 @@
  *
 */package sample.web;
 
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ModelProvider;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import sample.config.AppConfig;
-
-import static java.lang.String.format;
 
 @Controller
 public class IdentityProviderController {
@@ -56,35 +42,4 @@ public class IdentityProviderController {
 		this.provisioning = provisioning;
 	}
 
-	@RequestMapping(value = {"/saml/idp/select", "/"})
-	public String selectProvider(HttpServletRequest request, Model model) {
-
-		List<org.springframework.security.saml.provider.service.ModelProvider> providers = new LinkedList<>();
-		this.configuration.getIdentityProvider().getProviders().stream().forEach(
-			p -> {
-				try {
-					org.springframework.security.saml.provider.service.ModelProvider
-						mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
-					providers.add(mp);
-				} catch (Exception x) {
-					logger.debug(format(
-						"Unable to retrieve metadata for provider:%s with message:",
-						p.getMetadata(),
-						x.getMessage())
-					);
-				}
-			}
-		);
-		model.addAttribute("sps", providers);
-		return "select-provider";
-	}
-
-	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(provisioning.getBasePath(request));
-		builder.pathSegment("saml/idp/init");
-		IdentityProviderService provider = provisioning.getHostedProvider(request);
-		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
-		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8));
-		return builder.build().toUriString();
-	}
 }

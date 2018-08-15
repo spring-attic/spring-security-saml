@@ -28,6 +28,7 @@ import org.springframework.security.saml.provider.identity.IdentityProviderMetad
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.identity.IdpAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.identity.IdpInitiatedLoginFilter;
+import org.springframework.security.saml.provider.identity.SelectServiceProviderFilter;
 import org.springframework.security.saml.provider.provisioning.HostBasedSamlIdentityProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -79,6 +80,11 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 		);
 	}
 
+	@Bean
+	public Filter idpSelectServiceProviderFilter() {
+		return new SelectServiceProviderFilter(getSamlProvisioning());
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String prefix = getHostConfiguration().getIdentityProvider().getPrefix();
@@ -90,6 +96,7 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
 			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
 			.addFilterAfter(idpLogoutFilter(), idpAuthnRequestFilter().getClass())
+			.addFilterAfter(idpSelectServiceProviderFilter(), idpLogoutFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers(metadata).permitAll()

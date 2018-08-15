@@ -15,10 +15,11 @@
  *
  */
 
-package org.springframework.security.saml.provider.service;
+package org.springframework.security.saml.provider.identity;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,9 +32,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.SamlFilter;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.provider.service.ModelProvider;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -42,23 +44,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderService> {
-	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
+public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderService> {
 
+	private static Log logger = LogFactory.getLog(SelectServiceProviderFilter.class);
 	private final RequestMatcher requestMatcher;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 
-	public SelectIdentityProviderFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
+	public SelectServiceProviderFilter(SamlProviderProvisioning<IdentityProviderService> provisioning) {
 		this(
 			provisioning,
 			new SamlRequestMatcher(provisioning, "select")
 		);
 	}
 
-	public SelectIdentityProviderFilter(SamlProviderProvisioning<ServiceProviderService> provisioning,
-										RequestMatcher requestMatcher) {
+	public SelectServiceProviderFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
+									   RequestMatcher requestMatcher) {
 		super(provisioning);
 		this.requestMatcher = requestMatcher;
 	}
@@ -67,46 +68,51 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (requestMatcher.matches(request)) {
-			ServiceProviderService provider = getProvisioning().getHostedProvider(request);
-			LocalServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
+			IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+			LocalIdentityProviderConfiguration configuration = provider.getConfiguration();
+
 			configuration.getProviders().stream().forEach(
 				p -> {
 					try {
-						ModelProvider mp = new ModelProvider()
-							.setLinkText(p.getLinktext())
-							.setRedirect(getDiscoveryRedirect(provider, request, p));
+						ModelProvider mp =
+							new ModelProvider()
+								.setLinkText(p.getLinktext())
+								.setRedirect(getIdpInitUrl(request, p));
 						providers.add(mp);
 					} catch (Exception x) {
 						logger.debug(format(
 							"Unable to retrieve metadata for provider:%s with message:",
 							p.getMetadata(),
-							x.getMessage())
+							x.getMessage()
+							)
 						);
 					}
 				}
 			);
 			Map<String, Object> model = new HashMap<>();
-			model.put("title", "Select an Identity Provider");
+			model.put("title", "Select a Service Provider");
 			model.put("providers", providers);
 			processHtml(
 				request,
 				response,
 				selectTemplate,
-				model);
+				model
+			);
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
+
 	}
 
-	protected String getDiscoveryRedirect(ServiceProviderService provider,
-										  HttpServletRequest request,
-										  ExternalProviderConfiguration p) throws UnsupportedEncodingException {
+	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p)
+		throws UnsupportedEncodingException {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getProvisioning().getBasePath(request));
-		builder.pathSegment("saml/sp/discovery");
-		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
-		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
+		builder.pathSegment("saml/idp/init");
+		IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
+		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8.toString()));
 		return builder.build().toUriString();
 	}
 
@@ -114,7 +120,7 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 		return selectTemplate;
 	}
 
-	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
+	public SelectServiceProviderFilter setSelectTemplate(String selectTemplate) {
 		this.selectTemplate = selectTemplate;
 		return this;
 	}

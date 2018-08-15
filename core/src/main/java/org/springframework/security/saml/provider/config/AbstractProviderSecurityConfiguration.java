@@ -25,7 +25,7 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
@@ -38,7 +38,7 @@ import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.saml.util.Network;
 
-public abstract class AbstractProviderSecurityConfiguration<T extends HostedProvider> extends WebSecurityConfigurerAdapter {
+public abstract class AbstractProviderSecurityConfiguration<T extends HostedProviderService> extends WebSecurityConfigurerAdapter {
 
 	private final SamlServerConfiguration hostConfiguration;
 
@@ -67,6 +67,7 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 		return new DefaultValidator(samlImplementation());
 	}
 
+	@Deprecated
 	@Bean
 	public SamlDefaults samlDefaults() {
 		return new SamlDefaults(samlTime());

@@ -28,8 +28,8 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.identity.HostedIdentityProvider;
-import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.identity.HostedIdentityProviderService;
+import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -43,7 +43,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class HostBasedSamlIdentityProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
-	implements SamlProviderProvisioning<IdentityProvider> {
+	implements SamlProviderProvisioning<IdentityProviderService> {
 
 
 	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
@@ -55,7 +55,7 @@ public class HostBasedSamlIdentityProviderProvisioning
 
 
 	@Override
-	public IdentityProvider getHostedProvider(HttpServletRequest request) {
+	public IdentityProviderService getHostedProvider(HttpServletRequest request) {
 		String basePath = getBasePath(request);
 		LocalIdentityProviderConfiguration idpConfig =
 			getConfiguration().getServerConfiguration(request).getIdentityProvider();
@@ -94,7 +94,7 @@ public class HostBasedSamlIdentityProviderProvisioning
 
 		metadata.getIdentityProvider().setWantAuthnRequestsSigned(idpConfig.isWantRequestsSigned());
 
-		return new HostedIdentityProvider(
+		return new HostedIdentityProviderService(
 			idpConfig,
 			metadata,
 			getTransformer(),

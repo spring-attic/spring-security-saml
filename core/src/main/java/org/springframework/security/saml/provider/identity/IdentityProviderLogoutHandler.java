@@ -56,11 +56,11 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 
 	private static Log logger = LogFactory.getLog(IdentityProviderLogoutHandler.class);
 
-	private final SamlProviderProvisioning<IdentityProvider> provisioning;
+	private final SamlProviderProvisioning<IdentityProviderService> provisioning;
 	private final SamlMessageStore<Assertion, HttpServletRequest> assertionStore;
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".logout.request";
 
-	public IdentityProviderLogoutHandler(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdentityProviderLogoutHandler(SamlProviderProvisioning<IdentityProviderService> provisioning,
 										 SamlMessageStore<Assertion, HttpServletRequest> assertionStore) {
 		this.provisioning = provisioning;
 		this.assertionStore = assertionStore;
@@ -89,7 +89,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 										 HttpServletResponse response,
 										 Authentication authentication,
 										 String logoutRequestValue) throws IOException {
-		IdentityProvider provider = provisioning.getHostedProvider(request);
+		IdentityProviderService provider = provisioning.getHostedProvider(request);
 		LogoutRequest logoutRequest = provider.fromXml(
 			logoutRequestValue,
 			true,
@@ -139,7 +139,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 										  HttpServletResponse response,
 										  Authentication authentication,
 										  String logoutResponseValue) throws IOException {
-		IdentityProvider provider = getProvisioning().getHostedProvider(request);
+		IdentityProviderService provider = getProvisioning().getHostedProvider(request);
 		LogoutResponse logoutResponse = provider.fromXml(
 			logoutResponseValue,
 			true,
@@ -187,7 +187,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 				request.setAttribute(RUN_SUCCESS, TRUE);
 			}
 			else {
-				IdentityProvider provider = provisioning.getHostedProvider(request);
+				IdentityProviderService provider = provisioning.getHostedProvider(request);
 				logger.debug(format("Sending IDP logout request to SP:%s", assertion.getIssuer().getValue()));
 				ServiceProviderMetadata sp = provider.getRemoteProvider(assertion);
 				LogoutRequest logoutRequest = provider.logoutRequest(
@@ -248,7 +248,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		}
 	}
 
-	private String getRedirectUrl(IdentityProvider provider,
+	private String getRedirectUrl(IdentityProviderService provider,
 								  Saml2Object lr,
 								  String location,
 								  String paramName)
@@ -261,7 +261,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 			.toUriString();
 	}
 
-	public SamlProviderProvisioning<IdentityProvider> getProvisioning() {
+	public SamlProviderProvisioning<IdentityProviderService> getProvisioning() {
 		return provisioning;
 	}
 

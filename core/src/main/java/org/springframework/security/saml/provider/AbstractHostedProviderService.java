@@ -57,13 +57,13 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 
-public abstract class AbstractHostedProvider<
+public abstract class AbstractHostedProviderService<
 	Configuration extends LocalProviderConfiguration,
 	LocalMetadata extends Metadata<LocalMetadata>,
 	RemoteMetadata extends Metadata<RemoteMetadata>>
-	implements HostedProvider<Configuration, LocalMetadata, RemoteMetadata> {
+	implements HostedProviderService<Configuration, LocalMetadata, RemoteMetadata> {
 
-	private static Log logger = LogFactory.getLog(AbstractHostedProvider.class);
+	private static Log logger = LogFactory.getLog(AbstractHostedProviderService.class);
 
 	private final Configuration configuration;
 	private final LocalMetadata metadata;
@@ -72,11 +72,11 @@ public abstract class AbstractHostedProvider<
 	private final SamlMetadataCache cache;
 	private Clock clock = Clock.systemUTC();
 
-	public AbstractHostedProvider(Configuration configuration,
-								  LocalMetadata metadata,
-								  SamlTransformer transformer,
-								  SamlValidator validator,
-								  SamlMetadataCache cache) {
+	public AbstractHostedProviderService(Configuration configuration,
+										 LocalMetadata metadata,
+										 SamlTransformer transformer,
+										 SamlValidator validator,
+										 SamlMetadataCache cache) {
 		this.configuration = configuration;
 		this.metadata = metadata;
 		this.transformer = transformer;
@@ -305,7 +305,7 @@ public abstract class AbstractHostedProvider<
 		return cache;
 	}
 
-	public AbstractHostedProvider<Configuration, LocalMetadata, RemoteMetadata> setClock(Clock clock) {
+	public AbstractHostedProviderService<Configuration, LocalMetadata, RemoteMetadata> setClock(Clock clock) {
 		this.clock = clock;
 		return this;
 	}

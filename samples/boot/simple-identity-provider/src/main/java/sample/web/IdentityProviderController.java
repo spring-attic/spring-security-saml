@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.util.Network;
@@ -44,7 +44,7 @@ public class IdentityProviderController {
 	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
 	private SamlServerConfiguration configuration;
 	private Network network;
-	private SamlProviderProvisioning<IdentityProvider> provisioning;
+	private SamlProviderProvisioning<IdentityProviderService> provisioning;
 
 	@Autowired
 	public void setNetwork(Network network) {
@@ -57,7 +57,7 @@ public class IdentityProviderController {
 	}
 
 	@Autowired
-	public void setSamlPRoviderProvisioning(SamlProviderProvisioning<IdentityProvider> provisioning) {
+	public void setSamlPRoviderProvisioning(SamlProviderProvisioning<IdentityProviderService> provisioning) {
 		this.provisioning = provisioning;
 	}
 
@@ -86,7 +86,7 @@ public class IdentityProviderController {
 	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/idp/init");
-		IdentityProvider provider = provisioning.getHostedProvider(request);
+		IdentityProviderService provider = provisioning.getHostedProvider(request);
 		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8));
 		return builder.build().toUriString();

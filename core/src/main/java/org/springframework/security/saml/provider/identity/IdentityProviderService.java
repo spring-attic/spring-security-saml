@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.provider.identity;
 
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -26,11 +26,11 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public interface IdentityProvider extends
-	HostedProvider<
-		LocalIdentityProviderConfiguration,
-		IdentityProviderMetadata,
-		ServiceProviderMetadata> {
+public interface IdentityProviderService extends
+	HostedProviderService<
+			LocalIdentityProviderConfiguration,
+			IdentityProviderMetadata,
+			ServiceProviderMetadata> {
 
 	Assertion assertion(ServiceProviderMetadata sp,
 						String principal,

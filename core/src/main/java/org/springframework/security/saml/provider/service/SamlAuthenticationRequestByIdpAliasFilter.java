@@ -22,17 +22,17 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 public class SamlAuthenticationRequestByIdpAliasFilter extends SamlAuthenticationRequestFilter {
-	public SamlAuthenticationRequestByIdpAliasFilter(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public SamlAuthenticationRequestByIdpAliasFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		super(provisioning);
 	}
 
-	public SamlAuthenticationRequestByIdpAliasFilter(SamlProviderProvisioning<ServiceProvider> provisioning,
+	public SamlAuthenticationRequestByIdpAliasFilter(SamlProviderProvisioning<ServiceProviderService> provisioning,
 													 RequestMatcher requestMatcher) {
 		super(provisioning, requestMatcher);
 	}
 
 	@Override
-	protected IdentityProviderMetadata getIdentityProvider(ServiceProvider provider, String idpIdentifier) {
+	protected IdentityProviderMetadata getIdentityProvider(ServiceProviderService provider, String idpIdentifier) {
 		return provider.getRemoteProviders().stream()
 			.filter(p -> idpIdentifier.equals(p.getEntityAlias()))
 			.findFirst()

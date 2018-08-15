@@ -19,7 +19,7 @@ package org.springframework.security.saml;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -56,7 +56,7 @@ public class SamlRequestMatcher implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		HostedProvider provider = this.provisioning.getHostedProvider(request);
+		HostedProviderService provider = this.provisioning.getHostedProvider(request);
 		String prefix = provider.getConfiguration().getPrefix();
 		String alias = provider.getConfiguration().getAlias();
 		String path = this.path;

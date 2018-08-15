@@ -32,7 +32,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlMetadataFilter<ProviderType extends HostedProvider> extends SamlFilter<ProviderType> {
+public class SamlMetadataFilter<ProviderType extends HostedProviderService> extends SamlFilter<ProviderType> {
 
 	private final RequestMatcher requestMatcher;
 	private final String filename;

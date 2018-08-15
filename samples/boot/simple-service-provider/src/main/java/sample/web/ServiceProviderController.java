@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
@@ -45,7 +45,7 @@ public class ServiceProviderController {
 	private AppConfig configuration;
 	private Network network;
 	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
-	private SamlProviderProvisioning<ServiceProvider> provisioning;
+	private SamlProviderProvisioning<ServiceProviderService> provisioning;
 
 	@Autowired
 	public void setNetwork(Network network) {
@@ -58,7 +58,7 @@ public class ServiceProviderController {
 	}
 
 	@Autowired
-	public void setSamlService(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public void setSamlService(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		this.provisioning = provisioning;
 	}
 
@@ -93,7 +93,7 @@ public class ServiceProviderController {
 	protected String getDiscoveryRedirect(HttpServletRequest request, ExternalProviderConfiguration p) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
 		builder.pathSegment("saml/sp/discovery");
-		ServiceProvider provider = provisioning.getHostedProvider(request);
+		ServiceProviderService provider = provisioning.getHostedProvider(request);
 		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8));
 		return builder.build().toUriString();

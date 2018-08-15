@@ -44,18 +44,18 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * TODO - Error handling
  */
-public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProvider> {
-	private final SamlProviderProvisioning<ServiceProvider> provisioning;
+public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderService> {
+	private final SamlProviderProvisioning<ServiceProviderService> provisioning;
 	private final RequestMatcher requestMatcher;
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
 
-	public SamlAuthenticationRequestFilter(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public SamlAuthenticationRequestFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		this(provisioning, new SamlRequestMatcher(provisioning, "discovery", false));
 	}
 
 
-	public SamlAuthenticationRequestFilter(SamlProviderProvisioning<ServiceProvider> provisioning,
+	public SamlAuthenticationRequestFilter(SamlProviderProvisioning<ServiceProviderService> provisioning,
 										   RequestMatcher requestMatcher) {
 		super(provisioning);
 		this.provisioning = provisioning;
@@ -67,7 +67,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProvider>
 		throws ServletException, IOException {
 		String idpIdentifier = request.getParameter("idp");
 		if (getRequestMatcher().matches(request) && hasText(idpIdentifier)) {
-			ServiceProvider provider = provisioning.getHostedProvider(request);
+			ServiceProviderService provider = provisioning.getHostedProvider(request);
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
 			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
 			String encoded = getEncodedAuthnRequestValue(provider, authenticationRequest);
@@ -108,7 +108,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProvider>
 	}
 
 
-	protected IdentityProviderMetadata getIdentityProvider(ServiceProvider provider, String idpIdentifier) {
+	protected IdentityProviderMetadata getIdentityProvider(ServiceProviderService provider, String idpIdentifier) {
 		return provider.getRemoteProvider(idpIdentifier);
 	}
 
@@ -126,7 +126,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProvider>
 		return this;
 	}
 
-	private String getEncodedAuthnRequestValue(ServiceProvider provider, AuthenticationRequest authenticationRequest)
+	private String getEncodedAuthnRequestValue(ServiceProviderService provider, AuthenticationRequest authenticationRequest)
 		throws UnsupportedEncodingException {
 		String xml = provider.toEncodedXml(authenticationRequest, true);
 		return xml;

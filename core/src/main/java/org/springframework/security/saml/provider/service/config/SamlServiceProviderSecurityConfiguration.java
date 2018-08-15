@@ -26,7 +26,7 @@ import org.springframework.security.saml.provider.config.AbstractProviderSecurit
 import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
 import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
@@ -39,7 +39,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<ServiceProvider> {
+public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<ServiceProviderService> {
 
 	public SamlServiceProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
 		super(hostConfiguration);
@@ -79,7 +79,7 @@ public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSe
 
 	@Override
 	@Bean(name = "samlServiceProviderProvisioning")
-	public SamlProviderProvisioning<ServiceProvider> getSamlProvisioning() {
+	public SamlProviderProvisioning<ServiceProviderService> getSamlProvisioning() {
 		return new HostBasedSamlServiceProviderProvisioning(
 			samlConfigurationRepository(),
 			samlTransformer(),

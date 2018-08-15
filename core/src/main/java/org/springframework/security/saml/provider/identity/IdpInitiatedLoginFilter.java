@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
 
-public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProvider> {
+public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService> {
 
 	private static Log logger = LogFactory.getLog(IdpInitiatedLoginFilter.class);
 
@@ -57,7 +57,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProvider> {
 	private final SamlMessageStore<Assertion, HttpServletRequest> assertionStore;
 	private String postBindingTemplate = "/templates/saml2-post-binding.vm";
 
-	public IdpInitiatedLoginFilter(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdpInitiatedLoginFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
 								   SamlMessageStore<Assertion, HttpServletRequest> assertionStore) {
 		this(
 			provisioning,
@@ -66,7 +66,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProvider> {
 		);
 	}
 
-	public IdpInitiatedLoginFilter(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdpInitiatedLoginFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
 								   SamlMessageStore<Assertion, HttpServletRequest> assertionStore,
 								   SamlRequestMatcher requestMatcher) {
 		super(provisioning);
@@ -81,7 +81,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProvider> {
 		if (requestMatcher.matches(request) &&
 			authentication != null &&
 			authentication.isAuthenticated()) {
-			IdentityProvider provider = getProvisioning().getHostedProvider(request);
+			IdentityProviderService provider = getProvisioning().getHostedProvider(request);
 			IdentityProviderMetadata local = provider.getMetadata();
 			ServiceProviderMetadata recipient = getTargetProvider(request);
 			Assertion assertion = getAssertion(authentication, provider, recipient);
@@ -121,7 +121,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProvider> {
 	}
 
 	protected Assertion getAssertion(Authentication authentication,
-									 IdentityProvider provider,
+									 IdentityProviderService provider,
 									 ServiceProviderMetadata recipient) {
 		return provider.assertion(recipient, authentication.getName(), NameId.PERSISTENT);
 	}

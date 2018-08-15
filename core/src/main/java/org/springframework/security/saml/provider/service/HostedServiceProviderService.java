@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.AbstractHostedProvider;
+import org.springframework.security.saml.provider.AbstractHostedProviderService;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -40,17 +40,17 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import org.joda.time.DateTime;
 
-public class HostedServiceProvider extends AbstractHostedProvider<
+public class HostedServiceProviderService extends AbstractHostedProviderService<
 	LocalServiceProviderConfiguration,
 	ServiceProviderMetadata,
-	IdentityProviderMetadata> implements ServiceProvider {
+	IdentityProviderMetadata> implements ServiceProviderService {
 
 
-	public HostedServiceProvider(LocalServiceProviderConfiguration configuration,
-								 ServiceProviderMetadata metadata,
-								 SamlTransformer transformer,
-								 SamlValidator validator,
-								 SamlMetadataCache cache) {
+	public HostedServiceProviderService(LocalServiceProviderConfiguration configuration,
+										ServiceProviderMetadata metadata,
+										SamlTransformer transformer,
+										SamlValidator validator,
+										SamlMetadataCache cache) {
 		super(configuration, metadata, transformer, validator, cache);
 	}
 

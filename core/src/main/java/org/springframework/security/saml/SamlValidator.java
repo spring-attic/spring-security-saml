@@ -20,7 +20,7 @@ package org.springframework.security.saml;
 import java.util.List;
 
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
@@ -45,6 +45,6 @@ public interface SamlValidator {
 	 * @param provider the object used to resolve metadata
 	 * @throws ValidationException if validation failed. Details in the exception.
 	 */
-	void validate(Saml2Object saml2Object, HostedProvider provider) throws ValidationException;
+	void validate(Saml2Object saml2Object, HostedProviderService provider) throws ValidationException;
 
 }

@@ -27,7 +27,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-public class SamlProviderLogoutFilter<T extends HostedProvider> extends LogoutFilter {
+public class SamlProviderLogoutFilter<T extends HostedProviderService> extends LogoutFilter {
 
 	private final SamlProviderProvisioning<T> provisioning;
 

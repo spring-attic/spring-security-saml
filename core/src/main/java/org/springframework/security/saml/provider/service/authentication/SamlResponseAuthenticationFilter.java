@@ -28,7 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
@@ -46,14 +46,14 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 
 	private static Log logger = LogFactory.getLog(SamlResponseAuthenticationFilter.class);
 
-	private final SamlProviderProvisioning<ServiceProvider> provisioning;
+	private final SamlProviderProvisioning<ServiceProviderService> provisioning;
 
-	public SamlResponseAuthenticationFilter(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public SamlResponseAuthenticationFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		this(new SamlRequestMatcher(provisioning, "SSO"), provisioning);
 	}
 
 	private SamlResponseAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
-											 SamlProviderProvisioning<ServiceProvider> provisioning) {
+											 SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		super(requiresAuthenticationRequestMatcher);
 		this.provisioning = provisioning;
 	}
@@ -67,7 +67,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 			throw new AuthenticationCredentialsNotFoundException("SAMLResponse parameter missing");
 		}
 
-		ServiceProvider provider = getHostedProvider(request);
+		ServiceProviderService provider = getHostedProvider(request);
 
 		Response r = provider.fromXml(responseData, true, GET.matches(request.getMethod()), Response.class);
 		if (logger.isTraceEnabled()) {
@@ -101,7 +101,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 				super.requiresAuthentication(request, response);
 	}
 
-	private SamlProviderProvisioning<ServiceProvider> getProvisioning() {
+	private SamlProviderProvisioning<ServiceProviderService> getProvisioning() {
 		return provisioning;
 	}
 
@@ -109,7 +109,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 		return request.getParameter("SAMLResponse");
 	}
 
-	private ServiceProvider getHostedProvider(HttpServletRequest request) {
+	private ServiceProviderService getHostedProvider(HttpServletRequest request) {
 		return getProvisioning().getHostedProvider(request);
 	}
 

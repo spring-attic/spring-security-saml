@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
@@ -101,7 +101,7 @@ public class DefaultValidator implements SamlValidator {
 	}
 
 	@Override
-	public void validate(Saml2Object saml2Object, HostedProvider provider)
+	public void validate(Saml2Object saml2Object, HostedProviderService provider)
 		throws ValidationException {
 		if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;

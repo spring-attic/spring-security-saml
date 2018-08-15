@@ -28,7 +28,7 @@ import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.validation.ValidationResult;
 
-public interface HostedProvider<
+public interface HostedProviderService<
 	Configuration extends LocalProviderConfiguration,
 	LocalMetadata extends Metadata,
 	RemoteMetadata extends Metadata> {

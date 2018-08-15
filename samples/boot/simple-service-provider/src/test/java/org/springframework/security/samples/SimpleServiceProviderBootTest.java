@@ -32,7 +32,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -87,7 +87,7 @@ public class SimpleServiceProviderBootTest {
 	@Autowired
 	private SamlTransformer transformer;
 	@Autowired
-	private SamlProviderProvisioning<ServiceProvider> provisioning;
+	private SamlProviderProvisioning<ServiceProviderService> provisioning;
 	@Autowired
 	private SamlDefaults samlDefaults;
 	private String idpEntityId;
@@ -163,7 +163,7 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void processResponse() throws Exception {
-		ServiceProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);
 		configuration.getServiceProvider().setWantAssertionsSigned(false);
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequest();
@@ -190,7 +190,7 @@ public class SimpleServiceProviderBootTest {
 	@Disabled("Until we have implemented validation using the new service components")
 	public void invalidResponse() throws Exception {
 		configuration.getServiceProvider().setWantAssertionsSigned(false);
-		ServiceProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
@@ -215,7 +215,7 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void initiateLogout() throws Exception {
-		ServiceProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
@@ -250,7 +250,7 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void receiveLogoutRequest() throws Exception {
-		ServiceProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
@@ -297,7 +297,7 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void receiveLogoutResponse() throws Exception {
-		ServiceProvider provider = provisioning.getHostedProvider(defaultRequest);
+		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();

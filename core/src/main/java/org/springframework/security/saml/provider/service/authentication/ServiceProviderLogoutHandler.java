@@ -29,7 +29,7 @@ import org.springframework.security.saml.SamlAuthentication;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.provider.SamlLogoutSuccessHandler;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
@@ -52,9 +52,9 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 
 	private static Log logger = LogFactory.getLog(ServiceProviderLogoutHandler.class);
 
-	private final SamlProviderProvisioning<ServiceProvider> provisioning;
+	private final SamlProviderProvisioning<ServiceProviderService> provisioning;
 
-	public ServiceProviderLogoutHandler(SamlProviderProvisioning<ServiceProvider> provisioning) {
+	public ServiceProviderLogoutHandler(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		this.provisioning = provisioning;
 	}
 
@@ -81,7 +81,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 									   HttpServletResponse response,
 									   Authentication authentication,
 									   String logoutRequest) throws IOException {
-		ServiceProvider provider = provisioning.getHostedProvider(request);
+		ServiceProviderService provider = provisioning.getHostedProvider(request);
 		LogoutRequest lr = provider.fromXml(
 			logoutRequest,
 			true,
@@ -113,7 +113,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 		if (authentication instanceof SamlAuthentication) {
 			SamlAuthentication sa = (SamlAuthentication)authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
-			ServiceProvider provider = provisioning.getHostedProvider(request);
+			ServiceProviderService provider = provisioning.getHostedProvider(request);
 			ServiceProviderMetadata sp = provider.getMetadata();
 			IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			LogoutRequest lr = provider.logoutRequest(idp, (NameIdPrincipal) sa.getSamlPrincipal());
@@ -128,7 +128,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 		}
 	}
 
-	private String getRedirectUrl(ServiceProvider provider,
+	private String getRedirectUrl(ServiceProviderService provider,
 								  Saml2Object lr,
 								  String location,
 								  String paramName)

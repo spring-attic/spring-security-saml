@@ -25,7 +25,7 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.AbstractHostedProvider;
+import org.springframework.security.saml.provider.AbstractHostedProviderService;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -55,17 +55,17 @@ import org.joda.time.DateTime;
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 
-public class HostedIdentityProvider extends AbstractHostedProvider<
+public class HostedIdentityProviderService extends AbstractHostedProviderService<
 	LocalIdentityProviderConfiguration,
 	IdentityProviderMetadata,
 	ServiceProviderMetadata>
-	implements IdentityProvider {
+	implements IdentityProviderService {
 
-	public HostedIdentityProvider(LocalIdentityProviderConfiguration configuration,
-								  IdentityProviderMetadata metadata,
-								  SamlTransformer transformer,
-								  SamlValidator validator,
-								  SamlMetadataCache cache) {
+	public HostedIdentityProviderService(LocalIdentityProviderConfiguration configuration,
+										 IdentityProviderMetadata metadata,
+										 SamlTransformer transformer,
+										 SamlValidator validator,
+										 SamlMetadataCache cache) {
 		super(configuration, metadata, transformer, validator, cache);
 	}
 

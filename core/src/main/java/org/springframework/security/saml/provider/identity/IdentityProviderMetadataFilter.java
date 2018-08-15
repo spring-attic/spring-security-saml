@@ -21,16 +21,16 @@ import org.springframework.security.saml.provider.SamlMetadataFilter;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-public class IdentityProviderMetadataFilter extends SamlMetadataFilter<IdentityProvider> {
-	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProvider> provisioning) {
+public class IdentityProviderMetadataFilter extends SamlMetadataFilter<IdentityProviderService> {
+	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProviderService> provisioning) {
 		this(provisioning, "saml-idp-metadata.xml");
 	}
 
-	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProvider> provisioning, String filename) {
+	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProviderService> provisioning, String filename) {
 		super(provisioning, filename);
 	}
 
-	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
 										  RequestMatcher requestMatcher,
 										  String filename) {
 		super(provisioning, requestMatcher, filename);

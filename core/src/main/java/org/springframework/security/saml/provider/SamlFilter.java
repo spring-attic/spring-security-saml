@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract  class SamlFilter<T extends HostedProvider> extends OncePerRequestFilter {
+public abstract  class SamlFilter<T extends HostedProviderService> extends OncePerRequestFilter {
 
 	private final SamlProviderProvisioning<T> provisioning;
 

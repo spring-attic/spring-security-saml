@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
@@ -39,7 +39,7 @@ class SamlRequestMatcherTests {
 
 	private SamlProviderProvisioning provisioning = mock(SamlProviderProvisioning.class);
 	private LocalProviderConfiguration configuration = mock(LocalProviderConfiguration.class);
-	private HostedProvider provider = mock(HostedProvider.class);
+	private HostedProviderService provider = mock(HostedProviderService.class);
 	private String prefix;
 	private String url;
 	private SamlRequestMatcher matcher;

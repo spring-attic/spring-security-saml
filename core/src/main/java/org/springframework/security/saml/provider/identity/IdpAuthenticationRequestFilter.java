@@ -29,7 +29,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public class IdpAuthenticationRequestFilter extends IdpInitiatedLoginFilter {
 
-	public IdpAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdpAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
 										  SamlMessageStore<Assertion, HttpServletRequest> assertionStore) {
 		this(
 			provisioning,
@@ -38,7 +38,7 @@ public class IdpAuthenticationRequestFilter extends IdpInitiatedLoginFilter {
 		);
 	}
 
-	public IdpAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProvider> provisioning,
+	public IdpAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
 										  SamlMessageStore<Assertion, HttpServletRequest> assertionStore,
 										  SamlRequestMatcher requestMatcher) {
 		super(provisioning, assertionStore, requestMatcher);
@@ -46,7 +46,7 @@ public class IdpAuthenticationRequestFilter extends IdpInitiatedLoginFilter {
 
 	@Override
 	protected ServiceProviderMetadata getTargetProvider(HttpServletRequest request) {
-		IdentityProvider provider = getProvisioning().getHostedProvider(request);
+		IdentityProviderService provider = getProvisioning().getHostedProvider(request);
 		String param = request.getParameter("SAMLRequest");
 		AuthenticationRequest authn =
 			provider.fromXml(

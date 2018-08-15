@@ -27,7 +27,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.AbstractProviderSecurityConfiguration;
-import org.springframework.security.saml.provider.identity.IdentityProvider;
+import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.identity.IdentityProviderLogoutHandler;
 import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
 import org.springframework.security.saml.provider.identity.IdpAuthenticationRequestFilter;
@@ -41,7 +41,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<IdentityProvider> {
+public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
 
 	public SamlIdentityProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
 		super(hostConfiguration);
@@ -49,7 +49,7 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 
 	@Override
 	@Bean(name = "samlIdentityProviderProvisioning")
-	public SamlProviderProvisioning<IdentityProvider> getSamlProvisioning() {
+	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
 		return new HostBasedSamlIdentityProviderProvisioning(
 			samlConfigurationRepository(),
 			samlTransformer(),

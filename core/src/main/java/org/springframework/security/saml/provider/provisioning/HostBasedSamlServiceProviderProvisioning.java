@@ -28,8 +28,8 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.service.HostedServiceProvider;
-import org.springframework.security.saml.provider.service.ServiceProvider;
+import org.springframework.security.saml.provider.service.HostedServiceProviderService;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -43,7 +43,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class HostBasedSamlServiceProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
-	implements SamlProviderProvisioning<ServiceProvider> {
+	implements SamlProviderProvisioning<ServiceProviderService> {
 
 	public HostBasedSamlServiceProviderProvisioning(SamlConfigurationRepository configuration,
 													SamlTransformer transformer,
@@ -54,7 +54,7 @@ public class HostBasedSamlServiceProviderProvisioning
 
 
 	@Override
-	public ServiceProvider getHostedProvider(HttpServletRequest request) {
+	public ServiceProviderService getHostedProvider(HttpServletRequest request) {
 		String basePath = getBasePath(request);
 		LocalServiceProviderConfiguration spConfig =
 			getConfiguration().getServerConfiguration(request).getServiceProvider();
@@ -92,7 +92,7 @@ public class HostBasedSamlServiceProviderProvisioning
 		metadata.getServiceProvider().setWantAssertionsSigned(spConfig.isWantAssertionsSigned());
 		metadata.getServiceProvider().setAuthnRequestsSigned(spConfig.isSignRequests());
 
-		return new HostedServiceProvider(
+		return new HostedServiceProviderService(
 			spConfig,
 			metadata,
 			getTransformer(),

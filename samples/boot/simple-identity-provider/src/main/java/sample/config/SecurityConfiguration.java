@@ -19,14 +19,13 @@ package sample.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityConfiguration;
-
-import static java.util.Arrays.asList;
 
 @Configuration
 @EnableWebSecurity
@@ -38,11 +37,19 @@ public class SecurityConfiguration extends SamlIdentityProviderSecurityConfigura
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-
-		UserDetails userDetails = User.withUsername("user")
+		UserDetails userDetails = User.withDefaultPasswordEncoder()
+			.username("user")
 			.password("password")
 			.roles("USER")
 			.build();
-		return new InMemoryUserDetailsManager(asList(userDetails));
+		return new InMemoryUserDetailsManager(userDetails);
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.userDetailsService(userDetailsService()).formLogin()
+			.and().antMatcher("/**");
+		super.configure(http);
+
 	}
 }

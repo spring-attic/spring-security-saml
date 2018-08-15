@@ -85,7 +85,7 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 		String matcher = "/" + stripSlashes(prefix) + "/**";
 		String metadata = "/" + stripSlashes(prefix) + "/metadata";
 		http
-			.antMatcher(matcher)
+			//.antMatcher(matcher)
 			.addFilterAfter(idpMetadataFilter(), BasicAuthenticationFilter.class)
 			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
 			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
@@ -94,8 +94,6 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 			.authorizeRequests()
 			.antMatchers(metadata).permitAll()
 			.anyRequest().authenticated()
-			.and()
-			.formLogin()
 		;
 	}
 }

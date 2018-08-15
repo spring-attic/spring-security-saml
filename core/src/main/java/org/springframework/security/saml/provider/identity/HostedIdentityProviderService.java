@@ -17,8 +17,6 @@
 
 package org.springframework.security.saml.provider.identity;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlMetadataCache;
@@ -44,7 +42,6 @@ import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
-import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -72,18 +69,18 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 	@Override
 	public ServiceProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
 		if (saml2Object instanceof AuthenticationRequest) {
-			return getRemoteProvider((AuthenticationRequest)saml2Object);
+			return getRemoteProvider((AuthenticationRequest) saml2Object);
 		}
 		else if (saml2Object instanceof LogoutRequest) {
-			return getRemoteProvider((LogoutRequest)saml2Object);
+			return getRemoteProvider((LogoutRequest) saml2Object);
 		}
 		else if (saml2Object instanceof LogoutResponse) {
-			return getRemoteProvider((LogoutResponse)saml2Object);
+			return getRemoteProvider((LogoutResponse) saml2Object);
 		}
 		else if (saml2Object instanceof Assertion) {
-			return getRemoteProvider((Assertion)saml2Object);
+			return getRemoteProvider((Assertion) saml2Object);
 		}
-		throw new IllegalArgumentException("Unable to resolve class:"+saml2Object.getClass().getName());
+		throw new IllegalArgumentException("Unable to resolve class:" + saml2Object.getClass().getName());
 	}
 
 	public ServiceProviderMetadata getRemoteProvider(AuthenticationRequest request) {
@@ -145,11 +142,15 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 									.setRecipient(
 										request != null ?
 											request.getAssertionConsumerService().getLocation() :
-											getACSFromSp(sp).getLocation()
+											getPreferredEndpoint(
+												sp.getServiceProvider().getAssertionConsumerService(),
+												POST,
+												-1
+											).getLocation()
+
 									)
 							)
 					)
-
 
 			)
 			.setConditions(
@@ -190,7 +191,11 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 			.setVersion("2.0");
 		Endpoint acs = (authn != null ? authn.getAssertionConsumerService() : null);
 		if (acs == null) {
-			acs = getPreferredACS(recipient, asList(POST));
+			acs = getPreferredEndpoint(
+				recipient.getServiceProvider().getAssertionConsumerService(),
+				POST,
+				-1
+			);
 		}
 		if (acs != null) {
 			result.setDestination(acs.getLocation());
@@ -198,36 +203,4 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 		return result;
 	}
 
-	public Endpoint getPreferredACS(ServiceProviderMetadata recipient,
-									List<Binding> preferred) {
-
-		List<Endpoint> eps = recipient.getServiceProvider().getAssertionConsumerService();
-
-		if (eps == null || eps.isEmpty()) {
-			return null;
-		}
-		Endpoint result = null;
-		for (Endpoint e : eps) {
-			if (e.isDefault() && preferred.contains(e.getBinding())) {
-				result = e;
-				break;
-			}
-		}
-		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
-			if (e.isDefault()) {
-				result = e;
-				break;
-			}
-		}
-		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
-			if (preferred.contains(e.getBinding())) {
-				result = e;
-				break;
-			}
-		}
-		if (result == null ) {
-			result = getACSFromSp(recipient);
-		}
-		return result;
-	}
 }

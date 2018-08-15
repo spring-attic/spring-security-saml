@@ -62,7 +62,7 @@ public class ServiceProviderController {
 		this.provisioning = provisioning;
 	}
 
-	@RequestMapping(value = {"/", "/index", "logged-in"})
+	@RequestMapping(value = {"/", "/index", "/logged-in"})
 	public String home() {
 		return "logged-in";
 	}

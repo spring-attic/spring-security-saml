@@ -25,6 +25,8 @@ import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.validation.ValidationResult;
 
@@ -60,4 +62,9 @@ public interface HostedProviderService<
 	String toEncodedXml(Saml2Object saml2Object, boolean deflate);
 
 	String toEncodedXml(String xml, boolean deflate);
+
+	Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
+								  Binding preferredBinding,
+								  int preferredIndex);
+
 }

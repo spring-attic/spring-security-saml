@@ -17,7 +17,6 @@
 
 package org.springframework.security.saml.provider.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlMetadataCache;
@@ -34,7 +33,6 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
@@ -96,7 +94,13 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
 			.setBinding(Binding.POST)
-			.setAssertionConsumerService(getACSFromSp(sp))
+			.setAssertionConsumerService(
+				getPreferredEndpoint(
+					sp.getServiceProvider().getAssertionConsumerService(),
+					null,
+					-1
+				)
+			)
 			.setIssuer(new Issuer().setValue(sp.getEntityId()))
 			.setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
@@ -121,9 +125,4 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		return request;
 	}
 
-	@Override
-	public Endpoint getSingleSignOnEndpoint() {
-		List<Endpoint> endpoints = getMetadata().getServiceProvider().getSingleLogoutService();
-		return getSingleLogout(endpoints);
-	}
 }

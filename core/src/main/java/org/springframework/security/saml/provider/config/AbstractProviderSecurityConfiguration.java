@@ -46,7 +46,6 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 		this.hostConfiguration = hostConfiguration;
 	}
 
-
 	@Bean
 	public DefaultSessionAssertionStore samlAssertionStore() {
 		return new DefaultSessionAssertionStore();

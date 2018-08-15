@@ -20,7 +20,6 @@ package org.springframework.security.saml.provider.identity;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -88,7 +87,12 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 			assertionStore.addMessage(request, assertion.getId(), assertion);
 			Response r =  provider.response(assertion, recipient);
 
-			Endpoint acsUrl = getAcs(recipient);
+			Endpoint acsUrl = provider.getPreferredEndpoint(
+				recipient.getServiceProvider().getAssertionConsumerService(),
+				Binding.POST,
+				-1
+			);
+
 			logger.debug(
 				format(
 					"Sending assertion for SP:%s to URL:%s using Binding:%s",
@@ -131,14 +135,6 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 		return getProvisioning().getHostedProvider(request).getRemoteProvider(entityId);
 	}
 
-	protected Endpoint getAcs(ServiceProviderMetadata metadata) {
-		List<Endpoint> acs = metadata.getServiceProvider().getAssertionConsumerService();
-		Endpoint result = acs.stream().filter(e -> e.isDefault()).findFirst().orElse(null);
-		if (result == null) {
-			result = acs.get(0); //TODO return configured default?
-		}
-		return result;
-	}
 
 	public String getPostBindingTemplate() {
 		return postBindingTemplate;

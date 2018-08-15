@@ -40,6 +40,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Status;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
+import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -55,7 +56,6 @@ import org.joda.time.DateTime;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 
 public abstract class AbstractHostedProviderService<
 	Configuration extends LocalProviderConfiguration,
@@ -101,7 +101,12 @@ public abstract class AbstractHostedProviderService<
 		List<SsoProvider> ssoProviders = recipient.getSsoProviders();
 		LogoutRequest result = new LogoutRequest()
 			.setId(UUID.randomUUID().toString())
-			.setDestination(getSingleLogout(ssoProviders.get(0).getSingleLogoutService()))
+			.setDestination(
+				getPreferredEndpoint(
+					ssoProviders.get(0).getSingleLogoutService(),
+					null,
+					-1)
+			)
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
 			.setIssueInstant(DateTime.now())
 			.setNameId(principal)
@@ -113,7 +118,11 @@ public abstract class AbstractHostedProviderService<
 	@Override
 	public LogoutResponse logoutResponse(LogoutRequest request, RemoteMetadata recipient) {
 		List<SsoProvider> ssoProviders = recipient.getSsoProviders();
-		Endpoint destination = getSingleLogout(ssoProviders.get(0).getSingleLogoutService());
+		Endpoint destination = getPreferredEndpoint(
+			ssoProviders.get(0).getSingleLogoutService(),
+			null,
+			-1
+		);
 		return new LogoutResponse()
 			.setId(UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
@@ -157,7 +166,9 @@ public abstract class AbstractHostedProviderService<
 		if (issuer == null) {
 			return null;
 		}
-		else return getRemoteProvider(issuer.getValue());
+		else {
+			return getRemoteProvider(issuer.getValue());
+		}
 	}
 
 	protected RemoteMetadata getRemoteProvider(LogoutResponse response) {
@@ -190,16 +201,6 @@ public abstract class AbstractHostedProviderService<
 				"remote provider entityId",
 				entityId
 			);
-	}
-
-	protected Endpoint getACSFromSp(ServiceProviderMetadata sp) {
-		Endpoint endpoint = sp.getServiceProvider().getAssertionConsumerService().get(0);
-		for (Endpoint e : sp.getServiceProvider().getAssertionConsumerService()) {
-			if (e.isDefault()) {
-				endpoint = e;
-			}
-		}
-		return endpoint;
 	}
 
 	private RemoteMetadata resolve(String metadata, boolean skipSslValidation) {
@@ -236,7 +237,7 @@ public abstract class AbstractHostedProviderService<
 		RemoteMetadata remote = getRemoteProvider(saml2Object);
 		List<SimpleKey> verificationKeys = getVerificationKeys(remote);
 		try {
-			if (verificationKeys!=null && !verificationKeys.isEmpty()) {
+			if (verificationKeys != null && !verificationKeys.isEmpty()) {
 				getValidator().validateSignature(saml2Object, verificationKeys);
 			}
 		} catch (SignatureException x) {
@@ -256,10 +257,10 @@ public abstract class AbstractHostedProviderService<
 	private List<SimpleKey> getVerificationKeys(RemoteMetadata remote) {
 		List<SimpleKey> verificationKeys = emptyList();
 		if (remote instanceof ServiceProviderMetadata) {
-			verificationKeys = ((ServiceProviderMetadata)remote).getServiceProvider().getKeys();
+			verificationKeys = ((ServiceProviderMetadata) remote).getServiceProvider().getKeys();
 		}
 		else if (remote instanceof IdentityProviderMetadata) {
-			verificationKeys = ((IdentityProviderMetadata)remote).getIdentityProvider().getKeys();
+			verificationKeys = ((IdentityProviderMetadata) remote).getIdentityProvider().getKeys();
 		}
 		return verificationKeys;
 	}
@@ -270,7 +271,12 @@ public abstract class AbstractHostedProviderService<
 		if (encoded) {
 			xml = getTransformer().samlDecode(xml, deflated);
 		}
-		return type.cast(getTransformer().fromXml(xml, null, decryptionKeys));
+		Saml2Object result = type.cast(getTransformer().fromXml(xml, null, decryptionKeys));
+		//in order to add signatures, we need the verification keys from the remote provider
+		RemoteMetadata remote = getRemoteProvider(result);
+		List verificationKeys = remote.getSsoProviders().get(0).getKeys();
+		//perform transformation with verification keys
+		return type.cast(getTransformer().fromXml(xml, verificationKeys, decryptionKeys));
 	}
 
 	@Override
@@ -322,34 +328,56 @@ public abstract class AbstractHostedProviderService<
 		}
 	}
 
-	protected Endpoint getSingleLogout(List<Endpoint> logoutService) {
-		if (logoutService == null || logoutService.isEmpty()) {
+	@Override
+	public Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
+										 Binding preferredBinding,
+										 int preferredIndex) {
+		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
 		}
-		List<Endpoint> eps = logoutService;
+		List<Endpoint> eps = endpoints;
 		Endpoint result = null;
-		for (Endpoint e : eps) {
-			if (e.isDefault()) {
-				result = e;
-				break;
-			} else if (REDIRECT.equals(e.getBinding())) {
-				result = e;
-				break;
+		//find the preferred binding
+		if (preferredBinding != null) {
+			for (Endpoint e : eps) {
+				if (preferredBinding == e.getBinding()) {
+					result = e;
+					break;
+				}
 			}
 		}
-		if (result == null ) {
-			result = eps.get(0);
+		//find the configured index
+		if (result == null) {
+			for (Endpoint e : eps) {
+				if (e.getIndex() == preferredIndex) {
+					result = e;
+					break;
+				}
+			}
+		}
+		//find the default endpoint
+		if (result == null) {
+			for (Endpoint e : eps) {
+				if (e.isDefault()) {
+					result = e;
+					break;
+				}
+			}
+		}
+		//fallback to the very first available endpoint
+		if (result == null) {
+				result = eps.get(0);
 		}
 		return result;
 	}
 
-	private boolean isUri(String uri) {
-		boolean isUri = false;
-		try {
-			new URI(uri);
-			isUri = true;
-		} catch (URISyntaxException e) {
+		private boolean isUri (String uri){
+			boolean isUri = false;
+			try {
+				new URI(uri);
+				isUri = true;
+			} catch (URISyntaxException e) {
+			}
+			return isUri;
 		}
-		return isUri;
 	}
-}

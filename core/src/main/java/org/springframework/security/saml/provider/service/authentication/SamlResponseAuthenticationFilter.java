@@ -73,6 +73,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 		if (logger.isTraceEnabled()) {
 			logger.trace("Received SAMLResponse XML:" + r.getOriginalXML());
 		}
+		IdentityProviderMetadata remote = provider.getRemoteProvider(r);
 
 		ValidationResult validationResult = provider.validate(r);
 		if (validationResult.hasErrors()) {
@@ -81,7 +82,6 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 			);
 		}
 
-		IdentityProviderMetadata remote = provider.getRemoteProvider(r);
 		Authentication authentication = new DefaultSamlAuthentication(
 			true,
 			r.getAssertions().get(0),

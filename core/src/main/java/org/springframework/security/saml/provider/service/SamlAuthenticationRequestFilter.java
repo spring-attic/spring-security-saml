@@ -21,14 +21,16 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlRequestMatcher;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.SamlFilter;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -71,7 +73,12 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
 			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
 			String encoded = getEncodedAuthnRequestValue(provider, authenticationRequest);
-			Endpoint location = provider.getSingleSignOnEndpoint();
+			//TODO - this can be better
+			Endpoint location = provider.getPreferredEndpoint(
+				idp.getIdentityProvider().getSingleSignOnService(),
+				null,
+				-1
+			);
 			sendAuthenticationRequest(request, response, encoded, location);
 		}
 		else {
@@ -83,6 +90,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 											 HttpServletResponse response,
 											 String encoded,
 											 Endpoint location) throws IOException {
+		//TODO - send RelayState?
 		if (location.getBinding().equals(Binding.REDIRECT)) {
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(location.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
@@ -90,11 +98,14 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			response.sendRedirect(redirect);
 		}
 		else if (location.getBinding().equals(Binding.POST)) {
+			Map<String,String> model = new HashMap<>();
+			model.put("action", location.getLocation());
+			model.put("SAMLRequest", encoded);
 			processHtml(
 				request,
 				response,
 				getPostTemplate(),
-				Collections.singletonMap("SAMLRequest", encoded)
+				model
 			);
 		}
 		else {

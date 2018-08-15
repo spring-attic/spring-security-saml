@@ -43,12 +43,6 @@ public class ValidationResult {
 
 	private final Saml2Object saml2Object;
 
-	/**
-	 * @deprecated Use constructor that contains the actual object that was validated
-	 */
-	public ValidationResult() {
-		this(null);
-	}
 	public ValidationResult(Saml2Object saml2Object) {
 		this.saml2Object = saml2Object;
 	}

@@ -93,8 +93,9 @@ public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSe
 		String prefix = getHostConfiguration().getServiceProvider().getPrefix();
 		String matcher = "/" + stripSlashes(prefix) + "/**";
 		String select = "/" + stripSlashes(prefix) + "/select";
+		String metadata = "/" + stripSlashes(prefix) + "/metadata";
 		http
-			.antMatcher(matcher)
+			//.antMatcher(matcher)
 			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
 			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
 			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())

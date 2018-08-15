@@ -14,21 +14,22 @@
  *  limitations under the License.
  *
  */
-package sample.config;
+package org.springframework.security.saml.provider.service.config;
 
 import javax.servlet.Filter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.AbstractProviderSecurityConfiguration;
+import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.service.ServiceProvider;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
 import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
-import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
 import org.springframework.security.saml.provider.service.authentication.ServiceProviderLogoutHandler;
 import org.springframework.security.saml.provider.service.authentication.SimpleAuthenticationManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -36,29 +37,29 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-@EnableWebSecurity
-public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigurerAdapter {
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-	private final SamlProviderProvisioning<ServiceProvider> provisioning;
+public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<ServiceProvider> {
 
-	public SamlServiceProviderSecurityConfiguration(SamlProviderProvisioning<ServiceProvider> provisioning) {
-		this.provisioning = provisioning;
+	public SamlServiceProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
+		super(hostConfiguration);
 	}
+
 
 	@Bean
 	public Filter spMetadataFilter() {
-		return new ServiceProviderMetadataFilter(provisioning);
+		return new ServiceProviderMetadataFilter(getSamlProvisioning());
 	}
 
 	@Bean
 	public Filter spAuthenticationRequestFilter() {
-		return new SamlAuthenticationRequestFilter(provisioning);
+		return new SamlAuthenticationRequestFilter(getSamlProvisioning());
 	}
 
 	@Bean
 	public Filter spAuthenticationResponseFilter() {
 		SamlResponseAuthenticationFilter authenticationFilter =
-			new SamlResponseAuthenticationFilter(provisioning);
+			new SamlResponseAuthenticationFilter(getSamlProvisioning());
 		authenticationFilter.setAuthenticationManager(new SimpleAuthenticationManager());
 		authenticationFilter.setAuthenticationSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
 		authenticationFilter.setAuthenticationFailureHandler(new GenericErrorAuthenticationFailureHandler());
@@ -68,29 +69,42 @@ public class SamlServiceProviderSecurityConfiguration extends WebSecurityConfigu
 	@Bean
 	public Filter spSamlLogoutFilter() {
 		return new SamlProviderLogoutFilter<>(
-			provisioning,
-			new ServiceProviderLogoutHandler(provisioning),
+			getSamlProvisioning(),
+			new ServiceProviderLogoutHandler(getSamlProvisioning()),
 			new SimpleUrlLogoutSuccessHandler(),
 			new SecurityContextLogoutHandler()
 		);
 	}
 
 
+	@Override
+	@Bean(name = "samlServiceProviderProvisioning")
+	public SamlProviderProvisioning<ServiceProvider> getSamlProvisioning() {
+		return new HostBasedSamlServiceProviderProvisioning(
+			samlConfigurationRepository(),
+			samlTransformer(),
+			samlValidator(),
+			samlMetadataCache(samlNetworkHandler())
+		);
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		String prefix = getHostConfiguration().getServiceProvider().getPrefix();
+		String matcher = "/" + stripSlashes(prefix) + "/**";
+		String select = "/" + stripSlashes(prefix) + "/select";
 		http
-			.antMatcher("/saml/sp/**") //TODO - based on configuration
+			.antMatcher(matcher)
 			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
 			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
 			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
 			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
-			.antMatchers("/saml/sp/**").permitAll() //TODO - based on configuration
+			.antMatchers(matcher).permitAll()
 			.anyRequest().authenticated()
 			.and()
-			.formLogin().loginPage("/saml/sp/select") //TODO - based on configuration
+			.formLogin().loginPage(select)
 		;
 	}
 }

@@ -67,8 +67,8 @@ public class SamlMetadataFilter<ProviderType extends HostedProviderService> exte
 			String xml = provider.toXml(metadata);
 			getCacheHeaderWriter().writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);
-			String safeFilename = URLEncoder.encode(getFilename()+";", "ISO-8859-1");
-			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename+ "\"");
+			String safeFilename = URLEncoder.encode(getFilename(), "ISO-8859-1");
+			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename+ "\""+";");
 			response.getWriter().write(xml);
 		}
 		else {

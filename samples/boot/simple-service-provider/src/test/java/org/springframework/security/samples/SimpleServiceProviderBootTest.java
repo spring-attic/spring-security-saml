@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.key.SimpleKey;
@@ -352,6 +353,19 @@ public class SimpleServiceProviderBootTest {
 		String xml = transformer.samlDecode(request, true);
 		return (AuthenticationRequest) transformer.fromXml(xml, null, null);
 	}
+
+	@Test
+	public void selectIdentityProvider() throws Exception {
+		mockMvc.perform(
+			get("/saml/sp/select")
+			.accept(MediaType.TEXT_HTML)
+		)
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("<h1>Select an Identity Provider</h1>")))
+			.andExpect(content().string(containsString("Simple SAML PHP IDP")))
+			.andReturn();
+	}
+
 
 	public static Map<String, String> queryParams(URI url) {
 		Map<String, String> queryPairs = new LinkedHashMap<>();

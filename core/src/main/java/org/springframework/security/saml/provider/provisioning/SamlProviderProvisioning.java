@@ -23,6 +23,8 @@ import org.springframework.security.saml.provider.HostedProviderService;
 
 public interface SamlProviderProvisioning<T extends HostedProviderService> {
 	T getHostedProvider(HttpServletRequest request);
+
+	String getBasePath(HttpServletRequest request);
 }
 
 

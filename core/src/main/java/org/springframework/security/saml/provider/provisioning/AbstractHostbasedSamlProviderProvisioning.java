@@ -52,7 +52,7 @@ public class AbstractHostbasedSamlProviderProvisioning {
 		this.cache = cache;
 	}
 
-	protected String getBasePath(HttpServletRequest request) {
+	public String getBasePath(HttpServletRequest request) {
 		return request.getScheme() +
 			"://" +
 			request.getServerName() +

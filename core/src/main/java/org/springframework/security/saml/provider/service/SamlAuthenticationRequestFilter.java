@@ -98,7 +98,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			response.sendRedirect(redirect);
 		}
 		else if (location.getBinding().equals(Binding.POST)) {
-			Map<String,String> model = new HashMap<>();
+			Map<String,Object> model = new HashMap<>();
 			model.put("action", location.getLocation());
 			model.put("SAMLRequest", encoded);
 			processHtml(

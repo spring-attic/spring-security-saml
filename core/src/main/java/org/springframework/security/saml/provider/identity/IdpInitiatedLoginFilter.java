@@ -110,7 +110,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 			}
 			else if (acsUrl.getBinding() == Binding.POST) {
 				String encoded = provider.toEncodedXml(r, false);
-				Map<String, String> model = new HashMap<>();
+				Map<String, Object> model = new HashMap<>();
 				model.put("action", acsUrl.getLocation());
 				model.put("SAMLResponse", encoded);
 				processHtml(request, response, getPostBindingTemplate(), model);

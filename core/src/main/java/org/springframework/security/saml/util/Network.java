@@ -20,7 +20,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -80,15 +79,6 @@ public class Network {
 		} catch (KeyStoreException e) {
 			throw new SamlKeyException(e);
 		}
-	}
-
-	public String getBasePath(HttpServletRequest request) {
-		return request.getScheme() +
-			"://" +
-			request.getServerName() +
-			":" +
-			request.getServerPort() +
-			request.getContextPath();
 	}
 
 	public int getConnectTimeoutMillis() {

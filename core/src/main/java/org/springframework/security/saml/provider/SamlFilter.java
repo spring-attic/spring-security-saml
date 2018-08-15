@@ -54,7 +54,7 @@ public abstract  class SamlFilter<T extends HostedProviderService> extends OnceP
 	protected void processHtml(HttpServletRequest request,
 							   HttpServletResponse response,
 							   String html,
-							   Map<String, String> model) {
+							   Map<String, Object> model) {
 		cacheHeaderWriter.writeHeaders(request, response);
 		response.setContentType(TEXT_HTML_VALUE);
 		response.setCharacterEncoding(UTF_8.name());

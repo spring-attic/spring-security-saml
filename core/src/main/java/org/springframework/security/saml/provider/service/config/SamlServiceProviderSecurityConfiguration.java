@@ -26,6 +26,7 @@ import org.springframework.security.saml.provider.config.AbstractProviderSecurit
 import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
+import org.springframework.security.saml.provider.service.SelectIdentityProviderFilter;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
@@ -76,6 +77,10 @@ public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSe
 		);
 	}
 
+	@Bean
+	public Filter spSelectIdentityProviderFilter() {
+		return new SelectIdentityProviderFilter(getSamlProvisioning());
+	}
 
 	@Override
 	@Bean(name = "samlServiceProviderProvisioning")
@@ -100,6 +105,7 @@ public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSe
 			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
 			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
 			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())
+			.addFilterAfter(spSelectIdentityProviderFilter(), spSamlLogoutFilter().getClass())
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers(matcher).permitAll()

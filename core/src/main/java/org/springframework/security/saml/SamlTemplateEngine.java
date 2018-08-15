@@ -38,7 +38,7 @@ public interface SamlTemplateEngine {
 	 */
 	void process(HttpServletRequest request,
 				 String templateId,
-				 Map<String, String> model,
+				 Map<String, Object> model,
 				 Writer out);
 
 }

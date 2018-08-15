@@ -25,8 +25,8 @@ import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.ModelProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.util.Network;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,13 +43,8 @@ import static java.lang.String.format;
 public class IdentityProviderController {
 	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
 	private SamlServerConfiguration configuration;
-	private Network network;
 	private SamlProviderProvisioning<IdentityProviderService> provisioning;
 
-	@Autowired
-	public void setNetwork(Network network) {
-		this.network = network;
-	}
 
 	@Autowired
 	public void setAppConfig(AppConfig config) {
@@ -57,18 +52,19 @@ public class IdentityProviderController {
 	}
 
 	@Autowired
-	public void setSamlPRoviderProvisioning(SamlProviderProvisioning<IdentityProviderService> provisioning) {
+	public void setSamlProviderProvisioning(SamlProviderProvisioning<IdentityProviderService> provisioning) {
 		this.provisioning = provisioning;
 	}
 
 	@RequestMapping(value = {"/saml/idp/select", "/"})
 	public String selectProvider(HttpServletRequest request, Model model) {
 
-		List<ModelProvider> providers = new LinkedList<>();
+		List<org.springframework.security.saml.provider.service.ModelProvider> providers = new LinkedList<>();
 		this.configuration.getIdentityProvider().getProviders().stream().forEach(
 			p -> {
 				try {
-					ModelProvider mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
+					org.springframework.security.saml.provider.service.ModelProvider
+						mp = new ModelProvider().setLinkText(p.getLinktext()).setRedirect(getIdpInitUrl(request, p));
 					providers.add(mp);
 				} catch (Exception x) {
 					logger.debug(format(
@@ -84,7 +80,7 @@ public class IdentityProviderController {
 	}
 
 	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(network.getBasePath(request));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(provisioning.getBasePath(request));
 		builder.pathSegment("saml/idp/init");
 		IdentityProviderService provider = provisioning.getHostedProvider(request);
 		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);

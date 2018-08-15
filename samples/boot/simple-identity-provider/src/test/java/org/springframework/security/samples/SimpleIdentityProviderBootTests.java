@@ -420,6 +420,8 @@ public class SimpleIdentityProviderBootTests {
 
 	}
 
+
+
 	protected IdentityProviderMetadata getIdentityProviderMetadata() throws Exception {
 		MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
 			.andExpect(status().isOk())

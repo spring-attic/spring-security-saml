@@ -56,7 +56,7 @@ public class GenericErrorAuthenticationFailureHandler implements AuthenticationF
 										HttpServletResponse response,
 										AuthenticationException exception) throws IOException, ServletException {
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		Map<String, String> model = new HashMap<>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("message", getErrorMessage(exception));
 		processHtml(request, response, model);
 	}
@@ -67,7 +67,7 @@ public class GenericErrorAuthenticationFailureHandler implements AuthenticationF
 
 	protected void processHtml(HttpServletRequest request,
 							   HttpServletResponse response,
-							   Map<String, String> model) {
+							   Map<String, Object> model) {
 		response.setHeader(CACHE_CONTROL, "no-cache, no-store");
 		response.setHeader(PRAGMA, "no-cache");
 		response.setContentType(TEXT_HTML_VALUE);

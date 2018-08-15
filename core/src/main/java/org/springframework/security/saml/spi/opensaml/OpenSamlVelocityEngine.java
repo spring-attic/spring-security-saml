@@ -20,7 +20,6 @@ package org.springframework.security.saml.spi.opensaml;
 import java.io.Writer;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlTemplateEngine;
 
@@ -33,7 +32,7 @@ public class OpenSamlVelocityEngine implements SamlTemplateEngine {
 	@Override
 	public void process(HttpServletRequest request,
 						String templateId,
-						Map<String, String> model,
+						Map<String, Object> model,
 						Writer out
 	) {
 		org.apache.velocity.app.VelocityEngine velocityEngine = VelocityEngine.newVelocityEngine();

@@ -33,7 +33,6 @@ import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
-import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.saml.util.Network;
@@ -64,12 +63,6 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	@Bean
 	public SamlValidator samlValidator() {
 		return new DefaultValidator(samlImplementation());
-	}
-
-	@Deprecated
-	@Bean
-	public SamlDefaults samlDefaults() {
-		return new SamlDefaults(samlTime());
 	}
 
 	@Bean

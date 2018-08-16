@@ -108,13 +108,13 @@ public class HostBasedSamlIdentityProviderProvisioning
 															  List<SimpleKey> keys,
 															  String prefix,
 															  String aliasPath,
-															  AlgorithmMethod signAlgorith,
+															  AlgorithmMethod signAlgorithm,
 															  DigestMethod signDigest) {
 
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId(UUID.randomUUID().toString())
-			.setSigningKey(signingKey, signAlgorith, signDigest)
+			.setSigningKey(signingKey, signAlgorithm, signDigest)
 			.setProviders(
 				asList(
 					new org.springframework.security.saml.saml2.metadata.IdentityProvider()

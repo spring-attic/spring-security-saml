@@ -17,6 +17,7 @@
 package org.springframework.security.samples;
 
 import java.net.URI;
+import java.time.Clock;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
@@ -47,7 +49,6 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
-import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriUtils;
@@ -81,22 +82,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SimpleServiceProviderBootTest {
+
+	@Autowired
+	Clock samlTime;
+
 	@Autowired
 	SamlServerConfiguration configuration;
+
 	@Autowired
 	private MockMvc mockMvc;
+
 	@Autowired
 	private SamlTransformer transformer;
+
 	@Autowired
 	private SamlProviderProvisioning<ServiceProviderService> provisioning;
-	@Autowired
-	private SamlDefaults samlDefaults;
+
 	private String idpEntityId;
+
 	private String spBaseUrl;
 
 	@Autowired
 	private AppConfig config;
+
 	private MockHttpServletRequest defaultRequest;
+	private SamlTestObjectHelper helper;
 
 
 	@BeforeEach
@@ -104,6 +114,7 @@ public class SimpleServiceProviderBootTest {
 		idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		spBaseUrl = "http://localhost";
 		defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
+		helper = new SamlTestObjectHelper(samlTime);
 	}
 
 	@AfterEach
@@ -170,8 +181,8 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
-		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
-		Response response = samlDefaults.response(
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = helper.response(
 			authn,
 			assertion,
 			sp,
@@ -196,8 +207,8 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
-		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
-		Response response = samlDefaults.response(
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = helper.response(
 			authn,
 			assertion,
 			sp,
@@ -220,7 +231,7 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
-		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -255,7 +266,7 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
-		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -263,7 +274,7 @@ public class SimpleServiceProviderBootTest {
 			sp.getEntityId(),
 			null
 		);
-		LogoutRequest request = samlDefaults.logoutRequest(
+		LogoutRequest request = helper.logoutRequest(
 			sp,
 			idp,
 			assertion.getSubject().getPrincipal()
@@ -302,7 +313,7 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
-		Assertion assertion = samlDefaults.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -310,13 +321,13 @@ public class SimpleServiceProviderBootTest {
 			sp.getEntityId(),
 			null
 		);
-		LogoutRequest request = samlDefaults.logoutRequest(
+		LogoutRequest request = helper.logoutRequest(
 			idp,
 			sp,
 			assertion.getSubject().getPrincipal()
 		);
 
-		LogoutResponse response = samlDefaults.logoutResponse(request, sp, idp);
+		LogoutResponse response = helper.logoutResponse(request, sp, idp);
 
 		String xml = transformer.toXml(response);
 		String param = transformer.samlEncode(xml, true);

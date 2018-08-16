@@ -14,21 +14,9 @@
  *  limitations under the License.
  *
  */
-/*
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-package org.springframework.security.saml.spi.deprecated;
+
+package org.springframework.security.saml.helper;
+
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -39,10 +27,10 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -81,12 +69,7 @@ import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 import static org.springframework.util.StringUtils.hasText;
-
-/**
- * Simple class that creates SAML objects with sensible samlDefaults
- */
-public class SamlDefaults {
-
+public class SamlTestObjectHelper {
 	public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
 	public DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
 	public long NOT_BEFORE = 60000;
@@ -95,7 +78,7 @@ public class SamlDefaults {
 
 	private Clock time;
 
-	public SamlDefaults(Clock time) {
+	public SamlTestObjectHelper(Clock time) {
 		this.time = time;
 	}
 
@@ -103,7 +86,7 @@ public class SamlDefaults {
 		return time;
 	}
 
-	public SamlDefaults setTime(Clock time) {
+	public SamlTestObjectHelper setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -119,7 +102,15 @@ public class SamlDefaults {
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
 
 		ServiceProviderMetadata metadata =
-			serviceProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+			serviceProviderMetadata(
+				baseUrl,
+				signingKey,
+				keys,
+				prefix,
+				aliasPath,
+				configuration.getDefaultSigningAlgorithm(),
+				configuration.getDefaultDigest()
+			);
 
 		if (!configuration.getNameIds().isEmpty()) {
 			metadata.getServiceProvider().setNameIds(configuration.getNameIds());
@@ -132,12 +123,18 @@ public class SamlDefaults {
 														   SimpleKey signingKey,
 														   List<SimpleKey> keys,
 														   String prefix,
-														   String aliasPath) {
+														   String aliasPath,
+														   AlgorithmMethod algorithmMethod,
+														   DigestMethod digestMethod) {
 
 		return new ServiceProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId(UUID.randomUUID().toString())
-			.setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
+			.setSigningKey(
+				signingKey,
+				algorithmMethod==null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
+				digestMethod==null ? DEFAULT_SIGN_DIGEST : digestMethod
+			)
 			.setProviders(
 				asList(
 					new ServiceProvider()
@@ -196,7 +193,15 @@ public class SamlDefaults {
 
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);
-		IdentityProviderMetadata metadata = identityProviderMetadata(baseUrl, signingKey, keys, prefix, aliasPath);
+		IdentityProviderMetadata metadata = identityProviderMetadata(
+			baseUrl,
+			signingKey,
+			keys,
+			prefix,
+			aliasPath,
+			configuration.getDefaultSigningAlgorithm(),
+			configuration.getDefaultDigest()
+		);
 		if (!configuration.getNameIds().isEmpty()) {
 			metadata.getIdentityProvider().setNameIds(configuration.getNameIds());
 		}
@@ -206,12 +211,18 @@ public class SamlDefaults {
 															 SimpleKey signingKey,
 															 List<SimpleKey> keys,
 															 String prefix,
-															 String aliasPath) {
+															 String aliasPath,
+															 AlgorithmMethod algorithmMethod,
+															 DigestMethod digestMethod) {
 
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId(UUID.randomUUID().toString())
-			.setSigningKey(signingKey, DEFAULT_SIGN_ALGORITHM, DEFAULT_SIGN_DIGEST)
+			.setSigningKey(
+				signingKey,
+				algorithmMethod==null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
+				digestMethod==null ? DEFAULT_SIGN_DIGEST : digestMethod
+			)
 			.setProviders(
 				asList(
 					new IdentityProvider()

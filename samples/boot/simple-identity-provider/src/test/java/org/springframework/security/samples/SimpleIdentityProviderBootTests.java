@@ -18,6 +18,7 @@
 package org.springframework.security.samples;
 
 import java.net.URI;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -50,7 +52,6 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
-import org.springframework.security.saml.spi.deprecated.SamlDefaults;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -91,9 +92,6 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private SamlTransformer transformer;
 
-	@Autowired
-	private SamlDefaults samlDefaults;
-
 	@MockBean
 	private SamlMetadataCache cache;
 
@@ -106,8 +104,12 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private SamlProviderProvisioning<IdentityProviderService> provisioning;
 
+	@Autowired
+	private Clock samlTime;
+
 	private String baseUrl = "http://localhost";
 	private MockHttpServletRequest defaultRequest;
+	private SamlTestObjectHelper helper;
 
 	@BeforeEach
 	public void mockCache() {
@@ -126,6 +128,7 @@ public class SimpleIdentityProviderBootTests {
 		).willReturn(CACHED_SSS_META_DATA.getBytes());
 
 		defaultRequest = new MockHttpServletRequest("GET", baseUrl);
+		helper = new SamlTestObjectHelper(samlTime);
 	}
 
 	@AfterEach
@@ -197,7 +200,7 @@ public class SimpleIdentityProviderBootTests {
 		assertNotNull(session);
 		assertThat(sessionAssertionStore.size(request), equalTo(1));
 
-		LogoutRequest logoutRequest = samlDefaults.logoutRequest(
+		LogoutRequest logoutRequest = helper.logoutRequest(
 			idpm,
 			spm1,
 			new NameIdPrincipal()
@@ -300,7 +303,7 @@ public class SimpleIdentityProviderBootTests {
 		assertThat(sessionAssertionStore.size(request), equalTo(1));
 
 		//SP1 responds to the LogoutRequest
-		LogoutResponse logoutResponse = samlDefaults.logoutResponse(logoutRequest, idpm, spm1);
+		LogoutResponse logoutResponse = helper.logoutResponse(logoutRequest, idpm, spm1);
 		//The IDP should then create a new LogoutRequest for SP2
 		mvcResult = mockMvc.perform(
 			get("/saml/idp/logout")
@@ -334,7 +337,7 @@ public class SimpleIdentityProviderBootTests {
 		);
 
 		//SP2 responds to the LogoutRequest
-		logoutResponse = samlDefaults.logoutResponse(logoutRequest, idpm, spm2);
+		logoutResponse = helper.logoutResponse(logoutRequest, idpm, spm2);
 		mvcResult = mockMvc.perform(
 			get("/saml/idp/logout")
 				.param(
@@ -400,7 +403,7 @@ public class SimpleIdentityProviderBootTests {
 		ServiceProviderMetadata sp = provider.getRemoteProvider("spring.security.saml.sp.id");
 		assertNotNull(sp);
 
-		AuthenticationRequest authenticationRequest = samlDefaults.authenticationRequest(sp, local);
+		AuthenticationRequest authenticationRequest = helper.authenticationRequest(sp, local);
 		String xml = transformer.toXml(authenticationRequest);
 		String deflated = transformer.samlEncode(xml, true);
 

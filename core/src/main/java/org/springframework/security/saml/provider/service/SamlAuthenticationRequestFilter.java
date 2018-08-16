@@ -18,7 +18,6 @@
 package org.springframework.security.saml.provider.service;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,32 +71,34 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			ServiceProviderService provider = provisioning.getHostedProvider(request);
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
 			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
-			String encoded = getEncodedAuthnRequestValue(provider, authenticationRequest);
 			//TODO - this can be better
 			Endpoint location = provider.getPreferredEndpoint(
 				idp.getIdentityProvider().getSingleSignOnService(),
 				null,
 				-1
 			);
-			sendAuthenticationRequest(request, response, encoded, location);
+			sendAuthenticationRequest(provider, request, response, authenticationRequest, location);
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
 	}
 
-	protected void sendAuthenticationRequest(HttpServletRequest request,
+	protected void sendAuthenticationRequest(ServiceProviderService provider,
+											 HttpServletRequest request,
 											 HttpServletResponse response,
-											 String encoded,
+											 AuthenticationRequest authenticationRequest,
 											 Endpoint location) throws IOException {
 		//TODO - send RelayState?
 		if (location.getBinding().equals(Binding.REDIRECT)) {
+			String encoded = provider.toEncodedXml(authenticationRequest, true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(location.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
 			String redirect = url.build(true).toUriString();
 			response.sendRedirect(redirect);
 		}
 		else if (location.getBinding().equals(Binding.POST)) {
+			String encoded = provider.toEncodedXml(authenticationRequest, false);
 			Map<String,Object> model = new HashMap<>();
 			model.put("action", location.getLocation());
 			model.put("SAMLRequest", encoded);
@@ -137,9 +138,8 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		return this;
 	}
 
-	private String getEncodedAuthnRequestValue(ServiceProviderService provider, AuthenticationRequest authenticationRequest)
-		throws UnsupportedEncodingException {
-		String xml = provider.toEncodedXml(authenticationRequest, true);
+	private String getAuthnRequestXml(ServiceProviderService provider, AuthenticationRequest authenticationRequest) {
+		String xml = provider.toXml(authenticationRequest);
 		return xml;
 	}
 

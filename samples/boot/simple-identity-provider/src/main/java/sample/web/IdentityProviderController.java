@@ -20,6 +20,7 @@ import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,5 +42,11 @@ public class IdentityProviderController {
 	public void setSamlProviderProvisioning(SamlProviderProvisioning<IdentityProviderService> provisioning) {
 		this.provisioning = provisioning;
 	}
+
+	@RequestMapping(value = {"/"})
+	public String selectProvider() {
+		return "redirect:/saml/idp/select";
+	}
+
 
 }

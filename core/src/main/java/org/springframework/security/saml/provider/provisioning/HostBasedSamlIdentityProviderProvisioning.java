@@ -46,7 +46,7 @@ public class HostBasedSamlIdentityProviderProvisioning
 	implements SamlProviderProvisioning<IdentityProviderService> {
 
 
-	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
+	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository<HttpServletRequest> configuration,
 													 SamlTransformer transformer,
 													 SamlValidator validator,
 													 SamlMetadataCache cache) {

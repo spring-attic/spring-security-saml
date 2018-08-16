@@ -45,7 +45,7 @@ public class HostBasedSamlServiceProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
 	implements SamlProviderProvisioning<ServiceProviderService> {
 
-	public HostBasedSamlServiceProviderProvisioning(SamlConfigurationRepository configuration,
+	public HostBasedSamlServiceProviderProvisioning(SamlConfigurationRepository<HttpServletRequest> configuration,
 													SamlTransformer transformer,
 													SamlValidator validator,
 													SamlMetadataCache cache) {

@@ -17,14 +17,15 @@
 
 package org.springframework.security.saml.provider.config;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 
 /**
+ *
  * Adds support for multi tenancy based on the context of an HTTP request
  * Returns the server configuration based on a HTTP request.
+ * @param <Holder>
  */
-public interface SamlConfigurationRepository {
-	SamlServerConfiguration getServerConfiguration(HttpServletRequest request);
+
+public interface SamlConfigurationRepository<Holder> {
+	SamlServerConfiguration getServerConfiguration(Holder request);
 }

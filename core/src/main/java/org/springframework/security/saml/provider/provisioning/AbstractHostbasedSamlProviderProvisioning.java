@@ -37,12 +37,12 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class AbstractHostbasedSamlProviderProvisioning {
 
-	private final SamlConfigurationRepository configuration;
+	private final SamlConfigurationRepository<HttpServletRequest> configuration;
 	private final SamlTransformer transformer;
 	private final SamlValidator validator;
 	private final SamlMetadataCache cache;
 
-	public AbstractHostbasedSamlProviderProvisioning(SamlConfigurationRepository configuration,
+	public AbstractHostbasedSamlProviderProvisioning(SamlConfigurationRepository<HttpServletRequest> configuration,
 													 SamlTransformer transformer,
 													 SamlValidator validator,
 													 SamlMetadataCache cache) {
@@ -88,7 +88,7 @@ public class AbstractHostbasedSamlProviderProvisioning {
 	}
 
 
-	public SamlConfigurationRepository getConfiguration() {
+	public SamlConfigurationRepository<HttpServletRequest> getConfiguration() {
 		return configuration;
 	}
 

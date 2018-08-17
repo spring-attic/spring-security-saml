@@ -15,36 +15,19 @@
  *
 */package sample.web;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sample.config.AppConfig;
 
 @Controller
 public class IdentityProviderController {
 	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
-	private SamlServerConfiguration configuration;
-	private SamlProviderProvisioning<IdentityProviderService> provisioning;
-
-
-	@Autowired
-	public void setAppConfig(AppConfig config) {
-		this.configuration = config;
-	}
-
-	@Autowired
-	public void setSamlProviderProvisioning(SamlProviderProvisioning<IdentityProviderService> provisioning) {
-		this.provisioning = provisioning;
-	}
 
 	@RequestMapping(value = {"/"})
 	public String selectProvider() {
+		logger.info("Sample IDP Application - Select an SP to log into!");
 		return "redirect:/saml/idp/select";
 	}
 

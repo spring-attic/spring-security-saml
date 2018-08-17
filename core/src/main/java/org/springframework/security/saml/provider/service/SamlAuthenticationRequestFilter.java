@@ -74,7 +74,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			//TODO - this can be better
 			Endpoint location = provider.getPreferredEndpoint(
 				idp.getIdentityProvider().getSingleSignOnService(),
-				null,
+				Binding.REDIRECT,
 				-1
 			);
 			sendAuthenticationRequest(provider, request, response, authenticationRequest, location);

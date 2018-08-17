@@ -84,6 +84,40 @@ public abstract class AbstractHostedProviderService<
 		this.cache = cache;
 	}
 
+	public Clock getClock() {
+		return clock;
+	}
+
+	public AbstractHostedProviderService<Configuration, LocalMetadata, RemoteMetadata> setClock(Clock clock) {
+		this.clock = clock;
+		return this;
+	}
+
+	public SamlMetadataCache getCache() {
+		return cache;
+	}
+
+	protected RemoteMetadata getRemoteProvider(Issuer issuer) {
+		if (issuer == null) {
+			return null;
+		}
+		else {
+			return getRemoteProvider(issuer.getValue());
+		}
+	}
+
+	protected RemoteMetadata throwIfNull(RemoteMetadata metadata, String key, String value) {
+		if (metadata == null) {
+			String message = "Provider for key '%s' with value '%s' not found.";
+			throw new SamlProviderNotFoundException(
+				String.format(message, key, value)
+			);
+		}
+		else {
+			return metadata;
+		}
+	}
+
 	@Override
 	public Configuration getConfiguration() {
 		return configuration;
@@ -92,6 +126,24 @@ public abstract class AbstractHostedProviderService<
 	@Override
 	public LocalMetadata getMetadata() {
 		return metadata;
+	}
+
+	@Override
+	public List<RemoteMetadata> getRemoteProviders() {
+		List<RemoteMetadata> result = new LinkedList<>();
+		List<ExternalProviderConfiguration> providers = getConfiguration().getProviders();
+		for (ExternalProviderConfiguration c : providers) {
+			try {
+				RemoteMetadata m = getRemoteProvider(c);
+				if (m != null) {
+					m.setEntityAlias(c.getAlias());
+					result.add(m);
+				}
+			} catch (SamlException x) {
+				logger.debug("Unable to resolve identity provider metadata.", x);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -105,7 +157,8 @@ public abstract class AbstractHostedProviderService<
 				getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),
 					null,
-					-1)
+					-1
+				)
 			)
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
 			.setIssueInstant(DateTime.now())
@@ -138,54 +191,6 @@ public abstract class AbstractHostedProviderService<
 	public abstract RemoteMetadata getRemoteProvider(Saml2Object saml2Object);
 
 	@Override
-	public List<RemoteMetadata> getRemoteProviders() {
-		List<RemoteMetadata> result = new LinkedList<>();
-		List<ExternalProviderConfiguration> providers = getConfiguration().getProviders();
-		for (ExternalProviderConfiguration c : providers) {
-			try {
-				RemoteMetadata m = getRemoteProvider(c);
-				if (m != null) {
-					m.setEntityAlias(c.getAlias());
-					result.add(m);
-				}
-			} catch (SamlException x) {
-				logger.debug("Unable to resolve identity provider metadata.", x);
-			}
-		}
-		return result;
-	}
-
-	@Override
-	public RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c) {
-		String metadata = c.getMetadata();
-		return resolve(metadata, c.isSkipSslValidation());
-	}
-
-
-	protected RemoteMetadata getRemoteProvider(Issuer issuer) {
-		if (issuer == null) {
-			return null;
-		}
-		else {
-			return getRemoteProvider(issuer.getValue());
-		}
-	}
-
-	protected RemoteMetadata getRemoteProvider(LogoutResponse response) {
-		String issuer = response.getIssuer() != null ?
-			response.getIssuer().getValue() :
-			null;
-		return getRemoteProvider(issuer);
-	}
-
-	protected RemoteMetadata getRemoteProvider(LogoutRequest request) {
-		String issuer = request.getIssuer() != null ?
-			request.getIssuer().getValue() :
-			null;
-		return getRemoteProvider(issuer);
-	}
-
-	@Override
 	public RemoteMetadata getRemoteProvider(String entityId) {
 		for (RemoteMetadata m : getRemoteProviders()) {
 			while (m != null) {
@@ -203,33 +208,10 @@ public abstract class AbstractHostedProviderService<
 			);
 	}
 
-	private RemoteMetadata resolve(String metadata, boolean skipSslValidation) {
-		RemoteMetadata result;
-		if (isUri(metadata)) {
-			try {
-				byte[] data = cache.getMetadata(metadata, skipSslValidation);
-				result = (RemoteMetadata) transformer.fromXml(data, null, null);
-			} catch (SamlException x) {
-				throw x;
-			} catch (Exception x) {
-				String message = format("Unable to fetch metadata from: %s with message: %s", metadata, x.getMessage());
-				if (logger.isDebugEnabled()) {
-					logger.debug(message, x);
-				}
-				else {
-					logger.info(message);
-				}
-				throw new SamlMetadataException("Unable to successfully get metadata from:" + metadata, x);
-			}
-		}
-		else {
-			result = (RemoteMetadata) transformer.fromXml(metadata, null, null);
-		}
-		return throwIfNull(
-			result,
-			"metadata",
-			metadata
-		);
+	@Override
+	public RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c) {
+		String metadata = c.getMetadata();
+		return resolve(metadata, c.isSkipSslValidation());
 	}
 
 	@Override
@@ -253,7 +235,6 @@ public abstract class AbstractHostedProviderService<
 		return new ValidationResult(saml2Object);
 	}
 
-
 	private List<SimpleKey> getVerificationKeys(RemoteMetadata remote) {
 		List<SimpleKey> verificationKeys = emptyList();
 		if (remote instanceof ServiceProviderMetadata) {
@@ -263,6 +244,10 @@ public abstract class AbstractHostedProviderService<
 			verificationKeys = ((IdentityProviderMetadata) remote).getIdentityProvider().getKeys();
 		}
 		return verificationKeys;
+	}
+
+	public SamlValidator getValidator() {
+		return validator;
 	}
 
 	@Override
@@ -293,39 +278,6 @@ public abstract class AbstractHostedProviderService<
 	@Override
 	public String toEncodedXml(String xml, boolean deflate) {
 		return getTransformer().samlEncode(xml, deflate);
-	}
-
-	public SamlTransformer getTransformer() {
-		return transformer;
-	}
-
-	public SamlValidator getValidator() {
-		return validator;
-	}
-
-	public Clock getClock() {
-		return clock;
-	}
-
-	public SamlMetadataCache getCache() {
-		return cache;
-	}
-
-	public AbstractHostedProviderService<Configuration, LocalMetadata, RemoteMetadata> setClock(Clock clock) {
-		this.clock = clock;
-		return this;
-	}
-
-	protected RemoteMetadata throwIfNull(RemoteMetadata metadata, String key, String value) {
-		if (metadata == null) {
-			String message = "Provider for key '%s' with value '%s' not found.";
-			throw new SamlProviderNotFoundException(
-				String.format(message, key, value)
-			);
-		}
-		else {
-			return metadata;
-		}
 	}
 
 	@Override
@@ -366,18 +318,65 @@ public abstract class AbstractHostedProviderService<
 		}
 		//fallback to the very first available endpoint
 		if (result == null) {
-				result = eps.get(0);
+			result = eps.get(0);
 		}
 		return result;
 	}
 
-		private boolean isUri (String uri){
-			boolean isUri = false;
-			try {
-				new URI(uri);
-				isUri = true;
-			} catch (URISyntaxException e) {
-			}
-			return isUri;
-		}
+	public SamlTransformer getTransformer() {
+		return transformer;
 	}
+
+	private RemoteMetadata resolve(String metadata, boolean skipSslValidation) {
+		RemoteMetadata result;
+		if (isUri(metadata)) {
+			try {
+				byte[] data = cache.getMetadata(metadata, skipSslValidation);
+				result = (RemoteMetadata) transformer.fromXml(data, null, null);
+			} catch (SamlException x) {
+				throw x;
+			} catch (Exception x) {
+				String message = format("Unable to fetch metadata from: %s with message: %s", metadata, x.getMessage());
+				if (logger.isDebugEnabled()) {
+					logger.debug(message, x);
+				}
+				else {
+					logger.info(message);
+				}
+				throw new SamlMetadataException("Unable to successfully get metadata from:" + metadata, x);
+			}
+		}
+		else {
+			result = (RemoteMetadata) transformer.fromXml(metadata, null, null);
+		}
+		return throwIfNull(
+			result,
+			"metadata",
+			metadata
+		);
+	}
+
+	private boolean isUri(String uri) {
+		boolean isUri = false;
+		try {
+			new URI(uri);
+			isUri = true;
+		} catch (URISyntaxException e) {
+		}
+		return isUri;
+	}
+
+	protected RemoteMetadata getRemoteProvider(LogoutResponse response) {
+		String issuer = response.getIssuer() != null ?
+			response.getIssuer().getValue() :
+			null;
+		return getRemoteProvider(issuer);
+	}
+
+	protected RemoteMetadata getRemoteProvider(LogoutRequest request) {
+		String issuer = request.getIssuer() != null ?
+			request.getIssuer().getValue() :
+			null;
+		return getRemoteProvider(issuer);
+	}
+}

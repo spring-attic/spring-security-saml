@@ -33,19 +33,6 @@ public class SamlProviderLogoutFilter<T extends HostedProviderService> extends L
 
 	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
 									LogoutHandler samlLogoutHandler,
-									RequestMatcher requestMatcher,
-									LogoutSuccessHandler logoutSuccessHandler,
-									LogoutHandler... handlers) {
-		super(
-			new SamlLogoutSuccessHandler(logoutSuccessHandler, handlers),
-			samlLogoutHandler
-		);
-		this.provisioning = provisioning;
-		setLogoutRequestMatcher(requestMatcher);
-	}
-
-	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
-									LogoutHandler samlLogoutHandler,
 									LogoutSuccessHandler logoutSuccessHandler,
 									LogoutHandler... handlers) {
 		this(
@@ -55,6 +42,19 @@ public class SamlProviderLogoutFilter<T extends HostedProviderService> extends L
 			logoutSuccessHandler,
 			handlers
 		);
+	}
+
+	public SamlProviderLogoutFilter(SamlProviderProvisioning<T> provisioning,
+									LogoutHandler samlLogoutHandler,
+									RequestMatcher requestMatcher,
+									LogoutSuccessHandler logoutSuccessHandler,
+									LogoutHandler... handlers) {
+		super(
+			new SamlLogoutSuccessHandler(logoutSuccessHandler, handlers),
+			samlLogoutHandler
+		);
+		this.provisioning = provisioning;
+		setLogoutRequestMatcher(requestMatcher);
 	}
 
 	@Override

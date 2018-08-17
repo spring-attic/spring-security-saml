@@ -37,18 +37,33 @@ import org.apache.commons.logging.LogFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract  class SamlFilter<T extends HostedProviderService> extends OncePerRequestFilter {
-
-	private final SamlProviderProvisioning<T> provisioning;
+public abstract class SamlFilter<T extends HostedProviderService> extends OncePerRequestFilter {
 
 	private static Log logger = LogFactory.getLog(SamlFilter.class);
-
+	private final SamlProviderProvisioning<T> provisioning;
 	private String errorTemplate = "/templates/spi/generic-error.vm";
 	private SamlTemplateEngine samlTemplateEngine = new OpenSamlVelocityEngine();
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
 	protected SamlFilter(SamlProviderProvisioning<T> provisioning) {
 		this.provisioning = provisioning;
+	}
+
+	public String getErrorTemplate() {
+		return errorTemplate;
+	}
+
+	public SamlFilter setErrorTemplate(String errorTemplate) {
+		this.errorTemplate = errorTemplate;
+		return this;
+	}
+
+	public SamlProviderProvisioning<T> getProvisioning() {
+		return provisioning;
+	}
+
+	public HeaderWriter getCacheHeaderWriter() {
+		return cacheHeaderWriter;
 	}
 
 	protected void processHtml(HttpServletRequest request,
@@ -72,15 +87,6 @@ public abstract  class SamlFilter<T extends HostedProviderService> extends OnceP
 		}
 	}
 
-	public String getErrorTemplate() {
-		return errorTemplate;
-	}
-
-	public SamlFilter setErrorTemplate(String errorTemplate) {
-		this.errorTemplate = errorTemplate;
-		return this;
-	}
-
 	public SamlTemplateEngine getSamlTemplateEngine() {
 		return samlTemplateEngine;
 	}
@@ -88,13 +94,5 @@ public abstract  class SamlFilter<T extends HostedProviderService> extends OnceP
 	public SamlFilter setSamlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return this;
-	}
-
-	public SamlProviderProvisioning<T> getProvisioning() {
-		return provisioning;
-	}
-
-	public HeaderWriter getCacheHeaderWriter() {
-		return cacheHeaderWriter;
 	}
 }

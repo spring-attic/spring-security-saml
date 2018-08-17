@@ -85,7 +85,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 			ServiceProviderMetadata recipient = getTargetProvider(request);
 			Assertion assertion = getAssertion(authentication, provider, recipient);
 			assertionStore.addMessage(request, assertion.getId(), assertion);
-			Response r =  provider.response(assertion, recipient);
+			Response r = provider.response(assertion, recipient);
 
 			Endpoint acsUrl = provider.getPreferredEndpoint(
 				recipient.getServiceProvider().getAssertionConsumerService(),
@@ -116,7 +116,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 				processHtml(request, response, getPostBindingTemplate(), model);
 			}
 			else {
-				throw new SamlException("Unsupported binding:"+acsUrl.getBinding());
+				throw new SamlException("Unsupported binding:" + acsUrl.getBinding());
 			}
 		}
 		else {
@@ -124,17 +124,16 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 		}
 	}
 
-	protected Assertion getAssertion(Authentication authentication,
-									 IdentityProviderService provider,
-									 ServiceProviderMetadata recipient) {
-		return provider.assertion(recipient, authentication.getName(), NameId.PERSISTENT);
-	}
-
 	protected ServiceProviderMetadata getTargetProvider(HttpServletRequest request) {
 		String entityId = request.getParameter("sp");
 		return getProvisioning().getHostedProvider(request).getRemoteProvider(entityId);
 	}
 
+	protected Assertion getAssertion(Authentication authentication,
+									 IdentityProviderService provider,
+									 ServiceProviderMetadata recipient) {
+		return provider.assertion(recipient, authentication.getName(), NameId.PERSISTENT);
+	}
 
 	public String getPostBindingTemplate() {
 		return postBindingTemplate;

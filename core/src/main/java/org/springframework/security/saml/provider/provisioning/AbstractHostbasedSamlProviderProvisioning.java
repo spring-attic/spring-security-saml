@@ -19,15 +19,14 @@ package org.springframework.security.saml.provider.provisioning;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -52,13 +51,20 @@ public class AbstractHostbasedSamlProviderProvisioning {
 		this.cache = cache;
 	}
 
-	public String getBasePath(HttpServletRequest request) {
-		return request.getScheme() +
-			"://" +
-			request.getServerName() +
-			":" +
-			request.getServerPort() +
-			request.getContextPath();
+	public SamlConfigurationRepository<HttpServletRequest> getConfiguration() {
+		return configuration;
+	}
+
+	public SamlTransformer getTransformer() {
+		return transformer;
+	}
+
+	public SamlValidator getValidator() {
+		return validator;
+	}
+
+	public SamlMetadataCache getCache() {
+		return cache;
 	}
 
 	protected String getAliasPath(LocalProviderConfiguration configuration) {
@@ -87,20 +93,12 @@ public class AbstractHostbasedSamlProviderProvisioning {
 				.setIndex(index);
 	}
 
-
-	public SamlConfigurationRepository<HttpServletRequest> getConfiguration() {
-		return configuration;
-	}
-
-	public SamlTransformer getTransformer() {
-		return transformer;
-	}
-
-	public SamlValidator getValidator() {
-		return validator;
-	}
-
-	public SamlMetadataCache getCache() {
-		return cache;
+	public String getBasePath(HttpServletRequest request) {
+		return request.getScheme() +
+			"://" +
+			request.getServerName() +
+			":" +
+			request.getServerPort() +
+			request.getContextPath();
 	}
 }

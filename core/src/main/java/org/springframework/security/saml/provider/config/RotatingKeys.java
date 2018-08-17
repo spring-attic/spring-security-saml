@@ -28,6 +28,13 @@ public class RotatingKeys {
 	private SimpleKey active = null;
 	private List<SimpleKey> standBy = new LinkedList<>();
 
+	public List<SimpleKey> toList() {
+		LinkedList<SimpleKey> result = new LinkedList<>();
+		result.add(getActive());
+		result.addAll(getStandBy());
+		return result;
+	}
+
 	public SimpleKey getActive() {
 		return active;
 	}
@@ -47,12 +54,5 @@ public class RotatingKeys {
 	public RotatingKeys setStandBy(List<SimpleKey> standBy) {
 		this.standBy = standBy;
 		return this;
-	}
-
-	public List<SimpleKey> toList() {
-		LinkedList<SimpleKey> result = new LinkedList<>();
-		result.add(getActive());
-		result.addAll(getStandBy());
-		return result;
 	}
 }

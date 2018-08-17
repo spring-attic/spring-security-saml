@@ -52,6 +52,27 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		super(configuration, metadata, transformer, validator, cache);
 	}
 
+	@Override
+	public IdentityProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
+		if (saml2Object instanceof Assertion) {
+			return getRemoteProvider((Assertion) saml2Object);
+		}
+		else if (saml2Object instanceof Response) {
+			return getRemoteProvider((Response) saml2Object);
+		}
+		else if (saml2Object instanceof LogoutRequest) {
+			return getRemoteProvider((LogoutRequest) saml2Object);
+		}
+		else if (saml2Object instanceof LogoutResponse) {
+			return getRemoteProvider((LogoutResponse) saml2Object);
+		}
+		else {
+			throw new UnsupportedOperationException("Class:" +
+				saml2Object.getClass().getName() +
+				" not yet implemented");
+		}
+	}
+
 	public IdentityProviderMetadata getRemoteProvider(Assertion assertion) {
 		String issuer = assertion.getIssuer() != null ?
 			assertion.getIssuer().getValue() :
@@ -64,25 +85,6 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 			response.getIssuer().getValue() :
 			null;
 		return getRemoteProvider(issuer);
-	}
-
-	@Override
-	public IdentityProviderMetadata getRemoteProvider(Saml2Object saml2Object) {
-		if (saml2Object instanceof Assertion) {
-			return getRemoteProvider((Assertion)saml2Object);
-		}
-		else if (saml2Object instanceof Response) {
-			return getRemoteProvider((Response)saml2Object);
-		}
-		else if (saml2Object instanceof LogoutRequest) {
-			return getRemoteProvider((LogoutRequest)saml2Object);
-		}
-		else if (saml2Object instanceof LogoutResponse) {
-			return getRemoteProvider((LogoutResponse)saml2Object);
-		}
-		else {
-			throw new UnsupportedOperationException("Class:"+saml2Object.getClass().getName()+" not yet implemented");
-		}
 	}
 
 	@Override

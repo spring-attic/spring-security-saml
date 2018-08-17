@@ -82,14 +82,14 @@ public class LogoutRequest extends Request<LogoutRequest> {
 		return this;
 	}
 
+	public SimpleKey getSigningKey() {
+		return signingKey;
+	}
+
 	public LogoutRequest setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;
 		return _this();
-	}
-
-	public SimpleKey getSigningKey() {
-		return signingKey;
 	}
 }

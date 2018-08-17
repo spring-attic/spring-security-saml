@@ -41,7 +41,7 @@ public interface SamlTransformer {
 	 * @param xml              the XML representation of the object
 	 * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
 	 *                         The implementation will attempt each key until one succeeds
-	 * @param localKeys the configured local private keys. Used for decryption when needed.
+	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
 	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
 	 *                                                                              fails
@@ -60,7 +60,7 @@ public interface SamlTransformer {
 	 * @param xml              the XML representation of the object
 	 * @param verificationKeys Nullable. If not null, object signature will be validated upon conversion.
 	 *                         The implementation will attempt each key until one succeeds
-	 * @param localKeys the configured local private keys. Used for decryption when needed.
+	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
 	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
 	 *                                                                              fails

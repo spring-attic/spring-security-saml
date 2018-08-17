@@ -63,6 +63,16 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		this.requestMatcher = requestMatcher;
 	}
 
+	private String getAuthnRequestXml(ServiceProviderService provider, AuthenticationRequest authenticationRequest) {
+		String xml = provider.toXml(authenticationRequest);
+		return xml;
+	}
+
+	public SamlAuthenticationRequestFilter setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
+		this.cacheHeaderWriter = cacheHeaderWriter;
+		return this;
+	}
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
@@ -84,6 +94,14 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		}
 	}
 
+	private RequestMatcher getRequestMatcher() {
+		return requestMatcher;
+	}
+
+	protected IdentityProviderMetadata getIdentityProvider(ServiceProviderService provider, String idpIdentifier) {
+		return provider.getRemoteProvider(idpIdentifier);
+	}
+
 	protected void sendAuthenticationRequest(ServiceProviderService provider,
 											 HttpServletRequest request,
 											 HttpServletResponse response,
@@ -99,7 +117,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		}
 		else if (location.getBinding().equals(Binding.POST)) {
 			String encoded = provider.toEncodedXml(authenticationRequest, false);
-			Map<String,Object> model = new HashMap<>();
+			Map<String, Object> model = new HashMap<>();
 			model.put("action", location.getLocation());
 			model.put("SAMLRequest", encoded);
 			processHtml(
@@ -114,19 +132,9 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 				request,
 				response,
 				getErrorTemplate(),
-				Collections.singletonMap("message", "Unsupported binding:"+location.getBinding().toString())
+				Collections.singletonMap("message", "Unsupported binding:" + location.getBinding().toString())
 			);
 		}
-	}
-
-
-	protected IdentityProviderMetadata getIdentityProvider(ServiceProviderService provider, String idpIdentifier) {
-		return provider.getRemoteProvider(idpIdentifier);
-	}
-
-	public SamlAuthenticationRequestFilter setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
-		this.cacheHeaderWriter = cacheHeaderWriter;
-		return this;
 	}
 
 	public String getPostTemplate() {
@@ -136,15 +144,6 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 	public SamlAuthenticationRequestFilter setPostTemplate(String postTemplate) {
 		this.postTemplate = postTemplate;
 		return this;
-	}
-
-	private String getAuthnRequestXml(ServiceProviderService provider, AuthenticationRequest authenticationRequest) {
-		String xml = provider.toXml(authenticationRequest);
-		return xml;
-	}
-
-	private RequestMatcher getRequestMatcher() {
-		return requestMatcher;
 	}
 
 }

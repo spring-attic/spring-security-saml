@@ -42,7 +42,7 @@ public interface SamlValidator {
 	 * Performs an object validation on the respective object
 	 *
 	 * @param saml2Object the object to be validated according to SAML specification rules
-	 * @param provider the object used to resolve metadata
+	 * @param provider    the object used to resolve metadata
 	 * @throws ValidationException if validation failed. Details in the exception.
 	 */
 	void validate(Saml2Object saml2Object, HostedProviderService provider) throws ValidationException;

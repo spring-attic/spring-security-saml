@@ -78,9 +78,9 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 	}
 
 	protected void receivedLogoutRequest(HttpServletRequest request,
-									   HttpServletResponse response,
-									   Authentication authentication,
-									   String logoutRequest) throws IOException {
+										 HttpServletResponse response,
+										 Authentication authentication,
+										 String logoutRequest) throws IOException {
 		ServiceProviderService provider = provisioning.getHostedProvider(request);
 		LogoutRequest lr = provider.fromXml(
 			logoutRequest,
@@ -101,9 +101,9 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 	}
 
 	protected void receivedLogoutResponse(HttpServletRequest request,
-										HttpServletResponse response,
-										Authentication authentication,
-										String logoutResponse) {
+										  HttpServletResponse response,
+										  Authentication authentication,
+										  String logoutResponse) {
 		request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.SUCCESS);
 	}
 
@@ -111,7 +111,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 									 HttpServletResponse response,
 									 Authentication authentication) throws IOException {
 		if (authentication instanceof SamlAuthentication) {
-			SamlAuthentication sa = (SamlAuthentication)authentication;
+			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
 			ServiceProviderService provider = provisioning.getHostedProvider(request);
 			ServiceProviderMetadata sp = provider.getMetadata();

@@ -28,9 +28,9 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface IdentityProviderService extends
 	HostedProviderService<
-			LocalIdentityProviderConfiguration,
-			IdentityProviderMetadata,
-			ServiceProviderMetadata> {
+		LocalIdentityProviderConfiguration,
+		IdentityProviderMetadata,
+		ServiceProviderMetadata> {
 
 	Assertion assertion(ServiceProviderMetadata sp,
 						String principal,

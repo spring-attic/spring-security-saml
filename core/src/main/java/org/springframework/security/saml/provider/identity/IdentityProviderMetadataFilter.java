@@ -26,7 +26,8 @@ public class IdentityProviderMetadataFilter extends SamlMetadataFilter<IdentityP
 		this(provisioning, "saml-idp-metadata.xml");
 	}
 
-	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProviderService> provisioning, String filename) {
+	public IdentityProviderMetadataFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
+										  String filename) {
 		super(provisioning, filename);
 	}
 

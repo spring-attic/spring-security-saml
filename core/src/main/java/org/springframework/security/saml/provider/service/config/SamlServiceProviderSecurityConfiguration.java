@@ -27,8 +27,8 @@ import org.springframework.security.saml.provider.provisioning.HostBasedSamlServ
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.service.SelectIdentityProviderFilter;
-import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
 import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
 import org.springframework.security.saml.provider.service.authentication.ServiceProviderLogoutHandler;
@@ -40,12 +40,34 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<ServiceProviderService> {
+public class SamlServiceProviderSecurityConfiguration
+	extends AbstractProviderSecurityConfiguration<ServiceProviderService> {
 
 	public SamlServiceProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
 		super(hostConfiguration);
 	}
 
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		String prefix = getHostConfiguration().getServiceProvider().getPrefix();
+		String matcher = "/" + stripSlashes(prefix) + "/**";
+		String select = "/" + stripSlashes(prefix) + "/select";
+		String metadata = "/" + stripSlashes(prefix) + "/metadata";
+		http
+			//.antMatcher(matcher)
+			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
+			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
+			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())
+			.addFilterAfter(spSelectIdentityProviderFilter(), spSamlLogoutFilter().getClass())
+			.csrf().disable()
+			.authorizeRequests()
+			.antMatchers(matcher).permitAll()
+			.anyRequest().authenticated()
+			.and()
+			.formLogin().loginPage(select)
+		;
+	}
 
 	@Bean
 	public Filter spMetadataFilter() {
@@ -91,27 +113,5 @@ public class SamlServiceProviderSecurityConfiguration extends AbstractProviderSe
 			samlValidator(),
 			samlMetadataCache(samlNetworkHandler())
 		);
-	}
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		String prefix = getHostConfiguration().getServiceProvider().getPrefix();
-		String matcher = "/" + stripSlashes(prefix) + "/**";
-		String select = "/" + stripSlashes(prefix) + "/select";
-		String metadata = "/" + stripSlashes(prefix) + "/metadata";
-		http
-			//.antMatcher(matcher)
-			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
-			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
-			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
-			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())
-			.addFilterAfter(spSelectIdentityProviderFilter(), spSamlLogoutFilter().getClass())
-			.csrf().disable()
-			.authorizeRequests()
-			.antMatchers(matcher).permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.formLogin().loginPage(select)
-		;
 	}
 }

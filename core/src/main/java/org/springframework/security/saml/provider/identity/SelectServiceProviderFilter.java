@@ -64,6 +64,15 @@ public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderServ
 		this.requestMatcher = requestMatcher;
 	}
 
+	public String getSelectTemplate() {
+		return selectTemplate;
+	}
+
+	public SelectServiceProviderFilter setSelectTemplate(String selectTemplate) {
+		this.selectTemplate = selectTemplate;
+		return this;
+	}
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
@@ -114,14 +123,5 @@ public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderServ
 		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8.toString()));
 		return builder.build().toUriString();
-	}
-
-	public String getSelectTemplate() {
-		return selectTemplate;
-	}
-
-	public SelectServiceProviderFilter setSelectTemplate(String selectTemplate) {
-		this.selectTemplate = selectTemplate;
-		return this;
 	}
 }

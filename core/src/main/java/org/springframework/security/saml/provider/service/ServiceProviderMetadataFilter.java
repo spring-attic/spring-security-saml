@@ -26,7 +26,8 @@ public class ServiceProviderMetadataFilter extends SamlMetadataFilter<ServicePro
 		this(provisioning, "saml-sp-metadata.xml");
 	}
 
-	public ServiceProviderMetadataFilter(SamlProviderProvisioning<ServiceProviderService> provisioning, String filename) {
+	public ServiceProviderMetadataFilter(SamlProviderProvisioning<ServiceProviderService> provisioning,
+										 String filename) {
 		super(provisioning, filename);
 	}
 

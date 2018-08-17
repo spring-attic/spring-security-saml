@@ -45,15 +45,6 @@ public class SamlRequestMatcher implements RequestMatcher {
 		this.path = path;
 	}
 
-	public boolean isMatchAgainstAliasPath() {
-		return matchAgainstAliasPath;
-	}
-
-	public SamlRequestMatcher setMatchAgainstAliasPath(boolean matchAgainstAliasPath) {
-		this.matchAgainstAliasPath = matchAgainstAliasPath;
-		return this;
-	}
-
 	@Override
 	public boolean matches(HttpServletRequest request) {
 		HostedProviderService provider = this.provisioning.getHostedProvider(request);
@@ -74,5 +65,14 @@ public class SamlRequestMatcher implements RequestMatcher {
 		}
 		result = result + "/**";
 		return result;
+	}
+
+	public boolean isMatchAgainstAliasPath() {
+		return matchAgainstAliasPath;
+	}
+
+	public SamlRequestMatcher setMatchAgainstAliasPath(boolean matchAgainstAliasPath) {
+		this.matchAgainstAliasPath = matchAgainstAliasPath;
+		return this;
 	}
 }

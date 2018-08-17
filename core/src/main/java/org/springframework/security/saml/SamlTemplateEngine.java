@@ -31,10 +31,11 @@ public interface SamlTemplateEngine {
 
 	/**
 	 * Process a template and deliver the response
-	 * @param request the incoming HTTP request
+	 *
+	 * @param request    the incoming HTTP request
 	 * @param templateId the template to use
-	 * @param model the model with the data inputs
-	 * @param out a writer where the processed template will be written to
+	 * @param model      the model with the data inputs
+	 * @param out        a writer where the processed template will be written to
 	 */
 	void process(HttpServletRequest request,
 				 String templateId,

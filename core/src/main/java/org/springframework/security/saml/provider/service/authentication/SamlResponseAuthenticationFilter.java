@@ -59,6 +59,13 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 	}
 
 	@Override
+	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+		return
+			hasText(getSamlResponseData(request)) &&
+				super.requiresAuthentication(request, response);
+	}
+
+	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 		throws AuthenticationException, IOException, ServletException {
 
@@ -94,23 +101,16 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 
 	}
 
-	@Override
-	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		return
-			hasText(getSamlResponseData(request)) &&
-				super.requiresAuthentication(request, response);
-	}
-
-	private SamlProviderProvisioning<ServiceProviderService> getProvisioning() {
-		return provisioning;
-	}
-
 	private String getSamlResponseData(HttpServletRequest request) {
 		return request.getParameter("SAMLResponse");
 	}
 
 	private ServiceProviderService getHostedProvider(HttpServletRequest request) {
 		return getProvisioning().getHostedProvider(request);
+	}
+
+	private SamlProviderProvisioning<ServiceProviderService> getProvisioning() {
+		return provisioning;
 	}
 
 }

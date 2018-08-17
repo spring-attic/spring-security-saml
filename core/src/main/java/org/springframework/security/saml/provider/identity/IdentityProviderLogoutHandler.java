@@ -66,23 +66,66 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		this.assertionStore = assertionStore;
 	}
 
-	@Override
-	public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-		String logoutRequest = request.getParameter("SAMLRequest");
-		String logoutResponse = request.getParameter("SAMLResponse");
-		try {
-			if (hasText(logoutRequest)) {
-				receivedLogoutRequest(request, response, authentication, logoutRequest);
-			}
-			else if (hasText(logoutResponse)) {
-				receivedLogoutResponse(request, response, authentication, logoutResponse);
-			}
-			else {
-				idpInitiatedLogout(request, response, authentication);
-			}
-		} catch (IOException x) {
-			throw new SamlException(x);
+	private void removeAssertionFromStore(HttpServletRequest request, LogoutRequest logoutRequest) {
+		List<Assertion> messages = getAssertionStore().getMessages(request);
+		String issuer = logoutRequest.getIssuer().getValue();
+		List<Assertion> assertion = messages.stream().filter(
+			a -> issuer.equals(a.getIssuer().getValue())
+		)
+			.collect(toList());
+		assertion.stream().forEach(a -> getAssertionStore().removeMessage(request, a.getId()));
+	}
+
+	private boolean idpHasOtherSessions(HttpServletRequest request, LogoutRequest lr) {
+		List<Assertion> assertions = getAssertionStore().getMessages(request);
+		if (assertions.size() > 1) {
+			return true;
 		}
+		else if (assertions.size() == 1) {
+			String assertionEntityId = assertions.get(0).getSubject().getPrincipal().getSpNameQualifier();
+			String lrEntityId = lr.getIssuer().getValue();
+			return !assertionEntityId.equals(lrEntityId);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private LogoutRequest getInitialSpRequest(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			return null;
+		}
+		else {
+			return (LogoutRequest) session.getAttribute(ATTRIBUTE_NAME);
+		}
+	}
+
+	private void setInitialSpRequest(HttpServletRequest request, LogoutRequest lr) {
+		if (lr != null) {
+			request.getSession(true).setAttribute(ATTRIBUTE_NAME, lr);
+		}
+	}
+
+	private String getRedirectUrl(IdentityProviderService provider,
+								  Saml2Object lr,
+								  String location,
+								  String paramName)
+		throws UnsupportedEncodingException {
+		String xml = provider.toXml(lr);
+		String value = provider.toEncodedXml(xml, true);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
+			.build()
+			.toUriString();
+	}
+
+	public SamlProviderProvisioning<IdentityProviderService> getProvisioning() {
+		return provisioning;
+	}
+
+	public SamlMessageStore<Assertion, HttpServletRequest> getAssertionStore() {
+		return assertionStore;
 	}
 
 	protected void receivedLogoutRequest(HttpServletRequest request,
@@ -123,16 +166,6 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 			request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 			response.sendRedirect(url);
 		}
-	}
-
-	private void removeAssertionFromStore(HttpServletRequest request, LogoutRequest logoutRequest) {
-		List<Assertion> messages = getAssertionStore().getMessages(request);
-		String issuer = logoutRequest.getIssuer().getValue();
-		List<Assertion> assertion = messages.stream().filter(
-			a -> issuer.equals(a.getIssuer().getValue())
-		)
-			.collect(toList());
-		assertion.stream().forEach( a -> getAssertionStore().removeMessage(request, a.getId()));
 	}
 
 	protected void receivedLogoutResponse(HttpServletRequest request,
@@ -217,55 +250,22 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		}
 	}
 
-	private boolean idpHasOtherSessions(HttpServletRequest request, LogoutRequest lr) {
-		List<Assertion> assertions = getAssertionStore().getMessages(request);
-		if (assertions.size() > 1) {
-			return true;
+	@Override
+	public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+		String logoutRequest = request.getParameter("SAMLRequest");
+		String logoutResponse = request.getParameter("SAMLResponse");
+		try {
+			if (hasText(logoutRequest)) {
+				receivedLogoutRequest(request, response, authentication, logoutRequest);
+			}
+			else if (hasText(logoutResponse)) {
+				receivedLogoutResponse(request, response, authentication, logoutResponse);
+			}
+			else {
+				idpInitiatedLogout(request, response, authentication);
+			}
+		} catch (IOException x) {
+			throw new SamlException(x);
 		}
-		else if (assertions.size() == 1) {
-			String assertionEntityId = assertions.get(0).getSubject().getPrincipal().getSpNameQualifier();
-			String lrEntityId = lr.getIssuer().getValue();
-			return !assertionEntityId.equals(lrEntityId);
-		}
-		else {
-			return false;
-		}
-	}
-
-	private LogoutRequest getInitialSpRequest(HttpServletRequest request) {
-		HttpSession session = request.getSession(false);
-		if (session == null) {
-			return null;
-		}
-		else {
-			return (LogoutRequest) session.getAttribute(ATTRIBUTE_NAME);
-		}
-	}
-
-	private void setInitialSpRequest(HttpServletRequest request, LogoutRequest lr) {
-		if (lr != null) {
-			request.getSession(true).setAttribute(ATTRIBUTE_NAME, lr);
-		}
-	}
-
-	private String getRedirectUrl(IdentityProviderService provider,
-								  Saml2Object lr,
-								  String location,
-								  String paramName)
-		throws UnsupportedEncodingException {
-		String xml = provider.toXml(lr);
-		String value = provider.toEncodedXml(xml, true);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
-		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
-			.build()
-			.toUriString();
-	}
-
-	public SamlProviderProvisioning<IdentityProviderService> getProvisioning() {
-		return provisioning;
-	}
-
-	public SamlMessageStore<Assertion, HttpServletRequest> getAssertionStore() {
-		return assertionStore;
 	}
 }

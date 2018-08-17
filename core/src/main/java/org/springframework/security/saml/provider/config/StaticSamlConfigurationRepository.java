@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 
-public class StaticSamlConfigurationRepository implements SamlConfigurationRepository<HttpServletRequest>{
+public class StaticSamlConfigurationRepository implements SamlConfigurationRepository<HttpServletRequest> {
 
 	private final SamlServerConfiguration configuration;
 

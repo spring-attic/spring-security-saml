@@ -41,7 +41,7 @@ public class SamlLogoutSuccessHandler implements LogoutSuccessHandler {
 		NOT_COMPLETE
 	}
 
-	public static final String RUN_SUCCESS = SamlLogoutSuccessHandler.class.getName()+".logout.success";
+	public static final String RUN_SUCCESS = SamlLogoutSuccessHandler.class.getName() + ".logout.success";
 
 	private final List<LogoutHandler> delegates;
 	private final LogoutSuccessHandler successHandler;

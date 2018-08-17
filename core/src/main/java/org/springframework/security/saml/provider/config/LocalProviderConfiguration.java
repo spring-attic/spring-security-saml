@@ -48,6 +48,21 @@ public class LocalProviderConfiguration<
 		setPrefix(prefix);
 	}
 
+	protected String cleanPrefix(String prefix) {
+		if (hasText(prefix) && prefix.startsWith("/")) {
+			prefix = prefix.substring(1);
+		}
+		if (hasText(prefix) && !prefix.endsWith("/")) {
+			prefix = prefix + "/";
+		}
+		return prefix;
+	}
+
+	@SuppressWarnings("checked")
+	protected LocalConfiguration _this() {
+		return (LocalConfiguration) this;
+	}
+
 	public String getEntityId() {
 		return entityId;
 	}
@@ -55,11 +70,6 @@ public class LocalProviderConfiguration<
 	public LocalConfiguration setEntityId(String entityId) {
 		this.entityId = entityId;
 		return _this();
-	}
-
-	@SuppressWarnings("checked")
-	protected LocalConfiguration _this() {
-		return (LocalConfiguration) this;
 	}
 
 	public boolean isSignMetadata() {
@@ -107,16 +117,6 @@ public class LocalProviderConfiguration<
 		this.prefix = prefix;
 
 		return _this();
-	}
-
-	protected String cleanPrefix(String prefix) {
-		if (hasText(prefix) && prefix.startsWith("/")) {
-			prefix = prefix.substring(1);
-		}
-		if (hasText(prefix) && !prefix.endsWith("/")) {
-			prefix = prefix + "/";
-		}
-		return prefix;
 	}
 
 	public boolean isSingleLogoutEnabled() {

@@ -38,6 +38,14 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 
 	private final String ATTRIBUTE_NAME = getClass().getName() + ".assertions";
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Assertion> getMessages(HttpServletRequest request) {
+		return getDataMap(request).values().stream().collect(Collectors.toList());
+	}
+
 	protected Map<String, Assertion> getDataMap(HttpServletRequest request) {
 		return getDataMap(request, false);
 	}
@@ -56,14 +64,6 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 			}
 		}
 		return data;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<Assertion> getMessages(HttpServletRequest request) {
-		return getDataMap(request).values().stream().collect(Collectors.toList());
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class DefaultSessionAssertionStore implements SamlMessageStore<Assertion,
 	public synchronized Assertion removeFirst(HttpServletRequest request) {
 		Collection<Assertion> values = getDataMap(request).values();
 		Assertion first = null;
-		if (values!=null && !values.isEmpty()) {
+		if (values != null && !values.isEmpty()) {
 			first = values.stream().findFirst().get();
 			removeMessage(request, first.getId());
 		}

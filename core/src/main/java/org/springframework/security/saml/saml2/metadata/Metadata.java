@@ -40,11 +40,6 @@ public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T>
 	 */
 	private T next = null;
 
-
-	public boolean hasNext() {
-		return next != null;
-	}
-
 	public T getNext() {
 		return next;
 	}
@@ -52,5 +47,9 @@ public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T>
 	public Metadata<T> setNext(T next) {
 		this.next = next;
 		return this;
+	}
+
+	public boolean hasNext() {
+		return next != null;
 	}
 }

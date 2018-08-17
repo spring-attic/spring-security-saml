@@ -47,6 +47,13 @@ public class StringUtils {
 		return stripEndingSlases(path) + "/alias/" + alias;
 	}
 
+	public static String stripEndingSlases(String path) {
+		while (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
+		}
+		return path;
+	}
+
 	public static String appendSlash(String path) {
 		if (!path.endsWith("/")) {
 			path = path + "/";
@@ -64,13 +71,6 @@ public class StringUtils {
 	public static String stripSlashes(String path) {
 		path = stripStartingSlashes(path);
 		path = stripEndingSlases(path);
-		return path;
-	}
-
-	public static String stripEndingSlases(String path) {
-		while (path.endsWith("/")) {
-			path = path.substring(0,path.length()-1);
-		}
 		return path;
 	}
 

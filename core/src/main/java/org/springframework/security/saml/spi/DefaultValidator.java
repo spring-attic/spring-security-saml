@@ -190,7 +190,8 @@ public class DefaultValidator implements SamlValidator {
 			//issuer
 			//signature
 			if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
-				assertionValidation = new ValidationResult(response).addError(new ValidationError("Assertion is not signed"));
+				assertionValidation =
+					new ValidationResult(response).addError(new ValidationError("Assertion is not signed"));
 				continue;
 			}
 
@@ -249,7 +250,8 @@ public class DefaultValidator implements SamlValidator {
 					}
 					else if (!isAllowUnsolicitedResponses()) {
 						assertionValidation.addError(
-							new ValidationError("InResponseTo missing and system not configured to allow unsolicited messages")
+							new ValidationError(
+								"InResponseTo missing and system not configured to allow unsolicited messages")
 						);
 						continue;
 					}
@@ -259,8 +261,10 @@ public class DefaultValidator implements SamlValidator {
 					assertionValidation.addError(new ValidationError("Assertion Recipient field missing"));
 					continue;
 				}
-				else if (!compareURIs(requester.getServiceProvider().getAssertionConsumerService(),
-					data.getRecipient())) {
+				else if (!compareURIs(
+					requester.getServiceProvider().getAssertionConsumerService(),
+					data.getRecipient()
+				)) {
 					assertionValidation.addError(
 						new ValidationError("Invalid assertion Recipient field: " + data.getRecipient())
 					);
@@ -283,9 +287,11 @@ public class DefaultValidator implements SamlValidator {
 		for (AuthenticationStatement statement : ofNullable(validAssertion.getAuthenticationStatements())
 			.orElse(emptyList())) {
 			//VERIFY authentication statements
-			if (!isDateTimeSkewValid(getResponseSkewTimeMillis(),
-									 getMaxAuthenticationAgeMillis(),
-									 statement.getAuthInstant())) {
+			if (!isDateTimeSkewValid(
+				getResponseSkewTimeMillis(),
+				getMaxAuthenticationAgeMillis(),
+				statement.getAuthInstant()
+			)) {
 				return new ValidationResult(response)
 					.addError(
 						format(

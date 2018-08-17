@@ -39,6 +39,8 @@ public interface HostedProviderService<
 
 	LocalMetadata getMetadata();
 
+	List<RemoteMetadata> getRemoteProviders();
+
 	LogoutRequest logoutRequest(RemoteMetadata recipient,
 								NameIdPrincipal principal);
 
@@ -50,8 +52,6 @@ public interface HostedProviderService<
 	RemoteMetadata getRemoteProvider(String entityId);
 
 	RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c);
-
-	List<RemoteMetadata> getRemoteProviders();
 
 	ValidationResult validate(Saml2Object saml2Object);
 

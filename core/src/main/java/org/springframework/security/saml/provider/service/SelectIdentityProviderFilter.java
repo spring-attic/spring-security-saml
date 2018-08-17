@@ -63,6 +63,15 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 		this.requestMatcher = requestMatcher;
 	}
 
+	public String getSelectTemplate() {
+		return selectTemplate;
+	}
+
+	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
+		this.selectTemplate = selectTemplate;
+		return this;
+	}
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
@@ -81,7 +90,8 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 						logger.debug(format(
 							"Unable to retrieve metadata for provider:%s with message:",
 							p.getMetadata(),
-							x.getMessage())
+							x.getMessage()
+							)
 						);
 					}
 				}
@@ -93,7 +103,8 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 				request,
 				response,
 				selectTemplate,
-				model);
+				model
+			);
 		}
 		else {
 			filterChain.doFilter(request, response);
@@ -108,14 +119,5 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();
-	}
-
-	public String getSelectTemplate() {
-		return selectTemplate;
-	}
-
-	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
-		this.selectTemplate = selectTemplate;
-		return this;
 	}
 }

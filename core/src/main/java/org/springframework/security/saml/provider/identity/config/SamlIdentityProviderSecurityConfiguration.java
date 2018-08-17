@@ -37,21 +37,30 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
+public class SamlIdentityProviderSecurityConfiguration
+	extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
 
 	public SamlIdentityProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
 		super(hostConfiguration);
 	}
 
 	@Override
-	@Bean(name = "samlIdentityProviderProvisioning")
-	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
-		return new HostBasedSamlIdentityProviderProvisioning(
-			samlConfigurationRepository(),
-			samlTransformer(),
-			samlValidator(),
-			samlMetadataCache(samlNetworkHandler())
-		);
+	protected void configure(HttpSecurity http) throws Exception {
+		String prefix = getHostConfiguration().getIdentityProvider().getPrefix();
+		String matcher = "/" + stripSlashes(prefix) + "/**";
+		String metadata = "/" + stripSlashes(prefix) + "/metadata";
+		http
+			//.antMatcher(matcher)
+			.addFilterAfter(idpMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
+			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
+			.addFilterAfter(idpLogoutFilter(), idpAuthnRequestFilter().getClass())
+			.addFilterAfter(idpSelectServiceProviderFilter(), idpLogoutFilter().getClass())
+			.csrf().disable()
+			.authorizeRequests()
+			.antMatchers(metadata).permitAll()
+			.anyRequest().authenticated()
+		;
 	}
 
 	@Bean
@@ -86,21 +95,13 @@ public class SamlIdentityProviderSecurityConfiguration extends AbstractProviderS
 	}
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		String prefix = getHostConfiguration().getIdentityProvider().getPrefix();
-		String matcher = "/" + stripSlashes(prefix) + "/**";
-		String metadata = "/" + stripSlashes(prefix) + "/metadata";
-		http
-			//.antMatcher(matcher)
-			.addFilterAfter(idpMetadataFilter(), BasicAuthenticationFilter.class)
-			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
-			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
-			.addFilterAfter(idpLogoutFilter(), idpAuthnRequestFilter().getClass())
-			.addFilterAfter(idpSelectServiceProviderFilter(), idpLogoutFilter().getClass())
-			.csrf().disable()
-			.authorizeRequests()
-			.antMatchers(metadata).permitAll()
-			.anyRequest().authenticated()
-		;
+	@Bean(name = "samlIdentityProviderProvisioning")
+	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
+		return new HostBasedSamlIdentityProviderProvisioning(
+			samlConfigurationRepository(),
+			samlTransformer(),
+			samlValidator(),
+			samlMetadataCache(samlNetworkHandler())
+		);
 	}
 }

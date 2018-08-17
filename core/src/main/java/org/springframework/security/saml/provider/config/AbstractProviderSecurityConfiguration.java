@@ -18,7 +18,6 @@
 package org.springframework.security.saml.provider.config;
 
 import java.time.Clock;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Bean;
@@ -39,13 +38,20 @@ import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.security.saml.util.Network;
 
-public abstract class AbstractProviderSecurityConfiguration<T extends HostedProviderService> extends WebSecurityConfigurerAdapter {
+public abstract class AbstractProviderSecurityConfiguration<T extends HostedProviderService>
+	extends WebSecurityConfigurerAdapter {
 
 	private final SamlServerConfiguration hostConfiguration;
 
 	protected AbstractProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
 		this.hostConfiguration = hostConfiguration;
 	}
+
+	public SamlServerConfiguration getHostConfiguration() {
+		return hostConfiguration;
+	}
+
+	public abstract SamlProviderProvisioning<T> getSamlProvisioning();
 
 	@Bean
 	public DefaultSessionAssertionStore samlAssertionStore() {
@@ -63,8 +69,8 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	}
 
 	@Bean
-	public SamlValidator samlValidator() {
-		return new DefaultValidator(samlImplementation());
+	public SpringSecuritySaml samlImplementation() {
+		return new OpenSamlImplementation(samlTime());
 	}
 
 	@Bean
@@ -73,8 +79,8 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	}
 
 	@Bean
-	public SpringSecuritySaml samlImplementation() {
-		return new OpenSamlImplementation(samlTime());
+	public SamlValidator samlValidator() {
+		return new DefaultValidator(samlImplementation());
 	}
 
 	@Bean
@@ -90,17 +96,11 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	@Bean
 	public Network samlNetworkHandler() {
 		Network result = new Network();
-		if (hostConfiguration!=null && hostConfiguration.getNetwork()!=null) {
+		if (hostConfiguration != null && hostConfiguration.getNetwork() != null) {
 			result
 				.setConnectTimeoutMillis(hostConfiguration.getNetwork().getConnectTimeout())
 				.setReadTimeoutMillis(hostConfiguration.getNetwork().getReadTimeout());
 		}
 		return result;
 	}
-
-	public SamlServerConfiguration getHostConfiguration() {
-		return hostConfiguration;
-	}
-
-	public abstract  SamlProviderProvisioning<T> getSamlProvisioning();
 }

@@ -85,8 +85,8 @@ public class Assertion extends ImplementationHolder {
 		return issuer;
 	}
 
-	public Assertion setIssuer(Issuer issuer) {
-		this.issuer = issuer;
+	public Assertion setIssuer(String issuer) {
+		this.issuer = new Issuer().setValue(issuer);
 		return this;
 	}
 
@@ -146,6 +146,23 @@ public class Assertion extends ImplementationHolder {
 		return this;
 	}
 
+	public SimpleKey getSigningKey() {
+		return signingKey;
+	}
+
+	public AlgorithmMethod getAlgorithm() {
+		return algorithm;
+	}
+
+	public DigestMethod getDigest() {
+		return digest;
+	}
+
+	public Assertion setIssuer(Issuer issuer) {
+		this.issuer = issuer;
+		return this;
+	}
+
 	public List<Attribute> getAttributes(String name) {
 		return attributes
 			.stream()
@@ -159,23 +176,6 @@ public class Assertion extends ImplementationHolder {
 			.filter(a -> name.equals(a.getName()))
 			.findFirst();
 		return first.isPresent() ? first.get() : null;
-	}
-
-	public SimpleKey getSigningKey() {
-		return signingKey;
-	}
-
-	public AlgorithmMethod getAlgorithm() {
-		return algorithm;
-	}
-
-	public DigestMethod getDigest() {
-		return digest;
-	}
-
-	public Assertion setIssuer(String issuer) {
-		this.issuer = new Issuer().setValue(issuer);
-		return this;
 	}
 
 	public Assertion addAuthenticationStatement(AuthenticationStatement statement) {

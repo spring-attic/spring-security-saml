@@ -28,6 +28,7 @@ import org.joda.time.DateTime;
 
 /**
  * Base class for SAML providers
+ *
  * @param <T> return class for builder pattern
  */
 public class Provider<T extends Provider<T>> {

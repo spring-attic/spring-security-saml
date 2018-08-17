@@ -152,8 +152,14 @@ spring:
         - alias: uaa
           metadata: http://localhost:8082/uaa/saml/metadata
           link-text: Cloud Foundry UAA SP
-
         - alias: spring-security-saml-sp
+          metadata: http://localhost:8080/sample-sp/saml/sp/metadata
+          linktext: Spring Security SAML SP
+        - alias: simplesamlphp
+          metadata: http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
+          link-text: Simple SAML PHP SP
+        - alias: xml-example
+          link-text: Example SP Config Using XML
           metadata: |
             <md:EntityDescriptor ID="64e702d9-b8f1-4cd4-ab8d-a8c6ab5d74e4" entityID="spring.security.saml.sp.id"
                                  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
@@ -165,14 +171,10 @@ spring:
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
                 <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
                 <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO" index="0" isDefault="true"/>
+                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO/alias/boot-sample-sp" index="0" isDefault="true"/>
                 <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO" index="1" isDefault="false"/>
+                                             Location="http://localhost:8080/sample-sp/saml/sp/SSO/alias/boot-sample-sp" index="1" isDefault="false"/>
                 <md:AttributeConsumingService index="0" isDefault="true"/>
               </md:SPSSODescriptor>
             </md:EntityDescriptor>
-          linktext: Spring Security SAML SP
-        - alias: simplesamlphp
-          metadata: http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
-          link-text: Simple SAML PHP SP
 

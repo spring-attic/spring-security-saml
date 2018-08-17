@@ -27,6 +27,7 @@ import org.joda.time.DateTime;
 
 /**
  * Base class for requests
+ *
  * @param <T> - subclass to be returned as part of Builder pattern
  */
 public class Request<T extends Request<T>> extends ImplementationHolder {

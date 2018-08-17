@@ -1,12 +1,8 @@
 ##
-## Velocity Template for SAML 2 HTTP-POST binding
+## Velocity Template for Generic Errors
 ##
 ## Velocity context may contain the following properties
-## action - String - the action URL for the form
-## binding - String - the SAML binding type in use
-## RelayState - String - the relay state for the message
-## SAMLRequest - String - the Base64 encoded SAML Request
-## SAMLResponse - String - the Base64 encoded SAML Response
+## message - String - the error message
 ##
 <!DOCTYPE html>
 <html>

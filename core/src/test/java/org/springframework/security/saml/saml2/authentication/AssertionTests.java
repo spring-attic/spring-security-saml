@@ -43,18 +43,30 @@ import org.w3c.dom.Node;
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.saml.saml2.attribute.AttributeNameFormat.BASIC;
-import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.*;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.PASSWORD;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
 import static org.springframework.security.saml.saml2.authentication.StatusCode.SUCCESS;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
-import static org.springframework.security.saml.util.XmlTestUtil.*;
+import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
+import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
+import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
 
 public class AssertionTests extends MetadataBase {
+
 
 	private static final SimpleKey decryptionVerificationKey =
 		new SimpleKey("simplesamlphp",
@@ -232,8 +244,8 @@ public class AssertionTests extends MetadataBase {
 	@Test
 	public void create_with_request() {
 
-		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		Assertion assertion = samlDefaults.assertion(serviceProviderMetadata,
+		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		Assertion assertion = helper.assertion(serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",
@@ -295,9 +307,9 @@ public class AssertionTests extends MetadataBase {
 
 	@Test
 	public void check_xml() throws URISyntaxException, IOException {
-		AuthenticationRequest request = samlDefaults.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-		Assertion assertion = samlDefaults.assertion(serviceProviderMetadata,
+		Assertion assertion = helper.assertion(serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",
@@ -305,7 +317,7 @@ public class AssertionTests extends MetadataBase {
 
 		String username = "test@test.com";
 
-		NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
+		NameIdPrincipal principal = assertion.getSubject().getPrincipal();
 		principal.setFormat(EMAIL);
 		principal.setValue(username);
 
@@ -527,4 +539,5 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(resolve.getOriginalXML());
 		assertThat(resolve.getOriginalXML(), equalTo(new String(assertion, StandardCharsets.UTF_8)));
 	}
+
 }

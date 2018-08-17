@@ -56,7 +56,32 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 
 	@Override
 	public SubjectPrincipal<? extends SubjectPrincipal> getSamlPrincipal() {
-		return (SubjectPrincipal<? extends SubjectPrincipal>)assertion.getSubject().getPrincipal();
+		return assertion.getSubject().getPrincipal();
+	}
+
+	public Assertion getAssertion() {
+		return assertion;
+	}
+
+	protected void setAssertion(Assertion assertion) {
+		this.assertion = assertion;
+	}
+
+	@Override
+	public String getRelayState() {
+		return relayState;
+	}
+
+	public void setRelayState(String relayState) {
+		this.relayState = relayState;
+	}
+
+	protected void setHoldingEntityId(String holdingEntityId) {
+		this.holdingEntityId = holdingEntityId;
+	}
+
+	protected void setAssertingEntityId(String assertingEntityId) {
+		this.assertingEntityId = assertingEntityId;
 	}
 
 	@Override
@@ -74,10 +99,6 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 		return getAssertion();
 	}
 
-	public Assertion getAssertion() {
-		return assertion;
-	}
-
 	@Override
 	public Object getPrincipal() {
 		return getSamlPrincipal();
@@ -89,35 +110,14 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	}
 
 	@Override
-	public String getName() {
-		return getSamlPrincipal().getValue();
-	}
-
-	@Override
 	public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
 		if (!authenticated && isAuthenticated) {
 			throw new IllegalArgumentException("Unable to change state of an existing authentication object.");
 		}
 	}
 
-	protected void setAssertion(Assertion assertion) {
-		this.assertion = assertion;
-	}
-
-	protected void setAssertingEntityId(String assertingEntityId) {
-		this.assertingEntityId = assertingEntityId;
-	}
-
-	protected void setHoldingEntityId(String holdingEntityId) {
-		this.holdingEntityId = holdingEntityId;
-	}
-
 	@Override
-	public String getRelayState() {
-		return relayState;
-	}
-
-	public void setRelayState(String relayState) {
-		this.relayState = relayState;
+	public String getName() {
+		return getSamlPrincipal().getValue();
 	}
 }

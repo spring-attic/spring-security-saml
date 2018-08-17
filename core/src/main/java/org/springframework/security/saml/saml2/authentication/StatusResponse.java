@@ -128,13 +128,6 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 		return _this();
 	}
 
-	public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
-		this.signingKey = signingKey;
-		this.algorithm = algorithm;
-		this.digest = digest;
-		return _this();
-	}
-
 	public SimpleKey getSigningKey() {
 		return signingKey;
 	}
@@ -145,5 +138,12 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 
 	public DigestMethod getDigest() {
 		return digest;
+	}
+
+	public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+		this.signingKey = signingKey;
+		this.algorithm = algorithm;
+		this.digest = digest;
+		return _this();
 	}
 }

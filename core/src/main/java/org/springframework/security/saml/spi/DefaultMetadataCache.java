@@ -18,14 +18,17 @@ package org.springframework.security.saml.spi;
 
 import java.time.Clock;
 
+import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.util.TimebasedMap;
 
 /**
  * Caches metadata that has been retrieved over the network
+ *
  * @author fhanik
  */
-public class DefaultMetadataCache {
+public class DefaultMetadataCache implements SamlMetadataCache {
 
 	private final Network network;
 	private TimebasedMap<String, byte[]> cache;
@@ -52,4 +55,8 @@ public class DefaultMetadataCache {
 		cache.clear();
 	}
 
+	@Override
+	public byte[] remove(String uri) {
+		return cache.remove(uri);
+	}
 }

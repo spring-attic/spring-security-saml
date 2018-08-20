@@ -370,14 +370,14 @@ public class MetadataTests extends MetadataBase {
 		assertTrue(provider.isAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 		assertThat(provider.getId(), equalTo("sp.saml.spring.io"));
-        Duration cacheDuration = provider.getCacheDuration();
-        assertNotNull(cacheDuration);
-        assertThat(cacheDuration.getYears(), equalTo(2));
-        assertThat(cacheDuration.getMonths(), equalTo(6));
-        assertThat(cacheDuration.getDays(), equalTo(5));
-        assertThat(cacheDuration.getHours(), equalTo(12));
-        assertThat(cacheDuration.getMinutes(), equalTo(35));
-        assertThat(cacheDuration.getSeconds(), equalTo(30));
+		Duration cacheDuration = provider.getCacheDuration();
+		assertNotNull(cacheDuration);
+		assertThat(cacheDuration.getYears(), equalTo(2));
+		assertThat(cacheDuration.getMonths(), equalTo(6));
+		assertThat(cacheDuration.getDays(), equalTo(5));
+		assertThat(cacheDuration.getHours(), equalTo(12));
+		assertThat(cacheDuration.getMinutes(), equalTo(35));
+		assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
 
 		Endpoint requestInitiation = provider.getRequestInitiation();
@@ -513,14 +513,14 @@ public class MetadataTests extends MetadataBase {
 		assertTrue(provider.getWantAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 		assertThat(provider.getId(), equalTo("idp.saml.spring.io"));
-        Duration cacheDuration = provider.getCacheDuration();
-        assertNotNull(cacheDuration);
-        assertThat(cacheDuration.getYears(), equalTo(2));
-        assertThat(cacheDuration.getMonths(), equalTo(6));
-        assertThat(cacheDuration.getDays(), equalTo(5));
-        assertThat(cacheDuration.getHours(), equalTo(12));
-        assertThat(cacheDuration.getMinutes(), equalTo(35));
-        assertThat(cacheDuration.getSeconds(), equalTo(30));
+		Duration cacheDuration = provider.getCacheDuration();
+		assertNotNull(cacheDuration);
+		assertThat(cacheDuration.getYears(), equalTo(2));
+		assertThat(cacheDuration.getMonths(), equalTo(6));
+		assertThat(cacheDuration.getDays(), equalTo(5));
+		assertThat(cacheDuration.getHours(), equalTo(12));
+		assertThat(cacheDuration.getMinutes(), equalTo(35));
+		assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(provider.getValidUntil(), equalTo(fromZuluTime("2028-05-02T20:07:06.785Z")));
 
 		Endpoint requestInitiation = provider.getRequestInitiation();
@@ -637,7 +637,6 @@ public class MetadataTests extends MetadataBase {
 		assertTrue(entities.hasNext());
 		assertThat(entities.getNext().getClass(), equalTo(ServiceProviderMetadata.class));
 	}
-
 
 
 }

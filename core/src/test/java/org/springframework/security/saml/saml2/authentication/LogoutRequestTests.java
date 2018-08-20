@@ -57,6 +57,91 @@ class LogoutObjectTests {
 	private String issuer = "http://sp.test.org";
 	private DateTime instant = new DateTime();
 	private String destination = "http://idp.test.org";
+	private String EXAMPLE_REQUEST = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<saml2p:LogoutRequest Destination=\"http://idp.test.org\" ID=\"request-id\" " +
+		"IssueInstant=\"2018-06-04T14:53:16.712Z\" NotOnOrAfter=\"2018-06-04T15:53:16.712Z\" Version=\"2.0\" " +
+		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer " +
+		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test.org</saml2:Issuer><ds:Signature " +
+		"xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"<ds:SignedInfo>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/>\n" +
+		"<ds:Reference URI=\"#request-id\">\n" +
+		"<ds:Transforms>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"</ds:Transforms>\n" +
+		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"/>\n" +
+		"<ds:DigestValue>zEvGcnSA/2RwlBDayoKKmLIt/QfpBZc/76ticiNNvP2ldbnXZ9ibNcyoWbeioBhh9L4eMxWCjJFC\n" +
+		"BrVXibxQTg==</ds:DigestValue>\n" +
+		"</ds:Reference>\n" +
+		"</ds:SignedInfo>\n" +
+		"<ds:SignatureValue>\n" +
+		"Vmlrlk45qBbrDLRsMNWXgdTp1XLNutnrag7PW6BEGoG9LcQccnwOBCxsIdbbHWJL5RbuG80C4C2j\n" +
+		"FKMOAzu8sGmiw2InNLAWamaOs4tzrzWgmkud93oJL5DFdC8jjCZz6USUcoKvr1dNprSV45s4wFwC\n" +
+		"MkAYpfhh2JsL7m094Po=\n" +
+		"</ds:SignatureValue>\n" +
+		"<ds:KeyInfo><ds:X509Data><ds:X509Certificate" +
+		">MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEOMAwGA1UECBMF\n" +
+		"YXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEOMAwGA1UECxMFYXJ1YmExDjAM\n" +
+		"BgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5hcnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2\n" +
+		"MjdaFw0xNjExMTkyMjI2MjdaMHwxCzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UE\n" +
+		"ChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmEx\n" +
+		"HTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
+		"gQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39WqS9u0hnA+O7MCA/KlrAR\n" +
+		"4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCY\n" +
+		"xhMol6ZnTbSsFW6VZjFMjQIDAQABo4HaMIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1sy\n" +
+		"GDCBpwYDVR0jBIGfMIGcgBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3\n" +
+		"MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQL\n" +
+		"EwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyggEA\n" +
+		"MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ0HOZbbHClXmGUjGs+GS+xC1FO/am\n" +
+		"2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxCKdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3o\n" +
+		"ePe84k8jm3A7EvH5wi5hvCkKRpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=</ds:X509Certificate></ds:X509Data></ds" +
+		":KeyInfo></ds:Signature><saml2:NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\" " +
+		"NameQualifier=\"http://sp.test.org\" SPNameQualifier=\"http://sp.test.org\" " +
+		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">test@test.org</saml2:NameID></saml2p:LogoutRequest>";
+	private String EXAMPLE_RESPONSE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<saml2p:LogoutResponse Destination=\"http://idp.test.org\" ID=\"response-id\" InResponseTo=\"in-response-to\"" +
+		" IssueInstant=\"2018-06-04T19:24:09.572Z\" Version=\"2.0\" " +
+		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer NameQualifier=\"name qualifier\" " +
+		"SPNameQualifier=\"sp name qualifier\" xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test" +
+		".org</saml2:Issuer><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"<ds:SignedInfo>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha512\"/>\n" +
+		"<ds:Reference URI=\"#response-id\">\n" +
+		"<ds:Transforms>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"</ds:Transforms>\n" +
+		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
+		"<ds:DigestValue>qemZnU8Q1s8jNPhYl37mO8FToJnpU/k7V4BwnryApVA=</ds:DigestValue>\n" +
+		"</ds:Reference>\n" +
+		"</ds:SignedInfo>\n" +
+		"<ds:SignatureValue>\n" +
+		"teqIAaYeNrUqEOOCr7a1G7gWLU5e+F+WpV7J1EVtxCRXIZde0O1p56nQ8gZaHmYjvPdMuXuf2uo5\n" +
+		"XwAHjvaINoqRhotR3cY5xi/jgYQvz8VXTJc1OAEe5fCOiAIbsapNaW/0vhWDdq4F1I0GGEnztHNj\n" +
+		"w95+YBobRHd6CKQCCzw=\n" +
+		"</ds:SignatureValue>\n" +
+		"<ds:KeyInfo><ds:X509Data><ds:X509Certificate" +
+		">MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEOMAwGA1UECBMF\n" +
+		"YXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEOMAwGA1UECxMFYXJ1YmExDjAM\n" +
+		"BgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5hcnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2\n" +
+		"MjdaFw0xNjExMTkyMjI2MjdaMHwxCzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UE\n" +
+		"ChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmEx\n" +
+		"HTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
+		"gQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39WqS9u0hnA+O7MCA/KlrAR\n" +
+		"4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCY\n" +
+		"xhMol6ZnTbSsFW6VZjFMjQIDAQABo4HaMIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1sy\n" +
+		"GDCBpwYDVR0jBIGfMIGcgBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3\n" +
+		"MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQL\n" +
+		"EwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyggEA\n" +
+		"MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ0HOZbbHClXmGUjGs+GS+xC1FO/am\n" +
+		"2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxCKdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3o\n" +
+		"ePe84k8jm3A7EvH5wi5hvCkKRpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=</ds:X509Certificate></ds:X509Data></ds" +
+		":KeyInfo></ds:Signature><saml2p:Status><saml2p:StatusCode " +
+		"Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\"/><saml2p:StatusMessage>User logged " +
+		"out!</saml2p:StatusMessage></saml2p:Status></saml2p:LogoutResponse>";
 
 	@Test
 	public void requestFromXml() {
@@ -127,7 +212,7 @@ class LogoutObjectTests {
 
 		assertNodeCount(xml, "//ds:DigestMethod", 1);
 		assertNodeAttribute(
-			getNodes(xml,"//ds:DigestMethod").iterator().next(),
+			getNodes(xml, "//ds:DigestMethod").iterator().next(),
 			"Algorithm",
 			equalTo(SHA512.toString())
 		);
@@ -249,7 +334,7 @@ class LogoutObjectTests {
 
 		assertNodeCount(xml, "//ds:DigestMethod", 1);
 		assertNodeAttribute(
-			getNodes(xml,"//ds:DigestMethod").iterator().next(),
+			getNodes(xml, "//ds:DigestMethod").iterator().next(),
 			"Algorithm",
 			equalTo(SHA256.toString())
 		);
@@ -290,91 +375,4 @@ class LogoutObjectTests {
 
 
 	}
-
-	private String EXAMPLE_REQUEST = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		"<saml2p:LogoutRequest Destination=\"http://idp.test.org\" ID=\"request-id\" " +
-		"IssueInstant=\"2018-06-04T14:53:16.712Z\" NotOnOrAfter=\"2018-06-04T15:53:16.712Z\" Version=\"2.0\" " +
-		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer " +
-		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test.org</saml2:Issuer><ds:Signature " +
-		"xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-		"<ds:SignedInfo>\n" +
-		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/>\n" +
-		"<ds:Reference URI=\"#request-id\">\n" +
-		"<ds:Transforms>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"</ds:Transforms>\n" +
-		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"/>\n" +
-		"<ds:DigestValue>zEvGcnSA/2RwlBDayoKKmLIt/QfpBZc/76ticiNNvP2ldbnXZ9ibNcyoWbeioBhh9L4eMxWCjJFC\n" +
-		"BrVXibxQTg==</ds:DigestValue>\n" +
-		"</ds:Reference>\n" +
-		"</ds:SignedInfo>\n" +
-		"<ds:SignatureValue>\n" +
-		"Vmlrlk45qBbrDLRsMNWXgdTp1XLNutnrag7PW6BEGoG9LcQccnwOBCxsIdbbHWJL5RbuG80C4C2j\n" +
-		"FKMOAzu8sGmiw2InNLAWamaOs4tzrzWgmkud93oJL5DFdC8jjCZz6USUcoKvr1dNprSV45s4wFwC\n" +
-		"MkAYpfhh2JsL7m094Po=\n" +
-		"</ds:SignatureValue>\n" +
-		"<ds:KeyInfo><ds:X509Data><ds:X509Certificate" +
-		">MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEOMAwGA1UECBMF\n" +
-		"YXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEOMAwGA1UECxMFYXJ1YmExDjAM\n" +
-		"BgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5hcnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2\n" +
-		"MjdaFw0xNjExMTkyMjI2MjdaMHwxCzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UE\n" +
-		"ChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmEx\n" +
-		"HTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
-		"gQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39WqS9u0hnA+O7MCA/KlrAR\n" +
-		"4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCY\n" +
-		"xhMol6ZnTbSsFW6VZjFMjQIDAQABo4HaMIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1sy\n" +
-		"GDCBpwYDVR0jBIGfMIGcgBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3\n" +
-		"MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQL\n" +
-		"EwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyggEA\n" +
-		"MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ0HOZbbHClXmGUjGs+GS+xC1FO/am\n" +
-		"2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxCKdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3o\n" +
-		"ePe84k8jm3A7EvH5wi5hvCkKRpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=</ds:X509Certificate></ds:X509Data></ds" +
-		":KeyInfo></ds:Signature><saml2:NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\" " +
-		"NameQualifier=\"http://sp.test.org\" SPNameQualifier=\"http://sp.test.org\" " +
-		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">test@test.org</saml2:NameID></saml2p:LogoutRequest>";
-
-	private String EXAMPLE_RESPONSE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		"<saml2p:LogoutResponse Destination=\"http://idp.test.org\" ID=\"response-id\" InResponseTo=\"in-response-to\"" +
-		" IssueInstant=\"2018-06-04T19:24:09.572Z\" Version=\"2.0\" " +
-		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer NameQualifier=\"name qualifier\" " +
-		"SPNameQualifier=\"sp name qualifier\" xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test" +
-		".org</saml2:Issuer><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-		"<ds:SignedInfo>\n" +
-		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha512\"/>\n" +
-		"<ds:Reference URI=\"#response-id\">\n" +
-		"<ds:Transforms>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"</ds:Transforms>\n" +
-		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
-		"<ds:DigestValue>qemZnU8Q1s8jNPhYl37mO8FToJnpU/k7V4BwnryApVA=</ds:DigestValue>\n" +
-		"</ds:Reference>\n" +
-		"</ds:SignedInfo>\n" +
-		"<ds:SignatureValue>\n" +
-		"teqIAaYeNrUqEOOCr7a1G7gWLU5e+F+WpV7J1EVtxCRXIZde0O1p56nQ8gZaHmYjvPdMuXuf2uo5\n" +
-		"XwAHjvaINoqRhotR3cY5xi/jgYQvz8VXTJc1OAEe5fCOiAIbsapNaW/0vhWDdq4F1I0GGEnztHNj\n" +
-		"w95+YBobRHd6CKQCCzw=\n" +
-		"</ds:SignatureValue>\n" +
-		"<ds:KeyInfo><ds:X509Data><ds:X509Certificate" +
-		">MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEOMAwGA1UECBMF\n" +
-		"YXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEOMAwGA1UECxMFYXJ1YmExDjAM\n" +
-		"BgNVBAMTBWFydWJhMR0wGwYJKoZIhvcNAQkBFg5hcnViYUBhcnViYS5hcjAeFw0xNTExMjAyMjI2\n" +
-		"MjdaFw0xNjExMTkyMjI2MjdaMHwxCzAJBgNVBAYTAmF3MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UE\n" +
-		"ChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQLEwVhcnViYTEOMAwGA1UEAxMFYXJ1YmEx\n" +
-		"HTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
-		"gQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5L39WqS9u0hnA+O7MCA/KlrAR\n" +
-		"4bXaeVVhwfUPYBKIpaaTWFQR5cTR1UFZJL/OF9vAfpOwznoD66DDCnQVpbCjtDYWX+x6imxn8HCY\n" +
-		"xhMol6ZnTbSsFW6VZjFMjQIDAQABo4HaMIHXMB0GA1UdDgQWBBTx0lDzjH/iOBnOSQaSEWQLx1sy\n" +
-		"GDCBpwYDVR0jBIGfMIGcgBTx0lDzjH/iOBnOSQaSEWQLx1syGKGBgKR+MHwxCzAJBgNVBAYTAmF3\n" +
-		"MQ4wDAYDVQQIEwVhcnViYTEOMAwGA1UEChMFYXJ1YmExDjAMBgNVBAcTBWFydWJhMQ4wDAYDVQQL\n" +
-		"EwVhcnViYTEOMAwGA1UEAxMFYXJ1YmExHTAbBgkqhkiG9w0BCQEWDmFydWJhQGFydWJhLmFyggEA\n" +
-		"MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADgYEAYvBJ0HOZbbHClXmGUjGs+GS+xC1FO/am\n" +
-		"2suCSYqNB9dyMXfOWiJ1+TLJk+o/YZt8vuxCKdcZYgl4l/L6PxJ982SRhc83ZW2dkAZI4M0/Ud3o\n" +
-		"ePe84k8jm3A7EvH5wi5hvCkKRpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=</ds:X509Certificate></ds:X509Data></ds" +
-		":KeyInfo></ds:Signature><saml2p:Status><saml2p:StatusCode " +
-		"Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\"/><saml2p:StatusMessage>User logged " +
-		"out!</saml2p:StatusMessage></saml2p:Status></saml2p:LogoutResponse>";
 }

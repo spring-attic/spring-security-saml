@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.util;
 
 import org.junit.jupiter.api.Test;
 
-import static org.springframework.security.saml.spi.ExamplePemKey.*;
+import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 
 class InMemoryKeyStoreTests {
 

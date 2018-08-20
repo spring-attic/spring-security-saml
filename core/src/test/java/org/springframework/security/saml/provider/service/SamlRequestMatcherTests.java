@@ -21,10 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml.provider.HostedProviderService;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.SamlRequestMatcher;
+import org.springframework.security.saml.provider.HostedProviderService;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +64,10 @@ class SamlRequestMatcherTests {
 		when(provisioning.getHostedProvider(any(HttpServletRequest.class))).thenReturn(provider);
 	}
 
+	private String getPath() {
+		return path;
+	}
+
 	public String getAlias() {
 		return alias;
 	}
@@ -72,8 +76,33 @@ class SamlRequestMatcherTests {
 		return prefix;
 	}
 
-	private String getPath() {
-		return path;
+	@Test
+	public void contextMatch() {
+		contextPath = "/myapp";
+		match();
+	}
+
+	@Test
+	public void match() {
+		matcher = new SamlRequestMatcher(getProvisioning(), getPath());
+		request = getRequest();
+		assertTrue(matches(request));
+	}
+
+	private SamlProviderProvisioning getProvisioning() {
+		return provisioning;
+	}
+
+	protected MockHttpServletRequest getRequest() {
+		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST.name(), url);
+		request.setPathInfo(getUrl());
+		request.setServletPath(getServletPath());
+		request.setContextPath(getContextPath());
+		return request;
+	}
+
+	private boolean matches(MockHttpServletRequest request) {
+		return matcher.matches(request);
 	}
 
 	private String getUrl() {
@@ -86,27 +115,6 @@ class SamlRequestMatcherTests {
 
 	private String getContextPath() {
 		return contextPath;
-	}
-
-	private SamlProviderProvisioning getProvisioning() {
-		return provisioning;
-	}
-
-	private boolean matches(MockHttpServletRequest request) {
-		return matcher.matches(request);
-	}
-
-	@Test
-	public void match() {
-		matcher = new SamlRequestMatcher(getProvisioning(), getPath());
-		request = getRequest();
-		assertTrue(matches(request));
-	}
-
-	@Test
-	public void contextMatch() {
-		contextPath = "/myapp";
-		match();
 	}
 
 	@Test
@@ -138,14 +146,6 @@ class SamlRequestMatcherTests {
 		matcher = new SamlRequestMatcher(getProvisioning(), getPath());
 		request = getRequest();
 		assertTrue(matches(request));
-	}
-
-	protected MockHttpServletRequest getRequest() {
-		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST.name(), url);
-		request.setPathInfo(getUrl());
-		request.setServletPath(getServletPath());
-		request.setContextPath(getContextPath());
-		return request;
 	}
 
 }

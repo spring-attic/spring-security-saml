@@ -19,52 +19,32 @@ package org.springframework.security.saml.saml2.metadata;
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
-import org.springframework.security.saml.saml2.authentication.Conditions;
-import org.springframework.security.saml.saml2.authentication.Issuer;
-import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
-import org.springframework.security.saml.saml2.authentication.Subject;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 
 public abstract class MetadataBase {
 
+	protected static SamlTransformer config;
+	protected static Clock time;
 	public long NOT_BEFORE = 60000;
 	public long NOT_AFTER = 120000;
 	public long SESSION_NOT_AFTER = 30 * 60 * 1000;
-
-
-	protected static SamlTransformer config;
-	protected static Clock time;
 	protected SimpleKey spSigning;
 	protected SimpleKey idpSigning;
 	protected SimpleKey spVerifying;

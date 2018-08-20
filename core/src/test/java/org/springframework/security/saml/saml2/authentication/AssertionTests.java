@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 package org.springframework.security.saml.saml2.authentication;
 
 import java.io.IOException;
@@ -69,11 +69,13 @@ public class AssertionTests extends MetadataBase {
 
 
 	private static final SimpleKey decryptionVerificationKey =
-		new SimpleKey("simplesamlphp",
+		new SimpleKey(
+			"simplesamlphp",
 			null,
 			"MIIEEzCCAvugAwIBAgIJAIc1qzLrv+5nMA0GCSqGSIb3DQEBCwUAMIGfMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ08xFDASBgNVBAcMC0Nhc3RsZSBSb2NrMRwwGgYDVQQKDBNTYW1sIFRlc3RpbmcgU2VydmVyMQswCQYDVQQLDAJJVDEgMB4GA1UEAwwXc2ltcGxlc2FtbHBocC5jZmFwcHMuaW8xIDAeBgkqhkiG9w0BCQEWEWZoYW5pa0BwaXZvdGFsLmlvMB4XDTE1MDIyMzIyNDUwM1oXDTI1MDIyMjIyNDUwM1owgZ8xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDTzEUMBIGA1UEBwwLQ2FzdGxlIFJvY2sxHDAaBgNVBAoME1NhbWwgVGVzdGluZyBTZXJ2ZXIxCzAJBgNVBAsMAklUMSAwHgYDVQQDDBdzaW1wbGVzYW1scGhwLmNmYXBwcy5pbzEgMB4GCSqGSIb3DQEJARYRZmhhbmlrQHBpdm90YWwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC4cn62E1xLqpN34PmbrKBbkOXFjzWgJ9b+pXuaRft6A339uuIQeoeH5qeSKRVTl32L0gdz2ZivLwZXW+cqvftVW1tvEHvzJFyxeTW3fCUeCQsebLnA2qRa07RkxTo6Nf244mWWRDodcoHEfDUSbxfTZ6IExSojSIU2RnD6WllYWFdD1GFpBJOmQB8rAc8wJIBdHFdQnX8Ttl7hZ6rtgqEYMzYVMuJ2F2r1HSU1zSAvwpdYP6rRGFRJEfdA9mm3WKfNLSc5cljz0X/TXy0vVlAV95l9qcfFzPmrkNIst9FZSwpvB49LyAVke04FQPPwLgVH4gphiJH3jvZ7I+J5lS8VAgMBAAGjUDBOMB0GA1UdDgQWBBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAfBgNVHSMEGDAWgBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAvMS4EQeP/ipV4jOG5lO6/tYCb/iJeAduOnRhkJk0DbX329lDLZhTTL/x/w/9muCVcvLrzEp6PN+VWfw5E5FWtZN0yhGtP9R+vZnrV+oc2zGD+no1/ySFOe3EiJCO5dehxKjYEmBRv5sU/LZFKZpozKN/BMEa6CqLuxbzb7ykxVr7EVFXwltPxzE9TmL9OACNNyF5eJHWMRMllarUvkcXlh4pux4ks9e6zV9DQBy2zds9f1I3qxg0eX6JnGrXi/ZiCT+lJgVe3ZFXiejiLAiKB04sXW3ti0LW3lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk",
 			null,
-			KeyType.SIGNING);
+			KeyType.SIGNING
+		);
 	private static final SimpleKey decryptionKey =
 		new SimpleKey(
 			"decryption-key",
@@ -117,7 +119,8 @@ public class AssertionTests extends MetadataBase {
 
 	@Test
 	public void create_saml_response() throws Exception {
-		Response response = (Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		Response response =
+			(Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
 		response.setSigningKey(idpSigning, AlgorithmMethod.RSA_RIPEMD160, DigestMethod.SHA512);
 		response.getAssertions().get(0).setSigningKey(spSigning, AlgorithmMethod.RSA_SHA256, DigestMethod.SHA256);
 		String xml = config.toXml(response);
@@ -151,7 +154,8 @@ public class AssertionTests extends MetadataBase {
 
 	@Test
 	public void read_saml_response() throws Exception {
-		Response response = (Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		Response response =
+			(Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
 		assertNotNull(response);
 		assertNotNull(response.getImplementation());
 		assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
@@ -245,11 +249,13 @@ public class AssertionTests extends MetadataBase {
 	public void create_with_request() {
 
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		Assertion assertion = helper.assertion(serviceProviderMetadata,
+		Assertion assertion = helper.assertion(
+			serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",
-			NameId.PERSISTENT);
+			NameId.PERSISTENT
+		);
 
 		assertNotNull(assertion);
 
@@ -265,7 +271,10 @@ public class AssertionTests extends MetadataBase {
 		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
 		assertThat(assertion.getSubject().getPrincipal().getValue(), equalTo("test-principal"));
 		assertThat(((NameIdPrincipal) assertion.getSubject().getPrincipal()).getFormat(), equalTo(NameId.PERSISTENT));
-		assertThat(((NameIdPrincipal) assertion.getSubject().getPrincipal()).getSpNameQualifier(), equalTo(serviceProviderMetadata.getEntityId()));
+		assertThat(
+			((NameIdPrincipal) assertion.getSubject().getPrincipal()).getSpNameQualifier(),
+			equalTo(serviceProviderMetadata.getEntityId())
+		);
 		assertNotNull(assertion.getSubject().getConfirmations());
 		assertThat(assertion.getSubject().getConfirmations().size(), equalTo(1));
 		SubjectConfirmation subjectConfirmation = assertion.getSubject().getConfirmations().get(0);
@@ -309,11 +318,13 @@ public class AssertionTests extends MetadataBase {
 	public void check_xml() throws URISyntaxException, IOException {
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
-		Assertion assertion = helper.assertion(serviceProviderMetadata,
+		Assertion assertion = helper.assertion(
+			serviceProviderMetadata,
 			identityProviderMetadata,
 			request,
 			"test-principal",
-			NameId.PERSISTENT);
+			NameId.PERSISTENT
+		);
 
 		String username = "test@test.com";
 
@@ -330,7 +341,8 @@ public class AssertionTests extends MetadataBase {
 			new Attribute()
 				.setFriendlyName("Random Attributes")
 				.setName("rattr")
-				.addValues("Filip",
+				.addValues(
+					"Filip",
 					TRUE,
 					time,
 					new Integer(54),
@@ -376,13 +388,33 @@ public class AssertionTests extends MetadataBase {
 
 		assertNodeCount(xml, "//saml:SubjectConfirmation/saml:SubjectConfirmationData", 1);
 		nodes = getNodes(xml, "//saml:SubjectConfirmation/saml:SubjectConfirmationData");
-		assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZuluTime(assertion.getSubject().getConfirmations().get(0).getConfirmationData().getNotOnOrAfter())));
-		assertNodeAttribute(nodes.iterator().next(), "InResponseTo", equalTo(assertion.getSubject().getConfirmations().get(0).getConfirmationData().getInResponseTo()));
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"NotOnOrAfter",
+			equalTo(toZuluTime(assertion.getSubject()
+				.getConfirmations()
+				.get(0)
+				.getConfirmationData()
+				.getNotOnOrAfter()))
+		);
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"InResponseTo",
+			equalTo(assertion.getSubject().getConfirmations().get(0).getConfirmationData().getInResponseTo())
+		);
 
 		assertNodeCount(xml, "//saml:Conditions", 1);
 		nodes = getNodes(xml, "//saml:Conditions");
-		assertNodeAttribute(nodes.iterator().next(), "NotOnOrAfter", equalTo(toZuluTime(assertion.getConditions().getNotOnOrAfter())));
-		assertNodeAttribute(nodes.iterator().next(), "NotBefore", equalTo(toZuluTime(assertion.getConditions().getNotBefore())));
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"NotOnOrAfter",
+			equalTo(toZuluTime(assertion.getConditions().getNotOnOrAfter()))
+		);
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"NotBefore",
+			equalTo(toZuluTime(assertion.getConditions().getNotBefore()))
+		);
 
 		assertNodeCount(xml, "//saml:Conditions/saml:AudienceRestriction/saml:Audience", 1);
 		nodes = getNodes(xml, "//saml:Conditions/saml:AudienceRestriction/saml:Audience");
@@ -393,7 +425,11 @@ public class AssertionTests extends MetadataBase {
 		assertNodeCount(xml, "//saml:AuthnStatement", 1);
 		nodes = getNodes(xml, "//saml:AuthnStatement");
 		AuthenticationStatement authnStatement = assertion.getAuthenticationStatements().get(0);
-		assertNodeAttribute(nodes.iterator().next(), "AuthnInstant", equalTo(toZuluTime(authnStatement.getAuthInstant())));
+		assertNodeAttribute(
+			nodes.iterator().next(),
+			"AuthnInstant",
+			equalTo(toZuluTime(authnStatement.getAuthInstant()))
+		);
 		assertNodeAttribute(nodes.iterator().next(), "SessionIndex", equalTo(authnStatement.getSessionIndex()));
 		assertNodeCount(xml, "//saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef", 1);
 		nodes = getNodes(xml, "//saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef");
@@ -447,7 +483,8 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(assertion.getSubject().getConfirmations());
 		assertThat(assertion.getSubject().getConfirmations().size(), equalTo(1));
 		assertThat(assertion.getSubject().getConfirmations().get(0).getMethod(), equalTo(BEARER));
-		SubjectConfirmationData confirmationData = assertion.getSubject().getConfirmations().get(0).getConfirmationData();
+		SubjectConfirmationData confirmationData =
+			assertion.getSubject().getConfirmations().get(0).getConfirmationData();
 		assertNotNull(confirmationData);
 		assertThat(confirmationData.getInResponseTo(), equalTo("0ab65bc9-6ffc-4fce-a186-108ad42db073"));
 		assertThat(confirmationData.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-02T20:09:06.785Z")));
@@ -511,7 +548,11 @@ public class AssertionTests extends MetadataBase {
 				//using the wrong key
 				() -> config.fromXml(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")), null)
 			);
-		assertThat(expected.getMessage(), equalTo("Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key."));
+		assertThat(
+			expected.getMessage(),
+			equalTo(
+				"Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key.")
+		);
 	}
 
 	@Test

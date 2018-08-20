@@ -69,6 +69,7 @@ import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
 import static org.springframework.util.StringUtils.hasText;
+
 public class SamlTestObjectHelper {
 	public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
 	public DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
@@ -119,6 +120,16 @@ public class SamlTestObjectHelper {
 		return metadata;
 	}
 
+	protected String getAliasPath(LocalProviderConfiguration configuration) {
+		try {
+			return hasText(configuration.getAlias()) ?
+				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
+				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new SamlException(e);
+		}
+	}
+
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
 														   SimpleKey signingKey,
 														   List<SimpleKey> keys,
@@ -132,8 +143,8 @@ public class SamlTestObjectHelper {
 			.setId(UUID.randomUUID().toString())
 			.setSigningKey(
 				signingKey,
-				algorithmMethod==null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
-				digestMethod==null ? DEFAULT_SIGN_DIGEST : digestMethod
+				algorithmMethod == null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
+				digestMethod == null ? DEFAULT_SIGN_DIGEST : digestMethod
 			)
 			.setProviders(
 				asList(
@@ -143,29 +154,19 @@ public class SamlTestObjectHelper {
 						.setAuthnRequestsSigned(signingKey != null)
 						.setAssertionConsumerService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, REDIRECT, 1, false)
+								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/"+aliasPath, REDIRECT, 0, true)
+								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)
 			);
-	}
-
-	protected String getAliasPath(LocalProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
 	}
 
 	public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
@@ -207,6 +208,7 @@ public class SamlTestObjectHelper {
 		}
 		return metadata;
 	}
+
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
 															 SimpleKey signingKey,
 															 List<SimpleKey> keys,
@@ -220,8 +222,8 @@ public class SamlTestObjectHelper {
 			.setId(UUID.randomUUID().toString())
 			.setSigningKey(
 				signingKey,
-				algorithmMethod==null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
-				digestMethod==null ? DEFAULT_SIGN_DIGEST : digestMethod
+				algorithmMethod == null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
+				digestMethod == null ? DEFAULT_SIGN_DIGEST : digestMethod
 			)
 			.setProviders(
 				asList(
@@ -229,15 +231,15 @@ public class SamlTestObjectHelper {
 						.setWantAuthnRequestsSigned(true)
 						.setSingleSignOnService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/"+aliasPath, REDIRECT, 1, false)
+								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/"+aliasPath, REDIRECT, 0, true)
+								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)
@@ -373,81 +375,6 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public LogoutRequest logoutRequest(Metadata<? extends Metadata> recipient,
-									   Metadata<? extends Metadata> local,
-									   NameIdPrincipal principal) {
-
-
-		LogoutRequest result = new LogoutRequest()
-			.setId(UUID.randomUUID().toString())
-			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
-			.setIssueInstant(DateTime.now())
-			.setNameId(principal)
-			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-
-		return result;
-	}
-
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 IdentityProviderMetadata recipient,
-										 ServiceProviderMetadata  local) {
-		return logoutResponse(
-			request,
-			recipient,
-			local,
-			getSingleLogout(recipient.getIdentityProvider().getSingleLogoutService())
-		);
-	}
-
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 ServiceProviderMetadata recipient,
-										 IdentityProviderMetadata local) {
-		return logoutResponse(
-			request,
-			recipient,
-			local,
-			getSingleLogout(recipient.getServiceProvider().getSingleLogoutService())
-		);
-	}
-
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 Metadata<? extends Metadata> recipient,
-										 Metadata<? extends Metadata> local,
-										 Endpoint destination) {
-
-		return new LogoutResponse()
-			.setId(UUID.randomUUID().toString())
-			.setInResponseTo(request != null ? request.getId() : null)
-			.setDestination(destination != null ? destination.getLocation() : null)
-			.setStatus(new Status().setCode(StatusCode.SUCCESS))
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
-			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
-			.setIssueInstant(new DateTime())
-			.setVersion("2.0");
-	}
-
-	public Endpoint getSingleLogout(List<Endpoint> logoutService) {
-		if (logoutService == null || logoutService.isEmpty()) {
-			return null;
-		}
-		List<Endpoint> eps = logoutService;
-		Endpoint result = null;
-		for (Endpoint e : eps) {
-			if (e.isDefault()) {
-				result = e;
-				break;
-			} else if (REDIRECT.equals(e.getBinding())) {
-				result = e;
-				break;
-			}
-		}
-		if (result == null ) {
-			result = eps.get(0);
-		}
-		return result;
-	}
-
 	public Endpoint getPreferredACS(List<Endpoint> eps,
 									List<Binding> preferred) {
 		if (eps == null || eps.isEmpty()) {
@@ -472,9 +399,85 @@ public class SamlTestObjectHelper {
 				break;
 			}
 		}
-		if (result == null ) {
+		if (result == null) {
 			result = eps.get(0);
 		}
 		return result;
+	}
+
+	public LogoutRequest logoutRequest(Metadata<? extends Metadata> recipient,
+									   Metadata<? extends Metadata> local,
+									   NameIdPrincipal principal) {
+
+
+		LogoutRequest result = new LogoutRequest()
+			.setId(UUID.randomUUID().toString())
+			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
+			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setIssueInstant(DateTime.now())
+			.setNameId(principal)
+			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
+
+		return result;
+	}
+
+	public Endpoint getSingleLogout(List<Endpoint> logoutService) {
+		if (logoutService == null || logoutService.isEmpty()) {
+			return null;
+		}
+		List<Endpoint> eps = logoutService;
+		Endpoint result = null;
+		for (Endpoint e : eps) {
+			if (e.isDefault()) {
+				result = e;
+				break;
+			}
+			else if (REDIRECT.equals(e.getBinding())) {
+				result = e;
+				break;
+			}
+		}
+		if (result == null) {
+			result = eps.get(0);
+		}
+		return result;
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 IdentityProviderMetadata recipient,
+										 ServiceProviderMetadata local) {
+		return logoutResponse(
+			request,
+			recipient,
+			local,
+			getSingleLogout(recipient.getIdentityProvider().getSingleLogoutService())
+		);
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 Metadata<? extends Metadata> recipient,
+										 Metadata<? extends Metadata> local,
+										 Endpoint destination) {
+
+		return new LogoutResponse()
+			.setId(UUID.randomUUID().toString())
+			.setInResponseTo(request != null ? request.getId() : null)
+			.setDestination(destination != null ? destination.getLocation() : null)
+			.setStatus(new Status().setCode(StatusCode.SUCCESS))
+			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
+			.setIssueInstant(new DateTime())
+			.setVersion("2.0");
+	}
+
+	public LogoutResponse logoutResponse(LogoutRequest request,
+										 ServiceProviderMetadata recipient,
+										 IdentityProviderMetadata local) {
+		return logoutResponse(
+			request,
+			recipient,
+			local,
+			getSingleLogout(recipient.getServiceProvider().getSingleLogoutService())
+		);
 	}
 }

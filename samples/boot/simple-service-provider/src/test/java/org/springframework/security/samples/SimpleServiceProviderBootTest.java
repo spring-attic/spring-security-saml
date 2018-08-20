@@ -55,7 +55,6 @@ import org.springframework.web.util.UriUtils;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import sample.config.AppConfig;
@@ -199,7 +198,6 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@Test
-	@Disabled("Until we have implemented validation using the new service components")
 	public void invalidResponse() throws Exception {
 		configuration.getServiceProvider().setWantAssertionsSigned(false);
 		ServiceProviderService provider = provisioning.getHostedProvider(defaultRequest);

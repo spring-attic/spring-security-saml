@@ -42,9 +42,6 @@ public abstract class MetadataBase {
 
 	protected static SamlTransformer config;
 	protected static Clock time;
-	public long NOT_BEFORE = 60000;
-	public long NOT_AFTER = 120000;
-	public long SESSION_NOT_AFTER = 30 * 60 * 1000;
 	protected SimpleKey spSigning;
 	protected SimpleKey idpSigning;
 	protected SimpleKey spVerifying;
@@ -56,7 +53,7 @@ public abstract class MetadataBase {
 	protected SamlTestObjectHelper helper;
 
 	@BeforeAll
-	public static void init() throws Exception {
+	public static void init() {
 		time = Clock.systemUTC();
 		config = new DefaultSamlTransformer(new OpenSamlImplementation(time).init());
 		((DefaultSamlTransformer) config).afterPropertiesSet();

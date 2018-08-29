@@ -90,14 +90,13 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 
 	@Bean
 	public SamlConfigurationRepository samlConfigurationRepository() {
-		return new StaticSamlConfigurationRepository(hostConfiguration);
+		return new ThreadLocalSamlConfigurationRepository(hostConfiguration);
 	}
 
 	@Bean
 	public Filter samlConfigurationFilter() {
-		return new ServletSamlConfigurationFilter(
-			new ThreadLocalSamlConfigurationRepository(),
-			samlConfigurationRepository()
+		return new ThreadLocalSamlConfigurationFilter(
+			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
 		);
 	}
 

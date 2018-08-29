@@ -39,6 +39,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -68,6 +69,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -107,12 +109,17 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private Clock samlTime;
 
+	@Autowired
+	private SamlServerConfiguration configuration;
+
 	private String baseUrl = "http://localhost";
-	private MockHttpServletRequest defaultRequest;
 	private SamlTestObjectHelper helper;
 
 	@BeforeEach
 	public void mockCache() {
+		//since we're using objects outside of the mock request
+		configuration.getIdentityProvider().setBasePath(baseUrl);
+
 		given(
 			cache.getMetadata(
 				eq("http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp"),
@@ -127,7 +134,6 @@ public class SimpleIdentityProviderBootTests {
 			)
 		).willReturn(CACHED_SSS_META_DATA.getBytes());
 
-		defaultRequest = new MockHttpServletRequest("GET", baseUrl);
 		helper = new SamlTestObjectHelper(samlTime);
 	}
 
@@ -140,6 +146,20 @@ public class SimpleIdentityProviderBootTests {
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
 	public static class SpringBootApplicationTestConfig {
+	}
+
+	@Test
+	public void testCloneConfiguration() throws CloneNotSupportedException {
+		SamlServerConfiguration clone = configuration.clone();
+		clone.getIdentityProvider().getProviders().get(0).setMetadata("changed");
+		assertThat(
+			configuration.getIdentityProvider().getProviders().get(0).getMetadata(),
+			not(equalTo("changed"))
+		);
+		assertThat(
+			clone.getIdentityProvider().getProviders().get(0).getMetadata(),
+			equalTo("changed")
+		);
 	}
 
 	@Test
@@ -366,7 +386,7 @@ public class SimpleIdentityProviderBootTests {
 		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(false));
 		assertThat(idpm.getEntityAlias(), equalTo("spring.security.saml.idp.id"));
 		for (Endpoint ep : idpm.getIdentityProvider().getSingleSignOnService()) {
-			assertThat(ep.getLocation(), equalTo("http://localhost:80/saml/idp/SSO/alias/boot-sample-idp"));
+			assertThat(ep.getLocation(), equalTo("http://localhost/saml/idp/SSO/alias/boot-sample-idp"));
 		}
 		assertThat(
 			idpm.getIdentityProvider().getNameIds(),

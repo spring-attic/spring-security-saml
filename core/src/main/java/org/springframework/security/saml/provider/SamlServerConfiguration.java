@@ -59,7 +59,11 @@ public class SamlServerConfiguration implements Cloneable{
 	}
 
 	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
+	public SamlServerConfiguration clone() throws CloneNotSupportedException {
+		SamlServerConfiguration result = (SamlServerConfiguration)super.clone();
+		result.network = network != null ? network.clone() : null;
+		result.identityProvider = identityProvider != null ? identityProvider.clone() : null;
+		result.serviceProvider = serviceProvider != null ? serviceProvider.clone() : null;
+		return result;
 	}
 }

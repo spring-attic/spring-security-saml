@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.provider.config;
 
-public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
+public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> implements Cloneable {
 	private String alias;
 	private String metadata;
 	private String linktext;
@@ -75,5 +75,10 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 	public T setMetadataTrustCheck(boolean metadataTrustCheck) {
 		this.metadataTrustCheck = metadataTrustCheck;
 		return _this();
+	}
+
+	@Override
+	public T clone() throws CloneNotSupportedException {
+		return (T)super.clone();
 	}
 }

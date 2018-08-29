@@ -65,6 +65,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -146,6 +147,20 @@ public class SimpleServiceProviderBootTest {
     @EnableAutoConfiguration
     @ComponentScan(basePackages = "sample")
     public static class SpringBootApplicationTestConfig {
+    }
+
+    @Test
+    public void testCloneConfiguration() throws CloneNotSupportedException {
+        SamlServerConfiguration clone = configuration.clone();
+        clone.getServiceProvider().getProviders().get(0).setMetadata("changed");
+        assertThat(
+            configuration.getServiceProvider().getProviders().get(0).getMetadata(),
+            not(equalTo("changed"))
+        );
+        assertThat(
+            clone.getServiceProvider().getProviders().get(0).getMetadata(),
+            equalTo("changed")
+        );
     }
 
     @Test

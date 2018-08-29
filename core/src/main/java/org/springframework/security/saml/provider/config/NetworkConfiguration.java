@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.provider.config;
 
-public class NetworkConfiguration {
+public class NetworkConfiguration implements Cloneable {
 	private int readTimeout;
 	private int connectTimeout;
 
@@ -37,5 +37,10 @@ public class NetworkConfiguration {
 	public NetworkConfiguration setConnectTimeout(int connectTimeout) {
 		this.connectTimeout = connectTimeout;
 		return this;
+	}
+
+	@Override
+	public NetworkConfiguration clone() throws CloneNotSupportedException {
+		return (NetworkConfiguration)super.clone();
 	}
 }

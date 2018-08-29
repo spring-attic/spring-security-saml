@@ -29,7 +29,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class LocalProviderConfiguration<
 	LocalConfiguration extends LocalProviderConfiguration,
-	ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> {
+	ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> implements Cloneable {
 
 	private String entityId;
 	private String alias;
@@ -172,5 +172,16 @@ public class LocalProviderConfiguration<
 	public LocalProviderConfiguration<LocalConfiguration, ExternalConfiguration> setBasePath(String basePath) {
 		this.basePath = basePath;
 		return this;
+	}
+
+	@Override
+	public LocalConfiguration clone() throws CloneNotSupportedException {
+		LocalConfiguration result = (LocalConfiguration)super.clone();
+		LinkedList<ExternalConfiguration> newProviders = new LinkedList<>();
+		for (ExternalConfiguration externalConfiguration : getProviders()) {
+			newProviders.add(externalConfiguration.clone());
+		}
+		result.setProviders(newProviders);
+		return result;
 	}
 }

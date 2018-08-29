@@ -42,6 +42,7 @@ public class LocalProviderConfiguration<
 	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
 	private DigestMethod defaultDigest = DigestMethod.SHA256;
 	private List<ExternalConfiguration> providers = new LinkedList<>();
+	private String basePath;
 
 
 	public LocalProviderConfiguration(String prefix) {
@@ -162,5 +163,14 @@ public class LocalProviderConfiguration<
 	public LocalConfiguration setProviders(List<ExternalConfiguration> providers) {
 		this.providers = providers;
 		return _this();
+	}
+
+	public String getBasePath() {
+		return basePath;
+	}
+
+	public LocalProviderConfiguration<LocalConfiguration, ExternalConfiguration> setBasePath(String basePath) {
+		this.basePath = basePath;
+		return this;
 	}
 }

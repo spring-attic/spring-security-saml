@@ -17,11 +17,9 @@
 
 package org.springframework.security.saml.provider.config;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 
-public class StaticSamlConfigurationRepository implements SamlConfigurationRepository<HttpServletRequest> {
+public class StaticSamlConfigurationRepository implements SamlConfigurationRepository {
 
 	private final SamlServerConfiguration configuration;
 
@@ -30,7 +28,7 @@ public class StaticSamlConfigurationRepository implements SamlConfigurationRepos
 	}
 
 	@Override
-	public SamlServerConfiguration getServerConfiguration(HttpServletRequest request) {
+	public SamlServerConfiguration getServerConfiguration() {
 		return configuration;
 	}
 }

@@ -78,7 +78,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		throws ServletException, IOException {
 		String idpIdentifier = request.getParameter("idp");
 		if (getRequestMatcher().matches(request) && hasText(idpIdentifier)) {
-			ServiceProviderService provider = provisioning.getHostedProvider(request);
+			ServiceProviderService provider = provisioning.getHostedProvider();
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
 			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
 			//TODO - this can be better

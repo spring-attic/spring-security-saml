@@ -61,7 +61,7 @@ class SamlRequestMatcherTests {
 		when(configuration.getAlias()).then(invocation -> getAlias());
 		when(configuration.getPrefix()).then(invocation -> getPrefix());
 		when(provider.getConfiguration()).thenReturn(configuration);
-		when(provisioning.getHostedProvider(any(HttpServletRequest.class))).thenReturn(provider);
+		when(provisioning.getHostedProvider()).thenReturn(provider);
 	}
 
 	private String getPath() {

@@ -80,7 +80,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 		if (requestMatcher.matches(request) &&
 			authentication != null &&
 			authentication.isAuthenticated()) {
-			IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+			IdentityProviderService provider = getProvisioning().getHostedProvider();
 			IdentityProviderMetadata local = provider.getMetadata();
 			ServiceProviderMetadata recipient = getTargetProvider(request);
 			Assertion assertion = getAssertion(authentication, provider, recipient);
@@ -126,7 +126,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 
 	protected ServiceProviderMetadata getTargetProvider(HttpServletRequest request) {
 		String entityId = request.getParameter("sp");
-		return getProvisioning().getHostedProvider(request).getRemoteProvider(entityId);
+		return getProvisioning().getHostedProvider().getRemoteProvider(entityId);
 	}
 
 	protected Assertion getAssertion(Authentication authentication,

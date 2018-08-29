@@ -145,7 +145,7 @@ public class SimpleIdentityProviderBootTests {
 	@Test
 	public void idpInitiateLogout() throws Exception {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		IdentityProviderService provider = provisioning.getHostedProvider(defaultRequest);
+		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm = provider.getRemoteProvider("spring.security.saml.sp.id");
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
@@ -186,7 +186,7 @@ public class SimpleIdentityProviderBootTests {
 
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		String spm1EntityId = "spring.security.saml.sp.id";
-		IdentityProviderService provider = provisioning.getHostedProvider(defaultRequest);
+		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken(
@@ -251,7 +251,7 @@ public class SimpleIdentityProviderBootTests {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		String spm1EntityId = "spring.security.saml.sp.id";
 		String spm2EntityId = "http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp";
-		IdentityProviderService provider = provisioning.getHostedProvider(defaultRequest);
+		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
 		ServiceProviderMetadata spm2 = provider.getRemoteProvider(spm2EntityId);
 		UsernamePasswordAuthenticationToken token =
@@ -398,7 +398,7 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void receiveAuthenticationRequest() throws Exception {
-		IdentityProviderService provider = provisioning.getHostedProvider(defaultRequest);
+		IdentityProviderService provider = provisioning.getHostedProvider();
 		IdentityProviderMetadata local = provider.getMetadata();
 		ServiceProviderMetadata sp = provider.getRemoteProvider("spring.security.saml.sp.id");
 		assertNotNull(sp);

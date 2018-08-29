@@ -55,7 +55,8 @@ public class SamlServiceProviderSecurityConfiguration
 		String metadata = "/" + stripSlashes(prefix) + "/metadata";
 		http
 			//.antMatcher(matcher)
-			.addFilterAfter(spMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(samlConfigurationFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(spMetadataFilter(), samlConfigurationFilter().getClass())
 			.addFilterAfter(spAuthenticationRequestFilter(), spMetadataFilter().getClass())
 			.addFilterAfter(spAuthenticationResponseFilter(), spAuthenticationRequestFilter().getClass())
 			.addFilterAfter(spSamlLogoutFilter(), spAuthenticationResponseFilter().getClass())

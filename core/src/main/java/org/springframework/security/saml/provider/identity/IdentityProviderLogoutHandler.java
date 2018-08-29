@@ -132,7 +132,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 										 HttpServletResponse response,
 										 Authentication authentication,
 										 String logoutRequestValue) throws IOException {
-		IdentityProviderService provider = provisioning.getHostedProvider(request);
+		IdentityProviderService provider = provisioning.getHostedProvider();
 		LogoutRequest logoutRequest = provider.fromXml(
 			logoutRequestValue,
 			true,
@@ -172,7 +172,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 										  HttpServletResponse response,
 										  Authentication authentication,
 										  String logoutResponseValue) throws IOException {
-		IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+		IdentityProviderService provider = getProvisioning().getHostedProvider();
 		LogoutResponse logoutResponse = provider.fromXml(
 			logoutResponseValue,
 			true,
@@ -220,7 +220,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 				request.setAttribute(RUN_SUCCESS, TRUE);
 			}
 			else {
-				IdentityProviderService provider = provisioning.getHostedProvider(request);
+				IdentityProviderService provider = provisioning.getHostedProvider();
 				logger.debug(format("Sending IDP logout request to SP:%s", assertion.getIssuer().getValue()));
 				ServiceProviderMetadata sp = provider.getRemoteProvider(assertion);
 				LogoutRequest logoutRequest = provider.logoutRequest(

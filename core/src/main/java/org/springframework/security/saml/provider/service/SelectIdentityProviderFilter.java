@@ -76,7 +76,7 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (requestMatcher.matches(request)) {
-			ServiceProviderService provider = getProvisioning().getHostedProvider(request);
+			ServiceProviderService provider = getProvisioning().getHostedProvider();
 			LocalServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
 			configuration.getProviders().stream().forEach(
@@ -114,7 +114,9 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 	protected String getDiscoveryRedirect(ServiceProviderService provider,
 										  HttpServletRequest request,
 										  ExternalProviderConfiguration p) throws UnsupportedEncodingException {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getProvisioning().getBasePath(request));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
+			provider.getConfiguration().getBasePath()
+		);
 		builder.pathSegment("saml/sp/discovery");
 		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));

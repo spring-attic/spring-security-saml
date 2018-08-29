@@ -62,7 +62,7 @@ public class SamlMetadataFilter<ProviderType extends HostedProviderService> exte
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (getRequestMatcher().matches(request)) {
-			ProviderType provider = getProvisioning().getHostedProvider(request);
+			ProviderType provider = getProvisioning().getHostedProvider();
 			Metadata metadata = provider.getMetadata();
 			String xml = provider.toXml(metadata);
 			getCacheHeaderWriter().writeHeaders(request, response);

@@ -78,7 +78,7 @@ public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderServ
 		throws ServletException, IOException {
 		if (requestMatcher.matches(request)) {
 			List<ModelProvider> providers = new LinkedList<>();
-			IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+			IdentityProviderService provider = getProvisioning().getHostedProvider();
 			LocalIdentityProviderConfiguration configuration = provider.getConfiguration();
 
 			configuration.getProviders().stream().forEach(
@@ -117,9 +117,11 @@ public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderServ
 
 	protected String getIdpInitUrl(HttpServletRequest request, ExternalProviderConfiguration p)
 		throws UnsupportedEncodingException {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getProvisioning().getBasePath(request));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
+			getProvisioning().getHostedProvider().getConfiguration().getBasePath()
+		);
 		builder.pathSegment("saml/idp/init");
-		IdentityProviderService provider = getProvisioning().getHostedProvider(request);
+		IdentityProviderService provider = getProvisioning().getHostedProvider();
 		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8.toString()));
 		return builder.build().toUriString();

@@ -29,7 +29,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class LocalProviderConfiguration<
 	LocalConfiguration extends LocalProviderConfiguration,
-	ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> {
+	ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> implements Cloneable {
 
 	private String entityId;
 	private String alias;
@@ -42,6 +42,7 @@ public class LocalProviderConfiguration<
 	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
 	private DigestMethod defaultDigest = DigestMethod.SHA256;
 	private List<ExternalConfiguration> providers = new LinkedList<>();
+	private String basePath;
 
 
 	public LocalProviderConfiguration(String prefix) {
@@ -162,5 +163,25 @@ public class LocalProviderConfiguration<
 	public LocalConfiguration setProviders(List<ExternalConfiguration> providers) {
 		this.providers = providers;
 		return _this();
+	}
+
+	public String getBasePath() {
+		return basePath;
+	}
+
+	public LocalProviderConfiguration<LocalConfiguration, ExternalConfiguration> setBasePath(String basePath) {
+		this.basePath = basePath;
+		return this;
+	}
+
+	@Override
+	public LocalConfiguration clone() throws CloneNotSupportedException {
+		LocalConfiguration result = (LocalConfiguration)super.clone();
+		LinkedList<ExternalConfiguration> newProviders = new LinkedList<>();
+		for (ExternalConfiguration externalConfiguration : getProviders()) {
+			newProviders.add(externalConfiguration.clone());
+		}
+		result.setProviders(newProviders);
+		return result;
 	}
 }

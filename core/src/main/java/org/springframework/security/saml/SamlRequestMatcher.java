@@ -47,7 +47,7 @@ public class SamlRequestMatcher implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		HostedProviderService provider = this.provisioning.getHostedProvider(request);
+		HostedProviderService provider = this.provisioning.getHostedProvider();
 		String prefix = provider.getConfiguration().getPrefix();
 		String alias = provider.getConfiguration().getAlias();
 		String path = this.path;

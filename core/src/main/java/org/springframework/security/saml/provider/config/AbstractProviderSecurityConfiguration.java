@@ -18,7 +18,7 @@
 package org.springframework.security.saml.provider.config;
 
 import java.time.Clock;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.Filter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -89,8 +89,15 @@ public abstract class AbstractProviderSecurityConfiguration<T extends HostedProv
 	}
 
 	@Bean
-	public SamlConfigurationRepository<HttpServletRequest> samlConfigurationRepository() {
-		return new StaticSamlConfigurationRepository(hostConfiguration);
+	public SamlConfigurationRepository samlConfigurationRepository() {
+		return new ThreadLocalSamlConfigurationRepository(hostConfiguration);
+	}
+
+	@Bean
+	public Filter samlConfigurationFilter() {
+		return new ThreadLocalSamlConfigurationFilter(
+			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
+		);
 	}
 
 	@Bean

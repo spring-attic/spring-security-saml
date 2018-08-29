@@ -17,14 +17,12 @@
 
 package org.springframework.security.saml.provider.provisioning;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.saml.provider.HostedProviderService;
 
 public interface SamlProviderProvisioning<T extends HostedProviderService> {
-	T getHostedProvider(HttpServletRequest request);
 
-	String getBasePath(HttpServletRequest request);
+	T getHostedProvider();
+
 }
 
 

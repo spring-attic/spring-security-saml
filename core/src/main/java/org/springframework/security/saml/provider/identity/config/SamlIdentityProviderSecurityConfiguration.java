@@ -51,7 +51,8 @@ public class SamlIdentityProviderSecurityConfiguration
 		String metadata = "/" + stripSlashes(prefix) + "/metadata";
 		http
 			//.antMatcher(matcher)
-			.addFilterAfter(idpMetadataFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(samlConfigurationFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(idpMetadataFilter(), samlConfigurationFilter().getClass())
 			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
 			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
 			.addFilterAfter(idpLogoutFilter(), idpAuthnRequestFilter().getClass())

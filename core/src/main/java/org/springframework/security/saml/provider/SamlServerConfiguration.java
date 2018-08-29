@@ -25,7 +25,7 @@ import org.springframework.security.saml.provider.service.config.LocalServicePro
  * Represents a configuration for a hosted or domain.
  * A hosted domain can have one local service provider, or one local identity provider, or both.
  */
-public class SamlServerConfiguration {
+public class SamlServerConfiguration implements Cloneable{
 
 	private LocalServiceProviderConfiguration serviceProvider;
 	private LocalIdentityProviderConfiguration identityProvider;
@@ -56,5 +56,14 @@ public class SamlServerConfiguration {
 	public SamlServerConfiguration setNetwork(NetworkConfiguration network) {
 		this.network = network;
 		return this;
+	}
+
+	@Override
+	public SamlServerConfiguration clone() throws CloneNotSupportedException {
+		SamlServerConfiguration result = (SamlServerConfiguration)super.clone();
+		result.network = network != null ? network.clone() : null;
+		result.identityProvider = identityProvider != null ? identityProvider.clone() : null;
+		result.serviceProvider = serviceProvider != null ? serviceProvider.clone() : null;
+		return result;
 	}
 }

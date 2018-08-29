@@ -74,7 +74,7 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 			throw new AuthenticationCredentialsNotFoundException("SAMLResponse parameter missing");
 		}
 
-		ServiceProviderService provider = getHostedProvider(request);
+		ServiceProviderService provider = getProvisioning().getHostedProvider();
 
 		Response r = provider.fromXml(responseData, true, GET.matches(request.getMethod()), Response.class);
 		if (logger.isTraceEnabled()) {
@@ -103,10 +103,6 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 
 	private String getSamlResponseData(HttpServletRequest request) {
 		return request.getParameter("SAMLResponse");
-	}
-
-	private ServiceProviderService getHostedProvider(HttpServletRequest request) {
-		return getProvisioning().getHostedProvider(request);
 	}
 
 	private SamlProviderProvisioning<ServiceProviderService> getProvisioning() {

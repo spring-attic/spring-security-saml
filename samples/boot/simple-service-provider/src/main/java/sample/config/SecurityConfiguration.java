@@ -20,13 +20,12 @@ package sample.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityConfiguration;
-import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends SamlServiceProviderSecurityConfiguration {
 
-	public SecurityConfiguration(SamlServiceProviderServerBeanConfiguration configuration) {
+	public SecurityConfiguration(BeanConfig configuration) {
 		super(configuration);
 	}
 }

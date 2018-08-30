@@ -22,8 +22,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.time.Clock;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 
@@ -66,6 +68,8 @@ import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
+import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
@@ -93,6 +97,7 @@ import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xml.security.algorithms.JCEMapper;
 import org.apache.xml.security.signature.XMLSignatureException;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.ConfigurationService;
@@ -141,6 +146,7 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Condition;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.EncryptedAttribute;
 import org.opensaml.saml.saml2.core.EncryptedElementType;
 import org.opensaml.saml.saml2.core.EncryptedID;
@@ -150,6 +156,7 @@ import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.StatusMessage;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.saml.saml2.encryption.Encrypter;
 import org.opensaml.saml.saml2.metadata.ArtifactResolutionService;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
@@ -167,14 +174,18 @@ import org.opensaml.saml.saml2.metadata.SingleLogoutService;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder;
 import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.DataEncryptionParameters;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.encryption.support.EncryptionException;
 import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.KeyEncryptionParameters;
 import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
@@ -196,10 +207,12 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
+import static org.opensaml.security.crypto.KeySupport.generateKey;
 import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -317,7 +330,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		registry.setParserPool(parserPool);
 		encryptedKeyResolver = new ChainingEncryptedKeyResolver(
-			Arrays.asList(
+			asList(
 				new InlineEncryptedKeyResolver(),
 				new EncryptedElementTypeEncryptedKeyResolver(),
 				new SimpleRetrievalMethodEncryptedKeyResolver()
@@ -529,6 +542,23 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
+	protected EncryptedAssertion encryptAssertion(org.opensaml.saml.saml2.core.Assertion assertion,
+												  SimpleKey key,
+												  KeyEncryptionMethod keyAlgorithm,
+												  DataEncryptionMethod dataAlgorithm) {
+		Encrypter encrypter = getEncrypter(key, keyAlgorithm, dataAlgorithm);
+		try {
+			Encrypter.KeyPlacement keyPlacement =
+				Encrypter.KeyPlacement.valueOf(
+					System.getProperty("spring.security.saml.encrypt.key.placement", "PEER")
+				);
+			encrypter.setKeyPlacement(keyPlacement);
+			return encrypter.encrypt(assertion);
+		} catch (EncryptionException e) {
+			throw new SamlException("Unable to encrypt assertion.", e);
+		}
+	}
+
 	protected SAMLObject decrypt(EncryptedElementType encrypted, List<SimpleKey> keys) {
 		DecryptionException last = null;
 		for (SimpleKey key : keys) {
@@ -543,6 +573,36 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			throw new SamlKeyException("Unable to decrypt object.", last);
 		}
 		return null;
+	}
+
+	protected Encrypter getEncrypter(SimpleKey key,
+									 KeyEncryptionMethod keyAlgorithm,
+									 DataEncryptionMethod dataAlgorithm) {
+		Credential credential = getCredential(key, getCredentialsResolver(key));
+
+		SecretKey secretKey = generateKeyFromURI(dataAlgorithm);
+		BasicCredential dataCredential = new BasicCredential(secretKey);
+		DataEncryptionParameters dataEncryptionParameters = new DataEncryptionParameters();
+		dataEncryptionParameters.setEncryptionCredential(dataCredential);
+		dataEncryptionParameters.setAlgorithm(dataAlgorithm.toString());
+
+		KeyEncryptionParameters keyEncryptionParameters = new KeyEncryptionParameters();
+		keyEncryptionParameters.setEncryptionCredential(credential);
+		keyEncryptionParameters.setAlgorithm(keyAlgorithm.toString());
+
+		Encrypter encrypter = new Encrypter(dataEncryptionParameters, asList(keyEncryptionParameters));
+
+		return encrypter;
+	}
+
+	public static SecretKey generateKeyFromURI(DataEncryptionMethod algoURI) {
+		try {
+			String jceAlgorithmName = JCEMapper.getJCEKeyAlgorithmFromURI(algoURI.toString());
+			int keyLength = JCEMapper.getKeyLengthFromURI(algoURI.toString());
+			return generateKey(jceAlgorithmName, keyLength, null);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new SamlException(e);
+		}
 	}
 
 	protected Decrypter getDecrypter(SimpleKey key) {
@@ -773,7 +833,15 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		result.setStatus(status);
 
 		for (Assertion a : ofNullable(response.getAssertions()).orElse(emptyList())) {
-			result.getAssertions().add(internalToXml(a));
+			org.opensaml.saml.saml2.core.Assertion osAssertion = internalToXml(a);
+			if (a.getEncryptionKey() != null) {
+				EncryptedAssertion encryptedAssertion =
+					encryptAssertion(osAssertion, a.getEncryptionKey(), a.getKeyAlgorithm(), a.getDataAlgorithm());
+				result.getEncryptedAssertions().add(encryptedAssertion);
+			}
+			else {
+				result.getAssertions().add(osAssertion);
+			}
 		}
 		if (response.getSigningKey() != null) {
 			signObject(result, response.getSigningKey(), response.getAlgorithm(), response.getDigest());

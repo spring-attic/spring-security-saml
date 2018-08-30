@@ -28,6 +28,8 @@ import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.metadata.MetadataBase;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
@@ -44,6 +46,7 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -552,6 +555,49 @@ public class AssertionTests extends MetadataBase {
 			expected.getMessage(),
 			equalTo(
 				"Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key.")
+		);
+	}
+
+	@Test
+	public void encryptAssertion() throws Exception {
+		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES128_CBC);
+		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES256_CBC);
+		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES192_CBC);
+	}
+
+	public void encryptAssertion(KeyEncryptionMethod keyAlgorithm, DataEncryptionMethod dataAlgorithm) throws Exception {
+		Response response =
+			(Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		SimpleKey encryptionKey =
+			new SimpleKey(
+				"encryption-key",
+				null,
+				decryptionKey.getCertificate(),
+				null,
+				KeyType.ENCRYPTION
+			);
+		Assertion assertion = response.getAssertions().get(0);
+		assertion
+			.setSigningKey(null,null,null)
+			.setEncryptionKey(encryptionKey, keyAlgorithm, dataAlgorithm);
+
+		String encryptedXml = config.toXml(response);
+		assertThat(encryptedXml, containsString("xenc:CipherValue"));
+		assertThat(encryptedXml, containsString("saml2:EncryptedAssertion"));
+
+		List<SimpleKey> verification = asList(decryptionVerificationKey);
+		List<SimpleKey> local = asList(decryptionKey);
+		Saml2Object resolve = config.fromXml(encryptedXml, verification, local);
+		assertNotNull(resolve);
+		assertThat(resolve.getClass(), equalTo(Response.class));
+		Response r = (Response) resolve;
+		assertNotNull(r.getImplementation());
+		assertNotNull(r.getAssertions());
+		assertThat(r.getAssertions().size(), equalTo(1));
+
+		assertThat(
+			response.getAssertions().get(0).getSubject().getPrincipal().getValue(),
+			equalTo(r.getAssertions().get(0).getSubject().getPrincipal().getValue())
 		);
 	}
 

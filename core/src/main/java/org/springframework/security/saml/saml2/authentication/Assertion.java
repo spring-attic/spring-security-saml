@@ -25,6 +25,8 @@ import java.util.Optional;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
@@ -53,6 +55,9 @@ public class Assertion extends ImplementationHolder {
 	private SimpleKey signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
+	private SimpleKey encryptionKey;
+	private KeyEncryptionMethod keyAlgorithm;
+	private DataEncryptionMethod dataAlgorithm;
 
 	public String getVersion() {
 		return version;
@@ -193,5 +198,26 @@ public class Assertion extends ImplementationHolder {
 		this.algorithm = algorithm;
 		this.digest = digest;
 		return this;
+	}
+
+	public Assertion setEncryptionKey(SimpleKey encryptionKey,
+									  KeyEncryptionMethod keyAlgorithm,
+									  DataEncryptionMethod dataAlgorithm) {
+		this.encryptionKey = encryptionKey;
+		this.keyAlgorithm = keyAlgorithm;
+		this.dataAlgorithm = dataAlgorithm;
+		return this;
+	}
+
+	public SimpleKey getEncryptionKey() {
+		return encryptionKey;
+	}
+
+	public KeyEncryptionMethod getKeyAlgorithm() {
+		return keyAlgorithm;
+	}
+
+	public DataEncryptionMethod getDataAlgorithm() {
+		return dataAlgorithm;
 	}
 }

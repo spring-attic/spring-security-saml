@@ -51,7 +51,7 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 			samlConfigurationRepository(),
 			samlTransformer(),
 			samlValidator(),
-			samlMetadataCache(samlNetworkHandler())
+			samlMetadataCache()
 		);
 	}
 

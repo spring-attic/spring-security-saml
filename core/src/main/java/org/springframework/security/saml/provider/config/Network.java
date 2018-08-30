@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.util;
+package org.springframework.security.saml.provider.config;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.saml.SamlKeyException;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import org.apache.http.client.config.RequestConfig;
@@ -34,25 +35,29 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
-public class Network {
+class Network {
 
-	private int connectTimeoutMillis = 5000;
-	private int readTimeoutMillis = 10000;
+	private final int connectTimeoutMillis;
+	private final int readTimeoutMillis;
 
-	public byte[] get(String url, boolean skipSslValidation) {
-		RestTemplate template = new RestTemplate(createRequestFactory(skipSslValidation));
-		return template.getForObject(url, byte[].class);
+	Network(int connectTimeoutMillis, int readTimeoutMillis) {
+		this.connectTimeoutMillis = connectTimeoutMillis;
+		this.readTimeoutMillis = readTimeoutMillis;
 	}
 
-	public ClientHttpRequestFactory createRequestFactory(boolean skipSslValidation) {
+	public RestOperations get(boolean skipSslValidation) {
+		return new RestTemplate(createRequestFactory(skipSslValidation));
+	}
+
+	private ClientHttpRequestFactory createRequestFactory(boolean skipSslValidation) {
 		return createRequestFactory(getClientBuilder(skipSslValidation));
 	}
 
-	protected ClientHttpRequestFactory createRequestFactory(HttpClientBuilder builder) {
+	private ClientHttpRequestFactory createRequestFactory(HttpClientBuilder builder) {
 		return new HttpComponentsClientHttpRequestFactory(builder.build());
 	}
 
-	protected HttpClientBuilder getClientBuilder(boolean skipSslValidation) {
+	private HttpClientBuilder getClientBuilder(boolean skipSslValidation) {
 		HttpClientBuilder builder = HttpClients.custom()
 			.useSystemProperties()
 			.setRedirectStrategy(new DefaultRedirectStrategy());
@@ -61,15 +66,15 @@ public class Network {
 		}
 		builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
 		RequestConfig config = RequestConfig.custom()
-			.setConnectTimeout(getConnectTimeoutMillis())
-			.setConnectionRequestTimeout(getConnectTimeoutMillis())
-			.setSocketTimeout(getReadTimeoutMillis())
+			.setConnectTimeout(connectTimeoutMillis)
+			.setConnectionRequestTimeout(connectTimeoutMillis)
+			.setSocketTimeout(readTimeoutMillis)
 			.build();
 		builder.setDefaultRequestConfig(config);
 		return builder;
 	}
 
-	protected SSLContext getNonValidatingSslContext() {
+	private SSLContext getNonValidatingSslContext() {
 		try {
 			return new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
 		} catch (KeyManagementException e) {
@@ -79,23 +84,5 @@ public class Network {
 		} catch (KeyStoreException e) {
 			throw new SamlKeyException(e);
 		}
-	}
-
-	public int getConnectTimeoutMillis() {
-		return connectTimeoutMillis;
-	}
-
-	public Network setConnectTimeoutMillis(int connectTimeoutMillis) {
-		this.connectTimeoutMillis = connectTimeoutMillis;
-		return this;
-	}
-
-	public int getReadTimeoutMillis() {
-		return readTimeoutMillis;
-	}
-
-	public Network setReadTimeoutMillis(int readTimeoutMillis) {
-		this.readTimeoutMillis = readTimeoutMillis;
-		return this;
 	}
 }

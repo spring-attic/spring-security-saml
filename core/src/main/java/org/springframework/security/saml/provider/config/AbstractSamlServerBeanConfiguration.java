@@ -35,7 +35,7 @@ import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
-import org.springframework.security.saml.util.Network;
+import org.springframework.web.client.RestOperations;
 
 public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProviderService> {
 
@@ -72,8 +72,12 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 	}
 
 	@Bean
-	public SamlMetadataCache samlMetadataCache(Network network) {
-		return new DefaultMetadataCache(samlTime(), network);
+	public SamlMetadataCache samlMetadataCache() {
+		return new DefaultMetadataCache(
+			samlTime(),
+			samlValidatingNetworkHandler(),
+			samlNonValidatingNetworkHandler()
+		);
 	}
 
 	@Bean
@@ -92,15 +96,29 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 
 	protected abstract SamlServerConfiguration getBasicSamlServerConfiguration();
 
-	@Bean
-	public Network samlNetworkHandler() {
-		Network result = new Network();
+	private int getNetworkHandlerConnectTimeout() {
 		if (getBasicSamlServerConfiguration() != null && getBasicSamlServerConfiguration().getNetwork() != null) {
 			NetworkConfiguration networkConfiguration = getBasicSamlServerConfiguration().getNetwork();
-			result
-				.setConnectTimeoutMillis(networkConfiguration.getConnectTimeout())
-				.setReadTimeoutMillis(networkConfiguration.getReadTimeout());
+			return networkConfiguration.getConnectTimeout();
 		}
-		return result;
+		return 5000;
+	}
+
+	private int getNetworkHandlerReadTimeout() {
+		if (getBasicSamlServerConfiguration() != null && getBasicSamlServerConfiguration().getNetwork() != null) {
+			NetworkConfiguration networkConfiguration = getBasicSamlServerConfiguration().getNetwork();
+			return networkConfiguration.getReadTimeout();
+		}
+		return 10000;
+	}
+
+	@Bean
+	public RestOperations samlValidatingNetworkHandler() {
+		return new Network(getNetworkHandlerConnectTimeout(), getNetworkHandlerReadTimeout()).get(false);
+	}
+
+	@Bean
+	public RestOperations samlNonValidatingNetworkHandler() {
+		return new Network(getNetworkHandlerConnectTimeout(), getNetworkHandlerReadTimeout()).get(true);
 	}
 }

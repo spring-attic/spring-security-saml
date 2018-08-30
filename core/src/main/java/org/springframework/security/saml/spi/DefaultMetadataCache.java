@@ -20,8 +20,8 @@ import java.time.Clock;
 
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlMetadataException;
-import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.util.TimebasedMap;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Caches metadata that has been retrieved over the network
@@ -30,19 +30,29 @@ import org.springframework.security.saml.util.TimebasedMap;
  */
 public class DefaultMetadataCache implements SamlMetadataCache {
 
-	private final Network network;
+	private final RestOperations validatingNetwork;
+	private final RestOperations nonValidatingNetwork;
+
 	private TimebasedMap<String, byte[]> cache;
 
-	public DefaultMetadataCache(Clock time, Network network) {
+	public DefaultMetadataCache(Clock time,
+								RestOperations validatingNetwork,
+								RestOperations nonValidatingNetwork) {
 		cache = new TimebasedMap<>(time);
-		this.network = network;
+		this.validatingNetwork = validatingNetwork;
+		this.nonValidatingNetwork = nonValidatingNetwork;
 	}
 
 	public byte[] getMetadata(String uri, boolean skipSslValidation) {
 		byte[] data = cache.get(uri);
 		if (data == null) {
 			try {
-				data = network.get(uri, skipSslValidation);
+				if (skipSslValidation) {
+					data = nonValidatingNetwork.getForObject(uri, byte[].class);
+				}
+				else {
+					data = validatingNetwork.getForObject(uri, byte[].class);
+				}
 				cache.put(uri, data);
 			} catch (Exception x) {
 				throw new SamlMetadataException("Unable to download SAML metadata.", x);

@@ -42,7 +42,6 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.util.Network;
 import org.springframework.security.saml.validation.ValidationException;
 import org.springframework.security.saml.validation.ValidationResult;
 import org.springframework.security.saml.validation.ValidationResult.ValidationError;
@@ -65,7 +64,6 @@ public class DefaultValidator implements SamlValidator {
 	private boolean allowUnsolicitedResponses = true;
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
-	private Network network = new Network();
 
 	public DefaultValidator(SpringSecuritySaml implementation) {
 		setImplementation(implementation);
@@ -73,11 +71,6 @@ public class DefaultValidator implements SamlValidator {
 
 	private void setImplementation(SpringSecuritySaml implementation) {
 		this.implementation = implementation;
-	}
-
-	public DefaultValidator setNetwork(Network network) {
-		this.network = network;
-		return this;
 	}
 
 	public DefaultValidator setTime(Clock time) {

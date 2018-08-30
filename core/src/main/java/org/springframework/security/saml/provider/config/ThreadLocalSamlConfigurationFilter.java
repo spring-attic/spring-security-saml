@@ -21,11 +21,6 @@ public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 		this.repository = repository;
 	}
 
-
-	protected SamlServerConfiguration getConfiguration(HttpServletRequest request) {
-		return repository.getServerConfiguration();
-	}
-
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
@@ -48,6 +43,10 @@ public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 		} finally {
 			repository.reset();
 		}
+	}
+
+	protected SamlServerConfiguration getConfiguration(HttpServletRequest request) {
+		return repository.getServerConfiguration();
 	}
 
 	protected String getBasePath(HttpServletRequest request) {

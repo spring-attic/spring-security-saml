@@ -156,15 +156,6 @@ public class LocalProviderConfiguration<
 		return _this();
 	}
 
-	public List<ExternalConfiguration> getProviders() {
-		return providers;
-	}
-
-	public LocalConfiguration setProviders(List<ExternalConfiguration> providers) {
-		this.providers = providers;
-		return _this();
-	}
-
 	public String getBasePath() {
 		return basePath;
 	}
@@ -176,12 +167,21 @@ public class LocalProviderConfiguration<
 
 	@Override
 	public LocalConfiguration clone() throws CloneNotSupportedException {
-		LocalConfiguration result = (LocalConfiguration)super.clone();
+		LocalConfiguration result = (LocalConfiguration) super.clone();
 		LinkedList<ExternalConfiguration> newProviders = new LinkedList<>();
 		for (ExternalConfiguration externalConfiguration : getProviders()) {
 			newProviders.add(externalConfiguration.clone());
 		}
 		result.setProviders(newProviders);
 		return result;
+	}
+
+	public List<ExternalConfiguration> getProviders() {
+		return providers;
+	}
+
+	public LocalConfiguration setProviders(List<ExternalConfiguration> providers) {
+		this.providers = providers;
+		return _this();
 	}
 }

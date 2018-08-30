@@ -31,8 +31,8 @@ import org.springframework.security.saml.provider.identity.config.SamlIdentityPr
 @EnableWebSecurity
 public class SecurityConfiguration extends SamlIdentityProviderSecurityConfiguration {
 
-	public SecurityConfiguration(AppConfig hostConfiguration) {
-		super(hostConfiguration);
+	public SecurityConfiguration(BeanConfig configuration) {
+		super(configuration);
 	}
 
 	@Bean

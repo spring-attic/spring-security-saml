@@ -79,6 +79,6 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 
 	@Override
 	public T clone() throws CloneNotSupportedException {
-		return (T)super.clone();
+		return (T) super.clone();
 	}
 }

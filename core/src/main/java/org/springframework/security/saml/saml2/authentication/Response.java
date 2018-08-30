@@ -47,15 +47,6 @@ public class Response extends StatusResponse<Response> {
 		return this;
 	}
 
-	public Response setSigningKey(SimpleKey signingKey,
-								  AlgorithmMethod algorithm,
-								  DigestMethod digest) {
-		this.signingKey = signingKey;
-		this.algorithm = algorithm;
-		this.digest = digest;
-		return this;
-	}
-
 	public SimpleKey getSigningKey() {
 		return signingKey;
 	}
@@ -66,6 +57,15 @@ public class Response extends StatusResponse<Response> {
 
 	public DigestMethod getDigest() {
 		return digest;
+	}
+
+	public Response setSigningKey(SimpleKey signingKey,
+								  AlgorithmMethod algorithm,
+								  DigestMethod digest) {
+		this.signingKey = signingKey;
+		this.algorithm = algorithm;
+		this.digest = digest;
+		return this;
 	}
 
 	public Response addAssertion(Assertion assertion) {

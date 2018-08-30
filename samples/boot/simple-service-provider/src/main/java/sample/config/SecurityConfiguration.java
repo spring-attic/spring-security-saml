@@ -25,7 +25,7 @@ import org.springframework.security.saml.provider.service.config.SamlServiceProv
 @EnableWebSecurity
 public class SecurityConfiguration extends SamlServiceProviderSecurityConfiguration {
 
-	public SecurityConfiguration(AppConfig hostConfiguration) {
-		super(hostConfiguration);
+	public SecurityConfiguration(BeanConfig configuration) {
+		super(configuration);
 	}
 }

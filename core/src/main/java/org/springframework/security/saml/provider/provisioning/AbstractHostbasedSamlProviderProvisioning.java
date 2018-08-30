@@ -24,9 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
-import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
-import static org.springframework.util.StringUtils.hasText;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
@@ -50,7 +47,11 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-public abstract class AbstractHostbasedSamlProviderProvisioning<Holder> {
+import static java.util.Arrays.asList;
+import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
+import static org.springframework.util.StringUtils.hasText;
+
+public abstract class AbstractHostbasedSamlProviderProvisioning {
 
 	private final SamlConfigurationRepository configuration;
 	private final SamlTransformer transformer;
@@ -69,44 +70,6 @@ public abstract class AbstractHostbasedSamlProviderProvisioning<Holder> {
 
 	public SamlConfigurationRepository getConfigurationRepository() {
 		return configuration;
-	}
-
-	public SamlTransformer getTransformer() {
-		return transformer;
-	}
-
-	public SamlValidator getValidator() {
-		return validator;
-	}
-
-	public SamlMetadataCache getCache() {
-		return cache;
-	}
-
-	protected String getAliasPath(LocalProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
-	}
-
-	protected Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
-		builder.pathSegment(path);
-		return getEndpoint(builder.build().toUriString(), binding, index, isDefault);
-	}
-
-	protected Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
-		return
-			new Endpoint()
-				.setIndex(index)
-				.setBinding(binding)
-				.setLocation(url)
-				.setDefault(isDefault)
-				.setIndex(index);
 	}
 
 	protected IdentityProviderService getHostedIdentityProvider(LocalIdentityProviderConfiguration idpConfig) {
@@ -154,6 +117,16 @@ public abstract class AbstractHostbasedSamlProviderProvisioning<Holder> {
 		);
 	}
 
+	protected String getAliasPath(LocalProviderConfiguration configuration) {
+		try {
+			return hasText(configuration.getAlias()) ?
+				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
+				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new SamlException(e);
+		}
+	}
+
 	private IdentityProviderMetadata identityProviderMetadata(String baseUrl,
 															  SimpleKey signingKey,
 															  List<SimpleKey> keys,
@@ -186,6 +159,34 @@ public abstract class AbstractHostbasedSamlProviderProvisioning<Holder> {
 				)
 			);
 
+	}
+
+	public SamlTransformer getTransformer() {
+		return transformer;
+	}
+
+	public SamlValidator getValidator() {
+		return validator;
+	}
+
+	public SamlMetadataCache getCache() {
+		return cache;
+	}
+
+	protected Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+		builder.pathSegment(path);
+		return getEndpoint(builder.build().toUriString(), binding, index, isDefault);
+	}
+
+	protected Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
+		return
+			new Endpoint()
+				.setIndex(index)
+				.setBinding(binding)
+				.setLocation(url)
+				.setDefault(isDefault)
+				.setIndex(index);
 	}
 
 	public ServiceProviderService getHostedServiceProvider(LocalServiceProviderConfiguration spConfig) {
@@ -267,7 +268,6 @@ public abstract class AbstractHostbasedSamlProviderProvisioning<Holder> {
 				)
 			);
 	}
-
 
 
 }

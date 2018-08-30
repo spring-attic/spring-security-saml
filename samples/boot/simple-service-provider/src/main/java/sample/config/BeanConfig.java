@@ -15,32 +15,23 @@
  *
  */
 
-package org.springframework.security.saml.provider.config;
+package sample.config;
 
-public class NetworkConfiguration implements Cloneable {
-	private int readTimeout;
-	private int connectTimeout;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
 
-	public int getReadTimeout() {
-		return readTimeout;
-	}
+@Configuration
+public class BeanConfig extends SamlServiceProviderServerBeanConfiguration {
 
-	public NetworkConfiguration setReadTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-		return this;
-	}
+	private final AppConfig config;
 
-	public int getConnectTimeout() {
-		return connectTimeout;
-	}
-
-	public NetworkConfiguration setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-		return this;
+	public BeanConfig(AppConfig config) {
+		this.config = config;
 	}
 
 	@Override
-	public NetworkConfiguration clone() throws CloneNotSupportedException {
-		return (NetworkConfiguration) super.clone();
+	protected SamlServerConfiguration getBasicSamlServerConfiguration() {
+		return config;
 	}
 }

@@ -25,21 +25,21 @@ import org.springframework.security.saml.provider.service.ServiceProviderService
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 
 public class HostBasedSamlServiceProviderProvisioning
-    extends AbstractHostbasedSamlProviderProvisioning
-    implements SamlProviderProvisioning<ServiceProviderService> {
+	extends AbstractHostbasedSamlProviderProvisioning
+	implements SamlProviderProvisioning<ServiceProviderService> {
 
-    public HostBasedSamlServiceProviderProvisioning(SamlConfigurationRepository configuration,
-                                                    SamlTransformer transformer,
-                                                    SamlValidator validator,
-                                                    SamlMetadataCache cache) {
-        super(configuration, transformer, validator, cache);
-    }
+	public HostBasedSamlServiceProviderProvisioning(SamlConfigurationRepository configuration,
+													SamlTransformer transformer,
+													SamlValidator validator,
+													SamlMetadataCache cache) {
+		super(configuration, transformer, validator, cache);
+	}
 
 
-    @Override
-    public ServiceProviderService getHostedProvider() {
-        LocalServiceProviderConfiguration config =
-            getConfigurationRepository().getServerConfiguration().getServiceProvider();
-        return getHostedServiceProvider(config);
-    }
+	@Override
+	public ServiceProviderService getHostedProvider() {
+		LocalServiceProviderConfiguration config =
+			getConfigurationRepository().getServerConfiguration().getServiceProvider();
+		return getHostedServiceProvider(config);
+	}
 }

@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlIdentityProviderSecurityConfiguration
+public abstract class SamlIdentityProviderSecurityConfiguration
 	extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
 
 	private final SamlIdentityProviderServerBeanConfiguration configuration;

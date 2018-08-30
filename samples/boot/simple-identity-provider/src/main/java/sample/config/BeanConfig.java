@@ -30,7 +30,7 @@ public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
 	}
 
 	@Override
-	protected SamlServerConfiguration getBasicSamlServerConfiguration() {
+	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
 		return config;
 	}
 }

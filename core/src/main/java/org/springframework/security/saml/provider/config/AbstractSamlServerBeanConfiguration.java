@@ -90,23 +90,23 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 	@Bean
 	public SamlConfigurationRepository samlConfigurationRepository() {
 		return new ThreadLocalSamlConfigurationRepository(
-			new StaticSamlConfigurationRepository(getBasicSamlServerConfiguration())
+			new StaticSamlConfigurationRepository(getDefaultHostSamlServerConfiguration())
 		);
 	}
 
-	protected abstract SamlServerConfiguration getBasicSamlServerConfiguration();
+	protected abstract SamlServerConfiguration getDefaultHostSamlServerConfiguration();
 
 	private int getNetworkHandlerConnectTimeout() {
-		if (getBasicSamlServerConfiguration() != null && getBasicSamlServerConfiguration().getNetwork() != null) {
-			NetworkConfiguration networkConfiguration = getBasicSamlServerConfiguration().getNetwork();
+		if (getDefaultHostSamlServerConfiguration() != null && getDefaultHostSamlServerConfiguration().getNetwork() != null) {
+			NetworkConfiguration networkConfiguration = getDefaultHostSamlServerConfiguration().getNetwork();
 			return networkConfiguration.getConnectTimeout();
 		}
 		return 5000;
 	}
 
 	private int getNetworkHandlerReadTimeout() {
-		if (getBasicSamlServerConfiguration() != null && getBasicSamlServerConfiguration().getNetwork() != null) {
-			NetworkConfiguration networkConfiguration = getBasicSamlServerConfiguration().getNetwork();
+		if (getDefaultHostSamlServerConfiguration() != null && getDefaultHostSamlServerConfiguration().getNetwork() != null) {
+			NetworkConfiguration networkConfiguration = getDefaultHostSamlServerConfiguration().getNetwork();
 			return networkConfiguration.getReadTimeout();
 		}
 		return 10000;

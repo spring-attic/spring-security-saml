@@ -38,10 +38,6 @@ public abstract class SamlServiceProviderSecurityConfiguration
 		this.configuration = configuration;
 	}
 
-	public SamlServiceProviderServerBeanConfiguration getConfiguration() {
-		return configuration;
-	}
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String prefix = getPrefix();
@@ -81,6 +77,10 @@ public abstract class SamlServiceProviderSecurityConfiguration
 			.and()
 			.formLogin().loginPage(select)
 		;
+	}
+
+	public SamlServiceProviderServerBeanConfiguration getConfiguration() {
+		return configuration;
 	}
 
 

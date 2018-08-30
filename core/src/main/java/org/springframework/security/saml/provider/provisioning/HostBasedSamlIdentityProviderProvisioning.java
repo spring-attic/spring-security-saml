@@ -17,8 +17,6 @@
 
 package org.springframework.security.saml.provider.provisioning;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
@@ -27,24 +25,24 @@ import org.springframework.security.saml.provider.identity.IdentityProviderServi
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 
 public class HostBasedSamlIdentityProviderProvisioning
-    extends AbstractHostbasedSamlProviderProvisioning<HttpServletRequest>
-    implements SamlProviderProvisioning<IdentityProviderService> {
+	extends AbstractHostbasedSamlProviderProvisioning
+	implements SamlProviderProvisioning<IdentityProviderService> {
 
 
-    public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
-                                                     SamlTransformer transformer,
-                                                     SamlValidator validator,
-                                                     SamlMetadataCache cache) {
-        super(configuration, transformer, validator, cache);
-    }
+	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
+													 SamlTransformer transformer,
+													 SamlValidator validator,
+													 SamlMetadataCache cache) {
+		super(configuration, transformer, validator, cache);
+	}
 
 
-    @Override
-    public IdentityProviderService getHostedProvider() {
-        LocalIdentityProviderConfiguration config =
-            getConfigurationRepository().getServerConfiguration().getIdentityProvider();
-        return getHostedIdentityProvider(config);
-    }
+	@Override
+	public IdentityProviderService getHostedProvider() {
+		LocalIdentityProviderConfiguration config =
+			getConfigurationRepository().getServerConfiguration().getIdentityProvider();
+		return getHostedIdentityProvider(config);
+	}
 
 
 }

@@ -41,6 +41,6 @@ public class NetworkConfiguration implements Cloneable {
 
 	@Override
 	public NetworkConfiguration clone() throws CloneNotSupportedException {
-		return (NetworkConfiguration)super.clone();
+		return (NetworkConfiguration) super.clone();
 	}
 }

@@ -85,8 +85,8 @@ public class Assertion extends ImplementationHolder {
 		return issuer;
 	}
 
-	public Assertion setIssuer(String issuer) {
-		this.issuer = new Issuer().setValue(issuer);
+	public Assertion setIssuer(Issuer issuer) {
+		this.issuer = issuer;
 		return this;
 	}
 
@@ -158,8 +158,8 @@ public class Assertion extends ImplementationHolder {
 		return digest;
 	}
 
-	public Assertion setIssuer(Issuer issuer) {
-		this.issuer = issuer;
+	public Assertion setIssuer(String issuer) {
+		this.issuer = new Issuer().setValue(issuer);
 		return this;
 	}
 

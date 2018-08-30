@@ -41,11 +41,21 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 		return new IdentityProviderMetadataFilter(getSamlProvisioning());
 	}
 
+	@Override
+	@Bean(name = "samlIdentityProviderProvisioning")
+	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
+		return new HostBasedSamlIdentityProviderProvisioning(
+			samlConfigurationRepository(),
+			samlTransformer(),
+			samlValidator(),
+			samlMetadataCache(samlNetworkHandler())
+		);
+	}
+
 	@Bean
 	public Filter idpInitatedLoginFilter() {
 		return new IdpInitiatedLoginFilter(getSamlProvisioning(), samlAssertionStore());
 	}
-
 
 	@Bean
 	public Filter idpAuthnRequestFilter() {
@@ -65,17 +75,6 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 	@Bean
 	public Filter idpSelectServiceProviderFilter() {
 		return new SelectServiceProviderFilter(getSamlProvisioning());
-	}
-
-	@Override
-	@Bean(name = "samlIdentityProviderProvisioning")
-	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
-		return new HostBasedSamlIdentityProviderProvisioning(
-			samlConfigurationRepository(),
-			samlTransformer(),
-			samlValidator(),
-			samlMetadataCache(samlNetworkHandler())
-		);
 	}
 
 }

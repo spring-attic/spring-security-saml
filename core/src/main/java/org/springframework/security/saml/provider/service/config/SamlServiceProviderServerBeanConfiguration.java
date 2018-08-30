@@ -44,6 +44,17 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 		return new ServiceProviderMetadataFilter(getSamlProvisioning());
 	}
 
+	@Override
+	@Bean(name = "samlServiceProviderProvisioning")
+	public SamlProviderProvisioning<ServiceProviderService> getSamlProvisioning() {
+		return new HostBasedSamlServiceProviderProvisioning(
+			samlConfigurationRepository(),
+			samlTransformer(),
+			samlValidator(),
+			samlMetadataCache(samlNetworkHandler())
+		);
+	}
+
 	@Bean
 	public Filter spAuthenticationRequestFilter() {
 		return new SamlAuthenticationRequestFilter(getSamlProvisioning());
@@ -72,16 +83,5 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 	@Bean
 	public Filter spSelectIdentityProviderFilter() {
 		return new SelectIdentityProviderFilter(getSamlProvisioning());
-	}
-
-	@Override
-	@Bean(name = "samlServiceProviderProvisioning")
-	public SamlProviderProvisioning<ServiceProviderService> getSamlProvisioning() {
-		return new HostBasedSamlServiceProviderProvisioning(
-			samlConfigurationRepository(),
-			samlTransformer(),
-			samlValidator(),
-			samlMetadataCache(samlNetworkHandler())
-		);
 	}
 }

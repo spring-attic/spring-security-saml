@@ -76,7 +76,12 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 		return new DefaultMetadataCache(samlTime(), network);
 	}
 
-	protected abstract SamlServerConfiguration getBasicSamlServerConfiguration();
+	@Bean
+	public Filter samlConfigurationFilter() {
+		return new ThreadLocalSamlConfigurationFilter(
+			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
+		);
+	}
 
 	@Bean
 	public SamlConfigurationRepository samlConfigurationRepository() {
@@ -85,12 +90,7 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 		);
 	}
 
-	@Bean
-	public Filter samlConfigurationFilter() {
-		return new ThreadLocalSamlConfigurationFilter(
-			(ThreadLocalSamlConfigurationRepository)samlConfigurationRepository()
-		);
-	}
+	protected abstract SamlServerConfiguration getBasicSamlServerConfiguration();
 
 	@Bean
 	public Network samlNetworkHandler() {

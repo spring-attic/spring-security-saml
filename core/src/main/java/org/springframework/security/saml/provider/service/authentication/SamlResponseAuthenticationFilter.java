@@ -101,12 +101,12 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 
 	}
 
-	private String getSamlResponseData(HttpServletRequest request) {
-		return request.getParameter("SAMLResponse");
-	}
-
 	private SamlProviderProvisioning<ServiceProviderService> getProvisioning() {
 		return provisioning;
+	}
+
+	private String getSamlResponseData(HttpServletRequest request) {
+		return request.getParameter("SAMLResponse");
 	}
 
 }

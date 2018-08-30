@@ -62,7 +62,10 @@ public class ValidationResult {
 		}
 	}
 
-	@Override
+	public ValidationResult addError(String error) {
+		this.errors.add(new ValidationError(error));
+		return this;
+	}	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer("Validation Errors: ");
 		if (hasErrors()) {
@@ -81,7 +84,10 @@ public class ValidationResult {
 		return sb.toString();
 	}
 
-	public boolean hasErrors() {
+	public ValidationResult addError(ValidationError error) {
+		this.errors.add(error);
+		return this;
+	}	public boolean hasErrors() {
 		return !isSuccess();
 	}
 
@@ -99,13 +105,7 @@ public class ValidationResult {
 		return this;
 	}
 
-	public ValidationResult addError(String error) {
-		this.errors.add(new ValidationError(error));
-		return this;
-	}
 
-	public ValidationResult addError(ValidationError error) {
-		this.errors.add(error);
-		return this;
-	}
+
+
 }

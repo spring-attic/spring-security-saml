@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.key;
 
-public class SimpleKey {
+public class SimpleKey implements Cloneable {
 
 	private String name;
 	private String privateKey;
@@ -89,4 +89,8 @@ public class SimpleKey {
 		return this;
 	}
 
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 }

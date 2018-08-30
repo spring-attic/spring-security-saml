@@ -17,7 +17,10 @@
 
 package org.springframework.security.saml.saml2.encrypt;
 
+import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
+
+import org.springframework.security.saml.SamlException;
 
 public enum DataEncryptionMethod {
 
@@ -30,6 +33,14 @@ public enum DataEncryptionMethod {
 
 	DataEncryptionMethod(@Nonnull String urn) {
 		this.urn = urn;
+		try {
+			Field fieldName = getClass().getSuperclass().getDeclaredField("name");
+			fieldName.setAccessible(true);
+			fieldName.set(this, urn);
+			fieldName.setAccessible(false);
+		} catch (Exception e) {
+			throw new SamlException(e);
+		}
 	}
 
 	public static DataEncryptionMethod fromUrn(String other) {

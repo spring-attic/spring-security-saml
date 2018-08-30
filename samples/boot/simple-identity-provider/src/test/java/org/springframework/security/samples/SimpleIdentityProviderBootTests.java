@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +40,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
+import org.springframework.security.saml.key.KeyType;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
@@ -53,6 +56,7 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml.spi.ExamplePemKey;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -65,6 +69,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import sample.config.AppConfig;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -109,16 +114,13 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private Clock samlTime;
 
-	@Autowired
-	private SamlServerConfiguration configuration;
-
 	private String baseUrl = "http://localhost";
 	private SamlTestObjectHelper helper;
 
 	@BeforeEach
 	public void mockCache() {
 		//since we're using objects outside of the mock request
-		configuration.getIdentityProvider().setBasePath(baseUrl);
+		config.getIdentityProvider().setBasePath(baseUrl);
 
 		given(
 			cache.getMetadata(
@@ -139,6 +141,7 @@ public class SimpleIdentityProviderBootTests {
 
 	@AfterEach
 	public void reset() {
+		config.getIdentityProvider().setEncryptAssertions(false);
 		config.getIdentityProvider().setSingleLogoutEnabled(true);
 	}
 
@@ -150,10 +153,10 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void testCloneConfiguration() throws CloneNotSupportedException {
-		SamlServerConfiguration clone = configuration.clone();
+		SamlServerConfiguration clone = config.clone();
 		clone.getIdentityProvider().getProviders().get(0).setMetadata("changed");
 		assertThat(
-			configuration.getIdentityProvider().getProviders().get(0).getMetadata(),
+			config.getIdentityProvider().getProviders().get(0).getMetadata(),
 			not(equalTo("changed"))
 		);
 		assertThat(
@@ -166,10 +169,10 @@ public class SimpleIdentityProviderBootTests {
 	public void idpInitiateLogout() throws Exception {
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		IdentityProviderService provider = provisioning.getHostedProvider();
-		ServiceProviderMetadata spm = provider.getRemoteProvider("spring.security.saml.sp.id");
+		ServiceProviderMetadata spm = provider.getRemoteProvider("spring.security.saml.xml.sp.id");
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
-		MvcResult mvcResult = idpToSpLogin(token, "spring.security.saml.sp.id");
+		MvcResult mvcResult = idpToSpLogin(token, "spring.security.saml.xml.sp.id");
 		MockHttpServletRequest request = mvcResult.getRequest();
 		MockHttpSession session = (MockHttpSession) request.getSession(false);
 		assertThat(sessionAssertionStore.size(request), equalTo(1));
@@ -205,7 +208,7 @@ public class SimpleIdentityProviderBootTests {
 	public void receiveLogoutRequestNoOtherParties() throws Exception {
 
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		String spm1EntityId = "spring.security.saml.sp.id";
+		String spm1EntityId = "spring.security.saml.xml.sp.id";
 		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
 		UsernamePasswordAuthenticationToken token =
@@ -269,7 +272,7 @@ public class SimpleIdentityProviderBootTests {
 	public void receiveLogoutFollowThrough() throws Exception {
 
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		String spm1EntityId = "spring.security.saml.sp.id";
+		String spm1EntityId = "spring.security.saml.xml.sp.id";
 		String spm2EntityId = "http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp";
 		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
@@ -392,6 +395,13 @@ public class SimpleIdentityProviderBootTests {
 			idpm.getIdentityProvider().getNameIds(),
 			containsInAnyOrder(NameId.UNSPECIFIED, NameId.PERSISTENT, NameId.EMAIL)
 		);
+		for (KeyType type : asList(KeyType.SIGNING, KeyType.ENCRYPTION)) {
+			Optional<SimpleKey> first = idpm.getIdentityProvider().getKeys().stream()
+				.filter(k -> type == k.getType())
+				.findFirst();
+			assertThat("Key of type:"+type, first.isPresent(), equalTo(true));
+		}
+
 
 	}
 
@@ -406,7 +416,7 @@ public class SimpleIdentityProviderBootTests {
 	public void idpInitiatedLogin() throws Exception {
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
-		MvcResult result = idpToSpLogin(token, "spring.security.saml.sp.id");
+		MvcResult result = idpToSpLogin(token, "spring.security.saml.xml.sp.id");
 		String html = result.getResponse().getContentAsString();
 		assertThat(html, containsString("name=\"SAMLResponse\""));
 		String response = extractResponse(html, "SAMLResponse");
@@ -417,10 +427,32 @@ public class SimpleIdentityProviderBootTests {
 	}
 
 	@Test
+	public void idpInitiatedLoginGeneratedEncryptedAssertion() throws Exception {
+		config.getIdentityProvider().setEncryptAssertions(true);
+		UsernamePasswordAuthenticationToken token =
+			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
+		MvcResult result = idpToSpLogin(token, "spring.security.saml.xml.sp.id");
+		String html = result.getResponse().getContentAsString();
+		assertThat(html, containsString("name=\"SAMLResponse\""));
+		String response = extractResponse(html, "SAMLResponse");
+		String decodedXml = transformer.samlDecode(response, false);
+		assertThat(decodedXml, containsString("xenc:CipherValue"));
+		assertThat(decodedXml, containsString("saml2:EncryptedAssertion"));
+		Response r = (Response) transformer.fromXml(
+			decodedXml,
+			null,
+			asList(ExamplePemKey.RSA_TEST_KEY.getSimpleKey("encryption"))
+		);
+		assertNotNull(r);
+		assertThat(r.getAssertions(), notNullValue());
+		assertThat(r.getAssertions().size(), equalTo(1));
+	}
+
+	@Test
 	public void receiveAuthenticationRequest() throws Exception {
 		IdentityProviderService provider = provisioning.getHostedProvider();
 		IdentityProviderMetadata local = provider.getMetadata();
-		ServiceProviderMetadata sp = provider.getRemoteProvider("spring.security.saml.sp.id");
+		ServiceProviderMetadata sp = provider.getRemoteProvider("spring.security.saml.xml.sp.id");
 		assertNotNull(sp);
 
 		AuthenticationRequest authenticationRequest = helper.authenticationRequest(sp, local);

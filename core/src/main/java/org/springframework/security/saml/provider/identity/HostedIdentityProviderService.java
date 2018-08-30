@@ -17,12 +17,14 @@
 
 package org.springframework.security.saml.provider.identity;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.AbstractHostedProviderService;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -50,6 +52,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.joda.time.DateTime;
 
 import static java.util.Arrays.asList;
+import static org.springframework.security.saml.key.KeyType.ENCRYPTION;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 
 public class HostedIdentityProviderService extends AbstractHostedProviderService<
@@ -115,7 +118,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 							   String principal,
 							   NameId principalFormat) {
 		long now = getClock().millis();
-		return new Assertion()
+		Assertion assertion = new Assertion()
 			.setSigningKey(getMetadata().getSigningKey(), getMetadata().getAlgorithm(), getMetadata().getDigest())
 			.setVersion("2.0")
 			.setIssueInstant(new DateTime(now))
@@ -147,11 +150,9 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 												POST,
 												-1
 											).getLocation()
-
 									)
 							)
 					)
-
 			)
 			.setConditions(
 				new Conditions()
@@ -160,7 +161,6 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 					.addCriteria(
 						new AudienceRestriction()
 							.addAudience(sp.getEntityId())
-
 					)
 			)
 			.addAuthenticationStatement(
@@ -170,6 +170,22 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 					.setSessionNotOnOrAfter(new DateTime(now + getConfiguration().getSessionNotOnOrAfter()))
 
 			);
+
+		if (getConfiguration().isEncryptAssertions()) {
+			Optional<SimpleKey> encryptionKey = sp.getServiceProvider().getKeys().stream()
+				.filter(k -> ENCRYPTION == k.getType())
+				.findFirst();
+			if (encryptionKey.isPresent()) {
+				assertion.setEncryptionKey(
+					encryptionKey.get(),
+					getConfiguration().getKeyEncryptionAlgorithm(),
+					getConfiguration().getDataEncryptionAlgorithm()
+				);
+			}
+		}
+
+
+		return assertion;
 	}
 
 	@Override

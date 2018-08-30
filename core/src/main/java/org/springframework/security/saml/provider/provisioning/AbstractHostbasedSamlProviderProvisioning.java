@@ -28,6 +28,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
@@ -75,9 +76,11 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 	protected IdentityProviderService getHostedIdentityProvider(LocalIdentityProviderConfiguration idpConfig) {
 		String basePath = idpConfig.getBasePath();
 		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(idpConfig.getKeys().getActive());
+		SimpleKey activeKey = idpConfig.getKeys().getActive();
+		keys.add(activeKey);
+		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
 		keys.addAll(idpConfig.getKeys().getStandBy());
-		SimpleKey signingKey = idpConfig.isSignMetadata() ? idpConfig.getKeys().getActive() : null;
+		SimpleKey signingKey = idpConfig.isSignMetadata() ? activeKey : null;
 
 		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(idpConfig);
@@ -193,7 +196,9 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		String basePath = spConfig.getBasePath();
 
 		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(spConfig.getKeys().getActive());
+		SimpleKey activeKey = spConfig.getKeys().getActive();
+		keys.add(activeKey);
+		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
 		keys.addAll(spConfig.getKeys().getStandBy());
 		SimpleKey signingKey = spConfig.isSignMetadata() ? spConfig.getKeys().getActive() : null;
 

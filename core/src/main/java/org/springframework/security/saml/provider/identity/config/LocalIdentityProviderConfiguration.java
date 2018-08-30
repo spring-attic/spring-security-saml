@@ -18,12 +18,17 @@
 package org.springframework.security.saml.provider.identity.config;
 
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<LocalIdentityProviderConfiguration, ExternalServiceProviderConfiguration> {
 
 	private boolean wantRequestsSigned = true;
 	private boolean signAssertions = true;
+	private boolean encryptAssertions = false;
+	private KeyEncryptionMethod keyEncryptionAlgorithm = KeyEncryptionMethod.RSA_1_5;
+	private DataEncryptionMethod dataEncryptionAlgorithm = DataEncryptionMethod.AES256_CBC;
 	private long notOnOrAfter = 120000;
 	private long notBefore = 60000;
 	private long sessionNotOnOrAfter = 30 * 60 * 1000;
@@ -74,6 +79,33 @@ public class LocalIdentityProviderConfiguration extends
 
 	public LocalIdentityProviderConfiguration setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
 		this.sessionNotOnOrAfter = sessionNotOnOrAfter;
+		return this;
+	}
+
+	public boolean isEncryptAssertions() {
+		return encryptAssertions;
+	}
+
+	public LocalIdentityProviderConfiguration setEncryptAssertions(boolean encryptAssertions) {
+		this.encryptAssertions = encryptAssertions;
+		return this;
+	}
+
+	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
+		return keyEncryptionAlgorithm;
+	}
+
+	public LocalIdentityProviderConfiguration setKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+		this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+		return this;
+	}
+
+	public DataEncryptionMethod getDataEncryptionAlgorithm() {
+		return dataEncryptionAlgorithm;
+	}
+
+	public LocalIdentityProviderConfiguration setDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+		this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
 		return this;
 	}
 }

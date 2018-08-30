@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -32,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
+import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
@@ -61,6 +63,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import sample.config.AppConfig;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -192,6 +195,12 @@ public class SimpleServiceProviderBootTest {
             spm.getServiceProvider().getNameIds(),
             containsInAnyOrder(NameId.UNSPECIFIED, NameId.PERSISTENT, NameId.EMAIL)
         );
+        for (KeyType type : asList(KeyType.SIGNING, KeyType.ENCRYPTION)) {
+            Optional<SimpleKey> first = spm.getServiceProvider().getKeys().stream()
+                .filter(k -> type == k.getType())
+                .findFirst();
+            assertThat("Key of type:"+type, first.isPresent(), equalTo(true));
+        }
     }
 
     @Test

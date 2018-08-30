@@ -827,9 +827,11 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 					Endpoint ep = sp.getSingleLogoutService().get(i);
 					descriptor.getSingleLogoutServices().add(getSingleLogoutService(ep));
 				}
-				descriptor
-					.getAttributeConsumingServices()
-					.add(getAttributeConsumingService(sp.getRequestedAttributes()));
+				if (sp.getRequestedAttributes() != null && !sp.getRequestedAttributes().isEmpty()) {
+					descriptor
+						.getAttributeConsumingServices()
+						.add(getAttributeConsumingService(sp.getRequestedAttributes()));
+				}
 
 			}
 			else if (p instanceof IdentityProvider) {
@@ -865,31 +867,34 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				roleDescriptor.getKeyDescriptors().add(getKeyDescriptor(key));
 			}
 
-			ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder
-				(Extensions.DEFAULT_ELEMENT_NAME);
-			roleDescriptor.setExtensions(extensionsBuilder.buildObject());
-
+			//md:extensions
 			Endpoint requestInitiation = p.getRequestInitiation();
-			if (requestInitiation != null) {
-				RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder
-					(RequestInitiator.DEFAULT_ELEMENT_NAME);
-				RequestInitiator init = builder.buildObject();
-				init.setBinding(requestInitiation.getBinding().toString());
-				init.setLocation(requestInitiation.getLocation());
-				init.setResponseLocation(requestInitiation.getResponseLocation());
-				roleDescriptor.getExtensions().getUnknownXMLObjects().add(init);
-			}
 			Endpoint discovery = p.getDiscovery();
-			if (discovery != null) {
-				DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder
-					(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-				DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-				response.setBinding(discovery.getBinding().toString());
-				response.setLocation(discovery.getLocation());
-				response.setResponseLocation(discovery.getResponseLocation());
-				response.setIsDefault(discovery.isDefault());
-				response.setIndex(discovery.getIndex());
-				roleDescriptor.getExtensions().getUnknownXMLObjects().add(response);
+			if (requestInitiation != null || discovery != null) {
+				ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder
+					(Extensions.DEFAULT_ELEMENT_NAME);
+				roleDescriptor.setExtensions(extensionsBuilder.buildObject());
+
+				if (requestInitiation != null) {
+					RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder
+						(RequestInitiator.DEFAULT_ELEMENT_NAME);
+					RequestInitiator init = builder.buildObject();
+					init.setBinding(requestInitiation.getBinding().toString());
+					init.setLocation(requestInitiation.getLocation());
+					init.setResponseLocation(requestInitiation.getResponseLocation());
+					roleDescriptor.getExtensions().getUnknownXMLObjects().add(init);
+				}
+				if (discovery != null) {
+					DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder
+						(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+					DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
+					response.setBinding(discovery.getBinding().toString());
+					response.setLocation(discovery.getLocation());
+					response.setResponseLocation(discovery.getResponseLocation());
+					response.setIsDefault(discovery.isDefault());
+					response.setIndex(discovery.getIndex());
+					roleDescriptor.getExtensions().getUnknownXMLObjects().add(response);
+				}
 			}
 			result.add(roleDescriptor);
 		}

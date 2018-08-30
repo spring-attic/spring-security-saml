@@ -58,7 +58,7 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 
 	@Bean
 	public SpringSecuritySaml samlImplementation() {
-		return new OpenSamlImplementation(samlTime());
+		return new OpenSamlImplementation(samlTime()).init();
 	}
 
 	@Bean

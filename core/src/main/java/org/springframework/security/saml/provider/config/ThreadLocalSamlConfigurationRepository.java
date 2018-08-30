@@ -7,10 +7,10 @@ public class ThreadLocalSamlConfigurationRepository implements SamlConfiguration
 
     private static InheritableThreadLocal<SamlServerConfiguration> threadLocal = new InheritableThreadLocal<>();
 
-    private final SamlServerConfiguration initialValue;
+    private final SamlConfigurationRepository initialValueProvider;
 
-    public ThreadLocalSamlConfigurationRepository(SamlServerConfiguration initialValue) {
-        this.initialValue = initialValue;
+    public ThreadLocalSamlConfigurationRepository(SamlConfigurationRepository initialValueProvider) {
+        this.initialValueProvider = initialValueProvider;
     }
 
     @Override
@@ -18,7 +18,7 @@ public class ThreadLocalSamlConfigurationRepository implements SamlConfiguration
         SamlServerConfiguration result = threadLocal.get();
         if (result == null) {
             try {
-                result = initialValue.clone();
+                result = initialValueProvider.getServerConfiguration().clone();
             } catch (CloneNotSupportedException e) {
                 throw new SamlException(e);
             }

@@ -18,15 +18,19 @@
 package sample.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityConfiguration;
-import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfiguration extends SamlServiceProviderSecurityConfiguration {
+public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
+	private final AppConfig config;
 
-	public SecurityConfiguration(SamlServiceProviderServerBeanConfiguration configuration) {
-		super(configuration);
+	public BeanConfig(AppConfig config) {
+		this.config = config;
+	}
+
+	@Override
+	protected SamlServerConfiguration getBasicSamlServerConfiguration() {
+		return config;
 	}
 }

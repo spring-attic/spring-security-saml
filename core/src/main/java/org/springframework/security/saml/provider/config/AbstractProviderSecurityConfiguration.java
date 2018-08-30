@@ -17,97 +17,20 @@
 
 package org.springframework.security.saml.provider.config;
 
-import java.time.Clock;
-import javax.servlet.Filter;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlTemplateEngine;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.HostedProviderService;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
-import org.springframework.security.saml.spi.DefaultValidator;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
-import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
-import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
-import org.springframework.security.saml.util.Network;
 
 public abstract class AbstractProviderSecurityConfiguration<T extends HostedProviderService>
 	extends WebSecurityConfigurerAdapter {
 
-	private final SamlServerConfiguration hostConfiguration;
+	private final String prefix;
 
-	protected AbstractProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
-		this.hostConfiguration = hostConfiguration;
+	protected AbstractProviderSecurityConfiguration(String prefix) {
+		this.prefix = prefix;
 	}
 
-	public SamlServerConfiguration getHostConfiguration() {
-		return hostConfiguration;
-	}
 
-	public abstract SamlProviderProvisioning<T> getSamlProvisioning();
-
-	@Bean
-	public DefaultSessionAssertionStore samlAssertionStore() {
-		return new DefaultSessionAssertionStore();
-	}
-
-	@Bean
-	public SamlTemplateEngine samlTemplateEngine() {
-		return new OpenSamlVelocityEngine();
-	}
-
-	@Bean
-	public SamlTransformer samlTransformer() {
-		return new DefaultSamlTransformer(samlImplementation());
-	}
-
-	@Bean
-	public SpringSecuritySaml samlImplementation() {
-		return new OpenSamlImplementation(samlTime());
-	}
-
-	@Bean
-	public Clock samlTime() {
-		return Clock.systemUTC();
-	}
-
-	@Bean
-	public SamlValidator samlValidator() {
-		return new DefaultValidator(samlImplementation());
-	}
-
-	@Bean
-	public SamlMetadataCache samlMetadataCache(Network network) {
-		return new DefaultMetadataCache(samlTime(), network);
-	}
-
-	@Bean
-	public SamlConfigurationRepository samlConfigurationRepository() {
-		return new ThreadLocalSamlConfigurationRepository(hostConfiguration);
-	}
-
-	@Bean
-	public Filter samlConfigurationFilter() {
-		return new ThreadLocalSamlConfigurationFilter(
-			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
-		);
-	}
-
-	@Bean
-	public Network samlNetworkHandler() {
-		Network result = new Network();
-		if (hostConfiguration != null && hostConfiguration.getNetwork() != null) {
-			result
-				.setConnectTimeoutMillis(hostConfiguration.getNetwork().getConnectTimeout())
-				.setReadTimeoutMillis(hostConfiguration.getNetwork().getReadTimeout());
-		}
-		return result;
+	public String getPrefix() {
+		return prefix;
 	}
 }

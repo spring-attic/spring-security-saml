@@ -26,13 +26,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityConfiguration;
+import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
+import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends SamlIdentityProviderSecurityConfiguration {
 
-	public SecurityConfiguration(AppConfig hostConfiguration) {
-		super(hostConfiguration);
+	public SecurityConfiguration(SamlIdentityProviderServerBeanConfiguration configuration) {
+		super(configuration);
 	}
 
 	@Bean

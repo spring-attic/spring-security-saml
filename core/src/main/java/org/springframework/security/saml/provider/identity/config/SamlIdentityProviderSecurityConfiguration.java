@@ -16,23 +16,9 @@
  */
 package org.springframework.security.saml.provider.identity.config;
 
-import javax.servlet.Filter;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.AbstractProviderSecurityConfiguration;
-import org.springframework.security.saml.provider.identity.IdentityProviderLogoutHandler;
-import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.saml.provider.identity.IdpAuthenticationRequestFilter;
-import org.springframework.security.saml.provider.identity.IdpInitiatedLoginFilter;
-import org.springframework.security.saml.provider.identity.SelectServiceProviderFilter;
-import org.springframework.security.saml.provider.provisioning.HostBasedSamlIdentityProviderProvisioning;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
@@ -40,23 +26,49 @@ import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 public class SamlIdentityProviderSecurityConfiguration
 	extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
 
-	public SamlIdentityProviderSecurityConfiguration(SamlServerConfiguration hostConfiguration) {
-		super(hostConfiguration);
+	private final SamlIdentityProviderServerBeanConfiguration configuration;
+
+	public SamlIdentityProviderSecurityConfiguration(SamlIdentityProviderServerBeanConfiguration configuration) {
+		this("saml/idp/", configuration);
+	}
+
+	public SamlIdentityProviderSecurityConfiguration(String prefix,
+													 SamlIdentityProviderServerBeanConfiguration configuration) {
+		super(prefix);
+		this.configuration = configuration;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		String prefix = getHostConfiguration().getIdentityProvider().getPrefix();
+		String prefix = getPrefix();
 		String matcher = "/" + stripSlashes(prefix) + "/**";
 		String metadata = "/" + stripSlashes(prefix) + "/metadata";
 		http
 			//.antMatcher(matcher)
-			.addFilterAfter(samlConfigurationFilter(), BasicAuthenticationFilter.class)
-			.addFilterAfter(idpMetadataFilter(), samlConfigurationFilter().getClass())
-			.addFilterAfter(idpInitatedLoginFilter(), idpMetadataFilter().getClass())
-			.addFilterAfter(idpAuthnRequestFilter(), idpInitatedLoginFilter().getClass())
-			.addFilterAfter(idpLogoutFilter(), idpAuthnRequestFilter().getClass())
-			.addFilterAfter(idpSelectServiceProviderFilter(), idpLogoutFilter().getClass())
+			.addFilterAfter(
+				getConfiguration().samlConfigurationFilter(),
+				BasicAuthenticationFilter.class
+			)
+			.addFilterAfter(
+				getConfiguration().idpMetadataFilter(),
+				getConfiguration().samlConfigurationFilter().getClass()
+			)
+			.addFilterAfter(
+				getConfiguration().idpInitatedLoginFilter(),
+				getConfiguration().idpMetadataFilter().getClass()
+			)
+			.addFilterAfter(
+				getConfiguration().idpAuthnRequestFilter(),
+				getConfiguration().idpInitatedLoginFilter().getClass()
+			)
+			.addFilterAfter(
+				getConfiguration().idpLogoutFilter(),
+				getConfiguration().idpAuthnRequestFilter().getClass()
+			)
+			.addFilterAfter(
+				getConfiguration().idpSelectServiceProviderFilter(),
+				getConfiguration().idpLogoutFilter().getClass()
+			)
 			.csrf().disable()
 			.authorizeRequests()
 			.antMatchers(metadata).permitAll()
@@ -64,45 +76,7 @@ public class SamlIdentityProviderSecurityConfiguration
 		;
 	}
 
-	@Bean
-	public Filter idpMetadataFilter() {
-		return new IdentityProviderMetadataFilter(getSamlProvisioning());
-	}
-
-	@Bean
-	public Filter idpInitatedLoginFilter() {
-		return new IdpInitiatedLoginFilter(getSamlProvisioning(), samlAssertionStore());
-	}
-
-
-	@Bean
-	public Filter idpAuthnRequestFilter() {
-		return new IdpAuthenticationRequestFilter(getSamlProvisioning(), samlAssertionStore());
-	}
-
-	@Bean
-	public Filter idpLogoutFilter() {
-		return new SamlProviderLogoutFilter<>(
-			getSamlProvisioning(),
-			new IdentityProviderLogoutHandler(getSamlProvisioning(), samlAssertionStore()),
-			new SimpleUrlLogoutSuccessHandler(),
-			new SecurityContextLogoutHandler()
-		);
-	}
-
-	@Bean
-	public Filter idpSelectServiceProviderFilter() {
-		return new SelectServiceProviderFilter(getSamlProvisioning());
-	}
-
-	@Override
-	@Bean(name = "samlIdentityProviderProvisioning")
-	public SamlProviderProvisioning<IdentityProviderService> getSamlProvisioning() {
-		return new HostBasedSamlIdentityProviderProvisioning(
-			samlConfigurationRepository(),
-			samlTransformer(),
-			samlValidator(),
-			samlMetadataCache(samlNetworkHandler())
-		);
+	public SamlIdentityProviderServerBeanConfiguration getConfiguration() {
+		return configuration;
 	}
 }

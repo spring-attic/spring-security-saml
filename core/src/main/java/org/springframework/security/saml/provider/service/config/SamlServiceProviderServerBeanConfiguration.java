@@ -84,4 +84,10 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 	public Filter spSelectIdentityProviderFilter() {
 		return new SelectIdentityProviderFilter(getSamlProvisioning());
 	}
+
+	@Bean(name = "spSamlConfigurationFilter")
+	@Override
+	public Filter samlConfigurationFilter() {
+		return super.samlConfigurationFilter();
+	}
 }

@@ -77,4 +77,9 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 		return new SelectServiceProviderFilter(getSamlProvisioning());
 	}
 
+	@Bean(name = "idpSamlConfigurationFilter")
+	@Override
+	public Filter samlConfigurationFilter() {
+		return super.samlConfigurationFilter();
+	}
 }

@@ -21,6 +21,7 @@ import javax.servlet.Filter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.AbstractSamlServerBeanConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderLogoutHandler;
 import org.springframework.security.saml.provider.identity.IdentityProviderMetadataFilter;
@@ -82,4 +83,8 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 	public Filter samlConfigurationFilter() {
 		return super.samlConfigurationFilter();
 	}
+
+	@Override
+	@Bean(name = "idpSamlServerConfiguration")
+	protected abstract SamlServerConfiguration getDefaultHostSamlServerConfiguration();
 }

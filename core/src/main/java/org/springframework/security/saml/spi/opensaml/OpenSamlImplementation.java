@@ -515,9 +515,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				;
 				//TODO extract the digest value
 				for (ContentReference ref :
-					ofNullable(
-						signature.getContentReferences())
-						.orElse(emptyList())) {
+					ofNullable(signature.getContentReferences()).orElse(emptyList())) {
 					if (ref instanceof SAMLObjectContentReference) {
 						SAMLObjectContentReference sref = (SAMLObjectContentReference) ref;
 						result.setDigestAlgorithm(DigestMethod.fromUrn(sref.getDigestAlgorithm()));
@@ -635,8 +633,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.getRequestAttributes()));
 		}
 		else {
-			for (AttributeConsumingService s : ofNullable(desc.getAttributeConsumingServices()).orElse
-				(emptyList())) {
+			for (AttributeConsumingService s :
+				ofNullable(desc.getAttributeConsumingServices()).orElse(emptyList())) {
 				if (s != null) {
 					//take the first one
 					result.addAll(getRequestedAttributes(s.getRequestAttributes()));

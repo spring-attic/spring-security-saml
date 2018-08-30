@@ -24,7 +24,6 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
-import static java.util.Collections.emptyList;
 import static org.springframework.util.StringUtils.hasText;
 
 public class LocalProviderConfiguration<
@@ -38,7 +37,7 @@ public class LocalProviderConfiguration<
 	private RotatingKeys keys;
 	private String prefix;
 	private boolean singleLogoutEnabled = true;
-	private List<NameId> nameIds = emptyList();
+	private List<NameId> nameIds = new LinkedList<>();
 	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
 	private DigestMethod defaultDigest = DigestMethod.SHA256;
 	private List<ExternalConfiguration> providers = new LinkedList<>();

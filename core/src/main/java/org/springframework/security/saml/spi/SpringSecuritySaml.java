@@ -25,7 +25,6 @@ import javax.xml.datatype.Duration;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.util.EncodingUtils;
 
 /**
  * Static utility class that serves as the delimiter between Spring Security SAML and underlying implementation.

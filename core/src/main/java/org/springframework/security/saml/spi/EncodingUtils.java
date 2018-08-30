@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.util;
+package org.springframework.security.saml.spi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,18 +31,18 @@ import org.apache.commons.codec.binary.Base64;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.zip.Deflater.DEFLATED;
 
-public class EncodingUtils {
+class EncodingUtils {
 	private static Base64 UNCHUNKED_ENCODER = new Base64(0, new byte[]{'\n'});
 
 	public static String encode(byte[] b) {
 		return UNCHUNKED_ENCODER.encodeToString(b);
 	}
 
-	public static byte[] decode(String s) {
+	static byte[] decode(String s) {
 		return UNCHUNKED_ENCODER.decode(s);
 	}
 
-	public static byte[] deflate(String s) {
+	static byte[] deflate(String s) {
 		try {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DeflaterOutputStream deflater = new DeflaterOutputStream(b, new Deflater(DEFLATED, true));
@@ -54,7 +54,7 @@ public class EncodingUtils {
 		}
 	}
 
-	public static String inflate(byte[] b) {
+	static String inflate(byte[] b) {
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			InflaterOutputStream iout = new InflaterOutputStream(out, new Inflater(true));

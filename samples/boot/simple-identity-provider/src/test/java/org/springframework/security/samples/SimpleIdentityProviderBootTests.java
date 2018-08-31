@@ -27,6 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,7 +67,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import sample.config.AppConfig;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -103,7 +103,8 @@ public class SimpleIdentityProviderBootTests {
 	private SamlMetadataCache cache;
 
 	@Autowired
-	private AppConfig config;
+	@Qualifier("idpSamlServerConfiguration")
+	private SamlServerConfiguration config;
 
 	@Autowired
 	private DefaultSessionAssertionStore sessionAssertionStore;

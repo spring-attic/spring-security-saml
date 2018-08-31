@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -95,9 +96,6 @@ public class SimpleServiceProviderBootTest {
     Clock samlTime;
 
     @Autowired
-    SamlServerConfiguration configuration;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -114,7 +112,8 @@ public class SimpleServiceProviderBootTest {
     private String spBaseUrl;
 
     @Autowired
-    private AppConfig config;
+	@Qualifier("spSamlServerConfiguration")
+    private SamlServerConfiguration config;
 
     private MockHttpServletRequest defaultRequest;
     private SamlTestObjectHelper helper;
@@ -126,7 +125,7 @@ public class SimpleServiceProviderBootTest {
         spBaseUrl = "http://localhost";
         defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
         helper = new SamlTestObjectHelper(samlTime);
-        configuration.getServiceProvider().setBasePath(spBaseUrl);
+        config.getServiceProvider().setBasePath(spBaseUrl);
         cache.clear();
         cache = spy(cache);
         doReturn(IDP_METADATA_SIMPLE.getBytes(UTF_8))
@@ -154,10 +153,10 @@ public class SimpleServiceProviderBootTest {
 
     @Test
     public void testCloneConfiguration() throws CloneNotSupportedException {
-        SamlServerConfiguration clone = configuration.clone();
+        SamlServerConfiguration clone = config.clone();
         clone.getServiceProvider().getProviders().get(0).setMetadata("changed");
         assertThat(
-            configuration.getServiceProvider().getProviders().get(0).getMetadata(),
+            config.getServiceProvider().getProviders().get(0).getMetadata(),
             not(equalTo("changed"))
         );
         assertThat(
@@ -168,9 +167,9 @@ public class SimpleServiceProviderBootTest {
 
     @Test
     public void checkConfig() {
-        assertNotNull(configuration);
-        assertNull(configuration.getIdentityProvider());
-        LocalServiceProviderConfiguration sp = configuration.getServiceProvider();
+        assertNotNull(config);
+        assertNull(config.getIdentityProvider());
+        LocalServiceProviderConfiguration sp = config.getServiceProvider();
         assertNotNull(sp);
         assertThat(sp.getEntityId(), equalTo("spring.security.saml.sp.id"));
         assertTrue(sp.isSignMetadata());
@@ -220,7 +219,7 @@ public class SimpleServiceProviderBootTest {
     @Test
     public void processResponse() throws Exception {
         ServiceProviderService provider = provisioning.getHostedProvider();
-        configuration.getServiceProvider().setWantAssertionsSigned(false);
+        config.getServiceProvider().setWantAssertionsSigned(false);
         String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
         AuthenticationRequest authn = getAuthenticationRequest();
         IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
@@ -244,7 +243,7 @@ public class SimpleServiceProviderBootTest {
 
     @Test
     public void invalidResponse() throws Exception {
-        configuration.getServiceProvider().setWantAssertionsSigned(false);
+        config.getServiceProvider().setWantAssertionsSigned(false);
         ServiceProviderService provider = provisioning.getHostedProvider();
         String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
         AuthenticationRequest authn = getAuthenticationRequest();
@@ -391,7 +390,7 @@ public class SimpleServiceProviderBootTest {
     protected AuthenticationRequest getAuthenticationRequest() throws Exception {
         String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
         String redirect = mockMvc.perform(
-            get("/saml/sp/discovery/alias/" + configuration.getServiceProvider().getAlias())
+            get("/saml/sp/discovery/alias/" + config.getServiceProvider().getAlias())
                 .param("idp", idpEntityId)
         )
             .andExpect(status().isFound())

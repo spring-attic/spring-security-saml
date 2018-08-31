@@ -37,7 +37,6 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 public abstract class SamlIdentityProviderServerBeanConfiguration
 	extends AbstractSamlServerBeanConfiguration<IdentityProviderService> {
 
-	@Bean
 	public Filter idpMetadataFilter() {
 		return new IdentityProviderMetadataFilter(getSamlProvisioning());
 	}
@@ -53,17 +52,14 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 		);
 	}
 
-	@Bean
 	public Filter idpInitatedLoginFilter() {
 		return new IdpInitiatedLoginFilter(getSamlProvisioning(), samlAssertionStore());
 	}
 
-	@Bean
 	public Filter idpAuthnRequestFilter() {
 		return new IdpAuthenticationRequestFilter(getSamlProvisioning(), samlAssertionStore());
 	}
 
-	@Bean
 	public Filter idpLogoutFilter() {
 		return new SamlProviderLogoutFilter<>(
 			getSamlProvisioning(),
@@ -73,15 +69,8 @@ public abstract class SamlIdentityProviderServerBeanConfiguration
 		);
 	}
 
-	@Bean
 	public Filter idpSelectServiceProviderFilter() {
 		return new SelectServiceProviderFilter(getSamlProvisioning());
-	}
-
-	@Bean(name = "idpSamlConfigurationFilter")
-	@Override
-	public Filter samlConfigurationFilter() {
-		return super.samlConfigurationFilter();
 	}
 
 	@Override

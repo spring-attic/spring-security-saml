@@ -66,4 +66,11 @@ public class SamlServerConfiguration implements Cloneable {
 		result.serviceProvider = serviceProvider != null ? serviceProvider.clone() : null;
 		return result;
 	}
+
+	public SamlServerConfiguration transfer(SamlServerConfiguration external) {
+		return this
+			.setNetwork(external.getNetwork())
+			.setIdentityProvider(external.getIdentityProvider())
+			.setServiceProvider(external.getServiceProvider());
+	}
 }

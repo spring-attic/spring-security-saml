@@ -15,13 +15,18 @@
  *
  */
 
-include "core"
-include "samples/boot/simple-service-provider"
-include "samples/boot/simple-identity-provider"
-include "samples/boot/dsl-identity-provider"
+package sample.config;
 
-rootProject.name = "spring-security-saml"
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml-${p.name}"
+@Configuration
+public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
+
+	@Override
+	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
+		return
+			new SamlServerConfiguration();
+	}
 }

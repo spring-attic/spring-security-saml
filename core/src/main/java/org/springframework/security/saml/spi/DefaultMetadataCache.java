@@ -23,6 +23,8 @@ import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.util.TimebasedMap;
 import org.springframework.web.client.RestOperations;
 
+import static java.lang.String.format;
+
 /**
  * Caches metadata that has been retrieved over the network
  *
@@ -55,7 +57,10 @@ public class DefaultMetadataCache implements SamlMetadataCache {
 				}
 				cache.put(uri, data);
 			} catch (Exception x) {
-				throw new SamlMetadataException("Unable to download SAML metadata.", x);
+				throw new SamlMetadataException(
+					format("Unable to download SAML metadata[%s]", uri),
+					x
+				);
 			}
 		}
 		return data;

@@ -17,7 +17,12 @@
 
 package sample.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
 
@@ -28,5 +33,15 @@ public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
 	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
 		return
 			new SamlServerConfiguration();
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService() {
+		UserDetails userDetails = User.withDefaultPasswordEncoder()
+			.username("user")
+			.password("password")
+			.roles("USER")
+			.build();
+		return new InMemoryUserDetailsManager(userDetails);
 	}
 }

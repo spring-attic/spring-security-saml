@@ -17,16 +17,11 @@
 
 package sample.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.RotatingKeys;
 import org.springframework.security.saml.provider.identity.config.ExternalServiceProviderConfiguration;
@@ -47,14 +42,20 @@ public class Security {
 	@Order(1)
 	public static class SamlSecurity extends SamlIdentityProviderSecurityConfiguration {
 
+		private final BeanConfig beanConfig;
 		public SamlSecurity(BeanConfig configuration) {
 			super("/saml/dsl-idp-prefix/", configuration);
+			this.beanConfig = configuration;
 		}
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			String prefix = getPrefix();
 			super.configure(http);
+			//we want to use the FORM when accessing the SAML SSO endpoint
+			http
+				.userDetailsService(beanConfig.userDetailsService()).formLogin();
+
 			http.apply(identityProvider())
 				.prefix(prefix)
 				.useStandardFilters()
@@ -124,17 +125,14 @@ public class Security {
 	}
 
 	@Configuration
-	public class FormLoginSecurity extends WebSecurityConfigurerAdapter {
+	public class AppSecurity extends WebSecurityConfigurerAdapter {
 
-		@Bean
-		public UserDetailsService userDetailsService() {
-			UserDetails userDetails = User.withDefaultPasswordEncoder()
-				.username("user")
-				.password("password")
-				.roles("USER")
-				.build();
-			return new InMemoryUserDetailsManager(userDetails);
+		private final BeanConfig beanConfig;
+
+		public AppSecurity(BeanConfig beanConfig) {
+			this.beanConfig = beanConfig;
 		}
+
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
@@ -144,7 +142,7 @@ public class Security {
 				.authorizeRequests()
 				.antMatchers("/**").authenticated()
 				.and()
-				.userDetailsService(userDetailsService()).formLogin()
+				.userDetailsService(beanConfig.userDetailsService()).formLogin()
 			;
 
 

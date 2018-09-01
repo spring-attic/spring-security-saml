@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
-import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
 
 public abstract class SamlIdentityProviderSecurityConfiguration
 	extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
@@ -39,7 +38,7 @@ public abstract class SamlIdentityProviderSecurityConfiguration
 
 	public SamlIdentityProviderSecurityConfiguration(String prefix,
 													 SamlIdentityProviderServerBeanConfiguration configuration) {
-		super(stripStartingSlashes(prefix));
+		super(stripSlashes(prefix+"/"));
 		this.configuration = configuration;
 	}
 

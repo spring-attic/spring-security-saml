@@ -36,6 +36,7 @@ import org.springframework.security.saml.provider.identity.config.LocalIdentityP
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ModelProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.util.StringUtils;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -44,6 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
+import static org.springframework.util.StringUtils.hasText;
 
 public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderService> {
 
@@ -120,10 +122,19 @@ public class SelectServiceProviderFilter extends SamlFilter<IdentityProviderServ
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			getProvisioning().getHostedProvider().getConfiguration().getBasePath()
 		);
-		builder.pathSegment("saml/idp/init");
+		builder.pathSegment(getInitPath(request));
 		IdentityProviderService provider = getProvisioning().getHostedProvider();
 		ServiceProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("sp", UriUtils.encode(metadata.getEntityId(), StandardCharsets.UTF_8.toString()));
 		return builder.build().toUriString();
+	}
+
+	private String getInitPath(HttpServletRequest request) {
+		String ctxPath = request.getContextPath();
+		String requestUri = request.getRequestURI();
+		if (hasText(ctxPath)) {
+			requestUri = requestUri.substring(ctxPath.length());
+		}
+		return StringUtils.stripStartingSlashes(requestUri.replace("/select", "/init"));
 	}
 }

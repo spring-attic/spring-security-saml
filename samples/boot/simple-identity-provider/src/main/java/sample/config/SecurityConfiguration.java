@@ -17,39 +17,60 @@
 
 package sample.config;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityConfiguration;
 
-@Configuration
+import static org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityDsl.identityProvider;
+
 @EnableWebSecurity
-public class SecurityConfiguration extends SamlIdentityProviderSecurityConfiguration {
+public class SecurityConfiguration {
 
-	public SecurityConfiguration(BeanConfig configuration) {
-		super(configuration);
+	@Configuration
+	@Order(1)
+	public static class SamlSecurity extends SamlIdentityProviderSecurityConfiguration {
+
+		private final AppConfig appConfig;
+		private final BeanConfig beanConfig;
+
+		public SamlSecurity(BeanConfig beanConfig, @Qualifier("appConfig") AppConfig appConfig) {
+			super("/saml/idp/", beanConfig);
+			this.appConfig = appConfig;
+			this.beanConfig = beanConfig;
+		}
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			super.configure(http);
+			http
+				.userDetailsService(beanConfig.userDetailsService()).formLogin();
+			http.apply(identityProvider())
+				.configure(appConfig);
+		}
 	}
 
-	@Bean
-	public UserDetailsService userDetailsService() {
-		UserDetails userDetails = User.withDefaultPasswordEncoder()
-			.username("user")
-			.password("password")
-			.roles("USER")
-			.build();
-		return new InMemoryUserDetailsManager(userDetails);
-	}
+	@Configuration
+	public static class AppSecurity extends WebSecurityConfigurerAdapter {
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.userDetailsService(userDetailsService()).formLogin()
-			.and().antMatcher("/**");
-		super.configure(http);
+		private final BeanConfig beanConfig;
 
+		public AppSecurity(BeanConfig beanConfig) {
+			this.beanConfig = beanConfig;
+		}
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http
+				.antMatcher("/**")
+				.authorizeRequests()
+				.antMatchers("/**").authenticated()
+				.and()
+				.userDetailsService(beanConfig.userDetailsService()).formLogin()
+			;
+		}
 	}
 }

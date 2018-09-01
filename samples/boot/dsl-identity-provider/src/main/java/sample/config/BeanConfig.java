@@ -28,15 +28,11 @@ import org.springframework.security.saml.provider.identity.config.SamlIdentityPr
 
 @Configuration
 public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
-	private final AppConfig config;
-
-	public BeanConfig(AppConfig config) {
-		this.config = config;
-	}
 
 	@Override
 	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
-		return config;
+		return
+			new SamlServerConfiguration();
 	}
 
 	@Bean

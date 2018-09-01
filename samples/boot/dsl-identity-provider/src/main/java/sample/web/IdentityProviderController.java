@@ -13,15 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
+*/package sample.web;
 
-include "core"
-include "samples/boot/simple-service-provider"
-include "samples/boot/simple-identity-provider"
-include "samples/boot/dsl-identity-provider"
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-rootProject.name = "spring-security-saml"
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml-${p.name}"
+@Controller
+public class IdentityProviderController {
+	private static final Log logger =LogFactory.getLog(IdentityProviderController.class);
+
+	@RequestMapping(value = {"/**", "/"})
+	public String selectProvider() {
+		logger.info("Sample IDP DSL Application - Select an SP to log into!");
+		return "redirect:/saml/dsl-idp-prefix/select";
+	}
+
 }

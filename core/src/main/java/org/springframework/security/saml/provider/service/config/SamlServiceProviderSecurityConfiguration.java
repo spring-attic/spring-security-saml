@@ -21,10 +21,15 @@ import org.springframework.security.saml.provider.config.AbstractProviderSecurit
 import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public abstract class SamlServiceProviderSecurityConfiguration
 	extends AbstractProviderSecurityConfiguration<ServiceProviderService> {
+
+	private static Log logger = LogFactory.getLog(SamlServiceProviderSecurityConfiguration.class);
 
 	private SamlServiceProviderServerBeanConfiguration configuration;
 
@@ -34,18 +39,24 @@ public abstract class SamlServiceProviderSecurityConfiguration
 
 	public SamlServiceProviderSecurityConfiguration(String prefix,
 													SamlServiceProviderServerBeanConfiguration configuration) {
-		super(prefix);
+		super(stripSlashes(prefix+"/"));
 		this.configuration = configuration;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String prefix = getPrefix();
-		String matcher = "/" + stripSlashes(prefix) + "/**";
-		String select = "/" + stripSlashes(prefix) + "/select";
-		String metadata = "/" + stripSlashes(prefix) + "/metadata";
+
+		String filterChainPattern = "/" + stripSlashes(prefix) + "/**";
+		logger.info("Configuring SAML SP on pattern:"+filterChainPattern);
 		http
-			//.antMatcher(matcher)
+			.antMatcher(filterChainPattern)
+			.csrf().disable()
+			.authorizeRequests()
+			.antMatchers("/**").permitAll();
+
+
+		http
 			.addFilterAfter(
 				getConfiguration().samlConfigurationFilter(),
 				BasicAuthenticationFilter.class
@@ -70,12 +81,6 @@ public abstract class SamlServiceProviderSecurityConfiguration
 				getConfiguration().spSelectIdentityProviderFilter(),
 				getConfiguration().spSamlLogoutFilter().getClass()
 			)
-			.csrf().disable()
-			.authorizeRequests()
-			.antMatchers(matcher).permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.formLogin().loginPage(select)
 		;
 	}
 

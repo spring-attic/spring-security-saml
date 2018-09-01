@@ -80,14 +80,12 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 		);
 	}
 
-	@Bean
 	public Filter samlConfigurationFilter() {
 		return new ThreadLocalSamlConfigurationFilter(
 			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
 		);
 	}
 
-	@Bean
 	public SamlConfigurationRepository samlConfigurationRepository() {
 		return new ThreadLocalSamlConfigurationRepository(
 			new StaticSamlConfigurationRepository(getDefaultHostSamlServerConfiguration())

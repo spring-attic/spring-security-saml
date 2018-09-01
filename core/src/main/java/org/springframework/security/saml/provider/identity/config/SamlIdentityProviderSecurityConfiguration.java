@@ -19,12 +19,16 @@ package org.springframework.security.saml.provider.identity.config;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.provider.config.AbstractProviderSecurityConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public abstract class SamlIdentityProviderSecurityConfiguration
 	extends AbstractProviderSecurityConfiguration<IdentityProviderService> {
+
+	private static Log logger = LogFactory.getLog(SamlIdentityProviderSecurityConfiguration.class);
 
 	private final SamlIdentityProviderServerBeanConfiguration configuration;
 
@@ -34,46 +38,21 @@ public abstract class SamlIdentityProviderSecurityConfiguration
 
 	public SamlIdentityProviderSecurityConfiguration(String prefix,
 													 SamlIdentityProviderServerBeanConfiguration configuration) {
-		super(prefix);
+		super(stripSlashes(prefix+"/"));
 		this.configuration = configuration;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		String prefix = getPrefix();
-		String matcher = "/" + stripSlashes(prefix) + "/**";
-		String metadata = "/" + stripSlashes(prefix) + "/metadata";
+		String filterChainPattern = "/" + stripSlashes(getPrefix()) + "/**";
+		logger.info("Configuring SAML IDP on patther:"+filterChainPattern);
 		http
-			//.antMatcher(matcher)
-			.addFilterAfter(
-				getConfiguration().samlConfigurationFilter(),
-				BasicAuthenticationFilter.class
-			)
-			.addFilterAfter(
-				getConfiguration().idpMetadataFilter(),
-				getConfiguration().samlConfigurationFilter().getClass()
-			)
-			.addFilterAfter(
-				getConfiguration().idpInitatedLoginFilter(),
-				getConfiguration().idpMetadataFilter().getClass()
-			)
-			.addFilterAfter(
-				getConfiguration().idpAuthnRequestFilter(),
-				getConfiguration().idpInitatedLoginFilter().getClass()
-			)
-			.addFilterAfter(
-				getConfiguration().idpLogoutFilter(),
-				getConfiguration().idpAuthnRequestFilter().getClass()
-			)
-			.addFilterAfter(
-				getConfiguration().idpSelectServiceProviderFilter(),
-				getConfiguration().idpLogoutFilter().getClass()
-			)
+			.antMatcher(filterChainPattern)
 			.csrf().disable()
 			.authorizeRequests()
-			.antMatchers(metadata).permitAll()
-			.anyRequest().authenticated()
-		;
+			.antMatchers("/metadata").permitAll()
+			.antMatchers("/**").authenticated()
+			.and();
 	}
 
 	public SamlIdentityProviderServerBeanConfiguration getConfiguration() {

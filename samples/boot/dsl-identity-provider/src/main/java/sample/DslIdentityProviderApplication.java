@@ -13,15 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
+*/package sample;
 
-include "core"
-include "samples/boot/simple-service-provider"
-include "samples/boot/simple-identity-provider"
-include "samples/boot/dsl-identity-provider"
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-rootProject.name = "spring-security-saml"
+@SpringBootApplication
+public class DslIdentityProviderApplication {
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml-${p.name}"
+	public static void main(String[] args) {
+		SpringApplication.run(DslIdentityProviderApplication.class, args);
+	}
 }

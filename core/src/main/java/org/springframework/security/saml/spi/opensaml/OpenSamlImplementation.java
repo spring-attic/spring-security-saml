@@ -1169,7 +1169,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		auth.setForceAuthn(request.isForceAuth());
 		auth.setIsPassive(request.isPassive());
 		auth.setProtocolBinding(request.getBinding().toString());
-		auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
+		// Azure AD as IdP will not accept index if protocol binding or AssertationCustomerServiceURL is set.
+//		auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
 		auth.setAssertionConsumerServiceURL(request.getAssertionConsumerService().getLocation());
 		auth.setDestination(request.getDestination().getLocation());
 		auth.setNameIDPolicy(getNameIDPolicy(request.getNameIdPolicy()));

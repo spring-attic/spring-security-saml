@@ -34,6 +34,7 @@ import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 import org.joda.time.DateTime;
@@ -91,7 +92,9 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 	public AuthenticationRequest authenticationRequest(IdentityProviderMetadata idp) {
 		ServiceProviderMetadata sp = getMetadata();
 		AuthenticationRequest request = new AuthenticationRequest()
-			.setId(UUID.randomUUID().toString())
+				// Some service providers will not accept first character if 0..9
+				// Azure AD IdP for example.
+			.setId("_" + UUID.randomUUID().toString().substring(1))
 			.setIssueInstant(new DateTime(getClock().millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
@@ -108,22 +111,20 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
-		NameIdPolicy policy;
 		if (idp.getDefaultNameId() != null) {
-			policy = new NameIdPolicy(
+			request.setNameIdPolicy(new NameIdPolicy(
 				idp.getDefaultNameId(),
 				sp.getEntityAlias(),
 				true
-			);
+			));
 		}
-		else {
-			policy = new NameIdPolicy(
+		else if (idp.getIdentityProvider().getNameIds().size() > 0){
+			request.setNameIdPolicy(new NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
 				sp.getEntityAlias(),
 				true
-			);
+			));
 		}
-		request.setNameIdPolicy(policy);
 		return request;
 	}
 

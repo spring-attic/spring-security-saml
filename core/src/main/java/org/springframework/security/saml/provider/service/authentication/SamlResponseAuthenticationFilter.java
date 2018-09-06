@@ -34,6 +34,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.security.saml.validation.ValidationResult;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import org.apache.commons.logging.Log;
@@ -56,7 +57,10 @@ public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProc
 											 SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		super(requiresAuthenticationRequestMatcher);
 		this.provisioning = provisioning;
+		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 	}
+
+
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {

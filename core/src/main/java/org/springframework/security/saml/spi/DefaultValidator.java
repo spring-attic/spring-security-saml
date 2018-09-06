@@ -102,59 +102,57 @@ public class DefaultValidator implements SamlValidator {
 		if (saml2Object == null) {
 			throw new NullPointerException("Object to be validated cannot be null");
 		}
-		else if (saml2Object instanceof ServiceProviderMetadata) {
-			validate((ServiceProviderMetadata)saml2Object, provider);
+		ValidationResult result = null;
+		if (saml2Object instanceof ServiceProviderMetadata) {
+			result = validate((ServiceProviderMetadata)saml2Object, provider);
 		}
 		else if (saml2Object instanceof IdentityProviderMetadata) {
-			validate((IdentityProviderMetadata)saml2Object, provider);
+			result = validate((IdentityProviderMetadata)saml2Object, provider);
 		}
 		else if (saml2Object instanceof LogoutRequest) {
-			validate((LogoutRequest)saml2Object, provider);
+			result = validate((LogoutRequest)saml2Object, provider);
 		}
 		else if (saml2Object instanceof LogoutResponse) {
-			validate((LogoutResponse)saml2Object, provider);
+			result = validate((LogoutResponse)saml2Object, provider);
 		}
 		else if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;
 			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
 			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(r);
-			ValidationResult result = validate(r, null, requester, responder);
-			if (!result.isSuccess()) {
-				throw new ValidationException("Unable to validate SAML response.", result);
-			}
+			result = validate(r, null, requester, responder);
 		}
 		else if (saml2Object instanceof Assertion) {
 			Assertion a = (Assertion) saml2Object;
 			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
 			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(a);
-			ValidationResult result = validate(a, null, requester, responder);
-			if (!result.isSuccess()) {
-				throw new ValidationException("Unable to validate SAML assertion.", result);
-			}
+			result = validate(a, null, requester, responder);
 		}
 		else {
 			throw new ValidationException(
 				"No validation implemented for class:" + saml2Object.getClass().getName(),
 				new ValidationResult(saml2Object)
-					.addError("Unable to validate. No implementation.")
+					.addError("Unable to validate SAML object. No implementation.")
 			);
+		}
+		if (!result.isSuccess()) {
+			throw new ValidationException("Unable to validate SAML object.", result);
 		}
 	}
 
-	protected void validate(IdentityProviderMetadata metadata, HostedProviderService provider) {
-
+	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedProviderService provider) {
+		return new ValidationResult(metadata);
 	}
 
-	protected void validate(ServiceProviderMetadata metadata, HostedProviderService provider) {
-
+	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedProviderService provider) {
+		return new ValidationResult(metadata);
 	}
 
-	protected void validate(LogoutRequest logoutRequest, HostedProviderService provider) {
-
+	protected ValidationResult validate(LogoutRequest logoutRequest, HostedProviderService provider) {
+		return new ValidationResult(logoutRequest);
 	}
 
-	protected void validate(LogoutResponse logoutRequest, HostedProviderService provider) {
-
+	protected ValidationResult validate(LogoutResponse logoutResponse, HostedProviderService provider) {
+		return new ValidationResult(logoutResponse);
 	}
 
 	protected ValidationResult validate(Assertion assertion,

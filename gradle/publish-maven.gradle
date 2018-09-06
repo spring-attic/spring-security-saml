@@ -55,10 +55,10 @@ def customizePom(pom, gradleProject) {
 		generatedPom.project {
 			name = gradleProject.description
 			description = gradleProject.description
-			url = "https://github.com/SpringSource/spring-security-saml"
+			url = "https://github.com/spring-projects/spring-security-saml"
 			organization {
-				name = "SpringSource"
-				url = "http://springsource.org/spring-security-saml"
+				name = "Spring Framework"
+				url = "http://projects.spring.io/spring-security-saml/"
 			}
 			licenses {
 				license {
@@ -68,9 +68,9 @@ def customizePom(pom, gradleProject) {
 				}
 			}
 			scm {
-				url = "https://github.com/SpringSource/spring-security-saml"
-				connection = "scm:git:git://github.com/SpringSource/spring-security-saml"
-				developerConnection = "scm:git:git://github.com/SpringSource/spring-security-saml"
+				url = "https://github.com/spring-projects/spring-security-saml"
+				connection = "scm:git:git://github.com/spring-projects/spring-security-saml"
+				developerConnection = "scm:git:git://github.com/spring-projects/spring-security-saml"
 			}
 			developers {
 				developer {
@@ -83,14 +83,14 @@ def customizePom(pom, gradleProject) {
 			contributors {
 			}
 			issueManagement {
-				system = "jira"
-				url = "http://jira.springsource.org/browse/SES"
+				system = "github"
+				url = "https://github.com/spring-projects/spring-security-saml/issues"
 			}
 			mailingLists {
 				mailingList {
 					name = "Spring Security SAML Forum"
-					post = "http://forum.springsource.org/forumdisplay.php?86-SAML"
-					archive = "http://forum.springsource.org/forumdisplay.php?86-SAML"
+					post = "https://stackoverflow.com/questions/tagged/spring-saml"
+					archive = "https://stackoverflow.com/questions/tagged/spring-saml"
 				}
 			}
 		}

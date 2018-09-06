@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml.SamlValidator;
@@ -32,6 +33,8 @@ import org.springframework.security.saml.saml2.authentication.AudienceRestrictio
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
@@ -96,7 +99,22 @@ public class DefaultValidator implements SamlValidator {
 	@Override
 	public void validate(Saml2Object saml2Object, HostedProviderService provider)
 		throws ValidationException {
-		if (saml2Object instanceof Response) {
+		if (saml2Object == null) {
+			throw new NullPointerException("Object to be validated cannot be null");
+		}
+		else if (saml2Object instanceof ServiceProviderMetadata) {
+			validate((ServiceProviderMetadata)saml2Object, provider);
+		}
+		else if (saml2Object instanceof IdentityProviderMetadata) {
+			validate((IdentityProviderMetadata)saml2Object, provider);
+		}
+		else if (saml2Object instanceof LogoutRequest) {
+			validate((LogoutRequest)saml2Object, provider);
+		}
+		else if (saml2Object instanceof LogoutResponse) {
+			validate((LogoutResponse)saml2Object, provider);
+		}
+		else if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;
 			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
 			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(r);
@@ -105,13 +123,158 @@ public class DefaultValidator implements SamlValidator {
 				throw new ValidationException("Unable to validate SAML response.", result);
 			}
 		}
+		else if (saml2Object instanceof Assertion) {
+			Assertion a = (Assertion) saml2Object;
+			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
+			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(a);
+			ValidationResult result = validate(a, null, requester, responder);
+			if (!result.isSuccess()) {
+				throw new ValidationException("Unable to validate SAML assertion.", result);
+			}
+		}
+		else {
+			throw new ValidationException(
+				"No validation implemented for class:" + saml2Object.getClass().getName(),
+				new ValidationResult(saml2Object)
+					.addError("Unable to validate. No implementation.")
+			);
+		}
+	}
+
+	protected void validate(IdentityProviderMetadata metadata, HostedProviderService provider) {
+
+	}
+
+	protected void validate(ServiceProviderMetadata metadata, HostedProviderService provider) {
+
+	}
+
+	protected void validate(LogoutRequest logoutRequest, HostedProviderService provider) {
+
+	}
+
+	protected void validate(LogoutResponse logoutRequest, HostedProviderService provider) {
+
+	}
+
+	protected ValidationResult validate(Assertion assertion,
+										List<String> mustMatchInResponseTo,
+										ServiceProviderMetadata requester,
+										IdentityProviderMetadata responder) {
+		boolean wantAssertionsSigned = requester.getServiceProvider().isWantAssertionsSigned();
+		//verify assertion
+		//issuer
+		//signature
+		if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
+			return
+				new ValidationResult(assertion).addError(
+					new ValidationError("Assertion is not signed or signature is not validated")
+				);
+		}
+
+		if (responder == null) {
+			return new ValidationResult(assertion)
+				.addError("Remote provider for assertion was not found");
+		}
+
+		List<SubjectConfirmation> validConfirmations = new LinkedList<>();
+		ValidationResult assertionValidation = new ValidationResult(assertion);
+		for (SubjectConfirmation conf : assertion.getSubject().getConfirmations()) {
+
+			assertionValidation.setErrors(emptyList());
+			//verify assertion subject for BEARER
+			if (!BEARER.equals(conf.getMethod())) {
+				assertionValidation.addError("Invalid confirmation method:" + conf.getMethod());
+				continue;
+			}
+
+			//for each subject confirmation data
+			//1. data must not be null
+			SubjectConfirmationData data = conf.getConfirmationData();
+			if (data == null) {
+				assertionValidation.addError(new ValidationError("Empty subject confirmation data."));
+				continue;
+			}
+
+
+			//2. NotBefore must be null (saml-profiles-2.0-os 558)
+			// Not before forbidden by saml-profiles-2.0-os 558
+			if (data.getNotBefore() != null) {
+				assertionValidation.addError(
+					new ValidationError("Subject confirmation data should not have NotBefore date.")
+				);
+				continue;
+			}
+			//3. NotOnOfAfter must not be null and within skew
+			if (data.getNotOnOrAfter() == null) {
+				assertionValidation.addError(
+					new ValidationError("Subject confirmation data is missing NotOnOfAfter date.")
+				);
+				continue;
+			}
+
+			if (data.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
+				assertionValidation.addError(
+					new ValidationError(format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter()))
+				);
+			}
+			//4. InResponseTo if it exists
+			if (hasText(data.getInResponseTo())) {
+				if (mustMatchInResponseTo != null) {
+					if (!mustMatchInResponseTo.contains(data.getInResponseTo())) {
+						assertionValidation.addError(
+							new ValidationError(
+								format("No match for InResponseTo: %s found.", data.getInResponseTo())
+							)
+						);
+						continue;
+					}
+				}
+				else if (!isAllowUnsolicitedResponses()) {
+					assertionValidation.addError(
+						new ValidationError(
+							"InResponseTo missing and system not configured to allow unsolicited messages")
+					);
+					continue;
+				}
+			}
+			//5. Recipient must match ACS URL
+			if (!hasText(data.getRecipient())) {
+				assertionValidation.addError(new ValidationError("Assertion Recipient field missing"));
+				continue;
+			}
+			else if (!compareURIs(
+				requester.getServiceProvider().getAssertionConsumerService(),
+				data.getRecipient()
+			)) {
+				assertionValidation.addError(
+					new ValidationError("Invalid assertion Recipient field: " + data.getRecipient())
+				);
+				continue;
+			}
+
+			if (!assertionValidation.hasErrors()) {
+				validConfirmations.add(conf);
+			}
+
+		}
+		if (assertionValidation.hasErrors()) {
+			return assertionValidation;
+		}
+		assertion.getSubject().setConfirmations(validConfirmations);
+		//6. DECRYPT NAMEID if it is encrypted
+		//6b. Use regular NameID
+		if ((assertion.getSubject().getPrincipal()) == null) {
+			//we have a valid assertion, that's the one we will be using
+			return new ValidationResult(assertion).addError("Assertion principal is missing");
+		}
+		return new ValidationResult(assertion);
 	}
 
 	protected ValidationResult validate(Response response,
 										List<String> mustMatchInResponseTo,
 										ServiceProviderMetadata requester,
 										IdentityProviderMetadata responder) {
-		boolean wantAssertionsSigned = requester.getServiceProvider().isWantAssertionsSigned();
 		String entityId = requester.getEntityId();
 
 		if (response == null) {
@@ -127,6 +290,11 @@ public class DefaultValidator implements SamlValidator {
 			return new ValidationResult(response).addError(
 				new ValidationError("An error response was returned: " + statusCode.toString())
 			);
+		}
+
+		if (responder == null) {
+			return new ValidationResult(response)
+				.addError("Remote provider for response was not found");
 		}
 
 		if (response.getSignature() != null && !response.getSignature().isValidated()) {
@@ -178,96 +346,13 @@ public class DefaultValidator implements SamlValidator {
 		ValidationResult assertionValidation = new ValidationResult(response);
 		//DECRYPT ENCRYPTED ASSERTIONS
 		for (Assertion assertion : response.getAssertions()) {
-			assertionValidation.setErrors(emptyList());
-			//verify assertion
-			//issuer
-			//signature
-			if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
-				assertionValidation =
-					new ValidationResult(response).addError(new ValidationError("Assertion is not signed"));
-				continue;
-			}
-
-			for (SubjectConfirmation conf : assertion.getSubject().getConfirmations()) {
-				assertionValidation.setErrors(emptyList());
-
-				//verify assertion subject for BEARER
-				if (!BEARER.equals(conf.getMethod())) {
-					assertionValidation.addError(
-						new ValidationError("Invalid confirmation method:" + conf.getMethod())
-					);
-					continue;
-				}
-
-				//for each subject confirmation data
-				//1. data must not be null
-				SubjectConfirmationData data = conf.getConfirmationData();
-				if (data == null) {
-					assertionValidation.addError(new ValidationError("Empty subject confirmation data."));
-					continue;
-				}
-
-
-				//2. NotBefore must be null (saml-profiles-2.0-os 558)
-				// Not before forbidden by saml-profiles-2.0-os 558
-				if (data.getNotBefore() != null) {
-					assertionValidation.addError(
-						new ValidationError("Subject confirmation data should not have NotBefore date.")
-					);
-					continue;
-				}
-				//3. NotOnOfAfter must not be null and within skew
-				if (data.getNotOnOrAfter() == null) {
-					assertionValidation.addError(
-						new ValidationError("Subject confirmation data is missing NotOnOfAfter date.")
-					);
-					continue;
-				}
-
-				if (data.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
-					assertionValidation.addError(
-						new ValidationError(format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter()))
-					);
-				}
-				//4. InResponseTo if it exists
-				if (hasText(data.getInResponseTo())) {
-					if (mustMatchInResponseTo != null) {
-						if (!mustMatchInResponseTo.contains(data.getInResponseTo())) {
-							assertionValidation.addError(
-								new ValidationError(
-									format("No match for InResponseTo: %s found.", data.getInResponseTo())
-								)
-							);
-							continue;
-						}
-					}
-					else if (!isAllowUnsolicitedResponses()) {
-						assertionValidation.addError(
-							new ValidationError(
-								"InResponseTo missing and system not configured to allow unsolicited messages")
-						);
-						continue;
-					}
-				}
-				//5. Recipient must match ACS URL
-				if (!hasText(data.getRecipient())) {
-					assertionValidation.addError(new ValidationError("Assertion Recipient field missing"));
-					continue;
-				}
-				else if (!compareURIs(
-					requester.getServiceProvider().getAssertionConsumerService(),
-					data.getRecipient()
-				)) {
-					assertionValidation.addError(
-						new ValidationError("Invalid assertion Recipient field: " + data.getRecipient())
-					);
-					continue;
-				}
-			}
-			//6. DECRYPT NAMEID if it is encrypted
-			//6b. Use regular NameID
-			if ((assertion.getSubject().getPrincipal()) != null) {
-				//we have a valid assertion, that's the one we will be using
+			ValidationResult assertionResult = validate(
+				assertion,
+				mustMatchInResponseTo,
+				requester,
+				responder
+			);
+			if (!assertionResult.hasErrors()) {
 				validAssertion = assertion;
 				break;
 			}

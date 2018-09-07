@@ -108,10 +108,14 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 											 AuthenticationRequest authenticationRequest,
 											 Endpoint location) throws IOException {
 		//TODO - send RelayState?
+		String relayState = getRelayState(provider, request);
 		if (location.getBinding().equals(Binding.REDIRECT)) {
 			String encoded = provider.toEncodedXml(authenticationRequest, true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(location.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
+			if (hasText(relayState)) {
+				url.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
+			}
 			String redirect = url.build(true).toUriString();
 			response.sendRedirect(redirect);
 		}
@@ -120,6 +124,9 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			Map<String, Object> model = new HashMap<>();
 			model.put("action", location.getLocation());
 			model.put("SAMLRequest", encoded);
+			if (hasText(relayState)) {
+				model.put("RelayState", relayState);
+			}
 			processHtml(
 				request,
 				response,
@@ -135,6 +142,10 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 				Collections.singletonMap("message", "Unsupported binding:" + location.getBinding().toString())
 			);
 		}
+	}
+
+	protected String getRelayState(ServiceProviderService provider, HttpServletRequest request) {
+		return null;
 	}
 
 	public String getPostTemplate() {

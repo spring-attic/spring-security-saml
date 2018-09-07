@@ -47,15 +47,21 @@ public class IdpAuthenticationRequestFilter extends IdpInitiatedLoginFilter {
 	@Override
 	protected ServiceProviderMetadata getTargetProvider(HttpServletRequest request) {
 		IdentityProviderService provider = getProvisioning().getHostedProvider();
+		AuthenticationRequest authn = getAuthenticationRequest(request);
+		provider.validate(authn);
+		return provider.getRemoteProvider(authn);
+	}
+
+	@Override
+	protected AuthenticationRequest getAuthenticationRequest(HttpServletRequest request) {
+		IdentityProviderService provider = getProvisioning().getHostedProvider();
 		String param = request.getParameter("SAMLRequest");
-		AuthenticationRequest authn =
+		return
 			provider.fromXml(
 				param,
 				true,
 				HttpMethod.GET.name().equalsIgnoreCase(request.getMethod()),
 				AuthenticationRequest.class
 			);
-		provider.validate(authn);
-		return provider.getRemoteProvider(authn);
 	}
 }

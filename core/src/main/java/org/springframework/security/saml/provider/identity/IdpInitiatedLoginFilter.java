@@ -34,10 +34,10 @@ import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.SamlFilter;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -47,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
+import static org.springframework.util.StringUtils.hasText;
 
 public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService> {
 
@@ -81,11 +82,11 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 			authentication != null &&
 			authentication.isAuthenticated()) {
 			IdentityProviderService provider = getProvisioning().getHostedProvider();
-			IdentityProviderMetadata local = provider.getMetadata();
 			ServiceProviderMetadata recipient = getTargetProvider(request);
+			AuthenticationRequest authenticationRequest = getAuthenticationRequest(request);
 			Assertion assertion = getAssertion(authentication, provider, recipient);
 			assertionStore.addMessage(request, assertion.getId(), assertion);
-			Response r = provider.response(assertion, recipient);
+			Response r = provider.response(authenticationRequest, assertion, recipient);
 
 			Endpoint acsUrl = provider.getPreferredEndpoint(
 				recipient.getServiceProvider().getAssertionConsumerService(),
@@ -101,10 +102,14 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 					acsUrl.getBinding()
 				)
 			);
+			String relayState = request.getParameter("RelayState");
 			if (acsUrl.getBinding() == Binding.REDIRECT) {
 				String encoded = provider.toEncodedXml(r, true);
 				UriComponentsBuilder url = UriComponentsBuilder.fromUriString(acsUrl.getLocation());
 				url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
+				if (hasText(relayState)) {
+					url.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
+				}
 				String redirect = url.build(true).toUriString();
 				response.sendRedirect(redirect);
 			}
@@ -113,6 +118,9 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 				Map<String, Object> model = new HashMap<>();
 				model.put("action", acsUrl.getLocation());
 				model.put("SAMLResponse", encoded);
+				if (hasText(relayState)) {
+					model.put("RelayState", relayState);
+				}
 				processHtml(request, response, getPostBindingTemplate(), model);
 			}
 			else {
@@ -127,6 +135,10 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 	protected ServiceProviderMetadata getTargetProvider(HttpServletRequest request) {
 		String entityId = request.getParameter("sp");
 		return getProvisioning().getHostedProvider().getRemoteProvider(entityId);
+	}
+
+	protected AuthenticationRequest getAuthenticationRequest(HttpServletRequest request) {
+		return null;
 	}
 
 	protected Assertion getAssertion(Authentication authentication,

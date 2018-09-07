@@ -95,7 +95,13 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 
 		IdentityProviderMetadata idp = provider.getRemoteProvider(lr);
 		LogoutResponse logoutResponse = provider.logoutResponse(lr, idp);
-		String url = getRedirectUrl(provider, logoutResponse, logoutResponse.getDestination(), "SAMLResponse");
+		String url = getRedirectUrl(
+			provider,
+			logoutResponse,
+			logoutResponse.getDestination(),
+			"SAMLResponse",
+			request.getParameter("RelayState")
+		);
 		response.sendRedirect(url);
 		request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 	}
@@ -119,7 +125,16 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 			LogoutRequest lr = provider.logoutRequest(idp, (NameIdPrincipal) sa.getSamlPrincipal());
 			if (lr.getDestination() != null) {
 				logger.debug("Sending logout request through redirect.");
-				String redirect = getRedirectUrl(provider, lr, lr.getDestination().getLocation(), "SAMLRequest");
+				String redirect = getRedirectUrl(
+					provider,
+					lr,
+					lr.getDestination().getLocation(),
+					"SAMLRequest",
+					getLogoutRelayState(
+						request,
+						idp
+					)
+				);
 				response.sendRedirect(redirect);
 			}
 			else {
@@ -128,14 +143,22 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 		}
 	}
 
+	protected String getLogoutRelayState(HttpServletRequest request, IdentityProviderMetadata idp) {
+		return null;
+	}
+
 	private String getRedirectUrl(ServiceProviderService provider,
 								  Saml2Object lr,
 								  String location,
-								  String paramName)
+								  String paramName,
+								  String relayState)
 		throws UnsupportedEncodingException {
 		String xml = provider.toXml(lr);
 		String value = provider.toEncodedXml(xml, true);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+		if (hasText(relayState)) {
+			builder.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
+		}
 		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
 			.build()
 			.toUriString();

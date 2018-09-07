@@ -14,28 +14,37 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.util;
+package org.springframework.security.saml.spi;
 
+import java.time.Clock;
+
+import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
 
-class InMemoryKeyStoreTests {
+public class SamlKeyStoreProviderTests {
 
+	@BeforeAll
+	public static void initProvider() {
+		new OpenSamlImplementation(Clock.systemUTC()).init();
+	}
 	@Test
 	public void test_example() {
-		InMemoryKeyStore.fromKey(RSA_TEST_KEY.getSimpleKey("alias"));
+		new SamlKeyStoreProvider(){}.getKeyStore(RSA_TEST_KEY.getSimpleKey("alias"));
 	}
 
 	@Test
 	public void test_idp_1024() {
-		InMemoryKeyStore.fromKey(IDP_RSA_KEY.getSimpleKey("alias"));
+		new SamlKeyStoreProvider(){}.getKeyStore(IDP_RSA_KEY.getSimpleKey("alias"));
 	}
 
 	@Test
 	public void test_sp_1024() {
-		InMemoryKeyStore.fromKey(SP_RSA_KEY.getSimpleKey("alias"));
+		new SamlKeyStoreProvider(){}.getKeyStore(SP_RSA_KEY.getSimpleKey("alias"));
 	}
 }

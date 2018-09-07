@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.util;
+package org.springframework.security.saml.spi;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -28,22 +28,18 @@ import java.util.UUID;
 
 import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.util.X509Utilities;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class InMemoryKeyStore {
+public interface SamlKeyStoreProvider {
 
-	private static final char[] KS_PASSWD = UUID.randomUUID().toString().toCharArray();
-	private KeyStore ks;
+	char[] DEFAULT_KS_PASSWD = UUID.randomUUID().toString().toCharArray();
 
-	public InMemoryKeyStore(KeyStore ks) {
-		this.ks = ks;
-	}
-
-	public static InMemoryKeyStore fromKey(SimpleKey key) {
+	default KeyStore getKeyStore(SimpleKey key) {
 		try {
 			KeyStore ks = KeyStore.getInstance("JKS");
-			ks.load(null, KS_PASSWD);
+			ks.load(null, DEFAULT_KS_PASSWD);
 
 			byte[] certbytes = X509Utilities.getDER(key.getCertificate());
 			Certificate certificate = X509Utilities.getCertificate(certbytes);
@@ -58,17 +54,12 @@ public class InMemoryKeyStore {
 					Certificate[]{certificate});
 			}
 
-			return new InMemoryKeyStore(ks);
+			return ks;
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
 			throw new SamlKeyException(e);
 		} catch (IOException e) {
 			throw new SamlKeyException(e);
 		}
 	}
-
-	public KeyStore getKeyStore() {
-		return ks;
-	}
-
 
 }

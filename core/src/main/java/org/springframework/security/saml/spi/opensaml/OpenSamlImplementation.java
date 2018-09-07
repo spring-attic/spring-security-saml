@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.time.Clock;
@@ -84,8 +85,8 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
-import org.springframework.security.saml.util.InMemoryKeyStore;
 import org.springframework.util.CollectionUtils;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -221,10 +222,20 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	private static final Log logger = LogFactory.getLog(OpenSamlImplementation.class);
 	private BasicParserPool parserPool;
 	private ChainingEncryptedKeyResolver encryptedKeyResolver;
+	private SamlKeyStoreProvider samlKeyStoreProvider = new SamlKeyStoreProvider() {};
 
 	public OpenSamlImplementation(Clock time) {
 		super(time);
 		this.parserPool = new BasicParserPool();
+	}
+
+	public SamlKeyStoreProvider getSamlKeyStoreProvider() {
+		return samlKeyStoreProvider;
+	}
+
+	public OpenSamlImplementation setSamlKeyStoreProvider(SamlKeyStoreProvider samlKeyStoreProvider) {
+		this.samlKeyStoreProvider = samlKeyStoreProvider;
+		return this;
 	}
 
 	public BasicParserPool getParserPool() {
@@ -502,12 +513,12 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	public KeyStoreCredentialResolver getCredentialsResolver(SimpleKey key) {
-		InMemoryKeyStore ks = InMemoryKeyStore.fromKey(key);
+		KeyStore ks = getSamlKeyStoreProvider().getKeyStore(key);
 		Map<String, String> passwords = hasText(key.getPrivateKey()) ?
 			Collections.singletonMap(key.getName(), key.getPassphrase()) :
 			Collections.emptyMap();
 		KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(
-			ks.getKeyStore(),
+			ks,
 			passwords
 		);
 		return resolver;

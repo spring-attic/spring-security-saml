@@ -174,7 +174,7 @@ public class DefaultValidator implements SamlValidator {
 		if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
 			return
 				new ValidationResult(assertion).addError(
-					new ValidationError("Assertion is not signed or signature is not validated")
+					new ValidationError("Assertion is not signed or signature was not validated")
 				);
 		}
 
@@ -198,7 +198,7 @@ public class DefaultValidator implements SamlValidator {
 			//1. data must not be null
 			SubjectConfirmationData data = conf.getConfirmationData();
 			if (data == null) {
-				assertionValidation.addError(new ValidationError("Empty subject confirmation data."));
+				assertionValidation.addError(new ValidationError("Empty subject confirmation data"));
 				continue;
 			}
 
@@ -207,21 +207,21 @@ public class DefaultValidator implements SamlValidator {
 			// Not before forbidden by saml-profiles-2.0-os 558
 			if (data.getNotBefore() != null) {
 				assertionValidation.addError(
-					new ValidationError("Subject confirmation data should not have NotBefore date.")
+					new ValidationError("Subject confirmation data should not have NotBefore date")
 				);
 				continue;
 			}
 			//3. NotOnOfAfter must not be null and within skew
 			if (data.getNotOnOrAfter() == null) {
 				assertionValidation.addError(
-					new ValidationError("Subject confirmation data is missing NotOnOfAfter date.")
+					new ValidationError("Subject confirmation data is missing NotOnOfAfter date")
 				);
 				continue;
 			}
 
 			if (data.getNotOnOrAfter().plusMillis(getResponseSkewTimeMillis()).isBeforeNow()) {
 				assertionValidation.addError(
-					new ValidationError(format("Invalid NotOnOrAfter date: %s", data.getNotOnOrAfter()))
+					new ValidationError(format("Invalid NotOnOrAfter date: '%s'", data.getNotOnOrAfter()))
 				);
 			}
 			//4. InResponseTo if it exists
@@ -230,7 +230,7 @@ public class DefaultValidator implements SamlValidator {
 					if (!mustMatchInResponseTo.contains(data.getInResponseTo())) {
 						assertionValidation.addError(
 							new ValidationError(
-								format("No match for InResponseTo: %s found.", data.getInResponseTo())
+								format("No match for InResponseTo: '%s' found", data.getInResponseTo())
 							)
 						);
 						continue;
@@ -379,7 +379,7 @@ public class DefaultValidator implements SamlValidator {
 				return new ValidationResult(response)
 					.addError(
 						format(
-							"Authentication statement is too old to be used with value: %s current time: %s",
+							"Authentication statement is too old to be used with value: '%s' current time: '%s'",
 							toZuluTime(statement.getAuthInstant()),
 							toZuluTime(new DateTime())
 						)
@@ -391,7 +391,7 @@ public class DefaultValidator implements SamlValidator {
 				return new ValidationResult(response)
 					.addError(
 						format(
-							"Authentication session expired on: %s, current time: %s",
+							"Authentication session expired on: '%s', current time: '%s'",
 							toZuluTime(statement.getSessionNotOnOrAfter()),
 							toZuluTime(new DateTime())
 						)
@@ -425,7 +425,7 @@ public class DefaultValidator implements SamlValidator {
 						return new ValidationResult(response)
 							.addError(
 								format(
-									"Audience restriction evaluation failed for assertion condition. Expected %s Was %s",
+									"Audience restriction evaluation failed for assertion condition. Expected '%s' Was '%s'",
 									entityId,
 									ac.getAudiences()
 								)
@@ -486,7 +486,7 @@ public class DefaultValidator implements SamlValidator {
 					.addError(
 						new ValidationError(
 							format(
-								"Issuer mismatch. Expected: %s Actual: %s",
+								"Issuer mismatch. Expected: '%s' Actual: '%s'",
 								entity.getEntityId(),
 								issuer.getValue()
 							)
@@ -498,7 +498,7 @@ public class DefaultValidator implements SamlValidator {
 					.addError(
 						new ValidationError(
 							format(
-								"Issuer name format mismatch. Expected: %s Actual: %s",
+								"Issuer name format mismatch. Expected: '%s' Actual: '%s'",
 								ENTITY,
 								issuer.getFormat()
 							)

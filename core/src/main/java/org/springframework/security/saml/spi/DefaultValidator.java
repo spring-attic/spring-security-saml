@@ -30,6 +30,7 @@ import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
@@ -109,6 +110,9 @@ public class DefaultValidator implements SamlValidator {
 		else if (saml2Object instanceof IdentityProviderMetadata) {
 			result = validate((IdentityProviderMetadata)saml2Object, provider);
 		}
+		else if (saml2Object instanceof AuthenticationRequest) {
+			result = validate((AuthenticationRequest)saml2Object, provider);
+		}
 		else if (saml2Object instanceof LogoutRequest) {
 			result = validate((LogoutRequest)saml2Object, provider);
 		}
@@ -145,6 +149,10 @@ public class DefaultValidator implements SamlValidator {
 
 	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedProviderService provider) {
 		return new ValidationResult(metadata);
+	}
+
+	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedProviderService provider) {
+		return new ValidationResult(authnRequest);
 	}
 
 	protected ValidationResult validate(LogoutRequest logoutRequest, HostedProviderService provider) {

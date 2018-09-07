@@ -25,10 +25,23 @@ import org.springframework.security.saml.SamlTemplateEngine;
 
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
 import org.apache.velocity.VelocityContext;
+import org.apache.velocity.runtime.log.NullLogChute;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class OpenSamlVelocityEngine implements SamlTemplateEngine {
+
+	private final boolean disableVelocityLog;
+
+	public OpenSamlVelocityEngine() {
+		this(true);
+	}
+
+	public OpenSamlVelocityEngine(boolean disableVelocityLog) {
+		this.disableVelocityLog = disableVelocityLog;
+	}
+
+
 	@Override
 	public void process(HttpServletRequest request,
 						String templateId,
@@ -36,8 +49,7 @@ public class OpenSamlVelocityEngine implements SamlTemplateEngine {
 						Writer out
 	) {
 		org.apache.velocity.app.VelocityEngine velocityEngine = VelocityEngine.newVelocityEngine();
-		velocityEngine.init();
-
+		initializeVelocityEngine(velocityEngine);
 		VelocityContext context = new VelocityContext();
 		model.entrySet().stream().forEach(
 			e -> context.put(e.getKey(), e.getValue())
@@ -45,4 +57,12 @@ public class OpenSamlVelocityEngine implements SamlTemplateEngine {
 
 		velocityEngine.mergeTemplate(templateId, UTF_8.name(), context, out);
 	}
+
+	protected void initializeVelocityEngine(org.apache.velocity.app.VelocityEngine velocityEngine) {
+		if (disableVelocityLog) {
+			velocityEngine.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
+		}
+		velocityEngine.init();
+	}
+
 }

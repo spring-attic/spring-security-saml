@@ -39,6 +39,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion = "1.7.25"
 	ext.springVersion = "4.3.14.RELEASE"
 	ext.springSecurityVersion = "4.2.4.RELEASE"
+	ext.springBootVersion = '2.0.2.RELEASE'
 	ext.bcprovVersion = "1.59"
 	ext.bcpkixVersion = "1.59"
 	ext.openSamlVersion = "3.3.0"
@@ -77,6 +78,8 @@ configure(allprojects) { project ->
 	}
 
 	dependencies {
+		optional "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
+
 		testCompile(group: "org.junit.jupiter", name: "junit-jupiter-api", version: "$junitVersion")
 		testCompile(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: "$junitVersion")
 	}

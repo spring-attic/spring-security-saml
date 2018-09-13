@@ -16,9 +16,6 @@
  */
 
 buildscript {
-	ext {
-		springBootVersion = '2.0.2.RELEASE'
-	}
 	repositories {
 		mavenCentral()
 		//maven { url "https://repo.spring.io/snapshot" }

@@ -29,22 +29,48 @@ public class LocalServiceProviderConfiguration extends
 		super("saml/sp");
 	}
 
+	public static class Builder extends LocalProviderConfiguration.Builder<LocalServiceProviderConfiguration, ExternalIdentityProviderConfiguration, Builder> {
+
+        @Override
+        protected LocalServiceProviderConfiguration createLocalProviderConfigurationInstance() {
+            return new LocalServiceProviderConfiguration();
+        }
+
+        @Override
+        public LocalServiceProviderConfiguration build() {
+            return localProviderConfiguration;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        public Builder setSignRequests(boolean signRequests) {
+            localProviderConfiguration.signRequests = signRequests;
+            return this;
+        }
+
+        public Builder setWantAssertionsSigned(boolean wantAssertionsSigned) {
+            localProviderConfiguration.wantAssertionsSigned = wantAssertionsSigned;
+            return this;
+        }
+    }
+
 	public boolean isSignRequests() {
 		return signRequests;
 	}
 
-	public LocalServiceProviderConfiguration setSignRequests(boolean signRequests) {
+	public void setSignRequests(boolean signRequests) {
 		this.signRequests = signRequests;
-		return this;
 	}
 
 	public boolean isWantAssertionsSigned() {
 		return wantAssertionsSigned;
 	}
 
-	public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
+	public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
 		this.wantAssertionsSigned = wantAssertionsSigned;
-		return this;
 	}
 
 }

@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.provider;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.security.saml.provider.config.NetworkConfiguration;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
@@ -27,8 +28,13 @@ import org.springframework.security.saml.provider.service.config.LocalServicePro
  */
 public class SamlServerConfiguration implements Cloneable {
 
+	@NestedConfigurationProperty
 	private LocalServiceProviderConfiguration serviceProvider;
+
+	@NestedConfigurationProperty
 	private LocalIdentityProviderConfiguration identityProvider;
+
+	@NestedConfigurationProperty
 	private NetworkConfiguration network;
 
 	public LocalServiceProviderConfiguration getServiceProvider() {

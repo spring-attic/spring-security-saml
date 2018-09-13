@@ -37,75 +37,125 @@ public class LocalIdentityProviderConfiguration extends
 		super("saml/idp/");
 	}
 
+	public static class Builder extends LocalProviderConfiguration.Builder<LocalIdentityProviderConfiguration, ExternalServiceProviderConfiguration, Builder>{
+
+        @Override
+        protected LocalIdentityProviderConfiguration createLocalProviderConfigurationInstance() {
+            return new LocalIdentityProviderConfiguration();
+        }
+
+        @Override
+        public LocalIdentityProviderConfiguration build() {
+            return localProviderConfiguration;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        public Builder setWantRequestsSigned(boolean wantRequestsSigned) {
+            localProviderConfiguration.wantRequestsSigned = wantRequestsSigned;
+            return this;
+        }
+
+        public Builder setSignAssertions(boolean signAssertions) {
+            localProviderConfiguration.signAssertions = signAssertions;
+            return this;
+        }
+
+        public Builder setNotOnOrAfter(long notOnOrAfter) {
+            localProviderConfiguration.notOnOrAfter = notOnOrAfter;
+            return this;
+        }
+
+        public Builder setNotBefore(long notBefore) {
+            localProviderConfiguration.notBefore = notBefore;
+            return this;
+        }
+
+        public Builder setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
+            localProviderConfiguration.sessionNotOnOrAfter = sessionNotOnOrAfter;
+            return this;
+        }
+
+        public Builder setEncryptAssertions(boolean encryptAssertions) {
+            localProviderConfiguration.encryptAssertions = encryptAssertions;
+            return this;
+        }
+
+        public Builder setKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+            localProviderConfiguration.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+            return this;
+        }
+
+        public Builder setDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+            localProviderConfiguration.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+            return this;
+        }
+    }
+
 	public boolean isWantRequestsSigned() {
 		return wantRequestsSigned;
 	}
 
-	public LocalIdentityProviderConfiguration setWantRequestsSigned(boolean wantRequestsSigned) {
+	public void setWantRequestsSigned(boolean wantRequestsSigned) {
 		this.wantRequestsSigned = wantRequestsSigned;
-		return this;
 	}
 
 	public boolean isSignAssertions() {
 		return signAssertions;
 	}
 
-	public LocalIdentityProviderConfiguration setSignAssertions(boolean signAssertions) {
+	public void setSignAssertions(boolean signAssertions) {
 		this.signAssertions = signAssertions;
-		return this;
 	}
 
 	public long getNotOnOrAfter() {
 		return notOnOrAfter;
 	}
 
-	public LocalIdentityProviderConfiguration setNotOnOrAfter(long notOnOrAfter) {
+	public void setNotOnOrAfter(long notOnOrAfter) {
 		this.notOnOrAfter = notOnOrAfter;
-		return this;
 	}
 
 	public long getNotBefore() {
 		return notBefore;
 	}
 
-	public LocalIdentityProviderConfiguration setNotBefore(long notBefore) {
+	public void setNotBefore(long notBefore) {
 		this.notBefore = notBefore;
-		return this;
 	}
 
 	public long getSessionNotOnOrAfter() {
 		return sessionNotOnOrAfter;
 	}
 
-	public LocalIdentityProviderConfiguration setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
+	public void setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
 		this.sessionNotOnOrAfter = sessionNotOnOrAfter;
-		return this;
 	}
 
 	public boolean isEncryptAssertions() {
 		return encryptAssertions;
 	}
 
-	public LocalIdentityProviderConfiguration setEncryptAssertions(boolean encryptAssertions) {
+	public void setEncryptAssertions(boolean encryptAssertions) {
 		this.encryptAssertions = encryptAssertions;
-		return this;
 	}
 
 	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
 		return keyEncryptionAlgorithm;
 	}
 
-	public LocalIdentityProviderConfiguration setKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+	public void setKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
 		this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
-		return this;
 	}
 
 	public DataEncryptionMethod getDataEncryptionAlgorithm() {
 		return dataEncryptionAlgorithm;
 	}
 
-	public LocalIdentityProviderConfiguration setDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+	public void setDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
 		this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
-		return this;
 	}
 }

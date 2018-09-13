@@ -52,7 +52,7 @@ public class SamlServiceProviderSecurityDsl
 				.setReadTimeout(10000)
 		)
 		.setServiceProvider(
-			new LocalServiceProviderConfiguration()
+			new LocalServiceProviderConfiguration.Builder()
 				.setPrefix(prefix)
 				.setSignMetadata(true)
 				.setSignRequests(true)
@@ -66,6 +66,7 @@ public class SamlServiceProviderSecurityDsl
 					)
 				)
 				.setProviders(new LinkedList<>())
+				.build()
 		);
 
 	@Override
@@ -150,9 +151,8 @@ public class SamlServiceProviderSecurityDsl
 
 	public SamlServiceProviderSecurityDsl signatureAlgorithms(AlgorithmMethod signAlgorithm,
 															  DigestMethod signDigest) {
-		configuration.getServiceProvider()
-			.setDefaultSigningAlgorithm(signAlgorithm)
-			.setDefaultDigest(signDigest);
+		configuration.getServiceProvider().setDefaultSigningAlgorithm(signAlgorithm);
+		configuration.getServiceProvider().setDefaultDigest(signDigest);
 		return this;
 	}
 

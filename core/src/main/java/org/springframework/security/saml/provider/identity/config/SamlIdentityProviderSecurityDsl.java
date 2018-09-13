@@ -55,7 +55,7 @@ public class SamlIdentityProviderSecurityDsl
 				.setReadTimeout(10000)
 		)
 		.setIdentityProvider(
-			new LocalIdentityProviderConfiguration()
+			new LocalIdentityProviderConfiguration.Builder()
 				.setPrefix(prefix)
 				.setSignMetadata(true)
 				.setSignAssertions(true)
@@ -72,6 +72,7 @@ public class SamlIdentityProviderSecurityDsl
 				.setEncryptAssertions(false)
 				.setKeyEncryptionAlgorithm(RSA_1_5)
 				.setProviders(new LinkedList<>())
+				.build()
 		);
 
 	@Override
@@ -145,9 +146,8 @@ public class SamlIdentityProviderSecurityDsl
 
 	public SamlIdentityProviderSecurityDsl signatureAlgorithms(AlgorithmMethod signAlgorithm,
 															   DigestMethod signDigest) {
-		configuration.getIdentityProvider()
-			.setDefaultSigningAlgorithm(signAlgorithm)
-			.setDefaultDigest(signDigest);
+		configuration.getIdentityProvider().setDefaultSigningAlgorithm(signAlgorithm);
+		configuration.getIdentityProvider().setDefaultDigest(signDigest);
 		return this;
 	}
 
@@ -167,8 +167,10 @@ public class SamlIdentityProviderSecurityDsl
 															 KeyEncryptionMethod keyEncryptionAlgorithm,
 															 DataEncryptionMethod dataEncryptionAlgorithm) {
 		configuration.getIdentityProvider()
-			.setEncryptAssertions(encrypt)
-			.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm)
+			.setEncryptAssertions(encrypt);
+		configuration.getIdentityProvider()
+			.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
+		configuration.getIdentityProvider()
 			.setDataEncryptionAlgorithm(dataEncryptionAlgorithm);
 		return this;
 	}

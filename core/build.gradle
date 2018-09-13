@@ -27,6 +27,8 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-tx"
 	}
 
+	compileOnly "org.springframework.boot:spring-boot:$springBootVersion"
+
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "$bcprovVersion"
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcpkixVersion"
 

@@ -28,9 +28,9 @@ spring:
         want-assertions-signed: true
         single-logout-enabled: true
         name-ids:
-          - persistent
-          - email
-          - unspecified
+          - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
         keys:
           active:
             name: sp-signing-key-1

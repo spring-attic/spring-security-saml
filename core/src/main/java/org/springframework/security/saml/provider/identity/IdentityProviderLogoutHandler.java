@@ -107,7 +107,8 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		}
 	}
 
-	private String getRedirectUrl(IdentityProviderService provider,
+	private String getRedirectUrl(HttpServletRequest request,
+								  IdentityProviderService provider,
 								  Saml2Object lr,
 								  String location,
 								  String paramName)
@@ -115,6 +116,10 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 		String xml = provider.toXml(lr);
 		String value = provider.toEncodedXml(xml, true);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+		String relayState = request.getParameter("RelayState");
+		if (hasText(relayState)) {
+			builder.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
+		}
 		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
 			.build()
 			.toUriString();
@@ -162,7 +167,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 			logger.debug("No SP sessions found, returning logout response");
 			ServiceProviderMetadata sp = provider.getRemoteProvider(logoutRequest);
 			LogoutResponse lr = provider.logoutResponse(logoutRequest, sp);
-			String url = getRedirectUrl(provider, lr, lr.getDestination(), "SAMLResponse");
+			String url = getRedirectUrl(request, provider, lr, lr.getDestination(), "SAMLResponse");
 			request.setAttribute(RUN_SUCCESS, SamlLogoutSuccessHandler.LogoutStatus.REDIRECT);
 			response.sendRedirect(url);
 		}
@@ -195,6 +200,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 					provider.getRemoteProvider(logoutRequest)
 				);
 				String redirect = getRedirectUrl(
+					request,
 					provider,
 					logoutResponse,
 					logoutResponse.getDestination(),
@@ -235,6 +241,7 @@ public class IdentityProviderLogoutHandler implements LogoutHandler {
 					logger.debug("Sending logout request through redirect.");
 					//TODO review binding and send POST if needed
 					String redirect = getRedirectUrl(
+						request,
 						provider,
 						logoutRequest,
 						logoutRequest.getDestination().getLocation(),

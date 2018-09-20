@@ -315,6 +315,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			FALSE
 		);
 		parserBuilderFeatures.put("http://xml.org/sax/features/external-parameter-entities", FALSE);
+		parserBuilderFeatures.put("http://apache.org/xml/features/dom/defer-node-expansion", FALSE);
 		parserPool.setBuilderFeatures(parserBuilderFeatures);
 
 		try {

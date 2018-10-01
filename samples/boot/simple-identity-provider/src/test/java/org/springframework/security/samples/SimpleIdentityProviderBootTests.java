@@ -400,7 +400,7 @@ public class SimpleIdentityProviderBootTests {
 			Optional<SimpleKey> first = idpm.getIdentityProvider().getKeys().stream()
 				.filter(k -> type == k.getType())
 				.findFirst();
-			assertThat("Key of type:"+type, first.isPresent(), equalTo(true));
+			assertThat("Key of type:" + type, first.isPresent(), equalTo(true));
 		}
 
 

@@ -20,8 +20,6 @@ package org.springframework.security.samples;
 import java.net.URI;
 import java.time.Clock;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,14 +59,12 @@ import org.springframework.security.saml.spi.ExamplePemKey;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.util.UriUtils;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -81,6 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -620,19 +617,7 @@ public class SimpleIdentityProviderBootTests {
 		"grufDj9HmrvKHM2LZTp/cIUpxcNpVRyDA4iVNDc7V3qszaWP9ZIswAYnvmyDL2UHVDLE8xoGz/Ak\n" +
 		"xsRNN9VXNHewjQO605umiAKJ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8080/sample-sp/saml/sp/logout\"/><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat><md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://localhost:8080/sample-sp/saml/sp/SSO\" index=\"0\" isDefault=\"true\"/><md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://localhost:8080/sample-sp/saml/sp/SSO\" index=\"1\" isDefault=\"false\"/><md:AttributeConsumingService index=\"0\" isDefault=\"true\"/></md:SPSSODescriptor></md:EntityDescriptor>";
 
-	public static Map<String, String> queryParams(URI url) {
-		Map<String, String> queryPairs = new LinkedHashMap<>();
-		String query = url.getQuery();
-		String[] pairs = query.split("&");
-		for (String pair : pairs) {
-			int idx = pair.indexOf("=");
-			queryPairs.put(
-				UriUtils.decode(pair.substring(0, idx), UTF_8.name()),
-				UriUtils.decode(pair.substring(idx + 1), UTF_8.name())
-			);
-		}
-		return queryPairs;
-	}
+
 
 	private MvcResult idpToSpLogin(MockHttpSession session, String spEntityId) throws Exception {
 		return mockMvc.perform(

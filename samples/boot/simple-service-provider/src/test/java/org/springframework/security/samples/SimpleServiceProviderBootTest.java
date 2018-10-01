@@ -18,7 +18,6 @@ package org.springframework.security.samples;
 
 import java.net.URI;
 import java.time.Clock;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +54,6 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.util.UriUtils;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,6 +76,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -416,21 +415,6 @@ public class SimpleServiceProviderBootTest {
 			.andExpect(content().string(containsString("<h1>Select an Identity Provider</h1>")))
 			.andExpect(content().string(containsString("Simple SAML PHP IDP")))
 			.andReturn();
-	}
-
-
-	public static Map<String, String> queryParams(URI url) {
-		Map<String, String> queryPairs = new LinkedHashMap<>();
-		String query = url.getQuery();
-		String[] pairs = query.split("&");
-		for (String pair : pairs) {
-			int idx = pair.indexOf("=");
-			queryPairs.put(
-				UriUtils.decode(pair.substring(0, idx), UTF_8.name()),
-				UriUtils.decode(pair.substring(idx + 1), UTF_8.name())
-			);
-		}
-		return queryPairs;
 	}
 
 	protected ServiceProviderMetadata getServiceProviderMetadata() throws Exception {

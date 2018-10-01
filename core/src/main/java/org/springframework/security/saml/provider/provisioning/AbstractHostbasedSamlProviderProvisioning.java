@@ -192,7 +192,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 				.setIndex(index);
 	}
 
-	public ServiceProviderService getHostedServiceProvider(LocalServiceProviderConfiguration spConfig) {
+	protected ServiceProviderService getHostedServiceProvider(LocalServiceProviderConfiguration spConfig) {
 		String basePath = spConfig.getBasePath();
 
 		List<SimpleKey> keys = new LinkedList<>();

@@ -21,6 +21,17 @@ package org.springframework.security.saml.saml2.metadata;
  */
 public class ServiceProviderMetadata extends Metadata<ServiceProviderMetadata> {
 
+	public ServiceProviderMetadata() {
+	}
+
+	public ServiceProviderMetadata(ServiceProviderMetadata other) {
+		super(other);
+	}
+
+	public ServiceProviderMetadata(Metadata other) {
+		super(other);
+	}
+
 	public ServiceProvider getServiceProvider() {
 		return (ServiceProvider) getProviders()
 			.stream()

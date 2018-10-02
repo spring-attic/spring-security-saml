@@ -40,6 +40,14 @@ public class Metadata<T extends EntityDescriptor<T>> extends EntityDescriptor<T>
 	 */
 	private T next = null;
 
+	public Metadata() {
+	}
+
+	public Metadata(Metadata<T> other) {
+		super(other);
+		this.next = other.next;
+	}
+
 	public T getNext() {
 		return next;
 	}

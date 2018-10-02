@@ -17,7 +17,9 @@
 
 package org.springframework.security.saml.provider.service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
@@ -33,9 +35,11 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.SsoProvider;
 
 import org.joda.time.DateTime;
 
@@ -51,6 +55,21 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 										SamlValidator validator,
 										SamlMetadataCache cache) {
 		super(configuration, metadata, transformer, validator, cache);
+	}
+
+	@Override
+	protected IdentityProviderMetadata transformMetadata(String data) {
+		Metadata metadata = (Metadata)getTransformer().fromXml(data, null, null);
+		IdentityProviderMetadata result;
+		if (metadata instanceof IdentityProviderMetadata) {
+			result =  (IdentityProviderMetadata)metadata;
+		} else {
+			List<SsoProvider> providers = metadata.getSsoProviders();
+			providers = providers.stream().filter(p -> p instanceof IdentityProvider).collect(Collectors.toList());
+			result = new IdentityProviderMetadata(metadata);
+			result.setProviders(providers);
+		}
+		return result;
 	}
 
 	@Override

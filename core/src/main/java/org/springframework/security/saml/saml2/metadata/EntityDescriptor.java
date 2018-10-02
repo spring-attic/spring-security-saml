@@ -46,6 +46,22 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
+	EntityDescriptor() {
+	}
+
+	EntityDescriptor(EntityDescriptor other) {
+		this.id = other.id;
+		this.entityId = other.entityId;
+		this.entityAlias = other.entityAlias;
+		this.validUntil = other.validUntil;
+		this.cacheDuration = other.cacheDuration;
+		this.providers = other.providers;
+		this.signature = other.signature;
+		this.signingKey = other.signingKey;
+		this.algorithm = other.algorithm;
+		this.digest = other.digest;
+	}
+
 	public String getId() {
 		return id;
 	}

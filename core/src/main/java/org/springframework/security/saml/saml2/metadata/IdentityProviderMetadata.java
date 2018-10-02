@@ -23,6 +23,18 @@ public class IdentityProviderMetadata extends Metadata<IdentityProviderMetadata>
 
 	private NameId defaultNameId = null;
 
+	public IdentityProviderMetadata() {
+	}
+
+	public IdentityProviderMetadata(IdentityProviderMetadata other) {
+		super(other);
+		this.defaultNameId = other.defaultNameId;
+	}
+
+	public IdentityProviderMetadata(Metadata other) {
+		super(other);
+	}
+
 	public IdentityProvider getIdentityProvider() {
 		return (IdentityProvider) getProviders()
 			.stream()

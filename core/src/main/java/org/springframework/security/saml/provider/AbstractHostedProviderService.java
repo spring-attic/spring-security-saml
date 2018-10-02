@@ -19,6 +19,7 @@ package org.springframework.security.saml.provider;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.LinkedList;
 import java.util.List;
@@ -332,7 +333,7 @@ public abstract class AbstractHostedProviderService<
 		if (isUri(metadata)) {
 			try {
 				byte[] data = cache.getMetadata(metadata, skipSslValidation);
-				result = (RemoteMetadata) transformer.fromXml(data, null, null);
+				result = transformMetadata(new String(data, StandardCharsets.UTF_8));
 			} catch (SamlException x) {
 				throw x;
 			} catch (Exception x) {
@@ -347,7 +348,7 @@ public abstract class AbstractHostedProviderService<
 			}
 		}
 		else {
-			result = (RemoteMetadata) transformer.fromXml(metadata, null, null);
+			result = transformMetadata(metadata);
 		}
 		return throwIfNull(
 			result,
@@ -355,6 +356,8 @@ public abstract class AbstractHostedProviderService<
 			metadata
 		);
 	}
+
+	protected abstract RemoteMetadata transformMetadata(String data);
 
 	private boolean isUri(String uri) {
 		boolean isUri = false;

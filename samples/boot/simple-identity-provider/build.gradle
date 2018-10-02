@@ -16,9 +16,6 @@
  */
 
 buildscript {
-	ext {
-		springBootVersion = '2.0.2.RELEASE'
-	}
 	repositories {
 		mavenCentral()
 		//maven { url "https://repo.spring.io/snapshot" }
@@ -34,8 +31,6 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-
-ext['thymeleaf.version'] = '3.0.9.RELEASE'
 
 dependencies {
 	compile project(':spring-security-saml2-boot-config')

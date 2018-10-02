@@ -50,6 +50,7 @@ configure(allprojects) { project ->
 	ext.antisamyVersion = "1.5.7"
 	ext.xalanVersion = "2.7.2"
 	ext.xmlApisVersion = "1.4"
+	ext.springBootVersion = "2.0.2.RELEASE"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 	ext.junitVersion = "5.1.0"
 

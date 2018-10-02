@@ -20,6 +20,8 @@ description = "Spring Security SAML v2 Spring Boot Configuration"
 dependencies {
 	compile project(':spring-security-saml2-core')
 
+	optional "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
+
 	testCompile ("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

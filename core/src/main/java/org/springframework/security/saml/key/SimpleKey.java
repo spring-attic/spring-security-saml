@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.key;
 
-public class SimpleKey implements Cloneable {
+public class SimpleKey {
 
 	private String name;
 	private String privateKey;
@@ -33,11 +33,22 @@ public class SimpleKey implements Cloneable {
 					 String certificate,
 					 String passphrase,
 					 KeyType type) {
+		this();
 		this.name = name;
 		this.privateKey = privateKey;
 		this.certificate = certificate;
 		this.passphrase = passphrase;
 		this.type = type;
+	}
+
+	public SimpleKey(SimpleKey other) {
+		this(
+			other.getName(),
+			other.getPrivateKey(),
+			other.getCertificate(),
+			other.getPassphrase(),
+			other.getType()
+		);
 	}
 
 	public String getName() {
@@ -56,10 +67,6 @@ public class SimpleKey implements Cloneable {
 	public SimpleKey setType(KeyType type) {
 		this.type = type;
 		return this;
-	}
-
-	public SimpleKey clone(String alias, KeyType type) {
-		return new SimpleKey(alias, getPrivateKey(), getCertificate(), getPassphrase(), type);
 	}
 
 	public String getPrivateKey() {

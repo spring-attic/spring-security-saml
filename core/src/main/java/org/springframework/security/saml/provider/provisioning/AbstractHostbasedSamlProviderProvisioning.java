@@ -78,7 +78,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		List<SimpleKey> keys = new LinkedList<>();
 		SimpleKey activeKey = idpConfig.getKeys().getActive();
 		keys.add(activeKey);
-		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
+		keys.add(new SimpleKey(activeKey).setName(activeKey.getName()+"-encryption").setType(KeyType.ENCRYPTION));
 		keys.addAll(idpConfig.getKeys().getStandBy());
 		SimpleKey signingKey = idpConfig.isSignMetadata() ? activeKey : null;
 
@@ -198,7 +198,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		List<SimpleKey> keys = new LinkedList<>();
 		SimpleKey activeKey = spConfig.getKeys().getActive();
 		keys.add(activeKey);
-		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
+		keys.add(new SimpleKey(activeKey).setName(activeKey.getName()+"-encryption").setType(KeyType.ENCRYPTION));
 		keys.addAll(spConfig.getKeys().getStandBy());
 		SimpleKey signingKey = spConfig.isSignMetadata() ? spConfig.getKeys().getActive() : null;
 

@@ -91,7 +91,7 @@ public class MetadataTests extends MetadataBase {
 		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
-		SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
+		SimpleKey key = new SimpleKey(spSigning).setName("signing").setType(KeyType.SIGNING);
 
 		spm.getServiceProvider().setKeys(Arrays.asList(key));
 		spm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);
@@ -205,7 +205,7 @@ public class MetadataTests extends MetadataBase {
 		IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 
-		SimpleKey key = spSigning.clone("signing", KeyType.SIGNING);
+		SimpleKey key = new SimpleKey(spSigning).setName("signing").setType(KeyType.SIGNING);
 
 		ipm.getIdentityProvider().setKeys(Arrays.asList(key));
 		ipm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);

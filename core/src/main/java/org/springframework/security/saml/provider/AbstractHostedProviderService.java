@@ -33,7 +33,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.config.HostedProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -59,7 +59,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 public abstract class AbstractHostedProviderService<
-	Configuration extends LocalProviderConfiguration,
+	Configuration extends HostedProviderConfiguration,
 	LocalMetadata extends Metadata<LocalMetadata>,
 	RemoteMetadata extends Metadata<RemoteMetadata>>
 	implements HostedProviderService<Configuration, LocalMetadata, RemoteMetadata> {
@@ -253,7 +253,7 @@ public abstract class AbstractHostedProviderService<
 
 	@Override
 	public <T extends Saml2Object> T fromXml(String xml, boolean encoded, boolean deflated, Class<T> type) {
-		List<SimpleKey> decryptionKeys = getConfiguration().getKeys().toList();
+		List<SimpleKey> decryptionKeys = getConfiguration().getKeys();
 		if (encoded) {
 			xml = getTransformer().samlDecode(xml, deflated);
 		}

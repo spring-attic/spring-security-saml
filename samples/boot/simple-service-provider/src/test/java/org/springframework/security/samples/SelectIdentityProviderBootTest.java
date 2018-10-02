@@ -16,46 +16,28 @@
  */
 package org.springframework.security.samples;
 
-import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.MediaType;
-import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
+import sample.config.AppConfig;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -70,24 +52,31 @@ public class SelectIdentityProviderBootTest {
 	private String spBaseUrl;
 
 	@Autowired
-	@Qualifier("spSamlServerConfiguration")
-	private SamlServerConfiguration config;
+	private AppConfig config;
 
 	private List<ExternalIdentityProviderConfiguration> providers;
 
 	@BeforeEach
 	void setUp() {
 		idpEntityId = "http://dual.sp-idp.com/saml/idp/metadata";
-		providers = config.getServiceProvider().getProviders();
+		providers = config.toSamlServerConfiguration().getServiceProvider().getProviders();
 		List<ExternalIdentityProviderConfiguration> newConfig = new ArrayList<>(providers);
 		newConfig.add(
-			new ExternalIdentityProviderConfiguration()
-				.setAlias("dual")
-				.setMetadata(IDP_DUAL_METADATA)
-				.setSkipSslValidation(true)
-				.setLinktext("Dual IDP/SP Metadata")
+			new ExternalIdentityProviderConfiguration(
+				"dual",
+				IDP_DUAL_METADATA,
+				"Dual IDP/SP Metadata",
+				true,
+				false,
+				NameId.PERSISTENT,
+				0
+			)
 		);
-		config.getServiceProvider().setProviders(newConfig);
+
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getServiceProvider().setProviders(newConfig);
 
 		spBaseUrl = "http://localhost";
 		config.getServiceProvider().setBasePath(spBaseUrl);
@@ -95,8 +84,7 @@ public class SelectIdentityProviderBootTest {
 
 	@AfterEach
 	public void reset() {
-		config.getServiceProvider().setSingleLogoutEnabled(true);
-		config.getServiceProvider().setProviders(providers);
+
 	}
 
 	@Test

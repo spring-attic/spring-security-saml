@@ -21,4 +21,11 @@ import org.springframework.security.saml.provider.config.ExternalProviderConfigu
 
 public class ExternalServiceProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
+	public ExternalServiceProviderConfiguration(String alias,
+												String metadata,
+												String linktext,
+												boolean skipSslValidation,
+												boolean metadataTrustCheck) {
+		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
+	}
 }

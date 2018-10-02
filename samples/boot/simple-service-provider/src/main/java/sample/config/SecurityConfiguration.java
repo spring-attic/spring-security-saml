@@ -45,7 +45,7 @@ public class SecurityConfiguration {
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.apply(serviceProvider())
-				.configure(appConfig);
+				.configure(appConfig.toSamlServerConfiguration());
 		}
 	}
 

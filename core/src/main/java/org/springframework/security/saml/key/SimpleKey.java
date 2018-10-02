@@ -19,21 +19,17 @@ package org.springframework.security.saml.key;
 
 public class SimpleKey {
 
-	private String name;
-	private String privateKey;
-	private String certificate;
-	private String passphrase;
-	private KeyType type;
-
-	public SimpleKey() {
-	}
+	private final String name;
+	private final String privateKey;
+	private final String certificate;
+	private final String passphrase;
+	private final KeyType type;
 
 	public SimpleKey(String name,
 					 String privateKey,
 					 String certificate,
 					 String passphrase,
 					 KeyType type) {
-		this();
 		this.name = name;
 		this.privateKey = privateKey;
 		this.certificate = certificate;
@@ -55,18 +51,8 @@ public class SimpleKey {
 		return name;
 	}
 
-	public SimpleKey setName(String name) {
-		this.name = name;
-		return this;
-	}
-
 	public KeyType getType() {
 		return type;
-	}
-
-	public SimpleKey setType(KeyType type) {
-		this.type = type;
-		return this;
 	}
 
 	public String getPrivateKey() {
@@ -81,23 +67,4 @@ public class SimpleKey {
 		return passphrase;
 	}
 
-	public SimpleKey setPassphrase(String passphrase) {
-		this.passphrase = passphrase;
-		return this;
-	}
-
-	public SimpleKey setCertificate(String certificate) {
-		this.certificate = certificate;
-		return this;
-	}
-
-	public SimpleKey setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
-		return this;
-	}
-
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
 }

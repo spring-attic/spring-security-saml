@@ -15,44 +15,59 @@
  *
  */
 
-package org.springframework.security.saml.provider.config;
+package org.springframework.security.saml.boot;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.security.saml.key.SimpleKey;
 
 import static org.springframework.util.StringUtils.hasText;
 
 public class RotatingKeys {
-	private SimpleKey active = null;
-	private List<SimpleKey> standBy = new LinkedList<>();
+	@NestedConfigurationProperty
+	private SamlKey active = null;
+	@NestedConfigurationProperty
+	private List<SamlKey> standBy = new LinkedList<>();
 
 	public List<SimpleKey> toList() {
 		LinkedList<SimpleKey> result = new LinkedList<>();
-		result.add(getActive());
-		result.addAll(getStandBy());
+		result.add(getActive().toSimpleKey());
+		result.addAll(
+			getStandBy().stream().map(
+				k -> k.toSimpleKey()
+			).collect(Collectors.toList())
+		);
 		return result;
 	}
 
-	public SimpleKey getActive() {
+	public SamlKey getActive() {
 		return active;
 	}
 
-	public RotatingKeys setActive(SimpleKey active) {
-		this.active = active;
-		if (!hasText(active.getName())) {
-			active.setName("active-signing-key");
+	public void setActive(SamlKey active) {
+
+		if (hasText(active.getName())) {
+			this.active = active;
 		}
-		return this;
+		else {
+			this.active = new SamlKey(
+				"active-signing-key",
+				active.getPrivateKey(),
+				active.getCertificate(),
+				active.getPassphrase(),
+				active.getType()
+			);
+		}
 	}
 
-	public List<SimpleKey> getStandBy() {
+	public List<SamlKey> getStandBy() {
 		return standBy;
 	}
 
-	public RotatingKeys setStandBy(List<SimpleKey> standBy) {
+	public void setStandBy(List<SamlKey> standBy) {
 		this.standBy = standBy;
-		return this;
 	}
 }

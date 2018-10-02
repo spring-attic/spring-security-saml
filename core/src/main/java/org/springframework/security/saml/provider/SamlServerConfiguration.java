@@ -18,59 +18,44 @@
 package org.springframework.security.saml.provider;
 
 import org.springframework.security.saml.provider.config.NetworkConfiguration;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 
 /**
  * Represents a configuration for a hosted or domain.
  * A hosted domain can have one local service provider, or one local identity provider, or both.
  */
-public class SamlServerConfiguration implements Cloneable {
+public class SamlServerConfiguration {
 
-	private LocalServiceProviderConfiguration serviceProvider;
-	private LocalIdentityProviderConfiguration identityProvider;
-	private NetworkConfiguration network;
+	private final HostedServiceProviderConfiguration serviceProvider;
+	private final HostedIdentityProviderConfiguration identityProvider;
+	private final NetworkConfiguration network;
 
-	public LocalServiceProviderConfiguration getServiceProvider() {
+	public SamlServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
+								   HostedIdentityProviderConfiguration identityProvider,
+								   NetworkConfiguration network) {
+		this.serviceProvider = serviceProvider;
+		this.identityProvider = identityProvider;
+		this.network = network;
+	}
+
+	public HostedServiceProviderConfiguration getServiceProvider() {
 		return serviceProvider;
 	}
 
-	public SamlServerConfiguration setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
-		this.serviceProvider = serviceProvider;
-		return this;
-	}
-
-	public LocalIdentityProviderConfiguration getIdentityProvider() {
+	public HostedIdentityProviderConfiguration getIdentityProvider() {
 		return identityProvider;
-	}
-
-	public SamlServerConfiguration setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
-		this.identityProvider = identityProvider;
-		return this;
 	}
 
 	public NetworkConfiguration getNetwork() {
 		return network;
 	}
 
-	public SamlServerConfiguration setNetwork(NetworkConfiguration network) {
-		this.network = network;
-		return this;
-	}
-
-	@Override
-	public SamlServerConfiguration clone() throws CloneNotSupportedException {
-		SamlServerConfiguration result = (SamlServerConfiguration) super.clone();
-		result.network = network != null ? network.clone() : null;
-		result.identityProvider = identityProvider != null ? identityProvider.clone() : null;
-		result.serviceProvider = serviceProvider != null ? serviceProvider.clone() : null;
-		return result;
-	}
-
 	public SamlServerConfiguration transfer(SamlServerConfiguration external) {
-		return this
-			.setNetwork(external.getNetwork())
-			.setIdentityProvider(external.getIdentityProvider())
-			.setServiceProvider(external.getServiceProvider());
+		return new SamlServerConfiguration(
+			external.getServiceProvider(),
+			external.getIdentityProvider(),
+			external.getNetwork()
+		);
 	}
 }

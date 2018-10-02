@@ -32,7 +32,7 @@ import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.SamlFilter;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -77,7 +77,7 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 		throws ServletException, IOException {
 		if (requestMatcher.matches(request)) {
 			ServiceProviderService provider = getProvisioning().getHostedProvider();
-			LocalServiceProviderConfiguration configuration = provider.getConfiguration();
+			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
 			configuration.getProviders().stream().forEach(
 				p -> {

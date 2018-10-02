@@ -70,7 +70,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -118,7 +117,10 @@ public class SimpleIdentityProviderBootTests {
 	@BeforeEach
 	public void mockCache() {
 		//since we're using objects outside of the mock request
-		config.getIdentityProvider().setBasePath(baseUrl);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getIdentityProvider().setBasePath(baseUrl);
 
 		given(
 			cache.getMetadata(
@@ -139,28 +141,17 @@ public class SimpleIdentityProviderBootTests {
 
 	@AfterEach
 	public void reset() {
-		config.getIdentityProvider().setEncryptAssertions(false);
-		config.getIdentityProvider().setSingleLogoutEnabled(true);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getIdentityProvider().setEncryptAssertions(false);
+//		config.getIdentityProvider().setSingleLogoutEnabled(true);
 	}
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
 	public static class SpringBootApplicationTestConfig {
-	}
-
-	@Test
-	public void testCloneConfiguration() throws CloneNotSupportedException {
-		SamlServerConfiguration clone = config.clone();
-		clone.getIdentityProvider().getProviders().get(0).setMetadata("changed");
-		assertThat(
-			config.getIdentityProvider().getProviders().get(0).getMetadata(),
-			not(equalTo("changed"))
-		);
-		assertThat(
-			clone.getIdentityProvider().getProviders().get(0).getMetadata(),
-			equalTo("changed")
-		);
 	}
 
 	@Test
@@ -405,7 +396,10 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void singleLogoutDisabledMetadata() throws Exception {
-		config.getIdentityProvider().setSingleLogoutEnabled(false);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getIdentityProvider().setSingleLogoutEnabled(false);
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		assertThat(idpm.getIdentityProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
@@ -426,7 +420,10 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void idpInitiatedLoginGeneratedEncryptedAssertion() throws Exception {
-		config.getIdentityProvider().setEncryptAssertions(true);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getIdentityProvider().setEncryptAssertions(true);
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
 		MvcResult result = idpToSpLogin(token, "spring.security.saml.xml.sp.id");

@@ -39,7 +39,7 @@ import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -65,7 +65,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -118,12 +117,18 @@ public class SimpleServiceProviderBootTest {
 		spBaseUrl = "http://localhost";
 		defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
 		helper = new SamlTestObjectHelper(samlTime);
-		config.getServiceProvider().setBasePath(spBaseUrl);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+//			config.getServiceProvider().setBasePath(spBaseUrl);
+		}
 	}
 
 	@AfterEach
 	public void reset() {
-		config.getServiceProvider().setSingleLogoutEnabled(true);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+//			config.getServiceProvider().setSingleLogoutEnabled(true);
+		}
 	}
 
 	@SpringBootConfiguration
@@ -133,31 +138,17 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@Test
-	public void testCloneConfiguration() throws CloneNotSupportedException {
-		SamlServerConfiguration clone = config.clone();
-		clone.getServiceProvider().getProviders().get(0).setMetadata("changed");
-		assertThat(
-			config.getServiceProvider().getProviders().get(0).getMetadata(),
-			not(equalTo("changed"))
-		);
-		assertThat(
-			clone.getServiceProvider().getProviders().get(0).getMetadata(),
-			equalTo("changed")
-		);
-	}
-
-	@Test
 	public void checkConfig() {
 		assertNotNull(config);
 		assertNull(config.getIdentityProvider());
-		LocalServiceProviderConfiguration sp = config.getServiceProvider();
+		HostedServiceProviderConfiguration sp = config.getServiceProvider();
 		assertNotNull(sp);
 		assertThat(sp.getEntityId(), equalTo("spring.security.saml.sp.id"));
 		assertTrue(sp.isSignMetadata());
 		assertTrue(sp.isSignRequests());
-		SimpleKey activeKey = sp.getKeys().getActive();
+		SimpleKey activeKey = sp.getKeys().get(0);
 		assertNotNull(activeKey);
-		List<SimpleKey> standByKeys = sp.getKeys().getStandBy();
+		List<SimpleKey> standByKeys = sp.getKeys().subList(1,sp.getKeys().size());
 		assertNotNull(standByKeys);
 		assertThat(standByKeys.size(), equalTo(2));
 	}
@@ -185,7 +176,10 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void singleLogoutDisabledMetadata() throws Exception {
-		config.getServiceProvider().setSingleLogoutEnabled(false);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getServiceProvider().setSingleLogoutEnabled(false);
 		ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
@@ -200,7 +194,10 @@ public class SimpleServiceProviderBootTest {
 	@Test
 	public void processResponse() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
-		config.getServiceProvider().setWantAssertionsSigned(false);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getServiceProvider().setWantAssertionsSigned(false);
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequest();
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
@@ -224,7 +221,10 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	public void invalidResponse() throws Exception {
-		config.getServiceProvider().setWantAssertionsSigned(false);
+		if (1 / 1 == 1) {
+			throw new UnsupportedOperationException();
+		}
+//		config.getServiceProvider().setWantAssertionsSigned(false);
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequest();

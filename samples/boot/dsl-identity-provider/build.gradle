@@ -33,7 +33,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 dependencies {
-	compile project(':spring-security-saml2-core')
+	compile project(':spring-security-saml2-boot-config')
 	compile 'org.springframework:spring-webflux'
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'

@@ -9,9 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import static java.util.Arrays.asList;
-import static org.springframework.util.StringUtils.hasText;
-
 public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 
 	private final ThreadLocalSamlConfigurationRepository repository;
@@ -26,17 +23,6 @@ public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		SamlServerConfiguration configuration = getConfiguration(request);
 		//allow for dynamic host paths
-		if (configuration != null) {
-			for (LocalProviderConfiguration config : asList(
-				configuration.getIdentityProvider(),
-				configuration.getServiceProvider()
-			)
-				) {
-				if (config != null && !hasText(config.getBasePath())) {
-					config.setBasePath(getBasePath(request));
-				}
-			}
-		}
 		try {
 			repository.setServerConfiguration(configuration);
 			filterChain.doFilter(request, response);
@@ -46,7 +32,7 @@ public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 	}
 
 	protected SamlServerConfiguration getConfiguration(HttpServletRequest request) {
-		return repository.getServerConfiguration();
+		return repository.getServerConfiguration(request);
 	}
 
 	protected String getBasePath(HttpServletRequest request) {

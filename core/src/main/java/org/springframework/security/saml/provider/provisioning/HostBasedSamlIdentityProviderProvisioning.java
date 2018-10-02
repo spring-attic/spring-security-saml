@@ -17,19 +17,21 @@
 
 package org.springframework.security.saml.provider.provisioning;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
 
 public class HostBasedSamlIdentityProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
 	implements SamlProviderProvisioning<IdentityProviderService> {
 
 
-	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
+	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository<HttpServletRequest> configuration,
 													 SamlTransformer transformer,
 													 SamlValidator validator,
 													 SamlMetadataCache cache) {
@@ -39,8 +41,8 @@ public class HostBasedSamlIdentityProviderProvisioning
 
 	@Override
 	public IdentityProviderService getHostedProvider() {
-		LocalIdentityProviderConfiguration config =
-			getConfigurationRepository().getServerConfiguration().getIdentityProvider();
+		HostedIdentityProviderConfiguration config =
+			getConfigurationRepository().getServerConfiguration(null).getIdentityProvider();
 		return getHostedIdentityProvider(config);
 	}
 

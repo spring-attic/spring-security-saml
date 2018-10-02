@@ -17,30 +17,22 @@
 
 package org.springframework.security.saml.provider.config;
 
-public class NetworkConfiguration implements Cloneable {
-	private int readTimeout;
-	private int connectTimeout;
+public class NetworkConfiguration {
+	private final int readTimeout;
+	private final int connectTimeout;
+
+	public NetworkConfiguration(int readTimeout, int connectTimeout) {
+		this.readTimeout = readTimeout;
+		this.connectTimeout = connectTimeout;
+	}
+
 
 	public int getReadTimeout() {
 		return readTimeout;
-	}
-
-	public NetworkConfiguration setReadTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-		return this;
 	}
 
 	public int getConnectTimeout() {
 		return connectTimeout;
 	}
 
-	public NetworkConfiguration setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-		return this;
-	}
-
-	@Override
-	public NetworkConfiguration clone() throws CloneNotSupportedException {
-		return (NetworkConfiguration) super.clone();
-	}
 }

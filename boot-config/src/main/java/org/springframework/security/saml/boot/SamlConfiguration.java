@@ -17,5 +17,36 @@
 
 package org.springframework.security.saml.boot;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.security.saml.provider.SamlServerConfiguration;
+
+@ConfigurationProperties(prefix = "spring.security.saml2")
 public class SamlConfiguration {
+
+	@NestedConfigurationProperty
+	private LocalServiceProviderConfiguration serviceProvider;
+
+	@NestedConfigurationProperty
+	private LocalIdentityProviderConfiguration identityProvider;
+
+	public LocalServiceProviderConfiguration getServiceProvider() {
+		return serviceProvider;
+	}
+
+	public void setServiceProvider(LocalServiceProviderConfiguration serviceProvider) {
+		this.serviceProvider = serviceProvider;
+	}
+
+	public LocalIdentityProviderConfiguration getIdentityProvider() {
+		return identityProvider;
+	}
+
+	public void setIdentityProvider(LocalIdentityProviderConfiguration identityProvider) {
+		this.identityProvider = identityProvider;
+	}
+
+	public SamlServerConfiguration toSamlServerConfiguration() {
+		throw new UnsupportedOperationException();
+	}
 }

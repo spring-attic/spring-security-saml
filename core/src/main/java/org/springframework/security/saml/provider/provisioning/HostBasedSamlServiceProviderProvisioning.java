@@ -22,7 +22,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 
 public class HostBasedSamlServiceProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
@@ -38,8 +38,8 @@ public class HostBasedSamlServiceProviderProvisioning
 
 	@Override
 	public ServiceProviderService getHostedProvider() {
-		LocalServiceProviderConfiguration config =
-			getConfigurationRepository().getServerConfiguration().getServiceProvider();
+		HostedServiceProviderConfiguration config =
+			getConfigurationRepository().getServerConfiguration(null).getServiceProvider();
 		return getHostedServiceProvider(config);
 	}
 }

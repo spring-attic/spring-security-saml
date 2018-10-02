@@ -28,16 +28,15 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import org.springframework.security.saml.provider.config.HostedProviderConfiguration;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.HostedIdentityProviderService;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.HostedServiceProviderService;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -49,6 +48,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -73,14 +73,10 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		return configuration;
 	}
 
-	protected IdentityProviderService getHostedIdentityProvider(LocalIdentityProviderConfiguration idpConfig) {
+	protected IdentityProviderService getHostedIdentityProvider(HostedIdentityProviderConfiguration idpConfig) {
 		String basePath = idpConfig.getBasePath();
-		List<SimpleKey> keys = new LinkedList<>();
-		SimpleKey activeKey = idpConfig.getKeys().getActive();
-		keys.add(activeKey);
-		keys.add(new SimpleKey(activeKey).setName(activeKey.getName()+"-encryption").setType(KeyType.ENCRYPTION));
-		keys.addAll(idpConfig.getKeys().getStandBy());
-		SimpleKey signingKey = idpConfig.isSignMetadata() ? activeKey : null;
+		List<SimpleKey> keys = ofNullable(idpConfig.getKeys()).orElse(Collections.emptyList());
+		SimpleKey signingKey = idpConfig.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(idpConfig);
@@ -120,7 +116,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		);
 	}
 
-	protected String getAliasPath(LocalProviderConfiguration configuration) {
+	protected String getAliasPath(HostedProviderConfiguration configuration) {
 		try {
 			return hasText(configuration.getAlias()) ?
 				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
@@ -192,15 +188,12 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 				.setIndex(index);
 	}
 
-	protected ServiceProviderService getHostedServiceProvider(LocalServiceProviderConfiguration spConfig) {
+	protected ServiceProviderService getHostedServiceProvider(HostedServiceProviderConfiguration spConfig) {
 		String basePath = spConfig.getBasePath();
 
-		List<SimpleKey> keys = new LinkedList<>();
-		SimpleKey activeKey = spConfig.getKeys().getActive();
-		keys.add(activeKey);
-		keys.add(new SimpleKey(activeKey).setName(activeKey.getName()+"-encryption").setType(KeyType.ENCRYPTION));
-		keys.addAll(spConfig.getKeys().getStandBy());
-		SimpleKey signingKey = spConfig.isSignMetadata() ? spConfig.getKeys().getActive() : null;
+		List<SimpleKey> keys = new LinkedList<>(ofNullable(spConfig.getKeys()).orElse(Collections.emptyList()));
+		SimpleKey activeKey = keys.size()>0 ? keys.get(0) : null;
+		SimpleKey signingKey = spConfig.isSignMetadata() ? activeKey : null;
 
 		String prefix = hasText(spConfig.getPrefix()) ? spConfig.getPrefix() : "saml/sp/";
 		String aliasPath = getAliasPath(spConfig);

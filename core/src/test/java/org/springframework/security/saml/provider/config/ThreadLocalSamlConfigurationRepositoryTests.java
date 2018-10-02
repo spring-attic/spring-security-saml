@@ -19,6 +19,7 @@ package org.springframework.security.saml.provider.config;
 
 import java.time.Clock;
 
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -31,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 class ThreadLocalSamlConfigurationRepositoryTests {
@@ -42,14 +43,15 @@ class ThreadLocalSamlConfigurationRepositoryTests {
 	private SamlServerConfiguration configuration;
 	private Clock clock;
 	private InheritableThreadLocal threadLocal;
+	MockHttpServletRequest request = new MockHttpServletRequest();
 
 	@BeforeEach
 	public void setup() {
 		SamlConfigurationRepository mockConfig = mock(SamlConfigurationRepository.class);
 		clock = mock(Clock.class);
-		repository = new ThreadLocalSamlConfigurationRepository(mockConfig, clock);
-		configuration = new SamlServerConfiguration();
-		when(mockConfig.getServerConfiguration()).thenReturn(configuration);
+		repository = new ThreadLocalSamlConfigurationRepository(mockConfig);
+		configuration = new SamlServerConfiguration(null, null, null);
+		when(mockConfig.getServerConfiguration(any())).thenReturn(configuration);
 		when(clock.millis()).thenAnswer((Answer<Long>) invocation -> System.currentTimeMillis());
 		threadLocal = (InheritableThreadLocal) ReflectionTestUtils
 			.getField(ThreadLocalSamlConfigurationRepository.class, "threadLocal");
@@ -62,25 +64,25 @@ class ThreadLocalSamlConfigurationRepositoryTests {
 
 	@Test
 	public void get_creates_clone() {
-		assertNotSame(configuration, repository.getServerConfiguration());
+		assertNotSame(configuration, repository.getServerConfiguration(request));
 	}
 
 	@Test
 	public void configuration_doesnt_get_set() {
-		repository.getServerConfiguration();
+		repository.getServerConfiguration(request);
 		assertNull(threadLocal.get());
 	}
 
 	@Test
 	public void cached_entry_is_returned() {
-		SamlServerConfiguration c1 = repository.getServerConfiguration();
+		SamlServerConfiguration c1 = repository.getServerConfiguration(request);
 		repository.setServerConfiguration(c1);
-		assertSame(c1, repository.getServerConfiguration());
+		assertSame(c1, repository.getServerConfiguration(request));
 	}
 
 	@Test
 	public void reset_works() {
-		SamlServerConfiguration c1 = repository.getServerConfiguration();
+		SamlServerConfiguration c1 = repository.getServerConfiguration(request);
 		repository.setServerConfiguration(c1);
 		assertNotNull(threadLocal.get());
 		repository.reset();
@@ -89,28 +91,11 @@ class ThreadLocalSamlConfigurationRepositoryTests {
 
 	@Test
 	public void set_null_works() {
-		SamlServerConfiguration c1 = repository.getServerConfiguration();
+		SamlServerConfiguration c1 = repository.getServerConfiguration(request);
 		repository.setServerConfiguration(c1);
 		assertNotNull(threadLocal.get());
 		repository.setServerConfiguration(null);
 		assertNull(threadLocal.get());
 	}
-
-	@Test
-	public void expiration_works() {
-		SamlServerConfiguration c1 = repository.getServerConfiguration();
-		repository.setServerConfiguration(c1);
-		assertNotNull(threadLocal.get());
-
-		SamlServerConfiguration c2 = repository.getServerConfiguration();
-		assertSame(c1,c2);
-		reset(clock);
-		when(clock.millis()).thenReturn(System.currentTimeMillis() + (repository.getExpirationMillis()*2));
-
-		SamlServerConfiguration c3 = repository.getServerConfiguration();
-		assertNotSame(c2,c3);
-		assertNull(threadLocal.get());
-	}
-
 
 }

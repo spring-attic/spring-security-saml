@@ -28,7 +28,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.AbstractHostedProviderService;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
@@ -61,12 +61,12 @@ import static org.springframework.security.saml.key.KeyType.ENCRYPTION;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 
 public class HostedIdentityProviderService extends AbstractHostedProviderService<
-	LocalIdentityProviderConfiguration,
+	HostedIdentityProviderConfiguration,
 	IdentityProviderMetadata,
 	ServiceProviderMetadata>
 	implements IdentityProviderService {
 
-	public HostedIdentityProviderService(LocalIdentityProviderConfiguration configuration,
+	public HostedIdentityProviderService(HostedIdentityProviderConfiguration configuration,
 										 IdentityProviderMetadata metadata,
 										 SamlTransformer transformer,
 										 SamlValidator validator,

@@ -49,7 +49,7 @@ public class SecurityConfiguration {
 			http
 				.userDetailsService(beanConfig.userDetailsService()).formLogin();
 			http.apply(identityProvider())
-				.configure(appConfig);
+				.configure(appConfig.toSamlServerConfiguration());
 		}
 	}
 

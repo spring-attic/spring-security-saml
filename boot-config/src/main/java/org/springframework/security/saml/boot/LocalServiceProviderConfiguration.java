@@ -15,12 +15,14 @@
  *
  */
 
-package org.springframework.security.saml.provider.service.config;
+package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
+import java.util.stream.Collectors;
+
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 
 public class LocalServiceProviderConfiguration extends
-	LocalProviderConfiguration<LocalServiceProviderConfiguration, ExternalIdentityProviderConfiguration> {
+	LocalProviderConfiguration<RemoteIdentityProviderConfiguration> {
 
 	private boolean signRequests = false;
 	private boolean wantAssertionsSigned = false;
@@ -33,18 +35,34 @@ public class LocalServiceProviderConfiguration extends
 		return signRequests;
 	}
 
-	public LocalServiceProviderConfiguration setSignRequests(boolean signRequests) {
+	public void setSignRequests(boolean signRequests) {
 		this.signRequests = signRequests;
-		return this;
 	}
 
 	public boolean isWantAssertionsSigned() {
 		return wantAssertionsSigned;
 	}
 
-	public LocalServiceProviderConfiguration setWantAssertionsSigned(boolean wantAssertionsSigned) {
+	public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
 		this.wantAssertionsSigned = wantAssertionsSigned;
-		return this;
 	}
 
+	public HostedServiceProviderConfiguration toHostedConfiguration() {
+		return new HostedServiceProviderConfiguration(
+			getPrefix(),
+			getBasePath(),
+			getAlias(),
+			getEntityId(),
+			isSignMetadata(),
+			getMetadata(),
+			getKeys().toList(),
+			getDefaultSigningAlgorithm(),
+			getDefaultDigest(),
+			getNameIds(),
+			isSingleLogoutEnabled(),
+			getProviders().stream().map(p -> p.toExternalIdentityProviderConfiguration()).collect(Collectors.toList()),
+			isSignRequests(),
+			isWantAssertionsSigned()
+		);
+	}
 }

@@ -24,16 +24,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
-import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.provider.config.HostedProviderConfiguration;
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -97,11 +96,9 @@ public class SamlTestObjectHelper {
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   LocalServiceProviderConfiguration configuration) {
-		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(configuration.getKeys().getActive());
-		keys.addAll(configuration.getKeys().getStandBy());
-		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+														   HostedServiceProviderConfiguration configuration) {
+		List<SimpleKey> keys = configuration.getKeys();
+		SimpleKey signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String aliasPath = getAliasPath(configuration);
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
@@ -124,7 +121,7 @@ public class SamlTestObjectHelper {
 		return metadata;
 	}
 
-	protected String getAliasPath(LocalProviderConfiguration configuration) {
+	protected String getAliasPath(HostedProviderConfiguration configuration) {
 		try {
 			return hasText(configuration.getAlias()) ?
 				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
@@ -190,11 +187,9 @@ public class SamlTestObjectHelper {
 	}
 
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-															 LocalIdentityProviderConfiguration configuration) {
-		List<SimpleKey> keys = new LinkedList<>();
-		keys.add(configuration.getKeys().getActive());
-		keys.addAll(configuration.getKeys().getStandBy());
-		SimpleKey signingKey = configuration.isSignMetadata() ? configuration.getKeys().getActive() : null;
+															 HostedIdentityProviderConfiguration configuration) {
+		List<SimpleKey> keys = configuration.getKeys();
+		SimpleKey signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);

@@ -32,6 +32,6 @@ public class BeanConfig extends SamlServiceProviderServerBeanConfiguration {
 
 	@Override
 	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
-		return config;
+		return config.toSamlServerConfiguration();
 	}
 }

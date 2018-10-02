@@ -24,6 +24,6 @@ import org.springframework.security.saml.provider.SamlServerConfiguration;
  * Returns the server configuration based on a HTTP request.
  */
 
-public interface SamlConfigurationRepository {
-	SamlServerConfiguration getServerConfiguration();
+public interface SamlConfigurationRepository<Holder> {
+	SamlServerConfiguration getServerConfiguration(Holder holder);
 }

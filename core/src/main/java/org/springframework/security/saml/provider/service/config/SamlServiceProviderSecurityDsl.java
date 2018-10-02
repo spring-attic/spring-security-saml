@@ -24,20 +24,12 @@ import javax.servlet.Filter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.config.NetworkConfiguration;
-import org.springframework.security.saml.provider.config.RotatingKeys;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
-import static java.util.Arrays.asList;
-import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
-import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
-import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
-import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
 
 public class SamlServiceProviderSecurityDsl
 	extends AbstractHttpConfigurer<SamlServiceProviderSecurityDsl, HttpSecurity> {
@@ -45,28 +37,32 @@ public class SamlServiceProviderSecurityDsl
 	private String prefix = "saml/sp/";
 	private boolean useStandardFilterConfiguration = true;
 	private List<Filter> filters = new LinkedList<>();
-	private SamlServerConfiguration configuration = new SamlServerConfiguration()
-		.setNetwork(
-			new NetworkConfiguration()
-				.setConnectTimeout(5000)
-				.setReadTimeout(10000)
-		)
-		.setServiceProvider(
-			new LocalServiceProviderConfiguration()
-				.setPrefix(prefix)
-				.setSignMetadata(true)
-				.setSignRequests(true)
-				.setDefaultSigningAlgorithm(RSA_SHA256)
-				.setDefaultDigest(SHA256)
-				.setNameIds(
-					asList(
-						PERSISTENT,
-						EMAIL,
-						UNSPECIFIED
-					)
-				)
-				.setProviders(new LinkedList<>())
-		);
+	private SamlServerConfiguration configuration = new SamlServerConfiguration(
+		null,
+		null,
+		null
+	);
+//		.setNetwork(
+//			new NetworkConfiguration(readTimeout, connectTimeout)
+//				.setConnectTimeout(5000)
+//				.setReadTimeout(10000)
+//		)
+//		.setServiceProvider(
+//			new LocalServiceProviderConfiguration()
+//				.setPrefix(prefix)
+//				.setSignMetadata(true)
+//				.setSignRequests(true)
+//				.setDefaultSigningAlgorithm(RSA_SHA256)
+//				.setDefaultDigest(SHA256)
+//				.setNameIds(
+//					asList(
+//						PERSISTENT,
+//						EMAIL,
+//						UNSPECIFIED
+//					)
+//				)
+//				.setProviders(new LinkedList<>())
+//		);
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
@@ -118,59 +114,59 @@ public class SamlServiceProviderSecurityDsl
 	}
 
 	public SamlServiceProviderSecurityDsl prefix(String prefix) {
-		configuration.getServiceProvider().setPrefix(prefix);
+//		configuration.getServiceProvider().setPrefix(prefix);
 		this.prefix = prefix;
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl entityId(String entityId) {
-		configuration.getServiceProvider().setEntityId(entityId);
+//		configuration.getServiceProvider().setEntityId(entityId);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl alias(String alias) {
-		configuration.getServiceProvider().setAlias(alias);
+//		configuration.getServiceProvider().setAlias(alias);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl signMetadata(boolean sign) {
-		configuration.getServiceProvider().setSignMetadata(sign);
+//		configuration.getServiceProvider().setSignMetadata(sign);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl signRequests(boolean sign) {
-		configuration.getServiceProvider().setSignRequests(sign);
+//		configuration.getServiceProvider().setSignRequests(sign);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl wantAssertionsSigned(boolean sign) {
-		configuration.getServiceProvider().setWantAssertionsSigned(sign);
+//		configuration.getServiceProvider().setWantAssertionsSigned(sign);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl signatureAlgorithms(AlgorithmMethod signAlgorithm,
 															  DigestMethod signDigest) {
-		configuration.getServiceProvider()
-			.setDefaultSigningAlgorithm(signAlgorithm)
-			.setDefaultDigest(signDigest);
+//		configuration.getServiceProvider()
+//			.setDefaultSigningAlgorithm(signAlgorithm)
+//			.setDefaultDigest(signDigest);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl singleLogout(boolean enabled) {
-		configuration.getServiceProvider()
-			.setSingleLogoutEnabled(enabled);
+//		configuration.getServiceProvider()
+//			.setSingleLogoutEnabled(enabled);
 		return this;
 	}
 
 	public SamlServiceProviderSecurityDsl nameIds(List<NameId> nameIds) {
-		configuration.getServiceProvider()
-			.setNameIds(nameIds);
+//		configuration.getServiceProvider()
+//			.setNameIds(nameIds);
 		return this;
 	}
 
-	public SamlServiceProviderSecurityDsl rotatingKeys(RotatingKeys keys) {
-		configuration.getServiceProvider()
-			.setKeys(keys);
+	public SamlServiceProviderSecurityDsl keys(List<SimpleKey> keys) {
+//		configuration.getServiceProvider()
+//			.setKeys(keys);
 		return this;
 	}
 

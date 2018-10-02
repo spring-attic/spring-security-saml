@@ -15,45 +15,52 @@
  *
  */
 
-package org.springframework.security.saml.provider.config;
+package org.springframework.security.saml.boot;
 
-public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
-	private final String alias;
-	private final String metadata;
-	private final String linktext;
-	private final boolean skipSslValidation;
-	private final boolean metadataTrustCheck;
-
-	public ExternalProviderConfiguration(String alias,
-										 String metadata,
-										 String linktext,
-										 boolean skipSslValidation,
-										 boolean metadataTrustCheck) {
-		this.alias = alias;
-		this.metadata = metadata;
-		this.linktext = linktext;
-		this.skipSslValidation = skipSslValidation;
-		this.metadataTrustCheck = metadataTrustCheck;
-	}
+abstract class RemoteProviderConfiguration {
+	private String alias;
+	private String metadata;
+	private String linktext;
+	private boolean skipSslValidation = false;
+	private boolean metadataTrustCheck = false;
 
 	public String getAlias() {
 		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	public String getMetadata() {
 		return metadata;
 	}
 
+	public void setMetadata(String metadata) {
+		this.metadata = metadata;
+	}
+
 	public String getLinktext() {
 		return linktext;
+	}
+
+	public void setLinktext(String linktext) {
+		this.linktext = linktext;
 	}
 
 	public boolean isSkipSslValidation() {
 		return skipSslValidation;
 	}
 
+	public void setSkipSslValidation(boolean skipSslValidation) {
+		this.skipSslValidation = skipSslValidation;
+	}
+
 	public boolean isMetadataTrustCheck() {
 		return metadataTrustCheck;
 	}
 
+	public void setMetadataTrustCheck(boolean metadataTrustCheck) {
+		this.metadataTrustCheck = metadataTrustCheck;
+	}
 }

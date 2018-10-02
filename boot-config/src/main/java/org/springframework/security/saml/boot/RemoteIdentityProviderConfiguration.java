@@ -15,34 +15,33 @@
  *
  */
 
-package org.springframework.security.saml.provider.service.config;
+package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
-public class ExternalIdentityProviderConfiguration extends
-	ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
+public class RemoteIdentityProviderConfiguration extends RemoteProviderConfiguration {
 
-	private final NameId nameId;
-	private final int assertionConsumerServiceIndex;
-
-	public ExternalIdentityProviderConfiguration(String alias,
-												 String metadata,
-												 String linktext,
-												 boolean skipSslValidation,
-												 boolean metadataTrustCheck,
-												 NameId nameId, int assertionConsumerServiceIndex) {
-		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
-		this.nameId = nameId;
-		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
-	}
+	private NameId nameId;
+	private int assertionConsumerServiceIndex;
 
 	public NameId getNameId() {
 		return nameId;
+	}
+
+	public void setNameId(NameId nameId) {
+		this.nameId = nameId;
 	}
 
 	public int getAssertionConsumerServiceIndex() {
 		return assertionConsumerServiceIndex;
 	}
 
+	public void setAssertionConsumerServiceIndex(int assertionConsumerServiceIndex) {
+		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
+	}
+
+	public ExternalIdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
+		throw new UnsupportedOperationException();
+	}
 }

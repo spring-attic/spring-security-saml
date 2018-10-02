@@ -1676,14 +1676,20 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	protected Metadata getMetadata(List<? extends Provider> ssoProviders) {
+		Metadata result = determineMetadataType(ssoProviders);
+		result.setProviders(ssoProviders);
+		return result;
+	}
+
+	private Metadata determineMetadataType(List<? extends Provider> ssoProviders) {
 		Metadata result = new Metadata();
-		if (ssoProviders.size() == 1) {
-			if (ssoProviders.get(0) instanceof ServiceProvider) {
-				result = new ServiceProviderMetadata();
-			}
-			else if (ssoProviders.get(0) instanceof IdentityProvider) {
-				result = new IdentityProviderMetadata();
-			}
+		long sps = ssoProviders.stream().filter(p -> p instanceof ServiceProvider).count();
+		long idps = ssoProviders.stream().filter(p -> p instanceof IdentityProvider).count();
+
+		if (ssoProviders.size() == sps) {
+			result = new ServiceProviderMetadata();
+		} else if (ssoProviders.size() == idps) {
+			result = new IdentityProviderMetadata();
 		}
 		result.setProviders(ssoProviders);
 		return result;

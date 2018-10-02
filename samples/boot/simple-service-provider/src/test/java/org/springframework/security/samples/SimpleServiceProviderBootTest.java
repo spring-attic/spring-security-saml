@@ -60,7 +60,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -72,10 +71,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
@@ -124,18 +119,6 @@ public class SimpleServiceProviderBootTest {
 		defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
 		helper = new SamlTestObjectHelper(samlTime);
 		config.getServiceProvider().setBasePath(spBaseUrl);
-		cache.clear();
-		cache = spy(cache);
-		doReturn(IDP_METADATA_SIMPLE.getBytes(UTF_8))
-			.when(cache).getMetadata(
-			eq("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php"),
-			anyBoolean()
-		);
-		doReturn(IDP_METADATA_SPRING_LOCAL.getBytes(UTF_8))
-			.when(cache).getMetadata(
-			eq("http://localhost:8081/sample-idp/saml/idp/metadata"),
-			anyBoolean()
-		);
 	}
 
 	@AfterEach

@@ -15,14 +15,7 @@
  *
  */
 
-include "core"
-include "boot-config"
-include "samples/boot/simple-service-provider"
-include "samples/boot/simple-identity-provider"
-include "samples/boot/dsl-identity-provider"
+package org.springframework.security.saml.boot;
 
-rootProject.name = "spring-security-saml2"
-
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+public class SamlConfiguration {
 }

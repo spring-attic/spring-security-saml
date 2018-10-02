@@ -15,14 +15,13 @@
  *
  */
 
-include "core"
-include "boot-config"
-include "samples/boot/simple-service-provider"
-include "samples/boot/simple-identity-provider"
-include "samples/boot/dsl-identity-provider"
+description = "Spring Security SAML v2 Spring Boot Configuration"
 
-rootProject.name = "spring-security-saml2"
+dependencies {
+	compile project(':spring-security-saml2-core')
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+	testCompile ("org.springframework:spring-test:$springVersion") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+
 }

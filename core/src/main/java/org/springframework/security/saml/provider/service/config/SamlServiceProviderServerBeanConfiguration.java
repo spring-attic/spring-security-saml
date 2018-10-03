@@ -18,11 +18,17 @@
 package org.springframework.security.saml.provider.service.config;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.saml.SamlMessageStore;
+import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.config.AbstractSamlServerBeanConfiguration;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationFilter;
+import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationRepository;
 import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
@@ -33,25 +39,49 @@ import org.springframework.security.saml.provider.service.authentication.Generic
 import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
 import org.springframework.security.saml.provider.service.authentication.ServiceProviderLogoutHandler;
 import org.springframework.security.saml.provider.service.authentication.SimpleAuthenticationManager;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
-public abstract class SamlServiceProviderServerBeanConfiguration
-	extends AbstractSamlServerBeanConfiguration<ServiceProviderService> {
+public class SamlServiceProviderServerBeanConfiguration {
+
+	private final SamlTransformer samlTransformer;
+	private final SamlValidator samlValidator;
+	private final SamlMetadataCache samlMetadataCache;
+	private final SamlMessageStore<Assertion, HttpServletRequest> samlAssertionStore;
+	private final SamlConfigurationRepository<HttpServletRequest> samlConfigurationRepository;
+
+	protected SamlServiceProviderServerBeanConfiguration(SamlTransformer samlTransformer,
+														 SamlValidator samlValidator,
+														 SamlMetadataCache samlMetadataCache,
+														 SamlMessageStore<Assertion, HttpServletRequest> samlAssertionStore,
+														 SamlConfigurationRepository<HttpServletRequest> samlConfigurationRepository) {
+		this.samlTransformer = samlTransformer;
+		this.samlValidator = samlValidator;
+		this.samlMetadataCache = samlMetadataCache;
+		this.samlAssertionStore = samlAssertionStore;
+		this.samlConfigurationRepository = samlConfigurationRepository;
+	}
+
+	public Filter samlConfigurationFilter() {
+		return new ThreadLocalSamlConfigurationFilter(
+			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository
+		);
+	}
+
 
 	public Filter spMetadataFilter() {
 		return new ServiceProviderMetadataFilter(getSamlProvisioning());
 	}
 
-	@Override
 	@Bean(name = "samlServiceProviderProvisioning")
 	public SamlProviderProvisioning<ServiceProviderService> getSamlProvisioning() {
 		return new HostBasedSamlServiceProviderProvisioning(
-			samlConfigurationRepository(),
-			samlTransformer(),
-			samlValidator(),
-			samlMetadataCache()
+			samlConfigurationRepository,
+			samlTransformer,
+			samlValidator,
+			samlMetadataCache
 		);
 	}
 
@@ -81,7 +111,4 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 		return new SelectIdentityProviderFilter(getSamlProvisioning());
 	}
 
-	@Override
-	@Bean(name = "spSamlServerConfiguration")
-	protected abstract SamlServerConfiguration getDefaultHostSamlServerConfiguration();
 }

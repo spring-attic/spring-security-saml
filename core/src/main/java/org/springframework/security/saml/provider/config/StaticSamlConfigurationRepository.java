@@ -17,8 +17,6 @@
 
 package org.springframework.security.saml.provider.config;
 
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-
 public class StaticSamlConfigurationRepository implements SamlConfigurationRepository<Object> {
 
 	private final SamlServerConfiguration configuration;
@@ -29,6 +27,11 @@ public class StaticSamlConfigurationRepository implements SamlConfigurationRepos
 
 	@Override
 	public SamlServerConfiguration getServerConfiguration(Object anything) {
+		return getDefaultServerConfiguration();
+	}
+
+	@Override
+	public SamlServerConfiguration getDefaultServerConfiguration() {
 		return configuration;
 	}
 }

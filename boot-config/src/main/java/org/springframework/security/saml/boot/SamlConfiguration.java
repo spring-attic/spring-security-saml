@@ -19,7 +19,7 @@ package org.springframework.security.saml.boot;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
 public class SamlConfiguration {

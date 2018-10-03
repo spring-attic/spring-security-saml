@@ -20,7 +20,6 @@ package org.springframework.security.saml.provider.config;
 import java.time.Clock;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.junit.jupiter.api.AfterEach;

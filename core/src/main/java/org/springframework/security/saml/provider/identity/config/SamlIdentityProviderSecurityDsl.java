@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.metadata.NameId;

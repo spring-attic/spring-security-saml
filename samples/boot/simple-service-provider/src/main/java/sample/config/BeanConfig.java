@@ -17,21 +17,30 @@
 
 package sample.config;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.SamlMessageStore;
+import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlServiceProviderServerBeanConfiguration {
 
 	private final AppConfig config;
 
-	public BeanConfig(AppConfig config) {
+	public BeanConfig(AppConfig config,
+					  SamlTransformer samlTransformer,
+					  SamlValidator samlValidator,
+					  SamlMetadataCache samlMetadataCache,
+					  SamlMessageStore<Assertion, HttpServletRequest> samlAssertionStore,
+					  SamlConfigurationRepository<HttpServletRequest> samlConfigurationRepository) {
+		super(samlTransformer, samlValidator, samlMetadataCache, samlAssertionStore, samlConfigurationRepository);
 		this.config = config;
 	}
 
-	@Override
-	protected SamlServerConfiguration getDefaultHostSamlServerConfiguration() {
-		return config.toSamlServerConfiguration();
-	}
 }

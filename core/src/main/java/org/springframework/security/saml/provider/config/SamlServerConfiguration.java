@@ -15,9 +15,8 @@
  *
  */
 
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.config;
 
-import org.springframework.security.saml.provider.config.NetworkConfiguration;
 import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 

@@ -6,7 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {

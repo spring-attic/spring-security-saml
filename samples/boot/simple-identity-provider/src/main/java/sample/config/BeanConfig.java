@@ -17,20 +17,34 @@
 
 package sample.config;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.SamlMessageStore;
+import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
 	private final AppConfig config;
 
-	public BeanConfig(AppConfig config) {
+	public BeanConfig(AppConfig config,
+					  SamlTransformer samlTransformer,
+					  SamlValidator samlValidator,
+					  SamlMetadataCache samlMetadataCache,
+					  SamlMessageStore<Assertion, HttpServletRequest> samlAssertionStore,
+					  SamlConfigurationRepository<HttpServletRequest> samlConfigurationRepository) {
+		super(samlTransformer, samlValidator, samlMetadataCache, samlAssertionStore, samlConfigurationRepository);
 		this.config = config;
 	}
 

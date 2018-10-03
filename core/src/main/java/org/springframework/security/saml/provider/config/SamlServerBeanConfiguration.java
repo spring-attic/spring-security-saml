@@ -18,16 +18,11 @@
 package org.springframework.security.saml.provider.config;
 
 import java.time.Clock;
-import javax.servlet.Filter;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.HostedProviderService;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
@@ -37,41 +32,42 @@ import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 import org.springframework.web.client.RestOperations;
 
-public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProviderService> {
+/**
+ * Sensible defaults - core beans needed for SAML
+ */
+public class SamlServerBeanConfiguration {
 
-	public abstract SamlProviderProvisioning<T> getSamlProvisioning();
+	public SamlConfigurationRepository samlConfigurationRepository() {
+		return new ThreadLocalSamlConfigurationRepository(
+			new StaticSamlConfigurationRepository(null)
+		);
+	}
 
-	@Bean
+
 	public DefaultSessionAssertionStore samlAssertionStore() {
 		return new DefaultSessionAssertionStore();
 	}
 
-	@Bean
 	public SamlTemplateEngine samlTemplateEngine() {
 		return new OpenSamlVelocityEngine();
 	}
 
-	@Bean
 	public SamlTransformer samlTransformer() {
 		return new DefaultSamlTransformer(samlImplementation());
 	}
 
-	@Bean
 	public SpringSecuritySaml samlImplementation() {
 		return new OpenSamlImplementation(samlTime()).init();
 	}
 
-	@Bean
 	public Clock samlTime() {
 		return Clock.systemUTC();
 	}
 
-	@Bean
 	public SamlValidator samlValidator() {
 		return new DefaultValidator(samlImplementation());
 	}
 
-	@Bean
 	public SamlMetadataCache samlMetadataCache() {
 		return new DefaultMetadataCache(
 			samlTime(),
@@ -80,43 +76,12 @@ public abstract class AbstractSamlServerBeanConfiguration<T extends HostedProvid
 		);
 	}
 
-	public Filter samlConfigurationFilter() {
-		return new ThreadLocalSamlConfigurationFilter(
-			(ThreadLocalSamlConfigurationRepository) samlConfigurationRepository()
-		);
-	}
-
-	public SamlConfigurationRepository samlConfigurationRepository() {
-		return new ThreadLocalSamlConfigurationRepository(
-			new StaticSamlConfigurationRepository(getDefaultHostSamlServerConfiguration())
-		);
-	}
-
-	protected abstract SamlServerConfiguration getDefaultHostSamlServerConfiguration();
-
-	private int getNetworkHandlerConnectTimeout() {
-		if (getDefaultHostSamlServerConfiguration() != null && getDefaultHostSamlServerConfiguration().getNetwork() != null) {
-			NetworkConfiguration networkConfiguration = getDefaultHostSamlServerConfiguration().getNetwork();
-			return networkConfiguration.getConnectTimeout();
-		}
-		return 5000;
-	}
-
-	private int getNetworkHandlerReadTimeout() {
-		if (getDefaultHostSamlServerConfiguration() != null && getDefaultHostSamlServerConfiguration().getNetwork() != null) {
-			NetworkConfiguration networkConfiguration = getDefaultHostSamlServerConfiguration().getNetwork();
-			return networkConfiguration.getReadTimeout();
-		}
-		return 10000;
-	}
-
-	@Bean
 	public RestOperations samlValidatingNetworkHandler() {
-		return new Network(getNetworkHandlerConnectTimeout(), getNetworkHandlerReadTimeout()).get(false);
+		return new Network(4000, 8000).get(false);
 	}
 
-	@Bean
 	public RestOperations samlNonValidatingNetworkHandler() {
-		return new Network(getNetworkHandlerConnectTimeout(), getNetworkHandlerReadTimeout()).get(true);
+		return new Network(4000, 8000).get(true);
 	}
+
 }

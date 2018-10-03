@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -72,14 +72,14 @@ public class SamlServiceProviderSecurityDsl
 		serverConfig.transfer(this.configuration);
 
 		if (useStandardFilterConfiguration) {
-			SamlServiceProviderServerBeanConfiguration beanConfig =
+			SamlServiceProviderServerBeanConfiguration spBeanConfig =
 				context.getBean(SamlServiceProviderServerBeanConfiguration.class);
-			Filter samlConfigurationFilter = beanConfig.samlConfigurationFilter();
-			Filter metadataFilter = beanConfig.spMetadataFilter();
-			Filter spAuthenticationRequestFilter = beanConfig.spAuthenticationRequestFilter();
-			Filter spAuthenticationResponseFilter = beanConfig.spAuthenticationResponseFilter();
-			Filter spSamlLogoutFilter = beanConfig.spSamlLogoutFilter();
-			Filter spSelectIdentityProviderFilter = beanConfig.spSelectIdentityProviderFilter();
+			Filter samlConfigurationFilter = spBeanConfig.samlConfigurationFilter();
+			Filter metadataFilter = spBeanConfig.spMetadataFilter();
+			Filter spAuthenticationRequestFilter = spBeanConfig.spAuthenticationRequestFilter();
+			Filter spAuthenticationResponseFilter = spBeanConfig.spAuthenticationResponseFilter();
+			Filter spSamlLogoutFilter = spBeanConfig.spSamlLogoutFilter();
+			Filter spSelectIdentityProviderFilter = spBeanConfig.spSelectIdentityProviderFilter();
 			http
 				.addFilterAfter(
 					samlConfigurationFilter,

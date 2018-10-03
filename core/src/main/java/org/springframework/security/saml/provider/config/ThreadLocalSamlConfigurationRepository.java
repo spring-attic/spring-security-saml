@@ -2,8 +2,6 @@ package org.springframework.security.saml.provider.config;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.provider.SamlServerConfiguration;
-
 public class ThreadLocalSamlConfigurationRepository
 	implements SamlConfigurationRepository<HttpServletRequest> {
 
@@ -22,6 +20,11 @@ public class ThreadLocalSamlConfigurationRepository
 			result = initialValueProvider.getServerConfiguration(request);
 		}
 		return result;
+	}
+
+	@Override
+	public SamlServerConfiguration getDefaultServerConfiguration() {
+		return getServerConfiguration(null);
 	}
 
 	protected void setServerConfiguration(SamlServerConfiguration configuration) {

@@ -42,6 +42,16 @@ public class SamlKey {
 		this.type = type;
 	}
 
+	public SimpleKey toSimpleKey() {
+		return new SimpleKey(
+			getName(),
+			getPrivateKey(),
+			getCertificate(),
+			getPassphrase(),
+			getType()
+		);
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -80,15 +90,5 @@ public class SamlKey {
 
 	public void setType(KeyType type) {
 		this.type = type;
-	}
-
-	public SimpleKey toSimpleKey() {
-		return new SimpleKey(
-			getName(),
-			getPrivateKey(),
-			getCertificate(),
-			getPassphrase(),
-			getType()
-		);
 	}
 }

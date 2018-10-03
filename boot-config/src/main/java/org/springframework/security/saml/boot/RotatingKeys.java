@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.boot;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.security.saml.key.SimpleKey;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
 public class RotatingKeys {
@@ -34,11 +36,13 @@ public class RotatingKeys {
 
 	public List<SimpleKey> toList() {
 		LinkedList<SimpleKey> result = new LinkedList<>();
-		result.add(getActive().toSimpleKey());
+		if (getActive()!=null) {
+			result.add(getActive().toSimpleKey());
+		}
 		result.addAll(
-			getStandBy().stream().map(
-				k -> k.toSimpleKey()
-			).collect(Collectors.toList())
+			ofNullable(getStandBy()).orElse(Collections.emptyList())
+				.stream().map(k -> k.toSimpleKey())
+				.collect(Collectors.toList())
 		);
 		return result;
 	}
@@ -48,18 +52,9 @@ public class RotatingKeys {
 	}
 
 	public void setActive(SamlKey active) {
-
-		if (hasText(active.getName())) {
-			this.active = active;
-		}
-		else {
-			this.active = new SamlKey(
-				"active-signing-key",
-				active.getPrivateKey(),
-				active.getCertificate(),
-				active.getPassphrase(),
-				active.getType()
-			);
+		this.active = active;
+		if (!hasText(active.getName())) {
+			active.setName("active-key");
 		}
 	}
 

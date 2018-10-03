@@ -31,22 +31,6 @@ public class LocalServiceProviderConfiguration extends
 		super("saml/sp");
 	}
 
-	public boolean isSignRequests() {
-		return signRequests;
-	}
-
-	public void setSignRequests(boolean signRequests) {
-		this.signRequests = signRequests;
-	}
-
-	public boolean isWantAssertionsSigned() {
-		return wantAssertionsSigned;
-	}
-
-	public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
-		this.wantAssertionsSigned = wantAssertionsSigned;
-	}
-
 	public HostedServiceProviderConfiguration toHostedConfiguration() {
 		return new HostedServiceProviderConfiguration(
 			getPrefix(),
@@ -64,5 +48,21 @@ public class LocalServiceProviderConfiguration extends
 			isSignRequests(),
 			isWantAssertionsSigned()
 		);
+	}
+
+	public boolean isSignRequests() {
+		return signRequests;
+	}
+
+	public void setSignRequests(boolean signRequests) {
+		this.signRequests = signRequests;
+	}
+
+	public boolean isWantAssertionsSigned() {
+		return wantAssertionsSigned;
+	}
+
+	public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
+		this.wantAssertionsSigned = wantAssertionsSigned;
 	}
 }

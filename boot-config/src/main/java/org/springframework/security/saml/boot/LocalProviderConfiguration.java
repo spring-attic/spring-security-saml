@@ -27,7 +27,7 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import static org.springframework.util.StringUtils.hasText;
 
-abstract class LocalProviderConfiguration
+public abstract class LocalProviderConfiguration
 	<ExternalConfiguration extends RemoteProviderConfiguration> {
 
 	private String entityId;
@@ -35,7 +35,7 @@ abstract class LocalProviderConfiguration
 	private boolean signMetadata;
 	private String metadata;
 	@NestedConfigurationProperty
-	private RotatingKeys keys;
+	private RotatingKeys keys = new RotatingKeys();
 	private String prefix;
 	private boolean singleLogoutEnabled = true;
 	@NestedConfigurationProperty

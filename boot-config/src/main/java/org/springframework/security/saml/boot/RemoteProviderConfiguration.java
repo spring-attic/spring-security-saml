@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.boot;
 
-abstract class RemoteProviderConfiguration {
+public abstract class RemoteProviderConfiguration {
 	private String alias;
 	private String metadata;
 	private String linktext;
@@ -63,4 +63,6 @@ abstract class RemoteProviderConfiguration {
 	public void setMetadataTrustCheck(boolean metadataTrustCheck) {
 		this.metadataTrustCheck = metadataTrustCheck;
 	}
+
+
 }

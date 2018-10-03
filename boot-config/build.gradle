@@ -1,24 +1,24 @@
-/*
- * Copyright 2002-2018 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
 
-description = "Spring Security SAML v2 Spring Boot Configuration"
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 	compile project(':spring-security-saml2-core')
-	compileOnly "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
-	compile "org.springframework.boot:spring-boot:$springBootVersion"
+	compile group: "org.springframework.boot", name: "spring-boot-starter-web", version: "${springBootVersion}"
+	compileOnly group: "org.springframework.boot", name: "spring-boot-configuration-processor", version: "${springBootVersion}"
+
+	testCompile files(this.project(':spring-security-saml2-core').sourceSets.test.output)
+
+	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+	testCompile "commons-logging:commons-logging:1.2"
+
+	testCompile ("org.springframework:spring-test:$springVersion") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+
+	testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.18.3'
+
 }

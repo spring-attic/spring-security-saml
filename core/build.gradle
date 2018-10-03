@@ -34,25 +34,8 @@ dependencies {
 	compile(group: "org.opensaml", name: "opensaml-core", version: "$openSamlVersion")
 	compile(group: "org.opensaml", name: "opensaml-saml-api", version: "$openSamlVersion")
 	compile(group: "org.opensaml", name: "opensaml-saml-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-messaging-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-messaging-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-soap-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-soap-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-profile-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-profile-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-storage-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-storage-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-security-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-security-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xmlsec-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xmlsec-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xacml-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xacml-impl", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xacml-saml-api", version: "$openSamlVersion")
-//	compile(group: "org.opensaml", name: "opensaml-xacml-saml-impl", version: "$openSamlVersion")
 
 	compile group: 'commons-logging', name: 'commons-logging', version: "$commonsLoggingVersion"
-
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 

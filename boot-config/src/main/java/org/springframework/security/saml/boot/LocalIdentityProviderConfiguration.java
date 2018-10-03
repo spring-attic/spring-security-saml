@@ -63,6 +63,28 @@ public class LocalIdentityProviderConfiguration extends
 		this.encryptAssertions = encryptAssertions;
 	}
 
+	public HostedIdentityProviderConfiguration toHostedConfiguration() {
+		return new HostedIdentityProviderConfiguration(
+			getPrefix(),
+			getBasePath(),
+			getAlias(),
+			getEntityId(),
+			isSignMetadata(),
+			getMetadata(),
+			getKeys().toList(),
+			getDefaultSigningAlgorithm(),
+			getDefaultDigest(),
+			getNameIds(),
+			isSingleLogoutEnabled(),
+			getProviders().stream().map(p -> p.toExternalServiceProviderConfiguration()).collect(Collectors.toList()),
+			getKeyEncryptionAlgorithm(),
+			getDataEncryptionAlgorithm(),
+			getNotOnOrAfter(),
+			getNotBefore(),
+			getSessionNotOnOrAfter()
+		);
+	}
+
 	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
 		return keyEncryptionAlgorithm;
 	}
@@ -101,27 +123,5 @@ public class LocalIdentityProviderConfiguration extends
 
 	public void setSessionNotOnOrAfter(long sessionNotOnOrAfter) {
 		this.sessionNotOnOrAfter = sessionNotOnOrAfter;
-	}
-
-	public HostedIdentityProviderConfiguration toHostedConfiguration() {
-		return new HostedIdentityProviderConfiguration(
-			getPrefix(),
-			getBasePath(),
-			getAlias(),
-			getEntityId(),
-			isSignMetadata(),
-			getMetadata(),
-			getKeys().toList(),
-			getDefaultSigningAlgorithm(),
-			getDefaultDigest(),
-			getNameIds(),
-			isSingleLogoutEnabled(),
-			getProviders().stream().map(p -> p.toExternalServiceProviderConfiguration()).collect(Collectors.toList()),
-			getKeyEncryptionAlgorithm(),
-			getDataEncryptionAlgorithm(),
-			getNotOnOrAfter(),
-			getNotBefore(),
-			getSessionNotOnOrAfter()
-		);
 	}
 }

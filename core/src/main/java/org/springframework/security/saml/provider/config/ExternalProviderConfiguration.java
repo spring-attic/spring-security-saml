@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.provider.config;
 
-public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
+public abstract class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
 	private final String alias;
 	private final String metadata;
 	private final String linktext;

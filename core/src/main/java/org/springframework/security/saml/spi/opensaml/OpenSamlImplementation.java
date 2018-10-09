@@ -638,7 +638,12 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	protected List<? extends Provider> getSsoProviders(EntityDescriptor descriptor) {
 		final List<SsoProvider> providers = new LinkedList<>();
 		for (RoleDescriptor roleDescriptor : descriptor.getRoleDescriptors()) {
-			providers.add(getSsoProvider(roleDescriptor));
+			if (roleDescriptor instanceof IDPSSODescriptor || roleDescriptor instanceof SPSSODescriptor) {
+				providers.add(getSsoProvider(roleDescriptor));
+			}
+			else {
+				logger.debug("Ignoring unknown metadata descriptor:"+roleDescriptor.getClass().getName());
+			}
 		}
 		return providers;
 	}

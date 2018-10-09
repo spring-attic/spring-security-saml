@@ -638,5 +638,18 @@ public class MetadataTests extends MetadataBase {
 		assertThat(entities.getNext().getClass(), equalTo(ServiceProviderMetadata.class));
 	}
 
+	@Test
+	public void multiple_descriptors() throws IOException {
+		Metadata entities =
+			(Metadata) config.fromXml(
+				getFileBytes("/test-data/metadata/multi-descriptor-metadata.xml"),
+				asList(), //no verification here yet
+				null
+			);
+		assertNotNull(entities);
+		assertThat(entities.getClass(), equalTo(Metadata.class));
+		assertFalse(entities.hasNext());
+	}
+
 
 }

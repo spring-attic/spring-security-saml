@@ -638,7 +638,11 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	protected List<? extends Provider> getSsoProviders(EntityDescriptor descriptor) {
 		final List<SsoProvider> providers = new LinkedList<>();
 		for (RoleDescriptor roleDescriptor : descriptor.getRoleDescriptors()) {
-			providers.add(getSsoProvider(roleDescriptor));
+			SsoProvider ssoProvider = getSsoProvider(roleDescriptor);
+
+			if(ssoProvider != null) {
+				providers.add(ssoProvider);
+			}
 		}
 		return providers;
 	}
@@ -689,13 +693,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			return provider;
 		}
 		else {
-
+			return null; // instead of throwing an UnsupportedOperationException
 		}
-		throw new UnsupportedOperationException(
-			descriptor == null ?
-				null :
-				descriptor.getClass().getName()
-		);
 	}
 
 	protected List<Attribute> getRequestAttributes(SPSSODescriptor desc) {

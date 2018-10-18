@@ -19,10 +19,11 @@ package org.springframework.security.saml.boot;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.security.saml.provider.config.NetworkConfiguration;
 import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
-public class SamlConfiguration {
+public class SamlBootConfiguration {
 
 	@NestedConfigurationProperty
 	private LocalServiceProviderConfiguration serviceProvider;
@@ -47,6 +48,10 @@ public class SamlConfiguration {
 	}
 
 	public SamlServerConfiguration toSamlServerConfiguration() {
-		throw new UnsupportedOperationException();
+		return new SamlServerConfiguration(
+			serviceProvider == null ? null : serviceProvider.toHostedConfiguration(),
+			identityProvider == null ? null : identityProvider.toHostedConfiguration(),
+			new NetworkConfiguration(4000,4000)
+		);
 	}
 }

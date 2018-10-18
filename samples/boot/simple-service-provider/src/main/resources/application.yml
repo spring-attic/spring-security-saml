@@ -22,6 +22,7 @@ spring:
         connect-timeout: 5000
       service-provider:
         entity-id: spring.security.saml.sp.id
+        base-path: http://localhost:8080/sample-sp
         alias: boot-sample-sp
         sign-metadata: true
         sign-requests: true

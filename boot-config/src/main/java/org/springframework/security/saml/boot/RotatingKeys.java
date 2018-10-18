@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 
 import static java.util.Optional.ofNullable;
@@ -38,6 +39,7 @@ public class RotatingKeys {
 		LinkedList<SimpleKey> result = new LinkedList<>();
 		if (getActive()!=null) {
 			result.add(getActive().toSimpleKey());
+			result.add(getActive().toSimpleKey(getActive().getName()+"-encrypt", KeyType.ENCRYPTION));
 		}
 		result.addAll(
 			ofNullable(getStandBy()).orElse(Collections.emptyList())

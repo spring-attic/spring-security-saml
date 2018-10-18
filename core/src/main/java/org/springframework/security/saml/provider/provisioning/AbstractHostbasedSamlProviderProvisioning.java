@@ -50,6 +50,8 @@ import org.springframework.web.util.UriUtils;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
+import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
 public abstract class AbstractHostbasedSamlProviderProvisioning {
@@ -76,7 +78,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 	protected IdentityProviderService getHostedIdentityProvider(HostedIdentityProviderConfiguration idpConfig) {
 		String basePath = idpConfig.getBasePath();
 		List<SimpleKey> keys = ofNullable(idpConfig.getKeys()).orElse(Collections.emptyList());
-		SimpleKey signingKey = idpConfig.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+		SimpleKey signingKey = idpConfig.isSignMetadata() && keys.size() > 0 ? keys.get(0) : null;
 
 		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(idpConfig);
@@ -144,15 +146,33 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 						.setWantAuthnRequestsSigned(true)
 						.setSingleSignOnService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									Binding.POST,
+									0,
+									true
+								),
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									REDIRECT,
+									1,
+									false
+								)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
+									REDIRECT,
+									0,
+									true
+								)
 							)
 						)
 				)
@@ -192,7 +212,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		String basePath = spConfig.getBasePath();
 
 		List<SimpleKey> keys = new LinkedList<>(ofNullable(spConfig.getKeys()).orElse(Collections.emptyList()));
-		SimpleKey activeKey = keys.size()>0 ? keys.get(0) : null;
+		SimpleKey activeKey = keys.size() > 0 ? keys.get(0) : null;
 		SimpleKey signingKey = spConfig.isSignMetadata() ? activeKey : null;
 
 		String prefix = hasText(spConfig.getPrefix()) ? spConfig.getPrefix() : "saml/sp/";
@@ -252,15 +272,33 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 						.setAuthnRequestsSigned(signingKey != null)
 						.setAssertionConsumerService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									Binding.POST,
+									0,
+									true
+								),
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									REDIRECT,
+									1,
+									false
+								)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
+								getEndpoint(
+									baseUrl,
+									stripSlashes(prefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
+									REDIRECT,
+									0,
+									true
+								)
 							)
 						)
 				)

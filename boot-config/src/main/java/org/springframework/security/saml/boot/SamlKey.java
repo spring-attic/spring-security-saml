@@ -43,12 +43,19 @@ public class SamlKey {
 	}
 
 	public SimpleKey toSimpleKey() {
-		return new SimpleKey(
+		return toSimpleKey(
 			getName(),
+			getType()
+		);
+	}
+
+	public SimpleKey toSimpleKey(String name, KeyType type) {
+		return new SimpleKey(
+			name,
 			getPrivateKey(),
 			getCertificate(),
 			getPassphrase(),
-			getType()
+			type
 		);
 	}
 

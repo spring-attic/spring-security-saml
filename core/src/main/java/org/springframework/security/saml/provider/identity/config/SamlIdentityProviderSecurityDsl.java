@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.metadata.NameId;
@@ -39,11 +38,6 @@ public class SamlIdentityProviderSecurityDsl
 	private String prefix = "saml/idp/";
 	private boolean useStandardFilterConfiguration = true;
 	private List<Filter> filters = new LinkedList<>();
-	private SamlServerConfiguration configuration = new SamlServerConfiguration(
-		null,
-		null,
-		null
-	);
 //		.setNetwork(
 //			new NetworkConfiguration(readTimeout, connectTimeout)
 //				.setConnectTimeout(5000)
@@ -73,8 +67,6 @@ public class SamlIdentityProviderSecurityDsl
 	public void configure(HttpSecurity http) throws Exception {
 		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
-		SamlServerConfiguration serverConfig = context.getBean("idpSamlServerConfiguration",SamlServerConfiguration.class);
-		serverConfig.transfer(this.configuration);
 
 		if (useStandardFilterConfiguration) {
 			SamlIdentityProviderServerBeanConfiguration beanConfig =
@@ -110,11 +102,6 @@ public class SamlIdentityProviderSecurityDsl
 					idpLogoutFilter.getClass()
 				);
 		}
-	}
-
-	public SamlIdentityProviderSecurityDsl configure(SamlServerConfiguration config) {
-		this.configuration = config;
-		return this;
 	}
 
 	public SamlIdentityProviderSecurityDsl prefix(String prefix) {

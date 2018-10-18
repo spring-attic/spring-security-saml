@@ -34,18 +34,18 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends SamlServiceProviderSecurityConfiguration {
 
-		private AppConfig appConfig;
+		private SamlPropertyConfiguration samlPropertyConfiguration;
 
-		public SamlSecurity(BeanConfig beanConfig, @Qualifier("appConfig") AppConfig appConfig) {
+		public SamlSecurity(BeanConfig beanConfig, @Qualifier("samlPropertyConfiguration") SamlPropertyConfiguration samlPropertyConfiguration) {
 			super("/saml/sp/", beanConfig);
-			this.appConfig = appConfig;
+			this.samlPropertyConfiguration = samlPropertyConfiguration;
 		}
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.apply(serviceProvider())
-				.configure(appConfig.toSamlServerConfiguration());
+				;
 		}
 	}
 

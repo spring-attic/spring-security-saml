@@ -36,9 +36,9 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {
-	private final AppConfig config;
+	private final SamlPropertyConfiguration config;
 
-	public BeanConfig(AppConfig config,
+	public BeanConfig(SamlPropertyConfiguration config,
 					  SamlTransformer samlTransformer,
 					  SamlValidator samlValidator,
 					  SamlMetadataCache samlMetadataCache,

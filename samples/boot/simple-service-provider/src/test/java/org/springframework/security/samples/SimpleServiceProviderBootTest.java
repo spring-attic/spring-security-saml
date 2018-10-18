@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +35,6 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
@@ -59,6 +57,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import sample.config.SamlPropertyConfiguration;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -104,8 +103,7 @@ public class SimpleServiceProviderBootTest {
 	private String spBaseUrl;
 
 	@Autowired
-	@Qualifier("spSamlServerConfiguration")
-	private SamlServerConfiguration config;
+	private SamlPropertyConfiguration config;
 
 	private MockHttpServletRequest defaultRequest;
 	private SamlTestObjectHelper helper;
@@ -114,21 +112,12 @@ public class SimpleServiceProviderBootTest {
 	@BeforeEach
 	void setUp() {
 		idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
-		spBaseUrl = "http://localhost";
 		defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
 		helper = new SamlTestObjectHelper(samlTime);
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-//			config.getServiceProvider().setBasePath(spBaseUrl);
-		}
 	}
 
 	@AfterEach
 	public void reset() {
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-//			config.getServiceProvider().setSingleLogoutEnabled(true);
-		}
 	}
 
 	@SpringBootConfiguration
@@ -141,7 +130,7 @@ public class SimpleServiceProviderBootTest {
 	public void checkConfig() {
 		assertNotNull(config);
 		assertNull(config.getIdentityProvider());
-		HostedServiceProviderConfiguration sp = config.getServiceProvider();
+		HostedServiceProviderConfiguration sp = config.toSamlServerConfiguration().getServiceProvider();
 		assertNotNull(sp);
 		assertThat(sp.getEntityId(), equalTo("spring.security.saml.sp.id"));
 		assertTrue(sp.isSignMetadata());
@@ -150,7 +139,7 @@ public class SimpleServiceProviderBootTest {
 		assertNotNull(activeKey);
 		List<SimpleKey> standByKeys = sp.getKeys().subList(1,sp.getKeys().size());
 		assertNotNull(standByKeys);
-		assertThat(standByKeys.size(), equalTo(2));
+		assertThat(standByKeys.size(), equalTo(3)); //adding encryption key
 	}
 
 	@Test

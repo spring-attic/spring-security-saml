@@ -42,7 +42,15 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 	}
 
 	public ExternalIdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
-		throw new UnsupportedOperationException();
+		return new ExternalIdentityProviderConfiguration(
+			getAlias(),
+			getMetadata(),
+			getLinktext(),
+			isSkipSslValidation(),
+			isMetadataTrustCheck(),
+			getNameId(),
+			getAssertionConsumerServiceIndex()
+		);
 	}
 
 

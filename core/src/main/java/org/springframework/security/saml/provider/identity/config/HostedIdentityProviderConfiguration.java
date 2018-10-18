@@ -30,9 +30,9 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 public class HostedIdentityProviderConfiguration extends
 	HostedProviderConfiguration<ExternalServiceProviderConfiguration> {
 
-	private final boolean wantRequestsSigned = true;
-	private final boolean signAssertions = true;
-	private final boolean encryptAssertions = false;
+	private final boolean wantRequestsSigned;
+	private final boolean signAssertions;
+	private final boolean encryptAssertions;
 	private final KeyEncryptionMethod keyEncryptionAlgorithm;
 	private final DataEncryptionMethod dataEncryptionAlgorithm;
 	private final long notOnOrAfter;
@@ -44,6 +44,8 @@ public class HostedIdentityProviderConfiguration extends
 											   String alias,
 											   String entityId,
 											   boolean signMetadata,
+											   boolean signAssertions,
+											   boolean wantRequestsSigned,
 											   String metadata,
 											   List<SimpleKey> keys,
 											   AlgorithmMethod defaultSigningAlgorithm,
@@ -51,6 +53,7 @@ public class HostedIdentityProviderConfiguration extends
 											   List<NameId> nameIds,
 											   boolean singleLogoutEnabled,
 											   List<ExternalServiceProviderConfiguration> providers,
+											   boolean encryptAssertions,
 											   KeyEncryptionMethod keyEncryptionAlgorithm,
 											   DataEncryptionMethod dataEncryptionAlgorithm,
 											   long notOnOrAfter,
@@ -69,6 +72,9 @@ public class HostedIdentityProviderConfiguration extends
 			singleLogoutEnabled,
 			providers
 		);
+		this.wantRequestsSigned = wantRequestsSigned;
+		this.signAssertions = signAssertions;
+		this.encryptAssertions = encryptAssertions;
 		this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
 		this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
 		this.notOnOrAfter = notOnOrAfter;

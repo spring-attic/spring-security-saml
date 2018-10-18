@@ -19,6 +19,7 @@ spring:
         read-timeout: 8000
         connect-timeout: 4000
       identity-provider:
+        base-path: http://localhost:8081/sample-idp
         entity-id: spring.security.saml.idp.id
         alias: boot-sample-idp
         sign-metadata: true
@@ -27,9 +28,9 @@ spring:
         signing-algorithm: RSA_SHA256
         digest-method: SHA256
         single-logout-enabled: true
-#        encrypt-assertions: true
-#        key-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#rsa-1_5
-#        data-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#aes256-cbc
+        encrypt-assertions: true
+        key-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#rsa-1_5
+        data-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#aes256-cbc
         name-ids:
           - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
           - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
@@ -152,9 +153,6 @@ spring:
                 PM//DZj/ijS9WNzrLV06T7iYpYeTKveR8TYaBaJoovrlfPaCadI7L7WatrlQaMZ2
                 HffnsgNZROW70P9KbBF/4ejcVX96drpXiA==
         providers:
-        - alias: uaa
-          metadata: http://localhost:8082/uaa/saml/metadata
-          link-text: Cloud Foundry UAA SP
         - alias: spring-security-saml-sp
           metadata: http://localhost:8080/sample-sp/saml/sp/metadata
           linktext: Spring Security SAML SP

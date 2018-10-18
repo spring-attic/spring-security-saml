@@ -6,7 +6,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import static org.springframework.util.StringUtils.hasText;
 
 public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 
@@ -31,7 +35,60 @@ public class ThreadLocalSamlConfigurationFilter extends OncePerRequestFilter {
 	}
 
 	protected SamlServerConfiguration getConfiguration(HttpServletRequest request) {
-		return repository.getServerConfiguration(request);
+		SamlServerConfiguration result =  repository.getServerConfiguration(request);
+		String basePath = getBasePath(request);
+
+		HostedIdentityProviderConfiguration identityProvider = result.getIdentityProvider();
+		if (identityProvider!=null && !hasText(identityProvider.getBasePath())) {
+			identityProvider = new HostedIdentityProviderConfiguration(
+				identityProvider.getPrefix(),
+				basePath,
+				identityProvider.getAlias(),
+				identityProvider.getEntityId(),
+				identityProvider.isSignMetadata(),
+				identityProvider.isSignAssertions(),
+				identityProvider.isWantRequestsSigned(),
+				identityProvider.getMetadata(),
+				identityProvider.getKeys(),
+				identityProvider.getDefaultSigningAlgorithm(),
+				identityProvider.getDefaultDigest(),
+				identityProvider.getNameIds(),
+				identityProvider.isSingleLogoutEnabled(),
+				identityProvider.getProviders(),
+				identityProvider.isEncryptAssertions(),
+				identityProvider.getKeyEncryptionAlgorithm(),
+				identityProvider.getDataEncryptionAlgorithm(),
+				identityProvider.getNotOnOrAfter(),
+				identityProvider.getNotBefore(),
+				identityProvider.getSessionNotOnOrAfter()
+			);
+		}
+		HostedServiceProviderConfiguration serviceProvider = result.getServiceProvider();
+		if (serviceProvider!=null && !hasText(serviceProvider.getBasePath())) {
+
+			serviceProvider = new HostedServiceProviderConfiguration(
+				serviceProvider.getPrefix(),
+				basePath,
+				serviceProvider.getAlias(),
+				serviceProvider.getEntityId(),
+				serviceProvider.isSignMetadata(),
+				serviceProvider.getMetadata(),
+				serviceProvider.getKeys(),
+				serviceProvider.getDefaultSigningAlgorithm(),
+				serviceProvider.getDefaultDigest(),
+				serviceProvider.getNameIds(),
+				serviceProvider.isSingleLogoutEnabled(),
+				serviceProvider.getProviders(),
+				serviceProvider.isSignRequests(),
+				serviceProvider.isWantAssertionsSigned()
+			);
+		}
+
+		return new SamlServerConfiguration(
+			serviceProvider,
+			identityProvider,
+			result.getNetwork()
+		);
 	}
 
 	protected String getBasePath(HttpServletRequest request) {

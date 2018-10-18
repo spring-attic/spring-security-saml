@@ -25,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,7 +40,6 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
-import org.springframework.security.saml.provider.config.SamlServerConfiguration;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -55,7 +53,6 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
-import org.springframework.security.saml.spi.ExamplePemKey;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -64,12 +61,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import sample.config.SamlPropertyConfiguration;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -77,6 +76,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
+import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -99,8 +99,7 @@ public class SimpleIdentityProviderBootTests {
 	private SamlMetadataCache cache;
 
 	@Autowired
-	@Qualifier("idpSamlServerConfiguration")
-	private SamlServerConfiguration config;
+	private SamlPropertyConfiguration config;
 
 	@Autowired
 	private DefaultSessionAssertionStore sessionAssertionStore;
@@ -111,15 +110,11 @@ public class SimpleIdentityProviderBootTests {
 	@Autowired
 	private Clock samlTime;
 
-	private String baseUrl = "http://localhost";
 	private SamlTestObjectHelper helper;
 
 	@BeforeEach
 	public void mockCache() {
 		//since we're using objects outside of the mock request
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-		}
 //		config.getIdentityProvider().setBasePath(baseUrl);
 
 		given(
@@ -131,7 +126,7 @@ public class SimpleIdentityProviderBootTests {
 
 		given(
 			cache.getMetadata(
-				eq("spring.security.saml.sp.id"),
+				eq("http://localhost:8080/sample-sp/saml/sp/metadata"),
 				anyBoolean()
 			)
 		).willReturn(CACHED_SSS_META_DATA.getBytes());
@@ -141,11 +136,6 @@ public class SimpleIdentityProviderBootTests {
 
 	@AfterEach
 	public void reset() {
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-		}
-//		config.getIdentityProvider().setEncryptAssertions(false);
-//		config.getIdentityProvider().setSingleLogoutEnabled(true);
 	}
 
 	@SpringBootConfiguration
@@ -378,7 +368,7 @@ public class SimpleIdentityProviderBootTests {
 		assertThat(idpm.getIdentityProvider().getSingleLogoutService().isEmpty(), equalTo(false));
 		assertThat(idpm.getEntityAlias(), equalTo("spring.security.saml.idp.id"));
 		for (Endpoint ep : idpm.getIdentityProvider().getSingleSignOnService()) {
-			assertThat(ep.getLocation(), equalTo("http://localhost/saml/idp/SSO/alias/boot-sample-idp"));
+			assertThat(ep.getLocation(), equalTo("http://localhost:8081/sample-idp/saml/idp/SSO/alias/boot-sample-idp"));
 		}
 		assertThat(
 			idpm.getIdentityProvider().getNameIds(),
@@ -395,13 +385,10 @@ public class SimpleIdentityProviderBootTests {
 	}
 
 	@Test
-	public void singleLogoutDisabledMetadata() throws Exception {
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-		}
+	public void singleLogoutEnabledMetadata() throws Exception {
 //		config.getIdentityProvider().setSingleLogoutEnabled(false);
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		assertThat(idpm.getIdentityProvider().getSingleLogoutService(), containsInAnyOrder());
+		assertThat(idpm.getIdentityProvider().getSingleLogoutService().size(), greaterThan(0));
 	}
 
 	@Test
@@ -412,7 +399,11 @@ public class SimpleIdentityProviderBootTests {
 		String html = result.getResponse().getContentAsString();
 		assertThat(html, containsString("name=\"SAMLResponse\""));
 		String response = extractResponse(html, "SAMLResponse");
-		Response r = (Response) transformer.fromXml(transformer.samlDecode(response, false), null, null);
+		Response r = (Response) transformer.fromXml(
+			transformer.samlDecode(response, false),
+			config.getIdentityProvider().getKeys().toList(),
+			asList(RSA_TEST_KEY.getSimpleKey("test"))
+		);
 		assertNotNull(r);
 		assertThat(r.getAssertions(), notNullValue());
 		assertThat(r.getAssertions().size(), equalTo(1));
@@ -420,9 +411,6 @@ public class SimpleIdentityProviderBootTests {
 
 	@Test
 	public void idpInitiatedLoginGeneratedEncryptedAssertion() throws Exception {
-		if (1 / 1 == 1) {
-			throw new UnsupportedOperationException();
-		}
 //		config.getIdentityProvider().setEncryptAssertions(true);
 		UsernamePasswordAuthenticationToken token =
 			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
@@ -436,7 +424,7 @@ public class SimpleIdentityProviderBootTests {
 		Response r = (Response) transformer.fromXml(
 			decodedXml,
 			null,
-			asList(ExamplePemKey.RSA_TEST_KEY.getSimpleKey("encryption"))
+			asList(RSA_TEST_KEY.getSimpleKey("encryption"))
 		);
 		assertNotNull(r);
 		assertThat(r.getAssertions(), notNullValue());
@@ -466,7 +454,11 @@ public class SimpleIdentityProviderBootTests {
 		String html = result.getResponse().getContentAsString();
 		assertThat(html, containsString("name=\"SAMLResponse\""));
 		String response = extractResponse(html, "SAMLResponse");
-		Response r = (Response) transformer.fromXml(transformer.samlDecode(response, false), null, null);
+		Response r = (Response) transformer.fromXml(
+			transformer.samlDecode(response, false),
+			config.getIdentityProvider().getKeys().toList(),
+			asList(RSA_TEST_KEY.getSimpleKey("test"))
+		);
 		assertNotNull(r);
 		assertThat(r.getAssertions(), notNullValue());
 		assertThat(r.getAssertions().size(), equalTo(1));

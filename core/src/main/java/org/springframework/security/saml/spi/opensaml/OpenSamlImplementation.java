@@ -579,6 +579,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
 			} catch (DecryptionException e) {
 				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
+				last = e;
 			}
 		}
 		if (last != null) {

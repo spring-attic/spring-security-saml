@@ -22,6 +22,12 @@ import org.springframework.security.saml.provider.identity.config.ExternalServic
 public class RemoteServiceProviderConfiguration extends RemoteProviderConfiguration {
 
 	public ExternalServiceProviderConfiguration toExternalServiceProviderConfiguration() {
-		throw new UnsupportedOperationException();
+		return new ExternalServiceProviderConfiguration(
+			getAlias(),
+			getMetadata(),
+			getLinktext(),
+			isSkipSslValidation(),
+			isMetadataTrustCheck()
+		);
 	}
 }

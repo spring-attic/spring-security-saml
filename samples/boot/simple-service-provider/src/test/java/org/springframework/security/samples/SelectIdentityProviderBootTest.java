@@ -32,7 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import sample.config.AppConfig;
+import sample.config.SamlPropertyConfiguration;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,7 +52,7 @@ public class SelectIdentityProviderBootTest {
 	private String spBaseUrl;
 
 	@Autowired
-	private AppConfig config;
+	private SamlPropertyConfiguration config;
 
 	private List<ExternalIdentityProviderConfiguration> providers;
 

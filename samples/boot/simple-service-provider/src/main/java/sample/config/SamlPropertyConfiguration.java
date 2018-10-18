@@ -17,8 +17,8 @@
 package sample.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.boot.SamlConfiguration;
+import org.springframework.security.saml.boot.SamlBootConfiguration;
 
 @Configuration
-public class AppConfig extends SamlConfiguration {
+public class SamlPropertyConfiguration extends SamlBootConfiguration {
 }

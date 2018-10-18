@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,8 +61,8 @@ class ThreadLocalSamlConfigurationRepositoryTests {
 	}
 
 	@Test
-	public void get_creates_clone() {
-		assertNotSame(configuration, repository.getServerConfiguration(request));
+	public void get_does_not_create_clone() {
+		assertSame(configuration, repository.getServerConfiguration(request));
 	}
 
 	@Test

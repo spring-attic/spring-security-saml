@@ -34,10 +34,10 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends SamlIdentityProviderSecurityConfiguration {
 
-		private final AppConfig appConfig;
+		private final SamlPropertyConfiguration appConfig;
 		private final BeanConfig beanConfig;
 
-		public SamlSecurity(BeanConfig beanConfig, @Qualifier("appConfig") AppConfig appConfig) {
+		public SamlSecurity(BeanConfig beanConfig, @Qualifier("samlPropertyConfiguration") SamlPropertyConfiguration appConfig) {
 			super("/saml/idp/", beanConfig);
 			this.appConfig = appConfig;
 			this.beanConfig = beanConfig;
@@ -49,7 +49,7 @@ public class SecurityConfiguration {
 			http
 				.userDetailsService(beanConfig.userDetailsService()).formLogin();
 			http.apply(identityProvider())
-				.configure(appConfig.toSamlServerConfiguration());
+				;
 		}
 	}
 

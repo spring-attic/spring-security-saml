@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 package org.springframework.security.samples;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +23,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,30 +49,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 	"classpath:single-logout-disabled.properties",
 })
 public class SingleLogoutDisabledBootTests {
+
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
 	private SamlTransformer transformer;
 
+
 	@BeforeEach
-	public void mockCache() {
+	void setUp() {
+	}
+
+	@AfterEach
+	public void reset() {
+	}
+
+	@SpringBootConfiguration
+	@EnableAutoConfiguration
+	@ComponentScan(basePackages = "sample")
+	public static class SpringBootApplicationTestConfig {
 	}
 
 	@Test
 	public void singleLogoutDisabledMetadata() throws Exception {
-		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
-		assertThat(idpm.getIdentityProvider().getSingleLogoutService(), containsInAnyOrder());
+		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
 
-	protected IdentityProviderMetadata getIdentityProviderMetadata() throws Exception {
-		MvcResult result = mockMvc.perform(get("/saml/idp/metadata"))
+
+	protected ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
+		String xml = mockMvc.perform(get("/saml/sp/metadata"))
 			.andExpect(status().isOk())
-			.andReturn();
-		String xml = result.getResponse().getContentAsString();
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+		assertNotNull(xml);
 		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
 		assertNotNull(m);
-		assertThat(m.getClass(), equalTo(IdentityProviderMetadata.class));
-		return (IdentityProviderMetadata) m;
+		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+		return (ServiceProviderMetadata) m;
 	}
+
 }

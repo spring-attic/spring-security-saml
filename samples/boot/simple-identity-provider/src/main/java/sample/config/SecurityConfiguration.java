@@ -17,7 +17,6 @@
 
 package sample.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,12 +33,10 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends SamlIdentityProviderSecurityConfiguration {
 
-		private final SamlPropertyConfiguration appConfig;
 		private final BeanConfig beanConfig;
 
-		public SamlSecurity(BeanConfig beanConfig, @Qualifier("samlPropertyConfiguration") SamlPropertyConfiguration appConfig) {
+		public SamlSecurity(BeanConfig beanConfig) {
 			super("/saml/idp/", beanConfig);
-			this.appConfig = appConfig;
 			this.beanConfig = beanConfig;
 		}
 

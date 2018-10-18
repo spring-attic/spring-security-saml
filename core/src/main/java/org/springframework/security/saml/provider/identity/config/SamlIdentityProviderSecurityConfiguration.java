@@ -45,7 +45,7 @@ public abstract class SamlIdentityProviderSecurityConfiguration
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String filterChainPattern = "/" + stripSlashes(getPrefix()) + "/**";
-		logger.info("Configuring SAML IDP on patther:"+filterChainPattern);
+		logger.info("Configuring SAML IDP on pattern:"+filterChainPattern);
 		http
 			.antMatcher(filterChainPattern)
 			.csrf().disable()

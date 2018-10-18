@@ -17,7 +17,6 @@
 
 package org.springframework.security.saml.provider.service.config;
 
-import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.Filter;
 
@@ -36,8 +35,6 @@ public class SamlServiceProviderSecurityDsl
 	extends AbstractHttpConfigurer<SamlServiceProviderSecurityDsl, HttpSecurity> {
 
 	private String prefix = "saml/sp/";
-	private boolean useStandardFilterConfiguration = true;
-	private List<Filter> filters = new LinkedList<>();
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
@@ -53,41 +50,40 @@ public class SamlServiceProviderSecurityDsl
 	public void configure(HttpSecurity http) throws Exception {
 		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
-		if (useStandardFilterConfiguration) {
-			SamlServiceProviderServerBeanConfiguration spBeanConfig =
-				context.getBean(SamlServiceProviderServerBeanConfiguration.class);
-			Filter samlConfigurationFilter = spBeanConfig.samlConfigurationFilter();
-			Filter metadataFilter = spBeanConfig.spMetadataFilter();
-			Filter spAuthenticationRequestFilter = spBeanConfig.spAuthenticationRequestFilter();
-			Filter spAuthenticationResponseFilter = spBeanConfig.spAuthenticationResponseFilter();
-			Filter spSamlLogoutFilter = spBeanConfig.spSamlLogoutFilter();
-			Filter spSelectIdentityProviderFilter = spBeanConfig.spSelectIdentityProviderFilter();
-			http
-				.addFilterAfter(
-					samlConfigurationFilter,
-					BasicAuthenticationFilter.class
-				)
-				.addFilterAfter(
-					metadataFilter,
-					samlConfigurationFilter.getClass()
-				)
-				.addFilterAfter(
-					spAuthenticationRequestFilter,
-					metadataFilter.getClass()
-				)
-				.addFilterAfter(
-					spAuthenticationResponseFilter,
-					spAuthenticationRequestFilter.getClass()
-				)
-				.addFilterAfter(
-					spSamlLogoutFilter,
-					spAuthenticationResponseFilter.getClass()
-				)
-				.addFilterAfter(
-					spSelectIdentityProviderFilter,
-					spSamlLogoutFilter.getClass()
-				);
-		}
+		SamlServiceProviderServerBeanConfiguration spBeanConfig =
+			context.getBean(SamlServiceProviderServerBeanConfiguration.class);
+		Filter samlConfigurationFilter = spBeanConfig.samlConfigurationFilter();
+		Filter metadataFilter = spBeanConfig.spMetadataFilter();
+		Filter spAuthenticationRequestFilter = spBeanConfig.spAuthenticationRequestFilter();
+		Filter spAuthenticationResponseFilter = spBeanConfig.spAuthenticationResponseFilter();
+		Filter spSamlLogoutFilter = spBeanConfig.spSamlLogoutFilter();
+		Filter spSelectIdentityProviderFilter = spBeanConfig.spSelectIdentityProviderFilter();
+		http
+			.addFilterAfter(
+				samlConfigurationFilter,
+				BasicAuthenticationFilter.class
+			)
+			.addFilterAfter(
+				metadataFilter,
+				samlConfigurationFilter.getClass()
+			)
+			.addFilterAfter(
+				spAuthenticationRequestFilter,
+				metadataFilter.getClass()
+			)
+			.addFilterAfter(
+				spAuthenticationResponseFilter,
+				spAuthenticationRequestFilter.getClass()
+			)
+			.addFilterAfter(
+				spSamlLogoutFilter,
+				spAuthenticationResponseFilter.getClass()
+			)
+			.addFilterAfter(
+				spSelectIdentityProviderFilter,
+				spSamlLogoutFilter.getClass()
+			);
+
 	}
 
 	public SamlServiceProviderSecurityDsl prefix(String prefix) {
@@ -144,21 +140,6 @@ public class SamlServiceProviderSecurityDsl
 	public SamlServiceProviderSecurityDsl keys(List<SimpleKey> keys) {
 //		configuration.getServiceProvider()
 //			.setKeys(keys);
-		return this;
-	}
-
-	public SamlServiceProviderSecurityDsl useStandardFilters() {
-		return useStandardFilters(true);
-	}
-
-	public SamlServiceProviderSecurityDsl useStandardFilters(boolean enable) {
-		this.useStandardFilterConfiguration = enable;
-		return this;
-	}
-
-	public SamlServiceProviderSecurityDsl filters(List<Filter> filters) {
-		this.filters.clear();
-		this.filters.addAll(filters);
 		return this;
 	}
 

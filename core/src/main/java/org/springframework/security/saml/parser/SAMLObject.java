@@ -63,7 +63,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
             if (serializedObject == null) {
                 serializedObject = XMLHelper.nodeToString(SAMLUtil.marshallMessage(getObject()));
             }
-            out.writeUTF((String) serializedObject);
+            out.writeObject(serializedObject);
         } catch (MessageEncodingException e) {
             log.error("Error serializing SAML object", e);
             throw new IOException("Error serializing SAML object: " + e.getMessage());
@@ -80,7 +80,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
      * @throws ClassNotFoundException class not found
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        serializedObject = in.readUTF();
+        serializedObject = (String)in.readObject();
     }
 
     /**

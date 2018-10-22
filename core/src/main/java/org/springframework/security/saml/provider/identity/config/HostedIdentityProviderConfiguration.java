@@ -57,7 +57,8 @@ public class HostedIdentityProviderConfiguration extends
 											   KeyEncryptionMethod keyEncryptionAlgorithm,
 											   DataEncryptionMethod dataEncryptionAlgorithm,
 											   long notOnOrAfter,
-											   long notBefore, long sessionNotOnOrAfter) {
+											   long notBefore,
+											   long sessionNotOnOrAfter) {
 		super(
 			prefix,
 			basePath,

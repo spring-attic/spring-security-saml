@@ -43,7 +43,8 @@ public class HostedServiceProviderConfiguration extends
 											  List<NameId> nameIds,
 											  boolean singleLogoutEnabled,
 											  List<ExternalIdentityProviderConfiguration> providers,
-											  boolean signRequests, boolean wantAssertionsSigned) {
+											  boolean signRequests,
+											  boolean wantAssertionsSigned) {
 		super(
 			prefix,
 			basePath,

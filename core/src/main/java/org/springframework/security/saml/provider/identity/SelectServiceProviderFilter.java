@@ -31,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlRequestMatcher;
 import org.springframework.security.saml.provider.SamlFilter;
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.provider.service.ModelProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;

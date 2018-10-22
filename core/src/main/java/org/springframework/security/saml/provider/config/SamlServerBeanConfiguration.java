@@ -23,6 +23,7 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
@@ -77,11 +78,11 @@ public class SamlServerBeanConfiguration {
 	}
 
 	public RestOperations samlValidatingNetworkHandler() {
-		return new Network(4000, 8000).get(false);
+		return new RestOperationsUtils(4000, 8000).get(false);
 	}
 
 	public RestOperations samlNonValidatingNetworkHandler() {
-		return new Network(4000, 8000).get(true);
+		return new RestOperationsUtils(4000, 8000).get(true);
 	}
 
 }

@@ -19,8 +19,8 @@ package org.springframework.security.saml.provider;
 
 import java.util.List;
 
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.provider.config.HostedProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalProviderConfiguration;
+import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;

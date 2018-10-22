@@ -22,7 +22,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
-import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
 public class HostBasedSamlServiceProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning

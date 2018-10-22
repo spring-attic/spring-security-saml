@@ -17,6 +17,8 @@
 
 package org.springframework.security.saml.provider.config;
 
+import org.springframework.security.saml.registration.SamlServerConfiguration;
+
 public class StaticSamlConfigurationRepository implements SamlConfigurationRepository<Object> {
 
 	private final SamlServerConfiguration configuration;

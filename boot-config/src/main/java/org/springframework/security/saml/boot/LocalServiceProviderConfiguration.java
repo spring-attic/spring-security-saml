@@ -19,7 +19,7 @@ package org.springframework.security.saml.boot;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
 public class LocalServiceProviderConfiguration extends
 	LocalProviderConfiguration<RemoteIdentityProviderConfiguration> {

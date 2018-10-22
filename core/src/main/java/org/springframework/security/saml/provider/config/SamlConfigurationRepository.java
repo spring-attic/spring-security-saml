@@ -17,6 +17,8 @@
 
 package org.springframework.security.saml.provider.config;
 
+import org.springframework.security.saml.registration.SamlServerConfiguration;
+
 /**
  * Adds support for multi tenancy based on the context of an HTTP request
  * Returns the server configuration based on a HTTP request.

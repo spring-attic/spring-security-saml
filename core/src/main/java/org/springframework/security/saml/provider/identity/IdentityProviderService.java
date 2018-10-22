@@ -18,7 +18,7 @@
 package org.springframework.security.saml.provider.identity;
 
 import org.springframework.security.saml.provider.HostedProviderService;
-import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;

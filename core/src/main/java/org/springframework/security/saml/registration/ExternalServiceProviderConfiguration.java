@@ -15,24 +15,15 @@
  *
  */
 
-package org.springframework.security.saml.provider.config;
+package org.springframework.security.saml.registration;
 
-public class NetworkConfiguration {
-	private final int readTimeout;
-	private final int connectTimeout;
-
-	public NetworkConfiguration(int readTimeout, int connectTimeout) {
-		this.readTimeout = readTimeout;
-		this.connectTimeout = connectTimeout;
+public class ExternalServiceProviderConfiguration extends
+	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
+	public ExternalServiceProviderConfiguration(String alias,
+												String metadata,
+												String linktext,
+												boolean skipSslValidation,
+												boolean metadataTrustCheck) {
+		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
 	}
-
-
-	public int getReadTimeout() {
-		return readTimeout;
-	}
-
-	public int getConnectTimeout() {
-		return connectTimeout;
-	}
-
 }

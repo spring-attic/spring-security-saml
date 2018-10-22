@@ -27,7 +27,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.SamlProviderLogoutFilter;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.config.SamlServerConfiguration;
+import org.springframework.security.saml.registration.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationFilter;
 import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.IdentityProviderLogoutHandler;

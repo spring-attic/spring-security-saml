@@ -6,8 +6,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.SamlServerConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import static org.springframework.util.StringUtils.hasText;

@@ -24,7 +24,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
-import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 
 public class HostBasedSamlIdentityProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning

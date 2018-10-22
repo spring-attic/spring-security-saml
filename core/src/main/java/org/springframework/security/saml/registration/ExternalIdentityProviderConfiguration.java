@@ -15,9 +15,8 @@
  *
  */
 
-package org.springframework.security.saml.provider.service.config;
+package org.springframework.security.saml.registration;
 
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
 public class ExternalIdentityProviderConfiguration extends

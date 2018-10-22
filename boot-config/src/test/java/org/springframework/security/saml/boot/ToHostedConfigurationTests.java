@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
-import org.springframework.security.saml.provider.config.HostedProviderConfiguration;
-import org.springframework.security.saml.provider.identity.config.ExternalServiceProviderConfiguration;
-import org.springframework.security.saml.provider.identity.config.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.provider.service.config.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalProviderConfiguration;
+import org.springframework.security.saml.registration.HostedProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
 import org.junit.jupiter.api.Test;
 

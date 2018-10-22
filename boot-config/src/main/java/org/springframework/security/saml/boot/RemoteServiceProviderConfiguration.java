@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.provider.identity.config.ExternalServiceProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
 
 public class RemoteServiceProviderConfiguration extends RemoteProviderConfiguration {
 

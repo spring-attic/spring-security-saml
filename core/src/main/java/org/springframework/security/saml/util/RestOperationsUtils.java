@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.provider.config;
+package org.springframework.security.saml.util;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -35,12 +35,12 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
-class Network {
+public class RestOperationsUtils {
 
 	private final int connectTimeoutMillis;
 	private final int readTimeoutMillis;
 
-	Network(int connectTimeoutMillis, int readTimeoutMillis) {
+	public RestOperationsUtils(int connectTimeoutMillis, int readTimeoutMillis) {
 		this.connectTimeoutMillis = connectTimeoutMillis;
 		this.readTimeoutMillis = readTimeoutMillis;
 	}

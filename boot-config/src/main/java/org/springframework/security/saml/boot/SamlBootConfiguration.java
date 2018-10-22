@@ -19,8 +19,8 @@ package org.springframework.security.saml.boot;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml.provider.config.NetworkConfiguration;
-import org.springframework.security.saml.provider.config.SamlServerConfiguration;
+import org.springframework.security.saml.registration.NetworkConfiguration;
+import org.springframework.security.saml.registration.SamlServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
 public class SamlBootConfiguration {

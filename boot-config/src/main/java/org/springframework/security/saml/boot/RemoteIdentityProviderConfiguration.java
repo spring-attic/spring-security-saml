@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
 public class RemoteIdentityProviderConfiguration extends RemoteProviderConfiguration {

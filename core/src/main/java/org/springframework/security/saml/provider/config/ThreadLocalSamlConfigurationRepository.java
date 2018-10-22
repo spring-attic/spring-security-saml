@@ -2,6 +2,8 @@ package org.springframework.security.saml.provider.config;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.security.saml.registration.SamlServerConfiguration;
+
 public class ThreadLocalSamlConfigurationRepository
 	implements SamlConfigurationRepository<HttpServletRequest> {
 

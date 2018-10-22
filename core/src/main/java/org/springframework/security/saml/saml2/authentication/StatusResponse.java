@@ -146,4 +146,17 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 		this.digest = digest;
 		return _this();
 	}
+
+	@Override
+	public String getOriginEntityId() {
+		if (issuer != null) {
+			return issuer.getValue();
+		}
+		return null;
+	}
+
+	@Override
+	public String getDestinationEntityId() {
+		return destination;
+	}
 }

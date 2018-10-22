@@ -35,4 +35,8 @@ public interface Saml2Object {
 	Object getImplementation();
 
 	String getOriginalXML();
+
+	String getOriginEntityId();
+
+	String getDestinationEntityId();
 }

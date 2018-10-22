@@ -18,9 +18,11 @@
 package org.springframework.security.saml.saml2.authentication;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
@@ -219,5 +221,27 @@ public class Assertion extends ImplementationHolder {
 
 	public DataEncryptionMethod getDataAlgorithm() {
 		return dataAlgorithm;
+	}
+
+	@Override
+	public String getOriginEntityId() {
+		if (issuer != null) {
+			return issuer.getValue();
+		}
+		return null;
+	}
+
+	@Override
+	public String getDestinationEntityId() {
+		if (conditions != null && conditions.getCriteria() != null) {
+			Set<String> audiences = new HashSet<>();
+			conditions.getCriteria().stream()
+					.filter(ac -> ac instanceof AudienceRestriction)
+					.forEach(ar -> audiences.addAll(((AudienceRestriction)ar).getAudiences()));
+			if (audiences.size()==1) {
+				return audiences.iterator().next();
+			}
+		}
+		return null;
 	}
 }

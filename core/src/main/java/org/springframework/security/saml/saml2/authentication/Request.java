@@ -116,4 +116,17 @@ public class Request<T extends Request<T>> extends ImplementationHolder {
 		this.version = version;
 		return _this();
 	}
+
+	@Override
+	public String getOriginEntityId() {
+		if (issuer != null) {
+			return issuer.getValue();
+		}
+		return null;
+	}
+
+	@Override
+	public String getDestinationEntityId() {
+		return null;
+	}
 }

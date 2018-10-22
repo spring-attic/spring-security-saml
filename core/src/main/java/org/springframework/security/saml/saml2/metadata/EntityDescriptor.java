@@ -178,4 +178,14 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 		this.digest = digest;
 		return _this();
 	}
+
+	@Override
+	public String getOriginEntityId() {
+		return getEntityId();
+	}
+
+	@Override
+	public String getDestinationEntityId() {
+		return null;
+	}
 }

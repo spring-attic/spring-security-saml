@@ -24,8 +24,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.saml2.key.SimpleKey;
-import org.springframework.security.saml.provider.HostedProviderService;
+import org.springframework.security.saml.ValidationException;
+import org.springframework.security.saml.ValidationResult;
+import org.springframework.security.saml.ValidationResult.ValidationError;
+import org.springframework.security.saml.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
@@ -40,15 +42,13 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.validation.ValidationException;
-import org.springframework.security.saml.validation.ValidationResult;
-import org.springframework.security.saml.validation.ValidationResult.ValidationError;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -98,7 +98,7 @@ public class DefaultValidator implements SamlValidator {
 	}
 
 	@Override
-	public void validate(Saml2Object saml2Object, HostedProviderService provider)
+	public void validate(Saml2Object saml2Object, HostedProvider provider)
 		throws ValidationException {
 		if (saml2Object == null) {
 			throw new NullPointerException("Object to be validated cannot be null");
@@ -122,13 +122,13 @@ public class DefaultValidator implements SamlValidator {
 		else if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;
 			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
-			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(r);
+			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(r.getOriginEntityId());
 			result = validate(r, null, requester, responder);
 		}
 		else if (saml2Object instanceof Assertion) {
 			Assertion a = (Assertion) saml2Object;
 			ServiceProviderMetadata requester = (ServiceProviderMetadata) provider.getMetadata();
-			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(a);
+			IdentityProviderMetadata responder = (IdentityProviderMetadata) provider.getRemoteProvider(a.getOriginEntityId());
 			result = validate(a, null, requester, responder);
 		}
 		else {
@@ -143,23 +143,23 @@ public class DefaultValidator implements SamlValidator {
 		}
 	}
 
-	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedProviderService provider) {
+	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedProvider provider) {
 		return new ValidationResult(metadata);
 	}
 
-	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedProviderService provider) {
+	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedProvider provider) {
 		return new ValidationResult(metadata);
 	}
 
-	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedProviderService provider) {
+	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedProvider provider) {
 		return new ValidationResult(authnRequest);
 	}
 
-	protected ValidationResult validate(LogoutRequest logoutRequest, HostedProviderService provider) {
+	protected ValidationResult validate(LogoutRequest logoutRequest, HostedProvider provider) {
 		return new ValidationResult(logoutRequest);
 	}
 
-	protected ValidationResult validate(LogoutResponse logoutResponse, HostedProviderService provider) {
+	protected ValidationResult validate(LogoutResponse logoutResponse, HostedProvider provider) {
 		return new ValidationResult(logoutResponse);
 	}
 

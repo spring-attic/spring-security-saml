@@ -15,14 +15,16 @@
  *
  */
 
-package org.springframework.security.saml.provider.provisioning;
+package org.springframework.security.saml;
 
-import org.springframework.security.saml.provider.HostedProviderService;
+import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public interface SamlProviderProvisioning<T extends HostedProviderService> {
-
-	T getHostedProvider();
-
+public interface HostedIdentityProvider extends HostedProvider<
+	HostedIdentityProviderConfiguration,
+	IdentityProviderMetadata,
+	ExternalServiceProviderConfiguration,
+	ServiceProviderMetadata> {
 }
-
-

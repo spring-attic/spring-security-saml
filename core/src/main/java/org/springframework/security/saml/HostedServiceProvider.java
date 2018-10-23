@@ -14,27 +14,17 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.provider.service;
 
-public class ModelProvider {
-	private String linkText;
-	private String redirect;
+package org.springframework.security.saml;
 
-	public String getLinkText() {
-		return linkText;
-	}
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-	public ModelProvider setLinkText(String linkText) {
-		this.linkText = linkText;
-		return this;
-	}
-
-	public String getRedirect() {
-		return redirect;
-	}
-
-	public ModelProvider setRedirect(String redirect) {
-		this.redirect = redirect;
-		return this;
-	}
+public interface HostedServiceProvider extends HostedProvider<
+	HostedServiceProviderConfiguration,
+	ServiceProviderMetadata,
+	ExternalIdentityProviderConfiguration,
+	IdentityProviderMetadata> {
 }

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.validation;
+package org.springframework.security.saml;
 
 import java.util.Collections;
 import java.util.LinkedList;

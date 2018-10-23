@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -26,7 +26,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.UUID;
 
-import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.util.X509Utilities;
 

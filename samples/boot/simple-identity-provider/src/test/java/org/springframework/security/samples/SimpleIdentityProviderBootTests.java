@@ -38,8 +38,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;

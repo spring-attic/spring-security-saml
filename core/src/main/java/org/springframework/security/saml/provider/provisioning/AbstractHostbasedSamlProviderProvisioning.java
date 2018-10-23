@@ -28,7 +28,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.identity.HostedIdentityProviderService;

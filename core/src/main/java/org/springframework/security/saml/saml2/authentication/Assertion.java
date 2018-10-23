@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;

@@ -40,8 +40,8 @@ import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;

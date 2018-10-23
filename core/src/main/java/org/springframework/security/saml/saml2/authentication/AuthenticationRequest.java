@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;

@@ -16,7 +16,7 @@
  */
 package org.springframework.security.saml.saml2.signature;
 
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 
 public class Signature {
 

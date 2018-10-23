@@ -31,7 +31,7 @@ import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.registration.ExternalProviderConfiguration;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;

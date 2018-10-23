@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;

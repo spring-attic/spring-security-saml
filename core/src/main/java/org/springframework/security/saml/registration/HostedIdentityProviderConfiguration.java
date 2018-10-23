@@ -19,7 +19,7 @@ package org.springframework.security.saml.registration;
 
 import java.util.List;
 
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.metadata.NameId;

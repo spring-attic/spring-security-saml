@@ -10,7 +10,7 @@
     <bean id="bootstrap" class="org.opensaml.PaosBootstrap" init-method="bootstrap" lazy-init="false"/>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+    <bean id="keyManager" class="org.springframework.security.saml.saml2.key.JKSKeyManager">
         <constructor-arg value="org/springframework/security/saml/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>

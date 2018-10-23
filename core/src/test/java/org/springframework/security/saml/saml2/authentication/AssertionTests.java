@@ -24,8 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;

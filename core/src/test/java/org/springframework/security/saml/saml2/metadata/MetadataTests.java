@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.key.KeyType;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;

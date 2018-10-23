@@ -24,7 +24,7 @@ import javax.servlet.Filter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;

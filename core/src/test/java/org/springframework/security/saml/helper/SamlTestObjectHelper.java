@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;

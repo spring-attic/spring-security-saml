@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.key;
+package org.springframework.security.saml.saml2.key;
 
 public enum KeyType {
 	SIGNING("signing"),

@@ -27,7 +27,7 @@ import java.security.cert.CertificateException;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlKeyException;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.util.X509Utilities;
 
 import static org.springframework.util.StringUtils.hasText;

@@ -26,7 +26,7 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.provider.AbstractHostedProviderService;
 import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -57,7 +57,7 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.joda.time.DateTime;
 
 import static java.util.Arrays.asList;
-import static org.springframework.security.saml.key.KeyType.ENCRYPTION;
+import static org.springframework.security.saml.saml2.key.KeyType.ENCRYPTION;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 
 public class HostedIdentityProviderService extends AbstractHostedProviderService<

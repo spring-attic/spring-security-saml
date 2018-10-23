@@ -20,7 +20,7 @@ package org.springframework.security.saml;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.security.saml.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.Saml2Object;
 
 public interface SamlTransformer {

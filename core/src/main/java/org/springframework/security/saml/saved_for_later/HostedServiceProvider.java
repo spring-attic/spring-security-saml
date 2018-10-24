@@ -15,18 +15,16 @@
  *
  */
 
-package org.springframework.security.saml;
+package org.springframework.security.saml.saved_for_later;
 
-public class SamlMetadataException extends SamlException {
-	public SamlMetadataException(String message) {
-		super(message);
-	}
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-	public SamlMetadataException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public SamlMetadataException(Throwable cause) {
-		super(cause);
-	}
+public interface HostedServiceProvider extends HostedProvider<
+	HostedServiceProviderConfiguration,
+	ServiceProviderMetadata,
+	ExternalIdentityProviderConfiguration,
+	IdentityProviderMetadata> {
 }

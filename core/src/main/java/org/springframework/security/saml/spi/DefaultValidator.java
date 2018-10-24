@@ -23,11 +23,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.ValidationException;
-import org.springframework.security.saml.ValidationResult;
-import org.springframework.security.saml.ValidationResult.ValidationError;
-import org.springframework.security.saml.HostedProvider;
+import org.springframework.security.saml.saved_for_later.SamlValidator;
+import org.springframework.security.saml.saved_for_later.ValidationException;
+import org.springframework.security.saml.saved_for_later.ValidationResult;
+import org.springframework.security.saml.saved_for_later.ValidationResult.ValidationError;
+import org.springframework.security.saml.saved_for_later.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;

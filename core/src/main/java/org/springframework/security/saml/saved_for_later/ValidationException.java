@@ -14,9 +14,11 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml;
+package org.springframework.security.saml.saved_for_later;
 
 import java.util.Arrays;
+
+import org.springframework.security.saml.SamlException;
 
 public class ValidationException extends SamlException {
 

@@ -15,7 +15,9 @@
  *
  */
 
-package org.springframework.security.saml;
+package org.springframework.security.saml.saved_for_later;
+
+import org.springframework.security.saml.SamlException;
 
 public class SamlProviderNotFoundException extends SamlException {
 	public SamlProviderNotFoundException(String message) {

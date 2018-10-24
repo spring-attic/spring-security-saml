@@ -14,23 +14,21 @@
  *  limitations under the License.
  *
  */
-package sample.web;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+package org.springframework.security.saml.saved_for_later;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.security.saml.SamlException;
 
-@Controller
-public class ServiceProviderController {
-
-	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
-
-	@RequestMapping(value = {"/", "/index", "/logged-in"})
-	public String home() {
-		logger.info("Sample SP Application - You are logged in!");
-		return "logged-in";
+public class SamlKeyException extends SamlException {
+	public SamlKeyException(String message) {
+		super(message);
 	}
 
+	public SamlKeyException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public SamlKeyException(Throwable cause) {
+		super(cause);
+	}
 }

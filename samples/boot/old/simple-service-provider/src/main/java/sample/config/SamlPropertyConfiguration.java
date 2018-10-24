@@ -13,24 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
-package sample.web;
+*/
+package sample.config;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.boot.SamlBootConfiguration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-@Controller
-public class ServiceProviderController {
-
-	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
-
-	@RequestMapping(value = {"/", "/index", "/logged-in"})
-	public String home() {
-		logger.info("Sample SP Application - You are logged in!");
-		return "logged-in";
-	}
-
+@Configuration
+public class SamlPropertyConfiguration extends SamlBootConfiguration {
 }

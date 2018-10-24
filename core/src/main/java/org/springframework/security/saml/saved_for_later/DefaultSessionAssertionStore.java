@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.saved_for_later;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.security.saml.SamlMessageStore;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 
 /**

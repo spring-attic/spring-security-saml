@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.util;
+package org.springframework.security.saml.saved_for_later;
 
 import java.time.Clock;
 import java.util.AbstractMap;

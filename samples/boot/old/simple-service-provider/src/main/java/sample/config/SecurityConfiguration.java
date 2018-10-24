@@ -17,32 +17,35 @@
 
 package sample.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityConfiguration;
+
+import static org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityDsl.serviceProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {
 
 	@Configuration
 	@Order(1)
-	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
+	public static class SamlSecurity extends SamlServiceProviderSecurityConfiguration {
 
 		private SamlPropertyConfiguration samlPropertyConfiguration;
 
-		public SamlSecurity(SamlPropertyConfiguration samlPropertyConfiguration) {
+		public SamlSecurity(BeanConfig beanConfig, @Qualifier("samlPropertyConfiguration") SamlPropertyConfiguration samlPropertyConfiguration) {
+			super("/saml/sp/", beanConfig);
 			this.samlPropertyConfiguration = samlPropertyConfiguration;
 		}
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
-//			http.apply(
-//				serviceProvider()
-//			)
-//				;
+			http.apply(serviceProvider())
+				;
 		}
 	}
 

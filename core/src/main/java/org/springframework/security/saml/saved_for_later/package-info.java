@@ -14,23 +14,9 @@
  *  limitations under the License.
  *
  */
-package sample.web;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-@Controller
-public class ServiceProviderController {
-
-	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
-
-	@RequestMapping(value = {"/", "/index", "/logged-in"})
-	public String home() {
-		logger.info("Sample SP Application - You are logged in!");
-		return "logged-in";
-	}
-
-}
+/**
+ * temporary interfaces to avoid compilation issues.
+ * Not used in current samples
+ */
+package org.springframework.security.saml.saved_for_later;

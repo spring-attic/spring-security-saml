@@ -14,17 +14,15 @@
  *  limitations under the License.
  *
  */
+package sample;
 
-package org.springframework.security.saml;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
-import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+@SpringBootApplication
+public class SimpleServiceProviderApplication {
 
-public interface HostedIdentityProvider extends HostedProvider<
-	HostedIdentityProviderConfiguration,
-	IdentityProviderMetadata,
-	ExternalServiceProviderConfiguration,
-	ServiceProviderMetadata> {
+	public static void main(String[] args) {
+		SpringApplication.run(SimpleServiceProviderApplication.class, args);
+	}
 }

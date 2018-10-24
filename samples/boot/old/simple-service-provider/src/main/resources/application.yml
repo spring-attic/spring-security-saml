@@ -1,0 +1,172 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /sample-sp
+
+
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.springframework.security.saml: DEBUG
+
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    saml2:
+      network:
+        read-timeout: 10000
+        connect-timeout: 5000
+      service-provider:
+        entity-id: spring.security.saml.sp.id
+        base-path: http://localhost:8080/sample-sp
+        alias: boot-sample-sp
+        sign-metadata: true
+        sign-requests: true
+        want-assertions-signed: true
+        single-logout-enabled: true
+        name-ids:
+          - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+          - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+        keys:
+          active:
+            name: sp-signing-key-1
+            private-key: |
+              -----BEGIN RSA PRIVATE KEY-----
+              Proc-Type: 4,ENCRYPTED
+              DEK-Info: DES-EDE3-CBC,7C8510E4CED17A9F
+
+              SRYezKuY+AgM+gdiklVDBQ1ljeCFKnW3c5BM9sEyEOfkQm0zZx6fLr0afup0ToE4
+              iJGLxKw8swAnUAIjYda9wxqIEBb9mILyuRPevyfzmio2lE9KnARDEYRBqbwD9Lpd
+              vwZKNGHHJbZAgcUNfhXiYakmx0cUyp8HeO3Vqa/0XMiI/HAdlJ/ruYeT4e2DSrz9
+              ORZA2S5OvNpRQeCVf26l6ODKXnkDL0t5fDVY4lAhaiyhZtoT0sADlPIERBw73kHm
+              fGCTniY9qT0DT+R5Rqukk42mN2ij/cAr+kdV5colBi1fuN6d9gawCiH4zSb3LzHQ
+              9ccSlz6iQV1Ty2cRuTkB3zWC6Oy4q0BRlXnVRFOnOfYJztO6c2hD3Q9NxkDAbcgR
+              YWJWHpd0/HI8GyBpOG7hAS1l6aoleH30QCDOo7N2rFrTAaPC6g84oZOFSqkqvx4R
+              KTbWRwgJsqVxM6GqV6H9x1LNn2CpBizdGnp8VvnIiYcEvItMJbT1C1yeIUPoDDU2
+              Ct0Jofw/dquXStHWftPFjpIqB+5Ou//HQ2VNzjbyThNWVGtjnEKwSiHacQLS1sB3
+              iqFtSN/VCpdOcRujEBba+x5vlc8XCV1qr6x1PbvfPZVjyFdSM6JQidr0uEeDGDW3
+              TuYC1YgURN8zh0QF2lJIMX3xgbhr8HHNXv60ulcjeqYmna6VCS8AKJQgRTr4DGWt
+              Afv9BFV943Yp3nHwPC7nYC4FvMxOn4qW4KrHRJl57zcY6VDL4J030CfmvLjqUbuT
+              LYiQp/YgFlmoE4bcGuCiaRfUJZCwooPK2dQMoIvMZeVl9ExUGdXVMg==
+              -----END RSA PRIVATE KEY-----
+            passphrase: sppassword
+            certificate: |
+              -----BEGIN CERTIFICATE-----
+              MIICgTCCAeoCCQCuVzyqFgMSyDANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC
+              VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
+              A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD
+              DBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAeFw0xODA1MTQxNDMwNDRaFw0yODA1
+              MTExNDMwNDRaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjES
+              MBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkgU0FN
+              TDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1s
+              MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDRu7/EI0BlNzMEBFVAcbx+lLos
+              vzIWU+01dGTY8gBdhMQNYKZ92lMceo2CuVJ66cUURPym3i7nGGzoSnAxAre+0YIM
+              +U0razrWtAUE735bkcqELZkOTZLelaoOztmWqRbe5OuEmpewH7cx+kNgcVjdctOG
+              y3Q6x+I4qakY/9qhBQIDAQABMA0GCSqGSIb3DQEBCwUAA4GBAAeViTvHOyQopWEi
+              XOfI2Z9eukwrSknDwq/zscR0YxwwqDBMt/QdAODfSwAfnciiYLkmEjlozWRtOeN+
+              qK7UFgP1bRl5qksrYX5S0z2iGJh0GvonLUt3e20Ssfl5tTEDDnAEUMLfBkyaxEHD
+              RZ/nbTJ7VTeZOSyRoVn5XHhpuJ0B
+              -----END CERTIFICATE-----
+          stand-by:
+            - name: key2
+              private-key: |
+                -----BEGIN RSA PRIVATE KEY-----
+                Proc-Type: 4,ENCRYPTED
+                DEK-Info: DES-EDE3-CBC,393409C5B5DFA31D
+
+                O40s+E7P75d8OOcfvE3HTNY8gsULhYk7SBdRw50ZklH5G/TZwCxxfoRfPiA4Q1Jf
+                bpEHF8BzyLzjXZwYJT5UqaXW/3ozMj7BZ95UfCR0hrxMXQWq4Nak6gFyHh/1focS
+                ljzsLoBjyqjCc4BiFPD8uQHVGFv/PttCLydshnAVdSSrFLi0kVsFJMYOmL9ILG6l
+                Ld7Sb2ayD0/+1L0lLW8F6IbTtEYAwuA+mX25Imr9JMPKem1YwI1pqUHr8ifq0kd+
+                JsoI4Q0Qf2CKv/nfZI5EjqJO34U5podj2zkqN1W3z7dzdTYNOmigq8XVrBiSmT8B
+                lE7Ea1GDFol90AeF6ltJWEE6rM6kYzOoModXdK0ozEu4JNnBV/Fu81sOV9zHBs+9
+                zqM7jCC16b6n5W2IKGad02GVCBKE0fmIEfhEUsTJw5UJLjNFYF2PkA13Y7jVGZMT
+                38MfE3gWcYYOhXVPuMvJ1thXbjXEImg3yH+XHN3RMyups2B1s2JAXYVP2n5zI9pS
+                Y3Wt6iXAkKJ0Fiaa/myitUGtL1QvbhBOOfsw9HFuesxzJuKTJ7gqs0ceYwtpQ4X8
+                wjk0HXz/riAb+BI6ImEd6H077e/U5u1c9WOdqAKEExAlXL8EhG5Azsj84cCAFuGl
+                +T5XVBir0a1jUBQycnsinGZoy3lhE+92j8EhM4LgrDbzoqICVLrk1jX9FiDbcqzZ
+                if87phEJmxz+ymCygUjzYohc0sIOwVcMl+s6Y+JsfSBDyg2XEIhzPPdGdgpCrxBg
+                KEtaNgtbHXo7UOlN6voWliM14n1g13+xtUuX7hRve3Uy7MMwtuSVJA==
+                -----END RSA PRIVATE KEY-----
+              passphrase: sppassword
+              certificate: |
+                -----BEGIN CERTIFICATE-----
+                MIICgTCCAeoCCQCQqf5mvKPOpzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC
+                VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
+                A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD
+                DBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAeFw0xODA1MTQxNDQ0NDZaFw0yODA1
+                MTExNDQ0NDZaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjES
+                MBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkgU0FN
+                TDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1s
+                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCXJXpaDE6QmY9eN9pwcG8k/54a
+                K9YLzRgln64hZ6mvdK+OIIBB5E2Pgenfc3Pi8pF0B9dGUbbNK8+8L6HcZRT/3aXM
+                WlJsENJdMS13pnmSFimsTqoxYnayc2EaHULtvhMvLKf7UPRwX4jzxLanc6R4IcUL
+                JZ/dg9gBT5KDlm164wIDAQABMA0GCSqGSIb3DQEBCwUAA4GBAHDyh2B4AZ1C9LSi
+                gis+sAiVJIzODsnKg8pIWGI7bcFUK+i/Vj7qlx09ZD/GbrQts87Yp4aq+5OqVqb5
+                n6bS8DWB8jHCoHC5HACSBb3J7x/mC0PBsKXA9A8NSFzScErvfD/ACjWg3DJEghxn
+                lqAVTm/DQX/t8kNTdrLdlzsYTuE0
+                -----END CERTIFICATE-----
+            - name: key3
+              private-key: |
+                -----BEGIN RSA PRIVATE KEY-----
+                Proc-Type: 4,ENCRYPTED
+                DEK-Info: DES-EDE3-CBC,EF0A6B6E2C665851
+
+                UQ4gDBIOTrksMOLT2fXiqfcD3wpWT54jWhWq0fls8mLz65FU7/LY2dwATGmcCJrU
+                N6T9E8mmqbWO8gCKVEx8zBKHOAh9wJVJKVl7aDmHWFYDU1xyighg1GB468ZIqx4/
+                dFMY75hxNrOVNbicKcH1XKfn/GtJavbDon9L870l3X2cLFEIUiZGWFcTd8mAWHHY
+                d9IHgVQhwE2jBG9wnywO3FEKecwmo5m+VZsTQGWuZIYHSPhNcsoeEg+OViJGaFzi
+                xcbW1h+bIG6B3tIdXB7QIf79VPoW7vpXhCvl9+iMk6Tb3JhvnPEulPykiB8xsmzh
+                jqr0qc+eYmdTBjmYA5DPuICjo1YLNUZdys8AAe9qyXMU2baPiOsEwcBN1J1oXm/f
+                2v5IQX4aNq4KI0SowdNCSv/4txUwbyxGfHcTa+Jy1MbDKV8ggaHYQ1k76mLryRfZ
+                3JN937KLmArF6wK2JVO/VkGM1JWdlxcmcYpBGN0lCxFz5qIcMdQT08amCXyfk8Ov
+                KX5pFXXFNItFwXJW/tsZNfBiOPP2b7MLjxKuWvVm4SL0aOZG6NuOkZBnJ6AT7jIk
+                XTX7csdT/ogOrQrQiSeISeUUGgRULdHZLCgRQ4yVm58FE6QytFcuNddK0f527zr2
+                3qrRHT5153693p7Zb/FupEBlPK5yf3jpLKPGZTor1r5QQHsOE60nsZIhz4VtmNj8
+                f5+mgpFJ+s6UbkCqOFiE4FTbiWTvIX2K9Ho29FnnTPeLkaq9H4onFAAv2JM2JYEB
+                Mz8ZcX+KkiaArqIOvWgqCfLY4taF5XOPaU4/UGUXUUW4lQFw/0+0cw==
+                -----END RSA PRIVATE KEY-----
+              passphrase: sppassword
+              certificate: |
+                -----BEGIN CERTIFICATE-----
+                MIICgTCCAeoCCQC3dvhia5XvzjANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC
+                VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
+                A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD
+                DBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAeFw0xODA1MTQxNDQ1MzBaFw0yODA1
+                MTExNDQ1MzBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjES
+                MBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkgU0FN
+                TDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1s
+                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2iAUrJXrHaSOWrU95v8GUGVVl
+                5vWrYrNRFtsK5qkhB/nRbL08CbqIeD4pkJuIg0LuJdsBuMtYqOnhQSFF5tT36OId
+                ld9SfPA5m8zqPLsCcjWPQ66xoMdReEXN9E8s/mZOXn3jkKIqywUxJ+wkS5qoBlvm
+                ShwDff+igFlF/fBfpwIDAQABMA0GCSqGSIb3DQEBCwUAA4GBACDBjvIpc1/2yZ3T
+                Qe29bKif5pr/3NdKz4MWBJ6vjRk7Bs2hbPrM2ajxLbqPx6PRPeTOw5XZgrufDj9H
+                mrvKHM2LZTp/cIUpxcNpVRyDA4iVNDc7V3qszaWP9ZIswAYnvmyDL2UHVDLE8xoG
+                z/AkxsRNN9VXNHewjQO605umiAKJ
+                -----END CERTIFICATE-----
+        providers:
+        - alias: spring-security-saml-idp
+          metadata: http://localhost:8081/sample-idp/saml/idp/metadata
+          link-text: Spring Security SAML IDP/8081
+          name-id: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+          assertion-consumer-service-index: 0
+        - alias: spring-security-saml-dsl-idp
+          metadata: http://localhost:8083/dsl-idp/saml/dsl-idp-prefix/metadata
+          link-text: Spring Security SAML IDP/8083
+          name-id: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+          assertion-consumer-service-index: 0
+        - alias: uaa
+          metadata: http://localhost:8082/uaa/saml/idp/metadata
+          link-text: Cloud Foundry UAA IDP
+        - alias: simplesamlphp
+          metadata: http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php
+          link-text: Simple SAML PHP IDP
+        - alias: dual
+          linktext: Dual IDP/SP Metadata
+          metadata: http://dual.sp-idp.com/saml/idp/metadata
+

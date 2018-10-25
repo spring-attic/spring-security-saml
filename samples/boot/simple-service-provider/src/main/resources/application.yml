@@ -3,14 +3,13 @@ server:
   servlet:
     context-path: /sample-sp
 
-
-
 logging:
   level:
     root: INFO
     org.springframework.web: INFO
     org.springframework.security: INFO
     org.springframework.security.saml: DEBUG
+    sample: DEBUG
 
 spring:
   thymeleaf:
@@ -72,101 +71,40 @@ spring:
               qK7UFgP1bRl5qksrYX5S0z2iGJh0GvonLUt3e20Ssfl5tTEDDnAEUMLfBkyaxEHD
               RZ/nbTJ7VTeZOSyRoVn5XHhpuJ0B
               -----END CERTIFICATE-----
-          stand-by:
-            - name: key2
-              private-key: |
-                -----BEGIN RSA PRIVATE KEY-----
-                Proc-Type: 4,ENCRYPTED
-                DEK-Info: DES-EDE3-CBC,393409C5B5DFA31D
-
-                O40s+E7P75d8OOcfvE3HTNY8gsULhYk7SBdRw50ZklH5G/TZwCxxfoRfPiA4Q1Jf
-                bpEHF8BzyLzjXZwYJT5UqaXW/3ozMj7BZ95UfCR0hrxMXQWq4Nak6gFyHh/1focS
-                ljzsLoBjyqjCc4BiFPD8uQHVGFv/PttCLydshnAVdSSrFLi0kVsFJMYOmL9ILG6l
-                Ld7Sb2ayD0/+1L0lLW8F6IbTtEYAwuA+mX25Imr9JMPKem1YwI1pqUHr8ifq0kd+
-                JsoI4Q0Qf2CKv/nfZI5EjqJO34U5podj2zkqN1W3z7dzdTYNOmigq8XVrBiSmT8B
-                lE7Ea1GDFol90AeF6ltJWEE6rM6kYzOoModXdK0ozEu4JNnBV/Fu81sOV9zHBs+9
-                zqM7jCC16b6n5W2IKGad02GVCBKE0fmIEfhEUsTJw5UJLjNFYF2PkA13Y7jVGZMT
-                38MfE3gWcYYOhXVPuMvJ1thXbjXEImg3yH+XHN3RMyups2B1s2JAXYVP2n5zI9pS
-                Y3Wt6iXAkKJ0Fiaa/myitUGtL1QvbhBOOfsw9HFuesxzJuKTJ7gqs0ceYwtpQ4X8
-                wjk0HXz/riAb+BI6ImEd6H077e/U5u1c9WOdqAKEExAlXL8EhG5Azsj84cCAFuGl
-                +T5XVBir0a1jUBQycnsinGZoy3lhE+92j8EhM4LgrDbzoqICVLrk1jX9FiDbcqzZ
-                if87phEJmxz+ymCygUjzYohc0sIOwVcMl+s6Y+JsfSBDyg2XEIhzPPdGdgpCrxBg
-                KEtaNgtbHXo7UOlN6voWliM14n1g13+xtUuX7hRve3Uy7MMwtuSVJA==
-                -----END RSA PRIVATE KEY-----
-              passphrase: sppassword
-              certificate: |
-                -----BEGIN CERTIFICATE-----
-                MIICgTCCAeoCCQCQqf5mvKPOpzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC
-                VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
-                A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD
-                DBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAeFw0xODA1MTQxNDQ0NDZaFw0yODA1
-                MTExNDQ0NDZaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjES
-                MBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkgU0FN
-                TDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1s
-                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCXJXpaDE6QmY9eN9pwcG8k/54a
-                K9YLzRgln64hZ6mvdK+OIIBB5E2Pgenfc3Pi8pF0B9dGUbbNK8+8L6HcZRT/3aXM
-                WlJsENJdMS13pnmSFimsTqoxYnayc2EaHULtvhMvLKf7UPRwX4jzxLanc6R4IcUL
-                JZ/dg9gBT5KDlm164wIDAQABMA0GCSqGSIb3DQEBCwUAA4GBAHDyh2B4AZ1C9LSi
-                gis+sAiVJIzODsnKg8pIWGI7bcFUK+i/Vj7qlx09ZD/GbrQts87Yp4aq+5OqVqb5
-                n6bS8DWB8jHCoHC5HACSBb3J7x/mC0PBsKXA9A8NSFzScErvfD/ACjWg3DJEghxn
-                lqAVTm/DQX/t8kNTdrLdlzsYTuE0
-                -----END CERTIFICATE-----
-            - name: key3
-              private-key: |
-                -----BEGIN RSA PRIVATE KEY-----
-                Proc-Type: 4,ENCRYPTED
-                DEK-Info: DES-EDE3-CBC,EF0A6B6E2C665851
-
-                UQ4gDBIOTrksMOLT2fXiqfcD3wpWT54jWhWq0fls8mLz65FU7/LY2dwATGmcCJrU
-                N6T9E8mmqbWO8gCKVEx8zBKHOAh9wJVJKVl7aDmHWFYDU1xyighg1GB468ZIqx4/
-                dFMY75hxNrOVNbicKcH1XKfn/GtJavbDon9L870l3X2cLFEIUiZGWFcTd8mAWHHY
-                d9IHgVQhwE2jBG9wnywO3FEKecwmo5m+VZsTQGWuZIYHSPhNcsoeEg+OViJGaFzi
-                xcbW1h+bIG6B3tIdXB7QIf79VPoW7vpXhCvl9+iMk6Tb3JhvnPEulPykiB8xsmzh
-                jqr0qc+eYmdTBjmYA5DPuICjo1YLNUZdys8AAe9qyXMU2baPiOsEwcBN1J1oXm/f
-                2v5IQX4aNq4KI0SowdNCSv/4txUwbyxGfHcTa+Jy1MbDKV8ggaHYQ1k76mLryRfZ
-                3JN937KLmArF6wK2JVO/VkGM1JWdlxcmcYpBGN0lCxFz5qIcMdQT08amCXyfk8Ov
-                KX5pFXXFNItFwXJW/tsZNfBiOPP2b7MLjxKuWvVm4SL0aOZG6NuOkZBnJ6AT7jIk
-                XTX7csdT/ogOrQrQiSeISeUUGgRULdHZLCgRQ4yVm58FE6QytFcuNddK0f527zr2
-                3qrRHT5153693p7Zb/FupEBlPK5yf3jpLKPGZTor1r5QQHsOE60nsZIhz4VtmNj8
-                f5+mgpFJ+s6UbkCqOFiE4FTbiWTvIX2K9Ho29FnnTPeLkaq9H4onFAAv2JM2JYEB
-                Mz8ZcX+KkiaArqIOvWgqCfLY4taF5XOPaU4/UGUXUUW4lQFw/0+0cw==
-                -----END RSA PRIVATE KEY-----
-              passphrase: sppassword
-              certificate: |
-                -----BEGIN CERTIFICATE-----
-                MIICgTCCAeoCCQC3dvhia5XvzjANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC
-                VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG
-                A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD
-                DBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAeFw0xODA1MTQxNDQ1MzBaFw0yODA1
-                MTExNDQ1MzBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjES
-                MBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkgU0FN
-                TDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1s
-                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2iAUrJXrHaSOWrU95v8GUGVVl
-                5vWrYrNRFtsK5qkhB/nRbL08CbqIeD4pkJuIg0LuJdsBuMtYqOnhQSFF5tT36OId
-                ld9SfPA5m8zqPLsCcjWPQ66xoMdReEXN9E8s/mZOXn3jkKIqywUxJ+wkS5qoBlvm
-                ShwDff+igFlF/fBfpwIDAQABMA0GCSqGSIb3DQEBCwUAA4GBACDBjvIpc1/2yZ3T
-                Qe29bKif5pr/3NdKz4MWBJ6vjRk7Bs2hbPrM2ajxLbqPx6PRPeTOw5XZgrufDj9H
-                mrvKHM2LZTp/cIUpxcNpVRyDA4iVNDc7V3qszaWP9ZIswAYnvmyDL2UHVDLE8xoG
-                z/AkxsRNN9VXNHewjQO605umiAKJ
-                -----END CERTIFICATE-----
         providers:
-        - alias: spring-security-saml-idp
-          metadata: http://localhost:8081/sample-idp/saml/idp/metadata
-          link-text: Spring Security SAML IDP/8081
-          name-id: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
-          assertion-consumer-service-index: 0
-        - alias: spring-security-saml-dsl-idp
-          metadata: http://localhost:8083/dsl-idp/saml/dsl-idp-prefix/metadata
-          link-text: Spring Security SAML IDP/8083
-          name-id: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
-          assertion-consumer-service-index: 0
-        - alias: uaa
-          metadata: http://localhost:8082/uaa/saml/idp/metadata
-          link-text: Cloud Foundry UAA IDP
         - alias: simplesamlphp
-          metadata: http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php
           link-text: Simple SAML PHP IDP
-        - alias: dual
-          linktext: Dual IDP/SP Metadata
-          metadata: http://dual.sp-idp.com/saml/idp/metadata
+          metadata: |
+            <?xml version="1.0"?>
+            <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php" ID="pfx9f64957c-5ba2-482b-32a4-8d33751701ab"><ds:Signature>
+              <ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+              <ds:Reference URI="#pfx9f64957c-5ba2-482b-32a4-8d33751701ab"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>lEQ2J13Oa0UhAZPL3TxMgmcxN4g=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>IjEl6ir8nN4eqMttQxpJ8Yu/9Ga23kqld5TQsJP0cI2jc1BDsQMLcazJxkoqe9n86vj3XE4fLjAcIL+SxdxyoLR2sluZ8WzsDfciOeK8PUz6IaZCbjClnLrAWNuqqgCfS8nW+rp8a6RIgNIC9VhuCBL+d46M+EYwsaQE3GvrFYHLt06M5THbCmX1SfYft8x4FJDD7e+nW2L4BqLDiBpPQTxJZT0ZeIGG+uOawvlcX2kzHXj+fiK2iNoe9PwX9Pd9kY705r9mTElJsvsWINpna4968cNv6jR9pznXZ0AYU+GvNg0ii0Y1iADdIaJrrKbKLV0rhWPHgtLK+8Y3HKAMOg==</ds:SignatureValue>
+            <ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIEEzCCAvugAwIBAgIJAIc1qzLrv+5nMA0GCSqGSIb3DQEBCwUAMIGfMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ08xFDASBgNVBAcMC0Nhc3RsZSBSb2NrMRwwGgYDVQQKDBNTYW1sIFRlc3RpbmcgU2VydmVyMQswCQYDVQQLDAJJVDEgMB4GA1UEAwwXc2ltcGxlc2FtbHBocC5jZmFwcHMuaW8xIDAeBgkqhkiG9w0BCQEWEWZoYW5pa0BwaXZvdGFsLmlvMB4XDTE1MDIyMzIyNDUwM1oXDTI1MDIyMjIyNDUwM1owgZ8xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDTzEUMBIGA1UEBwwLQ2FzdGxlIFJvY2sxHDAaBgNVBAoME1NhbWwgVGVzdGluZyBTZXJ2ZXIxCzAJBgNVBAsMAklUMSAwHgYDVQQDDBdzaW1wbGVzYW1scGhwLmNmYXBwcy5pbzEgMB4GCSqGSIb3DQEJARYRZmhhbmlrQHBpdm90YWwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC4cn62E1xLqpN34PmbrKBbkOXFjzWgJ9b+pXuaRft6A339uuIQeoeH5qeSKRVTl32L0gdz2ZivLwZXW+cqvftVW1tvEHvzJFyxeTW3fCUeCQsebLnA2qRa07RkxTo6Nf244mWWRDodcoHEfDUSbxfTZ6IExSojSIU2RnD6WllYWFdD1GFpBJOmQB8rAc8wJIBdHFdQnX8Ttl7hZ6rtgqEYMzYVMuJ2F2r1HSU1zSAvwpdYP6rRGFRJEfdA9mm3WKfNLSc5cljz0X/TXy0vVlAV95l9qcfFzPmrkNIst9FZSwpvB49LyAVke04FQPPwLgVH4gphiJH3jvZ7I+J5lS8VAgMBAAGjUDBOMB0GA1UdDgQWBBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAfBgNVHSMEGDAWgBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAvMS4EQeP/ipV4jOG5lO6/tYCb/iJeAduOnRhkJk0DbX329lDLZhTTL/x/w/9muCVcvLrzEp6PN+VWfw5E5FWtZN0yhGtP9R+vZnrV+oc2zGD+no1/ySFOe3EiJCO5dehxKjYEmBRv5sU/LZFKZpozKN/BMEa6CqLuxbzb7ykxVr7EVFXwltPxzE9TmL9OACNNyF5eJHWMRMllarUvkcXlh4pux4ks9e6zV9DQBy2zds9f1I3qxg0eX6JnGrXi/ZiCT+lJgVe3ZFXiejiLAiKB04sXW3ti0LW3lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>
+              <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+                <md:KeyDescriptor use="signing">
+                  <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                    <ds:X509Data>
+                      <ds:X509Certificate>MIIEEzCCAvugAwIBAgIJAIc1qzLrv+5nMA0GCSqGSIb3DQEBCwUAMIGfMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ08xFDASBgNVBAcMC0Nhc3RsZSBSb2NrMRwwGgYDVQQKDBNTYW1sIFRlc3RpbmcgU2VydmVyMQswCQYDVQQLDAJJVDEgMB4GA1UEAwwXc2ltcGxlc2FtbHBocC5jZmFwcHMuaW8xIDAeBgkqhkiG9w0BCQEWEWZoYW5pa0BwaXZvdGFsLmlvMB4XDTE1MDIyMzIyNDUwM1oXDTI1MDIyMjIyNDUwM1owgZ8xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDTzEUMBIGA1UEBwwLQ2FzdGxlIFJvY2sxHDAaBgNVBAoME1NhbWwgVGVzdGluZyBTZXJ2ZXIxCzAJBgNVBAsMAklUMSAwHgYDVQQDDBdzaW1wbGVzYW1scGhwLmNmYXBwcy5pbzEgMB4GCSqGSIb3DQEJARYRZmhhbmlrQHBpdm90YWwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC4cn62E1xLqpN34PmbrKBbkOXFjzWgJ9b+pXuaRft6A339uuIQeoeH5qeSKRVTl32L0gdz2ZivLwZXW+cqvftVW1tvEHvzJFyxeTW3fCUeCQsebLnA2qRa07RkxTo6Nf244mWWRDodcoHEfDUSbxfTZ6IExSojSIU2RnD6WllYWFdD1GFpBJOmQB8rAc8wJIBdHFdQnX8Ttl7hZ6rtgqEYMzYVMuJ2F2r1HSU1zSAvwpdYP6rRGFRJEfdA9mm3WKfNLSc5cljz0X/TXy0vVlAV95l9qcfFzPmrkNIst9FZSwpvB49LyAVke04FQPPwLgVH4gphiJH3jvZ7I+J5lS8VAgMBAAGjUDBOMB0GA1UdDgQWBBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAfBgNVHSMEGDAWgBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAvMS4EQeP/ipV4jOG5lO6/tYCb/iJeAduOnRhkJk0DbX329lDLZhTTL/x/w/9muCVcvLrzEp6PN+VWfw5E5FWtZN0yhGtP9R+vZnrV+oc2zGD+no1/ySFOe3EiJCO5dehxKjYEmBRv5sU/LZFKZpozKN/BMEa6CqLuxbzb7ykxVr7EVFXwltPxzE9TmL9OACNNyF5eJHWMRMllarUvkcXlh4pux4ks9e6zV9DQBy2zds9f1I3qxg0eX6JnGrXi/ZiCT+lJgVe3ZFXiejiLAiKB04sXW3ti0LW3lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk</ds:X509Certificate>
+                    </ds:X509Data>
+                  </ds:KeyInfo>
+                </md:KeyDescriptor>
+                <md:KeyDescriptor use="encryption">
+                  <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                    <ds:X509Data>
+                      <ds:X509Certificate>MIIEEzCCAvugAwIBAgIJAIc1qzLrv+5nMA0GCSqGSIb3DQEBCwUAMIGfMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ08xFDASBgNVBAcMC0Nhc3RsZSBSb2NrMRwwGgYDVQQKDBNTYW1sIFRlc3RpbmcgU2VydmVyMQswCQYDVQQLDAJJVDEgMB4GA1UEAwwXc2ltcGxlc2FtbHBocC5jZmFwcHMuaW8xIDAeBgkqhkiG9w0BCQEWEWZoYW5pa0BwaXZvdGFsLmlvMB4XDTE1MDIyMzIyNDUwM1oXDTI1MDIyMjIyNDUwM1owgZ8xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDTzEUMBIGA1UEBwwLQ2FzdGxlIFJvY2sxHDAaBgNVBAoME1NhbWwgVGVzdGluZyBTZXJ2ZXIxCzAJBgNVBAsMAklUMSAwHgYDVQQDDBdzaW1wbGVzYW1scGhwLmNmYXBwcy5pbzEgMB4GCSqGSIb3DQEJARYRZmhhbmlrQHBpdm90YWwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC4cn62E1xLqpN34PmbrKBbkOXFjzWgJ9b+pXuaRft6A339uuIQeoeH5qeSKRVTl32L0gdz2ZivLwZXW+cqvftVW1tvEHvzJFyxeTW3fCUeCQsebLnA2qRa07RkxTo6Nf244mWWRDodcoHEfDUSbxfTZ6IExSojSIU2RnD6WllYWFdD1GFpBJOmQB8rAc8wJIBdHFdQnX8Ttl7hZ6rtgqEYMzYVMuJ2F2r1HSU1zSAvwpdYP6rRGFRJEfdA9mm3WKfNLSc5cljz0X/TXy0vVlAV95l9qcfFzPmrkNIst9FZSwpvB49LyAVke04FQPPwLgVH4gphiJH3jvZ7I+J5lS8VAgMBAAGjUDBOMB0GA1UdDgQWBBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAfBgNVHSMEGDAWgBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAvMS4EQeP/ipV4jOG5lO6/tYCb/iJeAduOnRhkJk0DbX329lDLZhTTL/x/w/9muCVcvLrzEp6PN+VWfw5E5FWtZN0yhGtP9R+vZnrV+oc2zGD+no1/ySFOe3EiJCO5dehxKjYEmBRv5sU/LZFKZpozKN/BMEa6CqLuxbzb7ykxVr7EVFXwltPxzE9TmL9OACNNyF5eJHWMRMllarUvkcXlh4pux4ks9e6zV9DQBy2zds9f1I3qxg0eX6JnGrXi/ZiCT+lJgVe3ZFXiejiLAiKB04sXW3ti0LW3lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk</ds:X509Certificate>
+                    </ds:X509Data>
+                  </ds:KeyInfo>
+                </md:KeyDescriptor>
+                <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SingleLogoutService.php"/>
+                <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+                <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php"/>
+              </md:IDPSSODescriptor>
+              <md:ContactPerson contactType="technical">
+                <md:GivenName>Filip</md:GivenName>
+                <md:SurName>Hanik</md:SurName>
+                <md:EmailAddress>fhanik@pivotal.io</md:EmailAddress>
+              </md:ContactPerson>
+            </md:EntityDescriptor>
+
 

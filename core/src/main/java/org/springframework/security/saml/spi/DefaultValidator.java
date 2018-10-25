@@ -171,11 +171,13 @@ public class DefaultValidator implements SamlValidator {
 		//verify assertion
 		//issuer
 		//signature
-		if (wantAssertionsSigned && (assertion.getSignature() == null || !assertion.getSignature().isValidated())) {
-			return
-				new ValidationResult(assertion).addError(
-					new ValidationError("Assertion is not signed or signature was not validated")
-				);
+		if (wantAssertionsSigned && !assertion.isEncrypted()) {
+			if (assertion.getSignature() == null || !assertion.getSignature().isValidated()) {
+				return
+					new ValidationResult(assertion).addError(
+						new ValidationError("Assertion is not signed or signature was not validated")
+					);
+			}
 		}
 
 		if (responder == null) {

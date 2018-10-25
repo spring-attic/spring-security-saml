@@ -17,14 +17,22 @@
 
 package org.springframework.security.saml.saved_for_later;
 
+import java.util.Map;
+
 import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
 import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-public interface HostedIdentityProvider extends HostedProvider<
+public class HostedIdentityProvider extends HostedProvider<
 	HostedIdentityProviderConfiguration,
 	IdentityProviderMetadata,
 	ExternalServiceProviderConfiguration,
 	ServiceProviderMetadata> {
+
+	public HostedIdentityProvider(HostedIdentityProviderConfiguration configuration,
+									 IdentityProviderMetadata metadata,
+									 Map<ExternalServiceProviderConfiguration, ServiceProviderMetadata> providers) {
+		super(configuration, metadata, providers);
+	}
 }

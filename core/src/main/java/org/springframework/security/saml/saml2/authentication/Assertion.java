@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toList;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 17, Line 649
  */
-public class Assertion extends ImplementationHolder {
+public class Assertion extends ImplementationHolder<Assertion> {
 
 	private String version;
 	private String id;
@@ -60,6 +60,15 @@ public class Assertion extends ImplementationHolder {
 	private SimpleKey encryptionKey;
 	private KeyEncryptionMethod keyAlgorithm;
 	private DataEncryptionMethod dataAlgorithm;
+	private final boolean encrypted;
+
+	public Assertion() {
+		this(false);
+	}
+
+	public Assertion(boolean encrypted) {
+		this.encrypted = encrypted;
+	}
 
 	public String getVersion() {
 		return version;
@@ -221,6 +230,16 @@ public class Assertion extends ImplementationHolder {
 
 	public DataEncryptionMethod getDataAlgorithm() {
 		return dataAlgorithm;
+	}
+
+	/**
+	 * Returns true if this object was parsed as an encrypted object and was
+	 * successfully decrypted.
+	 * We consider a successful decryption equivalent with a signature validation
+	 * @return true if the object parsed was encrypted at the time of decoding
+	 */
+	public boolean isEncrypted() {
+		return encrypted;
 	}
 
 	@Override

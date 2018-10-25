@@ -24,19 +24,38 @@ import org.springframework.security.saml.registration.HostedProviderConfiguratio
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.util.Assert;
 
-public interface HostedProvider<
+public abstract class HostedProvider<
 	Configuration extends HostedProviderConfiguration,
 	LocalMetadata extends Metadata,
 	RemoteConfiguration extends ExternalProviderConfiguration,
 	RemoteMetadata extends Metadata> {
 
-	Configuration getConfiguration();
+	private final Configuration configuration;
+	private final LocalMetadata metadata;
+	private final Map<RemoteConfiguration, RemoteMetadata> providers;
 
-	LocalMetadata getMetadata();
+	protected HostedProvider(Configuration configuration,
+							 LocalMetadata metadata,
+							 Map<RemoteConfiguration, RemoteMetadata> providers) {
+		this.configuration = configuration;
+		this.metadata = metadata;
+		this.providers = providers;
+	}
 
-	Map<RemoteConfiguration,RemoteMetadata> getRemoteProviders();
 
-	default RemoteMetadata getRemoteProvider(String entityId) {
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	public LocalMetadata getMetadata() {
+		return metadata;
+	}
+
+	public Map<RemoteConfiguration,RemoteMetadata> getRemoteProviders() {
+		return providers;
+	}
+
+	public RemoteMetadata getRemoteProvider(String entityId) {
 		Assert.notNull(entityId, "Entity ID can not be null");
 		return getRemoteProviders().entrySet().stream()
 			.map(e -> e.getValue())

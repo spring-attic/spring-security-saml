@@ -17,32 +17,79 @@
 
 package sample.config;
 
+import java.time.Clock;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.saml.SamlTemplateEngine;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saved_for_later.SamlValidator;
+import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
+import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
+
+import static sample.proof_of_concept.SamlSpDsl.serviceProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+	@Bean
+	public SpringSecuritySaml samlImplementation() {
+		return new OpenSamlImplementation(Clock.systemUTC()).init();
+	}
+
+	@Bean
+	public SamlTemplateEngine samlTemplateEngine() {
+		return new OpenSamlVelocityEngine(true);
+	}
+
+	@Bean
+	public SamlTransformer samlTransformer() {
+		return new DefaultSamlTransformer(
+			samlImplementation()
+		);
+	}
+
+	@Bean
+	public SamlValidator samlValidator() {
+		return new DefaultValidator(samlImplementation());
+	}
 
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private SamlPropertyConfiguration samlPropertyConfiguration;
+		private final SamlPropertyConfiguration samlPropertyConfiguration;
+		private final SamlValidator samlValidator;
+		private final SamlTransformer samlTransformer;
+		private final SamlTemplateEngine samlTemplateEngine;
 
-		public SamlSecurity(SamlPropertyConfiguration samlPropertyConfiguration) {
+		public SamlSecurity(SamlPropertyConfiguration samlPropertyConfiguration,
+							SamlValidator samlValidator,
+							SamlTransformer samlTransformer,
+							SamlTemplateEngine samlTemplateEngine) {
 			this.samlPropertyConfiguration = samlPropertyConfiguration;
+			this.samlValidator = samlValidator;
+			this.samlTransformer = samlTransformer;
+			this.samlTemplateEngine = samlTemplateEngine;
 		}
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
-//			http.apply(
-//				serviceProvider()
-//			)
-//				;
+			http.apply(
+				serviceProvider()
+					.setSamlTransformer(samlTransformer)
+					.setSamlValidator(samlValidator)
+					.setSpConfig(samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider())
+					.setSamlTemplateEngine(samlTemplateEngine)
+			);
 		}
 	}
 

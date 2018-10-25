@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2;
 
-public abstract class ImplementationHolder implements Saml2Object {
+public abstract class ImplementationHolder<T extends ImplementationHolder> implements Saml2Object {
 
 	private Object implementation;
 	private String originalXML;
@@ -26,9 +26,9 @@ public abstract class ImplementationHolder implements Saml2Object {
 		return implementation;
 	}
 
-	public ImplementationHolder setImplementation(Object implementation) {
+	public T setImplementation(Object implementation) {
 		this.implementation = implementation;
-		return this;
+		return _this();
 	}
 
 	@Override
@@ -36,8 +36,12 @@ public abstract class ImplementationHolder implements Saml2Object {
 		return originalXML;
 	}
 
-	public ImplementationHolder setOriginalXML(String originalXML) {
+	public T setOriginalXML(String originalXML) {
 		this.originalXML = originalXML;
-		return this;
+		return _this();
+	}
+
+	private T _this() {
+		return (T)this;
 	}
 }

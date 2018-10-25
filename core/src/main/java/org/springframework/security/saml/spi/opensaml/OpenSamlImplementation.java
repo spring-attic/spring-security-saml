@@ -422,7 +422,12 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.setSignature(signature);
 		}
 		else if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
-			result = resolveAssertion((org.opensaml.saml.saml2.core.Assertion) parsed, verificationKeys, localKeys);
+			result = resolveAssertion(
+				(org.opensaml.saml.saml2.core.Assertion) parsed,
+				verificationKeys,
+				localKeys,
+				false
+			);
 		}
 		else if (parsed instanceof org.opensaml.saml.saml2.core.Response) {
 			result = resolveResponse((org.opensaml.saml.saml2.core.Response) parsed, verificationKeys, localKeys)
@@ -458,6 +463,12 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	public Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
 			throw new SamlException("No object to validate signature against.");
+		}
+
+		if (saml2Object instanceof Assertion && ((Assertion)saml2Object).isEncrypted()) {
+			//we don't need to validate the signature
+			//of an assertion that was successfully decrypted
+			return null;
 		}
 
 		if (trustedKeys == null || trustedKeys.isEmpty()) {
@@ -1282,7 +1293,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setVersion(parsed.getVersion().toString())
 			.setStatus(getStatus(parsed.getStatus()))
 			.setAssertions(
-				parsed.getAssertions().stream().map(a -> resolveAssertion(a, verificationKeys, localKeys))
+				parsed.getAssertions().stream().map(
+					a -> resolveAssertion(a, verificationKeys, localKeys, false)
+				)
 					.collect(Collectors.toList())
 			);
 		if (parsed.getEncryptedAssertions() != null && !parsed.getEncryptedAssertions().isEmpty()) {
@@ -1294,7 +1307,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 						resolveAssertion(
 							(org.opensaml.saml.saml2.core.Assertion) decrypt(a, localKeys),
 							verificationKeys,
-							localKeys
+							localKeys,
+							true
 						)
 					)
 				);
@@ -1346,10 +1360,14 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	protected Assertion resolveAssertion(
 		org.opensaml.saml.saml2.core.Assertion parsed,
 		List<SimpleKey> verificationKeys,
-		List<SimpleKey> localKeys
+		List<SimpleKey> localKeys,
+		boolean encrypted
 	) {
-		Signature signature = validateSignature(parsed, verificationKeys);
-		return new Assertion()
+		Signature signature = null;
+		if (!encrypted) {
+			signature = validateSignature(parsed, verificationKeys);
+		}
+		return new Assertion(encrypted)
 			.setSignature(signature)
 			.setId(parsed.getID())
 			.setIssueInstant(parsed.getIssueInstant())
@@ -1359,6 +1377,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setConditions(getConditions(parsed.getConditions()))
 			.setAuthenticationStatements(getAuthenticationStatements(parsed.getAuthnStatements()))
 			.setAttributes(getAttributes(parsed.getAttributeStatements(), localKeys))
+			.setImplementation(parsed)
 			;
 	}
 

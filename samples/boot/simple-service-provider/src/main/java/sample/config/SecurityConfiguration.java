@@ -104,6 +104,10 @@ public class SecurityConfiguration {
 				.antMatchers("/**").authenticated()
 				.and()
 				.formLogin().loginPage("/saml/sp/select")
+			.and()
+				.logout()
+					.logoutUrl("/logout")
+					.logoutSuccessUrl("/saml/sp/select")
 			;
 		}
 	}

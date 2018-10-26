@@ -60,6 +60,7 @@ public class SamlSpDsl extends AbstractHttpConfigurer<SamlSpDsl, HttpSecurity> {
 		StaticServiceProviderResolver resolver = new StaticServiceProviderResolver(samlTransformer, spConfig);
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(samlTemplateEngine, resolver);
+		selectFilter.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
 
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
 			samlTemplateEngine,

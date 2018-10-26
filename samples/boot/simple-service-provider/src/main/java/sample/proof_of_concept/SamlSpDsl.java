@@ -59,6 +59,8 @@ public class SamlSpDsl extends AbstractHttpConfigurer<SamlSpDsl, HttpSecurity> {
 		super.configure(builder);
 		StaticServiceProviderResolver resolver = new StaticServiceProviderResolver(samlTransformer, spConfig);
 
+		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(samlTemplateEngine, resolver);
+
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
 			samlTemplateEngine,
 			samlTransformer,
@@ -69,7 +71,8 @@ public class SamlSpDsl extends AbstractHttpConfigurer<SamlSpDsl, HttpSecurity> {
 			samlTransformer, samlValidator, resolver
 		);
 
-		builder.addFilterAfter(authnFilter, BasicAuthenticationFilter.class);
+		builder.addFilterAfter(selectFilter, BasicAuthenticationFilter.class);
+		builder.addFilterAfter(authnFilter, selectFilter.getClass());
 		builder.addFilterAfter(authenticationFilter, authnFilter.getClass());
 
 	}

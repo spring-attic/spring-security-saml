@@ -16,23 +16,41 @@
  */
 package org.springframework.security.samples;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SimpleServiceProviderBootTest {
 
+
+	@Autowired
+	MockMvc mockMvc;
+
+	@Autowired
+	SamlTransformer transformer;
 
 	@BeforeEach
 	void setUp() {
@@ -49,7 +67,22 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@Test
-	public void checkConfig() {
+	@DisplayName("get Service Provider metadata")
+	public void testGetMetadata() throws Exception {
+		assertNotNull(getServiceProviderMetadata());
 	}
 
+
+	private ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
+		String xml = mockMvc.perform(get("/saml/sp/metadata"))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+		assertNotNull(xml);
+		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
+		assertNotNull(m);
+		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
+		return (ServiceProviderMetadata) m;
+	}
 }

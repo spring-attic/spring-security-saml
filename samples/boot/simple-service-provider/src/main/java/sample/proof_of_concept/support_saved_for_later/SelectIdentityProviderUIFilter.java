@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.support_saved_for_later;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -40,6 +40,8 @@ import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import sample.proof_of_concept.SamlFilter;
+import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -53,7 +55,7 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 
-	protected SelectIdentityProviderUIFilter(SamlTemplateEngine samlTemplateEngine,
+	public SelectIdentityProviderUIFilter(SamlTemplateEngine samlTemplateEngine,
 											 StaticServiceProviderResolver resolver) {
 		super(samlTemplateEngine);
 		this.resolver = resolver;

@@ -24,6 +24,9 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
+import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
+
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
@@ -41,7 +44,6 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
-		super.init(builder);
 		notNull(prefix, "SAML path prefix must not be null");
 		notNull(resolver, "Service Provider Resolver must not be null.");
 		notNull(samlTransformer, "SAML transformer must not be null.");
@@ -56,8 +58,12 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	@Override
 	public void configure(HttpSecurity builder) throws Exception {
-		super.configure(builder);
 
+		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
+			samlTemplateEngine,
+			samlTransformer,
+			resolver
+		);
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(samlTemplateEngine, resolver);
 		selectFilter.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
@@ -72,7 +78,8 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 			samlTransformer, samlValidator, resolver
 		);
 
-		builder.addFilterAfter(selectFilter, BasicAuthenticationFilter.class);
+		builder.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
+		builder.addFilterAfter(selectFilter, metadataFilter.getClass());
 		builder.addFilterAfter(authnFilter, selectFilter.getClass());
 		builder.addFilterAfter(authenticationFilter, authnFilter.getClass());
 

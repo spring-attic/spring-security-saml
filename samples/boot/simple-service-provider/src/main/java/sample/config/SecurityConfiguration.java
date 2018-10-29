@@ -64,20 +64,27 @@ public class SecurityConfiguration {
 		return new DefaultValidator(samlImplementation());
 	}
 
+	@Bean
+	public StaticServiceProviderResolver serviceProviderResolver(SamlPropertyConfiguration samlPropertyConfiguration) {
+		HostedServiceProviderConfiguration spConfig =
+			samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider();
+		return new StaticServiceProviderResolver(samlTransformer(), spConfig);
+	}
+
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private final SamlPropertyConfiguration samlPropertyConfiguration;
+		private final StaticServiceProviderResolver resolver;
 		private final SamlValidator samlValidator;
 		private final SamlTransformer samlTransformer;
 		private final SamlTemplateEngine samlTemplateEngine;
 
-		public SamlSecurity(SamlPropertyConfiguration samlPropertyConfiguration,
+		public SamlSecurity(StaticServiceProviderResolver resolver,
 							SamlValidator samlValidator,
 							SamlTransformer samlTransformer,
 							SamlTemplateEngine samlTemplateEngine) {
-			this.samlPropertyConfiguration = samlPropertyConfiguration;
+			this.resolver = resolver;
 			this.samlValidator = samlValidator;
 			this.samlTransformer = samlTransformer;
 			this.samlTemplateEngine = samlTemplateEngine;
@@ -86,9 +93,6 @@ public class SecurityConfiguration {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
-			HostedServiceProviderConfiguration spConfig =
-				samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider();
-			StaticServiceProviderResolver resolver = new StaticServiceProviderResolver(samlTransformer, spConfig);
 			http.apply(
 				serviceProvider()
 					.setPrefix("/saml/sp")
@@ -101,6 +105,7 @@ public class SecurityConfiguration {
 	}
 
 	@Configuration
+	@Order(2)
 	public static class AppSecurity extends WebSecurityConfigurerAdapter {
 
 		@Override

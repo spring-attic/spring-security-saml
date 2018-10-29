@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
 
+import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
+
 public class StaticServiceProviderResolver {
 
 	private final HostedServiceProviderConfiguration configuration;
@@ -35,10 +37,15 @@ public class StaticServiceProviderResolver {
 	}
 
 	public HostedServiceProvider resolve(HttpServletRequest request) {
-		return metadataResolver.resolve(request, getConfiguration());
+		HostedServiceProviderConfiguration config = getConfiguration(request);
+		return new HostedServiceProvider(
+			config,
+			metadataResolver.resolveHostedServiceProvider(request, config),
+			metadataResolver.resolveConfiguredProviders(config)
+		);
 	}
 
-	public HostedServiceProviderConfiguration getConfiguration() {
+	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		return configuration;
 	}
 }

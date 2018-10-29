@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.support_saved_for_later;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,7 +38,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saved_for_later.DefaultMetadataCache;
-import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
 import org.springframework.security.saml.saved_for_later.SamlMetadataCache;
 import org.springframework.security.saml.saved_for_later.SamlMetadataException;
 import org.springframework.security.saml.util.RestOperationsUtils;
@@ -71,17 +70,15 @@ public class ServiceProviderMetadataResolver {
 		this.samlTransformer = samlTransformer;
 	}
 
-	public HostedServiceProvider resolve(HttpServletRequest request,
-										 HostedServiceProviderConfiguration configuration) {
-		ServiceProviderMetadata metadata = generateMetadata(request, configuration);
-		Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> providers = getProviders(configuration);
+	public ServiceProviderMetadata resolveHostedServiceProvider(HttpServletRequest request,
+																HostedServiceProviderConfiguration configuration) {
+		return generateMetadata(request, configuration);
+	}
 
-		return new HostedServiceProvider(
-			configuration,
-			metadata,
-			providers
-		);
-
+	public Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
+		HostedServiceProviderConfiguration configuration
+	) {
+		return getProviders(configuration);
 	}
 
 	private Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> getProviders(

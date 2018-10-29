@@ -35,7 +35,7 @@ import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 
-import sample.proof_of_concept.ServiceProviderMetadataResolver;
+import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;

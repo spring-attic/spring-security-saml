@@ -16,6 +16,8 @@
  */
 package org.springframework.security.samples;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
@@ -92,7 +95,7 @@ public class SimpleServiceProviderBootTest {
 					.build();
 			}
 		)
-			.when(resolver).getConfiguration();
+			.when(resolver).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));

@@ -40,7 +40,7 @@ public class StaticServiceProviderResolver {
 
 	public HostedServiceProvider resolve(HttpServletRequest request) {
 		HostedServiceProviderConfiguration config = getConfiguration(request);
-		if (!hasText(configuration.getBasePath())) {
+		if (!hasText(config.getBasePath())) {
 			config = HostedServiceProviderConfiguration.Builder.builder(config)
 				.withBasePath(getBasePath(request, false))
 				.build();

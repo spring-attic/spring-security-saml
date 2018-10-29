@@ -16,6 +16,7 @@
  */
 package org.springframework.security.samples;
 
+import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SimpleServiceProviderBootTest {
+public class ServiceProviderMetadataTests {
 
 	@Autowired
 	MockMvc mockMvc;
@@ -66,7 +67,7 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@AfterEach
-	public void reset() {
+	void reset() {
 	}
 
 	@SpringBootConfiguration
@@ -77,7 +78,7 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	@DisplayName("get Service Provider metadata")
-	public void testGetMetadata() throws Exception {
+	void testGetMetadata() throws Exception {
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("spring.security.saml.sp.id"));
@@ -85,20 +86,34 @@ public class SimpleServiceProviderBootTest {
 
 	@Test
 	@DisplayName("Service Provider entity ID is generated")
-	public void generateSpEntityId() throws Exception {
+	void generateSpEntityId() throws Exception {
+		modifyConfig(builder -> builder.withEntityId(null));
+		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		assertNotNull(metadata);
+		assertThat(metadata.getEntityId(), equalTo("http://localhost"));
+	}
+
+	@Test
+	@DisplayName("Service Provider entity ID is based on configured base path")
+	void generateSpEntityIdFromBasePath() throws Exception {
+		modifyConfig(builder -> builder.withEntityId(null).withBasePath("http://localhost:8080/sample-sp"));
+		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		assertNotNull(metadata);
+		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));
+	}
+
+	private void modifyConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
 		Mockito.doAnswer(
 			invocation -> {
 				HostedServiceProviderConfiguration config =
 					(HostedServiceProviderConfiguration) invocation.callRealMethod();
-				return HostedServiceProviderConfiguration.Builder.builder(config)
-					.withEntityId(null)
-					.build();
+				HostedServiceProviderConfiguration.Builder builder =
+					HostedServiceProviderConfiguration.Builder.builder(config);
+				modifier.accept(builder);
+				return builder.build();
 			}
 		)
 			.when(resolver).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
-		ServiceProviderMetadata metadata = getServiceProviderMetadata();
-		assertNotNull(metadata);
-		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));
 	}
 
 	private ServiceProviderMetadata getServiceProviderMetadata() throws Exception {

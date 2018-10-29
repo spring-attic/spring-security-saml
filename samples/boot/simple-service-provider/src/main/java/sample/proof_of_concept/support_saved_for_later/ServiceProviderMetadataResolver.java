@@ -123,7 +123,7 @@ public class ServiceProviderMetadataResolver {
 					new org.springframework.security.saml.saml2.metadata.ServiceProvider()
 						.setKeys(keys)
 						.setWantAssertionsSigned(true)
-						.setAuthnRequestsSigned(keys.size() > 0)
+						.setAuthnRequestsSigned(keys.size() > 0 && configuration.isSignRequests())
 						.setAssertionConsumerService(
 							asList(
 								getEndpoint(

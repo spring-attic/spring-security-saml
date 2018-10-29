@@ -16,6 +16,8 @@
  */
 package org.springframework.security.samples;
 
+import java.net.URI;
+import java.util.Map;
 import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,6 +30,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -40,18 +44,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.springframework.test.web.servlet.MvcResult;
+import sample.config.SamlPropertyConfiguration;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ServiceProviderMetadataTests {
+public class ServiceProviderTests {
 
 	@Autowired
 	MockMvc mockMvc;
@@ -61,6 +70,9 @@ public class ServiceProviderMetadataTests {
 
 	@SpyBean
 	StaticServiceProviderResolver resolver;
+
+	@Autowired
+	SamlPropertyConfiguration configuration;
 
 	@BeforeEach
 	void setUp() {
@@ -74,6 +86,68 @@ public class ServiceProviderMetadataTests {
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "sample")
 	public static class SpringBootApplicationTestConfig {
+	}
+
+	@Test
+	@DisplayName("SP Initiated Login")
+	void getAuthNRequest() throws Exception {
+		AuthenticationRequest authn = getAuthenticationRequest();
+		assertThat(
+			authn.getDestination().getLocation(),
+			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+		);
+		assertThat(
+			authn.getOriginEntityId(),
+			equalTo("spring.security.saml.sp.id")
+		);
+		assertThat(
+			authn.getSignature(),
+			notNullValue()
+		);
+
+	}
+
+	@Test
+	@DisplayName("SP Initiated Login - Do not Sign requests")
+	void getAuthNRequestNotSigned() throws Exception {
+		modifyConfig(builder -> builder.withSignRequests(false));
+		AuthenticationRequest authn = getAuthenticationRequest();
+		assertThat(
+			authn.getDestination().getLocation(),
+			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+		);
+		assertThat(
+			authn.getOriginEntityId(),
+			equalTo("spring.security.saml.sp.id")
+		);
+		assertThat(
+			authn.getSignature(),
+			nullValue()
+		);
+
+	}
+
+	private AuthenticationRequest getAuthenticationRequest() throws Exception {
+		MvcResult result = mockMvc.perform(
+			get("/saml/sp/discovery")
+				.param("idp", "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+		)
+			.andExpect(status().is3xxRedirection())
+			.andReturn();
+
+		String location = result.getResponse().getHeader("Location");
+		Map<String, String> params = queryParams(new URI(location));
+		String request = params.get("SAMLRequest");
+		assertNotNull(request);
+		String xml = transformer.samlDecode(request, true);
+		Saml2Object saml2Object = transformer.fromXml(
+			xml,
+			configuration.getServiceProvider().getKeys().toList(),
+			configuration.getServiceProvider().getKeys().toList()
+		);
+		assertNotNull(saml2Object);
+		assertThat(saml2Object.getClass(), equalTo(AuthenticationRequest.class));
+		return (AuthenticationRequest) saml2Object;
 	}
 
 	@Test

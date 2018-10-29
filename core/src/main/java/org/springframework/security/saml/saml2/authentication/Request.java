@@ -40,6 +40,7 @@ public class Request<T extends Request<T>> extends ImplementationHolder {
 	private Endpoint destination;
 	private String consent;
 	private String version = "2.0";
+	private String destinationEntityId;
 
 	public Issuer getIssuer() {
 		return issuer;
@@ -127,6 +128,11 @@ public class Request<T extends Request<T>> extends ImplementationHolder {
 
 	@Override
 	public String getDestinationEntityId() {
-		return null;
+		return destinationEntityId;
+	}
+
+	public T setDestinationEntityId(String destinationEntityId) {
+		this.destinationEntityId = destinationEntityId;
+		return _this();
 	}
 }

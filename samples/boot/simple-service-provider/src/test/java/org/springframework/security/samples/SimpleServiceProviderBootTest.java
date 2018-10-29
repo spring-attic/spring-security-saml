@@ -21,8 +21,10 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,6 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -45,12 +49,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class SimpleServiceProviderBootTest {
 
-
 	@Autowired
 	MockMvc mockMvc;
 
 	@Autowired
 	SamlTransformer transformer;
+
+	@SpyBean
+	StaticServiceProviderResolver resolver;
 
 	@BeforeEach
 	void setUp() {
@@ -69,9 +75,28 @@ public class SimpleServiceProviderBootTest {
 	@Test
 	@DisplayName("get Service Provider metadata")
 	public void testGetMetadata() throws Exception {
-		assertNotNull(getServiceProviderMetadata());
+		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		assertNotNull(metadata);
+		assertThat(metadata.getEntityId(), equalTo("spring.security.saml.sp.id"));
 	}
 
+	@Test
+	@DisplayName("Service Provider entity ID is generated")
+	public void generateSpEntityId() throws Exception {
+		Mockito.doAnswer(
+			invocation -> {
+				HostedServiceProviderConfiguration config =
+					(HostedServiceProviderConfiguration) invocation.callRealMethod();
+				return HostedServiceProviderConfiguration.Builder.builder(config)
+					.withEntityId(null)
+					.build();
+			}
+		)
+			.when(resolver).getConfiguration();
+		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		assertNotNull(metadata);
+		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));
+	}
 
 	private ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
 		String xml = mockMvc.perform(get("/saml/sp/metadata"))

@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
@@ -70,9 +69,8 @@ public class ServiceProviderMetadataResolver {
 		this.samlTransformer = samlTransformer;
 	}
 
-	public ServiceProviderMetadata resolveHostedServiceProvider(HttpServletRequest request,
-																HostedServiceProviderConfiguration configuration) {
-		return generateMetadata(request, configuration);
+	public ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration) {
+		return generateMetadata(configuration);
 	}
 
 	public Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
@@ -107,17 +105,14 @@ public class ServiceProviderMetadataResolver {
 		}
 	}
 
-	private ServiceProviderMetadata generateMetadata(HttpServletRequest request,
-													 HostedServiceProviderConfiguration configuration) {
-
-		String baseUrl = hasText(configuration.getBasePath()) ?
-			configuration.getBasePath() :
-			getBasePath(request, false);
+	private ServiceProviderMetadata generateMetadata(HostedServiceProviderConfiguration configuration) {
 
 		String prefix = configuration.getPrefix();
 		List<SimpleKey> keys = configuration.getKeys();
 		String aliasPath = getAliasPath(configuration);
-		String entityId = hasText(configuration.getEntityId()) ? configuration.getEntityId() : baseUrl;
+		String baseUrl = configuration.getBasePath();
+		String entityId =
+			hasText(configuration.getEntityId()) ? configuration.getEntityId() : baseUrl;
 
 		return new ServiceProviderMetadata()
 			.setEntityId(entityId)
@@ -178,21 +173,6 @@ public class ServiceProviderMetadataResolver {
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);
-	}
-
-	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
-		boolean includePort = true;
-		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		return request.getScheme() +
-			"://" +
-			request.getServerName() +
-			(includePort ? (":" + request.getServerPort()) : "") +
-			request.getContextPath();
 	}
 
 	private String getAliasPath(HostedProviderConfiguration configuration) {

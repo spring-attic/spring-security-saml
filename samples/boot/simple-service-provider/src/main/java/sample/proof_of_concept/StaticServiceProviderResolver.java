@@ -24,6 +24,8 @@ import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
 
 import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class StaticServiceProviderResolver {
 
 	private final HostedServiceProviderConfiguration configuration;
@@ -38,14 +40,34 @@ public class StaticServiceProviderResolver {
 
 	public HostedServiceProvider resolve(HttpServletRequest request) {
 		HostedServiceProviderConfiguration config = getConfiguration(request);
+		if (!hasText(configuration.getBasePath())) {
+			config = HostedServiceProviderConfiguration.Builder.builder(config)
+				.withBasePath(getBasePath(request, false))
+				.build();
+		}
 		return new HostedServiceProvider(
 			config,
-			metadataResolver.resolveHostedServiceProvider(request, config),
+			metadataResolver.resolveHostedServiceProvider(config),
 			metadataResolver.resolveConfiguredProviders(config)
 		);
 	}
 
 	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		return configuration;
+	}
+
+	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
+		boolean includePort = true;
+		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		return request.getScheme() +
+			"://" +
+			request.getServerName() +
+			(includePort ? (":" + request.getServerPort()) : "") +
+			request.getContextPath();
 	}
 }

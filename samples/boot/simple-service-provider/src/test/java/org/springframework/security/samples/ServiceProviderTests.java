@@ -17,6 +17,7 @@
 package org.springframework.security.samples;
 
 import java.net.URI;
+import java.time.Clock;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
@@ -29,10 +30,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,7 +60,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -124,7 +132,32 @@ public class ServiceProviderTests {
 			authn.getSignature(),
 			nullValue()
 		);
+	}
 
+	@Test
+	void authenticate() throws Exception {
+		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		IdentityProviderMetadata idp =
+			(IdentityProviderMetadata) transformer.fromXml(
+				configuration.getServiceProvider().getProviders().get(0).getMetadata(),
+				null,
+				null);
+		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
+		Assertion a = helper.assertion(
+			sp,
+			idp,
+			null,
+			"user@test.org",
+			NameId.EMAIL
+		);
+		Response r = helper.response(null, a, sp, idp);
+		String xml = transformer.toXml(r);
+		String encoded = transformer.samlEncode(xml, false);
+
+		mockMvc.perform(
+			post("/saml/sp/SSO")
+				.param("SAMLResponse", encoded)
+		).andExpect(authenticated());
 	}
 
 	private AuthenticationRequest getAuthenticationRequest() throws Exception {

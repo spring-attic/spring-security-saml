@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
@@ -34,7 +35,9 @@ import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 
-import static sample.proof_of_concept.SamlSpDsl.serviceProvider;
+import sample.proof_of_concept.StaticServiceProviderResolver;
+
+import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -83,11 +86,15 @@ public class SecurityConfiguration {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			super.configure(http);
+			HostedServiceProviderConfiguration spConfig =
+				samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider();
+			StaticServiceProviderResolver resolver = new StaticServiceProviderResolver(samlTransformer, spConfig);
 			http.apply(
 				serviceProvider()
+					.setPrefix("/saml/sp")
+					.setServiceProviderResolver(resolver)
 					.setSamlTransformer(samlTransformer)
 					.setSamlValidator(samlValidator)
-					.setSpConfig(samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider())
 					.setSamlTemplateEngine(samlTemplateEngine)
 			);
 		}

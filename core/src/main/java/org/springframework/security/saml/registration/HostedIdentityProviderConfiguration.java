@@ -19,9 +19,9 @@ package org.springframework.security.saml.registration;
 
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -114,4 +114,186 @@ public class HostedIdentityProviderConfiguration extends
 		return dataEncryptionAlgorithm;
 	}
 
+
+	public static final class Builder {
+		private String prefix;
+		private String basePath;
+		private boolean wantRequestsSigned;
+		private String alias;
+		private String entityId;
+		private boolean signAssertions;
+		private boolean signMetadata;
+		private boolean encryptAssertions;
+		private String metadata;
+		private KeyEncryptionMethod keyEncryptionAlgorithm;
+		private List<SimpleKey> keys;
+		private AlgorithmMethod defaultSigningAlgorithm;
+		private DataEncryptionMethod dataEncryptionAlgorithm;
+		private DigestMethod defaultDigest;
+		private long notOnOrAfter;
+		private long notBefore;
+		private List<NameId> nameIds;
+		private long sessionNotOnOrAfter;
+		private boolean singleLogoutEnabled;
+		private List<ExternalServiceProviderConfiguration> providers;
+
+		private Builder() {
+		}
+
+		public static Builder builder() {
+			return new Builder();
+		}
+
+		public static Builder builder(HostedIdentityProviderConfiguration configuration) {
+			return builder()
+				.withWantRequestsSigned(configuration.isWantRequestsSigned())
+				.withSignAssertions(configuration.isSignAssertions())
+				.withEncryptAssertions(configuration.isEncryptAssertions())
+				.withKeyEncryptionAlgorithm(configuration.getKeyEncryptionAlgorithm())
+				.withDataEncryptionAlgorithm(configuration.getDataEncryptionAlgorithm())
+				.withNotOnOrAfter(configuration.getNotOnOrAfter())
+				.withNotBefore(configuration.getNotBefore())
+				.withSessionNotOnOrAfter(configuration.getSessionNotOnOrAfter())
+				.withPrefix(configuration.getPrefix())
+				.withBasePath(configuration.getBasePath())
+				.withAlias(configuration.getAlias())
+				.withEntityId(configuration.getEntityId())
+				.withSignMetadata(configuration.isSignMetadata())
+				.withMetadata(configuration.getMetadata())
+				.withKeys(configuration.getKeys())
+				.withDefaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
+				.withDefaultDigest(configuration.getDefaultDigest())
+				.withNameIds(configuration.getNameIds())
+				.withSingleLogoutEnabled(configuration.isSingleLogoutEnabled())
+				.withProviders(configuration.getProviders());
+
+		}
+
+		public Builder withPrefix(String prefix) {
+			this.prefix = prefix;
+			return this;
+		}
+
+		public Builder withBasePath(String basePath) {
+			this.basePath = basePath;
+			return this;
+		}
+
+		public Builder withWantRequestsSigned(boolean wantRequestsSigned) {
+			this.wantRequestsSigned = wantRequestsSigned;
+			return this;
+		}
+
+		public Builder withAlias(String alias) {
+			this.alias = alias;
+			return this;
+		}
+
+		public Builder withEntityId(String entityId) {
+			this.entityId = entityId;
+			return this;
+		}
+
+		public Builder withSignAssertions(boolean signAssertions) {
+			this.signAssertions = signAssertions;
+			return this;
+		}
+
+		public Builder withSignMetadata(boolean signMetadata) {
+			this.signMetadata = signMetadata;
+			return this;
+		}
+
+		public Builder withEncryptAssertions(boolean encryptAssertions) {
+			this.encryptAssertions = encryptAssertions;
+			return this;
+		}
+
+		public Builder withMetadata(String metadata) {
+			this.metadata = metadata;
+			return this;
+		}
+
+		public Builder withKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+			this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+			return this;
+		}
+
+		public Builder withKeys(List<SimpleKey> keys) {
+			this.keys = keys;
+			return this;
+		}
+
+		public Builder withDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
+			return this;
+		}
+
+		public Builder withDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+			this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+			return this;
+		}
+
+		public Builder withDefaultDigest(DigestMethod defaultDigest) {
+			this.defaultDigest = defaultDigest;
+			return this;
+		}
+
+		public Builder withNotOnOrAfter(long notOnOrAfter) {
+			this.notOnOrAfter = notOnOrAfter;
+			return this;
+		}
+
+		public Builder withNotBefore(long notBefore) {
+			this.notBefore = notBefore;
+			return this;
+		}
+
+		public Builder withNameIds(List<NameId> nameIds) {
+			this.nameIds = nameIds;
+			return this;
+		}
+
+		public Builder withSessionNotOnOrAfter(long sessionNotOnOrAfter) {
+			this.sessionNotOnOrAfter = sessionNotOnOrAfter;
+			return this;
+		}
+
+		public Builder withSingleLogoutEnabled(boolean singleLogoutEnabled) {
+			this.singleLogoutEnabled = singleLogoutEnabled;
+			return this;
+		}
+
+		public Builder withProviders(List<ExternalServiceProviderConfiguration> providers) {
+			this.providers = providers;
+			return this;
+		}
+
+		public HostedIdentityProviderConfiguration build() {
+			HostedIdentityProviderConfiguration hostedIdentityProviderConfiguration =
+				new HostedIdentityProviderConfiguration(
+					prefix,
+					basePath,
+					alias,
+					entityId,
+					signMetadata,
+					signAssertions,
+					wantRequestsSigned,
+					metadata,
+					keys,
+					defaultSigningAlgorithm,
+					defaultDigest,
+					nameIds,
+					singleLogoutEnabled,
+					providers,
+					encryptAssertions,
+					keyEncryptionAlgorithm,
+					dataEncryptionAlgorithm,
+					notOnOrAfter,
+					notBefore,
+					sessionNotOnOrAfter
+				);
+			return hostedIdentityProviderConfiguration;
+		}
+	}
 }

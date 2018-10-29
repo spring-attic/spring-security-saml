@@ -21,15 +21,15 @@ package org.springframework.security.saml.registration;
  * Represents a configuration for a host or domain.
  * A hosted domain can have one local service provider, or one local identity provider, or both.
  */
-public class SamlServerConfiguration {
+public class HostedServerConfiguration {
 
 	private final HostedServiceProviderConfiguration serviceProvider;
 	private final HostedIdentityProviderConfiguration identityProvider;
 	private final NetworkConfiguration network;
 
-	public SamlServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
-								   HostedIdentityProviderConfiguration identityProvider,
-								   NetworkConfiguration network) {
+	public HostedServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
+									 HostedIdentityProviderConfiguration identityProvider,
+									 NetworkConfiguration network) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
 		this.network = network;
@@ -47,11 +47,51 @@ public class SamlServerConfiguration {
 		return network;
 	}
 
-	public SamlServerConfiguration transfer(SamlServerConfiguration external) {
-		return new SamlServerConfiguration(
+	public HostedServerConfiguration transfer(HostedServerConfiguration external) {
+		return new HostedServerConfiguration(
 			external.getServiceProvider(),
 			external.getIdentityProvider(),
 			external.getNetwork()
 		);
+	}
+
+
+	public static final class Builder {
+		private HostedServiceProviderConfiguration serviceProvider;
+		private HostedIdentityProviderConfiguration identityProvider;
+		private NetworkConfiguration network;
+
+		private Builder() {
+		}
+
+		public static Builder builder() {
+			return new Builder();
+		}
+
+		public static Builder builder(HostedServerConfiguration configuration) {
+			return new Builder()
+				.withIdentityProvider(configuration.getIdentityProvider())
+				.withServiceProvider(configuration.getServiceProvider())
+				.withNetwork(configuration.getNetwork());
+		}
+
+		public Builder withServiceProvider(HostedServiceProviderConfiguration serviceProvider) {
+			this.serviceProvider = serviceProvider;
+			return this;
+		}
+
+		public Builder withIdentityProvider(HostedIdentityProviderConfiguration identityProvider) {
+			this.identityProvider = identityProvider;
+			return this;
+		}
+
+		public Builder withNetwork(NetworkConfiguration network) {
+			this.network = network;
+			return this;
+		}
+
+		public HostedServerConfiguration build() {
+			return new HostedServerConfiguration(serviceProvider, identityProvider, network);
+		}
 	}
 }

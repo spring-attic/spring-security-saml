@@ -71,4 +71,134 @@ public class HostedServiceProviderConfiguration extends
 	}
 
 
+	public static final class Builder {
+		private boolean signRequests;
+		private boolean wantAssertionsSigned;
+		private String prefix;
+		private String basePath;
+		private String alias;
+		private String entityId;
+		private boolean signMetadata;
+		private String metadata;
+		private List<SimpleKey> keys;
+		private AlgorithmMethod defaultSigningAlgorithm;
+		private DigestMethod defaultDigest;
+		private List<NameId> nameIds;
+		private boolean singleLogoutEnabled;
+		private List<ExternalIdentityProviderConfiguration> providers;
+
+		private Builder() {
+		}
+
+		public static Builder builder() {
+			return new Builder();
+		}
+
+		public static Builder builder(HostedServiceProviderConfiguration configuration) {
+			return builder()
+				.withSignRequests(configuration.isSignRequests())
+				.withWantAssertionsSigned(configuration.isWantAssertionsSigned())
+				.withPrefix(configuration.getPrefix())
+				.withBasePath(configuration.getBasePath())
+				.withAlias(configuration.getAlias())
+				.withEntityId(configuration.getEntityId())
+				.withSignMetadata(configuration.isSignMetadata())
+				.withMetadata(configuration.getMetadata())
+				.withKeys(configuration.getKeys())
+				.withDefaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
+				.withDefaultDigest(configuration.getDefaultDigest())
+				.withNameIds(configuration.getNameIds())
+				.withSingleLogoutEnabled(configuration.isSingleLogoutEnabled())
+				.withProviders(configuration.getProviders());
+		}
+
+		public Builder withSignRequests(boolean signRequests) {
+			this.signRequests = signRequests;
+			return this;
+		}
+
+		public Builder withWantAssertionsSigned(boolean wantAssertionsSigned) {
+			this.wantAssertionsSigned = wantAssertionsSigned;
+			return this;
+		}
+
+		public Builder withPrefix(String prefix) {
+			this.prefix = prefix;
+			return this;
+		}
+
+		public Builder withBasePath(String basePath) {
+			this.basePath = basePath;
+			return this;
+		}
+
+		public Builder withAlias(String alias) {
+			this.alias = alias;
+			return this;
+		}
+
+		public Builder withEntityId(String entityId) {
+			this.entityId = entityId;
+			return this;
+		}
+
+		public Builder withSignMetadata(boolean signMetadata) {
+			this.signMetadata = signMetadata;
+			return this;
+		}
+
+		public Builder withMetadata(String metadata) {
+			this.metadata = metadata;
+			return this;
+		}
+
+		public Builder withKeys(List<SimpleKey> keys) {
+			this.keys = keys;
+			return this;
+		}
+
+		public Builder withDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
+			return this;
+		}
+
+		public Builder withDefaultDigest(DigestMethod defaultDigest) {
+			this.defaultDigest = defaultDigest;
+			return this;
+		}
+
+		public Builder withNameIds(List<NameId> nameIds) {
+			this.nameIds = nameIds;
+			return this;
+		}
+
+		public Builder withSingleLogoutEnabled(boolean singleLogoutEnabled) {
+			this.singleLogoutEnabled = singleLogoutEnabled;
+			return this;
+		}
+
+		public Builder withProviders(List<ExternalIdentityProviderConfiguration> providers) {
+			this.providers = providers;
+			return this;
+		}
+
+		public HostedServiceProviderConfiguration build() {
+			HostedServiceProviderConfiguration hostedServiceProviderConfiguration =
+				new HostedServiceProviderConfiguration(prefix,
+					basePath,
+					alias,
+					entityId,
+					signMetadata,
+					metadata,
+					keys,
+					defaultSigningAlgorithm,
+					defaultDigest,
+					nameIds,
+					singleLogoutEnabled,
+					providers,
+					signRequests,
+					wantAssertionsSigned);
+			return hostedServiceProviderConfiguration;
+		}
+	}
 }

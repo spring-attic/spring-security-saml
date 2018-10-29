@@ -20,7 +20,7 @@ package org.springframework.security.saml.boot;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.security.saml.registration.NetworkConfiguration;
-import org.springframework.security.saml.registration.SamlServerConfiguration;
+import org.springframework.security.saml.registration.HostedServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
 public class SamlBootConfiguration {
@@ -47,8 +47,8 @@ public class SamlBootConfiguration {
 		this.identityProvider = identityProvider;
 	}
 
-	public SamlServerConfiguration toSamlServerConfiguration() {
-		return new SamlServerConfiguration(
+	public HostedServerConfiguration toSamlServerConfiguration() {
+		return new HostedServerConfiguration(
 			serviceProvider == null ? null : serviceProvider.toHostedConfiguration(),
 			identityProvider == null ? null : identityProvider.toHostedConfiguration(),
 			new NetworkConfiguration(4000,4000)

@@ -27,7 +27,7 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class HostedProviderConfiguration
+public abstract class HostedProviderConfiguration
 	<ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> {
 
 	private final String prefix;

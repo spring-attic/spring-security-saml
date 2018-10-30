@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.saved_for_later;
+package org.springframework.security.saml.provider;
 
 import java.util.Map;
 

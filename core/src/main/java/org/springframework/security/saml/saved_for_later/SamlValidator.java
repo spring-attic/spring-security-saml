@@ -19,6 +19,7 @@ package org.springframework.security.saml.saved_for_later;
 
 import java.util.List;
 
+import org.springframework.security.saml.provider.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.signature.Signature;

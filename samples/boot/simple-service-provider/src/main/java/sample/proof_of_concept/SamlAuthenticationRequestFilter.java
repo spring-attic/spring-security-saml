@@ -40,7 +40,7 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saved_for_later.SamlProviderNotFoundException;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;

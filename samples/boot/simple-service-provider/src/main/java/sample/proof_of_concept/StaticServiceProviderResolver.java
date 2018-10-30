@@ -20,7 +20,7 @@ package sample.proof_of_concept;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 
 import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
 

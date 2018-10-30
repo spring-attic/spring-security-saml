@@ -30,7 +30,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.saml.saved_for_later.ValidationException;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;

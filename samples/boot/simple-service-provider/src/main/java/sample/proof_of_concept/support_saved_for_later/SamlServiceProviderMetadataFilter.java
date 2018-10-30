@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saved_for_later.HostedServiceProvider;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import sample.proof_of_concept.SamlFilter;

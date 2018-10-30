@@ -51,7 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.test.web.servlet.MvcResult;
-import sample.config.SamlPropertyConfiguration;
+import sample.SamlPropertyConfiguration;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;

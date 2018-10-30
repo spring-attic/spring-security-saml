@@ -15,7 +15,7 @@
  *
  */
 
-package sample.config;
+package sample;
 
 import java.time.Clock;
 

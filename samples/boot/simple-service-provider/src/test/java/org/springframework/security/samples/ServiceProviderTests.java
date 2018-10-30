@@ -51,7 +51,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.test.web.servlet.MvcResult;
-import sample.SamlPropertyConfiguration;
+
+import sample.SecurityConfiguration;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,7 +81,7 @@ public class ServiceProviderTests {
 	StaticServiceProviderResolver resolver;
 
 	@Autowired
-	SamlPropertyConfiguration configuration;
+	SecurityConfiguration.SamlPropertyConfiguration configuration;
 
 	@BeforeEach
 	void setUp() {

@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
@@ -35,13 +36,16 @@ import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 
-import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
 import sample.proof_of_concept.StaticServiceProviderResolver;
+import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
 
 import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+	@Configuration
+	public static class SamlPropertyConfiguration extends SamlBootConfiguration {}
 
 	@Bean
 	public SpringSecuritySaml samlImplementation() {

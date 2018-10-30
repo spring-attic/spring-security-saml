@@ -20,10 +20,10 @@ import java.util.Collections;
 
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.MetadataBase;
+import org.springframework.security.saml.saml2.metadata.NameId;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
-import org.opensaml.saml.saml2.core.NameID;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.FALSE;
@@ -72,7 +72,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
-		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.PERSISTENT));
+		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 0);
 	}
@@ -140,7 +140,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
-		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameID.PERSISTENT));
+		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 1);
 		nodes = getNodes(xml, "//samlp:RequestedAuthnContext");

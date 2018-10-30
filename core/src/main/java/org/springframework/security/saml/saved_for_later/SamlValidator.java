@@ -19,7 +19,8 @@ package org.springframework.security.saml.saved_for_later;
 
 import java.util.List;
 
-import org.springframework.security.saml.provider.HostedProvider;
+import org.springframework.security.saml.provider.HostedIdentityProvider;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.key.SimpleKey;
 import org.springframework.security.saml.saml2.signature.Signature;
@@ -38,12 +39,21 @@ public interface SamlValidator {
 		throws SignatureException;
 
 	/**
-	 * Performs an object validation on the respective object
+	 * Performs an object validation on behalf of a service provider on the respective object
 	 *
 	 * @param saml2Object the object to be validated according to SAML specification rules
 	 * @param provider    the object used to resolve metadata
 	 * @throws ValidationException if validation failed. Details in the exception.
 	 */
-	void validate(Saml2Object saml2Object, HostedProvider provider) throws ValidationException;
+	void validate(Saml2Object saml2Object, HostedServiceProvider provider) throws ValidationException;
+
+	/**
+	 * Performs an object validation on behalf of an identity provider on the respective object
+	 *
+	 * @param saml2Object the object to be validated according to SAML specification rules
+	 * @param provider    the object used to resolve metadata
+	 * @throws ValidationException if validation failed. Details in the exception.
+	 */
+	void validate(Saml2Object saml2Object, HostedIdentityProvider provider) throws ValidationException;
 
 }

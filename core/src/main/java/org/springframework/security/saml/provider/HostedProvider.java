@@ -24,7 +24,7 @@ import org.springframework.security.saml.registration.HostedProviderConfiguratio
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.util.Assert;
 
-public abstract class HostedProvider<
+abstract class HostedProvider<
 	Configuration extends HostedProviderConfiguration,
 	LocalMetadata extends Metadata,
 	RemoteConfiguration extends ExternalProviderConfiguration,

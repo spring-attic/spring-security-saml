@@ -17,6 +17,7 @@
 
 package sample.proof_of_concept;
 
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.SamlTemplateEngine;
@@ -42,6 +43,7 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	private SamlTransformer samlTransformer;
 	private SamlValidator samlValidator;
 	private SamlTemplateEngine samlTemplateEngine;
+	private AuthenticationManager authenticationManager = null;
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
@@ -87,6 +89,9 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 			samlValidator,
 			resolver
 		);
+		if (authenticationManager != null) {
+			authenticationFilter.setAuthenticationManager(authenticationManager);
+		}
 
 		builder.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
 		builder.addFilterAfter(selectFilter, metadataFilter.getClass());
@@ -117,6 +122,11 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	public SamlServiceProviderDsl samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
+		return this;
+	}
+
+	public SamlServiceProviderDsl authenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
 		return this;
 	}
 }

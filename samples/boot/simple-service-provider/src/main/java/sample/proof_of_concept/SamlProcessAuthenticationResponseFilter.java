@@ -25,12 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.saml.saved_for_later.ValidationException;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
@@ -50,10 +50,12 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 	private final SamlValidator validator;
 	private final StaticServiceProviderResolver resolver;
 
-	public SamlProcessAuthenticationResponseFilter(SamlTransformer transformer,
+	public SamlProcessAuthenticationResponseFilter(AntPathRequestMatcher matcher,
+												   SamlTransformer transformer,
 												   SamlValidator validator,
-												   StaticServiceProviderResolver resolver) {
-		super(new AntPathRequestMatcher("/saml/sp/SSO/**"));
+												   StaticServiceProviderResolver resolver
+	) {
+		super(matcher);
 		this.transformer = transformer;
 		this.validator = validator;
 		this.resolver = resolver;
@@ -64,7 +66,8 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		Response samlResponse = super.requiresAuthentication(request, response) ? getSamlWebResponse(request,
+		Response samlResponse = super.requiresAuthentication(request, response) ? getSamlWebResponse(
+			request,
 			resolver.resolve(request)
 		) : null;
 		return samlResponse != null;

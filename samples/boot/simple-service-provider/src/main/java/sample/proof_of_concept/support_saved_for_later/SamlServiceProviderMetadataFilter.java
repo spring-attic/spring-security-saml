@@ -40,16 +40,18 @@ public class SamlServiceProviderMetadataFilter extends SamlFilter {
 	private final SamlTransformer transformer;
 	private final StaticServiceProviderResolver resolver;
 
-	private AntPathRequestMatcher matcher = new AntPathRequestMatcher("/saml/sp/metadata/**");
+	private final AntPathRequestMatcher matcher;
 	private String filename = "saml-service-provider-metadata.xml";
 
 
-	public SamlServiceProviderMetadataFilter(SamlTemplateEngine samlTemplateEngine,
+	public SamlServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
+											 SamlTemplateEngine samlTemplateEngine,
 											 SamlTransformer transformer,
 											 StaticServiceProviderResolver resolver) {
 		super(samlTemplateEngine);
 		this.transformer = transformer;
 		this.resolver = resolver;
+		this.matcher = matcher;
 	}
 
 

@@ -42,6 +42,7 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.test.web.servlet.MvcResult;
-
 import sample.SecurityConfiguration;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
@@ -119,7 +118,7 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("SP Initiated Login - Do not Sign requests")
 	void getAuthNRequestNotSigned() throws Exception {
-		modifyConfig(builder -> builder.withSignRequests(false));
+		mockConfig(builder -> builder.withSignRequests(false));
 		AuthenticationRequest authn = getAuthenticationRequest();
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -195,7 +194,7 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("Service Provider entity ID is generated")
 	void generateSpEntityId() throws Exception {
-		modifyConfig(builder -> builder.withEntityId(null));
+		mockConfig(builder -> builder.withEntityId(null));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://localhost"));
@@ -204,13 +203,13 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("Service Provider entity ID is based on configured base path")
 	void generateSpEntityIdFromBasePath() throws Exception {
-		modifyConfig(builder -> builder.withEntityId(null).withBasePath("http://localhost:8080/sample-sp"));
+		mockConfig(builder -> builder.withEntityId(null).withBasePath("http://localhost:8080/sample-sp"));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));
 	}
 
-	private void modifyConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
+	private void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
 		Mockito.doAnswer(
 			invocation -> {
 				HostedServiceProviderConfiguration config =

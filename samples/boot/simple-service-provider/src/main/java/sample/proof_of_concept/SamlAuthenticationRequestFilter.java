@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
@@ -40,7 +41,6 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saved_for_later.SamlProviderNotFoundException;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
@@ -58,12 +58,14 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
-	private AntPathRequestMatcher matcher = new AntPathRequestMatcher("/saml/sp/discovery/**");
+	private final AntPathRequestMatcher matcher;
 
-	public SamlAuthenticationRequestFilter(SamlTemplateEngine samlTemplateEngine,
+	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
+										   SamlTemplateEngine samlTemplateEngine,
 										   SamlTransformer transformer,
 										   StaticServiceProviderResolver resolver) {
 		super(samlTemplateEngine);
+		this.matcher = matcher;
 		this.resolver = resolver;
 		this.transformer = transformer;
 	}

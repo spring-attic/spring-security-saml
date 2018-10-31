@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 @Controller
 public class ServiceProviderController {
 
-	private static final Log logger =LogFactory.getLog(ServiceProviderController.class);
+	private static final Log logger = LogFactory.getLog(ServiceProviderController.class);
 
 	@RequestMapping(value = {"/", "/index", "/logged-in"})
 	public String home() {

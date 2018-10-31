@@ -105,11 +105,11 @@ public class SecurityConfiguration {
 			super.configure(http);
 			http.apply(
 				serviceProvider()
-					.setPrefix("/saml/sp")
-					.setServiceProviderResolver(resolver)
-					.setSamlTransformer(samlTransformer)
-					.setSamlValidator(samlValidator)
-					.setSamlTemplateEngine(samlTemplateEngine)
+					.prefix("/saml/sp")
+					.serviceProviderResolver(resolver)
+					.samlTransformer(samlTransformer)
+					.samlValidator(samlValidator)
+					.samlTemplateEngine(samlTemplateEngine)
 			);
 		}
 	}

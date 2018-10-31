@@ -23,6 +23,7 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.saved_for_later.SamlValidator;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
 import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
@@ -58,24 +59,34 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	@Override
 	public void configure(HttpSecurity builder) throws Exception {
+		String matchPrefix = "/" + stripSlashes(prefix);
 
 		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
+			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
 			samlTemplateEngine,
 			samlTransformer,
 			resolver
 		);
 
-		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(samlTemplateEngine, resolver);
-		selectFilter.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
+		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
+			new AntPathRequestMatcher(matchPrefix + "/select/**"),
+			samlTemplateEngine,
+			resolver
+		)
+			.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
 
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
+			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
 			samlTemplateEngine,
 			samlTransformer,
 			resolver
 		);
 
 		SamlProcessAuthenticationResponseFilter authenticationFilter = new SamlProcessAuthenticationResponseFilter(
-			samlTransformer, samlValidator, resolver
+			new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
+			samlTransformer,
+			samlValidator,
+			resolver
 		);
 
 		builder.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
@@ -85,27 +96,27 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	}
 
-	public SamlServiceProviderDsl setSamlTransformer(SamlTransformer samlTransformer) {
+	public SamlServiceProviderDsl samlTransformer(SamlTransformer samlTransformer) {
 		this.samlTransformer = samlTransformer;
 		return this;
 	}
 
-	public SamlServiceProviderDsl setSamlValidator(SamlValidator samlValidator) {
+	public SamlServiceProviderDsl samlValidator(SamlValidator samlValidator) {
 		this.samlValidator = samlValidator;
 		return this;
 	}
 
-	public SamlServiceProviderDsl setPrefix(String prefix) {
+	public SamlServiceProviderDsl prefix(String prefix) {
 		this.prefix = prefix;
 		return this;
 	}
 
-	public SamlServiceProviderDsl setServiceProviderResolver(StaticServiceProviderResolver resolver) {
+	public SamlServiceProviderDsl serviceProviderResolver(StaticServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
-	public SamlServiceProviderDsl setSamlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
+	public SamlServiceProviderDsl samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return this;
 	}

@@ -29,11 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlTemplateEngine;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.ExternalProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.provider.HostedServiceProvider;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -51,13 +50,15 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderUIFilter.class);
 
 	private final StaticServiceProviderResolver resolver;
-	private RequestMatcher requestMatcher = new AntPathRequestMatcher("/saml/sp/select/**");;
+	private final RequestMatcher matcher;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 
-	public SelectIdentityProviderUIFilter(SamlTemplateEngine samlTemplateEngine,
-											 StaticServiceProviderResolver resolver) {
+	public SelectIdentityProviderUIFilter(RequestMatcher matcher,
+										  SamlTemplateEngine samlTemplateEngine,
+										  StaticServiceProviderResolver resolver) {
 		super(samlTemplateEngine);
+		this.matcher = matcher;
 		this.resolver = resolver;
 	}
 
@@ -65,7 +66,7 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (requestMatcher.matches(request)) {
+		if (matcher.matches(request)) {
 			HostedServiceProvider provider = resolver.resolve(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
@@ -107,7 +108,7 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 	}
 
 	private String getDiscoveryRedirect(HostedServiceProvider provider,
-										  ExternalProviderConfiguration p) throws UnsupportedEncodingException {
+										ExternalProviderConfiguration p) throws UnsupportedEncodingException {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
@@ -117,13 +118,8 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 		return builder.build().toUriString();
 	}
 
-	public RequestMatcher getRequestMatcher() {
-		return requestMatcher;
-	}
-
-	public SelectIdentityProviderUIFilter setRequestMatcher(RequestMatcher requestMatcher) {
-		this.requestMatcher = requestMatcher;
-		return this;
+	public RequestMatcher getMatcher() {
+		return matcher;
 	}
 
 	public String getSelectTemplate() {

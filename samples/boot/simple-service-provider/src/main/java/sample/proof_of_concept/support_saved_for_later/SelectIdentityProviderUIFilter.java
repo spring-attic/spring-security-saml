@@ -28,24 +28,24 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.ExternalProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sample.proof_of_concept.SamlFilter;
+import sample.proof_of_concept.SamlTemplateProcessor;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class SelectIdentityProviderUIFilter extends SamlFilter {
+public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderUIFilter.class);
 
@@ -53,11 +53,12 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 	private final RequestMatcher matcher;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
+	private final SamlTemplateProcessor template;
 
 	public SelectIdentityProviderUIFilter(RequestMatcher matcher,
-										  SamlTemplateEngine samlTemplateEngine,
-										  StaticServiceProviderResolver resolver) {
-		super(samlTemplateEngine);
+										  StaticServiceProviderResolver resolver,
+										  SamlTemplateProcessor template) {
+		this.template = template;
 		this.matcher = matcher;
 		this.resolver = resolver;
 	}
@@ -94,7 +95,7 @@ public class SelectIdentityProviderUIFilter extends SamlFilter {
 				Map<String, Object> model = new HashMap<>();
 				model.put("title", "Select an Identity Provider");
 				model.put("providers", providers);
-				processHtmlBody(
+				template.processHtmlBody(
 					request,
 					response,
 					selectTemplate,

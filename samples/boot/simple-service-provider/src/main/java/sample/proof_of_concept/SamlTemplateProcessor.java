@@ -27,25 +27,24 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public abstract class SamlFilter extends OncePerRequestFilter {
+public class SamlTemplateProcessor {
 
 	private final SamlTemplateEngine samlTemplateEngine;
 	private String errorTemplate = "/templates/spi/generic-error.vm";
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
-	protected SamlFilter(SamlTemplateEngine samlTemplateEngine) {
+	public SamlTemplateProcessor(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 	}
 
-	protected void processHtmlBody(HttpServletRequest request,
-								   HttpServletResponse response,
-								   String html,
-								   Map<String, Object> model) {
+	public void processHtmlBody(HttpServletRequest request,
+								HttpServletResponse response,
+								String html,
+								Map<String, Object> model) {
 		cacheHeaderWriter.writeHeaders(request, response);
 		response.setContentType(TEXT_HTML_VALUE);
 		response.setCharacterEncoding(UTF_8.name());
@@ -66,7 +65,7 @@ public abstract class SamlFilter extends OncePerRequestFilter {
 		return errorTemplate;
 	}
 
-	public SamlFilter setErrorTemplate(String errorTemplate) {
+	public SamlTemplateProcessor setErrorTemplate(String errorTemplate) {
 		this.errorTemplate = errorTemplate;
 		return this;
 	}
@@ -75,7 +74,7 @@ public abstract class SamlFilter extends OncePerRequestFilter {
 		return cacheHeaderWriter;
 	}
 
-	public SamlFilter setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
+	public SamlTemplateProcessor setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
 		this.cacheHeaderWriter = cacheHeaderWriter;
 		return this;
 	}

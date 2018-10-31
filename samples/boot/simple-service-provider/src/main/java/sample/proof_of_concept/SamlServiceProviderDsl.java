@@ -59,27 +59,26 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 
 	@Override
 	public void configure(HttpSecurity builder) throws Exception {
+		SamlTemplateProcessor template = new SamlTemplateProcessor(samlTemplateEngine);
 		String matchPrefix = "/" + stripSlashes(prefix);
 
 		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
 			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
-			samlTemplateEngine,
 			samlTransformer,
 			resolver
 		);
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
 			new AntPathRequestMatcher(matchPrefix + "/select/**"),
-			samlTemplateEngine,
-			resolver
+			resolver, template
 		)
 			.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
 
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
 			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
-			samlTemplateEngine,
 			samlTransformer,
-			resolver
+			resolver,
+			template
 		);
 
 		SamlProcessAuthenticationResponseFilter authenticationFilter = new SamlProcessAuthenticationResponseFilter(

@@ -24,31 +24,30 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.web.header.HeaderWriter;
+import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import sample.proof_of_concept.SamlFilter;
 import sample.proof_of_concept.StaticServiceProviderResolver;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlServiceProviderMetadataFilter extends SamlFilter {
+public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
 	private final StaticServiceProviderResolver resolver;
 
 	private final AntPathRequestMatcher matcher;
 	private String filename = "saml-service-provider-metadata.xml";
-
+	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
 	public SamlServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
-											 SamlTemplateEngine samlTemplateEngine,
 											 SamlTransformer transformer,
 											 StaticServiceProviderResolver resolver) {
-		super(samlTemplateEngine);
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.matcher = matcher;
@@ -61,7 +60,7 @@ public class SamlServiceProviderMetadataFilter extends SamlFilter {
 		if (matcher.matches(request)) {
 			HostedServiceProvider provider = resolver.resolve(request);
 			String xml = transformer.toXml(provider.getMetadata());
-			getCacheHeaderWriter().writeHeaders(request, response);
+			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");
 			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"" + ";");

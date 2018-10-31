@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -44,6 +43,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saved_for_later.SamlProviderNotFoundException;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -51,7 +51,7 @@ import org.joda.time.DateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class SamlAuthenticationRequestFilter extends SamlFilter {
+public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
 	private final StaticServiceProviderResolver resolver;
@@ -59,12 +59,13 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
 	private final AntPathRequestMatcher matcher;
+	private final SamlTemplateProcessor template;
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
-										   SamlTemplateEngine samlTemplateEngine,
 										   SamlTransformer transformer,
-										   StaticServiceProviderResolver resolver) {
-		super(samlTemplateEngine);
+										   StaticServiceProviderResolver resolver,
+										   SamlTemplateProcessor template) {
+		this.template = template;
 		this.matcher = matcher;
 		this.resolver = resolver;
 		this.transformer = transformer;
@@ -118,7 +119,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 			if (hasText(relayState)) {
 				model.put("RelayState", relayState);
 			}
-			processHtmlBody(
+			template.processHtmlBody(
 				request,
 				response,
 				getPostTemplate(),
@@ -133,10 +134,10 @@ public class SamlAuthenticationRequestFilter extends SamlFilter {
 	private void displayError(HttpServletRequest request,
 							  HttpServletResponse response,
 							  String message) {
-		processHtmlBody(
+		template.processHtmlBody(
 			request,
 			response,
-			getErrorTemplate(),
+			template.getErrorTemplate(),
 			Collections.singletonMap("message", message)
 		);
 	}

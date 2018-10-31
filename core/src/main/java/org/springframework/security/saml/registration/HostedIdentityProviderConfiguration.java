@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -46,7 +46,7 @@ public class HostedIdentityProviderConfiguration extends
 											   boolean signAssertions,
 											   boolean wantRequestsSigned,
 											   String metadata,
-											   List<SimpleKey> keys,
+											   List<KeyData> keys,
 											   AlgorithmMethod defaultSigningAlgorithm,
 											   DigestMethod defaultDigest,
 											   List<NameId> nameIds,
@@ -126,7 +126,7 @@ public class HostedIdentityProviderConfiguration extends
 		private boolean encryptAssertions;
 		private String metadata;
 		private KeyEncryptionMethod keyEncryptionAlgorithm;
-		private List<SimpleKey> keys;
+		private List<KeyData> keys;
 		private AlgorithmMethod defaultSigningAlgorithm;
 		private DataEncryptionMethod dataEncryptionAlgorithm;
 		private DigestMethod defaultDigest;
@@ -219,7 +219,7 @@ public class HostedIdentityProviderConfiguration extends
 			return this;
 		}
 
-		public Builder withKeys(List<SimpleKey> keys) {
+		public Builder withKeys(List<KeyData> keys) {
 			this.keys = keys;
 			return this;
 		}

@@ -39,7 +39,7 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -85,7 +85,7 @@ public class DefaultValidator implements SamlValidator {
 	}
 
 	@Override
-	public Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> verificationKeys)
+	public Signature validateSignature(Saml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
 			return implementation.validateSignature(saml2Object, verificationKeys);

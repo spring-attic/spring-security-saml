@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
@@ -54,10 +54,10 @@ public class Assertion extends ImplementationHolder<Assertion> {
 	private Advice advice;
 	private List<AuthenticationStatement> authenticationStatements = new LinkedList<>();
 	private List<Attribute> attributes = new LinkedList<>();
-	private SimpleKey signingKey;
+	private KeyData signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
-	private SimpleKey encryptionKey;
+	private KeyData encryptionKey;
 	private KeyEncryptionMethod keyAlgorithm;
 	private DataEncryptionMethod dataAlgorithm;
 	private final boolean encrypted;
@@ -162,7 +162,7 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
@@ -204,14 +204,14 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
-	public Assertion setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public Assertion setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;
 		return this;
 	}
 
-	public Assertion setEncryptionKey(SimpleKey encryptionKey,
+	public Assertion setEncryptionKey(KeyData encryptionKey,
 									  KeyEncryptionMethod keyAlgorithm,
 									  DataEncryptionMethod dataAlgorithm) {
 		this.encryptionKey = encryptionKey;
@@ -220,7 +220,7 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
-	public SimpleKey getEncryptionKey() {
+	public KeyData getEncryptionKey() {
 		return encryptionKey;
 	}
 

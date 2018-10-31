@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.signature.Signature;
 
@@ -71,13 +71,13 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 	public abstract String toXml(Saml2Object saml2Object);
 
 	public abstract Saml2Object resolve(
-		String xml, List<SimpleKey> verificationKeys, List<SimpleKey>
+		String xml, List<KeyData> verificationKeys, List<KeyData>
 		localKeys
 	);
 
-	public abstract Saml2Object resolve(byte[] xml, List<SimpleKey> trustedKeys, List<SimpleKey> localKeys);
+	public abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
 
-	public abstract Signature validateSignature(Saml2Object saml2Object, List<SimpleKey> trustedKeys);
+	public abstract Signature validateSignature(Saml2Object saml2Object, List<KeyData> trustedKeys);
 
 	public String encode(byte[] b) {
 		return EncodingUtils.encode(b);

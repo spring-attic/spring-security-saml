@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
@@ -33,7 +33,7 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 public class Response extends StatusResponse<Response> {
 	private List<Assertion> assertions = new LinkedList<>();
 
-	private SimpleKey signingKey = null;
+	private KeyData signingKey = null;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
@@ -47,7 +47,7 @@ public class Response extends StatusResponse<Response> {
 		return this;
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
@@ -59,7 +59,7 @@ public class Response extends StatusResponse<Response> {
 		return digest;
 	}
 
-	public Response setSigningKey(SimpleKey signingKey,
+	public Response setSigningKey(KeyData signingKey,
 								  AlgorithmMethod algorithm,
 								  DigestMethod digest) {
 		this.signingKey = signingKey;

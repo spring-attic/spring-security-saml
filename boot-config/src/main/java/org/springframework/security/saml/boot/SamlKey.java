@@ -18,7 +18,7 @@
 package org.springframework.security.saml.boot;
 
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 
 public class SamlKey {
 	private String name;
@@ -42,15 +42,15 @@ public class SamlKey {
 		this.type = type;
 	}
 
-	public SimpleKey toSimpleKey() {
+	public KeyData toSimpleKey() {
 		return toSimpleKey(
 			getName(),
 			getType()
 		);
 	}
 
-	public SimpleKey toSimpleKey(String name, KeyType type) {
-		return new SimpleKey(
+	public KeyData toSimpleKey(String name, KeyType type) {
+		return new KeyData(
 			name,
 			getPrivateKey(),
 			getCertificate(),

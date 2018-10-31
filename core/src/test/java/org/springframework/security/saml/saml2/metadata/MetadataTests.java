@@ -23,7 +23,7 @@ import java.util.List;
 import javax.xml.datatype.Duration;
 
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
@@ -63,7 +63,7 @@ import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount
 
 public class MetadataTests extends MetadataBase {
 
-	private SimpleKey keyLoginRunPivotalIo = new SimpleKey(
+	private KeyData keyLoginRunPivotalIo = new KeyData(
 		"test",
 		null,
 		"MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
@@ -91,7 +91,7 @@ public class MetadataTests extends MetadataBase {
 		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
-		SimpleKey key = new SimpleKey(
+		KeyData key = new KeyData(
 			"signing",
 			spSigning.getPrivateKey(),
 			spSigning.getCertificate(),
@@ -211,7 +211,7 @@ public class MetadataTests extends MetadataBase {
 		IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 
-		SimpleKey key = new SimpleKey(
+		KeyData key = new KeyData(
 			"signing",
 			spSigning.getPrivateKey(),
 			spSigning.getCertificate(),
@@ -315,8 +315,8 @@ public class MetadataTests extends MetadataBase {
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		SimpleKey spSigning = provider.getKeys().get(0);
-		SimpleKey spEncryption = provider.getKeys().get(1);
+		KeyData spSigning = provider.getKeys().get(0);
+		KeyData spEncryption = provider.getKeys().get(1);
 		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
 		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
@@ -408,7 +408,7 @@ public class MetadataTests extends MetadataBase {
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(1));
-		SimpleKey spSigning = provider.getKeys().get(0);
+		KeyData spSigning = provider.getKeys().get(0);
 		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(RSA_TEST_KEY.getSimpleKey("test").getCertificate()));
 
@@ -551,8 +551,8 @@ public class MetadataTests extends MetadataBase {
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		SimpleKey spSigning = provider.getKeys().get(0);
-		SimpleKey spEncryption = provider.getKeys().get(1);
+		KeyData spSigning = provider.getKeys().get(0);
+		KeyData spEncryption = provider.getKeys().get(1);
 		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(IDP_RSA_KEY.getSimpleKey("alias").getCertificate()));
 		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
@@ -599,8 +599,8 @@ public class MetadataTests extends MetadataBase {
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		SimpleKey spSigning = provider.getKeys().get(0);
-		SimpleKey spEncryption = provider.getKeys().get(1);
+		KeyData spSigning = provider.getKeys().get(0);
+		KeyData spEncryption = provider.getKeys().get(1);
 		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
 		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));

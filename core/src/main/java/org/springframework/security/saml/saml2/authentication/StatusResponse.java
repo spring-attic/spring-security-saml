@@ -16,7 +16,7 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -38,7 +38,7 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 	private Issuer issuer;
 	private Signature signature;
 	private Status status;
-	private SimpleKey signingKey;
+	private KeyData signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
@@ -128,7 +128,7 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 		return _this();
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
@@ -140,7 +140,7 @@ public class StatusResponse<T extends StatusResponse> extends ImplementationHold
 		return digest;
 	}
 
-	public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public T setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

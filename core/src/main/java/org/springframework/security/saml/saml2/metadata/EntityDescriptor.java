@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -42,7 +42,7 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 	private Duration cacheDuration;
 	private List<? extends Provider> providers;
 	private Signature signature;
-	private SimpleKey signingKey;
+	private KeyData signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
@@ -151,7 +151,7 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 		return _this();
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
@@ -172,7 +172,7 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 		return _this();
 	}
 
-	public T setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public T setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

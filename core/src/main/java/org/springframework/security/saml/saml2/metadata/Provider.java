@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
@@ -34,7 +34,7 @@ import org.joda.time.DateTime;
 public class Provider<T extends Provider<T>> {
 
 	private Signature signature;
-	private List<SimpleKey> keys = new LinkedList<>();
+	private List<KeyData> keys = new LinkedList<>();
 	private String id;
 	private DateTime validUntil;
 	private Duration cacheDuration;
@@ -49,11 +49,11 @@ public class Provider<T extends Provider<T>> {
 		return (T) this;
 	}
 
-	public List<SimpleKey> getKeys() {
+	public List<KeyData> getKeys() {
 		return Collections.unmodifiableList(keys);
 	}
 
-	public T setKeys(List<SimpleKey> keys) {
+	public T setKeys(List<KeyData> keys) {
 		this.keys.clear();
 		if (keys != null) {
 			this.keys.addAll(keys);

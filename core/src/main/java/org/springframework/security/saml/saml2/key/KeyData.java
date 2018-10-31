@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2.key;
 
-public class SimpleKey {
+public class KeyData {
 
 	private final String name;
 	private final String privateKey;
@@ -25,11 +25,11 @@ public class SimpleKey {
 	private final String passphrase;
 	private final KeyType type;
 
-	public SimpleKey(String name,
-					 String privateKey,
-					 String certificate,
-					 String passphrase,
-					 KeyType type) {
+	public KeyData(String name,
+				   String privateKey,
+				   String certificate,
+				   String passphrase,
+				   KeyType type) {
 		this.name = name;
 		this.privateKey = privateKey;
 		this.certificate = certificate;
@@ -37,7 +37,7 @@ public class SimpleKey {
 		this.type = type;
 	}
 
-	public SimpleKey(SimpleKey other) {
+	public KeyData(KeyData other) {
 		this(
 			other.getName(),
 			other.getPrivateKey(),

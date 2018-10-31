@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
@@ -37,7 +37,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 	private Endpoint assertionConsumerService;
 	private RequestedAuthenticationContext requestedAuthenticationContext;
 	private AuthenticationContextClassReference authenticationContextClassReference;
-	private SimpleKey signingKey;
+	private KeyData signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 
@@ -92,7 +92,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return _this();
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
@@ -131,7 +131,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return isPassive;
 	}
 
-	public AuthenticationRequest setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public AuthenticationRequest setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

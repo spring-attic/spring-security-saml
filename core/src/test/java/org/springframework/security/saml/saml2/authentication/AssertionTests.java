@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
@@ -71,16 +71,16 @@ import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
 public class AssertionTests extends MetadataBase {
 
 
-	private static final SimpleKey decryptionVerificationKey =
-		new SimpleKey(
+	private static final KeyData decryptionVerificationKey =
+		new KeyData(
 			"simplesamlphp",
 			null,
 			"MIIEEzCCAvugAwIBAgIJAIc1qzLrv+5nMA0GCSqGSIb3DQEBCwUAMIGfMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ08xFDASBgNVBAcMC0Nhc3RsZSBSb2NrMRwwGgYDVQQKDBNTYW1sIFRlc3RpbmcgU2VydmVyMQswCQYDVQQLDAJJVDEgMB4GA1UEAwwXc2ltcGxlc2FtbHBocC5jZmFwcHMuaW8xIDAeBgkqhkiG9w0BCQEWEWZoYW5pa0BwaXZvdGFsLmlvMB4XDTE1MDIyMzIyNDUwM1oXDTI1MDIyMjIyNDUwM1owgZ8xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDTzEUMBIGA1UEBwwLQ2FzdGxlIFJvY2sxHDAaBgNVBAoME1NhbWwgVGVzdGluZyBTZXJ2ZXIxCzAJBgNVBAsMAklUMSAwHgYDVQQDDBdzaW1wbGVzYW1scGhwLmNmYXBwcy5pbzEgMB4GCSqGSIb3DQEJARYRZmhhbmlrQHBpdm90YWwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC4cn62E1xLqpN34PmbrKBbkOXFjzWgJ9b+pXuaRft6A339uuIQeoeH5qeSKRVTl32L0gdz2ZivLwZXW+cqvftVW1tvEHvzJFyxeTW3fCUeCQsebLnA2qRa07RkxTo6Nf244mWWRDodcoHEfDUSbxfTZ6IExSojSIU2RnD6WllYWFdD1GFpBJOmQB8rAc8wJIBdHFdQnX8Ttl7hZ6rtgqEYMzYVMuJ2F2r1HSU1zSAvwpdYP6rRGFRJEfdA9mm3WKfNLSc5cljz0X/TXy0vVlAV95l9qcfFzPmrkNIst9FZSwpvB49LyAVke04FQPPwLgVH4gphiJH3jvZ7I+J5lS8VAgMBAAGjUDBOMB0GA1UdDgQWBBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAfBgNVHSMEGDAWgBTTyP6Cc5HlBJ5+ucVCwGc5ogKNGzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAvMS4EQeP/ipV4jOG5lO6/tYCb/iJeAduOnRhkJk0DbX329lDLZhTTL/x/w/9muCVcvLrzEp6PN+VWfw5E5FWtZN0yhGtP9R+vZnrV+oc2zGD+no1/ySFOe3EiJCO5dehxKjYEmBRv5sU/LZFKZpozKN/BMEa6CqLuxbzb7ykxVr7EVFXwltPxzE9TmL9OACNNyF5eJHWMRMllarUvkcXlh4pux4ks9e6zV9DQBy2zds9f1I3qxg0eX6JnGrXi/ZiCT+lJgVe3ZFXiejiLAiKB04sXW3ti0LW3lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk",
 			null,
 			KeyType.SIGNING
 		);
-	private static final SimpleKey decryptionKey =
-		new SimpleKey(
+	private static final KeyData decryptionKey =
+		new KeyData(
 			"decryption-key",
 			"-----BEGIN RSA PRIVATE KEY-----\n" +
 				"Proc-Type: 4,ENCRYPTED\n" +
@@ -568,8 +568,8 @@ public class AssertionTests extends MetadataBase {
 	public void encryptAssertion(KeyEncryptionMethod keyAlgorithm, DataEncryptionMethod dataAlgorithm) throws Exception {
 		Response response =
 			(Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
-		SimpleKey encryptionKey =
-			new SimpleKey(
+		KeyData encryptionKey =
+			new KeyData(
 				"encryption-key",
 				null,
 				decryptionKey.getCertificate(),
@@ -585,8 +585,8 @@ public class AssertionTests extends MetadataBase {
 		assertThat(encryptedXml, containsString("xenc:CipherValue"));
 		assertThat(encryptedXml, containsString("saml2:EncryptedAssertion"));
 
-		List<SimpleKey> verification = asList(decryptionVerificationKey);
-		List<SimpleKey> local = asList(decryptionKey);
+		List<KeyData> verification = asList(decryptionVerificationKey);
+		List<KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(encryptedXml, verification, local);
 		assertNotNull(resolve);
 		assertThat(resolve.getClass(), equalTo(Response.class));
@@ -604,8 +604,8 @@ public class AssertionTests extends MetadataBase {
 	@Test
 	public void decryptAssertion() throws Exception {
 		byte[] assertion = getFileBytes("/test-data/assertion/assertion-encrypted-external-20180523.xml");
-		List<SimpleKey> verification = asList(decryptionVerificationKey);
-		List<SimpleKey> local = asList(decryptionKey);
+		List<KeyData> verification = asList(decryptionVerificationKey);
+		List<KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(assertion, verification, local);
 		assertNotNull(resolve);
 		assertThat(resolve.getClass(), equalTo(Response.class));
@@ -618,8 +618,8 @@ public class AssertionTests extends MetadataBase {
 	@Test
 	public void originalXML() throws Exception {
 		byte[] assertion = getFileBytes("/test-data/assertion/assertion-encrypted-external-20180523.xml");
-		List<SimpleKey> verification = asList(decryptionVerificationKey);
-		List<SimpleKey> local = asList(decryptionKey);
+		List<KeyData> verification = asList(decryptionVerificationKey);
+		List<KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(assertion, verification, local);
 		assertNotNull(resolve);
 		assertThat(resolve.getClass(), equalTo(Response.class));

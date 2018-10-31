@@ -24,7 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
@@ -42,10 +42,10 @@ public abstract class MetadataBase {
 
 	protected static SamlTransformer config;
 	protected static Clock time;
-	protected SimpleKey spSigning;
-	protected SimpleKey idpSigning;
-	protected SimpleKey spVerifying;
-	protected SimpleKey idpVerifying;
+	protected KeyData spSigning;
+	protected KeyData idpSigning;
+	protected KeyData spVerifying;
+	protected KeyData idpVerifying;
 	protected String spBaseUrl;
 	protected String idpBaseUrl;
 	protected ServiceProviderMetadata serviceProviderMetadata;
@@ -68,9 +68,9 @@ public abstract class MetadataBase {
 	@BeforeEach
 	public void setup() {
 		idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
-		idpVerifying = new SimpleKey("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
+		idpVerifying = new KeyData("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
 		spSigning = SP_RSA_KEY.getSimpleKey("sp");
-		spVerifying = new SimpleKey("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
+		spVerifying = new KeyData("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
 		spBaseUrl = "http://sp.localhost:8080/uaa";
 		idpBaseUrl = "http://idp.localhost:8080/uaa";
 		helper = new SamlTestObjectHelper(time);

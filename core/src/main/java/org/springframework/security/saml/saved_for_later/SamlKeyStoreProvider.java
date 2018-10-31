@@ -26,7 +26,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.UUID;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.util.X509Utilities;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -35,7 +35,7 @@ public interface SamlKeyStoreProvider {
 
 	char[] DEFAULT_KS_PASSWD = UUID.randomUUID().toString().toCharArray();
 
-	default KeyStore getKeyStore(SimpleKey key) {
+	default KeyStore getKeyStore(KeyData key) {
 		try {
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(null, DEFAULT_KS_PASSWD);

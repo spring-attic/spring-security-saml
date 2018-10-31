@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
@@ -97,8 +97,8 @@ public class SamlTestObjectHelper {
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
 														   HostedServiceProviderConfiguration configuration) {
-		List<SimpleKey> keys = configuration.getKeys();
-		SimpleKey signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+		List<KeyData> keys = configuration.getKeys();
+		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String aliasPath = getAliasPath(configuration);
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
@@ -132,8 +132,8 @@ public class SamlTestObjectHelper {
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   SimpleKey signingKey,
-														   List<SimpleKey> keys,
+														   KeyData signingKey,
+														   List<KeyData> keys,
 														   String prefix,
 														   String aliasPath,
 														   AlgorithmMethod algorithmMethod,
@@ -188,8 +188,8 @@ public class SamlTestObjectHelper {
 
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
 															 HostedIdentityProviderConfiguration configuration) {
-		List<SimpleKey> keys = configuration.getKeys();
-		SimpleKey signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+		List<KeyData> keys = configuration.getKeys();
+		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);
@@ -209,8 +209,8 @@ public class SamlTestObjectHelper {
 	}
 
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-															 SimpleKey signingKey,
-															 List<SimpleKey> keys,
+															 KeyData signingKey,
+															 List<KeyData> keys,
 															 String prefix,
 															 String aliasPath,
 															 AlgorithmMethod algorithmMethod,

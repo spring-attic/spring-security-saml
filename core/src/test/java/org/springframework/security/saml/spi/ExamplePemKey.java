@@ -16,7 +16,7 @@
  */
 package org.springframework.security.saml.spi;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 
 /*
 
@@ -154,8 +154,8 @@ public enum ExamplePemKey {
 		this.passphrase = passphrase;
 	}
 
-	public SimpleKey getSimpleKey(String alias) {
-		return new SimpleKey(alias, getPrivate(), getPublic(), getPassphrase(), null);
+	public KeyData getSimpleKey(String alias) {
+		return new KeyData(alias, getPrivate(), getPublic(), getPassphrase(), null);
 	}
 
 	public String getPrivate() {
@@ -170,7 +170,7 @@ public enum ExamplePemKey {
 		return passphrase;
 	}
 
-	public SimpleKey getPublicKey(String alias) {
-		return new SimpleKey(alias, null, getPublic(), null, null);
+	public KeyData getPublicKey(String alias) {
+		return new KeyData(alias, null, getPublic(), null, null);
 	}
 }

@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -59,7 +59,7 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+	public Saml2Object fromXml(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		return implementation.resolve(xml, verificationKeys, localKeys);
 	}
 

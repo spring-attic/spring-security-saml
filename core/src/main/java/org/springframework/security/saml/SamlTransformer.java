@@ -20,7 +20,7 @@ package org.springframework.security.saml;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
 
 public interface SamlTransformer {
@@ -50,7 +50,7 @@ public interface SamlTransformer {
 	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
-	default Saml2Object fromXml(String xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys) {
+	default Saml2Object fromXml(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		return fromXml(xml.getBytes(StandardCharsets.UTF_8), verificationKeys, localKeys);
 	}
 
@@ -69,7 +69,7 @@ public interface SamlTransformer {
 	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
-	Saml2Object fromXml(byte[] xml, List<SimpleKey> verificationKeys, List<SimpleKey> localKeys);
+	Saml2Object fromXml(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys);
 
 	/**
 	 * Deflates and base64 encodes the SAML message readying it for transport.

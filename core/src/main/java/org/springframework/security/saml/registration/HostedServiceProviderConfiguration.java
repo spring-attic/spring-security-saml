@@ -19,7 +19,7 @@ package org.springframework.security.saml.registration;
 
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -36,7 +36,7 @@ public class HostedServiceProviderConfiguration extends
 											  String entityId,
 											  boolean signMetadata,
 											  String metadata,
-											  List<SimpleKey> keys,
+											  List<KeyData> keys,
 											  AlgorithmMethod defaultSigningAlgorithm,
 											  DigestMethod defaultDigest,
 											  List<NameId> nameIds,
@@ -80,7 +80,7 @@ public class HostedServiceProviderConfiguration extends
 		private String entityId;
 		private boolean signMetadata;
 		private String metadata;
-		private List<SimpleKey> keys;
+		private List<KeyData> keys;
 		private AlgorithmMethod defaultSigningAlgorithm;
 		private DigestMethod defaultDigest;
 		private List<NameId> nameIds;
@@ -152,7 +152,7 @@ public class HostedServiceProviderConfiguration extends
 			return this;
 		}
 
-		public Builder withKeys(List<SimpleKey> keys) {
+		public Builder withKeys(List<KeyData> keys) {
 			this.keys = keys;
 			return this;
 		}

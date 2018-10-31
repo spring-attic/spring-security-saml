@@ -30,7 +30,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -108,7 +108,7 @@ public class ServiceProviderMetadataResolver {
 	private ServiceProviderMetadata generateMetadata(HostedServiceProviderConfiguration configuration) {
 
 		String prefix = configuration.getPrefix();
-		List<SimpleKey> keys = configuration.getKeys();
+		List<KeyData> keys = configuration.getKeys();
 		String aliasPath = getAliasPath(configuration);
 		String baseUrl = configuration.getBasePath();
 		String entityId =

@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import org.springframework.security.saml.saml2.key.SimpleKey;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
@@ -30,7 +30,7 @@ import org.joda.time.DateTime;
  */
 public class LogoutRequest extends Request<LogoutRequest> {
 
-	private SimpleKey signingKey;
+	private KeyData signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
 	private NameIdPrincipal nameId;
@@ -82,11 +82,11 @@ public class LogoutRequest extends Request<LogoutRequest> {
 		return this;
 	}
 
-	public SimpleKey getSigningKey() {
+	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
-	public LogoutRequest setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public LogoutRequest setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;

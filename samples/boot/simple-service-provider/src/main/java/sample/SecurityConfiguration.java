@@ -29,15 +29,16 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 
-import sample.proof_of_concept.StaticServiceProviderResolver;
-import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
+import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.impl.ServiceProviderMetadataResolver;
+import sample.proof_of_concept.impl.StaticServiceProviderResolver;
 
 import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 
@@ -75,7 +76,7 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public StaticServiceProviderResolver serviceProviderResolver(SamlPropertyConfiguration samlPropertyConfiguration) {
+	public ServiceProviderResolver serviceProviderResolver(SamlPropertyConfiguration samlPropertyConfiguration) {
 		HostedServiceProviderConfiguration spConfig =
 			samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider();
 		return new StaticServiceProviderResolver(serviceProviderMetadata(), spConfig);
@@ -85,12 +86,12 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private final StaticServiceProviderResolver resolver;
+		private final ServiceProviderResolver resolver;
 		private final SamlValidator samlValidator;
 		private final SamlTransformer samlTransformer;
 		private final SamlTemplateEngine samlTemplateEngine;
 
-		public SamlSecurity(StaticServiceProviderResolver resolver,
+		public SamlSecurity(ServiceProviderResolver resolver,
 							SamlValidator samlValidator,
 							SamlTransformer samlTransformer,
 							SamlTemplateEngine samlTemplateEngine) {

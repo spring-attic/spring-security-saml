@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.impl;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -40,7 +41,6 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -48,13 +48,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import org.joda.time.DateTime;
+import sample.proof_of_concept.ServiceProviderResolver;
 
 import static org.springframework.util.StringUtils.hasText;
 
 public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
-	private final StaticServiceProviderResolver resolver;
+	private final ServiceProviderResolver resolver;
 
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
@@ -63,7 +64,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
 										   SamlTransformer transformer,
-										   StaticServiceProviderResolver resolver,
+										   ServiceProviderResolver resolver,
 										   SamlTemplateProcessor template) {
 		this.template = template;
 		this.matcher = matcher;

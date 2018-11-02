@@ -15,18 +15,16 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.impl;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
-import sample.proof_of_concept.support_saved_for_later.ServiceProviderMetadataResolver;
-
 import static org.springframework.util.StringUtils.hasText;
 
-public class StaticServiceProviderResolver {
+public class StaticServiceProviderResolver implements sample.proof_of_concept.ServiceProviderResolver {
 
 	private final HostedServiceProviderConfiguration configuration;
 	private final ServiceProviderMetadataResolver metadataResolver;
@@ -38,6 +36,7 @@ public class StaticServiceProviderResolver {
 		this.metadataResolver = metadataResolver;
 	}
 
+	@Override
 	public HostedServiceProvider resolve(HttpServletRequest request) {
 		HostedServiceProviderConfiguration config = getConfiguration(request);
 		if (!hasText(config.getBasePath())) {
@@ -52,6 +51,7 @@ public class StaticServiceProviderResolver {
 		);
 	}
 
+	@Override
 	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		return configuration;
 	}

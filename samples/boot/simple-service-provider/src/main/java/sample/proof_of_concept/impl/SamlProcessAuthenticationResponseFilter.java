@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept;
+package sample.proof_of_concept.impl;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -40,6 +40,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import sample.proof_of_concept.ServiceProviderResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
@@ -48,12 +49,12 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 	private static Log logger = LogFactory.getLog(SamlProcessAuthenticationResponseFilter.class);
 	private final SamlTransformer transformer;
 	private final SamlValidator validator;
-	private final StaticServiceProviderResolver resolver;
+	private final ServiceProviderResolver resolver;
 
 	public SamlProcessAuthenticationResponseFilter(AntPathRequestMatcher matcher,
 												   SamlTransformer transformer,
 												   SamlValidator validator,
-												   StaticServiceProviderResolver resolver
+												   ServiceProviderResolver resolver
 	) {
 		super(matcher);
 		this.transformer = transformer;

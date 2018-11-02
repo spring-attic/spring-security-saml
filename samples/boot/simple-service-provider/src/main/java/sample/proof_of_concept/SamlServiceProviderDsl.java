@@ -26,6 +26,9 @@ import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import sample.proof_of_concept.impl.SamlAuthenticationRequestFilter;
+import sample.proof_of_concept.impl.SamlProcessAuthenticationResponseFilter;
+import sample.proof_of_concept.impl.SamlTemplateProcessor;
 import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
 import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
 
@@ -39,7 +42,7 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	}
 
 	private String prefix = "/saml/sp";
-	private StaticServiceProviderResolver resolver;
+	private ServiceProviderResolver resolver;
 	private SamlTransformer samlTransformer;
 	private SamlValidator samlValidator;
 	private SamlTemplateEngine samlTemplateEngine;
@@ -115,7 +118,7 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		return this;
 	}
 
-	public SamlServiceProviderDsl serviceProviderResolver(StaticServiceProviderResolver resolver) {
+	public SamlServiceProviderDsl serviceProviderResolver(ServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}

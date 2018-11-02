@@ -45,7 +45,7 @@ public class SamlTemplateProcessor {
 								HttpServletResponse response,
 								String html,
 								Map<String, Object> model) {
-		cacheHeaderWriter.writeHeaders(request, response);
+		getCacheHeaderWriter().writeHeaders(request, response);
 		response.setContentType(TEXT_HTML_VALUE);
 		response.setCharacterEncoding(UTF_8.name());
 		StringWriter out = new StringWriter();

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.saved_for_later;
+package org.springframework.security.saml.spi.opensaml;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -26,6 +26,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.UUID;
 
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.util.X509Utilities;
 

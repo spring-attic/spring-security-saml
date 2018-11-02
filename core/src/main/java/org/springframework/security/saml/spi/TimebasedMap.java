@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saved_for_later;
+package org.springframework.security.saml.spi;
 
 import java.time.Clock;
 import java.util.AbstractMap;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class TimebasedMap<K, V> implements Map<K, V> {
+class TimebasedMap<K, V> implements Map<K, V> {
 
 	private Map<K, MapEntry<V>> map = new ConcurrentHashMap<>();
 	private long expirationTimeMills = 1000 * 60 * 10;
@@ -37,7 +37,7 @@ public class TimebasedMap<K, V> implements Map<K, V> {
 	private AtomicLong lastScan = new AtomicLong(System.currentTimeMillis());
 	private Clock time;
 
-	public TimebasedMap(Clock time) {
+	TimebasedMap(Clock time) {
 		this.time = time;
 	}
 

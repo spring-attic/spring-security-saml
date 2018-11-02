@@ -14,10 +14,11 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saved_for_later;
+package org.springframework.security.saml.spi;
 
 import java.time.Clock;
 
+import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.web.client.RestOperations;
 
 import static java.lang.String.format;

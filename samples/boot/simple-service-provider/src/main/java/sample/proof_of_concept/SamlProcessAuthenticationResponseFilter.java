@@ -31,8 +31,8 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.saved_for_later.SamlValidator;
-import org.springframework.security.saml.saved_for_later.ValidationException;
+import org.springframework.security.saml.spi.SamlValidator;
+import org.springframework.security.saml.spi.ValidationException;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
@@ -125,12 +125,13 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 			validator.validate(r, provider);
 			authenticated = true;
 		} catch (ValidationException e) {
-			logger.debug("Unable to validate signature for SAML response.");
+			logger.debug(e.getMessage());
+			return null;
 		}
 
 		Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);
 		return new DefaultSamlAuthentication(
-			authenticated,
+			authenticated,//false if validation failed
 			assertion,
 			r.getOriginEntityId(),
 			provider.getMetadata().getEntityId(),

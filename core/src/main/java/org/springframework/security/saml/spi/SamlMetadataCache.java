@@ -15,20 +15,13 @@
  *
  */
 
-package org.springframework.security.saml.saved_for_later;
+package org.springframework.security.saml.spi;
 
-import org.springframework.security.saml.SamlException;
+public interface SamlMetadataCache {
 
-public class SamlKeyException extends SamlException {
-	public SamlKeyException(String message) {
-		super(message);
-	}
+	byte[] getMetadata(String uri, boolean skipSslValidation);
 
-	public SamlKeyException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	void clear();
 
-	public SamlKeyException(Throwable cause) {
-		super(cause);
-	}
+	byte[] remove(String uri);
 }

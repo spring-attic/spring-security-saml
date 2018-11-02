@@ -46,10 +46,7 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.saved_for_later.SamlValidator;
-import org.springframework.security.saml.saved_for_later.ValidationException;
-import org.springframework.security.saml.saved_for_later.ValidationResult;
-import org.springframework.security.saml.saved_for_later.ValidationResult.ValidationError;
+import org.springframework.security.saml.spi.ValidationResult.ValidationError;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;

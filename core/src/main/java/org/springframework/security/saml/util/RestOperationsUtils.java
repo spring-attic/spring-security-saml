@@ -23,7 +23,7 @@ import javax.net.ssl.SSLContext;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.saml.saved_for_later.SamlKeyException;
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 

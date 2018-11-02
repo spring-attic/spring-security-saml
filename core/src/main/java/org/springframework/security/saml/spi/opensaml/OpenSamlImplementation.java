@@ -39,7 +39,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.saved_for_later.SamlKeyException;
+import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
@@ -85,7 +85,6 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saved_for_later.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.util.CollectionUtils;
 

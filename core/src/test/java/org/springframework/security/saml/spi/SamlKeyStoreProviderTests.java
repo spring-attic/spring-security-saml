@@ -18,7 +18,7 @@ package org.springframework.security.saml.spi;
 
 import java.time.Clock;
 
-import org.springframework.security.saml.saved_for_later.SamlKeyStoreProvider;
+import org.springframework.security.saml.spi.opensaml.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 
 import org.junit.jupiter.api.BeforeAll;

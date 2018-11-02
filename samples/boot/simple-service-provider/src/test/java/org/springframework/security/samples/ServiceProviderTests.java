@@ -40,6 +40,8 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -141,7 +143,8 @@ public class ServiceProviderTests {
 			(IdentityProviderMetadata) transformer.fromXml(
 				configuration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
-				null);
+				null
+			);
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
 		Assertion a = helper.assertion(
 			sp,
@@ -149,6 +152,11 @@ public class ServiceProviderTests {
 			null,
 			"user@test.org",
 			NameId.EMAIL
+		);
+		a.setSigningKey(
+			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
+			AlgorithmMethod.RSA_SHA256,
+			DigestMethod.SHA256
 		);
 		Response r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);

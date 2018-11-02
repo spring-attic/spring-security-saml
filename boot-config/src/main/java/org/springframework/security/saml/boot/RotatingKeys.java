@@ -38,12 +38,12 @@ public class RotatingKeys {
 	public List<KeyData> toList() {
 		LinkedList<KeyData> result = new LinkedList<>();
 		if (getActive()!=null) {
-			result.add(getActive().toSimpleKey());
-			result.add(getActive().toSimpleKey(getActive().getName()+"-encrypt", KeyType.ENCRYPTION));
+			result.add(getActive().toKeyData());
+			result.add(getActive().toKeyData(getActive().getName()+"-encrypt", KeyType.ENCRYPTION));
 		}
 		result.addAll(
 			ofNullable(getStandBy()).orElse(Collections.emptyList())
-				.stream().map(k -> k.toSimpleKey())
+				.stream().map(k -> k.toKeyData())
 				.collect(Collectors.toList())
 		);
 		return result;

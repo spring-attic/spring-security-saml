@@ -42,14 +42,14 @@ public class SamlKey {
 		this.type = type;
 	}
 
-	public KeyData toSimpleKey() {
-		return toSimpleKey(
+	public KeyData toKeyData() {
+		return toKeyData(
 			getName(),
 			getType()
 		);
 	}
 
-	public KeyData toSimpleKey(String name, KeyType type) {
+	public KeyData toKeyData(String name, KeyType type) {
 		return new KeyData(
 			name,
 			getPrivateKey(),

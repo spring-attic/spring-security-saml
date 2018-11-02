@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept.support_saved_for_later;
+package sample.proof_of_concept.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedProviderConfiguration;
@@ -38,8 +39,8 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.spi.SamlMetadataCache;
-import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.util.RestOperationsUtils;
+import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -50,6 +51,7 @@ import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
+import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
@@ -98,7 +100,9 @@ public class ServiceProviderMetadataResolver {
 			if (isUri(idp.getMetadata())) {
 				data = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
 			}
-			return (IdentityProviderMetadata) samlTransformer.fromXml(data, null, null);
+			IdentityProviderMetadata metadata = (IdentityProviderMetadata) samlTransformer.fromXml(data, null, null);
+			metadata.setEntityAlias(idp.getAlias());
+			return metadata;
 		} catch (SamlMetadataException e) {
 			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
 			return null;
@@ -116,6 +120,7 @@ public class ServiceProviderMetadataResolver {
 
 		return new ServiceProviderMetadata()
 			.setEntityId(entityId)
+			.setEntityAlias(getEntityAlias(configuration, entityId))
 			.setId("M" + UUID.randomUUID().toString())
 			.setSigningKey(keys.get(0), RSA_SHA256, SHA256)
 			.setProviders(
@@ -157,6 +162,11 @@ public class ServiceProviderMetadataResolver {
 						)
 				)
 			);
+	}
+
+	private String getEntityAlias(HostedServiceProviderConfiguration configuration, String entityId) {
+		return hasText(configuration.getAlias()) ? configuration.getAlias() :
+			isUrl(entityId) ? StringUtils.getHostFromUrl(entityId) : entityId;
 	}
 
 	private Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {

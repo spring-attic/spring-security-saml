@@ -22,13 +22,14 @@ import java.util.Iterator;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.util.StringUtils;
 
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
@@ -57,6 +58,7 @@ import static org.springframework.security.saml.saml2.metadata.NameId.X509_SUBJE
 import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
+import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.X509Utilities.keyCleanup;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
@@ -372,7 +374,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
 		assertThat(sp.getEntityId(), equalTo("https://sp.saml.spring.io/sp"));
-		assertThat(sp.getEntityAlias(), equalTo(sp.getEntityId()));
+		assertThat(sp.getEntityAlias(), equalTo(StringUtils.getHostFromUrl(sp.getEntityId())));
 		assertNotNull(sp.getProviders());
 		assertThat(sp.getProviders().size(), equalTo(1));
 
@@ -516,7 +518,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(idp);
 		assertNotNull(idp.getImplementation());
 		assertThat(idp.getEntityId(), equalTo("https://idp.saml.spring.io"));
-		assertThat(idp.getEntityAlias(), equalTo(idp.getEntityId()));
+		assertThat(idp.getEntityAlias(), equalTo(getHostFromUrl(idp.getEntityId())));
 		assertNotNull(idp.getProviders());
 		assertThat(idp.getProviders().size(), equalTo(1));
 

@@ -40,8 +40,6 @@ import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
@@ -71,6 +69,8 @@ import org.springframework.security.saml.saml2.authentication.SubjectConfirmatio
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
@@ -214,6 +214,8 @@ import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
 import static org.opensaml.security.crypto.KeySupport.generateKey;
 import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
+import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
+import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.util.StringUtils.hasText;
 
 public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplementation> {
@@ -1693,7 +1695,13 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		long duration = descriptor.getCacheDuration() != null ? descriptor.getCacheDuration() : -1;
 		desc.setCacheDuration(toDuration(duration));
 		desc.setEntityId(descriptor.getEntityID());
-		desc.setEntityAlias(descriptor.getEntityID());
+		if (isUrl(desc.getEntityId())) {
+			desc.setEntityAlias(getHostFromUrl(desc.getEntityId()));
+		}
+		else {
+			desc.setEntityAlias(desc.getEntityId());
+		}
+
 		desc.setId(descriptor.getID());
 		desc.setValidUntil(descriptor.getValidUntil());
 		return desc;

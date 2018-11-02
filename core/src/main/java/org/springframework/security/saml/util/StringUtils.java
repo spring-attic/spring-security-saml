@@ -17,6 +17,7 @@
 package org.springframework.security.saml.util;
 
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.springframework.security.saml.SamlException;
 
@@ -33,6 +34,23 @@ public class StringUtils {
 			cleanValue = "_" + cleanValue.substring(1);
 		}
 		return cleanValue;
+	}
+
+	public static String getHostFromUrl(String url) {
+		try {
+			return new URL(url).getHost();
+		} catch (Exception e) {
+			throw new SamlException(e);
+		}
+	}
+
+	public static boolean isUrl(String s) {
+		try {
+			new URL(s);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public static URIBuilder fromString(String url) {

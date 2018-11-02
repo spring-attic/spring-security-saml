@@ -54,7 +54,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import sample.SecurityConfiguration;
-import sample.proof_of_concept.StaticServiceProviderResolver;
+import sample.proof_of_concept.ServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -79,7 +79,7 @@ public class ServiceProviderTests {
 	SamlTransformer transformer;
 
 	@SpyBean
-	StaticServiceProviderResolver resolver;
+	ServiceProviderResolver resolver;
 
 	@Autowired
 	SecurityConfiguration.SamlPropertyConfiguration configuration;
@@ -211,10 +211,11 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("Service Provider entity ID is based on configured base path")
 	void generateSpEntityIdFromBasePath() throws Exception {
-		mockConfig(builder -> builder.withEntityId(null).withBasePath("http://localhost:8080/sample-sp"));
+		mockConfig(builder -> builder.withEntityId(null).withBasePath("http://some.other.host:8080/sample-sp"));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
-		assertThat(metadata.getEntityId(), equalTo("http://localhost:8080/sample-sp"));
+		assertThat(metadata.getEntityId(), equalTo("http://some.other.host:8080/sample-sp"));
+		assertThat(metadata.getEntityAlias(), equalTo("some.other.host"));
 	}
 
 	private void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {

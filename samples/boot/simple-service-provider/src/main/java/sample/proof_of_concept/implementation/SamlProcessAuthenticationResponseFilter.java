@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept.impl;
+package sample.proof_of_concept.implementation;
 
 import java.io.IOException;
 import javax.servlet.ServletException;

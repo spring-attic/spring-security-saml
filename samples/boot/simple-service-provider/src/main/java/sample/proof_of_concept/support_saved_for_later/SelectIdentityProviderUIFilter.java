@@ -40,7 +40,7 @@ import org.springframework.web.util.UriUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import sample.proof_of_concept.ServiceProviderResolver;
-import sample.proof_of_concept.impl.SamlTemplateProcessor;
+import sample.proof_of_concept.implementation.SamlTemplateProcessor;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;

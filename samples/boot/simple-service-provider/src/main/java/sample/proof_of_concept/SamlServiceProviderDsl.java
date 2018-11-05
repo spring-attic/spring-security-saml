@@ -26,9 +26,9 @@ import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import sample.proof_of_concept.impl.SamlAuthenticationRequestFilter;
-import sample.proof_of_concept.impl.SamlProcessAuthenticationResponseFilter;
-import sample.proof_of_concept.impl.SamlTemplateProcessor;
+import sample.proof_of_concept.implementation.SamlAuthenticationRequestFilter;
+import sample.proof_of_concept.implementation.SamlProcessAuthenticationResponseFilter;
+import sample.proof_of_concept.implementation.SamlTemplateProcessor;
 import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
 import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
 

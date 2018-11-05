@@ -15,7 +15,7 @@
  *
  */
 
-package sample.proof_of_concept.impl;
+package sample.proof_of_concept.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;

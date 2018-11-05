@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saml2.authentication;
+package saml.saml2.authentication;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,23 +24,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.authentication.AssertionCondition;
+import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
+import org.springframework.security.saml.saml2.authentication.AuthenticationContext;
+import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml.saml2.authentication.Conditions;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.authentication.OneTimeUse;
+import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Status;
+import org.springframework.security.saml.saml2.authentication.Subject;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
+import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
-import org.springframework.security.saml.saml2.metadata.MetadataBase;
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.spi.ExamplePemKey;
 
 import org.hamcrest.core.IsEqual;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
+import saml.saml2.metadata.MetadataBase;
+import saml.spi.ExamplePemKey;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;

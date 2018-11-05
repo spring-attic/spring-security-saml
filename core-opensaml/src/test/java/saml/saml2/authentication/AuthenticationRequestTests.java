@@ -14,17 +14,20 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saml2.authentication;
+package saml.saml2.authentication;
 
 import java.util.Collections;
 
+import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.MetadataBase;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
+import saml.saml2.metadata.MetadataBase;
 
 import static java.lang.Boolean.FALSE;
 import static org.hamcrest.MatcherAssert.assertThat;

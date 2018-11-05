@@ -18,9 +18,9 @@
 package org.springframework.security.saml.saml2.encrypt;
 
 import java.lang.reflect.Field;
-import javax.annotation.Nonnull;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.util.Assert;
 
 public enum KeyEncryptionMethod {
 
@@ -29,7 +29,8 @@ public enum KeyEncryptionMethod {
 
 	private final String urn;
 
-	KeyEncryptionMethod(@Nonnull String urn) {
+	KeyEncryptionMethod(String urn) {
+		Assert.notNull(urn, "URN cannot be null for enum: "+getClass().getSimpleName());
 		this.urn = urn;
 		try {
 			Field fieldName = getClass().getSuperclass().getDeclaredField("name");

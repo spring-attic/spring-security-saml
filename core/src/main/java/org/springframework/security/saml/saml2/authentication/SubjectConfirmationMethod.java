@@ -17,9 +17,8 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.security.saml.SamlException;
+import org.springframework.util.Assert;
 
 public enum SubjectConfirmationMethod {
 
@@ -30,7 +29,8 @@ public enum SubjectConfirmationMethod {
 
 	private final String urn;
 
-	SubjectConfirmationMethod(@Nonnull String urn) {
+	SubjectConfirmationMethod(String urn) {
+		Assert.notNull(urn, "URN cannot be null for enum: "+getClass().getSimpleName());
 		this.urn = urn;
 	}
 

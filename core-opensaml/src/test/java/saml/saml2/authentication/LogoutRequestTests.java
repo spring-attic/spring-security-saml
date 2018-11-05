@@ -15,11 +15,18 @@
  *
  */
 
-package org.springframework.security.saml.saml2.authentication;
+package saml.saml2.authentication;
 
 import java.time.Clock;
 import java.util.Arrays;
 
+import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutReason;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
+import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.authentication.Status;
+import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;

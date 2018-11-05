@@ -17,9 +17,8 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.security.saml.SamlException;
+import org.springframework.util.Assert;
 
 /**
  * Defines binding type as part of an Endpoint as defined by
@@ -43,7 +42,8 @@ public enum Binding {
 
 	private final String urn;
 
-	Binding(@Nonnull String urn) {
+	Binding(String urn) {
+		Assert.notNull(urn, "URN cannot be null for enum: "+getClass().getSimpleName());
 		this.urn = urn;
 	}
 

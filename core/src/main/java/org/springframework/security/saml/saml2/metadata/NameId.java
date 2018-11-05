@@ -18,9 +18,9 @@
 package org.springframework.security.saml.saml2.metadata;
 
 import java.lang.reflect.Field;
-import javax.annotation.Nonnull;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.util.Assert;
 
 /**
  * Attribute Name Format Identifiers
@@ -41,7 +41,8 @@ public enum NameId {
 
 	private final String urn;
 
-	NameId(@Nonnull String urn) {
+	NameId(String urn) {
+		Assert.notNull(urn, "URN cannot be null for enum: "+getClass().getSimpleName());
 		this.urn = urn;
 		//Spring introspection calls valueOf(..) on enums
 		//so we have to overwrite the name

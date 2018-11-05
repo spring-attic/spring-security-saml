@@ -14,11 +14,11 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.spi;
+package saml.spi;
 
 import java.time.Clock;
 
-import org.springframework.security.saml.spi.opensaml.SamlKeyStoreProvider;
+import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 
 import org.junit.jupiter.api.BeforeAll;

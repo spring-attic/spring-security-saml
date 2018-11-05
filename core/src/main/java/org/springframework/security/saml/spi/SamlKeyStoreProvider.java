@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.opensaml;
+package org.springframework.security.saml.spi;
 
 import java.io.IOException;
 import java.security.KeyStore;

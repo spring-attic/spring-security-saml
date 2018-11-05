@@ -29,7 +29,7 @@
  *
  */
 
-package org.springframework.security.saml.impl;
+package saml.impl;
 
 import java.time.Clock;
 import java.util.UUID;

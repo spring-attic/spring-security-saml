@@ -16,6 +16,7 @@
  */
 
 include "core"
+include "core-opensaml"
 include "boot-config"
 include "samples/boot/simple-service-provider"
 

@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.saml2.metadata;
+package saml.saml2.metadata;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,6 +26,14 @@ import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.IdentityProvider;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.metadata.ServiceProvider;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.SignatureException;

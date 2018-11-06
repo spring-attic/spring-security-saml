@@ -17,9 +17,15 @@
 
 package org.springframework.security.saml.spi.keycloak;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.time.Clock;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.xml.crypto.dsig.XMLObject;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 
 import org.springframework.security.saml.SamlException;
@@ -62,6 +70,7 @@ import org.springframework.security.saml.saml2.authentication.SubjectConfirmatio
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
@@ -75,13 +84,17 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.util.X509Utilities;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.keycloak.common.VerificationException;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
 import org.keycloak.dom.saml.v2.assertion.AttributeStatementType;
 import org.keycloak.dom.saml.v2.assertion.AttributeType;
@@ -102,11 +115,14 @@ import org.keycloak.dom.saml.v2.metadata.AttributeConsumingServiceType;
 import org.keycloak.dom.saml.v2.metadata.EndpointType;
 import org.keycloak.dom.saml.v2.metadata.EntitiesDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.EntityDescriptorType;
+import org.keycloak.dom.saml.v2.metadata.IDPSSODescriptorType;
+import org.keycloak.dom.saml.v2.metadata.IndexedEndpointType;
 import org.keycloak.dom.saml.v2.metadata.KeyDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.KeyTypes;
 import org.keycloak.dom.saml.v2.metadata.RequestedAttributeType;
 import org.keycloak.dom.saml.v2.metadata.RoleDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.SPSSODescriptorType;
+import org.keycloak.dom.saml.v2.metadata.SSODescriptorType;
 import org.keycloak.dom.saml.v2.protocol.AuthnContextComparisonType;
 import org.keycloak.dom.saml.v2.protocol.AuthnRequestType;
 import org.keycloak.dom.saml.v2.protocol.LogoutRequestType;
@@ -116,15 +132,22 @@ import org.keycloak.dom.saml.v2.protocol.ResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusType;
 import org.keycloak.dom.xmlsec.w3.xmldsig.KeyInfoType;
-import org.keycloak.saml.processing.api.saml.v2.request.SAML2Request;
-import org.keycloak.saml.processing.core.saml.v2.common.SAMLDocumentHolder;
+import org.keycloak.rotation.HardcodedKeyLocator;
+import org.keycloak.rotation.KeyLocator;
+import org.keycloak.saml.common.exceptions.ProcessingException;
+import org.keycloak.saml.common.util.DocumentUtil;
+import org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature;
+import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
+import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
+import static org.springframework.util.StringUtils.hasText;
 
 public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlImplementation> {
 
@@ -150,25 +173,21 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	@Override
 	public long toMillis(Duration duration) {
-		if (isNull(duration)) {
-			return -1;
-		}
-		else {
-			throw new UnsupportedOperationException();
-			//return DOMTypeSupport.durationToLong(duration);
-		}
+		long now = System.currentTimeMillis();
+		Date d = new Date(now);
+		long millis = duration.getTimeInMillis(d);
+		return Math.abs(millis - now);
 	}
 
 	@Override
 	public Duration toDuration(long millis) {
-		if (millis < 0) {
-			return null;
-		}
-		else {
-			throw new UnsupportedOperationException();
-			//return DOMTypeSupport.getDataTypeFactory().newDuration(millis);
+		try {
+			return DatatypeFactory.newInstance().newDuration(millis);
+		} catch (DatatypeConfigurationException e) {
+			throw new SamlException(e);
 		}
 	}
+
 
 	@Override
 	public String toXml(Saml2Object saml2Object) {
@@ -207,16 +226,19 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
-		SAMLDocumentHolder parsed = parse(xml);
-//		Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
+		SamlObjectHolder parsed = parse(xml);
+		Signature signature = validateSignature(parsed, verificationKeys);
 		Saml2Object result = null;
-//		if (parsed instanceof EntityDescriptor) {
-//			result = resolveMetadata((EntityDescriptor) parsed)
-//				.setSignature(signature);
-//		}
-//		else if (parsed instanceof EntitiesDescriptor) {
-//			result = resolveMetadata((EntitiesDescriptor) parsed, verificationKeys, localKeys);
-//		}
+		if (parsed.getSamlObject() instanceof EntityDescriptorType) {
+			result = resolveMetadata((EntityDescriptorType) parsed.getSamlObject())
+				.setSignature(signature)
+			;
+		}
+		else if (parsed.getSamlObject() instanceof EntitiesDescriptorType) {
+			result =
+				resolveMetadata(parsed, (EntitiesDescriptorType) parsed.getSamlObject(), verificationKeys, localKeys);
+		}
+
 //		else if (parsed instanceof AuthnRequest) {
 //			result = resolveAuthenticationRequest((AuthnRequest) parsed)
 //				.setSignature(signature);
@@ -285,8 +307,60 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-	public Signature validateSignature(Object object, List<KeyData> keys) {
+	private static PublicKey getPublicKey(String certPem) throws VerificationException {
+		if (certPem == null) {
+			throw new SamlException("Public certificate is missing.");
+		}
+
+		try {
+			byte[] certbytes = X509Utilities.getDER(certPem);
+			Certificate cert = X509Utilities.getCertificate(certbytes);
+			//TODO - should be based off of config
+			//((X509Certificate) cert).checkValidity();
+			return cert.getPublicKey();
+		} catch (CertificateException ex) {
+			throw new SamlException("Certificate is not valid.", ex);
+		} catch (Exception e) {
+			throw new SamlException("Could not decode cert", e);
+		}
+
+	}
+
+	public Signature validateSignature(SamlObjectHolder parsed, List<KeyData> keys) {
 		Signature result = null;
+		try {
+			Method method = ReflectionUtils.findMethod(parsed.getSamlObject().getClass(), "getSignature");
+			if (method != null) {
+				Object sig = method.invoke(parsed.getSamlObject(), new Object[0]);
+				if (sig != null) {
+					boolean ok = false;
+					for (KeyData key : keys) {
+						SAML2Signature saml2Signature = new SAML2Signature();
+						try {
+							PublicKey publicKey = getPublicKey(key.getCertificate());
+							KeyLocator keyLocator = new HardcodedKeyLocator(publicKey);
+							if (saml2Signature.validate(parsed.getDocument(), keyLocator)) {
+								ok = true;
+								break;
+							}
+						} catch (ProcessingException e) {
+							logger.trace("Signature validation failed.", e);
+						}
+					}
+					if (!ok) {
+						throw new SignatureException(
+							"Unable to validate signature for object:" +
+								parsed.getSamlObject()
+						);
+					}
+				}
+			}
+		} catch (SignatureException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new SamlException("Unable to get signature for class:" + parsed.getSamlObject().getClass(), e);
+		}
+
 //		if (object.isSigned() && keys != null && !keys.isEmpty()) {
 //			SignatureException last = null;
 //			for (KeyData key : keys) {
@@ -313,16 +387,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-//	public Credential getCredential(KeyData key, KeyStoreCredentialResolver resolver) {
-//		try {
-//			CriteriaSet cs = new CriteriaSet();
-//			EntityIdCriterion criteria = new EntityIdCriterion(key.getName());
-//			cs.add(criteria);
-//			return resolver.resolveSingle(cs);
-//		} catch (ResolverException e) {
-//			throw new SamlKeyException("Can't obtain SP private key", e);
-//		}
-//	}
 
 //	public KeyStoreCredentialResolver getCredentialsResolver(KeyData key) {
 //		KeyStore ks = getSamlKeyStoreProvider().getKeyStore(key);
@@ -439,9 +503,14 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		return decrypter;
 //	}
 
-	protected SAMLDocumentHolder parse(byte[] xml) {
+	protected SamlObjectHolder parse(byte[] xml) {
 		try {
-			return SAML2Request.getSAML2ObjectFromStream(null);
+			InputStream reader = new ByteArrayInputStream(xml);
+			Document samlDocument = DocumentUtil.getDocument(reader);
+			SAMLParser samlParser = SAMLParser.getInstance();
+			JAXPValidationUtil.checkSchemaValidation(samlDocument);
+			Object object = samlParser.parse(samlDocument);
+			return new SamlObjectHolder(samlDocument, object);
 		} catch (Exception e) {
 			throw new SamlException(e);
 		}
@@ -449,65 +518,74 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected List<? extends Provider> getSsoProviders(EntityDescriptorType descriptor) {
 		final List<SsoProvider> providers = new LinkedList<>();
-//		for (RoleDescriptor roleDescriptor : descriptor.getRoleDescriptors()) {
-//			if (roleDescriptor instanceof IDPSSODescriptor || roleDescriptor instanceof SPSSODescriptor) {
-//				providers.add(getSsoProvider(roleDescriptor));
-//			}
-//			else {
-//				logger.debug("Ignoring unknown metadata descriptor:"+roleDescriptor.getClass().getName());
-//			}
-//		}
+		List<SSODescriptorType> roles = new LinkedList<>();
+		descriptor.getChoiceType().stream()
+			.forEach(ct -> ct.getDescriptors().stream().forEach(
+				d -> {
+					if (d.getIdpDescriptor() != null) {
+						roles.add(d.getIdpDescriptor());
+					}
+					if (d.getSpDescriptor() != null) {
+						roles.add(d.getSpDescriptor());
+					}
+				}
+			));
+
+		for (SSODescriptorType roleDescriptor : roles) {
+			providers.add(getSsoProvider(roleDescriptor));
+		}
 		return providers;
 	}
 
-	protected SsoProvider getSsoProvider(RoleDescriptorType descriptor) {
-//		if (descriptor instanceof SPSSODescriptor) {
-//			SPSSODescriptor desc = (SPSSODescriptor) descriptor;
-//			ServiceProvider provider = new ServiceProvider();
-//			provider.setId(desc.getID());
-//			provider.setValidUntil(desc.getValidUntil());
-//			if (desc.getCacheDuration() != null) {
-//				provider.setCacheDuration(toDuration(desc.getCacheDuration()));
-//			}
-//			provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
-//			provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
-//			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
-//			provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutServices()));
-//			provider.setManageNameIDService(getEndpoints(desc.getManageNameIDServices()));
-//			provider.setAuthnRequestsSigned(desc.isAuthnRequestsSigned());
-//			provider.setWantAssertionsSigned(desc.getWantAssertionsSigned());
-//			provider.setAssertionConsumerService(getEndpoints(desc.getAssertionConsumerServices()));
-//			provider.setRequestedAttributes(getRequestAttributes(desc));
-//			provider.setKeys(getProviderKeys(descriptor));
-//			provider.setDiscovery(getDiscovery(desc));
-//			provider.setRequestInitiation(getRequestInitiation(desc));
-//			//TODO
-//			//provider.setAttributeConsumingService(getEndpoints(desc.getAttributeConsumingServices()));
-//			return provider;
-//		}
-//		else if (descriptor instanceof IDPSSODescriptor) {
-//			IDPSSODescriptor desc = (IDPSSODescriptor) descriptor;
-//			IdentityProvider provider = new IdentityProvider();
-//			provider.setId(desc.getID());
-//			provider.setValidUntil(desc.getValidUntil());
-//			if (desc.getCacheDuration() != null) {
-//				provider.setCacheDuration(toDuration(desc.getCacheDuration()));
-//			}
-//			provider.setProtocolSupportEnumeration(desc.getSupportedProtocols());
-//			provider.setNameIds(getNameIDs(desc.getNameIDFormats()));
-//			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionServices()));
-//			provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutServices()));
-//			provider.setManageNameIDService(getEndpoints(desc.getManageNameIDServices()));
-//			provider.setWantAuthnRequestsSigned(desc.getWantAuthnRequestsSigned());
-//			provider.setSingleSignOnService(getEndpoints(desc.getSingleSignOnServices()));
-//			provider.setKeys(getProviderKeys(descriptor));
-//			provider.setDiscovery(getDiscovery(desc));
-//			provider.setRequestInitiation(getRequestInitiation(desc));
-//			return provider;
-//		}
-//		else {
-//
-//		}
+	protected SsoProvider getSsoProvider(SSODescriptorType descriptor) {
+		if (descriptor instanceof SPSSODescriptorType) {
+			SPSSODescriptorType desc = (SPSSODescriptorType) descriptor;
+			ServiceProvider provider = new ServiceProvider();
+			provider.setId(desc.getID());
+			if (desc.getValidUntil() != null) {
+				provider.setValidUntil(new DateTime(desc.getValidUntil().toGregorianCalendar()));
+			}
+			if (desc.getCacheDuration() != null) {
+				provider.setCacheDuration(desc.getCacheDuration());
+			}
+			provider.setProtocolSupportEnumeration(desc.getProtocolSupportEnumeration());
+			provider.setNameIds(getNameIDs(desc.getNameIDFormat()));
+			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionService()));
+			provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutService()));
+			provider.setManageNameIDService(getEndpoints(desc.getManageNameIDService()));
+			provider.setAuthnRequestsSigned(desc.isAuthnRequestsSigned());
+			provider.setWantAssertionsSigned(desc.isWantAssertionsSigned());
+			provider.setAssertionConsumerService(getEndpoints(desc.getAssertionConsumerService()));
+			provider.setRequestedAttributes(getRequestAttributes(desc));
+			provider.setKeys(getProviderKeys(descriptor));
+			provider.setDiscovery(getDiscovery(desc));
+			provider.setRequestInitiation(getRequestInitiation(desc));
+			//TODO
+			//provider.setAttributeConsumingService(getEndpoints(desc.getAttributeConsumingServices()));
+			return provider;
+		}
+		else if (descriptor instanceof IDPSSODescriptorType) {
+			IDPSSODescriptorType desc = (IDPSSODescriptorType) descriptor;
+			IdentityProvider provider = new IdentityProvider();
+			provider.setId(desc.getID());
+			if (desc.getValidUntil() != null) {
+				provider.setValidUntil(new DateTime(desc.getValidUntil().toGregorianCalendar()));
+			}
+			if (desc.getCacheDuration() != null) {
+				provider.setCacheDuration(desc.getCacheDuration());
+			}
+			provider.setProtocolSupportEnumeration(desc.getProtocolSupportEnumeration());
+			provider.setNameIds(getNameIDs(desc.getNameIDFormat()));
+			provider.setArtifactResolutionService(getEndpoints(desc.getArtifactResolutionService()));
+			provider.setSingleLogoutService(getEndpoints(desc.getSingleLogoutService()));
+			provider.setManageNameIDService(getEndpoints(desc.getManageNameIDService()));
+			provider.setWantAuthnRequestsSigned(desc.isWantAuthnRequestsSigned());
+			provider.setSingleSignOnService(getEndpoints(desc.getSingleSignOnService()));
+			provider.setKeys(getProviderKeys(descriptor));
+			provider.setDiscovery(getDiscovery(desc));
+			provider.setRequestInitiation(getRequestInitiation(desc));
+			return provider;
+		}
 		throw new UnsupportedOperationException(
 			descriptor == null ?
 				null :
@@ -517,68 +595,75 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected List<Attribute> getRequestAttributes(SPSSODescriptorType desc) {
 		List<Attribute> result = new LinkedList<>();
-//		if (desc.getDefaultAttributeConsumingService() != null) {
-//			result.addAll(getRequestedAttributes(desc.getDefaultAttributeConsumingService()
-//				.getRequestAttributes()));
-//		}
-//		else {
-//			for (AttributeConsumingService s :
-//				ofNullable(desc.getAttributeConsumingServices()).orElse(emptyList())) {
-//				if (s != null) {
-//					//take the first one
-//					result.addAll(getRequestedAttributes(s.getRequestAttributes()));
-//					break;
-//				}
-//			}
-//		}
+		for (AttributeConsumingServiceType s : ofNullable(desc.getAttributeConsumingService()).orElse(emptyList())) {
+			if (s != null) {
+				//take the first one
+				result.addAll(getRequestedAttributes(s.getRequestedAttribute()));
+				break;
+			}
+		}
 		return result;
 	}
 
 	protected Endpoint getRequestInitiation(RoleDescriptorType desc) {
 		Endpoint result = null;
-//		if (desc.getExtensions() == null) {
-//			return null;
-//		}
-//		for (XMLObject obj : desc.getExtensions().getUnknownXMLObjects()) {
-//			if (obj instanceof RequestInitiator) {
-//				RequestInitiator req = (RequestInitiator) obj;
-//				result = new Endpoint()
-//					.setIndex(0)
-//					.setDefault(false)
-//					.setBinding(Binding.fromUrn(req.getBinding()))
-//					.setLocation(req.getLocation())
-//					.setResponseLocation(req.getResponseLocation());
-//			}
-//		}
+		if (desc.getExtensions() == null) {
+			return null;
+		}
+		for (Object obj : desc.getExtensions().getAny()) {
+			if (obj instanceof Element) {
+				Element e = (Element) obj;
+				if ("RequestInitiator".equals(e.getLocalName())) {
+					String binding = e.getAttribute("Binding");
+					String location = e.getAttribute("Location");
+					String responseLocation = e.getAttribute("ResponseLocation");
+					String index = e.getAttribute("index");
+					String isDefault = e.getAttribute("isDefault");
+					result = new Endpoint()
+						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
+						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
+						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.REQUEST_INITIATOR)
+						.setLocation(location)
+						.setResponseLocation(responseLocation);
+				}
+			}
+		}
 		return result;
 	}
 
 	protected Endpoint getDiscovery(RoleDescriptorType desc) {
 		Endpoint result = null;
-//		if (desc.getExtensions() == null) {
-//			return null;
-//		}
-//		for (XMLObject obj : desc.getExtensions().getUnknownXMLObjects()) {
-//			if (obj instanceof DiscoveryResponse) {
-//				DiscoveryResponse resp = (DiscoveryResponse) obj;
-//				result = new Endpoint()
-//					.setDefault(resp.isDefault())
-//					.setIndex(resp.getIndex())
-//					.setBinding(Binding.fromUrn(resp.getBinding()))
-//					.setLocation(resp.getLocation())
-//					.setResponseLocation(resp.getResponseLocation());
-//			}
-//		}
+		if (desc.getExtensions() == null) {
+			return null;
+		}
+		for (Object obj : desc.getExtensions().getAny()) {
+			if (obj instanceof Element) {
+				Element e = (Element) obj;
+				if ("DiscoveryResponse".equals(e.getLocalName())) {
+					String binding = e.getAttribute("Binding");
+					String location = e.getAttribute("Location");
+					String responseLocation = e.getAttribute("ResponseLocation");
+					String index = e.getAttribute("index");
+					String isDefault = e.getAttribute("isDefault");
+					result = new Endpoint()
+						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
+						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
+						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.DISCOVERY)
+						.setLocation(location)
+						.setResponseLocation(responseLocation);
+				}
+			}
+		}
 		return result;
 	}
 
-	protected List<KeyData> getProviderKeys(RoleDescriptorType descriptor) {
+	protected List<KeyData> getProviderKeys(SSODescriptorType descriptor) {
 		List<KeyData> result = new LinkedList<>();
-//		for (KeyDescriptor desc : ofNullable(descriptor.getKeyDescriptors()).orElse(emptyList())) {
-//			if (desc != null) {
-//				result.addAll(getKeyFromDescriptor(desc));
-//			}
-//		}
+		for (KeyDescriptorType desc : ofNullable(descriptor.getKeyDescriptor()).orElse(emptyList())) {
+			if (desc != null) {
+				result.addAll(getKeyFromDescriptor(desc));
+			}
+		}
 		return result;
 	}
 
@@ -587,9 +672,19 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		if (desc.getKeyInfo() == null) {
 			return null;
 		}
-//		KeyType type = desc.getUse() != null ? KeyType.valueOf(desc.getUse().name()) : KeyType.UNSPECIFIED;
-//		int index = 0;
-//		for (X509DataType x509 : ofNullable(desc.getKeyInfo().getX509Datas()).orElse(emptyList())) {
+		KeyType type = desc.getUse() != null ? KeyType.valueOf(desc.getUse().name()) : KeyType.UNSPECIFIED;
+		int index = 0;
+		result.add(
+			new KeyData(
+				type.getTypeName() + "-" + (index++),
+				null,
+				desc.getKeyInfo().getFirstChild().getTextContent(),
+				null,
+				type
+			)
+		);
+
+		//for (X509DataType x509 : ofNullable(desc.getKeyInfo().getC).orElse(emptyList())) {
 //			for (X509Certificate cert : ofNullable(x509.getX509Certificates()).orElse(emptyList())) {
 //				result.add(new KeyData(type.getTypeName() + "-" + (index++), null, cert.getValue(), null,
 //					type
@@ -600,37 +695,44 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-	protected List<Endpoint> getEndpoints(
-		List<? extends EndpointType>
-			services
-	) {
+	protected List<Endpoint> getEndpoints(List<? extends EndpointType> services) {
 		List<Endpoint> result = new LinkedList<>();
-//		if (services != null) {
-//			services
-//				.stream()
-//				.forEach(s -> {
-//						Endpoint endpoint = new Endpoint()
-//							.setBinding(Binding.fromUrn(s.getBinding()))
-//							.setLocation(s.getLocation())
-//							.setResponseLocation(s.getResponseLocation());
-//						result.add(endpoint);
-//						if (s instanceof IndexedEndpoint) {
-//							IndexedEndpoint idxEndpoint = (IndexedEndpoint) s;
-//							endpoint
-//								.setIndex(idxEndpoint.getIndex())
-//								.setDefault(idxEndpoint.isDefault());
-//						}
-//					}
-//				);
-//		}
+		if (services != null) {
+			services
+				.stream()
+				.forEach(s -> {
+						Endpoint endpoint = new Endpoint()
+							.setBinding(Binding.fromUrn(s.getBinding().toString()))
+							.setLocation(s.getLocation().toString());
+						if (s.getResponseLocation() != null) {
+							endpoint.setResponseLocation(s.getResponseLocation().toString());
+						}
+						result.add(endpoint);
+						if (s instanceof IndexedEndpointType) {
+							IndexedEndpointType idxEndpoint = (IndexedEndpointType) s;
+							endpoint
+								.setIndex(idxEndpoint.getIndex())
+								.setDefault(idxEndpoint.isIsDefault() != null ? idxEndpoint.isIsDefault() : false);
+						}
+					}
+				);
+		}
 		return result;
 	}
 
-	protected List<NameId> getNameIDs(List<NameIDType> nameIDFormats) {
+	protected List<NameId> getNameIDs(List<? extends Object> nameIDFormats) {
 		List<NameId> result = new LinkedList<>();
-		if (nameIDFormats != null) {
-			nameIDFormats.stream()
-				.forEach(n -> result.add(NameId.fromUrn(n.getFormat().toString())));
+		for (Object o : ofNullable(nameIDFormats).orElse(emptyList())) {
+			if (o == null) {
+				continue;
+			}
+			else if (o instanceof String) {
+				result.add(NameId.fromUrn((String) o));
+			}
+			else if (o instanceof NameIDType) {
+				NameIDType t = (NameIDType) o;
+				result.add(NameId.fromUrn(t.getFormat().toString()));
+			}
 		}
 		return result;
 	}
@@ -1092,13 +1194,13 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setInResponseTo(parsed.getInResponseTo())
 			.setIssueInstant(new DateTime(parsed.getIssueInstant().toGregorianCalendar()))
 			.setIssuer(getIssuer(parsed.getIssuer()))
-			.setVersion(parsed.getVersion().toString())
+			.setVersion(parsed.getVersion())
 			.setStatus(getStatus(parsed.getStatus()))
 			.setAssertions(
 				parsed.getAssertions().stream()
 					.filter(a -> a.getAssertion() != null)
 					.map(a -> resolveAssertion(a.getAssertion(), verificationKeys, localKeys, false)
-				)
+					)
 					.collect(Collectors.toList())
 			);
 		List<EncryptedAssertionType> encryptedAssertions = parsed.getAssertions().stream()
@@ -1171,7 +1273,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	) {
 		Signature signature = null;
 		if (!encrypted) {
-			signature = validateSignature(parsed, verificationKeys);
+			throw new UnsupportedOperationException();
+			//signature = validateSignature(parsed, verificationKeys);
 		}
 		return new Assertion(encrypted)
 			.setSignature(signature)
@@ -1243,7 +1346,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 		for (StatementAbstractType st : ofNullable(authnStatements).orElse(emptyList())) {
 			if (st instanceof AuthnStatementType) {
-				AuthnStatementType s = (AuthnStatementType)st;
+				AuthnStatementType s = (AuthnStatementType) st;
 				AuthnContextType authnContext = s.getAuthnContext();
 				AuthnContextClassRefType authnContextClassRef =
 					(AuthnContextClassRefType) authnContext.getURIType().stream()
@@ -1449,7 +1552,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-	protected Metadata resolveMetadata(EntitiesDescriptorType parsed,
+	protected Metadata resolveMetadata(SamlObjectHolder holder,
+									   EntitiesDescriptorType parsed,
 									   List<KeyData> verificationKeys,
 									   List<KeyData> localKeys) {
 		Metadata result = null, current = null;
@@ -1464,7 +1568,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				current.setNext(m);
 				current = m;
 			}
-			Signature signature = validateSignature(desc, verificationKeys);
+			Signature signature = validateSignature(holder, verificationKeys);
 			current.setSignature(signature);
 		}
 		return result;
@@ -1486,7 +1590,9 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 
 		desc.setId(descriptor.getID());
-		desc.setValidUntil(new DateTime(descriptor.getValidUntil().toGregorianCalendar()));
+		if (ofNullable(descriptor.getValidUntil()).isPresent()) {
+			desc.setValidUntil(new DateTime(descriptor.getValidUntil().toGregorianCalendar()));
+		}
 		return desc;
 	}
 

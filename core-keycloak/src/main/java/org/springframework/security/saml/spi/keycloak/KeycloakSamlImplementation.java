@@ -19,6 +19,7 @@ package org.springframework.security.saml.spi.keycloak;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,12 +32,18 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.xml.crypto.dsig.XMLObject;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
@@ -115,6 +122,7 @@ import org.keycloak.dom.saml.v2.metadata.AttributeConsumingServiceType;
 import org.keycloak.dom.saml.v2.metadata.EndpointType;
 import org.keycloak.dom.saml.v2.metadata.EntitiesDescriptorType;
 import org.keycloak.dom.saml.v2.metadata.EntityDescriptorType;
+import org.keycloak.dom.saml.v2.metadata.ExtensionsType;
 import org.keycloak.dom.saml.v2.metadata.IDPSSODescriptorType;
 import org.keycloak.dom.saml.v2.metadata.IndexedEndpointType;
 import org.keycloak.dom.saml.v2.metadata.KeyDescriptorType;
@@ -131,13 +139,14 @@ import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
 import org.keycloak.dom.saml.v2.protocol.ResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusType;
-import org.keycloak.dom.xmlsec.w3.xmldsig.KeyInfoType;
 import org.keycloak.rotation.HardcodedKeyLocator;
 import org.keycloak.rotation.KeyLocator;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.DocumentUtil;
+import org.keycloak.saml.common.util.StaxUtil;
 import org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature;
 import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
+import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
 import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -145,6 +154,7 @@ import org.w3c.dom.Element;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static org.springframework.security.saml.saml2.Namespace.NS_SIGNATURE;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.util.StringUtils.hasText;
@@ -191,15 +201,15 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	@Override
 	public String toXml(Saml2Object saml2Object) {
-		XMLObject result = null;
-//		if (saml2Object instanceof AuthenticationRequest) {
+		Object result = null;
+		if (saml2Object instanceof Metadata) {
+			result = internalToXml((Metadata) saml2Object);
+		}
+//		else if (saml2Object instanceof AuthenticationRequest) {
 //			result = internalToXml((AuthenticationRequest) saml2Object);
 //		}
 //		else if (saml2Object instanceof Assertion) {
 //			result = internalToXml((Assertion) saml2Object);
-//		}
-//		else if (saml2Object instanceof Metadata) {
-//			result = internalToXml((Metadata) saml2Object);
 //		}
 //		else if (saml2Object instanceof Response) {
 //			result = internalToXml((Response) saml2Object);
@@ -297,9 +307,9 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			throw new SamlKeyException("At least one verification key has to be provided");
 		}
 
-//		if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
-//			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
-//		}
+		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
+			return validateSignature((SamlObjectHolder) saml2Object.getImplementation(), trustedKeys);
+		}
 		else {
 			throw new SamlException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
@@ -782,16 +792,25 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected EntityDescriptorType internalToXml(Metadata<? extends Metadata> metadata) {
-		EntityDescriptorType desc = null;//getEntityDescriptor();
-//		desc.setEntityID(metadata.getEntityId());
-//		if (hasText(metadata.getId())) {
-//			desc.setID(metadata.getId());
-//		}
-//		else {
-//			desc.setID(UUID.randomUUID().toString());
-//		}
-//		List<RoleDescriptor> descriptors = getRoleDescriptors(metadata);
-//		desc.getRoleDescriptors().addAll(descriptors);
+		EntityDescriptorType desc = new EntityDescriptorType(metadata.getEntityId());
+		if (hasText(metadata.getId())) {
+			desc.setID(metadata.getId());
+		}
+		else {
+			desc.setID("M" + UUID.randomUUID().toString());
+		}
+		List<RoleDescriptorType> descriptors = getRoleDescriptors(metadata);
+		descriptors.stream().forEach(
+			d -> {
+				if (d instanceof SSODescriptorType) {
+					desc.addChoiceType(
+						EntityDescriptorType.EDTChoiceType.oneValue(
+							new EntityDescriptorType.EDTDescriptorChoiceType((SSODescriptorType) d)
+						)
+					);
+				}
+			}
+		);
 //		if (metadata.getSigningKey() != null) {
 //			signObject(desc, metadata.getSigningKey(), metadata.getAlgorithm(), metadata.getDigest());
 //		}
@@ -800,133 +819,128 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected List<RoleDescriptorType> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
 		List<RoleDescriptorType> result = new LinkedList<>();
-//		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
-//			RoleDescriptor roleDescriptor = null;
-//			if (p instanceof ServiceProvider) {
-//				ServiceProvider sp = (ServiceProvider) p;
-//				SPSSODescriptor descriptor = getSPSSODescriptor();
-//				roleDescriptor = descriptor;
-//				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
-//				descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
-//
-//				for (NameId id : p.getNameIds()) {
-//					descriptor.getNameIDFormats().add(getNameIDFormat(id));
-//				}
-//
-//				for (int i = 0; i < sp.getAssertionConsumerService().size(); i++) {
-//					Endpoint ep = sp.getAssertionConsumerService().get(i);
-//					descriptor.getAssertionConsumerServices().add(getAssertionConsumerService(ep, i));
-//				}
-//				for (int i = 0; i < sp.getArtifactResolutionService().size(); i++) {
-//					Endpoint ep = sp.getArtifactResolutionService().get(i);
-//					descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
-//				}
-//				for (int i = 0; i < sp.getSingleLogoutService().size(); i++) {
-//					Endpoint ep = sp.getSingleLogoutService().get(i);
-//					descriptor.getSingleLogoutServices().add(getSingleLogoutService(ep));
-//				}
-//				if (sp.getRequestedAttributes() != null && !sp.getRequestedAttributes().isEmpty()) {
-//					descriptor
-//						.getAttributeConsumingServices()
-//						.add(getAttributeConsumingService(sp.getRequestedAttributes()));
-//				}
-//
-//			}
-//			else if (p instanceof IdentityProvider) {
-//				IdentityProvider idp = (IdentityProvider) p;
-//				IDPSSODescriptor descriptor = getIDPSSODescriptor();
-//				roleDescriptor = descriptor;
-//				descriptor.setWantAuthnRequestsSigned(idp.getWantAuthnRequestsSigned());
-//				for (NameId id : p.getNameIds()) {
-//					descriptor.getNameIDFormats().add(getNameIDFormat(id));
-//				}
-//				for (int i = 0; i < idp.getSingleSignOnService().size(); i++) {
-//					Endpoint ep = idp.getSingleSignOnService().get(i);
-//					descriptor.getSingleSignOnServices().add(getSingleSignOnService(ep, i));
-//				}
-//				for (int i = 0; i < p.getSingleLogoutService().size(); i++) {
-//					Endpoint ep = p.getSingleLogoutService().get(i);
-//					descriptor.getSingleLogoutServices().add(getSingleLogoutService(ep));
-//				}
-//				for (int i = 0; i < p.getArtifactResolutionService().size(); i++) {
-//					Endpoint ep = p.getArtifactResolutionService().get(i);
-//					descriptor.getArtifactResolutionServices().add(getArtifactResolutionService(ep, i));
-//				}
-//			}
-//			long now = getTime().millis();
-//			if (p.getCacheDuration() != null) {
-//				roleDescriptor.setCacheDuration(p.getCacheDuration().getTimeInMillis(new Date(now)));
-//			}
-//			roleDescriptor.setValidUntil(p.getValidUntil());
-//			roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
-//			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
-//
-//			for (KeyData key : p.getKeys()) {
-//				roleDescriptor.getKeyDescriptors().add(getKeyDescriptor(key));
-//			}
-//
-//			//md:extensions
-//			Endpoint requestInitiation = p.getRequestInitiation();
-//			Endpoint discovery = p.getDiscovery();
-//			if (requestInitiation != null || discovery != null) {
-//				ExtensionsBuilder extensionsBuilder = (ExtensionsBuilder) getBuilderFactory().getBuilder
-//					(Extensions.DEFAULT_ELEMENT_NAME);
-//				roleDescriptor.setExtensions(extensionsBuilder.buildObject());
-//
-//				if (requestInitiation != null) {
-//					RequestInitiatorBuilder builder = (RequestInitiatorBuilder) getBuilderFactory().getBuilder
-//						(RequestInitiator.DEFAULT_ELEMENT_NAME);
-//					RequestInitiator init = builder.buildObject();
-//					init.setBinding(requestInitiation.getBinding().toString());
-//					init.setLocation(requestInitiation.getLocation());
-//					init.setResponseLocation(requestInitiation.getResponseLocation());
-//					roleDescriptor.getExtensions().getUnknownXMLObjects().add(init);
-//				}
-//				if (discovery != null) {
-//					DiscoveryResponseBuilder builder = (DiscoveryResponseBuilder) getBuilderFactory().getBuilder
-//						(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-//					DiscoveryResponse response = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-//					response.setBinding(discovery.getBinding().toString());
-//					response.setLocation(discovery.getLocation());
-//					response.setResponseLocation(discovery.getResponseLocation());
-//					response.setIsDefault(discovery.isDefault());
-//					response.setIndex(discovery.getIndex());
-//					roleDescriptor.getExtensions().getUnknownXMLObjects().add(response);
-//				}
-//			}
-//			result.add(roleDescriptor);
-//		}
+		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
+			RoleDescriptorType roleDescriptor = null;
+			if (p instanceof ServiceProvider) {
+				ServiceProvider sp = (ServiceProvider) p;
+				SPSSODescriptorType descriptor = new SPSSODescriptorType(sp.getProtocolSupportEnumeration());
+				roleDescriptor = descriptor;
+				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
+				descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
+				for (NameId id : p.getNameIds()) {
+					descriptor.addNameIDFormat(id.toString());
+				}
+				for (int i = 0; i < sp.getAssertionConsumerService().size(); i++) {
+					Endpoint ep = sp.getAssertionConsumerService().get(i);
+					descriptor.addAssertionConsumerService(getIndexedEndpointType(ep, i));
+				}
+				for (int i = 0; i < sp.getArtifactResolutionService().size(); i++) {
+					Endpoint ep = sp.getArtifactResolutionService().get(i);
+					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
+				}
+				for (int i = 0; i < sp.getSingleLogoutService().size(); i++) {
+					Endpoint ep = sp.getSingleLogoutService().get(i);
+					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
+				}
+				if (sp.getRequestedAttributes() != null && !sp.getRequestedAttributes().isEmpty()) {
+					descriptor.addAttributeConsumerService(getAttributeConsumingService(sp.getRequestedAttributes()));
+				}
+
+			}
+			else if (p instanceof IdentityProvider) {
+				IdentityProvider idp = (IdentityProvider) p;
+				IDPSSODescriptorType descriptor = new IDPSSODescriptorType(idp.getProtocolSupportEnumeration());
+				roleDescriptor = descriptor;
+				descriptor.setWantAuthnRequestsSigned(idp.getWantAuthnRequestsSigned());
+				for (NameId id : p.getNameIds()) {
+					descriptor.addNameIDFormat(id.toString());
+				}
+				for (int i = 0; i < idp.getSingleSignOnService().size(); i++) {
+					Endpoint ep = idp.getSingleSignOnService().get(i);
+					descriptor.addSingleSignOnService(getSingleSignOnService(ep, i));
+				}
+				for (int i = 0; i < p.getSingleLogoutService().size(); i++) {
+					Endpoint ep = p.getSingleLogoutService().get(i);
+					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
+				}
+				for (int i = 0; i < p.getArtifactResolutionService().size(); i++) {
+					Endpoint ep = p.getArtifactResolutionService().get(i);
+					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
+				}
+			}
+			long now = getTime().millis();
+			if (p.getCacheDuration() != null) {
+				roleDescriptor.setCacheDuration(p.getCacheDuration());
+			}
+			//roleDescriptor.setValidUntil(p.getValidUntil().toGregorianCalendar());
+			//roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
+			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
+
+			for (KeyData key : p.getKeys()) {
+				roleDescriptor.addKeyDescriptor(getKeyDescriptor(key));
+			}
+
+			//md:extensions
+			Endpoint requestInitiation = p.getRequestInitiation();
+			Endpoint discovery = p.getDiscovery();
+			if (requestInitiation != null || discovery != null) {
+				ExtensionsType extensionsType = new ExtensionsType();
+				if (requestInitiation != null) {
+					try {
+						EndpointType ri = new EndpointType(
+							new URI(requestInitiation.getBinding().toString()),
+							new URI(requestInitiation.getLocation())
+						);
+						if (hasText(requestInitiation.getResponseLocation())) {
+							ri.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
+						}
+						extensionsType.addExtension(ri);
+					} catch (URISyntaxException e) {
+						throw new SamlException(e);
+					}
+				}
+				if (discovery != null) {
+					try {
+						IndexedEndpointType d = new IndexedEndpointType(
+							new URI(discovery.getBinding().toString()),
+							new URI(discovery.getLocation())
+						);
+						if (hasText(discovery.getResponseLocation())) {
+							d.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
+						}
+						if (discovery.getIndex() >= 0) {
+							d.setIndex(discovery.getIndex());
+						}
+						d.setIsDefault(discovery.isDefault() ? true : null);
+						extensionsType.addExtension(d);
+					} catch (URISyntaxException e) {
+						throw new SamlException(e);
+					}
+				}
+				roleDescriptor.setExtensions(extensionsType);
+			}
+			roleDescriptor.setID(p.getId());
+			result.add(roleDescriptor);
+		}
 		return result;
 	}
 
 	protected AttributeConsumingServiceType getAttributeConsumingService(List<Attribute> attributes) {
-
-//		AttributeConsumingService service = buildSAMLObject(AttributeConsumingService.class);
-//		service.setIsDefault(true);
-//		service.setIndex(0);
-//		List<RequestedAttribute> attrs = new LinkedList<>();
-//		for (Attribute a : attributes) {
-//			RequestedAttribute ra = buildSAMLObject(RequestedAttribute.class);
-//			ra.setIsRequired(a.isRequired());
-//			ra.setFriendlyName(a.getFriendlyName());
-//			ra.setName(a.getName());
-//			ra.setNameFormat(a.getNameFormat().toString());
-//			attrs.add(ra);
-//		}
-//		service.getRequestAttributes().addAll(attrs);
-//		return service;
-		throw new UnsupportedOperationException();
+		AttributeConsumingServiceType service = new AttributeConsumingServiceType(0);
+		service.setIsDefault(true);
+		for (Attribute a : attributes) {
+			RequestedAttributeType ra = new RequestedAttributeType(a.getName());
+			ra.setIsRequired(a.isRequired());
+			ra.setFriendlyName(a.getFriendlyName());
+			ra.setName(a.getName());
+			ra.setNameFormat(a.getNameFormat().toString());
+			service.addRequestedAttribute(ra);
+		}
+		return service;
 	}
 
-	protected Object getArtifactResolutionService(Endpoint ep, int i) {
-//		ArtifactResolutionService service = buildSAMLObject(ArtifactResolutionService.class);
-//		service.setLocation(ep.getLocation());
-//		service.setBinding(ep.getBinding().toString());
-//		service.setIndex(i);
-//		service.setIsDefault(ep.isDefault());
-//		service.setResponseLocation(ep.getResponseLocation());
-//		return service;
-		throw new UnsupportedOperationException();
+	protected IndexedEndpointType getArtifactResolutionService(Endpoint ep, int i) {
+		return getIndexedEndpointType(ep, i);
 	}
 
 	protected StatusResponseType internalToXml(LogoutResponse response) {
@@ -1122,8 +1136,22 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		throw new UnsupportedOperationException();
 	}
 
-	protected String marshallToXml(XMLObject auth) {
-		throw new UnsupportedOperationException();
+	protected String marshallToXml(Object object) {
+		if (object instanceof EntityDescriptorType) {
+			StringWriter writer = new StringWriter();
+			try {
+				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
+				SAMLMetadataWriter metadataWriter = new KeycloakSamlMetadataWriter(streamWriter);
+				metadataWriter.writeEntityDescriptor((EntityDescriptorType) object);
+				streamWriter.flush();
+				return writer.getBuffer().toString();
+			} catch (ProcessingException | XMLStreamException e) {
+				throw new SamlException(e);
+			}
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	protected RequestedAuthnContextType getRequestedAuthenticationContext(AuthenticationRequest request) {
@@ -1715,39 +1743,32 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-	public Object getSingleSignOnService(Endpoint endpoint, int index) {
-//		SAMLObjectBuilder<SingleSignOnService> builder =
-//			(SAMLObjectBuilder<SingleSignOnService>) getBuilderFactory()
-//				.getBuilder(SingleSignOnService.DEFAULT_ELEMENT_NAME);
-//		SingleSignOnService sso = builder.buildObject();
-//		sso.setLocation(endpoint.getLocation());
-//		sso.setBinding(endpoint.getBinding().toString());
-//		return sso;
-		throw new UnsupportedOperationException();
+	public IndexedEndpointType getSingleSignOnService(Endpoint endpoint, int index) {
+		return getIndexedEndpointType(endpoint, index);
 	}
 
-	public Object getAssertionConsumerService(Endpoint endpoint, int index) {
-//		SAMLObjectBuilder<AssertionConsumerService> builder =
-//			(SAMLObjectBuilder<AssertionConsumerService>) getBuilderFactory()
-//				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
-//		AssertionConsumerService consumer = builder.buildObject();
-//		consumer.setLocation(endpoint.getLocation());
-//		consumer.setBinding(endpoint.getBinding().toString());
-//		consumer.setIsDefault(endpoint.isDefault());
-//		consumer.setIndex(index);
-//		return consumer;
-		throw new UnsupportedOperationException();
+	public IndexedEndpointType getAssertionConsumerService(Endpoint endpoint, int index) {
+		return getIndexedEndpointType(endpoint, index);
 	}
 
-	public Object getSingleLogoutService(Endpoint endpoint) {
-//		SAMLObjectBuilder<SingleLogoutService> builder =
-//			(SAMLObjectBuilder<SingleLogoutService>) getBuilderFactory()
-//				.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
-//		SingleLogoutService service = builder.buildObject();
-//		service.setBinding(endpoint.getBinding().toString());
-//		service.setLocation(endpoint.getLocation());
-//		return service;
-		throw new UnsupportedOperationException();
+	private IndexedEndpointType getIndexedEndpointType(Endpoint endpoint, int index) {
+		try {
+			IndexedEndpointType result = new IndexedEndpointType(
+				new URI(endpoint.getBinding().toString()),
+				new URI(endpoint.getLocation())
+			);
+			if (index > 0) {
+				result.setIndex(index);
+			}
+			result.setIsDefault(endpoint.isDefault() ? true : null);
+			return result;
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+	}
+
+	public IndexedEndpointType getSingleLogoutService(Endpoint endpoint) {
+		return getIndexedEndpointType(endpoint, -1);
 	}
 
 	public KeyDescriptorType getKeyDescriptor(KeyData key) {
@@ -1756,16 +1777,34 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
 //		Credential credential = getCredential(key, resolver);
 		try {
-			KeyInfoType info = null;//getKeyInfoGenerator(credential).generate(credential);
-			descriptor.setKeyInfo(null);
+			//getKeyInfoGenerator(credential).generate(credential);
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element x509Cert = doc.createElementNS(NS_SIGNATURE, "ds:X509Certificate");
+			x509Cert.setTextContent(X509Utilities.keyCleanup(key.getCertificate()));
+			Element x509Data = doc.createElementNS(NS_SIGNATURE, "ds:X509Data");
+			x509Data.appendChild(x509Cert);
+			Element keyInfo = doc.createElementNS(NS_SIGNATURE, "ds:KeyInfo");
+			keyInfo.appendChild(x509Data);
+			descriptor.setKeyInfo(keyInfo);
 			if (key.getType() != null) {
-				descriptor.setUse(KeyTypes.fromValue(key.getType().toString()));
+				switch (key.getType()) {
+					case SIGNING:
+						descriptor.setUse(KeyTypes.SIGNING);
+						break;
+					case ENCRYPTION:
+						descriptor.setUse(KeyTypes.ENCRYPTION);
+						break;
+					case UNSPECIFIED:
+						break;
+				}
 			}
 			else {
 				descriptor.setUse(KeyTypes.SIGNING);
 			}
 			return descriptor;
-		} catch (SecurityException e) {
+		} catch (SecurityException | ParserConfigurationException e) {
 			throw new SamlKeyException(e);
 		}
 	}

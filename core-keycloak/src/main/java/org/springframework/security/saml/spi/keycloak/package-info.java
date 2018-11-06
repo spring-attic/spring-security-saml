@@ -15,14 +15,7 @@
  *
  */
 
-include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "boot-config"
-include "samples/boot/simple-service-provider"
-
-rootProject.name = "spring-security-saml2"
-
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
-}
+/**
+ * OpenSAML 3.x specific code
+ */
+package org.springframework.security.saml.spi.opensaml;

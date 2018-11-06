@@ -39,6 +39,7 @@ import javax.xml.crypto.dsig.XMLObject;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -872,7 +873,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			if (p.getCacheDuration() != null) {
 				roleDescriptor.setCacheDuration(p.getCacheDuration());
 			}
-			//roleDescriptor.setValidUntil(p.getValidUntil().toGregorianCalendar());
+			roleDescriptor.setValidUntil(getXmlGregorianCalendar(p.getValidUntil()));
 			//roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
 			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
 
@@ -923,6 +924,18 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			result.add(roleDescriptor);
 		}
 		return result;
+	}
+
+	private XMLGregorianCalendar getXmlGregorianCalendar(DateTime date) {
+		if (date == null) {
+			return null;
+		}
+		try {
+			DatatypeFactory df = DatatypeFactory.newInstance();
+			return df.newXMLGregorianCalendar(date.toGregorianCalendar());
+		} catch (DatatypeConfigurationException e) {
+			throw new SamlException(e);
+		}
 	}
 
 	protected AttributeConsumingServiceType getAttributeConsumingService(List<Attribute> attributes) {

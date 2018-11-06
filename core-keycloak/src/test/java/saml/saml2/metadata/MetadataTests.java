@@ -121,13 +121,8 @@ public class MetadataTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "AuthnRequestsSigned", equalTo("true"));
 		assertNodeAttribute(nodes.iterator().next(), "WantAssertionsSigned", equalTo("true"));
 		assertNodeAttribute(nodes.iterator().next(), "ID", equalTo("sp.saml.spring.io"));
-
-		assertNodeCount(xml, "//ds:Signature", 1);
-		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
-
-		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
+		assertNodeAttribute(nodes.iterator().next(), "cacheDuration", equalTo("P2Y6M5DT12H35M30S"));
+		assertNodeAttribute(nodes.iterator().next(), "validUntil", equalTo("2028-05-02T20:07:06.785Z"));
 
 		assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions", 1);
 		assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions/idpdisc:DiscoveryResponse", 1);
@@ -214,6 +209,12 @@ public class MetadataTests extends MetadataBase {
 			);
 		}
 
+		assertNodeCount(xml, "//ds:Signature", 1);
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
 	}
 
 	@Test
@@ -240,13 +241,9 @@ public class MetadataTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "protocolSupportEnumeration", equalTo(NS_PROTOCOL));
 		assertNodeAttribute(nodes.iterator().next(), "WantAuthnRequestsSigned", equalTo("true"));
 		assertNodeAttribute(nodes.iterator().next(), "ID", equalTo("idp.saml.spring.io"));
+		assertNodeAttribute(nodes.iterator().next(), "cacheDuration", equalTo("P2Y6M5DT12H35M30S"));
+		assertNodeAttribute(nodes.iterator().next(), "validUntil", equalTo("2028-05-02T20:07:06.785Z"));
 
-		assertNodeCount(xml, "//ds:Signature", 1);
-		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
-
-		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
 
 		assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions", 1);
 		assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions/idpdisc:DiscoveryResponse", 1);
@@ -303,6 +300,12 @@ public class MetadataTests extends MetadataBase {
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.TRANSIENT.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
 
+		assertNodeCount(xml, "//ds:Signature", 1);
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
 
 	}
 

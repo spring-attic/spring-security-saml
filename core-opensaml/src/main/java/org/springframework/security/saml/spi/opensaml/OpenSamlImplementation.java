@@ -1240,7 +1240,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 					result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
 					break;
 				case minimum:
-					result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
+					result.setComparison(AuthnContextComparisonTypeEnumeration.MINIMUM);
 					break;
 				default:
 					result.setComparison(EXACT);

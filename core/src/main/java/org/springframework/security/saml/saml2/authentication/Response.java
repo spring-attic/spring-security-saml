@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -30,7 +31,7 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 47, Line 1995
  */
-public class Response extends StatusResponse<Response> {
+public class Response extends StatusResponse<Response> implements SignableSaml2Object<Response> {
 	private List<Assertion> assertions = new LinkedList<>();
 
 	private KeyData signingKey = null;
@@ -59,6 +60,7 @@ public class Response extends StatusResponse<Response> {
 		return digest;
 	}
 
+	@Override
 	public Response setSigningKey(KeyData signingKey,
 								  AlgorithmMethod algorithm,
 								  DigestMethod digest) {

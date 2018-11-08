@@ -24,11 +24,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.EncryptableSaml2Object;
 import org.springframework.security.saml.saml2.ImplementationHolder;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
@@ -42,7 +44,8 @@ import static java.util.stream.Collectors.toList;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 17, Line 649
  */
-public class Assertion extends ImplementationHolder<Assertion> {
+public class Assertion extends ImplementationHolder<Assertion>
+	implements SignableSaml2Object<Assertion>, EncryptableSaml2Object<Assertion> {
 
 	private String version;
 	private String id;
@@ -162,14 +165,17 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
+	@Override
 	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
+	@Override
 	public AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
+	@Override
 	public DigestMethod getDigest() {
 		return digest;
 	}
@@ -204,6 +210,7 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
+	@Override
 	public Assertion setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
@@ -211,6 +218,7 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
+	@Override
 	public Assertion setEncryptionKey(KeyData encryptionKey,
 									  KeyEncryptionMethod keyAlgorithm,
 									  DataEncryptionMethod dataAlgorithm) {
@@ -220,14 +228,17 @@ public class Assertion extends ImplementationHolder<Assertion> {
 		return this;
 	}
 
+	@Override
 	public KeyData getEncryptionKey() {
 		return encryptionKey;
 	}
 
+	@Override
 	public KeyEncryptionMethod getKeyAlgorithm() {
 		return keyAlgorithm;
 	}
 
+	@Override
 	public DataEncryptionMethod getDataAlgorithm() {
 		return dataAlgorithm;
 	}

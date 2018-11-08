@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
@@ -33,7 +34,8 @@ import org.joda.time.DateTime;
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  * Page 13, Line 268
  */
-public class EntityDescriptor<T extends EntityDescriptor> extends ImplementationHolder {
+public class EntityDescriptor<T extends EntityDescriptor> extends ImplementationHolder
+implements SignableSaml2Object<T> {
 
 	private String id;
 	private String entityId;
@@ -172,6 +174,7 @@ public class EntityDescriptor<T extends EntityDescriptor> extends Implementation
 		return _this();
 	}
 
+	@Override
 	public T setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;

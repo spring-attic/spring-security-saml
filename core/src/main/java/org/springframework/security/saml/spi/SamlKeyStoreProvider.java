@@ -37,9 +37,13 @@ public interface SamlKeyStoreProvider {
 	char[] DEFAULT_KS_PASSWD = UUID.randomUUID().toString().toCharArray();
 
 	default KeyStore getKeyStore(KeyData key) {
+		return getKeyStore(key, DEFAULT_KS_PASSWD);
+	}
+
+	default KeyStore getKeyStore(KeyData key, char[] keystorePassword) {
 		try {
 			KeyStore ks = KeyStore.getInstance("JKS");
-			ks.load(null, DEFAULT_KS_PASSWD);
+			ks.load(null, keystorePassword);
 
 			byte[] certbytes = X509Utilities.getDER(key.getCertificate());
 			Certificate certificate = X509Utilities.getCertificate(certbytes);
@@ -47,11 +51,7 @@ public interface SamlKeyStoreProvider {
 
 			if (hasText(key.getPrivateKey())) {
 				PrivateKey pkey = X509Utilities.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
-
-				//RSAPrivateKey privateKey = X509Utilities.getPrivateKey(keybytes, "RSA");
-
-				ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new
-					Certificate[]{certificate});
+				ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
 			}
 
 			return ks;

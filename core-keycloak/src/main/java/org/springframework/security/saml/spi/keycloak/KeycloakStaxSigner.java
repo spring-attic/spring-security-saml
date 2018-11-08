@@ -32,6 +32,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.security.saml.saml2.Namespace;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 
 import org.apache.xml.security.exceptions.XMLSecurityException;
@@ -44,13 +45,13 @@ import org.apache.xml.security.stax.securityToken.SecurityTokenConstants;
 
 import static java.util.Arrays.asList;
 
-public class KeycloakStaxSigner {
+class KeycloakStaxSigner {
 
-	public String sign(Metadata metadata,
+	String sign(Metadata metadata,
 					   String xml,
 					   Key signingKey,
-					   X509Certificate signingCert) {
-		QName qName = new QName("urn:oasis:names:tc:SAML:2.0:metadata", "EntityDescriptor", "md");
+				X509Certificate signingCert) {
+		QName qName = new QName(Namespace.NS_METADATA, "EntityDescriptor", Namespace.NS_METADATA_PREFIX);
 		Reader xmlReader = new StringReader(xml);
 		try {
 			return sign(

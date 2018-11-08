@@ -24,9 +24,15 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.util.Collection;
 import java.util.Date;
@@ -50,6 +56,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -221,14 +228,19 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		else if (saml2Object instanceof LogoutResponse) {
 //			result = internalToXml((LogoutResponse) saml2Object);
 //		}
-		if (result != null) {
-			return marshallToXml(result);
+		if (result == null) {
+			throw new SamlException("To xml transformation not supported for: " +
+				saml2Object != null ?
+				saml2Object.getClass().getName() :
+				"null"
+			);
 		}
-		throw new SamlException("To xml transformation not supported for: " +
-			saml2Object != null ?
-			saml2Object.getClass().getName() :
-			"null"
-		);
+		String xml = marshallToXml(result);
+		if (saml2Object instanceof SignableSaml2Object) {
+			SignableSaml2Object signable = (SignableSaml2Object)saml2Object;
+			xml = signObject(xml, signable, signable.getSigningKey(), signable.getAlgorithm(), signable.getDigest());
+		}
+		return xml;
 	}
 
 	@Override
@@ -1786,11 +1798,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	public KeyDescriptorType getKeyDescriptor(KeyData key) {
 		KeyDescriptorType descriptor = new KeyDescriptorType();
-
-//		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
-//		Credential credential = getCredential(key, resolver);
 		try {
-			//getKeyInfoGenerator(credential).generate(credential);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document doc = db.newDocument();
@@ -1828,11 +1836,30 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		return manager.getDefaultManager().getFactory(credential).newInstance();
 //	}
 
-	public void signObject(Object signable,
-						   KeyData key,
-						   AlgorithmMethod algorithm,
-						   DigestMethod digest) {
-		throw new UnsupportedOperationException();
+	public String signObject(String xml,
+							 SignableSaml2Object signable,
+							 KeyData key,
+							 AlgorithmMethod algorithm,
+							 DigestMethod digest) {
+
+		if (!(signable instanceof Metadata)) {
+			throw new UnsupportedOperationException();
+		}
+
+		if (signable.getSigningKey() == null) {
+			return xml;
+		}
+		KeycloakStaxSigner signer = new KeycloakStaxSigner();
+		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {};
+		KeyStore keyStore = keystoreProvider.getKeyStore(key, key.getName().toCharArray());
+		try {
+			Key sk = keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
+			Certificate certificate = keyStore.getCertificate(key.getName());
+			return signer.sign((Metadata)signable, xml, sk, (X509Certificate) certificate);
+		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+			throw new SamlException(e);
+		}
+
 //		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
 //		Credential credential = getCredential(key, resolver);
 //

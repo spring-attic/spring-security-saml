@@ -97,6 +97,15 @@ public class MetadataTests extends MetadataBase {
 	);
 
 	@Test
+	public void verifySigning() throws Exception {
+		String xml = config.toXml(identityProviderMetadata);
+		config.fromXml(xml, asList(spVerifying), null);
+		xml = config.toXml(serviceProviderMetadata);
+		config.fromXml(xml, asList(idpVerifying), null);
+	}
+
+
+	@Test
 	public void sp_to_xml() throws Exception {
 		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);

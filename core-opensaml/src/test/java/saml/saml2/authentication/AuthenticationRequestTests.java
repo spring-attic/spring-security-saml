@@ -23,6 +23,8 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -78,6 +80,34 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 0);
+
+		assertNodeCount(xml, "//ds:Signature", 1);
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA1.toString());
+
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA1.toString());
+	}
+
+	@Test
+	public void parseKeyCloakGenerated() {
+		String xml = "<samlp:AuthnRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" AssertionConsumerServiceURL=\"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias\" Destination=\"http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias\" ForceAuthn=\"false\" ID=\"92ef2fe5-c74e-442e-8152-c29fa7a0d697\" IsPassive=\"false\" IssueInstant=\"2018-11-08T12:12:40.687-08:00\" ProtocolBinding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Version=\"2.0\"><saml:Issuer xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.localhost:8080/uaa</saml:Issuer><dsig:Signature xmlns:dsig=\"http://www.w3.org/2000/09/xmldsig#\"><dsig:SignedInfo><dsig:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/><dsig:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><dsig:Reference URI=\"#92ef2fe5-c74e-442e-8152-c29fa7a0d697\"><dsig:Transforms><dsig:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><dsig:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/></dsig:Transforms><dsig:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><dsig:DigestValue>cX9y82HOEEavQ1irwOTf5bMTks8=</dsig:DigestValue></dsig:Reference></dsig:SignedInfo><dsig:SignatureValue>OEIkCE95W1UvkIMMKF5E+1QnZA0IUvNNdQ+m4ZwkvfoHRdqz9ui/A1sSndX2g4fJeXPevP+eZisK&#13;\n" +
+			"JvKmCmPrNoSbhxRy35Hj+rYM8K939ebVCrJlCaREMs94LDipf7xBb9aANDkHVWOQBtdDYSz4cDUp&#13;\n" +
+			"fIQu0K61DAhJDljZIxA=</dsig:SignatureValue><dsig:KeyInfo><dsig:KeyName>signing</dsig:KeyName><dsig:X509Data><dsig:X509Certificate>MIICgTCCAeoCCQDtqkmhbmvARzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV&#13;\n" +
+			"BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy&#13;\n" +
+			"aXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQDDBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAe&#13;\n" +
+			"Fw0xODA0MzAyMTA1MTNaFw0yODA0MjcyMTA1MTNaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwK&#13;\n" +
+			"V2FzaGluZ3RvbjESMBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkg&#13;\n" +
+			"U0FNTDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1sMIGfMA0G&#13;\n" +
+			"CSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBRIHAaQLxTLJQDt8NDz/zT1PZuwu9pwo44zGLnrbU22qX&#13;\n" +
+			"LuNhbur/nqxEpIJBjy1BYyeGvlcGhOXTu1uThZdmKC71KwGNgTHdE1ciC/Fu/GMtgoVsQujtOV92&#13;\n" +
+			"Fw5mMcJR7yNIsGP0+4nCWj41M+4h/EdbUawCWNWEqrgyvDrGWwIDAQABMA0GCSqGSIb3DQEBCwUA&#13;\n" +
+			"A4GBALcvf1p3lOPlgcJNv2JUh1Z53VWbOOPRqm31AXCN5rvb52nqGi5gz1jJz1oXliBRsvOt5cDP&#13;\n" +
+			"89uUTAQ2HWuJTlm0M/1dJh1CJ7cjugoFEMYCjEA72CS8wYjujtZhXZYFdI/eMeJw0IoRqVh3mZqU&#13;\n" +
+			"4V1B7udBKD/Kmbwpm4XZI/An</dsig:X509Certificate></dsig:X509Data><dsig:KeyValue><dsig:RSAKeyValue><dsig:Modulus>wUSBwGkC8UyyUA7fDQ8/809T2bsLvacKOOMxi5621Ntqly7jYW7q/56sRKSCQY8tQWMnhr5XBoTl&#13;\n" +
+			"07tbk4WXZigu9SsBjYEx3RNXIgvxbvxjLYKFbELo7TlfdhcOZjHCUe8jSLBj9PuJwlo+NTPuIfxH&#13;\n" +
+			"W1GsAljVhKq4Mrw6xls=</dsig:Modulus><dsig:Exponent>AQAB</dsig:Exponent></dsig:RSAKeyValue></dsig:KeyValue></dsig:KeyInfo></dsig:Signature><samlp:NameIDPolicy AllowCreate=\"true\" Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\"/></samlp:AuthnRequest>";
+		config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 	}
 
 	@Test
@@ -108,6 +138,8 @@ class AuthenticationRequestTests extends MetadataBase {
 			data.getAssertionConsumerService().getLocation(),
 			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
+
+
 	}
 
 	@Test

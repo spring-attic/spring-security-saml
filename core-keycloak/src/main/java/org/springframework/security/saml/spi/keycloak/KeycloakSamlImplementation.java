@@ -20,24 +20,15 @@ package org.springframework.security.saml.spi.keycloak;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
@@ -96,20 +87,15 @@ import org.springframework.security.saml.saml2.metadata.Provider;
 import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.X509Utilities;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
-import org.keycloak.common.VerificationException;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
 import org.keycloak.dom.saml.v2.assertion.AttributeStatementType;
 import org.keycloak.dom.saml.v2.assertion.AttributeType;
@@ -124,6 +110,7 @@ import org.keycloak.dom.saml.v2.assertion.EncryptedElementType;
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
 import org.keycloak.dom.saml.v2.assertion.OneTimeUseType;
 import org.keycloak.dom.saml.v2.assertion.StatementAbstractType;
+import org.keycloak.dom.saml.v2.assertion.SubjectConfirmationDataType;
 import org.keycloak.dom.saml.v2.assertion.SubjectConfirmationType;
 import org.keycloak.dom.saml.v2.assertion.SubjectType;
 import org.keycloak.dom.saml.v2.metadata.AttributeConsumingServiceType;
@@ -147,21 +134,22 @@ import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
 import org.keycloak.dom.saml.v2.protocol.ResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusType;
-import org.keycloak.rotation.HardcodedKeyLocator;
-import org.keycloak.rotation.KeyLocator;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.DocumentUtil;
 import org.keycloak.saml.common.util.StaxUtil;
-import org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature;
 import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
+import org.keycloak.saml.processing.core.saml.v2.writers.SAMLAssertionWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
+import org.keycloak.saml.processing.core.saml.v2.writers.SAMLRequestWriter;
 import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
 import static org.springframework.security.saml.saml2.Namespace.NS_SIGNATURE;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
@@ -177,6 +165,32 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		super(time);
 	}
 
+	private Metadata determineMetadataType(List<? extends Provider> ssoProviders) {
+		Metadata result = new Metadata();
+		long sps = ssoProviders.stream().filter(p -> p instanceof ServiceProvider).count();
+		long idps = ssoProviders.stream().filter(p -> p instanceof IdentityProvider).count();
+
+		if (ssoProviders.size() == sps) {
+			result = new ServiceProviderMetadata();
+		}
+		else if (ssoProviders.size() == idps) {
+			result = new IdentityProviderMetadata();
+		}
+		result.setProviders(ssoProviders);
+		return result;
+	}
+
+	public static SecretKey generateKeyFromURI(DataEncryptionMethod algoURI) {
+		throw new UnsupportedOperationException();
+//		try {
+//			String jceAlgorithmName = JCEMapper.getJCEKeyAlgorithmFromURI(algoURI.toString());
+//			int keyLength = JCEMapper.getKeyLengthFromURI(algoURI.toString());
+//			return generateKey(jceAlgorithmName, keyLength, null);
+//		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+//			throw new SamlException(e);
+//		}
+	}
+
 	public SamlKeyStoreProvider getSamlKeyStoreProvider() {
 		return samlKeyStoreProvider;
 	}
@@ -187,6 +201,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected void bootstrap() {
+		org.apache.xml.security.Init.init();
 	}
 
 	@Override
@@ -206,19 +221,22 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-
 	@Override
 	public String toXml(Saml2Object saml2Object) {
 		Object result = null;
 		if (saml2Object instanceof Metadata) {
 			result = internalToXml((Metadata) saml2Object);
 		}
-//		else if (saml2Object instanceof AuthenticationRequest) {
-//			result = internalToXml((AuthenticationRequest) saml2Object);
-//		}
-//		else if (saml2Object instanceof Assertion) {
-//			result = internalToXml((Assertion) saml2Object);
-//		}
+		else if (saml2Object instanceof AuthenticationRequest) {
+			result = internalToXml((AuthenticationRequest) saml2Object);
+		}
+		else if (saml2Object instanceof Assertion) {
+			try {
+				result = internalToXml((Assertion) saml2Object);
+			} catch (URISyntaxException e) {
+				throw new SamlException(e);
+			}
+		}
 //		else if (saml2Object instanceof Response) {
 //			result = internalToXml((Response) saml2Object);
 //		}
@@ -237,8 +255,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 		String xml = marshallToXml(result);
 		if (saml2Object instanceof SignableSaml2Object) {
-			SignableSaml2Object signable = (SignableSaml2Object)saml2Object;
-			xml = signObject(xml, signable, signable.getSigningKey(), signable.getAlgorithm(), signable.getDigest());
+			SignableSaml2Object signable = (SignableSaml2Object) saml2Object;
+			xml = signObject(xml, signable);
 		}
 		return xml;
 	}
@@ -250,22 +268,28 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		SamlObjectHolder parsed = parse(xml);
-		Signature signature = validateSignature(parsed, verificationKeys);
+		Map<String, Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
 		Saml2Object result = null;
 		if (parsed.getSamlObject() instanceof EntityDescriptorType) {
-			result = resolveMetadata((EntityDescriptorType) parsed.getSamlObject())
-				.setSignature(signature)
-			;
+			result = resolveMetadata(
+				(EntityDescriptorType) parsed.getSamlObject(),
+				signatureMap
+			);
 		}
 		else if (parsed.getSamlObject() instanceof EntitiesDescriptorType) {
 			result =
-				resolveMetadata(parsed, (EntitiesDescriptorType) parsed.getSamlObject(), verificationKeys, localKeys);
+				resolveMetadata(
+					(EntitiesDescriptorType) parsed.getSamlObject(),
+					signatureMap
+				);
+			;
 		}
-
-//		else if (parsed instanceof AuthnRequest) {
-//			result = resolveAuthenticationRequest((AuthnRequest) parsed)
-//				.setSignature(signature);
-//		}
+		else if (parsed.getSamlObject() instanceof AuthnRequestType) {
+			result = resolveAuthenticationRequest(
+				(AuthnRequestType) parsed.getSamlObject(),
+				signatureMap
+			);
+		}
 //		else if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
 //			result = resolveAssertion(
 //				(org.opensaml.saml.saml2.core.Assertion) parsed,
@@ -321,170 +345,23 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 
 		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
-			return validateSignature((SamlObjectHolder) saml2Object.getImplementation(), trustedKeys);
+			Map<String, Signature> signatureMap =
+				KeycloakSignatureValidator.validateSignature(
+					(SamlObjectHolder) saml2Object.getImplementation(),
+					trustedKeys
+				);
+			if (!signatureMap.isEmpty()) {
+				return signatureMap.entrySet().iterator().next().getValue();
+			}
+			else {
+				return null;
+			}
 		}
 		else {
 			throw new SamlException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}
-	}
-
-	private static PublicKey getPublicKey(String certPem) throws VerificationException {
-		if (certPem == null) {
-			throw new SamlException("Public certificate is missing.");
-		}
-
-		try {
-			byte[] certbytes = X509Utilities.getDER(certPem);
-			Certificate cert = X509Utilities.getCertificate(certbytes);
-			//TODO - should be based off of config
-			//((X509Certificate) cert).checkValidity();
-			return cert.getPublicKey();
-		} catch (CertificateException ex) {
-			throw new SamlException("Certificate is not valid.", ex);
-		} catch (Exception e) {
-			throw new SamlException("Could not decode cert", e);
-		}
-
-	}
-
-	public Signature validateSignature(SamlObjectHolder parsed, List<KeyData> keys) {
-		Signature result = null;
-		try {
-			Method method = ReflectionUtils.findMethod(parsed.getSamlObject().getClass(), "getSignature");
-			if (method != null) {
-				Object sig = method.invoke(parsed.getSamlObject(), new Object[0]);
-				if (sig != null) {
-					boolean ok = false;
-					for (KeyData key : keys) {
-						SAML2Signature saml2Signature = new SAML2Signature();
-						try {
-							PublicKey publicKey = getPublicKey(key.getCertificate());
-							KeyLocator keyLocator = new HardcodedKeyLocator(publicKey);
-							if (saml2Signature.validate(parsed.getDocument(), keyLocator)) {
-								ok = true;
-								break;
-							}
-						} catch (ProcessingException e) {
-							logger.trace("Signature validation failed.", e);
-						}
-					}
-					if (!ok) {
-						throw new SignatureException(
-							"Unable to validate signature for object:" +
-								parsed.getSamlObject()
-						);
-					}
-				}
-			}
-		} catch (SignatureException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new SamlException("Unable to get signature for class:" + parsed.getSamlObject().getClass(), e);
-		}
-
-//		if (object.isSigned() && keys != null && !keys.isEmpty()) {
-//			SignatureException last = null;
-//			for (KeyData key : keys) {
-//				try {
-//					Credential credential = getCredential(key, getCredentialsResolver(key));
-//					SignatureValidator.validate(object.getSignature(), credential);
-//					last = null;
-//					result = getSignature(object)
-//						.setValidated(true)
-//						.setValidatingKey(key);
-//					break;
-//				} catch (SignatureException e) {
-//					last = e;
-//				}
-//			}
-//			if (last != null) {
-//				throw new org.springframework.security.saml.saml2.signature.SignatureException(
-//					"Signature validation against a " + object.getClass().getName() +
-//						" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
-//					last
-//				);
-//			}
-//		}
-		return result;
-	}
-
-
-//	public KeyStoreCredentialResolver getCredentialsResolver(KeyData key) {
-//		KeyStore ks = getSamlKeyStoreProvider().getKeyStore(key);
-//		Map<String, String> passwords = hasText(key.getPrivateKey()) ?
-//			Collections.singletonMap(key.getName(), key.getPassphrase()) :
-//			Collections.emptyMap();
-//		KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(
-//			ks,
-//			passwords
-//		);
-//		return resolver;
-//	}
-
-	protected Signature getSignature(Object target) {
-		Signature result = null;
-//		org.opensaml.xmlsec.signature.Signature signature = target.getSignature();
-//		if (signature != null && signature instanceof SignatureImpl) {
-//			SignatureImpl impl = (SignatureImpl) signature;
-//			try {
-//				result = new Signature()
-//					.setSignatureAlgorithm(AlgorithmMethod.fromUrn(impl.getSignatureAlgorithm()))
-//					.setCanonicalizationAlgorithm(CanonicalizationMethod.fromUrn(impl
-//						.getCanonicalizationAlgorithm()))
-//					.setSignatureValue(org.apache.xml.security.utils.Base64.encode(impl.getXMLSignature()
-//						.getSignatureValue()))
-//				;
-//				//TODO extract the digest value
-//				for (ContentReference ref :
-//					ofNullable(signature.getContentReferences()).orElse(emptyList())) {
-//					if (ref instanceof SAMLObjectContentReference) {
-//						SAMLObjectContentReference sref = (SAMLObjectContentReference) ref;
-//						result.setDigestAlgorithm(DigestMethod.fromUrn(sref.getDigestAlgorithm()));
-//					}
-//				}
-//
-//			} catch (XMLSignatureException e) {
-//				//TODO - ignore for now
-//			}
-//		}
-		return result;
-	}
-
-	protected EncryptedAssertionType encryptAssertion(AssertionType assertion,
-													  KeyData key,
-													  KeyEncryptionMethod keyAlgorithm,
-													  DataEncryptionMethod dataAlgorithm) {
-//		Encrypter encrypter = getEncrypter(key, keyAlgorithm, dataAlgorithm);
-//		try {
-//			Encrypter.KeyPlacement keyPlacement =
-//				Encrypter.KeyPlacement.valueOf(
-//					System.getProperty("spring.security.saml.encrypt.key.placement", "PEER")
-//				);
-//			encrypter.setKeyPlacement(keyPlacement);
-//			return encrypter.encrypt(assertion);
-//		} catch (EncryptionException e) {
-//			throw new SamlException("Unable to encrypt assertion.", e);
-//		}
-		throw new UnsupportedOperationException();
-	}
-
-	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
-//		DecryptionException last = null;
-//		for (KeyData key : keys) {
-//			Decrypter decrypter = getDecrypter(key);
-//			try {
-//				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
-//			} catch (DecryptionException e) {
-//				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
-//				last = e;
-//			}
-//		}
-//		if (last != null) {
-//			throw new SamlKeyException("Unable to decrypt object.", last);
-//		}
-		return null;
 	}
 
 //	protected Encrypter getEncrypter(KeyData key,
@@ -507,15 +384,30 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		return encrypter;
 //	}
 
-	public static SecretKey generateKeyFromURI(DataEncryptionMethod algoURI) {
-		throw new UnsupportedOperationException();
-//		try {
-//			String jceAlgorithmName = JCEMapper.getJCEKeyAlgorithmFromURI(algoURI.toString());
-//			int keyLength = JCEMapper.getKeyLengthFromURI(algoURI.toString());
-//			return generateKey(jceAlgorithmName, keyLength, null);
-//		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-//			throw new SamlException(e);
+	protected EntityDescriptorType internalToXml(Metadata<? extends Metadata> metadata) {
+		EntityDescriptorType desc = new EntityDescriptorType(metadata.getEntityId());
+		if (hasText(metadata.getId())) {
+			desc.setID(metadata.getId());
+		}
+		else {
+			desc.setID("M" + UUID.randomUUID().toString());
+		}
+		List<RoleDescriptorType> descriptors = getRoleDescriptors(metadata);
+		descriptors.stream().forEach(
+			d -> {
+				if (d instanceof SSODescriptorType) {
+					desc.addChoiceType(
+						EntityDescriptorType.EDTChoiceType.oneValue(
+							new EntityDescriptorType.EDTDescriptorChoiceType((SSODescriptorType) d)
+						)
+					);
+				}
+			}
+		);
+//		if (metadata.getSigningKey() != null) {
+//			signObject(desc, metadata.getSigningKey(), metadata.getAlgorithm(), metadata.getDigest());
 //		}
+		return desc;
 	}
 
 //	protected Decrypter getDecrypter(KeyData key) {
@@ -526,12 +418,366 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //		return decrypter;
 //	}
 
+	protected AuthnRequestType internalToXml(AuthenticationRequest request) {
+		XMLGregorianCalendar instant =
+			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
+		String id = ofNullable(request.getId()).orElse("an" + UUID.randomUUID().toString());
+		AuthnRequestType auth = new AuthnRequestType(id, instant);
+		auth.setForceAuthn(request.isForceAuth());
+		auth.setIsPassive(request.isPassive());
+		try {
+			auth.setProtocolBinding(new URI(request.getBinding().toString()));
+			auth.setAssertionConsumerServiceURL(new URI(request.getAssertionConsumerService().getLocation()));
+			auth.setDestination(new URI(request.getDestination().getLocation()));
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+		// Azure AD as IdP will not accept index if protocol binding or AssertationCustomerServiceURL is set.
+		//auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
+		auth.setNameIDPolicy(getNameIDPolicy(request.getNameIdPolicy()));
+		auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
+		auth.setIssuer(toIssuer(request.getIssuer()));
+		return auth;
+	}
+
+	protected String marshallToXml(Object object) {
+		StringWriter writer = new StringWriter();
+		if (object instanceof EntityDescriptorType) {
+			try {
+				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
+				SAMLMetadataWriter metadataWriter = new KeycloakSamlMetadataWriter(streamWriter);
+				metadataWriter.writeEntityDescriptor((EntityDescriptorType) object);
+				streamWriter.flush();
+				return writer.getBuffer().toString();
+			} catch (ProcessingException | XMLStreamException e) {
+				throw new SamlException(e);
+			}
+		}
+		else if (object instanceof AuthnRequestType) {
+			try {
+				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
+				SAMLRequestWriter requestWriter = new SAMLRequestWriter(streamWriter);
+				requestWriter.write((AuthnRequestType) object);
+				streamWriter.flush();
+				return writer.getBuffer().toString();
+			} catch (ProcessingException | XMLStreamException e) {
+				throw new SamlException(e);
+			}
+		}
+		else if (object instanceof AssertionType) {
+			try {
+				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
+				SAMLAssertionWriter assertionWriter = new SAMLAssertionWriter(streamWriter);
+				assertionWriter.write((AssertionType) object);
+				streamWriter.flush();
+				return writer.getBuffer().toString();
+			} catch (ProcessingException | XMLStreamException e) {
+				throw new SamlException(e);
+			}
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public String signObject(String xml,
+							 SignableSaml2Object signable) {
+		if (signable.getSigningKey() == null) {
+			return xml;
+		}
+
+		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {};
+		KeycloakStaxSigner signer = new KeycloakStaxSigner(keystoreProvider);
+		return signer.sign(signable, xml);
+	}
+
+	protected List<RoleDescriptorType> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
+		List<RoleDescriptorType> result = new LinkedList<>();
+		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
+			RoleDescriptorType roleDescriptor = null;
+			if (p instanceof ServiceProvider) {
+				ServiceProvider sp = (ServiceProvider) p;
+				SPSSODescriptorType descriptor = new SPSSODescriptorType(sp.getProtocolSupportEnumeration());
+				roleDescriptor = descriptor;
+				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
+				descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
+				for (NameId id : p.getNameIds()) {
+					descriptor.addNameIDFormat(id.toString());
+				}
+				for (int i = 0; i < sp.getAssertionConsumerService().size(); i++) {
+					Endpoint ep = sp.getAssertionConsumerService().get(i);
+					descriptor.addAssertionConsumerService(getIndexedEndpointType(ep, i));
+				}
+				for (int i = 0; i < sp.getArtifactResolutionService().size(); i++) {
+					Endpoint ep = sp.getArtifactResolutionService().get(i);
+					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
+				}
+				for (int i = 0; i < sp.getSingleLogoutService().size(); i++) {
+					Endpoint ep = sp.getSingleLogoutService().get(i);
+					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
+				}
+				if (sp.getRequestedAttributes() != null && !sp.getRequestedAttributes().isEmpty()) {
+					descriptor.addAttributeConsumerService(getAttributeConsumingService(sp.getRequestedAttributes()));
+				}
+
+			}
+			else if (p instanceof IdentityProvider) {
+				IdentityProvider idp = (IdentityProvider) p;
+				IDPSSODescriptorType descriptor = new IDPSSODescriptorType(
+					ofNullable(idp.getProtocolSupportEnumeration()).orElse(emptyList())
+				);
+				roleDescriptor = descriptor;
+				descriptor.setWantAuthnRequestsSigned(idp.getWantAuthnRequestsSigned());
+				for (NameId id : p.getNameIds()) {
+					descriptor.addNameIDFormat(id.toString());
+				}
+				for (int i = 0; i < idp.getSingleSignOnService().size(); i++) {
+					Endpoint ep = idp.getSingleSignOnService().get(i);
+					descriptor.addSingleSignOnService(getSingleSignOnService(ep, i));
+				}
+				for (int i = 0; i < p.getSingleLogoutService().size(); i++) {
+					Endpoint ep = p.getSingleLogoutService().get(i);
+					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
+				}
+				for (int i = 0; i < p.getArtifactResolutionService().size(); i++) {
+					Endpoint ep = p.getArtifactResolutionService().get(i);
+					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
+				}
+			}
+			long now = getTime().millis();
+			if (p.getCacheDuration() != null) {
+				roleDescriptor.setCacheDuration(p.getCacheDuration());
+			}
+			roleDescriptor.setValidUntil(getXmlGregorianCalendar(p.getValidUntil()));
+			//roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
+			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
+
+			for (KeyData key : p.getKeys()) {
+				roleDescriptor.addKeyDescriptor(getKeyDescriptor(key));
+			}
+
+			//md:extensions
+			Endpoint requestInitiation = p.getRequestInitiation();
+			Endpoint discovery = p.getDiscovery();
+			if (requestInitiation != null || discovery != null) {
+				ExtensionsType extensionsType = new ExtensionsType();
+				if (requestInitiation != null) {
+					try {
+						EndpointType ri = new EndpointType(
+							new URI(requestInitiation.getBinding().toString()),
+							new URI(requestInitiation.getLocation())
+						);
+						if (hasText(requestInitiation.getResponseLocation())) {
+							ri.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
+						}
+						extensionsType.addExtension(ri);
+					} catch (URISyntaxException e) {
+						throw new SamlException(e);
+					}
+				}
+				if (discovery != null) {
+					try {
+						IndexedEndpointType d = new IndexedEndpointType(
+							new URI(discovery.getBinding().toString()),
+							new URI(discovery.getLocation())
+						);
+						if (hasText(discovery.getResponseLocation())) {
+							d.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
+						}
+						if (discovery.getIndex() >= 0) {
+							d.setIndex(discovery.getIndex());
+						}
+						d.setIsDefault(discovery.isDefault() ? true : null);
+						extensionsType.addExtension(d);
+					} catch (URISyntaxException e) {
+						throw new SamlException(e);
+					}
+				}
+				roleDescriptor.setExtensions(extensionsType);
+			}
+			roleDescriptor.setID(p.getId());
+			result.add(roleDescriptor);
+		}
+		return result;
+	}
+
+	private XMLGregorianCalendar getXmlGregorianCalendar(DateTime date) {
+		if (date == null) {
+			return null;
+		}
+		try {
+			DatatypeFactory df = DatatypeFactory.newInstance();
+			return df.newXMLGregorianCalendar(date.toGregorianCalendar());
+		} catch (DatatypeConfigurationException e) {
+			throw new SamlException(e);
+		}
+	}
+
+	protected NameIDPolicyType getNameIDPolicy(
+		NameIdPolicy nameIdPolicy
+	) {
+		NameIDPolicyType result = null;
+		if (nameIdPolicy != null) {
+			result = new NameIDPolicyType();
+			result.setAllowCreate(nameIdPolicy.getAllowCreate());
+			try {
+				result.setFormat(new URI(nameIdPolicy.getFormat().toString()));
+			} catch (URISyntaxException e) {
+				throw new SamlException(e);
+			}
+			result.setSPNameQualifier(nameIdPolicy.getSpNameQualifier());
+		}
+		return result;
+	}
+
+	protected RequestedAuthnContextType getRequestedAuthenticationContext(AuthenticationRequest request) {
+		RequestedAuthnContextType result = null;
+		if (request.getRequestedAuthenticationContext() != null) {
+			result = new RequestedAuthnContextType();
+			switch (request.getRequestedAuthenticationContext()) {
+				case exact:
+					result.setComparison(AuthnContextComparisonType.EXACT);
+					break;
+				case better:
+					result.setComparison(AuthnContextComparisonType.BETTER);
+					break;
+				case maximum:
+					result.setComparison(AuthnContextComparisonType.MAXIMUM);
+					break;
+				case minimum:
+					result.setComparison(AuthnContextComparisonType.MINIMUM);
+					break;
+				default:
+					result.setComparison(AuthnContextComparisonType.EXACT);
+					break;
+			}
+			if (request.getAuthenticationContextClassReference() != null) {
+				result.addAuthnContextClassRef(request.getAuthenticationContextClassReference().toString());
+			}
+		}
+		return result;
+	}
+
+	protected NameIDType toIssuer(Issuer issuer) {
+		NameIDType result = new NameIDType();
+		result.setValue(issuer.getValue());
+		try {
+			if (issuer.getFormat() != null) {
+				result.setFormat(new URI(issuer.getFormat().toString()));
+			}
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+		result.setSPNameQualifier(issuer.getSpNameQualifier());
+		result.setNameQualifier(issuer.getNameQualifier());
+		return result;
+	}
+
+	private IndexedEndpointType getIndexedEndpointType(Endpoint endpoint, int index) {
+		try {
+			IndexedEndpointType result = new IndexedEndpointType(
+				new URI(endpoint.getBinding().toString()),
+				new URI(endpoint.getLocation())
+			);
+			if (index > 0) {
+				result.setIndex(index);
+			}
+			result.setIsDefault(endpoint.isDefault() ? true : null);
+			return result;
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+	}
+
+	protected IndexedEndpointType getArtifactResolutionService(Endpoint ep, int i) {
+		return getIndexedEndpointType(ep, i);
+	}
+
+	public IndexedEndpointType getSingleLogoutService(Endpoint endpoint) {
+		return getIndexedEndpointType(endpoint, -1);
+	}
+
+	protected AttributeConsumingServiceType getAttributeConsumingService(List<Attribute> attributes) {
+		AttributeConsumingServiceType service = new AttributeConsumingServiceType(0);
+		service.setIsDefault(true);
+		for (Attribute a : attributes) {
+			RequestedAttributeType ra = new RequestedAttributeType(a.getName());
+			ra.setIsRequired(a.isRequired());
+			ra.setFriendlyName(a.getFriendlyName());
+			ra.setName(a.getName());
+			ra.setNameFormat(a.getNameFormat().toString());
+			service.addRequestedAttribute(ra);
+		}
+		return service;
+	}
+
+	public IndexedEndpointType getSingleSignOnService(Endpoint endpoint, int index) {
+		return getIndexedEndpointType(endpoint, index);
+	}
+
+	public KeyDescriptorType getKeyDescriptor(KeyData key) {
+		KeyDescriptorType descriptor = new KeyDescriptorType();
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.newDocument();
+			Element x509Cert = doc.createElementNS(NS_SIGNATURE, "ds:X509Certificate");
+			x509Cert.setTextContent(X509Utilities.keyCleanup(key.getCertificate()));
+			Element x509Data = doc.createElementNS(NS_SIGNATURE, "ds:X509Data");
+			x509Data.appendChild(x509Cert);
+			Element keyInfo = doc.createElementNS(NS_SIGNATURE, "ds:KeyInfo");
+			keyInfo.appendChild(x509Data);
+			descriptor.setKeyInfo(keyInfo);
+			if (key.getType() != null) {
+				switch (key.getType()) {
+					case SIGNING:
+						descriptor.setUse(KeyTypes.SIGNING);
+						break;
+					case ENCRYPTION:
+						descriptor.setUse(KeyTypes.ENCRYPTION);
+						break;
+					case UNSPECIFIED:
+						break;
+				}
+			}
+			else {
+				descriptor.setUse(KeyTypes.SIGNING);
+			}
+			return descriptor;
+		} catch (SecurityException | ParserConfigurationException e) {
+			throw new SamlKeyException(e);
+		}
+	}
+
+	protected EncryptedAssertionType encryptAssertion(AssertionType assertion,
+													  KeyData key,
+													  KeyEncryptionMethod keyAlgorithm,
+													  DataEncryptionMethod dataAlgorithm) {
+//		Encrypter encrypter = getEncrypter(key, keyAlgorithm, dataAlgorithm);
+//		try {
+//			Encrypter.KeyPlacement keyPlacement =
+//				Encrypter.KeyPlacement.valueOf(
+//					System.getProperty("spring.security.saml.encrypt.key.placement", "PEER")
+//				);
+//			encrypter.setKeyPlacement(keyPlacement);
+//			return encrypter.encrypt(assertion);
+//		} catch (EncryptionException e) {
+//			throw new SamlException("Unable to encrypt assertion.", e);
+//		}
+		throw new UnsupportedOperationException();
+	}
+
 	protected SamlObjectHolder parse(byte[] xml) {
 		try {
 			InputStream reader = new ByteArrayInputStream(xml);
 			Document samlDocument = DocumentUtil.getDocument(reader);
 			SAMLParser samlParser = SAMLParser.getInstance();
 			JAXPValidationUtil.checkSchemaValidation(samlDocument);
+			//check for signatures
+			NodeList signature = samlDocument.getElementsByTagNameNS(NS_SIGNATURE, "Signature");
+			if (signature != null && signature.getLength() > 0) {
+				configureIdAttribute(samlDocument);
+			}
 			Object object = samlParser.parse(samlDocument);
 			return new SamlObjectHolder(samlDocument, object);
 		} catch (Exception e) {
@@ -804,170 +1050,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		throw new UnsupportedOperationException();
 	}
 
-	protected EntityDescriptorType internalToXml(Metadata<? extends Metadata> metadata) {
-		EntityDescriptorType desc = new EntityDescriptorType(metadata.getEntityId());
-		if (hasText(metadata.getId())) {
-			desc.setID(metadata.getId());
-		}
-		else {
-			desc.setID("M" + UUID.randomUUID().toString());
-		}
-		List<RoleDescriptorType> descriptors = getRoleDescriptors(metadata);
-		descriptors.stream().forEach(
-			d -> {
-				if (d instanceof SSODescriptorType) {
-					desc.addChoiceType(
-						EntityDescriptorType.EDTChoiceType.oneValue(
-							new EntityDescriptorType.EDTDescriptorChoiceType((SSODescriptorType) d)
-						)
-					);
-				}
-			}
-		);
-//		if (metadata.getSigningKey() != null) {
-//			signObject(desc, metadata.getSigningKey(), metadata.getAlgorithm(), metadata.getDigest());
-//		}
-		return desc;
-	}
-
-	protected List<RoleDescriptorType> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
-		List<RoleDescriptorType> result = new LinkedList<>();
-		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
-			RoleDescriptorType roleDescriptor = null;
-			if (p instanceof ServiceProvider) {
-				ServiceProvider sp = (ServiceProvider) p;
-				SPSSODescriptorType descriptor = new SPSSODescriptorType(sp.getProtocolSupportEnumeration());
-				roleDescriptor = descriptor;
-				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
-				descriptor.setWantAssertionsSigned(sp.isWantAssertionsSigned());
-				for (NameId id : p.getNameIds()) {
-					descriptor.addNameIDFormat(id.toString());
-				}
-				for (int i = 0; i < sp.getAssertionConsumerService().size(); i++) {
-					Endpoint ep = sp.getAssertionConsumerService().get(i);
-					descriptor.addAssertionConsumerService(getIndexedEndpointType(ep, i));
-				}
-				for (int i = 0; i < sp.getArtifactResolutionService().size(); i++) {
-					Endpoint ep = sp.getArtifactResolutionService().get(i);
-					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
-				}
-				for (int i = 0; i < sp.getSingleLogoutService().size(); i++) {
-					Endpoint ep = sp.getSingleLogoutService().get(i);
-					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
-				}
-				if (sp.getRequestedAttributes() != null && !sp.getRequestedAttributes().isEmpty()) {
-					descriptor.addAttributeConsumerService(getAttributeConsumingService(sp.getRequestedAttributes()));
-				}
-
-			}
-			else if (p instanceof IdentityProvider) {
-				IdentityProvider idp = (IdentityProvider) p;
-				IDPSSODescriptorType descriptor = new IDPSSODescriptorType(idp.getProtocolSupportEnumeration());
-				roleDescriptor = descriptor;
-				descriptor.setWantAuthnRequestsSigned(idp.getWantAuthnRequestsSigned());
-				for (NameId id : p.getNameIds()) {
-					descriptor.addNameIDFormat(id.toString());
-				}
-				for (int i = 0; i < idp.getSingleSignOnService().size(); i++) {
-					Endpoint ep = idp.getSingleSignOnService().get(i);
-					descriptor.addSingleSignOnService(getSingleSignOnService(ep, i));
-				}
-				for (int i = 0; i < p.getSingleLogoutService().size(); i++) {
-					Endpoint ep = p.getSingleLogoutService().get(i);
-					descriptor.addSingleLogoutService(getSingleLogoutService(ep));
-				}
-				for (int i = 0; i < p.getArtifactResolutionService().size(); i++) {
-					Endpoint ep = p.getArtifactResolutionService().get(i);
-					descriptor.addArtifactResolutionService(getArtifactResolutionService(ep, i));
-				}
-			}
-			long now = getTime().millis();
-			if (p.getCacheDuration() != null) {
-				roleDescriptor.setCacheDuration(p.getCacheDuration());
-			}
-			roleDescriptor.setValidUntil(getXmlGregorianCalendar(p.getValidUntil()));
-			//roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
-			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
-
-			for (KeyData key : p.getKeys()) {
-				roleDescriptor.addKeyDescriptor(getKeyDescriptor(key));
-			}
-
-			//md:extensions
-			Endpoint requestInitiation = p.getRequestInitiation();
-			Endpoint discovery = p.getDiscovery();
-			if (requestInitiation != null || discovery != null) {
-				ExtensionsType extensionsType = new ExtensionsType();
-				if (requestInitiation != null) {
-					try {
-						EndpointType ri = new EndpointType(
-							new URI(requestInitiation.getBinding().toString()),
-							new URI(requestInitiation.getLocation())
-						);
-						if (hasText(requestInitiation.getResponseLocation())) {
-							ri.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
-						}
-						extensionsType.addExtension(ri);
-					} catch (URISyntaxException e) {
-						throw new SamlException(e);
-					}
-				}
-				if (discovery != null) {
-					try {
-						IndexedEndpointType d = new IndexedEndpointType(
-							new URI(discovery.getBinding().toString()),
-							new URI(discovery.getLocation())
-						);
-						if (hasText(discovery.getResponseLocation())) {
-							d.setResponseLocation(new URI(requestInitiation.getResponseLocation()));
-						}
-						if (discovery.getIndex() >= 0) {
-							d.setIndex(discovery.getIndex());
-						}
-						d.setIsDefault(discovery.isDefault() ? true : null);
-						extensionsType.addExtension(d);
-					} catch (URISyntaxException e) {
-						throw new SamlException(e);
-					}
-				}
-				roleDescriptor.setExtensions(extensionsType);
-			}
-			roleDescriptor.setID(p.getId());
-			result.add(roleDescriptor);
-		}
-		return result;
-	}
-
-	private XMLGregorianCalendar getXmlGregorianCalendar(DateTime date) {
-		if (date == null) {
-			return null;
-		}
-		try {
-			DatatypeFactory df = DatatypeFactory.newInstance();
-			return df.newXMLGregorianCalendar(date.toGregorianCalendar());
-		} catch (DatatypeConfigurationException e) {
-			throw new SamlException(e);
-		}
-	}
-
-	protected AttributeConsumingServiceType getAttributeConsumingService(List<Attribute> attributes) {
-		AttributeConsumingServiceType service = new AttributeConsumingServiceType(0);
-		service.setIsDefault(true);
-		for (Attribute a : attributes) {
-			RequestedAttributeType ra = new RequestedAttributeType(a.getName());
-			ra.setIsRequired(a.isRequired());
-			ra.setFriendlyName(a.getFriendlyName());
-			ra.setName(a.getName());
-			ra.setNameFormat(a.getNameFormat().toString());
-			service.addRequestedAttribute(ra);
-		}
-		return service;
-	}
-
-	protected IndexedEndpointType getArtifactResolutionService(Endpoint ep, int i) {
-		return getIndexedEndpointType(ep, i);
-	}
-
 	protected StatusResponseType internalToXml(LogoutResponse response) {
 //		org.opensaml.saml.saml2.core.LogoutResponse result =
 //			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutResponse.class);
@@ -1027,96 +1109,54 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		throw new UnsupportedOperationException();
 	}
 
-	protected AssertionType internalToXml(Assertion request) {
-//		org.opensaml.saml.saml2.core.Assertion a = buildSAMLObject(org.opensaml.saml.saml2.core.Assertion
-//			.class);
-//		a.setVersion(SAMLVersion.VERSION_20);
-//		a.setIssueInstant(request.getIssueInstant());
-//		a.setID(request.getId());
-//		org.opensaml.saml.saml2.core.Issuer issuer = buildSAMLObject(org.opensaml.saml.saml2.core.Issuer
-//			.class);
-//		issuer.setValue(request.getIssuer().getValue());
-//		a.setIssuer(issuer);
-//
-//		NameIdPrincipal principal = (NameIdPrincipal) request.getSubject().getPrincipal();
-//
-//		NameID nid = buildSAMLObject(NameID.class);
-//		nid.setValue(request.getSubject().getPrincipal().getValue());
-//		nid.setFormat(principal.getFormat().toString());
-//		nid.setSPNameQualifier(principal.getSpNameQualifier());
-//
-//		org.opensaml.saml.saml2.core.SubjectConfirmationData confData =
-//			buildSAMLObject(org.opensaml.saml.saml2.core.SubjectConfirmationData.class);
-//		confData.setInResponseTo(request.getSubject()
-//			.getConfirmations()
-//			.get(0)
-//			.getConfirmationData()
-//			.getInResponseTo());
-//		confData.setNotBefore(request.getSubject().getConfirmations().get(0).getConfirmationData().getNotBefore());
-//		confData.setNotOnOrAfter(request.getSubject()
-//			.getConfirmations()
-//			.get(0)
-//			.getConfirmationData()
-//			.getNotOnOrAfter());
-//		confData.setRecipient(request.getSubject().getConfirmations().get(0).getConfirmationData().getRecipient());
-//
-//		org.opensaml.saml.saml2.core.SubjectConfirmation confirmation =
-//			buildSAMLObject(org.opensaml.saml.saml2.core.SubjectConfirmation.class);
-//		confirmation.setMethod(request.getSubject().getConfirmations().get(0).getMethod().toString());
-//		confirmation.setSubjectConfirmationData(confData);
-//
-//		org.opensaml.saml.saml2.core.Subject subject =
-//			buildSAMLObject(org.opensaml.saml.saml2.core.Subject.class);
-//		a.setSubject(subject);
-//		subject.setNameID(nid);
-//		subject.getSubjectConfirmations().add(confirmation);
-//
-//		org.opensaml.saml.saml2.core.Conditions conditions =
-//			buildSAMLObject(org.opensaml.saml.saml2.core.Conditions.class);
-//		conditions.setNotBefore(request.getConditions().getNotBefore());
-//		conditions.setNotOnOrAfter(request.getConditions().getNotOnOrAfter());
-//		a.setConditions(conditions);
-//
-//		request.getConditions().getCriteria().forEach(c -> addCondition(conditions, c));
-//
-//
-//		for (AuthenticationStatement stmt : request.getAuthenticationStatements()) {
-//			org.opensaml.saml.saml2.core.AuthnStatement authnStatement =
-//				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnStatement.class);
-//			org.opensaml.saml.saml2.core.AuthnContext actx =
-//				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContext.class);
-//			org.opensaml.saml.saml2.core.AuthnContextClassRef aref =
-//				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContextClassRef.class);
-//			aref.setAuthnContextClassRef(stmt.getAuthenticationContext().getClassReference().toString());
-//			actx.setAuthnContextClassRef(aref);
-//			authnStatement.setAuthnContext(actx);
-//			a.getAuthnStatements().add(authnStatement);
-//			authnStatement.setSessionIndex(stmt.getSessionIndex());
-//			authnStatement.setSessionNotOnOrAfter(stmt.getSessionNotOnOrAfter());
-//			authnStatement.setAuthnInstant(stmt.getAuthInstant());
-//		}
-//
-//		org.opensaml.saml.saml2.core.AttributeStatement astmt =
-//			buildSAMLObject(org.opensaml.saml.saml2.core.AttributeStatement.class);
-//		for (Attribute attr : request.getAttributes()) {
-//			org.opensaml.saml.saml2.core.Attribute attribute =
-//				buildSAMLObject(org.opensaml.saml.saml2.core.Attribute.class);
-//			attribute.setName(attr.getName());
-//			attribute.setFriendlyName(attr.getFriendlyName());
-//			attribute.setNameFormat(attr.getNameFormat().toString());
-//			attr.getValues().stream().forEach(
-//				av -> attribute.getAttributeValues().add(objectToXmlObject(av))
-//			);
-//			astmt.getAttributes().add(attribute);
-//		}
-//		a.getAttributeStatements().add(astmt);
-//
-//		if (request.getSigningKey() != null) {
-//			signObject(a, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
-//		}
-//
-//		return a;
-		throw new UnsupportedOperationException();
+	protected AssertionType internalToXml(Assertion request) throws URISyntaxException {
+		String id = ofNullable(request.getId()).orElse("A" + UUID.randomUUID().toString());
+		XMLGregorianCalendar instant =
+			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
+		AssertionType a = new AssertionType(id, instant);
+		a.setIssuer(getIssuer(request.getIssuer()));
+		a.setSubject(getSubject(request.getSubject()));
+		a.setConditions(getConditions(request.getConditions()));
+
+		for (AuthenticationStatement stmt : request.getAuthenticationStatements()) {
+			AuthnStatementType authnStatement = getAuthnStatementType(stmt);
+			a.addStatement(authnStatement);
+		}
+
+		for (Attribute attribute : request.getAttributes()) {
+			AttributeStatementType ast = new AttributeStatementType();
+			AttributeType at = new AttributeType(attribute.getName());
+			at.setFriendlyName(attribute.getFriendlyName());
+			at.setNameFormat(attribute.getNameFormat().toString());
+			for (Object o : attribute.getValues()) {
+				if (o != null) {
+					at.addAttributeValue(o.toString());
+				}
+			}
+			AttributeStatementType.ASTChoiceType choice = new AttributeStatementType.ASTChoiceType(at);
+			ast.addAttribute(choice);
+			a.addStatement(ast);
+		}
+
+		return a;
+	}
+
+	private AuthnStatementType getAuthnStatementType(AuthenticationStatement stmt) throws URISyntaxException {
+		AuthnStatementType authnStatement = new AuthnStatementType(getXmlGregorianCalendar(stmt.getAuthInstant()));
+		AuthnContextType actx = new AuthnContextType();
+		if (stmt.getAuthenticationContext().getClassReference() != null) {
+			AuthnContextClassRefType aref = new AuthnContextClassRefType(
+				new URI(stmt.getAuthenticationContext().getClassReference().toString())
+			);
+			AuthnContextType.AuthnContextTypeSequence sequence = actx.new AuthnContextTypeSequence();
+			sequence.setClassRef(aref);
+			actx.setSequence(sequence);
+		}
+
+		authnStatement.setAuthnContext(actx);
+		authnStatement.setSessionIndex(stmt.getSessionIndex());
+		authnStatement.setSessionNotOnOrAfter(getXmlGregorianCalendar(stmt.getSessionNotOnOrAfter()));
+		return authnStatement;
 	}
 
 	protected void addCondition(ConditionsType conditions, AssertionCondition c) {
@@ -1136,92 +1176,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 //			conditions.getConditions().add(otu);
 //		}
 		throw new UnsupportedOperationException();
-	}
-
-	protected AuthnRequestType internalToXml(AuthenticationRequest request) {
-//		AuthnRequest auth = buildSAMLObject(AuthnRequest.class);
-//		auth.setID(request.getId());
-//		auth.setVersion(SAMLVersion.VERSION_20);
-//		auth.setIssueInstant(request.getIssueInstant());
-//		auth.setForceAuthn(request.isForceAuth());
-//		auth.setIsPassive(request.isPassive());
-//		auth.setProtocolBinding(request.getBinding().toString());
-//		// Azure AD as IdP will not accept index if protocol binding or AssertationCustomerServiceURL is set.
-////		auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
-//		auth.setAssertionConsumerServiceURL(request.getAssertionConsumerService().getLocation());
-//		auth.setDestination(request.getDestination().getLocation());
-//		auth.setNameIDPolicy(getNameIDPolicy(request.getNameIdPolicy()));
-//		auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
-//		auth.setIssuer(toIssuer(request.getIssuer()));
-//		if (request.getSigningKey() != null) {
-//			this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
-//		}
-//
-//		return auth;
-		throw new UnsupportedOperationException();
-	}
-
-	protected String marshallToXml(Object object) {
-		if (object instanceof EntityDescriptorType) {
-			StringWriter writer = new StringWriter();
-			try {
-				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
-				SAMLMetadataWriter metadataWriter = new KeycloakSamlMetadataWriter(streamWriter);
-				metadataWriter.writeEntityDescriptor((EntityDescriptorType) object);
-				streamWriter.flush();
-				return writer.getBuffer().toString();
-			} catch (ProcessingException | XMLStreamException e) {
-				throw new SamlException(e);
-			}
-		}
-		else {
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	protected RequestedAuthnContextType getRequestedAuthenticationContext(AuthenticationRequest request) {
-		RequestedAuthnContextType result = null;
-		if (request.getRequestedAuthenticationContext() != null) {
-			result = new RequestedAuthnContextType();
-			switch (request.getRequestedAuthenticationContext()) {
-				case exact:
-					result.setComparison(AuthnContextComparisonType.EXACT);
-					break;
-				case better:
-					result.setComparison(AuthnContextComparisonType.BETTER);
-					break;
-				case maximum:
-					result.setComparison(AuthnContextComparisonType.MAXIMUM);
-					break;
-				case minimum:
-					result.setComparison(AuthnContextComparisonType.MINIMUM);
-					break;
-				default:
-					result.setComparison(AuthnContextComparisonType.EXACT);
-					break;
-			}
-			if (request.getAuthenticationContextClassReference() != null) {
-				result.addAuthnContextClassRef(request.getAuthenticationContextClassReference().toString());
-			}
-		}
-		return result;
-	}
-
-	protected NameIDPolicyType getNameIDPolicy(
-		NameIdPolicy nameIdPolicy
-	) {
-		NameIDPolicyType result = null;
-		if (nameIdPolicy != null) {
-			result = new NameIDPolicyType();
-			result.setAllowCreate(nameIdPolicy.getAllowCreate());
-			try {
-				result.setFormat(new URI(nameIdPolicy.getFormat().toString()));
-			} catch (URISyntaxException e) {
-				throw new SamlException(e);
-			}
-			result.setSPNameQualifier(nameIdPolicy.getSpNameQualifier());
-		}
-		return result;
 	}
 
 	protected NameIdPolicy fromNameIDPolicy(NameIDPolicyType nameIDPolicy) {
@@ -1279,36 +1233,37 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	}
 
-	protected LogoutResponse resolveLogoutResponse(StatusResponseType response,
-												   List<KeyData> verificationKeys,
-												   List<KeyData> localKeys) {
-		LogoutResponse result = new LogoutResponse()
-			.setId(response.getID())
-			.setInResponseTo(response.getInResponseTo())
-			.setConsent(response.getConsent())
-			.setVersion(response.getVersion())
-			.setIssueInstant(new DateTime(response.getIssueInstant().toGregorianCalendar()))
-			.setIssuer(getIssuer(response.getIssuer()))
-			.setDestination(response.getDestination())
-			.setStatus(getStatus(response.getStatus()));
-
+	private NameIDType getIssuer(Issuer issuer) {
+		if (issuer == null) {
+			return null;
+		}
+		NameIDType result = new NameIDType();
+		result.setNameQualifier(issuer.getNameQualifier());
+		result.setSPNameQualifier(issuer.getSpNameQualifier());
+		result.setValue(issuer.getValue());
+		try {
+			result.setFormat(
+				issuer.getFormat() == null ?
+					null :
+					new URI(issuer.getFormat().toString())
+			);
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
 		return result;
 	}
 
-	protected LogoutRequest resolveLogoutRequest(LogoutRequestType request,
-												 List<KeyData> verificationKeys,
-												 List<KeyData> localKeys) {
-		LogoutRequest result = new LogoutRequest()
-			.setId(request.getID())
-			.setConsent(request.getConsent())
-			.setVersion(request.getVersion().toString())
-			.setNotOnOrAfter(new DateTime(request.getNotOnOrAfter()))
-			.setIssueInstant(new DateTime(request.getIssueInstant()))
-			.setReason(LogoutReason.fromUrn(request.getReason()))
-			.setIssuer(getIssuer(request.getIssuer()))
-			.setDestination(new Endpoint().setLocation(request.getDestination().toString()));
-		NameIDType nameID = getNameID(request.getNameID(), request.getEncryptedID(), localKeys);
-		result.setNameId(getNameIdPrincipal(nameID));
+	private Issuer getIssuer(NameIDType issuer) {
+		if (issuer == null) {
+			return null;
+		}
+		Issuer result = new Issuer()
+			.setValue(issuer.getValue())
+			.setSpNameQualifier(issuer.getSPNameQualifier())
+			.setNameQualifier(issuer.getNameQualifier());
+		if (issuer.getFormat() != null) {
+			result.setFormat(NameId.fromUrn(issuer.getFormat().toString()));
+		}
 		return result;
 	}
 
@@ -1343,55 +1298,93 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			;
 	}
 
-	protected List<Attribute> getRequestedAttributes(List<RequestedAttributeType> attributes) {
-		List<Attribute> result = new LinkedList<>();
-		for (RequestedAttributeType a : ofNullable(attributes).orElse(emptyList())) {
-			result.add(
-				new Attribute()
-					.setFriendlyName(a.getFriendlyName())
-					.setName(a.getName())
-					.setNameFormat(AttributeNameFormat.fromUrn(a.getNameFormat()))
-					.setValues(getJavaValues(a.getAttributeValue()))
-					.setRequired(a.isIsRequired())
-			);
-		}
-		return result;
+	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
+//		DecryptionException last = null;
+//		for (KeyData key : keys) {
+//			Decrypter decrypter = getDecrypter(key);
+//			try {
+//				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
+//			} catch (DecryptionException e) {
+//				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
+//				last = e;
+//			}
+//		}
+//		if (last != null) {
+//			throw new SamlKeyException("Unable to decrypt object.", last);
+//		}
+		return null;
 	}
 
-	protected List<Attribute> getAttributes(
-		Collection<AttributeStatementType> attributeStatements, List<KeyData>
-		localKeys
-	) {
-		List<Attribute> result = new LinkedList<>();
-		for (AttributeStatementType stmt : ofNullable(attributeStatements).orElse(emptyList())) {
-			for (AttributeStatementType.ASTChoiceType a : ofNullable(stmt.getAttributes()).orElse(emptyList())) {
-				if (a.getAttribute() != null) {
-					result.add(
-						new Attribute()
-							.setFriendlyName(a.getAttribute().getFriendlyName())
-							.setName(a.getAttribute().getName())
-							.setNameFormat(AttributeNameFormat.fromUrn(a.getAttribute().getNameFormat()))
-							.setValues(getJavaValues(a.getAttribute().getAttributeValue()))
-					);
-				}
-				else if (a.getEncryptedAssertion() != null) {
-					AttributeType at = (AttributeType) decrypt(a.getEncryptedAssertion(), localKeys);
-					result.add(
-						new Attribute()
-							.setFriendlyName(at.getFriendlyName())
-							.setName(at.getName())
-							.setNameFormat(AttributeNameFormat.fromUrn(at.getNameFormat()))
-							.setValues(getJavaValues(at.getAttributeValue()))
-					);
-				}
+	private SubjectType getSubject(Subject subject) {
+		try {
+			if (subject == null) {
+				return null;
 			}
+
+			NameIDType principal = new NameIDType();
+			principal.setValue(subject.getPrincipal().getValue());
+			principal.setSPProvidedID(subject.getPrincipal().getSpProvidedId());
+			principal.setSPNameQualifier(subject.getPrincipal().getSpNameQualifier());
+			principal.setNameQualifier(subject.getPrincipal().getNameQualifier());
+			principal.setFormat(new URI(subject.getPrincipal().getFormat().toString()));
+
+			SubjectType.STSubType subType = new SubjectType.STSubType();
+			subType.addBaseID(principal);
+
+			for (SubjectConfirmation confirmation : subject.getConfirmations()) {
+				SubjectConfirmationType ct = new SubjectConfirmationType();
+				ct.setMethod(confirmation.getMethod().toString());
+				if (confirmation.getNameId() != null) {
+					NameIDType nameId = new NameIDType();
+					nameId.setValue(confirmation.getNameId());
+					if (confirmation.getFormat() != null) {
+						nameId.setFormat(new URI(confirmation.getFormat().toString()));
+					}
+					ct.setNameID(nameId);
+					SubjectConfirmationData confirmationData = confirmation.getConfirmationData();
+					if (confirmationData != null) {
+						SubjectConfirmationDataType cdataType = new SubjectConfirmationDataType();
+						cdataType.setInResponseTo(confirmationData.getInResponseTo());
+						cdataType.setNotBefore(getXmlGregorianCalendar(confirmationData.getNotBefore()));
+						cdataType.setNotOnOrAfter(getXmlGregorianCalendar(confirmationData.getNotOnOrAfter()));
+						cdataType.setRecipient(confirmationData.getRecipient());
+						ct.setSubjectConfirmationData(cdataType);
+					}
+				}
+				subType.addConfirmation(ct);
+			}
+
+			SubjectType result = new SubjectType();
+			result.setSubType(subType);
+			return result;
+		} catch (URISyntaxException | NullPointerException e) {
+			throw new SamlException(e);
 		}
+	}
+
+	private Subject getSubject(SubjectType subject, List<KeyData> localKeys) {
+
+		return new Subject()
+			.setPrincipal(getPrincipal(subject, localKeys))
+			.setConfirmations(getConfirmations(subject.getConfirmation(), localKeys))
+			;
+	}
+
+	private ConditionsType getConditions(Conditions conditions) {
+		ConditionsType result = new ConditionsType();
+		result.setNotBefore(getXmlGregorianCalendar(conditions.getNotBefore()));
+		result.setNotOnOrAfter(getXmlGregorianCalendar(conditions.getNotOnOrAfter()));
+		getCriteriaOut(conditions.getCriteria()).forEach(
+			c -> result.addCondition(c)
+		);
 		return result;
 	}
 
-	protected List<Object> getJavaValues(List<Object> attributeValues) {
-		List<Object> result = new LinkedList<>(attributeValues);
-		return result;
+	private Conditions getConditions(ConditionsType conditions) {
+		return new Conditions()
+			.setNotBefore(new DateTime(conditions.getNotBefore().toGregorianCalendar()))
+			.setNotOnOrAfter(new DateTime(conditions.getNotOnOrAfter().toGregorianCalendar()))
+			.setCriteria(getCriteria(conditions.getConditions()));
 	}
 
 	protected List<AuthenticationStatement> getAuthenticationStatements(Collection<StatementAbstractType> authnStatements) {
@@ -1429,43 +1422,50 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-	protected Conditions getConditions(ConditionsType conditions) {
-		return new Conditions()
-			.setNotBefore(new DateTime(conditions.getNotBefore().toGregorianCalendar()))
-			.setNotOnOrAfter(new DateTime(conditions.getNotOnOrAfter().toGregorianCalendar()))
-			.setCriteria(getCriteria(conditions.getConditions()));
-	}
-
-	protected List<AssertionCondition> getCriteria(List<ConditionAbstractType> conditions) {
-		List<AssertionCondition> result = new LinkedList<>();
-		for (ConditionAbstractType c : conditions) {
-			if (c instanceof AudienceRestrictionType) {
-				AudienceRestrictionType aud = (AudienceRestrictionType) c;
-
-				if (aud.getAudience() != null) {
+	protected List<Attribute> getAttributes(
+		Collection<AttributeStatementType> attributeStatements, List<KeyData>
+		localKeys
+	) {
+		List<Attribute> result = new LinkedList<>();
+		for (AttributeStatementType stmt : ofNullable(attributeStatements).orElse(emptyList())) {
+			for (AttributeStatementType.ASTChoiceType a : ofNullable(stmt.getAttributes()).orElse(emptyList())) {
+				if (a.getAttribute() != null) {
 					result.add(
-						new AudienceRestriction()
-							.setAudiences(
-								aud.getAudience().stream().map(
-									a -> a.toString()
-								).collect(Collectors.toList())
-							)
+						new Attribute()
+							.setFriendlyName(a.getAttribute().getFriendlyName())
+							.setName(a.getAttribute().getName())
+							.setNameFormat(AttributeNameFormat.fromUrn(a.getAttribute().getNameFormat()))
+							.setValues(getJavaValues(a.getAttribute().getAttributeValue()))
 					);
 				}
-			}
-			else if (c instanceof OneTimeUseType) {
-				result.add(new OneTimeUse());
+				else if (a.getEncryptedAssertion() != null) {
+					AttributeType at = (AttributeType) decrypt(a.getEncryptedAssertion(), localKeys);
+					result.add(
+						new Attribute()
+							.setFriendlyName(at.getFriendlyName())
+							.setName(at.getName())
+							.setNameFormat(AttributeNameFormat.fromUrn(at.getNameFormat()))
+							.setValues(getJavaValues(at.getAttributeValue()))
+					);
+				}
 			}
 		}
 		return result;
 	}
 
-	protected Subject getSubject(SubjectType subject, List<KeyData> localKeys) {
-
-		return new Subject()
-			.setPrincipal(getPrincipal(subject, localKeys))
-			.setConfirmations(getConfirmations(subject.getConfirmation(), localKeys))
-			;
+	protected NameIdPrincipal getPrincipal(SubjectType subject, List<KeyData> localKeys) {
+		NameIDType p = null;
+//			getNameID(
+//				subject.getNameID(),
+//				subject.getEncryptedID(),
+//				localKeys
+//			);
+//		if (p != null) {
+//			return getNameIdPrincipal(p);
+//		}
+//		else {
+		throw new UnsupportedOperationException("Currently only supporting NameID subject principals");
+//		}
 	}
 
 	protected List<SubjectConfirmation> getConfirmations(
@@ -1493,6 +1493,60 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
+	private List<ConditionAbstractType> getCriteriaOut(List<AssertionCondition> conditions) {
+		List<ConditionAbstractType> result = new LinkedList<>();
+		ofNullable(conditions).orElse(emptyList()).forEach(
+			c -> {
+				if (c instanceof AudienceRestriction) {
+					AudienceRestrictionType a = new AudienceRestrictionType();
+					AudienceRestriction ar = (AudienceRestriction)c;
+					for (String s : ofNullable(ar.getAudiences()).orElse(emptyList())) {
+						try {
+							a.addAudience(new URI(s));
+						} catch (URISyntaxException e) {
+							throw new SamlException(e);
+						}
+					}
+					result.add(a);
+				}
+				else if (c instanceof OneTimeUse) {
+					OneTimeUseType one = new OneTimeUseType();
+					result.add(one);
+				}
+			}
+
+		);
+		return result;
+	}
+	private List<AssertionCondition> getCriteria(List<ConditionAbstractType> conditions) {
+		List<AssertionCondition> result = new LinkedList<>();
+		for (ConditionAbstractType c : conditions) {
+			if (c instanceof AudienceRestrictionType) {
+				AudienceRestrictionType aud = (AudienceRestrictionType) c;
+
+				if (aud.getAudience() != null) {
+					result.add(
+						new AudienceRestriction()
+							.setAudiences(
+								aud.getAudience().stream().map(
+									a -> a.toString()
+								).collect(Collectors.toList())
+							)
+					);
+				}
+			}
+			else if (c instanceof OneTimeUseType) {
+				result.add(new OneTimeUse());
+			}
+		}
+		return result;
+	}
+
+	protected List<Object> getJavaValues(List<Object> attributeValues) {
+		List<Object> result = new LinkedList<>(attributeValues);
+		return result;
+	}
+
 	protected NameIDType getNameID(NameIDType id,
 								   EncryptedElementType eid,
 								   List<KeyData> localKeys) {
@@ -1504,19 +1558,37 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-	protected NameIdPrincipal getPrincipal(SubjectType subject, List<KeyData> localKeys) {
-		NameIDType p = null;
-//			getNameID(
-//				subject.getNameID(),
-//				subject.getEncryptedID(),
-//				localKeys
-//			);
-//		if (p != null) {
-//			return getNameIdPrincipal(p);
-//		}
-//		else {
-		throw new UnsupportedOperationException("Currently only supporting NameID subject principals");
-//		}
+	protected LogoutResponse resolveLogoutResponse(StatusResponseType response,
+												   List<KeyData> verificationKeys,
+												   List<KeyData> localKeys) {
+		LogoutResponse result = new LogoutResponse()
+			.setId(response.getID())
+			.setInResponseTo(response.getInResponseTo())
+			.setConsent(response.getConsent())
+			.setVersion(response.getVersion())
+			.setIssueInstant(new DateTime(response.getIssueInstant().toGregorianCalendar()))
+			.setIssuer(getIssuer(response.getIssuer()))
+			.setDestination(response.getDestination())
+			.setStatus(getStatus(response.getStatus()));
+
+		return result;
+	}
+
+	protected LogoutRequest resolveLogoutRequest(LogoutRequestType request,
+												 List<KeyData> verificationKeys,
+												 List<KeyData> localKeys) {
+		LogoutRequest result = new LogoutRequest()
+			.setId(request.getID())
+			.setConsent(request.getConsent())
+			.setVersion(request.getVersion().toString())
+			.setNotOnOrAfter(new DateTime(request.getNotOnOrAfter()))
+			.setIssueInstant(new DateTime(request.getIssueInstant()))
+			.setReason(LogoutReason.fromUrn(request.getReason()))
+			.setIssuer(getIssuer(request.getIssuer()))
+			.setDestination(new Endpoint().setLocation(request.getDestination().toString()));
+		NameIDType nameID = getNameID(request.getNameID(), request.getEncryptedID(), localKeys);
+		result.setNameId(getNameIdPrincipal(nameID));
+		return result;
 	}
 
 	protected NameIdPrincipal getNameIdPrincipal(NameIDType p) {
@@ -1528,29 +1600,23 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setValue(p.getValue());
 	}
 
-	protected NameIDType toIssuer(Issuer issuer) {
-		NameIDType result = new NameIDType();
-		result.setValue(issuer.getValue());
-		try {
-			result.setFormat(new URI(issuer.getFormat().toString()));
-		} catch (URISyntaxException e) {
-			throw new SamlException(e);
+	protected List<Attribute> getRequestedAttributes(List<RequestedAttributeType> attributes) {
+		List<Attribute> result = new LinkedList<>();
+		for (RequestedAttributeType a : ofNullable(attributes).orElse(emptyList())) {
+			result.add(
+				new Attribute()
+					.setFriendlyName(a.getFriendlyName())
+					.setName(a.getName())
+					.setNameFormat(AttributeNameFormat.fromUrn(a.getNameFormat()))
+					.setValues(getJavaValues(a.getAttributeValue()))
+					.setRequired(a.isIsRequired())
+			);
 		}
-		result.setSPNameQualifier(issuer.getSpNameQualifier());
-		result.setNameQualifier(issuer.getNameQualifier());
 		return result;
 	}
 
-	protected Issuer getIssuer(NameIDType issuer) {
-		return issuer == null ? null :
-			new Issuer()
-				.setValue(issuer.getValue())
-				.setFormat(NameId.fromUrn(issuer.getFormat().toString()))
-				.setSpNameQualifier(issuer.getSPNameQualifier())
-				.setNameQualifier(issuer.getNameQualifier());
-	}
-
-	protected AuthenticationRequest resolveAuthenticationRequest(AuthnRequestType parsed) {
+	protected AuthenticationRequest resolveAuthenticationRequest(AuthnRequestType parsed,
+																 Map<String, Signature> signatureMap) {
 		AuthnRequestType request = parsed;
 		AuthenticationRequest result = new AuthenticationRequest()
 			.setBinding(Binding.fromUrn(request.getProtocolBinding().toString()))
@@ -1579,7 +1645,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
 			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
 			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
-
+		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, request.getSignature());
 		return result;
 	}
 
@@ -1599,40 +1665,38 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		if (request.getRequestedAuthnContext() != null) {
 			AuthnContextComparisonType comparison = request.getRequestedAuthnContext().getComparison();
 			if (null != comparison) {
-				result = RequestedAuthenticationContext.valueOf(comparison.toString());
+				result = RequestedAuthenticationContext.fromName(comparison.toString());
 			}
 		}
 		return result;
 	}
 
-	protected Metadata resolveMetadata(SamlObjectHolder holder,
-									   EntitiesDescriptorType parsed,
-									   List<KeyData> verificationKeys,
-									   List<KeyData> localKeys) {
+	protected Metadata resolveMetadata(EntitiesDescriptorType parsed,
+									   Map<String, Signature> signatureMap) {
 		Metadata result = null, current = null;
 		for (Object object : parsed.getEntityDescriptor()) {
 			EntityDescriptorType desc = (EntityDescriptorType) object;
 			if (result == null) {
-				result = resolveMetadata(desc);
+				result = resolveMetadata(desc, signatureMap);
 				current = result;
 			}
 			else {
-				Metadata m = resolveMetadata(desc);
+				Metadata m = resolveMetadata(desc, signatureMap);
 				current.setNext(m);
 				current = m;
 			}
-			Signature signature = validateSignature(holder, verificationKeys);
-			current.setSignature(signature);
 		}
 		return result;
 	}
 
-	protected Metadata resolveMetadata(EntityDescriptorType parsed) {
+	protected Metadata resolveMetadata(EntityDescriptorType parsed,
+									   Map<String, Signature> signatureMap) {
 		EntityDescriptorType descriptor = parsed;
 		List<? extends Provider> ssoProviders = getSsoProviders(descriptor);
 		Metadata desc = getMetadata(ssoProviders);
-		long duration =
-			descriptor.getCacheDuration() != null ? descriptor.getCacheDuration().getTimeInMillis(new Date()) : -1;
+		long duration = descriptor.getCacheDuration() != null ?
+			descriptor.getCacheDuration().getTimeInMillis(new Date()) : -1;
+
 		desc.setCacheDuration(toDuration(duration));
 		desc.setEntityId(descriptor.getEntityID());
 		if (isUrl(desc.getEntityId())) {
@@ -1646,26 +1710,13 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		if (ofNullable(descriptor.getValidUntil()).isPresent()) {
 			desc.setValidUntil(new DateTime(descriptor.getValidUntil().toGregorianCalendar()));
 		}
+
+		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, desc, descriptor.getSignature());
 		return desc;
 	}
 
 	protected Metadata getMetadata(List<? extends Provider> ssoProviders) {
 		Metadata result = determineMetadataType(ssoProviders);
-		result.setProviders(ssoProviders);
-		return result;
-	}
-
-	private Metadata determineMetadataType(List<? extends Provider> ssoProviders) {
-		Metadata result = new Metadata();
-		long sps = ssoProviders.stream().filter(p -> p instanceof ServiceProvider).count();
-		long idps = ssoProviders.stream().filter(p -> p instanceof IdentityProvider).count();
-
-		if (ssoProviders.size() == sps) {
-			result = new ServiceProviderMetadata();
-		}
-		else if (ssoProviders.size() == idps) {
-			result = new IdentityProviderMetadata();
-		}
 		result.setProviders(ssoProviders);
 		return result;
 	}
@@ -1768,125 +1819,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-	public IndexedEndpointType getSingleSignOnService(Endpoint endpoint, int index) {
-		return getIndexedEndpointType(endpoint, index);
-	}
-
 	public IndexedEndpointType getAssertionConsumerService(Endpoint endpoint, int index) {
 		return getIndexedEndpointType(endpoint, index);
-	}
-
-	private IndexedEndpointType getIndexedEndpointType(Endpoint endpoint, int index) {
-		try {
-			IndexedEndpointType result = new IndexedEndpointType(
-				new URI(endpoint.getBinding().toString()),
-				new URI(endpoint.getLocation())
-			);
-			if (index > 0) {
-				result.setIndex(index);
-			}
-			result.setIsDefault(endpoint.isDefault() ? true : null);
-			return result;
-		} catch (URISyntaxException e) {
-			throw new SamlException(e);
-		}
-	}
-
-	public IndexedEndpointType getSingleLogoutService(Endpoint endpoint) {
-		return getIndexedEndpointType(endpoint, -1);
-	}
-
-	public KeyDescriptorType getKeyDescriptor(KeyData key) {
-		KeyDescriptorType descriptor = new KeyDescriptorType();
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.newDocument();
-			Element x509Cert = doc.createElementNS(NS_SIGNATURE, "ds:X509Certificate");
-			x509Cert.setTextContent(X509Utilities.keyCleanup(key.getCertificate()));
-			Element x509Data = doc.createElementNS(NS_SIGNATURE, "ds:X509Data");
-			x509Data.appendChild(x509Cert);
-			Element keyInfo = doc.createElementNS(NS_SIGNATURE, "ds:KeyInfo");
-			keyInfo.appendChild(x509Data);
-			descriptor.setKeyInfo(keyInfo);
-			if (key.getType() != null) {
-				switch (key.getType()) {
-					case SIGNING:
-						descriptor.setUse(KeyTypes.SIGNING);
-						break;
-					case ENCRYPTION:
-						descriptor.setUse(KeyTypes.ENCRYPTION);
-						break;
-					case UNSPECIFIED:
-						break;
-				}
-			}
-			else {
-				descriptor.setUse(KeyTypes.SIGNING);
-			}
-			return descriptor;
-		} catch (SecurityException | ParserConfigurationException e) {
-			throw new SamlKeyException(e);
-		}
-	}
-
-//	public KeyInfoGenerator getKeyInfoGenerator(Credential credential) {
-//		NamedKeyInfoGeneratorManager manager = DefaultSecurityConfigurationBootstrap
-//			.buildBasicKeyInfoGeneratorManager();
-//		return manager.getDefaultManager().getFactory(credential).newInstance();
-//	}
-
-	public String signObject(String xml,
-							 SignableSaml2Object signable,
-							 KeyData key,
-							 AlgorithmMethod algorithm,
-							 DigestMethod digest) {
-
-		if (!(signable instanceof Metadata)) {
-			throw new UnsupportedOperationException();
-		}
-
-		if (signable.getSigningKey() == null) {
-			return xml;
-		}
-		KeycloakStaxSigner signer = new KeycloakStaxSigner();
-		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {};
-		KeyStore keyStore = keystoreProvider.getKeyStore(key, key.getName().toCharArray());
-		try {
-			Key sk = keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
-			Certificate certificate = keyStore.getCertificate(key.getName());
-			return signer.sign((Metadata)signable, xml, sk, (X509Certificate) certificate);
-		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-			throw new SamlException(e);
-		}
-
-//		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
-//		Credential credential = getCredential(key, resolver);
-//
-//		XMLObjectBuilder<org.opensaml.xmlsec.signature.Signature> signatureBuilder =
-//			(XMLObjectBuilder<org.opensaml.xmlsec.signature.Signature>) getBuilderFactory()
-//				.getBuilder(org.opensaml.xmlsec.signature.Signature.DEFAULT_ELEMENT_NAME);
-//		org.opensaml.xmlsec.signature.Signature signature = signatureBuilder.buildObject(org.opensaml.xmlsec
-//			.signature.Signature.DEFAULT_ELEMENT_NAME);
-//
-//		signable.setSignature(signature);
-//
-//		SignatureSigningParameters parameters = new SignatureSigningParameters();
-//		parameters.setSigningCredential(credential);
-//		parameters.setKeyInfoGenerator(getKeyInfoGenerator(credential));
-//		parameters.setSignatureAlgorithm(algorithm.toString());
-//		parameters.setSignatureReferenceDigestMethod(digest.toString());
-//		parameters.setSignatureCanonicalizationAlgorithm(
-//			CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString()
-//		);
-//
-//		try {
-//			SignatureSupport.prepareSignatureParams(signature, parameters);
-//			Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(signable);
-//			marshaller.marshall(signable);
-//			Signer.signObject(signature);
-//		} catch (SecurityException | MarshallingException | SignatureException e) {
-//			throw new SamlKeyException(e);
-//		}
 	}
 }

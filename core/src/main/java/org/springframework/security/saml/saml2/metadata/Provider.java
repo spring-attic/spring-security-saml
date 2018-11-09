@@ -21,10 +21,13 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
+import org.springframework.security.saml.saml2.Namespace;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 
 import org.joda.time.DateTime;
+
+import static java.util.Arrays.asList;
 
 /**
  * Base class for SAML providers
@@ -38,7 +41,7 @@ public class Provider<T extends Provider<T>> {
 	private String id;
 	private DateTime validUntil;
 	private Duration cacheDuration;
-	private List<String> protocolSupportEnumeration;
+	private List<String> protocolSupportEnumeration = asList(Namespace.NS_PROTOCOL);
 
 	public Signature getSignature() {
 		return signature;

@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -28,7 +29,8 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 50, Line 2147
  */
-public class AuthenticationRequest extends Request<AuthenticationRequest> {
+public class AuthenticationRequest extends Request<AuthenticationRequest>
+	implements SignableSaml2Object<AuthenticationRequest> {
 
 	private String providerName;
 	private Binding binding;
@@ -92,14 +94,17 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return _this();
 	}
 
+	@Override
 	public KeyData getSigningKey() {
 		return signingKey;
 	}
 
+	@Override
 	public AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
+	@Override
 	public DigestMethod getDigest() {
 		return digest;
 	}
@@ -131,6 +136,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return isPassive;
 	}
 
+	@Override
 	public AuthenticationRequest setSigningKey(KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;

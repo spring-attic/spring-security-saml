@@ -50,9 +50,18 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 	}
 
 	public void write(SPSSODescriptorType spSSODescriptor) throws ProcessingException {
-		StaxUtil.writeStartElement(writer, METADATA_PREFIX, JBossSAMLConstants.SP_SSO_DESCRIPTOR.get(), JBossSAMLURIConstants.METADATA_NSURI.get());
-		StaxUtil.writeAttribute(writer, new QName(JBossSAMLConstants.PROTOCOL_SUPPORT_ENUMERATION.get()), spSSODescriptor
-			.getProtocolSupportEnumeration().get(0));
+		StaxUtil.writeStartElement(
+			writer,
+			METADATA_PREFIX,
+			JBossSAMLConstants.SP_SSO_DESCRIPTOR.get(),
+			JBossSAMLURIConstants.METADATA_NSURI.get()
+		);
+		StaxUtil.writeAttribute(
+			writer,
+			new QName(JBossSAMLConstants.PROTOCOL_SUPPORT_ENUMERATION.get()),
+			spSSODescriptor
+				.getProtocolSupportEnumeration().get(0)
+		);
 
 		// Write the attributes
 		if (hasText(spSSODescriptor.getID())) {
@@ -66,12 +75,14 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 		Boolean authnSigned = spSSODescriptor.isAuthnRequestsSigned();
 		if (authnSigned != null) {
 			StaxUtil.writeAttribute(writer, new QName(JBossSAMLConstants.AUTHN_REQUESTS_SIGNED.get()),
-				authnSigned.toString());
+				authnSigned.toString()
+			);
 		}
 		Boolean wantAssertionsSigned = spSSODescriptor.isWantAssertionsSigned();
 		if (wantAssertionsSigned != null) {
 			StaxUtil.writeAttribute(writer, new QName(JBossSAMLConstants.WANT_ASSERTIONS_SIGNED.get()),
-				wantAssertionsSigned.toString());
+				wantAssertionsSigned.toString()
+			);
 		}
 
 		if (spSSODescriptor.getCacheDuration() != null) {
@@ -120,10 +131,16 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 	}
 
 	public void write(IDPSSODescriptorType idpSSODescriptor) throws ProcessingException {
-		if (idpSSODescriptor == null)
+		if (idpSSODescriptor == null) {
 			throw new ProcessingException(logger.nullArgumentError("IDPSSODescriptorType"));
+		}
 
-		StaxUtil.writeStartElement(writer, METADATA_PREFIX, JBossSAMLConstants.IDP_SSO_DESCRIPTOR.get(), JBossSAMLURIConstants.METADATA_NSURI.get());
+		StaxUtil.writeStartElement(
+			writer,
+			METADATA_PREFIX,
+			JBossSAMLConstants.IDP_SSO_DESCRIPTOR.get(),
+			JBossSAMLURIConstants.METADATA_NSURI.get()
+		);
 
 		if (hasText(idpSSODescriptor.getID())) {
 			StaxUtil.writeAttribute(
@@ -136,7 +153,8 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 		Boolean wantsAuthnRequestsSigned = idpSSODescriptor.isWantAuthnRequestsSigned();
 		if (wantsAuthnRequestsSigned != null) {
 			StaxUtil.writeAttribute(writer, new QName(JBossSAMLConstants.WANT_AUTHN_REQUESTS_SIGNED.get()),
-				wantsAuthnRequestsSigned.toString());
+				wantsAuthnRequestsSigned.toString()
+			);
 		}
 		writeProtocolSupportEnumeration(idpSSODescriptor.getProtocolSupportEnumeration());
 
@@ -184,21 +202,6 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 		StaxUtil.flush(writer);
 	}
 
-	private void writeDateUntilAttribute(XMLGregorianCalendar validUntil, String localName) throws ProcessingException {
-		StaxUtil.writeAttribute(writer, localName, validUntil.toString());
-	}
-
-	private void writeDurationAttribute(Duration cacheDuration, String localName) throws ProcessingException {
-		StaxUtil.writeAttribute(writer, localName, cacheDuration.toString());
-	}
-
-	private void writeNameIDFormat(String nameIDFormat) throws ProcessingException {
-		StaxUtil.writeStartElement(writer, METADATA_PREFIX, JBossSAMLConstants.NAMEID_FORMAT.get(), JBossSAMLURIConstants.METADATA_NSURI.get());
-
-		StaxUtil.writeCharacters(writer, nameIDFormat);
-		StaxUtil.writeEndElement(writer);
-	}
-
 	private void writeProtocolSupportEnumeration(List<String> protoEnum) throws ProcessingException {
 		if (protoEnum.size() > 0) {
 			StringBuilder sb = new StringBuilder();
@@ -206,9 +209,33 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 				sb.append(str).append(" ");
 			}
 
-			StaxUtil.writeAttribute(writer, new QName(JBossSAMLConstants.PROTOCOL_SUPPORT_ENUMERATION.get()), sb.toString()
-				.trim());
+			StaxUtil.writeAttribute(
+				writer,
+				new QName(JBossSAMLConstants.PROTOCOL_SUPPORT_ENUMERATION.get()),
+				sb.toString()
+					.trim()
+			);
 		}
+	}
+
+	private void writeDurationAttribute(Duration cacheDuration, String localName) throws ProcessingException {
+		StaxUtil.writeAttribute(writer, localName, cacheDuration.toString());
+	}
+
+	private void writeDateUntilAttribute(XMLGregorianCalendar validUntil, String localName) throws ProcessingException {
+		StaxUtil.writeAttribute(writer, localName, validUntil.toString());
+	}
+
+	private void writeNameIDFormat(String nameIDFormat) throws ProcessingException {
+		StaxUtil.writeStartElement(
+			writer,
+			METADATA_PREFIX,
+			JBossSAMLConstants.NAMEID_FORMAT.get(),
+			JBossSAMLURIConstants.METADATA_NSURI.get()
+		);
+
+		StaxUtil.writeCharacters(writer, nameIDFormat);
+		StaxUtil.writeEndElement(writer);
 	}
 
 	private void writeExtensions(ExtensionsType extensions) throws ProcessingException {
@@ -216,7 +243,7 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 			StaxUtil.writeStartElement(writer, "md", "Extensions", NS_METADATA);
 			for (Object o : extensions.getAny()) {
 				if (o instanceof EndpointType) {
-					EndpointType ep = (EndpointType)o;
+					EndpointType ep = (EndpointType) o;
 					if (ep.getBinding().toString().equals(REQUEST_INITIATOR.toString())) {
 						StaxUtil.writeStartElement(writer, "init", "RequestInitiator", REQUEST_INITIATOR.toString());
 						StaxUtil.writeNameSpace(writer, "init", REQUEST_INITIATOR.toString());
@@ -225,7 +252,7 @@ public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {
 						StaxUtil.writeEndElement(writer);
 					}
 					else if (ep.getBinding().toString().equals(DISCOVERY.toString())) {
-						IndexedEndpointType iep = (IndexedEndpointType)ep;
+						IndexedEndpointType iep = (IndexedEndpointType) ep;
 						StaxUtil.writeStartElement(writer, "idpdisc", "DiscoveryResponse", DISCOVERY.toString());
 						StaxUtil.writeNameSpace(writer, "idpdisc", DISCOVERY.toString());
 						StaxUtil.writeAttribute(writer, "Binding", DISCOVERY.toString());

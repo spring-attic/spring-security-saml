@@ -58,15 +58,15 @@ public class KeycloakSamlVelocityEngine implements SamlTemplateEngine {
 		velocityEngine.mergeTemplate(templateId, UTF_8.name(), context, out);
 	}
 
+	private org.apache.velocity.app.VelocityEngine newVelocityEngine() {
+		return newVelocityEngine(getDefaultProperties());
+	}
+
 	protected void initializeVelocityEngine(org.apache.velocity.app.VelocityEngine velocityEngine) {
 		if (disableVelocityLog) {
 			velocityEngine.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
 		}
 		velocityEngine.init();
-	}
-
-	private org.apache.velocity.app.VelocityEngine newVelocityEngine() {
-		return newVelocityEngine(getDefaultProperties());
 	}
 
 	private org.apache.velocity.app.VelocityEngine newVelocityEngine(final Properties props) {
@@ -77,10 +77,14 @@ public class KeycloakSamlVelocityEngine implements SamlTemplateEngine {
 
 	private Properties getDefaultProperties() {
 		final Properties props = new Properties();
-		props.setProperty("string.resource.loader.class",
-			"org.apache.velocity.runtime.resource.loader.StringResourceLoader");
-		props.setProperty("classpath.resource.loader.class",
-			"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		props.setProperty(
+			"string.resource.loader.class",
+			"org.apache.velocity.runtime.resource.loader.StringResourceLoader"
+		);
+		props.setProperty(
+			"classpath.resource.loader.class",
+			"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader"
+		);
 		props.setProperty("resource.loader", "classpath, string");
 		return props;
 	}

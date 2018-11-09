@@ -26,5 +26,14 @@ public enum RequestedAuthenticationContext {
 	exact,
 	minimum,
 	maximum,
-	better
+	better;
+
+	public static RequestedAuthenticationContext fromName(String name) {
+		for (RequestedAuthenticationContext ctx : RequestedAuthenticationContext.values()) {
+			if (ctx.name().equalsIgnoreCase(name)) {
+				return ctx;
+			}
+		}
+		return null;
+	}
 }

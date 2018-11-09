@@ -17,90 +17,102 @@
 
 package org.springframework.security.saml.spi.keycloak;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.saml2.Namespace;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
+import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
+import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 
-import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.apache.xml.security.stax.ext.OutboundXMLSec;
-import org.apache.xml.security.stax.ext.SecurePart;
-import org.apache.xml.security.stax.ext.XMLSec;
-import org.apache.xml.security.stax.ext.XMLSecurityConstants;
-import org.apache.xml.security.stax.ext.XMLSecurityProperties;
-import org.apache.xml.security.stax.securityToken.SecurityTokenConstants;
+import org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature;
+import org.w3c.dom.Document;
 
-import static java.util.Arrays.asList;
+import static org.keycloak.saml.common.util.DocumentUtil.getDocument;
+import static org.keycloak.saml.common.util.DocumentUtil.getDocumentAsString;
 
 class KeycloakStaxSigner {
 
-	String sign(Metadata metadata,
-					   String xml,
-					   Key signingKey,
-				X509Certificate signingCert) {
-		QName qName = new QName(Namespace.NS_METADATA, "EntityDescriptor", Namespace.NS_METADATA_PREFIX);
-		Reader xmlReader = new StringReader(xml);
+	private final SamlKeyStoreProvider provider;
+
+	KeycloakStaxSigner(SamlKeyStoreProvider provider) {
+		this.provider = provider;
+	}
+
+	private QName getQnameForMetadata() {
+		return new QName(Namespace.NS_METADATA, "EntityDescriptor");
+	}
+
+	private QName getQnameForAuthenticationRequest() {
+		return new QName(Namespace.NS_PROTOCOL, "AuthnRequest");
+	}
+
+	String sign(SignableSaml2Object signable, String xml) {
 		try {
-			return sign(
+			KeyData key = signable.getSigningKey();
+
+			SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {
+			};
+			KeyStore keyStore = keystoreProvider.getKeyStore(key, key.getName().toCharArray());
+			Key signingKey = keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
+			X509Certificate signingCert = (X509Certificate) keyStore.getCertificate(key.getName());
+			if (signable instanceof Metadata) {
+			}
+			else if (signable instanceof AuthenticationRequest) {
+			}
+			else if (signable instanceof Assertion) {
+			}
+			else {
+				throw new UnsupportedOperationException("Unable to sign class:" + signable.getClass());
+			}
+			Reader xmlReader = new StringReader(xml);
+			String result = signDOM(
 				xmlReader,
-				asList(qName),
-				metadata.getAlgorithm().toString(),
-				metadata.getDigest().toString(),
+				signable.getAlgorithm().toString(),
+				signable.getDigest().toString(),
 				signingKey,
 				signingCert
 			);
-		} catch (XMLSecurityException | XMLStreamException e) {
+			return result;
+		} catch (Exception e) {
 			throw new SamlException(e);
 		}
 	}
 
-	private String sign(
+	private String signDOM(
 		Reader xmlReader,
-		List<QName> namesToSign,
 		String algorithm,
 		String digest,
 		Key signingKey,
 		X509Certificate signingCert
-	) throws XMLSecurityException, XMLStreamException {
-		XMLSecurityProperties properties = new XMLSecurityProperties();
-		List<XMLSecurityConstants.Action> actions = new ArrayList<>();
-		actions.add(XMLSecurityConstants.SIGNATURE);
-		properties.setActions(actions);
+	) throws Exception {
 
-		properties.setSignatureAlgorithm(algorithm);
-		properties.setSignatureDigestAlgorithm(digest);
-		properties.setSignatureCerts(new X509Certificate[]{signingCert});
-		properties.setSignatureKey(signingKey);
-		properties.setSignatureKeyIdentifier(SecurityTokenConstants.KeyIdentifier_X509KeyIdentifier);
-
-		for (QName nameToSign : namesToSign) {
-			SecurePart securePart = new SecurePart(nameToSign, SecurePart.Modifier.Content);
-			properties.addSignaturePart(securePart);
-		}
-
-		OutboundXMLSec outboundXMLSec = XMLSec.getOutboundXMLSec(properties);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		XMLStreamWriter xmlStreamWriter = outboundXMLSec.processOutMessage(baos, StandardCharsets.UTF_8.name());
-
-		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-		XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(xmlReader);
-
-		XmlReaderToWriter.writeAll(xmlStreamReader, xmlStreamWriter);
-		xmlStreamWriter.flush();
-		xmlStreamWriter.close();
-		return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+		Document document = getDocument(xmlReader);
+		SAML2Signature samlSignature = new SAML2Signature();
+		samlSignature.setSignatureMethod(algorithm);
+		samlSignature.setDigestMethod(digest);
+		samlSignature.setNextSibling(samlSignature.getNextSiblingOfIssuer(document));
+		samlSignature.setX509Certificate(signingCert);
+		samlSignature.signSAMLDocument(
+			document,
+			"signing",
+			new KeyPair(signingCert.getPublicKey(), (PrivateKey) signingKey),
+			CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString()
+		);
+		// write the content into xml
+		return getDocumentAsString(document);
 	}
+
+
 }

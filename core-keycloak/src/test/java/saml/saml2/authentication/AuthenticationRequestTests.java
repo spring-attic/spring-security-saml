@@ -23,6 +23,8 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -78,6 +80,51 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 0);
+
+		assertNodeCount(xml, "//ds:Signature", 1);
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA1.toString());
+
+		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA1.toString());
+	}
+
+	@Test
+	public void parseOpenSamlGenerated() {
+
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+			"<saml2p:AuthnRequest AssertionConsumerServiceURL=\"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias\" Destination=\"http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias\" ForceAuthn=\"false\" ID=\"7f24b8b7-2729-4395-8d6d-15d589b1d212\" IsPassive=\"false\" IssueInstant=\"2018-11-08T17:42:21.195Z\" ProtocolBinding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Version=\"2.0\" xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.localhost:8080/uaa</saml2:Issuer><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+			"<ds:SignedInfo>\n" +
+			"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+			"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+			"<ds:Reference URI=\"#7f24b8b7-2729-4395-8d6d-15d589b1d212\">\n" +
+			"<ds:Transforms>\n" +
+			"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+			"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+			"</ds:Transforms>\n" +
+			"<ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
+			"<ds:DigestValue>arEsOu92QLpsjSVkO1OE7bqfhfM=</ds:DigestValue>\n" +
+			"</ds:Reference>\n" +
+			"</ds:SignedInfo>\n" +
+			"<ds:SignatureValue>\n" +
+			"TKKoxYu85FAJG24mGkFsrNIszIz2bLajfyqC3wVnSEbtQOV6JPlFgv2SIcTKu56AnXaWHPoWbVAI\n" +
+			"4es/xfzgmwpM57HGReFZ8eIeNf1/6TfGT61JuAh6ITeE6lOJLLusNzAXD/dSYdj3Qrv2p8DOREuJ\n" +
+			"zJSZSu8IhGXWnqPlpVs=\n" +
+			"</ds:SignatureValue>\n" +
+			"<ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQDtqkmhbmvARzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
+			"BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy\n" +
+			"aXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQDDBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAe\n" +
+			"Fw0xODA0MzAyMTA1MTNaFw0yODA0MjcyMTA1MTNaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwK\n" +
+			"V2FzaGluZ3RvbjESMBAGA1UEBwwJVmFuY291dmVyMR0wGwYDVQQKDBRTcHJpbmcgU2VjdXJpdHkg\n" +
+			"U0FNTDELMAkGA1UECwwCc3AxIDAeBgNVBAMMF3NwLnNwcmluZy5zZWN1cml0eS5zYW1sMIGfMA0G\n" +
+			"CSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBRIHAaQLxTLJQDt8NDz/zT1PZuwu9pwo44zGLnrbU22qX\n" +
+			"LuNhbur/nqxEpIJBjy1BYyeGvlcGhOXTu1uThZdmKC71KwGNgTHdE1ciC/Fu/GMtgoVsQujtOV92\n" +
+			"Fw5mMcJR7yNIsGP0+4nCWj41M+4h/EdbUawCWNWEqrgyvDrGWwIDAQABMA0GCSqGSIb3DQEBCwUA\n" +
+			"A4GBALcvf1p3lOPlgcJNv2JUh1Z53VWbOOPRqm31AXCN5rvb52nqGi5gz1jJz1oXliBRsvOt5cDP\n" +
+			"89uUTAQ2HWuJTlm0M/1dJh1CJ7cjugoFEMYCjEA72CS8wYjujtZhXZYFdI/eMeJw0IoRqVh3mZqU\n" +
+			"4V1B7udBKD/Kmbwpm4XZI/An</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><saml2p:NameIDPolicy AllowCreate=\"true\" Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\"/></saml2p:AuthnRequest>";
+
+		config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 	}
 
 	@Test

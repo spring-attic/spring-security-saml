@@ -20,6 +20,7 @@ package org.springframework.security.saml.saml2;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.saml2.signature.Signature;
 
 public interface SignableSaml2Object<T extends Saml2Object> extends Saml2Object {
 
@@ -30,4 +31,8 @@ public interface SignableSaml2Object<T extends Saml2Object> extends Saml2Object 
 	AlgorithmMethod getAlgorithm();
 
 	DigestMethod getDigest();
+
+	String getId();
+
+	T setSignature(Signature signature);
 }

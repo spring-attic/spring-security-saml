@@ -24,13 +24,12 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.saml2.Namespace;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
@@ -50,21 +49,11 @@ class KeycloakStaxSigner {
 		this.provider = provider;
 	}
 
-	private QName getQnameForMetadata() {
-		return new QName(Namespace.NS_METADATA, "EntityDescriptor");
-	}
-
-	private QName getQnameForAuthenticationRequest() {
-		return new QName(Namespace.NS_PROTOCOL, "AuthnRequest");
-	}
-
 	String sign(SignableSaml2Object signable, String xml) {
 		try {
 			KeyData key = signable.getSigningKey();
 
-			SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {
-			};
-			KeyStore keyStore = keystoreProvider.getKeyStore(key, key.getName().toCharArray());
+			KeyStore keyStore = provider.getKeyStore(key, key.getName().toCharArray());
 			Key signingKey = keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
 			X509Certificate signingCert = (X509Certificate) keyStore.getCertificate(key.getName());
 			if (signable instanceof Metadata) {
@@ -72,6 +61,8 @@ class KeycloakStaxSigner {
 			else if (signable instanceof AuthenticationRequest) {
 			}
 			else if (signable instanceof Assertion) {
+			}
+			else if (signable instanceof Response) {
 			}
 			else {
 				throw new UnsupportedOperationException("Unable to sign class:" + signable.getClass());

@@ -132,6 +132,7 @@ import org.keycloak.dom.saml.v2.protocol.LogoutRequestType;
 import org.keycloak.dom.saml.v2.protocol.NameIDPolicyType;
 import org.keycloak.dom.saml.v2.protocol.RequestedAuthnContextType;
 import org.keycloak.dom.saml.v2.protocol.ResponseType;
+import org.keycloak.dom.saml.v2.protocol.StatusCodeType;
 import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusType;
 import org.keycloak.saml.common.exceptions.ProcessingException;
@@ -141,6 +142,7 @@ import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLAssertionWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLRequestWriter;
+import org.keycloak.saml.processing.core.saml.v2.writers.SAMLResponseWriter;
 import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -151,6 +153,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
 import static org.springframework.security.saml.saml2.Namespace.NS_SIGNATURE;
+import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.util.StringUtils.hasText;
@@ -231,15 +234,11 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			result = internalToXml((AuthenticationRequest) saml2Object);
 		}
 		else if (saml2Object instanceof Assertion) {
-			try {
-				result = internalToXml((Assertion) saml2Object);
-			} catch (URISyntaxException e) {
-				throw new SamlException(e);
-			}
+			result = internalToXml((Assertion) saml2Object);
 		}
-//		else if (saml2Object instanceof Response) {
-//			result = internalToXml((Response) saml2Object);
-//		}
+		else if (saml2Object instanceof Response) {
+			result = internalToXml((Response) saml2Object);
+		}
 //		else if (saml2Object instanceof LogoutRequest) {
 //			result = internalToXml((LogoutRequest) saml2Object);
 //		}
@@ -288,6 +287,13 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			result = resolveAuthenticationRequest(
 				(AuthnRequestType) parsed.getSamlObject(),
 				signatureMap
+			);
+		}
+		else if (parsed.getSamlObject() instanceof ResponseType) {
+			result = resolveResponse(
+				(ResponseType) parsed.getSamlObject(),
+				signatureMap,
+				localKeys
 			);
 		}
 //		else if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
@@ -404,9 +410,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				}
 			}
 		);
-//		if (metadata.getSigningKey() != null) {
-//			signObject(desc, metadata.getSigningKey(), metadata.getAlgorithm(), metadata.getDigest());
-//		}
 		return desc;
 	}
 
@@ -467,8 +470,19 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		else if (object instanceof AssertionType) {
 			try {
 				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
-				SAMLAssertionWriter assertionWriter = new SAMLAssertionWriter(streamWriter);
+				SAMLAssertionWriter assertionWriter = new KeycloakSamlAssertionWriter(streamWriter);
 				assertionWriter.write((AssertionType) object);
+				streamWriter.flush();
+				return writer.getBuffer().toString();
+			} catch (ProcessingException | XMLStreamException e) {
+				throw new SamlException(e);
+			}
+		}
+		else if (object instanceof ResponseType) {
+			try {
+				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
+				SAMLResponseWriter assertionWriter = new SAMLResponseWriter(streamWriter);
+				assertionWriter.write((ResponseType) object);
 				streamWriter.flush();
 				return writer.getBuffer().toString();
 			} catch (ProcessingException | XMLStreamException e) {
@@ -1007,47 +1021,48 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected ResponseType internalToXml(Response response) {
-//		org.opensaml.saml.saml2.core.Response result = buildSAMLObject(org.opensaml.saml.saml2.core.Response.class);
-//		result.setConsent(response.getConsent());
-//		result.setID(ofNullable(response.getId()).orElse("a" + UUID.randomUUID().toString()));
-//		result.setInResponseTo(response.getInResponseTo());
-//		result.setVersion(SAMLVersion.VERSION_20);
-//		result.setIssueInstant(response.getIssueInstant());
-//		result.setDestination(response.getDestination());
-//		result.setIssuer(toIssuer(response.getIssuer()));
-//
-//		if (response.getStatus() == null || response.getStatus().getCode() == null) {
-//			throw new SamlException("Status cannot be null on a response");
-//		}
-//		org.opensaml.saml.saml2.core.Status status = buildSAMLObject(org.opensaml.saml.saml2.core.Status.class);
-//		org.opensaml.saml.saml2.core.StatusCode code = buildSAMLObject(org.opensaml.saml.saml2.core.StatusCode.class);
-//		code.setValue(response.getStatus().getCode().toString());
-//		status.setStatusCode(code);
-//
-//		if (hasText(response.getStatus().getMessage())) {
-//			StatusMessage message = buildSAMLObject(StatusMessage.class);
-//			message.setMessage(response.getStatus().getMessage());
-//			status.setStatusMessage(message);
-//		}
-//
-//		result.setStatus(status);
-//
-//		for (Assertion a : ofNullable(response.getAssertions()).orElse(emptyList())) {
-//			org.opensaml.saml.saml2.core.Assertion osAssertion = internalToXml(a);
-//			if (a.getEncryptionKey() != null) {
-//				EncryptedAssertion encryptedAssertion =
-//					encryptAssertion(osAssertion, a.getEncryptionKey(), a.getKeyAlgorithm(), a.getDataAlgorithm());
-//				result.getEncryptedAssertions().add(encryptedAssertion);
-//			}
-//			else {
-//				result.getAssertions().add(osAssertion);
-//			}
-//		}
-//		if (response.getSigningKey() != null) {
-//			signObject(result, response.getSigningKey(), response.getAlgorithm(), response.getDigest());
-//		}
-//		return result;
-		throw new UnsupportedOperationException();
+		ResponseType result = new ResponseType(
+			ofNullable(response.getId()).orElse("a" + UUID.randomUUID().toString()),
+			getXmlGregorianCalendar(response.getIssueInstant())
+		);
+		result.setConsent(response.getConsent());
+		result.setInResponseTo(response.getInResponseTo());
+		result.setDestination(response.getDestination());
+		result.setIssuer(toIssuer(response.getIssuer()));
+
+		if (response.getStatus() == null || response.getStatus().getCode() == null) {
+			throw new SamlException("Status cannot be null on a response");
+		}
+
+		StatusCodeType code = new StatusCodeType();
+		try {
+			code.setValue(new URI(response.getStatus().getCode().toString()));
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+		StatusType status = new StatusType();
+		status.setStatusCode(code);
+
+		if (hasText(response.getStatus().getMessage())) {
+			status.setStatusMessage(response.getStatus().getMessage());
+		}
+		result.setStatus(status);
+
+		for (Assertion a : ofNullable(response.getAssertions()).orElse(emptyList())) {
+			AssertionType osAssertion = internalToXml(a);
+			ResponseType.RTChoiceType assertionType;
+			if (a.getEncryptionKey() != null) {
+				EncryptedAssertionType encryptedAssertion =
+					encryptAssertion(osAssertion, a.getEncryptionKey(), a.getKeyAlgorithm(), a.getDataAlgorithm());
+				assertionType = new ResponseType.RTChoiceType(encryptedAssertion);
+			}
+			else {
+				assertionType = new ResponseType.RTChoiceType(osAssertion);
+			}
+			result.addAssertion(assertionType);
+		}
+		return result;
+
 	}
 
 	protected StatusResponseType internalToXml(LogoutResponse response) {
@@ -1109,7 +1124,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		throw new UnsupportedOperationException();
 	}
 
-	protected AssertionType internalToXml(Assertion request) throws URISyntaxException {
+	protected AssertionType internalToXml(Assertion request) {
 		String id = ofNullable(request.getId()).orElse("A" + UUID.randomUUID().toString());
 		XMLGregorianCalendar instant =
 			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
@@ -1130,7 +1145,12 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			at.setNameFormat(attribute.getNameFormat().toString());
 			for (Object o : attribute.getValues()) {
 				if (o != null) {
-					at.addAttributeValue(o.toString());
+					if (o instanceof DateTime) {
+						at.addAttributeValue(toZuluTime((DateTime) o));
+					}
+					else {
+						at.addAttributeValue(o.toString());
+					}
 				}
 			}
 			AttributeStatementType.ASTChoiceType choice = new AttributeStatementType.ASTChoiceType(at);
@@ -1141,13 +1161,18 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return a;
 	}
 
-	private AuthnStatementType getAuthnStatementType(AuthenticationStatement stmt) throws URISyntaxException {
+	private AuthnStatementType getAuthnStatementType(AuthenticationStatement stmt)  {
 		AuthnStatementType authnStatement = new AuthnStatementType(getXmlGregorianCalendar(stmt.getAuthInstant()));
 		AuthnContextType actx = new AuthnContextType();
 		if (stmt.getAuthenticationContext().getClassReference() != null) {
-			AuthnContextClassRefType aref = new AuthnContextClassRefType(
-				new URI(stmt.getAuthenticationContext().getClassReference().toString())
-			);
+			AuthnContextClassRefType aref = null;
+			try {
+				aref = new AuthnContextClassRefType(
+					new URI(stmt.getAuthenticationContext().getClassReference().toString())
+				);
+			} catch (URISyntaxException e) {
+				throw new SamlException(e);
+			}
 			AuthnContextType.AuthnContextTypeSequence sequence = actx.new AuthnContextTypeSequence();
 			sequence.setClassRef(aref);
 			actx.setSequence(sequence);
@@ -1191,7 +1216,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected Response resolveResponse(
 		ResponseType parsed,
-		List<KeyData> verificationKeys,
+		Map<String, Signature> signatureMap,
 		List<KeyData> localKeys
 	) {
 		Response result = new Response()
@@ -1206,7 +1231,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setAssertions(
 				parsed.getAssertions().stream()
 					.filter(a -> a.getAssertion() != null)
-					.map(a -> resolveAssertion(a.getAssertion(), verificationKeys, localKeys, false)
+					.map(a -> resolveAssertion(a.getAssertion(), signatureMap, localKeys, false)
 					)
 					.collect(Collectors.toList())
 			);
@@ -1221,14 +1246,14 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					a -> result.addAssertion(
 						resolveAssertion(
 							(AssertionType) decrypt(a, localKeys),
-							verificationKeys,
+							signatureMap,
 							localKeys,
 							true
 						)
 					)
 				);
 		}
-
+		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, parsed.getSignature());
 		return result;
 
 	}
@@ -1275,17 +1300,11 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected Assertion resolveAssertion(
 		AssertionType parsed,
-		List<KeyData> verificationKeys,
+		Map<String, Signature> signatureMap,
 		List<KeyData> localKeys,
 		boolean encrypted
 	) {
-		Signature signature = null;
-		if (!encrypted) {
-			throw new UnsupportedOperationException();
-			//signature = validateSignature(parsed, verificationKeys);
-		}
-		return new Assertion(encrypted)
-			.setSignature(signature)
+		Assertion assertion = new Assertion(encrypted)
 			.setId(parsed.getID())
 			.setIssueInstant(new DateTime(parsed.getIssueInstant().toGregorianCalendar()))
 			.setVersion(parsed.getVersion())
@@ -1294,8 +1313,9 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setConditions(getConditions(parsed.getConditions()))
 			.setAuthenticationStatements(getAuthenticationStatements(parsed.getStatements()))
 			.setAttributes(getAttributes(parsed.getAttributeStatements(), localKeys))
-			.setImplementation(parsed)
-			;
+			.setImplementation(parsed);
+		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, assertion, parsed.getSignature());
+		return assertion;
 	}
 
 	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
@@ -1341,16 +1361,17 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 						nameId.setFormat(new URI(confirmation.getFormat().toString()));
 					}
 					ct.setNameID(nameId);
-					SubjectConfirmationData confirmationData = confirmation.getConfirmationData();
-					if (confirmationData != null) {
-						SubjectConfirmationDataType cdataType = new SubjectConfirmationDataType();
-						cdataType.setInResponseTo(confirmationData.getInResponseTo());
-						cdataType.setNotBefore(getXmlGregorianCalendar(confirmationData.getNotBefore()));
-						cdataType.setNotOnOrAfter(getXmlGregorianCalendar(confirmationData.getNotOnOrAfter()));
-						cdataType.setRecipient(confirmationData.getRecipient());
-						ct.setSubjectConfirmationData(cdataType);
-					}
 				}
+				SubjectConfirmationData confirmationData = confirmation.getConfirmationData();
+				if (confirmationData != null) {
+					SubjectConfirmationDataType cdataType = new SubjectConfirmationDataType();
+					cdataType.setInResponseTo(confirmationData.getInResponseTo());
+					cdataType.setNotBefore(getXmlGregorianCalendar(confirmationData.getNotBefore()));
+					cdataType.setNotOnOrAfter(getXmlGregorianCalendar(confirmationData.getNotOnOrAfter()));
+					cdataType.setRecipient(confirmationData.getRecipient());
+					ct.setSubjectConfirmationData(cdataType);
+				}
+
 				subType.addConfirmation(ct);
 			}
 
@@ -1400,22 +1421,24 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 						.findFirst()
 						.orElse(null);
 				String ref = null;
-				if (authnContextClassRef.getValue() != null) {
+				if (authnContextClassRef != null && authnContextClassRef.getValue() != null) {
 					ref = authnContextClassRef.getValue().toString();
 				}
 
-				result.add(
-					new AuthenticationStatement()
-						.setSessionIndex(s.getSessionIndex())
-						.setAuthInstant(new DateTime(s.getAuthnInstant().toGregorianCalendar()))
-						.setSessionNotOnOrAfter(new DateTime(s.getSessionNotOnOrAfter().toGregorianCalendar()))
-						.setAuthenticationContext(
-							authnContext != null ?
-								new AuthenticationContext()
-									.setClassReference(AuthenticationContextClassReference.fromUrn(ref))
-								: null
-						)
-				);
+				AuthenticationStatement statement = new AuthenticationStatement()
+					.setSessionIndex(s.getSessionIndex())
+					.setAuthInstant(new DateTime(s.getAuthnInstant().toGregorianCalendar()))
+					.setAuthenticationContext(
+						authnContext != null ?
+							new AuthenticationContext()
+								.setClassReference(AuthenticationContextClassReference.fromUrn(ref))
+							: null
+					);
+				if (s.getSessionNotOnOrAfter() != null) {
+					statement.setSessionNotOnOrAfter(new DateTime(s.getSessionNotOnOrAfter().toGregorianCalendar()));
+				}
+				result.add(statement);
+
 			}
 
 		}
@@ -1454,23 +1477,21 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected NameIdPrincipal getPrincipal(SubjectType subject, List<KeyData> localKeys) {
-		NameIDType p = null;
-//			getNameID(
-//				subject.getNameID(),
-//				subject.getEncryptedID(),
-//				localKeys
-//			);
-//		if (p != null) {
-//			return getNameIdPrincipal(p);
-//		}
-//		else {
-		throw new UnsupportedOperationException("Currently only supporting NameID subject principals");
-//		}
+		NameIDType p = getNameID(
+			(NameIDType) subject.getSubType().getBaseID(),
+			subject.getSubType().getEncryptedID(),
+			localKeys
+		);
+		if (p != null) {
+			return getNameIdPrincipal(p);
+		}
+		else {
+			throw new UnsupportedOperationException("Currently only supporting NameID subject principals");
+		}
 	}
 
-	protected List<SubjectConfirmation> getConfirmations(
-		List<SubjectConfirmationType> subjectConfirmations, List<KeyData> localKeys
-	) {
+	protected List<SubjectConfirmation> getConfirmations(List<SubjectConfirmationType> subjectConfirmations,
+														 List<KeyData> localKeys) {
 		List<SubjectConfirmation> result = new LinkedList<>();
 		for (SubjectConfirmationType s : subjectConfirmations) {
 			NameIDType nameID = getNameID(s.getNameID(), s.getEncryptedID(), localKeys);
@@ -1484,8 +1505,12 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 							.setRecipient(s.getSubjectConfirmationData().getRecipient())
 							.setNotOnOrAfter(new DateTime(s.getSubjectConfirmationData()
 								.getNotOnOrAfter()
-								.toGregorianCalendar()))
-							.setNotBefore(new DateTime(s.getSubjectConfirmationData().getNotBefore()))
+								.toGregorianCalendar())
+							)
+							.setNotBefore(new DateTime(s.getSubjectConfirmationData()
+								.getNotBefore()
+								.toGregorianCalendar())
+							)
 							.setInResponseTo(s.getSubjectConfirmationData().getInResponseTo())
 					)
 			);
@@ -1499,7 +1524,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			c -> {
 				if (c instanceof AudienceRestriction) {
 					AudienceRestrictionType a = new AudienceRestrictionType();
-					AudienceRestriction ar = (AudienceRestriction)c;
+					AudienceRestriction ar = (AudienceRestriction) c;
 					for (String s : ofNullable(ar.getAudiences()).orElse(emptyList())) {
 						try {
 							a.addAudience(new URI(s));
@@ -1518,6 +1543,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		);
 		return result;
 	}
+
 	private List<AssertionCondition> getCriteria(List<ConditionAbstractType> conditions) {
 		List<AssertionCondition> result = new LinkedList<>();
 		for (ConditionAbstractType c : conditions) {
@@ -1553,7 +1579,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		NameIDType result = id;
 		if (result == null && eid != null && eid.getEncryptedElement() != null) {
 			//result = (NameIDType) decrypt(eid, localKeys);
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("not yet decrypting name ID");
 		}
 		return result;
 	}

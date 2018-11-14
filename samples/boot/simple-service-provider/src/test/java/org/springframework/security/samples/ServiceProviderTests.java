@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import sample.SecurityConfiguration;
+import sample.SampleSamlBootConfiguration;
 import sample.proof_of_concept.ServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -82,7 +82,7 @@ public class ServiceProviderTests {
 	ServiceProviderResolver resolver;
 
 	@Autowired
-	SecurityConfiguration.SamlPropertyConfiguration configuration;
+	SampleSamlBootConfiguration configuration;
 
 	@BeforeEach
 	void setUp() {

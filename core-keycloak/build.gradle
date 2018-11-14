@@ -12,7 +12,6 @@ dependencies {
 	compile group: 'org.keycloak', name: 'keycloak-saml-core-public', version: '4.5.0.Final'
 	compile group: 'org.keycloak', name: 'keycloak-common', version: '4.5.0.Final'
 	compile group: 'org.jboss.logging', name: 'jboss-logging', version: '3.3.2.Final'
-	compile group: 'org.apache.velocity', name: 'velocity', version: '1.7'
 
 
 	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion"

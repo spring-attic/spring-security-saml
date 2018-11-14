@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.keycloak;
+package org.springframework.security.saml.spi;
 
 import java.io.Writer;
 import java.util.Map;
@@ -29,15 +29,15 @@ import org.apache.velocity.runtime.log.NullLogChute;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class KeycloakSamlVelocityEngine implements SamlTemplateEngine {
+public class VelocityTemplateEngine implements SamlTemplateEngine {
 
 	private final boolean disableVelocityLog;
 
-	public KeycloakSamlVelocityEngine() {
+	public VelocityTemplateEngine() {
 		this(true);
 	}
 
-	public KeycloakSamlVelocityEngine(boolean disableVelocityLog) {
+	public VelocityTemplateEngine(boolean disableVelocityLog) {
 		this.disableVelocityLog = disableVelocityLog;
 	}
 

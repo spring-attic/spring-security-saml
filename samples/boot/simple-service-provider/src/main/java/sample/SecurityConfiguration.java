@@ -33,8 +33,8 @@ import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultValidator;
 import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
-import org.springframework.security.saml.spi.opensaml.OpenSamlVelocityEngine;
 
 import sample.proof_of_concept.ServiceProviderResolver;
 import sample.proof_of_concept.implementation.ServiceProviderMetadataResolver;
@@ -55,7 +55,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SamlTemplateEngine samlTemplateEngine() {
-		return new OpenSamlVelocityEngine(true);
+		return new VelocityTemplateEngine(true);
 	}
 
 	@Bean
@@ -86,15 +86,18 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
+		private final SpringSecuritySaml implementation;
 		private final ServiceProviderResolver resolver;
 		private final SamlValidator samlValidator;
 		private final SamlTransformer samlTransformer;
 		private final SamlTemplateEngine samlTemplateEngine;
 
-		public SamlSecurity(ServiceProviderResolver resolver,
+		public SamlSecurity(SpringSecuritySaml implemenation,
+							ServiceProviderResolver resolver,
 							SamlValidator samlValidator,
 							SamlTransformer samlTransformer,
 							SamlTemplateEngine samlTemplateEngine) {
+			this.implementation = implemenation;
 			this.resolver = resolver;
 			this.samlValidator = samlValidator;
 			this.samlTransformer = samlTransformer;
@@ -107,6 +110,7 @@ public class SecurityConfiguration {
 			http.apply(
 				serviceProvider()
 					.prefix("/saml/sp")
+					.setImplementation(implementation)
 					.serviceProviderResolver(resolver)
 					.samlTransformer(samlTransformer)
 					.samlValidator(samlValidator)

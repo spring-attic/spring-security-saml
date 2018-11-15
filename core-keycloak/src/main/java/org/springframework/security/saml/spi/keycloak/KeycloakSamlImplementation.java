@@ -791,6 +791,23 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
+	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
+//		DecryptionException last = null;
+//		for (KeyData key : keys) {
+//			Decrypter decrypter = getDecrypter(key);
+//			try {
+//				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
+//			} catch (DecryptionException e) {
+//				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
+//				last = e;
+//			}
+//		}
+//		if (last != null) {
+//			throw new SamlKeyException("Unable to decrypt object.", last);
+//		}
+		return null;
+	}
+
 	protected EncryptedAssertionType encryptAssertion(AssertionType assertion,
 													  KeyData key,
 													  KeyEncryptionMethod keyAlgorithm,
@@ -1351,22 +1368,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return assertion;
 	}
 
-	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
-//		DecryptionException last = null;
-//		for (KeyData key : keys) {
-//			Decrypter decrypter = getDecrypter(key);
-//			try {
-//				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
-//			} catch (DecryptionException e) {
-//				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
-//				last = e;
-//			}
-//		}
-//		if (last != null) {
-//			throw new SamlKeyException("Unable to decrypt object.", last);
-//		}
-		return null;
-	}
+
 
 	private SubjectType getSubject(Subject subject) {
 		try {

@@ -19,6 +19,7 @@ package org.springframework.security.saml.spi.keycloak;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -26,6 +27,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
@@ -91,25 +94,47 @@ class KeycloakSigner {
 			Document document = getDocument(xmlReader);
 			configureIdAttribute(document);
 			if (signable instanceof Metadata) {
-			}
-			else if (signable instanceof AuthenticationRequest) {
-			}
-			else if (signable instanceof Assertion) {
+				return sign((Metadata)signable, document);
 			}
 			else if (signable instanceof Response) {
 				return sign((Response)signable, document);
 			}
+			else if (signable instanceof AuthenticationRequest) {
+				return sign(signable, document);
+			}
+			else if (signable instanceof Assertion) {
+				return sign(signable, document);
+			}
 			else {
 				throw new UnsupportedOperationException("Unable to sign class:" + signable.getClass());
 			}
-			SignatureUtilTransferObject sig = getSignatureObject(signable);
-			sig.setDocumentToBeSigned(document);
-			sig.setNextSibling(getIssuerSibling(document));
-			document = XMLSignatureUtil.sign(sig, CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString());
-			return getDocumentAsString(document);
 		} catch (Exception e) {
 			throw new SamlException(e);
 		}
+	}
+
+	private String sign(SignableSaml2Object signable, Document document)
+		throws GeneralSecurityException, MarshalException, XMLSignatureException {
+		SignatureUtilTransferObject sig = getSignatureObject(signable);
+		sig.setDocumentToBeSigned(document);
+		sig.setNextSibling(getIssuerSibling(document));
+		document = XMLSignatureUtil.sign(sig, CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString());
+		return getDocumentAsString(document);
+	}
+
+	private String sign(Metadata signable, Document document)
+		throws GeneralSecurityException, MarshalException, XMLSignatureException {
+		SignatureUtilTransferObject sig = getSignatureObject(signable);
+		document = XMLSignatureUtil.sign(document,
+			sig.getKeyName(),
+			sig.getKeyPair(),
+			sig.getDigestMethod(),
+			sig.getSignatureMethod(),
+			"#" + signable.getId(),
+			sig.getX509Certificate(),
+			CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString()
+		);
+		return getDocumentAsString(document);
 	}
 
 	private SignatureUtilTransferObject getSignatureObject(SignableSaml2Object so)
@@ -138,7 +163,11 @@ class KeycloakSigner {
 
 	private Node getIssuerSibling(Document doc) {
 		// Find the sibling of Issuer
-		NodeList nl = doc.getElementsByTagNameNS(JBossSAMLURIConstants.ASSERTION_NSURI.get(), JBossSAMLConstants.ISSUER.get());
+		return getSibling(doc, JBossSAMLURIConstants.ASSERTION_NSURI.get(), JBossSAMLConstants.ISSUER.get());
+	}
+
+	private Node getSibling(Document doc, String namespaceURI, String localName) {
+		NodeList nl = doc.getElementsByTagNameNS(namespaceURI, localName);
 		if (nl.getLength() > 0) {
 			Node issuer = nl.item(0);
 			return issuer.getNextSibling();

@@ -419,12 +419,10 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	protected EntityDescriptorType internalToXml(Metadata<? extends Metadata> metadata) {
 		EntityDescriptorType desc = new EntityDescriptorType(metadata.getEntityId());
-		if (hasText(metadata.getId())) {
-			desc.setID(metadata.getId());
+		if (!hasText(metadata.getId())) {
+			metadata.setId("m" + UUID.randomUUID().toString());
 		}
-		else {
-			desc.setID("M" + UUID.randomUUID().toString());
-		}
+		desc.setID(metadata.getId());
 		List<RoleDescriptorType> descriptors = getRoleDescriptors(metadata);
 		descriptors.stream().forEach(
 			d -> {
@@ -451,8 +449,10 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	protected AuthnRequestType internalToXml(AuthenticationRequest request) {
 		XMLGregorianCalendar instant =
 			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
-		String id = ofNullable(request.getId()).orElse("an" + UUID.randomUUID().toString());
-		AuthnRequestType auth = new AuthnRequestType(id, instant);
+		if (!hasText(request.getId())) {
+			request.setId("an" + UUID.randomUUID().toString());
+		}
+		AuthnRequestType auth = new AuthnRequestType(request.getId(), instant);
 		auth.setForceAuthn(request.isForceAuth());
 		auth.setIsPassive(request.isPassive());
 		try {
@@ -1049,8 +1049,11 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected ResponseType internalToXml(Response response) {
+		if (!hasText(response.getId())) {
+			response.setId("r" + UUID.randomUUID().toString());
+		}
 		ResponseType result = new ResponseType(
-			ofNullable(response.getId()).orElse("a" + UUID.randomUUID().toString()),
+			response.getId(),
 			getXmlGregorianCalendar(response.getIssueInstant())
 		);
 		result.setConsent(response.getConsent());
@@ -1153,10 +1156,12 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected AssertionType internalToXml(Assertion request) {
-		String id = ofNullable(request.getId()).orElse("A" + UUID.randomUUID().toString());
+		if (!hasText(request.getId())) {
+			request.setId("a" + UUID.randomUUID().toString());
+		}
 		XMLGregorianCalendar instant =
 			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
-		AssertionType a = new AssertionType(id, instant);
+		AssertionType a = new AssertionType(request.getId(), instant);
 		a.setIssuer(getIssuer(request.getIssuer()));
 		a.setSubject(getSubject(request.getSubject()));
 		a.setConditions(getConditions(request.getConditions()));

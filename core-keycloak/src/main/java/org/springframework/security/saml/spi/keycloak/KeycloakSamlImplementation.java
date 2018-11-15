@@ -20,6 +20,8 @@ package org.springframework.security.saml.spi.keycloak;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +94,7 @@ import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.X509Utilities;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -138,7 +141,7 @@ import org.keycloak.dom.saml.v2.protocol.StatusType;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.DocumentUtil;
 import org.keycloak.saml.common.util.StaxUtil;
-import org.keycloak.saml.processing.core.parsers.saml.SAMLParser;
+import org.keycloak.saml.processing.core.parsers.saml.assertion.SAMLAttributeValueParser;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLAssertionWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLRequestWriter;
@@ -204,7 +207,22 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	protected void bootstrap() {
+		try {
+			overrideSingletonField(SAMLAttributeValueParser.class, "INSTANCE", new KeycloakSamlAttributeParser());
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new SamlException("Unable to initialize attribute parser to support xsd:DateTime formats", e);
+		}
 		org.apache.xml.security.Init.init();
+	}
+
+	private void overrideSingletonField(Class<?> clazz, String name, KeycloakSamlAttributeParser value)
+		throws NoSuchFieldException, IllegalAccessException {
+		Field instance = ReflectionUtils.findField(clazz, name);
+		instance.setAccessible(true);
+		Field modifiersField = Field.class.getDeclaredField("modifiers");
+		modifiersField.setAccessible(true);
+		modifiersField.setInt(instance, instance.getModifiers() & ~Modifier.FINAL);
+		instance.set(null, value);
 	}
 
 	@Override
@@ -296,6 +314,15 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				localKeys
 			);
 		}
+		else if (parsed.getSamlObject() instanceof AssertionType) {
+			AssertionType at = (AssertionType) parsed.getSamlObject();
+			result = resolveAssertion(
+				at,
+				signatureMap,
+				localKeys,
+				false
+			);
+		}
 //		else if (parsed instanceof org.opensaml.saml.saml2.core.Assertion) {
 //			result = resolveAssertion(
 //				(org.opensaml.saml.saml2.core.Assertion) parsed,
@@ -331,7 +358,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			}
 			return result;
 		}
-		throw new SamlException("Deserialization not yet supported for class: " + parsed.getClass());
+		throw new SamlException("Deserialization not yet supported for class: " + parsed.getSamlObject().getClass());
 	}
 
 	@Override
@@ -500,8 +527,9 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			return xml;
 		}
 
-		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {};
-		KeycloakStaxSigner signer = new KeycloakStaxSigner(keystoreProvider);
+		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {
+		};
+		KeycloakSigner signer = new KeycloakSigner(keystoreProvider);
 		return signer.sign(signable, xml);
 	}
 
@@ -781,11 +809,11 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		throw new UnsupportedOperationException();
 	}
 
-	protected SamlObjectHolder parse(byte[] xml) {
+	private SamlObjectHolder parse(byte[] xml) {
 		try {
 			InputStream reader = new ByteArrayInputStream(xml);
 			Document samlDocument = DocumentUtil.getDocument(reader);
-			SAMLParser samlParser = SAMLParser.getInstance();
+			KeycloakSamlParser samlParser = new KeycloakSamlParser();
 			JAXPValidationUtil.checkSchemaValidation(samlDocument);
 			//check for signatures
 			NodeList signature = samlDocument.getElementsByTagNameNS(NS_SIGNATURE, "Signature");
@@ -1161,7 +1189,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return a;
 	}
 
-	private AuthnStatementType getAuthnStatementType(AuthenticationStatement stmt)  {
+	private AuthnStatementType getAuthnStatementType(AuthenticationStatement stmt) {
 		AuthnStatementType authnStatement = new AuthnStatementType(getXmlGregorianCalendar(stmt.getAuthInstant()));
 		AuthnContextType actx = new AuthnContextType();
 		if (stmt.getAuthenticationContext().getClassReference() != null) {
@@ -1415,11 +1443,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			if (st instanceof AuthnStatementType) {
 				AuthnStatementType s = (AuthnStatementType) st;
 				AuthnContextType authnContext = s.getAuthnContext();
-				AuthnContextClassRefType authnContextClassRef =
-					(AuthnContextClassRefType) authnContext.getURIType().stream()
-						.filter(t -> t instanceof AuthnContextClassRefType)
-						.findFirst()
-						.orElse(null);
+				AuthnContextClassRefType authnContextClassRef = authnContext.getSequence().getClassRef();
 				String ref = null;
 				if (authnContextClassRef != null && authnContextClassRef.getValue() != null) {
 					ref = authnContextClassRef.getValue().toString();

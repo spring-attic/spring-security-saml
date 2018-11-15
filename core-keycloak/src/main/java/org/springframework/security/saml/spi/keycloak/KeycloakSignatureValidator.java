@@ -18,18 +18,21 @@
 package org.springframework.security.saml.spi.keycloak;
 
 import java.security.Key;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.xml.crypto.KeySelector;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
@@ -41,9 +44,6 @@ import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.util.X509Utilities;
 
-import org.keycloak.rotation.HardcodedKeyLocator;
-import org.keycloak.rotation.KeyLocator;
-import org.keycloak.saml.processing.core.util.XMLSignatureUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -71,47 +71,69 @@ class KeycloakSignatureValidator {
 			}
 			return valid;
 		} catch (SignatureException e) {
-			throw new SignatureException("Unable to validate signature for object:" + parsed.getSamlObject(), e);
+			throw new SignatureException(
+				"Signature validation against a " + parsed.getSamlObject().getClass().getName() +
+				" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
+				e);
 		} catch (Exception e) {
-			throw new SamlException("Unable to get signature for class:" + parsed.getSamlObject().getClass(), e);
+			throw new SamlException(
+				"Unable to get signature for class:" + parsed.getSamlObject().getClass().getName(),
+				e
+			);
 		}
 	}
 
 	static Signature validateSignature(Node signatureNode, List<KeyData> keys) {
-		final List<Key> publicKeys = getPublicKeys(keys);
-		final TrackingIterator<Key> trackingIterator = new TrackingIterator<>(publicKeys);
-		KeyLocator keyLocator = new HardcodedKeyLocator(publicKeys) {
-			@Override
-			public Key getKey(String kid) {
-				if (publicKeys.size() == 1) {
-					return iterator().next();
+		Exception last = null;
+		for (KeyData key : keys) {
+			Key publicKey = getPublicKey(key.getCertificate());
+			KeySelector selector = KeySelector.singletonKeySelector(publicKey);
+			try {
+				if (validateUsingKeySelector(signatureNode, selector)) {
+					Signature sig = getSignature((Element) signatureNode)
+						.setValidated(true)
+						.setValidatingKey(key);
+					return sig;
 				}
-				else {
-					return null;
-				}
+			} catch (Exception e) {
+				last = e;
 			}
-
-			@Override
-			public Iterator<Key> iterator() {
-				trackingIterator.reset();
-				return trackingIterator;
-			}
-		};
-		try {
-			boolean ok = XMLSignatureUtil.validateSingleNode(signatureNode, keyLocator);
-			if (ok) {
-				KeyData keyData = keys.get(trackingIterator.getCurrentIndex());
-				Signature sig = getSignature((Element) signatureNode)
-					.setValidated(true)
-					.setValidatingKey(keyData);
-				return sig;
+		}
+		if (last != null) {
+			if (last instanceof SignatureException) {
+				throw (SignatureException)last;
 			}
 			else {
-				throw new SignatureException("Unable to validate signature using " + keys.size() + " keys.");
+				throw new SignatureException(last);
 			}
-		} catch (MarshalException | XMLSignatureException e) {
-			throw new SignatureException(e);
 		}
+		else {
+			throw new SignatureException(
+				"Signature validation failed using " +
+				keys.size() +
+				(keys.size() == 1 ? " key." : " keys.")
+			);
+		}
+	}
+
+	private static XMLSignatureFactory getXMLSignatureFactory() {
+		try {
+			return XMLSignatureFactory.getInstance("DOM", "ApacheXMLDSig");
+		} catch (NoSuchProviderException ex) {
+			try {
+				return XMLSignatureFactory.getInstance("DOM");
+			} catch (Exception err) {
+				throw new SamlException(err);
+			}
+		}
+	}
+
+	private static boolean validateUsingKeySelector(Node signatureNode, KeySelector validationKeySelector)
+		throws XMLSignatureException, MarshalException {
+		DOMValidateContext valContext = new DOMValidateContext(validationKeySelector, signatureNode);
+		XMLSignatureFactory fac = getXMLSignatureFactory();
+		XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+		return signature.validate(valContext);
 	}
 
 	static String getSignatureHashKey(Signature signature) {

@@ -179,7 +179,7 @@ public class AssertionTests extends MetadataBase {
 		assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
 		assertThat(response.getDestination(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
 		assertThat(response.getInResponseTo(), equalTo("a77141543-a0b4-4720-9e64-b08814d2af86"));
-		assertThat(response.getIssueInstant(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+		assertThat(toZuluTime(response.getIssueInstant()), equalTo(("2018-05-07T22:14:19.785Z")));
 		assertThat(response.getIssuer().getValue(), equalTo("https://idp.saml.spring.io"));
 
 		Status status = response.getStatus();
@@ -194,13 +194,13 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(assertion);
 		assertThat(assertion.getId(), equalTo("0d295a03-2f6f-4c6f-8ca2-6b456219ccd0"));
 		assertThat(assertion.getVersion(), equalTo("2.0"));
-		assertThat(assertion.getIssueInstant(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+		assertThat(toZuluTime(assertion.getIssueInstant()), equalTo(("2018-05-07T22:14:19.785Z")));
 
 		Subject subject = assertion.getSubject();
 		assertNotNull(subject);
 		assertNotNull(subject.getPrincipal());
 		assertThat(subject.getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
-		NameIdPrincipal principal = (NameIdPrincipal) subject.getPrincipal();
+		NameIdPrincipal principal = subject.getPrincipal();
 		assertThat(principal.getValue(), equalTo("spring@idp.saml.spring.io"));
 		assertThat(principal.getFormat(), equalTo(EMAIL));
 
@@ -214,13 +214,13 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(data);
 		assertThat(data.getInResponseTo(), equalTo("77141543-a0b4-4720-9e64-b08814d2af86"));
 		assertThat(data.getRecipient(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
-		assertThat(data.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
-		assertThat(data.getNotBefore(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+		assertThat(toZuluTime(data.getNotOnOrAfter()), equalTo(("2018-05-07T22:19:19.785Z")));
+		assertThat(toZuluTime(data.getNotBefore()), equalTo(("2018-05-07T22:14:19.785Z")));
 
 		Conditions conditions = assertion.getConditions();
 		assertNotNull(conditions);
-		assertThat(conditions.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-07T22:19:19.785Z")));
-		assertThat(conditions.getNotBefore(), equalTo(fromZuluTime("2018-05-07T22:14:19.785Z")));
+		assertThat(toZuluTime(conditions.getNotOnOrAfter()), equalTo(("2018-05-07T22:19:19.785Z")));
+		assertThat(toZuluTime(conditions.getNotBefore()), equalTo(("2018-05-07T22:14:19.785Z")));
 		List<AssertionCondition> criteria = conditions.getCriteria();
 		assertNotNull(criteria);
 		assertThat(criteria.size(), equalTo(1));
@@ -484,7 +484,7 @@ public class AssertionTests extends MetadataBase {
 
 		assertNotNull(assertion);
 		assertThat(assertion.getId(), equalTo("1aa4400b-d6f1-41d1-a80a-2331816b7876"));
-		assertThat(assertion.getIssueInstant(), equalTo(fromZuluTime("2018-05-02T20:07:06.785Z")));
+		assertThat(toZuluTime(assertion.getIssueInstant()), equalTo("2018-05-02T20:07:06.785Z"));
 		assertThat(assertion.getVersion(), equalTo("2.0"));
 
 		assertNotNull(assertion.getIssuer());
@@ -493,7 +493,7 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(assertion.getSubject());
 		assertNotNull(assertion.getSubject().getPrincipal());
 		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(NameIdPrincipal.class));
-		NameIdPrincipal principal = (NameIdPrincipal) assertion.getSubject().getPrincipal();
+		NameIdPrincipal principal = assertion.getSubject().getPrincipal();
 		assertThat(principal.getFormat(), equalTo(EMAIL));
 		assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
 		assertThat(principal.getValue(), equalTo("test@test.com"));
@@ -505,12 +505,12 @@ public class AssertionTests extends MetadataBase {
 			assertion.getSubject().getConfirmations().get(0).getConfirmationData();
 		assertNotNull(confirmationData);
 		assertThat(confirmationData.getInResponseTo(), equalTo("0ab65bc9-6ffc-4fce-a186-108ad42db073"));
-		assertThat(confirmationData.getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-02T20:09:06.785Z")));
-		assertThat(confirmationData.getNotBefore(), equalTo(fromZuluTime("2018-05-02T20:06:06.785Z")));
+		assertThat(toZuluTime(confirmationData.getNotOnOrAfter()), equalTo("2018-05-02T20:09:06.785Z"));
+		assertThat(toZuluTime(confirmationData.getNotBefore()), equalTo("2018-05-02T20:06:06.785Z"));
 
 		assertNotNull(assertion.getConditions());
-		assertThat(assertion.getConditions().getNotOnOrAfter(), equalTo(fromZuluTime("2018-05-02T20:05:06.785Z")));
-		assertThat(assertion.getConditions().getNotBefore(), equalTo(fromZuluTime("2018-05-02T20:06:06.785Z")));
+		assertThat(toZuluTime(assertion.getConditions().getNotOnOrAfter()), equalTo("2018-05-02T20:05:06.785Z"));
+		assertThat(toZuluTime(assertion.getConditions().getNotBefore()), equalTo("2018-05-02T20:06:06.785Z"));
 		assertNotNull(assertion.getConditions().getCriteria());
 		assertThat(assertion.getConditions().getCriteria().size(), equalTo(2));
 		assertThat(assertion.getConditions().getCriteria().get(0).getClass(), equalTo(AudienceRestriction.class));
@@ -569,7 +569,7 @@ public class AssertionTests extends MetadataBase {
 		assertThat(
 			expected.getMessage(),
 			equalTo(
-				"Signature validation against a org.opensaml.saml.saml2.core.impl.AssertionImpl object failed using 1 key.")
+				"Signature validation against a org.keycloak.dom.saml.v2.assertion.AssertionType object failed using 1 key.")
 		);
 	}
 

@@ -16,6 +16,12 @@
  */
 package org.springframework.security.saml.util;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.springframework.security.saml.SamlException;
+
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormatter;
@@ -33,5 +39,24 @@ public class DateUtils {
 
 	public static DateTime fromZuluTime(String instant) {
 		return zulu().parseDateTime(instant);
+	}
+
+	public static DateTime toDateTime(XMLGregorianCalendar calendar) {
+		if (calendar == null) {
+			return null;
+		}
+		return new DateTime(calendar.toGregorianCalendar());
+	}
+
+	public static XMLGregorianCalendar toXmlGregorianCalendar(DateTime date) {
+		if (date == null) {
+			return null;
+		}
+		try {
+			DatatypeFactory df = DatatypeFactory.newInstance();
+			return df.newXMLGregorianCalendar(date.toGregorianCalendar());
+		} catch (DatatypeConfigurationException e) {
+			throw new SamlException(e);
+		}
 	}
 }

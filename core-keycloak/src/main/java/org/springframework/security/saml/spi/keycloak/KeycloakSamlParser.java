@@ -83,6 +83,7 @@ public class KeycloakSamlParser extends AbstractParser {
 		PARSERS.put(SAMLProtocolQNames.ARTIFACT_RESPONSE.getQName(), () -> SAMLArtifactResponseParser.getInstance());
 
 		PARSERS.put(SAMLProtocolQNames.ASSERTION.getQName(), () -> new KeycloakSamlAssertionParser());
+		PARSERS.put(SAMLProtocolQNames.NAMEID.getQName(), () -> new KeycloakSamlNameIdParser());
 		PARSERS.put(
 			SAMLProtocolQNames.ENCRYPTED_ASSERTION.getQName(),
 			() -> SAMLEncryptedAssertionParser.getInstance()

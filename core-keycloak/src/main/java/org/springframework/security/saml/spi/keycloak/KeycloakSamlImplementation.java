@@ -92,6 +92,7 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.util.DateUtils;
 import org.springframework.security.saml.util.X509Utilities;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -138,6 +139,7 @@ import org.keycloak.dom.saml.v2.protocol.ResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusCodeType;
 import org.keycloak.dom.saml.v2.protocol.StatusResponseType;
 import org.keycloak.dom.saml.v2.protocol.StatusType;
+import org.keycloak.saml.common.exceptions.ConfigurationException;
 import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.DocumentUtil;
 import org.keycloak.saml.common.util.StaxUtil;
@@ -147,6 +149,7 @@ import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLRequestWriter;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLResponseWriter;
 import org.keycloak.saml.processing.core.util.JAXPValidationUtil;
+import org.keycloak.saml.processing.core.util.XMLEncryptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -156,6 +159,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
 import static org.springframework.security.saml.saml2.Namespace.NS_SIGNATURE;
+import static org.springframework.security.saml.util.DateUtils.toDateTime;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
@@ -164,8 +168,8 @@ import static org.springframework.util.StringUtils.hasText;
 public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlImplementation> {
 
 	private static final Log logger = LogFactory.getLog(KeycloakSamlImplementation.class);
-	private SamlKeyStoreProvider samlKeyStoreProvider = new SamlKeyStoreProvider() {
-	};
+	private SamlKeyStoreProvider samlKeyStoreProvider = new SamlKeyStoreProvider() {};
+	private KeycloakSamlParser samlParser = new KeycloakSamlParser();
 
 	public KeycloakSamlImplementation(Clock time) {
 		super(time);
@@ -527,9 +531,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			return xml;
 		}
 
-		SamlKeyStoreProvider keystoreProvider = new SamlKeyStoreProvider() {
-		};
-		KeycloakSigner signer = new KeycloakSigner(keystoreProvider);
+		KeycloakSigner signer = new KeycloakSigner(samlKeyStoreProvider);
 		return signer.sign(signable, xml);
 	}
 
@@ -644,15 +646,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	private XMLGregorianCalendar getXmlGregorianCalendar(DateTime date) {
-		if (date == null) {
-			return null;
-		}
-		try {
-			DatatypeFactory df = DatatypeFactory.newInstance();
-			return df.newXMLGregorianCalendar(date.toGregorianCalendar());
-		} catch (DatatypeConfigurationException e) {
-			throw new SamlException(e);
-		}
+		return DateUtils.toXmlGregorianCalendar(date);
 	}
 
 	protected NameIDPolicyType getNameIDPolicy(
@@ -791,8 +785,53 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-	protected Object decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
-//		DecryptionException last = null;
+	private class DecryptedData {
+		private final Object decryptedData;
+		private final KeyData decryptionKey;
+
+		private DecryptedData(Object decryptedData, KeyData decryptionKey) {
+			this.decryptedData = decryptedData;
+			this.decryptionKey = decryptionKey;
+		}
+
+		public Object getDecryptedData() {
+			return decryptedData;
+		}
+
+		public KeyData getDecryptionKey() {
+			return decryptionKey;
+		}
+	}
+
+	private DecryptedData decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
+		Element element = encrypted.getEncryptedElement();
+		Document encryptedAssertionDocument = null;
+		try {
+			encryptedAssertionDocument = DocumentUtil.createDocument();
+		} catch (ConfigurationException e) {
+			throw new SamlException(e);
+		}
+		encryptedAssertionDocument.appendChild(encryptedAssertionDocument.importNode(element, true));
+		Exception last = null;
+		for (KeyData k : keys) {
+			try {
+				KeyInfo info = new KeyInfo(getSamlKeyStoreProvider(), k);
+				Element result =
+					XMLEncryptionUtil.decryptElementInDocument(
+						encryptedAssertionDocument,
+						info.getKeyPair().getPrivate()
+					);
+				Object parse = samlParser.parse(result);
+				return new DecryptedData(parse, k);
+			} catch (Exception x) {
+				last = x;
+			}
+		}
+		if (last != null) {
+			throw new SamlKeyException("Unable to decrypt object.", last);
+		}
+
+		//		DecryptionException last = null;
 //		for (KeyData key : keys) {
 //			Decrypter decrypter = getDecrypter(key);
 //			try {
@@ -830,7 +869,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		try {
 			InputStream reader = new ByteArrayInputStream(xml);
 			Document samlDocument = DocumentUtil.getDocument(reader);
-			KeycloakSamlParser samlParser = new KeycloakSamlParser();
 			JAXPValidationUtil.checkSchemaValidation(samlDocument);
 			//check for signatures
 			NodeList signature = samlDocument.getElementsByTagNameNS(NS_SIGNATURE, "Signature");
@@ -870,9 +908,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			SPSSODescriptorType desc = (SPSSODescriptorType) descriptor;
 			ServiceProvider provider = new ServiceProvider();
 			provider.setId(desc.getID());
-			if (desc.getValidUntil() != null) {
-				provider.setValidUntil(new DateTime(desc.getValidUntil().toGregorianCalendar()));
-			}
+			provider.setValidUntil(toDateTime(desc.getValidUntil()));
 			if (desc.getCacheDuration() != null) {
 				provider.setCacheDuration(desc.getCacheDuration());
 			}
@@ -896,9 +932,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			IDPSSODescriptorType desc = (IDPSSODescriptorType) descriptor;
 			IdentityProvider provider = new IdentityProvider();
 			provider.setId(desc.getID());
-			if (desc.getValidUntil() != null) {
-				provider.setValidUntil(new DateTime(desc.getValidUntil().toGregorianCalendar()));
-			}
+			provider.setValidUntil(toDateTime(desc.getValidUntil()));
 			if (desc.getCacheDuration() != null) {
 				provider.setCacheDuration(desc.getCacheDuration());
 			}
@@ -1274,7 +1308,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setDestination(parsed.getDestination())
 			.setId(parsed.getID())
 			.setInResponseTo(parsed.getInResponseTo())
-			.setIssueInstant(new DateTime(parsed.getIssueInstant().toGregorianCalendar()))
+			.setIssueInstant(toDateTime(parsed.getIssueInstant()))
 			.setIssuer(getIssuer(parsed.getIssuer()))
 			.setVersion(parsed.getVersion())
 			.setStatus(getStatus(parsed.getStatus()))
@@ -1295,7 +1329,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				.forEach(
 					a -> result.addAssertion(
 						resolveAssertion(
-							(AssertionType) decrypt(a, localKeys),
+							(AssertionType) decrypt(a, localKeys).getDecryptedData(),
 							signatureMap,
 							localKeys,
 							true
@@ -1356,7 +1390,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	) {
 		Assertion assertion = new Assertion(encrypted)
 			.setId(parsed.getID())
-			.setIssueInstant(new DateTime(parsed.getIssueInstant().toGregorianCalendar()))
+			.setIssueInstant(toDateTime(parsed.getIssueInstant()))
 			.setVersion(parsed.getVersion())
 			.setIssuer(getIssuer(parsed.getIssuer()))
 			.setSubject(getSubject(parsed.getSubject(), localKeys))
@@ -1438,8 +1472,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	private Conditions getConditions(ConditionsType conditions) {
 		return new Conditions()
-			.setNotBefore(new DateTime(conditions.getNotBefore().toGregorianCalendar()))
-			.setNotOnOrAfter(new DateTime(conditions.getNotOnOrAfter().toGregorianCalendar()))
+			.setNotBefore(toDateTime(conditions.getNotBefore()))
+			.setNotOnOrAfter(toDateTime(conditions.getNotOnOrAfter()))
 			.setCriteria(getCriteria(conditions.getConditions()));
 	}
 
@@ -1458,16 +1492,14 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 				AuthenticationStatement statement = new AuthenticationStatement()
 					.setSessionIndex(s.getSessionIndex())
-					.setAuthInstant(new DateTime(s.getAuthnInstant().toGregorianCalendar()))
+					.setAuthInstant(toDateTime(s.getAuthnInstant()))
 					.setAuthenticationContext(
 						authnContext != null ?
 							new AuthenticationContext()
 								.setClassReference(AuthenticationContextClassReference.fromUrn(ref))
 							: null
 					);
-				if (s.getSessionNotOnOrAfter() != null) {
-					statement.setSessionNotOnOrAfter(new DateTime(s.getSessionNotOnOrAfter().toGregorianCalendar()));
-				}
+				statement.setSessionNotOnOrAfter(toDateTime(s.getSessionNotOnOrAfter()));
 				result.add(statement);
 
 			}
@@ -1493,7 +1525,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					);
 				}
 				else if (a.getEncryptedAssertion() != null) {
-					AttributeType at = (AttributeType) decrypt(a.getEncryptedAssertion(), localKeys);
+					AttributeType at = (AttributeType) decrypt(a.getEncryptedAssertion(), localKeys).getDecryptedData();
 					result.add(
 						new Attribute()
 							.setFriendlyName(at.getFriendlyName())
@@ -1526,23 +1558,18 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		List<SubjectConfirmation> result = new LinkedList<>();
 		for (SubjectConfirmationType s : subjectConfirmations) {
 			NameIDType nameID = getNameID(s.getNameID(), s.getEncryptedID(), localKeys);
+			SubjectConfirmationData confirmationData = new SubjectConfirmationData()
+				.setRecipient(s.getSubjectConfirmationData().getRecipient())
+				.setNotOnOrAfter(toDateTime(s.getSubjectConfirmationData().getNotOnOrAfter()))
+				.setNotBefore(toDateTime(s.getSubjectConfirmationData().getNotBefore()))
+				.setInResponseTo(s.getSubjectConfirmationData().getInResponseTo());
 			result.add(
 				new SubjectConfirmation()
 					.setNameId(nameID != null ? nameID.getValue() : null)
 					.setFormat(nameID != null ? NameId.fromUrn(nameID.getFormat().toString()) : null)
 					.setMethod(SubjectConfirmationMethod.fromUrn(s.getMethod()))
 					.setConfirmationData(
-						new SubjectConfirmationData()
-							.setRecipient(s.getSubjectConfirmationData().getRecipient())
-							.setNotOnOrAfter(new DateTime(s.getSubjectConfirmationData()
-								.getNotOnOrAfter()
-								.toGregorianCalendar())
-							)
-							.setNotBefore(new DateTime(s.getSubjectConfirmationData()
-								.getNotBefore()
-								.toGregorianCalendar())
-							)
-							.setInResponseTo(s.getSubjectConfirmationData().getInResponseTo())
+						confirmationData
 					)
 			);
 		}
@@ -1609,8 +1636,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 								   List<KeyData> localKeys) {
 		NameIDType result = id;
 		if (result == null && eid != null && eid.getEncryptedElement() != null) {
-			//result = (NameIDType) decrypt(eid, localKeys);
-			throw new UnsupportedOperationException("not yet decrypting name ID");
+			result = (NameIDType) decrypt(eid, localKeys).getDecryptedData();
 		}
 		return result;
 	}
@@ -1623,7 +1649,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setInResponseTo(response.getInResponseTo())
 			.setConsent(response.getConsent())
 			.setVersion(response.getVersion())
-			.setIssueInstant(new DateTime(response.getIssueInstant().toGregorianCalendar()))
+			.setIssueInstant(toDateTime(response.getIssueInstant()))
 			.setIssuer(getIssuer(response.getIssuer()))
 			.setDestination(response.getDestination())
 			.setStatus(getStatus(response.getStatus()));
@@ -1697,7 +1723,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			.setForceAuth(request.isForceAuthn())
 			.setPassive(request.isIsPassive())
 			.setId(request.getID())
-			.setIssueInstant(new DateTime(request.getIssueInstant().toGregorianCalendar()))
+			.setIssueInstant(toDateTime(request.getIssueInstant()))
 			.setVersion(request.getVersion())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
 			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
@@ -1764,9 +1790,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 
 		desc.setId(descriptor.getID());
-		if (ofNullable(descriptor.getValidUntil()).isPresent()) {
-			desc.setValidUntil(new DateTime(descriptor.getValidUntil().toGregorianCalendar()));
-		}
+		desc.setValidUntil(toDateTime(descriptor.getValidUntil()));
 
 		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, desc, descriptor.getSignature());
 		return desc;

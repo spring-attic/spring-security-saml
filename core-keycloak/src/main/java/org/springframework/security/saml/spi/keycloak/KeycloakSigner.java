@@ -20,13 +20,9 @@ package org.springframework.security.saml.spi.keycloak;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
 
@@ -35,7 +31,6 @@ import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
@@ -143,7 +138,7 @@ class KeycloakSigner {
 		sig.setDigestMethod(so.getDigest().toString());
 		sig.setReferenceURI("#"+so.getId());
 		sig.setSignatureMethod(so.getAlgorithm().toString());
-		KeyInfo info = new KeyInfo(so.getSigningKey());
+		KeyInfo info = new KeyInfo(provider, so.getSigningKey());
 		sig.setX509Certificate(info.getCertificate());
 		sig.setKeyPair(info.getKeyPair());
 		sig.setKeyName(so.getSigningKey().getName());
@@ -185,22 +180,4 @@ class KeycloakSigner {
 		return null;
 	}
 
-	private class KeyInfo {
-		private final KeyPair keyPair;
-		private X509Certificate certificate;
-
-		KeyInfo(KeyData key) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-			KeyStore keyStore = provider.getKeyStore(key, key.getName().toCharArray());
-			PrivateKey privateKey = (PrivateKey)keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
-			certificate = (X509Certificate) keyStore.getCertificate(key.getName());
-			keyPair = new KeyPair(certificate.getPublicKey(), privateKey);
-		}
-		KeyPair getKeyPair() {
-			return keyPair;
-		}
-
-		X509Certificate getCertificate() {
-			return certificate;
-		}
-	}
 }

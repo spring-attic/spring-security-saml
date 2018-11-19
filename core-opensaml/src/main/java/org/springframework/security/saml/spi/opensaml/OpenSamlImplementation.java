@@ -231,28 +231,24 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		this.parserPool = new BasicParserPool();
 	}
 
-	public SamlKeyStoreProvider getSamlKeyStoreProvider() {
-		return samlKeyStoreProvider;
-	}
-
 	public OpenSamlImplementation setSamlKeyStoreProvider(SamlKeyStoreProvider samlKeyStoreProvider) {
 		this.samlKeyStoreProvider = samlKeyStoreProvider;
 		return this;
 	}
 
-	public BasicParserPool getParserPool() {
+	private BasicParserPool getParserPool() {
 		return parserPool;
 	}
 
-	public MarshallerFactory getMarshallerFactory() {
+	private MarshallerFactory getMarshallerFactory() {
 		return XMLObjectProviderRegistrySupport.getMarshallerFactory();
 	}
 
-	public UnmarshallerFactory getUnmarshallerFactory() {
+	private UnmarshallerFactory getUnmarshallerFactory() {
 		return XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
 	}
 
-	public EntityDescriptor getEntityDescriptor() {
+	private EntityDescriptor getEntityDescriptor() {
 		XMLObjectBuilderFactory builderFactory = getBuilderFactory();
 		SAMLObjectBuilder<EntityDescriptor> builder =
 			(SAMLObjectBuilder<EntityDescriptor>) builderFactory.getBuilder(EntityDescriptor
@@ -260,27 +256,27 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return builder.buildObject();
 	}
 
-	public SPSSODescriptor getSPSSODescriptor() {
+	private SPSSODescriptor getSPSSODescriptor() {
 		SAMLObjectBuilder<SPSSODescriptor> builder =
 			(SAMLObjectBuilder<SPSSODescriptor>) getBuilderFactory().getBuilder(SPSSODescriptor
 				.DEFAULT_ELEMENT_NAME);
 		return builder.buildObject();
 	}
 
-	public IDPSSODescriptor getIDPSSODescriptor() {
+	private IDPSSODescriptor getIDPSSODescriptor() {
 		SAMLObjectBuilder<IDPSSODescriptor> builder =
 			(SAMLObjectBuilder<IDPSSODescriptor>) getBuilderFactory().getBuilder(IDPSSODescriptor
 				.DEFAULT_ELEMENT_NAME);
 		return builder.buildObject();
 	}
 
-	public Extensions getMetadataExtensions() {
+	private Extensions getMetadataExtensions() {
 		SAMLObjectBuilder<Extensions> builder =
 			(SAMLObjectBuilder<Extensions>) getBuilderFactory().getBuilder(Extensions.DEFAULT_ELEMENT_NAME);
 		return builder.buildObject();
 	}
 
-	public XMLObjectBuilderFactory getBuilderFactory() {
+	private XMLObjectBuilderFactory getBuilderFactory() {
 		return XMLObjectProviderRegistrySupport.getBuilderFactory();
 	}
 
@@ -408,6 +404,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return resolve(xml.getBytes(UTF_8), verificationKeys, localKeys);
 	}
 
+	@Override
 	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		XMLObject parsed = parse(xml);
 		Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
@@ -487,7 +484,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	public Signature validateSignature(SignableSAMLObject object, List<KeyData> keys) {
+	private Signature validateSignature(SignableSAMLObject object, List<KeyData> keys) {
 		Signature result = null;
 		if (object.isSigned() && keys != null && !keys.isEmpty()) {
 			SignatureException last = null;
@@ -515,7 +512,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	public Credential getCredential(KeyData key, KeyStoreCredentialResolver resolver) {
+	private Credential getCredential(KeyData key, KeyStoreCredentialResolver resolver) {
 		try {
 			CriteriaSet cs = new CriteriaSet();
 			EntityIdCriterion criteria = new EntityIdCriterion(key.getName());
@@ -526,8 +523,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	public KeyStoreCredentialResolver getCredentialsResolver(KeyData key) {
-		KeyStore ks = getSamlKeyStoreProvider().getKeyStore(key);
+	private KeyStoreCredentialResolver getCredentialsResolver(KeyData key) {
+		KeyStore ks = samlKeyStoreProvider.getKeyStore(key);
 		Map<String, String> passwords = hasText(key.getPrivateKey()) ?
 			Collections.singletonMap(key.getName(), key.getPassphrase()) :
 			Collections.emptyMap();
@@ -538,7 +535,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return resolver;
 	}
 
-	protected Signature getSignature(SignableSAMLObject target) {
+	private Signature getSignature(SignableSAMLObject target) {
 		org.opensaml.xmlsec.signature.Signature signature = target.getSignature();
 		Signature result = null;
 		if (signature != null && signature instanceof SignatureImpl) {
@@ -567,10 +564,10 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected EncryptedAssertion encryptAssertion(org.opensaml.saml.saml2.core.Assertion assertion,
-												  KeyData key,
-												  KeyEncryptionMethod keyAlgorithm,
-												  DataEncryptionMethod dataAlgorithm) {
+	private EncryptedAssertion encryptAssertion(org.opensaml.saml.saml2.core.Assertion assertion,
+												KeyData key,
+												KeyEncryptionMethod keyAlgorithm,
+												DataEncryptionMethod dataAlgorithm) {
 		Encrypter encrypter = getEncrypter(key, keyAlgorithm, dataAlgorithm);
 		try {
 			Encrypter.KeyPlacement keyPlacement =
@@ -584,7 +581,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected SAMLObject decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
+	private SAMLObject decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
 		DecryptionException last = null;
 		for (KeyData key : keys) {
 			Decrypter decrypter = getDecrypter(key);
@@ -601,9 +598,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return null;
 	}
 
-	protected Encrypter getEncrypter(KeyData key,
-									 KeyEncryptionMethod keyAlgorithm,
-									 DataEncryptionMethod dataAlgorithm) {
+	private Encrypter getEncrypter(KeyData key,
+								   KeyEncryptionMethod keyAlgorithm,
+								   DataEncryptionMethod dataAlgorithm) {
 		Credential credential = getCredential(key, getCredentialsResolver(key));
 
 		SecretKey secretKey = generateKeyFromURI(dataAlgorithm);
@@ -621,7 +618,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return encrypter;
 	}
 
-	public static SecretKey generateKeyFromURI(DataEncryptionMethod algoURI) {
+	private static SecretKey generateKeyFromURI(DataEncryptionMethod algoURI) {
 		try {
 			String jceAlgorithmName = JCEMapper.getJCEKeyAlgorithmFromURI(algoURI.toString());
 			int keyLength = JCEMapper.getKeyLengthFromURI(algoURI.toString());
@@ -631,7 +628,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected Decrypter getDecrypter(KeyData key) {
+	private Decrypter getDecrypter(KeyData key) {
 		Credential credential = getCredential(key, getCredentialsResolver(key));
 		KeyInfoCredentialResolver resolver = new StaticKeyInfoCredentialResolver(credential);
 		Decrypter decrypter = new Decrypter(null, resolver, encryptedKeyResolver);
@@ -639,7 +636,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return decrypter;
 	}
 
-	protected XMLObject parse(byte[] xml) {
+	private XMLObject parse(byte[] xml) {
 		try {
 			Document document = getParserPool().parse(new ByteArrayInputStream(xml));
 			Element element = document.getDocumentElement();
@@ -649,7 +646,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected List<? extends Provider> getSsoProviders(EntityDescriptor descriptor) {
+	private List<? extends Provider> getSsoProviders(EntityDescriptor descriptor) {
 		final List<SsoProvider> providers = new LinkedList<>();
 		for (RoleDescriptor roleDescriptor : descriptor.getRoleDescriptors()) {
 			if (roleDescriptor instanceof IDPSSODescriptor || roleDescriptor instanceof SPSSODescriptor) {
@@ -662,7 +659,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return providers;
 	}
 
-	protected SsoProvider getSsoProvider(RoleDescriptor descriptor) {
+	private SsoProvider getSsoProvider(RoleDescriptor descriptor) {
 		if (descriptor instanceof SPSSODescriptor) {
 			SPSSODescriptor desc = (SPSSODescriptor) descriptor;
 			ServiceProvider provider = new ServiceProvider();
@@ -707,9 +704,6 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			provider.setRequestInitiation(getRequestInitiation(desc));
 			return provider;
 		}
-		else {
-
-		}
 		throw new UnsupportedOperationException(
 			descriptor == null ?
 				null :
@@ -717,7 +711,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		);
 	}
 
-	protected List<Attribute> getRequestAttributes(SPSSODescriptor desc) {
+	private List<Attribute> getRequestAttributes(SPSSODescriptor desc) {
 		List<Attribute> result = new LinkedList<>();
 		if (desc.getDefaultAttributeConsumingService() != null) {
 			result.addAll(getRequestedAttributes(desc.getDefaultAttributeConsumingService()
@@ -736,7 +730,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Endpoint getRequestInitiation(RoleDescriptor desc) {
+	private Endpoint getRequestInitiation(RoleDescriptor desc) {
 		if (desc.getExtensions() == null) {
 			return null;
 		}
@@ -755,7 +749,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Endpoint getDiscovery(RoleDescriptor desc) {
+	private Endpoint getDiscovery(RoleDescriptor desc) {
 		if (desc.getExtensions() == null) {
 			return null;
 		}
@@ -774,7 +768,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<KeyData> getProviderKeys(RoleDescriptor descriptor) {
+	private List<KeyData> getProviderKeys(RoleDescriptor descriptor) {
 		List<KeyData> result = new LinkedList<>();
 		for (KeyDescriptor desc : ofNullable(descriptor.getKeyDescriptors()).orElse(emptyList())) {
 			if (desc != null) {
@@ -784,7 +778,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<KeyData> getKeyFromDescriptor(KeyDescriptor desc) {
+	private List<KeyData> getKeyFromDescriptor(KeyDescriptor desc) {
 		List<KeyData> result = new LinkedList<>();
 		if (desc.getKeyInfo() == null) {
 			return null;
@@ -802,7 +796,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<Endpoint> getEndpoints(
+	private List<Endpoint> getEndpoints(
 		List<? extends org.opensaml.saml.saml2.metadata.Endpoint>
 			services
 	) {
@@ -828,7 +822,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<NameId> getNameIDs(List<NameIDFormat> nameIDFormats) {
+	private List<NameId> getNameIDs(List<NameIDFormat> nameIDFormats) {
 		List<NameId> result = new LinkedList<>();
 		if (nameIDFormats != null) {
 			nameIDFormats.stream()
@@ -837,7 +831,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected org.opensaml.saml.saml2.core.Response internalToXml(Response response) {
+	private org.opensaml.saml.saml2.core.Response internalToXml(Response response) {
 		org.opensaml.saml.saml2.core.Response result = buildSAMLObject(org.opensaml.saml.saml2.core.Response.class);
 		result.setConsent(response.getConsent());
 		result.setID(ofNullable(response.getId()).orElse("a" + UUID.randomUUID().toString()));
@@ -880,7 +874,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected EntityDescriptor internalToXml(Metadata<? extends Metadata> metadata) {
+	private EntityDescriptor internalToXml(Metadata<? extends Metadata> metadata) {
 		EntityDescriptor desc = getEntityDescriptor();
 		desc.setEntityID(metadata.getEntityId());
 		if (hasText(metadata.getId())) {
@@ -897,7 +891,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return desc;
 	}
 
-	protected List<RoleDescriptor> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
+	private List<RoleDescriptor> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
 		List<RoleDescriptor> result = new LinkedList<>();
 		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
 			RoleDescriptor roleDescriptor = null;
@@ -998,7 +992,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected AttributeConsumingService getAttributeConsumingService(List<Attribute> attributes) {
+	private AttributeConsumingService getAttributeConsumingService(List<Attribute> attributes) {
 
 		AttributeConsumingService service = buildSAMLObject(AttributeConsumingService.class);
 		service.setIsDefault(true);
@@ -1016,7 +1010,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return service;
 	}
 
-	protected ArtifactResolutionService getArtifactResolutionService(Endpoint ep, int i) {
+	private ArtifactResolutionService getArtifactResolutionService(Endpoint ep, int i) {
 		ArtifactResolutionService service = buildSAMLObject(ArtifactResolutionService.class);
 		service.setLocation(ep.getLocation());
 		service.setBinding(ep.getBinding().toString());
@@ -1026,7 +1020,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return service;
 	}
 
-	protected org.opensaml.saml.saml2.core.LogoutResponse internalToXml(LogoutResponse response) {
+	private org.opensaml.saml.saml2.core.LogoutResponse internalToXml(LogoutResponse response) {
 		org.opensaml.saml.saml2.core.LogoutResponse result =
 			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutResponse.class);
 		result.setInResponseTo(response.getInResponseTo());
@@ -1058,7 +1052,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected org.opensaml.saml.saml2.core.LogoutRequest internalToXml(LogoutRequest request) {
+	private org.opensaml.saml.saml2.core.LogoutRequest internalToXml(LogoutRequest request) {
 		org.opensaml.saml.saml2.core.LogoutRequest lr =
 			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutRequest.class);
 		lr.setDestination(request.getDestination().getLocation());
@@ -1083,7 +1077,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return lr;
 	}
 
-	protected org.opensaml.saml.saml2.core.Assertion internalToXml(Assertion request) {
+	private org.opensaml.saml.saml2.core.Assertion internalToXml(Assertion request) {
 		org.opensaml.saml.saml2.core.Assertion a = buildSAMLObject(org.opensaml.saml.saml2.core.Assertion
 			.class);
 		a.setVersion(SAMLVersion.VERSION_20);
@@ -1174,7 +1168,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return a;
 	}
 
-	protected void addCondition(org.opensaml.saml.saml2.core.Conditions conditions, AssertionCondition c) {
+	private void addCondition(org.opensaml.saml.saml2.core.Conditions conditions, AssertionCondition c) {
 		if (c instanceof AudienceRestriction) {
 			org.opensaml.saml.saml2.core.AudienceRestriction ar =
 				buildSAMLObject(org.opensaml.saml.saml2.core.AudienceRestriction.class);
@@ -1192,7 +1186,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected AuthnRequest internalToXml(AuthenticationRequest request) {
+	private AuthnRequest internalToXml(AuthenticationRequest request) {
 		AuthnRequest auth = buildSAMLObject(AuthnRequest.class);
 		auth.setID(request.getId());
 		auth.setVersion(SAMLVersion.VERSION_20);
@@ -1201,7 +1195,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		auth.setIsPassive(request.isPassive());
 		auth.setProtocolBinding(request.getBinding().toString());
 		// Azure AD as IdP will not accept index if protocol binding or AssertationCustomerServiceURL is set.
-//		auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
+		//auth.setAssertionConsumerServiceIndex(request.getAssertionConsumerService().getIndex());
 		auth.setAssertionConsumerServiceURL(request.getAssertionConsumerService().getLocation());
 		auth.setDestination(request.getDestination().getLocation());
 		auth.setNameIDPolicy(getNameIDPolicy(request.getNameIdPolicy()));
@@ -1214,7 +1208,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return auth;
 	}
 
-	protected String marshallToXml(XMLObject auth) {
+	private String marshallToXml(XMLObject auth) {
 		try {
 			Element element = getMarshallerFactory()
 				.getMarshaller(auth)
@@ -1225,7 +1219,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected RequestedAuthnContext getRequestedAuthenticationContext(AuthenticationRequest request) {
+	private RequestedAuthnContext getRequestedAuthenticationContext(AuthenticationRequest request) {
 		RequestedAuthnContext result = null;
 		if (request.getRequestedAuthenticationContext() != null) {
 			result = buildSAMLObject(RequestedAuthnContext.class);
@@ -1256,7 +1250,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected NameIDPolicy getNameIDPolicy(
+	private NameIDPolicy getNameIDPolicy(
 		NameIdPolicy nameIdPolicy
 	) {
 		NameIDPolicy result = null;
@@ -1269,7 +1263,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected NameIdPolicy fromNameIDPolicy(NameIDPolicy nameIDPolicy) {
+	private NameIdPolicy fromNameIDPolicy(NameIDPolicy nameIDPolicy) {
 		NameIdPolicy result = null;
 		if (nameIDPolicy != null) {
 			result = new NameIdPolicy()
@@ -1280,7 +1274,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Response resolveResponse(
+	private Response resolveResponse(
 		org.opensaml.saml.saml2.core.Response parsed,
 		List<KeyData> verificationKeys,
 		List<KeyData> localKeys
@@ -1320,9 +1314,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 	}
 
-	protected LogoutResponse resolveLogoutResponse(org.opensaml.saml.saml2.core.LogoutResponse response,
-												   List<KeyData> verificationKeys,
-												   List<KeyData> localKeys) {
+	private LogoutResponse resolveLogoutResponse(org.opensaml.saml.saml2.core.LogoutResponse response,
+												 List<KeyData> verificationKeys,
+												 List<KeyData> localKeys) {
 		LogoutResponse result = new LogoutResponse()
 			.setId(response.getID())
 			.setInResponseTo(response.getInResponseTo())
@@ -1336,9 +1330,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected LogoutRequest resolveLogoutRequest(org.opensaml.saml.saml2.core.LogoutRequest request,
-												 List<KeyData> verificationKeys,
-												 List<KeyData> localKeys) {
+	private LogoutRequest resolveLogoutRequest(org.opensaml.saml.saml2.core.LogoutRequest request,
+											   List<KeyData> verificationKeys,
+											   List<KeyData> localKeys) {
 		LogoutRequest result = new LogoutRequest()
 			.setId(request.getID())
 			.setConsent(request.getConsent())
@@ -1353,13 +1347,13 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Status getStatus(org.opensaml.saml.saml2.core.Status status) {
+	private Status getStatus(org.opensaml.saml.saml2.core.Status status) {
 		return new Status()
 			.setCode(StatusCode.fromUrn(status.getStatusCode().getValue()))
 			.setMessage(status.getStatusMessage() != null ? status.getStatusMessage().getMessage() : null);
 	}
 
-	protected Assertion resolveAssertion(
+	private Assertion resolveAssertion(
 		org.opensaml.saml.saml2.core.Assertion parsed,
 		List<KeyData> verificationKeys,
 		List<KeyData> localKeys,
@@ -1383,7 +1377,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			;
 	}
 
-	protected List<Attribute> getRequestedAttributes(List<RequestedAttribute> attributes) {
+	private List<Attribute> getRequestedAttributes(List<RequestedAttribute> attributes) {
 		List<Attribute> result = new LinkedList<>();
 		for (RequestedAttribute a : ofNullable(attributes).orElse(emptyList())) {
 			result.add(
@@ -1398,7 +1392,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<Attribute> getAttributes(
+	private List<Attribute> getAttributes(
 		List<AttributeStatement> attributeStatements, List<KeyData>
 		localKeys
 	) {
@@ -1428,7 +1422,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<Object> getJavaValues(List<XMLObject> attributeValues) {
+	private List<Object> getJavaValues(List<XMLObject> attributeValues) {
 		List<Object> result = new LinkedList<>();
 		for (XMLObject o : ofNullable(attributeValues).orElse(emptyList())) {
 			if (o == null) {
@@ -1465,7 +1459,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected List<AuthenticationStatement> getAuthenticationStatements(
+	private List<AuthenticationStatement> getAuthenticationStatements(
 		List<AuthnStatement>
 			authnStatements
 	) {
@@ -1496,14 +1490,14 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Conditions getConditions(org.opensaml.saml.saml2.core.Conditions conditions) {
+	private Conditions getConditions(org.opensaml.saml.saml2.core.Conditions conditions) {
 		return new Conditions()
 			.setNotBefore(conditions.getNotBefore())
 			.setNotOnOrAfter(conditions.getNotOnOrAfter())
 			.setCriteria(getCriteria(conditions.getConditions()));
 	}
 
-	protected List<AssertionCondition> getCriteria(List<org.opensaml.saml.saml2.core.Condition> conditions) {
+	private List<AssertionCondition> getCriteria(List<org.opensaml.saml.saml2.core.Condition> conditions) {
 		List<AssertionCondition> result = new LinkedList<>();
 		for (Condition c : conditions) {
 			if (c instanceof org.opensaml.saml.saml2.core.AudienceRestriction) {
@@ -1527,7 +1521,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Subject getSubject(org.opensaml.saml.saml2.core.Subject subject, List<KeyData> localKeys) {
+	private Subject getSubject(org.opensaml.saml.saml2.core.Subject subject, List<KeyData> localKeys) {
 
 		return new Subject()
 			.setPrincipal(getPrincipal(subject, localKeys))
@@ -1535,7 +1529,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			;
 	}
 
-	protected List<SubjectConfirmation> getConfirmations(
+	private List<SubjectConfirmation> getConfirmations(
 		List<org.opensaml.saml.saml2.core
 			.SubjectConfirmation> subjectConfirmations, List<KeyData> localKeys
 	) {
@@ -1559,9 +1553,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected NameID getNameID(NameID id,
-							   EncryptedID eid,
-							   List<KeyData> localKeys) {
+	private NameID getNameID(NameID id,
+							 EncryptedID eid,
+							 List<KeyData> localKeys) {
 		NameID result = id;
 		if (result == null && eid != null && eid.getEncryptedData() != null) {
 			result = (NameID) decrypt(eid, localKeys);
@@ -1569,7 +1563,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected NameIdPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<KeyData> localKeys) {
+	private NameIdPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<KeyData> localKeys) {
 		NameID p =
 			getNameID(
 				subject.getNameID(),
@@ -1584,7 +1578,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected NameIdPrincipal getNameIdPrincipal(NameID p) {
+	private NameIdPrincipal getNameIdPrincipal(NameID p) {
 		return new NameIdPrincipal()
 			.setSpNameQualifier(p.getSPNameQualifier())
 			.setNameQualifier(p.getNameQualifier())
@@ -1593,7 +1587,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setValue(p.getValue());
 	}
 
-	protected org.opensaml.saml.saml2.core.Issuer toIssuer(Issuer issuer) {
+	private org.opensaml.saml.saml2.core.Issuer toIssuer(Issuer issuer) {
 		org.opensaml.saml.saml2.core.Issuer result =
 			buildSAMLObject(org.opensaml.saml.saml2.core.Issuer.class);
 		result.setValue(issuer.getValue());
@@ -1605,7 +1599,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Issuer getIssuer(org.opensaml.saml.saml2.core.Issuer issuer) {
+	private Issuer getIssuer(org.opensaml.saml.saml2.core.Issuer issuer) {
 		return issuer == null ? null :
 			new Issuer()
 				.setValue(issuer.getValue())
@@ -1614,7 +1608,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.setNameQualifier(issuer.getNameQualifier());
 	}
 
-	protected AuthenticationRequest resolveAuthenticationRequest(AuthnRequest parsed) {
+	private AuthenticationRequest resolveAuthenticationRequest(AuthnRequest parsed) {
 		AuthnRequest request = parsed;
 		AuthenticationRequest result = new AuthenticationRequest()
 			.setBinding(Binding.fromUrn(request.getProtocolBinding()))
@@ -1647,7 +1641,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
+	private AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
 		AuthenticationContextClassReference result = null;
 		final RequestedAuthnContext context = request.getRequestedAuthnContext();
 		if (context != null && !CollectionUtils.isEmpty(context.getAuthnContextClassRefs())) {
@@ -1657,7 +1651,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected RequestedAuthenticationContext getRequestedAuthenticationContext(AuthnRequest request) {
+	private RequestedAuthenticationContext getRequestedAuthenticationContext(AuthnRequest request) {
 		RequestedAuthenticationContext result = null;
 
 		if (request.getRequestedAuthnContext() != null) {
@@ -1669,9 +1663,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Metadata resolveMetadata(EntitiesDescriptor parsed,
-									   List<KeyData> verificationKeys,
-									   List<KeyData> localKeys) {
+	private Metadata resolveMetadata(EntitiesDescriptor parsed,
+									 List<KeyData> verificationKeys,
+									 List<KeyData> localKeys) {
 		Metadata result = null, current = null;
 		for (EntityDescriptor desc : parsed.getEntityDescriptors()) {
 			if (result == null) {
@@ -1689,7 +1683,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected Metadata resolveMetadata(EntityDescriptor parsed) {
+	private Metadata resolveMetadata(EntityDescriptor parsed) {
 		EntityDescriptor descriptor = parsed;
 		List<? extends Provider> ssoProviders = getSsoProviders(descriptor);
 		Metadata desc = getMetadata(ssoProviders);
@@ -1708,7 +1702,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return desc;
 	}
 
-	protected Metadata getMetadata(List<? extends Provider> ssoProviders) {
+	private Metadata getMetadata(List<? extends Provider> ssoProviders) {
 		Metadata result = determineMetadataType(ssoProviders);
 		result.setProviders(ssoProviders);
 		return result;
@@ -1728,7 +1722,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return result;
 	}
 
-	protected XMLObject objectToXmlObject(Object o) {
+	private XMLObject objectToXmlObject(Object o) {
 		if (o == null) {
 			return null;
 		}
@@ -1771,7 +1765,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	protected String xmlObjectToString(XMLObject o) {
+	private String xmlObjectToString(XMLObject o) {
 		String toMatch = null;
 		if (o instanceof XSString) {
 			toMatch = ((XSString) o).getValue();
@@ -1806,7 +1800,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return null;
 	}
 
-	protected Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
+	private Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
 		return
 			new Endpoint()
 				.setIndex(index)
@@ -1816,7 +1810,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.setIndex(index);
 	}
 
-	public NameIDFormat getNameIDFormat(NameId nameId) {
+	private NameIDFormat getNameIDFormat(NameId nameId) {
 		SAMLObjectBuilder<NameIDFormat> builder =
 			(SAMLObjectBuilder<NameIDFormat>) getBuilderFactory().getBuilder(NameIDFormat.DEFAULT_ELEMENT_NAME);
 		NameIDFormat format = builder.buildObject();
@@ -1824,7 +1818,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return format;
 	}
 
-	public SingleSignOnService getSingleSignOnService(Endpoint endpoint, int index) {
+	private SingleSignOnService getSingleSignOnService(Endpoint endpoint, int index) {
 		SAMLObjectBuilder<SingleSignOnService> builder =
 			(SAMLObjectBuilder<SingleSignOnService>) getBuilderFactory()
 				.getBuilder(SingleSignOnService.DEFAULT_ELEMENT_NAME);
@@ -1834,7 +1828,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return sso;
 	}
 
-	public AssertionConsumerService getAssertionConsumerService(Endpoint endpoint, int index) {
+	private AssertionConsumerService getAssertionConsumerService(Endpoint endpoint, int index) {
 		SAMLObjectBuilder<AssertionConsumerService> builder =
 			(SAMLObjectBuilder<AssertionConsumerService>) getBuilderFactory()
 				.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
@@ -1846,7 +1840,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return consumer;
 	}
 
-	public SingleLogoutService getSingleLogoutService(Endpoint endpoint) {
+	private SingleLogoutService getSingleLogoutService(Endpoint endpoint) {
 		SAMLObjectBuilder<SingleLogoutService> builder =
 			(SAMLObjectBuilder<SingleLogoutService>) getBuilderFactory()
 				.getBuilder(SingleLogoutService.DEFAULT_ELEMENT_NAME);
@@ -1856,7 +1850,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return service;
 	}
 
-	public KeyDescriptor getKeyDescriptor(KeyData key) {
+	private KeyDescriptor getKeyDescriptor(KeyData key) {
 		SAMLObjectBuilder<KeyDescriptor> builder =
 			(SAMLObjectBuilder<KeyDescriptor>) getBuilderFactory()
 				.getBuilder(KeyDescriptor.DEFAULT_ELEMENT_NAME);
@@ -1879,16 +1873,16 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	public KeyInfoGenerator getKeyInfoGenerator(Credential credential) {
+	private KeyInfoGenerator getKeyInfoGenerator(Credential credential) {
 		NamedKeyInfoGeneratorManager manager = DefaultSecurityConfigurationBootstrap
 			.buildBasicKeyInfoGeneratorManager();
 		return manager.getDefaultManager().getFactory(credential).newInstance();
 	}
 
-	public void signObject(SignableSAMLObject signable,
-						   KeyData key,
-						   AlgorithmMethod algorithm,
-						   DigestMethod digest) {
+	private void signObject(SignableSAMLObject signable,
+							KeyData key,
+							AlgorithmMethod algorithm,
+							DigestMethod digest) {
 
 		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
 		Credential credential = getCredential(key, resolver);
@@ -1920,7 +1914,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 	}
 
-	public <T> T buildSAMLObject(final Class<T> clazz) {
+	private <T> T buildSAMLObject(final Class<T> clazz) {
 		T object = null;
 		try {
 			QName defaultElementName = (QName) clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);

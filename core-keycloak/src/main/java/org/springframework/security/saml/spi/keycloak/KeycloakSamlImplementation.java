@@ -333,7 +333,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public Signature validateSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
+	public Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
 			throw new SamlException("No object to validate signature against.");
 		}

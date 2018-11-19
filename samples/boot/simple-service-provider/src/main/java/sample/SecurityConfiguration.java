@@ -30,7 +30,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -67,7 +67,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SamlValidator samlValidator() {
-		return new DefaultValidator(samlImplementation());
+		return new DefaultSamlValidator(samlImplementation());
 	}
 
 	@Bean

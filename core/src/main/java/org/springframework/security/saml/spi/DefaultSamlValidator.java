@@ -60,7 +60,7 @@ import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultValidator implements SamlValidator {
+public class DefaultSamlValidator implements SamlValidator {
 
 	private SpringSecuritySaml implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -68,7 +68,7 @@ public class DefaultValidator implements SamlValidator {
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultValidator(SpringSecuritySaml implementation) {
+	public DefaultSamlValidator(SpringSecuritySaml implementation) {
 		setImplementation(implementation);
 	}
 
@@ -76,7 +76,7 @@ public class DefaultValidator implements SamlValidator {
 		this.implementation = implementation;
 	}
 
-	public DefaultValidator setTime(Clock time) {
+	public DefaultSamlValidator setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -85,7 +85,7 @@ public class DefaultValidator implements SamlValidator {
 	public Signature validateSignature(Saml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
-			return implementation.validateSignature(saml2Object, verificationKeys);
+			return implementation.getValidSignature(saml2Object, verificationKeys);
 		} catch (Exception x) {
 			if (x instanceof SignatureException) {
 				throw x;
@@ -487,7 +487,7 @@ public class DefaultValidator implements SamlValidator {
 		return responseSkewTimeMillis;
 	}
 
-	public DefaultValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public DefaultSamlValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -496,7 +496,7 @@ public class DefaultValidator implements SamlValidator {
 		return allowUnsolicitedResponses;
 	}
 
-	public DefaultValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public DefaultSamlValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}

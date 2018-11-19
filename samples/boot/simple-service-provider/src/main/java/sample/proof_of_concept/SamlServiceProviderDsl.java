@@ -23,7 +23,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.DefaultValidator;
+import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -70,7 +70,7 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 			samlTransformer = new DefaultSamlTransformer(implementation);
 		}
 		if (samlValidator == null) {
-			samlValidator = new DefaultValidator(implementation);
+			samlValidator = new DefaultSamlValidator(implementation);
 		}
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);

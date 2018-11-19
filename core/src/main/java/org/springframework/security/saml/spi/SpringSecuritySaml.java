@@ -70,7 +70,7 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
 	public abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
 
-	public abstract Signature validateSignature(Saml2Object saml2Object, List<KeyData> trustedKeys);
+	public abstract Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys);
 
 	public String encode(byte[] b) {
 		return EncodingUtils.encode(b);

@@ -23,13 +23,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.spi.DefaultSamlValidator;
-import org.springframework.security.saml.spi.SamlValidator;
-import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
 import sample.proof_of_concept.ServiceProviderResolver;
@@ -41,34 +36,22 @@ import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-	@Configuration
-	public static class SamlPropertyConfiguration extends SamlBootConfiguration {}
-
-	@Bean
-	public SamlTemplateEngine samlTemplateEngine() {
-		return new VelocityTemplateEngine(true);
-	}
-
 	@Bean
 	public SamlTransformer samlTransformer() {
 		return new OpenSamlTransformer();
 	}
 
 	@Bean
-	public SamlValidator samlValidator() {
-		return new DefaultSamlValidator(samlTransformer());
-	}
-
-	@Bean
-	public ServiceProviderMetadataResolver serviceProviderMetadata() {
-		return new ServiceProviderMetadataResolver(samlTransformer());
-	}
-
-	@Bean
-	public ServiceProviderResolver serviceProviderResolver(SamlPropertyConfiguration samlPropertyConfiguration) {
+	public ServiceProviderResolver serviceProviderResolver(SampleSamlBootConfiguration samlPropertyConfiguration) {
 		HostedServiceProviderConfiguration spConfig =
-			samlPropertyConfiguration.toSamlServerConfiguration().getServiceProvider();
-		return new StaticServiceProviderResolver(serviceProviderMetadata(), spConfig);
+			samlPropertyConfiguration
+				.toSamlServerConfiguration()
+				.getServiceProvider();
+
+		ServiceProviderMetadataResolver serviceProviderMetadataResolver =
+			new ServiceProviderMetadataResolver(samlTransformer());
+
+		return new StaticServiceProviderResolver(serviceProviderMetadataResolver, spConfig);
 	}
 
 	@Configuration
@@ -76,18 +59,12 @@ public class SecurityConfiguration {
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
 		private final ServiceProviderResolver resolver;
-		private final SamlValidator samlValidator;
 		private final SamlTransformer samlTransformer;
-		private final SamlTemplateEngine samlTemplateEngine;
 
 		public SamlSecurity(ServiceProviderResolver resolver,
-							SamlValidator samlValidator,
-							SamlTransformer samlTransformer,
-							SamlTemplateEngine samlTemplateEngine) {
+							SamlTransformer samlTransformer) {
 			this.resolver = resolver;
-			this.samlValidator = samlValidator;
 			this.samlTransformer = samlTransformer;
-			this.samlTemplateEngine = samlTemplateEngine;
 		}
 
 		@Override
@@ -98,8 +75,6 @@ public class SecurityConfiguration {
 					.prefix("/saml/sp")
 					.serviceProviderResolver(resolver)
 					.samlTransformer(samlTransformer)
-					.samlValidator(samlValidator)
-					.samlTemplateEngine(samlTemplateEngine)
 			);
 		}
 	}
@@ -116,10 +91,10 @@ public class SecurityConfiguration {
 				.antMatchers("/**").authenticated()
 				.and()
 				.formLogin().loginPage("/saml/sp/select")
-			.and()
+				.and()
 				.logout()
-					.logoutUrl("/logout")
-					.logoutSuccessUrl("/saml/sp/select")
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/saml/sp/select")
 			;
 		}
 	}

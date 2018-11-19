@@ -527,12 +527,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	public String signObject(String xml,
 							 SignableSaml2Object signable) {
-		if (signable.getSigningKey() == null) {
-			return xml;
-		}
-
 		KeycloakSigner signer = new KeycloakSigner(samlKeyStoreProvider);
-		return signer.sign(signable, xml);
+		return signer.signOrEncrypt(signable, xml);
 	}
 
 	protected List<RoleDescriptorType> getRoleDescriptors(Metadata<? extends Metadata> metadata) {
@@ -830,20 +826,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		if (last != null) {
 			throw new SamlKeyException("Unable to decrypt object.", last);
 		}
-
-		//		DecryptionException last = null;
-//		for (KeyData key : keys) {
-//			Decrypter decrypter = getDecrypter(key);
-//			try {
-//				return (SAMLObject) decrypter.decryptData(encrypted.getEncryptedData());
-//			} catch (DecryptionException e) {
-//				logger.debug(format("Unable to decrypt element:%s", encrypted), e);
-//				last = e;
-//			}
-//		}
-//		if (last != null) {
-//			throw new SamlKeyException("Unable to decrypt object.", last);
-//		}
 		return null;
 	}
 
@@ -1133,14 +1115,14 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		for (Assertion a : ofNullable(response.getAssertions()).orElse(emptyList())) {
 			AssertionType osAssertion = internalToXml(a);
 			ResponseType.RTChoiceType assertionType;
-			if (a.getEncryptionKey() != null) {
-				EncryptedAssertionType encryptedAssertion =
-					encryptAssertion(osAssertion, a.getEncryptionKey(), a.getKeyAlgorithm(), a.getDataAlgorithm());
-				assertionType = new ResponseType.RTChoiceType(encryptedAssertion);
-			}
-			else {
+//			if (a.getEncryptionKey() != null) {
+//				EncryptedAssertionType encryptedAssertion =
+//					encryptAssertion(osAssertion, a.getEncryptionKey(), a.getKeyAlgorithm(), a.getDataAlgorithm());
+//				assertionType = new ResponseType.RTChoiceType(encryptedAssertion);
+//			}
+//			else {
 				assertionType = new ResponseType.RTChoiceType(osAssertion);
-			}
+//			}
 			result.addAssertion(assertionType);
 		}
 		return result;

@@ -28,17 +28,22 @@ import java.security.cert.X509Certificate;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 
+import static org.springframework.util.StringUtils.hasText;
+
 class KeyInfo {
 	private final KeyPair keyPair;
 	private X509Certificate certificate;
 
 	KeyInfo(SamlKeyStoreProvider provider, KeyData key) throws UnrecoverableKeyException, NoSuchAlgorithmException,
-													  KeyStoreException {
+															   KeyStoreException {
 		KeyStore keyStore = provider.getKeyStore(key, key.getName().toCharArray());
-		PrivateKey privateKey = (PrivateKey)keyStore.getKey(key.getName(), key.getPassphrase().toCharArray());
+		PrivateKey privateKey = hasText(key.getPrivateKey()) ?
+			(PrivateKey) keyStore.getKey(key.getName(), key.getPassphrase().toCharArray()) :
+			null;
 		certificate = (X509Certificate) keyStore.getCertificate(key.getName());
 		keyPair = new KeyPair(certificate.getPublicKey(), privateKey);
 	}
+
 	KeyPair getKeyPair() {
 		return keyPair;
 	}

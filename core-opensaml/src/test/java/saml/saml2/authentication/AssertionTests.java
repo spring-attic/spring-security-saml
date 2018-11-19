@@ -578,6 +578,7 @@ public class AssertionTests extends MetadataBase {
 		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES128_CBC);
 		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES256_CBC);
 		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.AES192_CBC);
+		encryptAssertion(KeyEncryptionMethod.RSA_1_5, DataEncryptionMethod.TRIPLEDES_CBS);
 	}
 
 	public void encryptAssertion(KeyEncryptionMethod keyAlgorithm, DataEncryptionMethod dataAlgorithm) throws Exception {
@@ -598,7 +599,7 @@ public class AssertionTests extends MetadataBase {
 
 		String encryptedXml = config.toXml(response);
 		assertThat(encryptedXml, containsString("xenc:CipherValue"));
-		assertThat(encryptedXml, containsString("saml2:EncryptedAssertion"));
+		assertThat(encryptedXml, containsString(":EncryptedAssertion"));
 
 		List<KeyData> verification = asList(decryptionVerificationKey);
 		List<KeyData> local = asList(decryptionKey);

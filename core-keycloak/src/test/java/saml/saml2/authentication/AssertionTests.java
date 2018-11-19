@@ -598,7 +598,7 @@ public class AssertionTests extends MetadataBase {
 
 		String encryptedXml = config.toXml(response);
 		assertThat(encryptedXml, containsString("xenc:CipherValue"));
-		assertThat(encryptedXml, containsString("saml2:EncryptedAssertion"));
+		assertThat(encryptedXml, containsString(":EncryptedAssertion"));
 
 		List<KeyData> verification = asList(decryptionVerificationKey);
 		List<KeyData> local = asList(decryptionKey);

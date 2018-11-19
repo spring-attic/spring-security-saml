@@ -450,7 +450,9 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	@Override
 	public Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
-			throw new SamlException("No object to validate signature against.");
+			throw new org.springframework.security.saml.saml2.signature.SignatureException(
+				"No object to validate signature against."
+			);
 		}
 
 		if (saml2Object instanceof Assertion && ((Assertion)saml2Object).isEncrypted()) {
@@ -460,14 +462,16 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		}
 
 		if (trustedKeys == null || trustedKeys.isEmpty()) {
-			throw new SamlKeyException("At least one verification key has to be provided");
+			throw new org.springframework.security.saml.saml2.signature.SignatureException(
+				"At least one verification key has to be provided"
+			);
 		}
 
 		if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
 			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
 		}
 		else {
-			throw new SamlException(
+			throw new org.springframework.security.saml.saml2.signature.SignatureException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}

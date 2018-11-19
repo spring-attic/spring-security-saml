@@ -76,7 +76,7 @@ class KeycloakSignatureValidator {
 				" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
 				e);
 		} catch (Exception e) {
-			throw new SamlException(
+			throw new SignatureException(
 				"Unable to get signature for class:" + parsed.getSamlObject().getClass().getName(),
 				e
 			);

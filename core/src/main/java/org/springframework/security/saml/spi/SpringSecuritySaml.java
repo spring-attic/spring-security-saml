@@ -25,6 +25,7 @@ import javax.xml.datatype.Duration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 
 /**
  * Static utility class that serves as the delimiter between Spring Security SAML and underlying implementation.
@@ -70,7 +71,8 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
 	public abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
 
-	public abstract Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys);
+	public abstract Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys)
+		throws SignatureException;
 
 	public String encode(byte[] b) {
 		return EncodingUtils.encode(b);

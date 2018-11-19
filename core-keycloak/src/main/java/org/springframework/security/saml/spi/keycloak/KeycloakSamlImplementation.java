@@ -89,6 +89,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.DateUtils;
@@ -335,7 +336,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	@Override
 	public Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
-			throw new SamlException("No object to validate signature against.");
+			throw new SignatureException("No object to validate signature against.");
 		}
 
 		if (saml2Object instanceof Assertion && ((Assertion) saml2Object).isEncrypted()) {
@@ -345,7 +346,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 
 		if (trustedKeys == null || trustedKeys.isEmpty()) {
-			throw new SamlKeyException("At least one verification key has to be provided");
+			throw new SignatureException("At least one verification key has to be provided");
 		}
 
 		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
@@ -362,7 +363,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			}
 		}
 		else {
-			throw new SamlException(
+			throw new SignatureException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}

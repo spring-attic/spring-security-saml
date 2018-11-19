@@ -16,6 +16,11 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.springframework.security.saml.SamlException;
+
 /**
  * Implementation samlp:StatusCode as defined by
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
@@ -139,6 +144,14 @@ public enum StatusCode {
 	@Override
 	public String toString() {
 		return urn;
+	}
+
+	public URI toUri() {
+		try {
+			return new URI(this.urn);
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
 	}
 
 }

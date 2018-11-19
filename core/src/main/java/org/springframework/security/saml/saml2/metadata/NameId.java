@@ -18,6 +18,8 @@
 package org.springframework.security.saml.saml2.metadata;
 
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.util.Assert;
@@ -68,5 +70,13 @@ public enum NameId {
 	@Override
 	public String toString() {
 		return this.urn;
+	}
+
+	public URI toUri() {
+		try {
+			return new URI(this.urn);
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
 	}
 }

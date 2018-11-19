@@ -17,6 +17,9 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.springframework.security.saml.SamlException;
 import org.springframework.util.Assert;
 
@@ -59,5 +62,13 @@ public enum Binding {
 	@Override
 	public String toString() {
 		return this.urn;
+	}
+
+	public java.net.URI toUri() {
+		try {
+			return new URI(this.urn);
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
 	}
 }

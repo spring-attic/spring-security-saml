@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
@@ -28,7 +29,7 @@ import org.joda.time.DateTime;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 62, Line 2686
  */
-public class LogoutRequest extends Request<LogoutRequest> {
+public class LogoutRequest extends Request<LogoutRequest> implements SignableSaml2Object<LogoutRequest> {
 
 	private KeyData signingKey;
 	private AlgorithmMethod algorithm;

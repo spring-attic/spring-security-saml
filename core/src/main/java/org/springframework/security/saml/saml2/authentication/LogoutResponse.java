@@ -17,10 +17,12 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
+
 /**
  * Implementation samlp:LogoutResponse as defined by
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 62, Line 2708
  */
-public class LogoutResponse extends StatusResponse<LogoutResponse> {
+public class LogoutResponse extends StatusResponse<LogoutResponse> implements SignableSaml2Object<LogoutResponse> {
 }

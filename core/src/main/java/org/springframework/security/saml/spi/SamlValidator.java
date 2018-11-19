@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.security.saml.provider.HostedIdentityProvider;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
@@ -35,7 +36,7 @@ public interface SamlValidator {
 	 * @return the key that successfully validated the signature
 	 * @throws SignatureException if object failed signature validation
 	 */
-	Signature validateSignature(Saml2Object saml2Object, List<KeyData> verificationKeys)
+	Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException;
 
 	/**

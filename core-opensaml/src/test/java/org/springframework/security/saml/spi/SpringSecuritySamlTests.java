@@ -29,12 +29,11 @@
  *
  */
 
-package saml.impl;
+package org.springframework.security.saml.spi;
 
 import java.time.Clock;
 import java.util.UUID;
 
-import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
 
 import org.junit.jupiter.api.Test;

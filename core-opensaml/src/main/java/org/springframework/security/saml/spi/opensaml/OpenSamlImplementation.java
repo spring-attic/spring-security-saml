@@ -42,6 +42,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
 import org.springframework.security.saml.saml2.ImplementationHolder;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -207,7 +208,6 @@ import org.w3c.dom.Element;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -389,11 +389,6 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public Saml2Object resolve(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
-		return resolve(xml.getBytes(UTF_8), verificationKeys, localKeys);
-	}
-
-	@Override
 	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		XMLObject parsed = parse(xml);
 		Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
@@ -448,7 +443,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
+	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
 			throw new org.springframework.security.saml.saml2.signature.SignatureException(
 				"No object to validate signature against."

@@ -23,9 +23,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.xml.datatype.Duration;
 
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Static utility class that serves as the delimiter between Spring Security SAML and underlying implementation.
@@ -63,30 +66,32 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
 	protected abstract void bootstrap();
 
-	public abstract Duration toDuration(long millis);
+	protected abstract Duration toDuration(long millis);
 
-	public abstract String toXml(Saml2Object saml2Object);
+	protected abstract String toXml(Saml2Object saml2Object);
 
-	public abstract Saml2Object resolve(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys);
+	protected final Saml2Object resolve(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
+		return resolve(xml.getBytes(UTF_8), verificationKeys, localKeys);
+	}
 
-	public abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
+	protected abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
 
-	public abstract Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys)
+	protected abstract Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
 		throws SignatureException;
 
-	public String encode(byte[] b) {
+	protected String encode(byte[] b) {
 		return EncodingUtils.encode(b);
 	}
 
-	public byte[] decode(String s) {
+	protected byte[] decode(String s) {
 		return EncodingUtils.decode(s);
 	}
 
-	public byte[] deflate(String s) {
+	protected byte[] deflate(String s) {
 		return EncodingUtils.deflate(s);
 	}
 
-	public String inflate(byte[] b) {
+	protected String inflate(byte[] b) {
 		return EncodingUtils.inflate(b);
 	}
 

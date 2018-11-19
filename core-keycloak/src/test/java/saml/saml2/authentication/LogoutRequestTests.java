@@ -17,9 +17,9 @@
 
 package saml.saml2.authentication;
 
-import java.time.Clock;
 import java.util.Arrays;
 
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutReason;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -33,8 +33,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
-import org.springframework.security.saml.spi.keycloak.KeycloakSamlImplementation;
+import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -59,7 +58,7 @@ import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
 
 class LogoutObjectTests {
 
-	SpringSecuritySaml saml = new KeycloakSamlImplementation(Clock.systemUTC()).init();
+	KeycloakSamlTransformer saml = new KeycloakSamlTransformer();
 	private String issuer = "http://sp.test.org";
 	private DateTime instant = new DateTime();
 	private String destination = "http://idp.test.org";
@@ -151,7 +150,7 @@ class LogoutObjectTests {
 
 	@Test
 	public void requestFromXml() {
-		LogoutRequest request = (LogoutRequest) saml.resolve(
+		LogoutRequest request = (LogoutRequest) saml.fromXml(
 			EXAMPLE_REQUEST, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")), null);
 		assertThat(request.getId(), equalTo("request-id"));
 		assertNotNull(request.getDestination());
@@ -238,14 +237,19 @@ class LogoutObjectTests {
 		assertNodeAttribute(
 			getNodes(xml, "//samlp:LogoutRequest/saml:NameID").iterator().next(), "Format", equalTo(EMAIL.toString()));
 
-		saml.getValidSignature(saml.resolve(xml, null, null), Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
+		saml.getValidSignature(
+			saml.fromXml(xml, null, null, SignableSaml2Object.class),
+			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test"))
+		);
 
 		Exception expected =
 			assertThrows(
 				SignatureException.class,
 				//using the wrong key
 				() -> saml.getValidSignature(
-					saml.resolve(xml, null, null), Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong")))
+					saml.fromXml(xml, null, null, SignableSaml2Object.class),
+					Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong"))
+				)
 			);
 		assertThat(
 			expected.getMessage(), equalTo(
@@ -256,10 +260,11 @@ class LogoutObjectTests {
 
 	@Test
 	public void responseFromXml() throws Exception {
-		LogoutResponse response = (LogoutResponse) saml.resolve(
+		LogoutResponse response = saml.fromXml(
 			EXAMPLE_RESPONSE,
 			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")),
-			null
+			null,
+			LogoutResponse.class
 		);
 		assertThat(response.getId(), equalTo("response-id"));
 		assertNotNull(response.getDestination());
@@ -365,14 +370,19 @@ class LogoutObjectTests {
 			equalTo("User logged out!")
 		);
 
-		saml.getValidSignature(saml.resolve(xml, null, null), Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
+		saml.getValidSignature(
+			saml.fromXml(xml, null, null, SignableSaml2Object.class),
+			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test"))
+		);
 
 		Exception expected =
 			assertThrows(
 				SignatureException.class,
 				//using the wrong key
 				() -> saml.getValidSignature(
-					saml.resolve(xml, null, null), Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong")))
+					saml.fromXml(xml, null, null, SignableSaml2Object.class),
+					Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong"))
+				)
 			);
 		assertThat(
 			expected.getMessage(), equalTo(

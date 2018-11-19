@@ -29,7 +29,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
+import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -57,7 +57,7 @@ public abstract class MetadataBase {
 	@BeforeAll
 	public static void init() {
 		time = Clock.systemUTC();
-		config = new DefaultSamlTransformer(new OpenSamlImplementation(time).init());
+		config = new OpenSamlTransformer();
 		((DefaultSamlTransformer) config).afterPropertiesSet();
 	}
 

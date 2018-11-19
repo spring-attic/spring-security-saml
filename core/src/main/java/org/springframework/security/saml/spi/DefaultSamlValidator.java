@@ -23,9 +23,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedIdentityProvider;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
@@ -62,17 +64,17 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class DefaultSamlValidator implements SamlValidator {
 
-	private SpringSecuritySaml implementation;
+	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultSamlValidator(SpringSecuritySaml implementation) {
+	public DefaultSamlValidator(SamlTransformer implementation) {
 		setImplementation(implementation);
 	}
 
-	private void setImplementation(SpringSecuritySaml implementation) {
+	private void setImplementation(SamlTransformer implementation) {
 		this.implementation = implementation;
 	}
 
@@ -82,7 +84,7 @@ public class DefaultSamlValidator implements SamlValidator {
 	}
 
 	@Override
-	public Signature validateSignature(Saml2Object saml2Object, List<KeyData> verificationKeys)
+	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
 			return implementation.getValidSignature(saml2Object, verificationKeys);

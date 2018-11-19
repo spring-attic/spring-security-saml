@@ -21,12 +21,15 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
+public abstract class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
 
 	private SpringSecuritySaml implementation;
 
@@ -90,6 +93,12 @@ public class DefaultSamlTransformer implements SamlTransformer, InitializingBean
 		else {
 			return new String(b, UTF_8);
 		}
+	}
+
+	@Override
+	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+		throws SignatureException {
+		return implementation.getValidSignature(saml2Object, trustedKeys);
 	}
 
 }

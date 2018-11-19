@@ -20,8 +20,11 @@ package org.springframework.security.saml;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 
 public interface SamlTransformer {
 
@@ -71,6 +74,22 @@ public interface SamlTransformer {
 	 */
 	Saml2Object fromXml(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys);
 
+	default <T extends Saml2Object> T fromXml(
+		byte[] xml,
+		List<KeyData> verificationKeys,
+		List<KeyData> localKeys,
+		Class<T> type) {
+		return type.cast(fromXml(xml, verificationKeys, localKeys));
+	}
+
+	default <T extends Saml2Object> T fromXml(
+		String xml,
+		List<KeyData> verificationKeys,
+		List<KeyData> localKeys,
+		Class<T> type) {
+		return type.cast(fromXml(xml, verificationKeys, localKeys));
+	}
+
 	/**
 	 * Deflates and base64 encodes the SAML message readying it for transport.
 	 * If the result is used as a query parameter, it still has to be URL encoded.
@@ -89,5 +108,8 @@ public interface SamlTransformer {
 	 * @return the original string
 	 */
 	String samlDecode(String s, boolean inflate);
+
+	Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+		throws SignatureException;
 
 }

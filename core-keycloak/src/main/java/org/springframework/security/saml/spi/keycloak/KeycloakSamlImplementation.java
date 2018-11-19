@@ -154,7 +154,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
@@ -265,11 +264,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return xml;
 	}
 
-	@Override
-	public Saml2Object resolve(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
-		return resolve(xml.getBytes(UTF_8), verificationKeys, localKeys);
-	}
-
 	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		SamlObjectHolder parsed = parse(xml);
 		Map<String, Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
@@ -334,7 +328,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public Signature getValidSignature(Saml2Object saml2Object, List<KeyData> trustedKeys) {
+	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
 			throw new SignatureException("No object to validate signature against.");
 		}

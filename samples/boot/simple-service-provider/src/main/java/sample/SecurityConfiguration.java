@@ -17,8 +17,6 @@
 
 package sample;
 
-import java.time.Clock;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -29,12 +27,10 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
-import org.springframework.security.saml.spi.opensaml.OpenSamlImplementation;
+import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
 import sample.proof_of_concept.ServiceProviderResolver;
 import sample.proof_of_concept.implementation.ServiceProviderMetadataResolver;
@@ -49,25 +45,18 @@ public class SecurityConfiguration {
 	public static class SamlPropertyConfiguration extends SamlBootConfiguration {}
 
 	@Bean
-	public SpringSecuritySaml samlImplementation() {
-		return new OpenSamlImplementation(Clock.systemUTC()).init();
-	}
-
-	@Bean
 	public SamlTemplateEngine samlTemplateEngine() {
 		return new VelocityTemplateEngine(true);
 	}
 
 	@Bean
 	public SamlTransformer samlTransformer() {
-		return new DefaultSamlTransformer(
-			samlImplementation()
-		);
+		return new OpenSamlTransformer();
 	}
 
 	@Bean
 	public SamlValidator samlValidator() {
-		return new DefaultSamlValidator(samlImplementation());
+		return new DefaultSamlValidator(samlTransformer());
 	}
 
 	@Bean
@@ -86,18 +75,15 @@ public class SecurityConfiguration {
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private final SpringSecuritySaml implementation;
 		private final ServiceProviderResolver resolver;
 		private final SamlValidator samlValidator;
 		private final SamlTransformer samlTransformer;
 		private final SamlTemplateEngine samlTemplateEngine;
 
-		public SamlSecurity(SpringSecuritySaml implemenation,
-							ServiceProviderResolver resolver,
+		public SamlSecurity(ServiceProviderResolver resolver,
 							SamlValidator samlValidator,
 							SamlTransformer samlTransformer,
 							SamlTemplateEngine samlTemplateEngine) {
-			this.implementation = implemenation;
 			this.resolver = resolver;
 			this.samlValidator = samlValidator;
 			this.samlTransformer = samlTransformer;
@@ -110,7 +96,6 @@ public class SecurityConfiguration {
 			http.apply(
 				serviceProvider()
 					.prefix("/saml/sp")
-					.setImplementation(implementation)
 					.serviceProviderResolver(resolver)
 					.samlTransformer(samlTransformer)
 					.samlValidator(samlValidator)

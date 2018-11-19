@@ -30,6 +30,7 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.keycloak.KeycloakSamlImplementation;
+import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -57,7 +58,7 @@ public abstract class MetadataBase {
 	@BeforeAll
 	public static void init() {
 		time = Clock.systemUTC();
-		config = new DefaultSamlTransformer(new KeycloakSamlImplementation(time).init());
+		config = new KeycloakSamlTransformer(new KeycloakSamlImplementation(time).init());
 		((DefaultSamlTransformer) config).afterPropertiesSet();
 	}
 

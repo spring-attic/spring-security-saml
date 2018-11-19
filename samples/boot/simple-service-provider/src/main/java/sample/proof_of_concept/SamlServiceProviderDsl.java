@@ -22,10 +22,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -50,12 +48,11 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	 */
 	private String prefix = "/saml/sp";
 	private ServiceProviderResolver resolver = null;
-	private SpringSecuritySaml implementation = null;
+	private SamlTransformer samlTransformer = null;
 
 	/*
 	 * Fields with implementation defaults
 	 */
-	private SamlTransformer samlTransformer = null;
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
@@ -63,14 +60,11 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
 		notNull(prefix, "SAML path prefix must not be null.");
-		notNull(implementation, "SAML Core Implementation must not be null.");
+		notNull(samlTransformer, "SAML Core Transformer Implementation must not be null.");
 		notNull(resolver, "Service Provider Resolver must not be null.");
 
-		if (samlTransformer == null) {
-			samlTransformer = new DefaultSamlTransformer(implementation);
-		}
 		if (samlValidator == null) {
-			samlValidator = new DefaultSamlValidator(implementation);
+			samlValidator = new DefaultSamlValidator(samlTransformer);
 		}
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);
@@ -153,8 +147,4 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		return this;
 	}
 
-	public SamlServiceProviderDsl setImplementation(SpringSecuritySaml implementation) {
-		this.implementation = implementation;
-		return this;
-	}
 }

@@ -179,9 +179,9 @@ class KeycloakSignatureValidator {
 
 	static String getSignatureHashKey(String signatureValue, String digestValue) {
 		return new StringBuffer("Signature Hash Key[Sig=")
-			.append(signatureValue)
+			.append(signatureValue.trim())
 			.append("; Digest=")
-			.append(digestValue)
+			.append(digestValue.trim())
 			.append("]")
 			.toString();
 	}

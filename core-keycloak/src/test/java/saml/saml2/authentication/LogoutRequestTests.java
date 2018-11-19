@@ -52,7 +52,6 @@ import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA512;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
-import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
@@ -157,7 +156,7 @@ class LogoutObjectTests {
 		assertThat(request.getId(), equalTo("request-id"));
 		assertNotNull(request.getDestination());
 		assertThat(request.getDestination().getLocation(), equalTo("http://idp.test.org"));
-		assertThat(request.getIssueInstant(), equalTo(fromZuluTime("2018-06-04T14:53:16.712Z")));
+		assertThat(toZuluTime(request.getIssueInstant()), equalTo(("2018-06-04T14:53:16.712Z")));
 		assertNotNull(request.getIssuer());
 		assertThat(request.getIssuer().getValue(), equalTo("http://sp.test.org"));
 		assertNotNull(request.getSignature());
@@ -250,7 +249,7 @@ class LogoutObjectTests {
 			);
 		assertThat(
 			expected.getMessage(), equalTo(
-				"Signature validation against a org.opensaml.saml.saml2.core.impl.LogoutRequestImpl object failed " +
+				"Signature validation against a org.keycloak.dom.saml.v2.protocol.LogoutRequestType object failed " +
 					"using 1 key."));
 
 	}
@@ -265,7 +264,7 @@ class LogoutObjectTests {
 		assertThat(response.getId(), equalTo("response-id"));
 		assertNotNull(response.getDestination());
 		assertThat(response.getDestination(), equalTo(destination));
-		assertThat(response.getIssueInstant(), equalTo(fromZuluTime("2018-06-04T19:24:09.572Z")));
+		assertThat(toZuluTime(response.getIssueInstant()), equalTo(("2018-06-04T19:24:09.572Z")));
 		assertThat(response.getInResponseTo(), equalTo("in-response-to"));
 		assertThat(response.getIssuer().getValue(), equalTo(issuer));
 		assertThat(response.getStatus().getCode(), equalTo(StatusCode.SUCCESS));
@@ -377,7 +376,7 @@ class LogoutObjectTests {
 			);
 		assertThat(
 			expected.getMessage(), equalTo(
-				"Signature validation against a org.opensaml.saml.saml2.core.impl.LogoutResponseImpl object failed " +
+				"Signature validation against a org.keycloak.dom.saml.v2.protocol.StatusResponseType object failed " +
 					"using 1 key."));
 
 

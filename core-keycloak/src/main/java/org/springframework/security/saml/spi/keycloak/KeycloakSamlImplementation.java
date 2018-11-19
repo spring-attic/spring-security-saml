@@ -329,20 +329,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 
 	@Override
 	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
-		if (saml2Object == null || saml2Object.getImplementation() == null) {
-			throw new SignatureException("No object to validate signature against.");
-		}
-
-		if (saml2Object instanceof Assertion && ((Assertion) saml2Object).isEncrypted()) {
-			//we don't need to validate the signature
-			//of an assertion that was successfully decrypted
-			return null;
-		}
-
-		if (trustedKeys == null || trustedKeys.isEmpty()) {
-			throw new SignatureException("At least one verification key has to be provided");
-		}
-
 		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
 			Map<String, Signature> signatureMap =
 				KeycloakSignatureValidator.validateSignature(

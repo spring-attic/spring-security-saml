@@ -87,7 +87,7 @@ public class DefaultSamlValidator implements SamlValidator {
 	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
-			return implementation.getValidSignature(saml2Object, verificationKeys);
+			return implementation.validateSignature(saml2Object, verificationKeys);
 		} catch (Exception x) {
 			if (x instanceof SignatureException) {
 				throw x;

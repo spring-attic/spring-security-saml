@@ -237,7 +237,7 @@ class LogoutObjectTests {
 		assertNodeAttribute(
 			getNodes(xml, "//samlp:LogoutRequest/saml:NameID").iterator().next(), "Format", equalTo(EMAIL.toString()));
 
-		saml.getValidSignature(
+		saml.validateSignature(
 			saml.fromXml(xml, null, null, SignableSaml2Object.class),
 			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test"))
 		);
@@ -246,7 +246,7 @@ class LogoutObjectTests {
 			assertThrows(
 				SignatureException.class,
 				//using the wrong key
-				() -> saml.getValidSignature(
+				() -> saml.validateSignature(
 					saml.fromXml(xml, null, null, SignableSaml2Object.class),
 					Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong"))
 				)
@@ -275,7 +275,7 @@ class LogoutObjectTests {
 		assertThat(response.getStatus().getCode(), equalTo(StatusCode.SUCCESS));
 		assertThat(response.getStatus().getMessage(), equalTo("User logged out!"));
 
-		Signature signature = saml.getValidSignature(response, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
+		Signature signature = saml.validateSignature(response, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
 		assertNotNull(signature);
 		assertThat(signature.isValidated(), equalTo(true));
 		assertThat(signature.getSignatureAlgorithm(), equalTo(AlgorithmMethod.RSA_SHA512));
@@ -370,7 +370,7 @@ class LogoutObjectTests {
 			equalTo("User logged out!")
 		);
 
-		saml.getValidSignature(
+		saml.validateSignature(
 			saml.fromXml(xml, null, null, SignableSaml2Object.class),
 			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test"))
 		);
@@ -379,7 +379,7 @@ class LogoutObjectTests {
 			assertThrows(
 				SignatureException.class,
 				//using the wrong key
-				() -> saml.getValidSignature(
+				() -> saml.validateSignature(
 					saml.fromXml(xml, null, null, SignableSaml2Object.class),
 					Arrays.asList(SP_RSA_KEY.getSimpleKey("wrong"))
 				)

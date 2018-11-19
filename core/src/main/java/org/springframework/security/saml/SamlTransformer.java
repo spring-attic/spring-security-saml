@@ -109,7 +109,7 @@ public interface SamlTransformer {
 	 */
 	String samlDecode(String s, boolean inflate);
 
-	Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+	Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
 		throws SignatureException;
 
 }

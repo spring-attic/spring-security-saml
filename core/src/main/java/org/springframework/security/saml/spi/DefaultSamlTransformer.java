@@ -21,9 +21,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
+import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 
@@ -96,8 +97,27 @@ public abstract class DefaultSamlTransformer implements SamlTransformer, Initial
 	}
 
 	@Override
-	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
 		throws SignatureException {
+		if (saml2Object == null || saml2Object.getImplementation() == null) {
+			throw new SignatureException("No object to validate signature against.");
+		}
+
+		if (saml2Object instanceof Assertion && ((Assertion) saml2Object).isEncrypted()) {
+			//we don't need to validate the signature
+			//of an assertion that was successfully decrypted
+			try {
+				return implementation.getValidSignature(saml2Object, trustedKeys);
+			} catch (SignatureException x) {
+				//ignore. if we decrypted the object, we don't need this
+				return null;
+			}
+		}
+
+		if (trustedKeys == null || trustedKeys.isEmpty()) {
+			throw new SignatureException("At least one verification key has to be provided");
+		}
+
 		return implementation.getValidSignature(saml2Object, trustedKeys);
 	}
 

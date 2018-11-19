@@ -57,7 +57,7 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 		return (T) this;
 	}
 
-	protected synchronized void performInit() {
+	private synchronized void performInit() {
 		if (hasInitCompleted.compareAndSet(false, true)) {
 			java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			bootstrap();

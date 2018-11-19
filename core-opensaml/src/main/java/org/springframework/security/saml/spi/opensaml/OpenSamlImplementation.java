@@ -210,7 +210,6 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
 import static org.opensaml.security.crypto.KeySupport.generateKey;
@@ -346,16 +345,6 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				new SimpleRetrievalMethodEncryptedKeyResolver()
 			)
 		);
-	}
-
-	@Override
-	public long toMillis(Duration duration) {
-		if (isNull(duration)) {
-			return -1;
-		}
-		else {
-			return DOMTypeSupport.durationToLong(duration);
-		}
 	}
 
 	@Override

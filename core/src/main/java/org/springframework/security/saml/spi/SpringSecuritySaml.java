@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.signature.Signature;
 
 /**
@@ -55,25 +55,18 @@ public abstract class SpringSecuritySaml<T extends SpringSecuritySaml> {
 
 	protected synchronized void performInit() {
 		if (hasInitCompleted.compareAndSet(false, true)) {
-			java.security.Security.addProvider(
-				new org.bouncycastle.jce.provider.BouncyCastleProvider()
-			);
+			java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			bootstrap();
 		}
 	}
 
 	protected abstract void bootstrap();
 
-	public abstract long toMillis(Duration duration);
-
 	public abstract Duration toDuration(long millis);
 
 	public abstract String toXml(Saml2Object saml2Object);
 
-	public abstract Saml2Object resolve(
-		String xml, List<KeyData> verificationKeys, List<KeyData>
-		localKeys
-	);
+	public abstract Saml2Object resolve(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys);
 
 	public abstract Saml2Object resolve(byte[] xml, List<KeyData> trustedKeys, List<KeyData> localKeys);
 

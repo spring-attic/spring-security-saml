@@ -220,14 +220,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public long toMillis(Duration duration) {
-		long now = System.currentTimeMillis();
-		Date d = new Date(now);
-		long millis = duration.getTimeInMillis(d);
-		return Math.abs(millis - now);
-	}
-
-	@Override
 	public Duration toDuration(long millis) {
 		try {
 			return DatatypeFactory.newInstance().newDuration(millis);

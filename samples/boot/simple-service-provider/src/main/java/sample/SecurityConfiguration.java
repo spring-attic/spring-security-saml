@@ -37,12 +37,12 @@ import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-	@Bean
+	@Bean //pick the underlying library
 	public SamlTransformer samlTransformer() {
 		return new OpenSamlTransformer();
 	}
 
-	@Bean
+	@Bean //implement the resolver
 	public ServiceProviderResolver serviceProviderResolver(SampleSamlBootConfiguration samlPropertyConfiguration) {
 		HostedServiceProviderConfiguration spConfig =
 			samlPropertyConfiguration
@@ -70,22 +70,6 @@ public class SecurityConfiguration {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			super.configure(http);
-			http.apply(
-				serviceProvider()
-					.prefix("/saml/sp")
-					.serviceProviderResolver(resolver)
-					.samlTransformer(samlTransformer)
-			);
-		}
-	}
-
-	@Configuration
-	@Order(2)
-	public static class AppSecurity extends WebSecurityConfigurerAdapter {
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
 			http
 				.antMatcher("/**")
 				.authorizeRequests()
@@ -97,7 +81,12 @@ public class SecurityConfiguration {
 				.logoutUrl("/logout")
 				.logoutSuccessUrl("/saml/sp/select")
 			;
+			http.apply(
+				serviceProvider()
+					.prefix("/saml/sp")
+					.serviceProviderResolver(resolver)
+					.samlTransformer(samlTransformer)
+			);
 		}
 	}
-
 }

@@ -46,13 +46,13 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	/*
 	 * User required fields
 	 */
-	private String prefix = "/saml/sp";
 	private ServiceProviderResolver resolver = null;
 	private SamlTransformer samlTransformer = null;
 
 	/*
 	 * Fields with implementation defaults
 	 */
+	private String prefix = "/saml/sp";
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
@@ -69,9 +69,9 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);
 		}
-		String antPattern = "/" + stripSlashes(prefix);
-		builder.antMatcher(antPattern + "/**")
-			.csrf().disable()
+		String antPattern = "/" + stripSlashes(prefix)+"/**";
+		builder.antMatcher(antPattern)
+			.csrf().ignoringAntMatchers(antPattern).and()
 			.authorizeRequests()
 			.antMatchers("/**").permitAll();
 	}

@@ -279,6 +279,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return XMLObjectProviderRegistrySupport.getBuilderFactory();
 	}
 
+	@Override
 	protected void bootstrap() {
 		//configure default values
 		//maxPoolSize = 5;
@@ -348,7 +349,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public Duration toDuration(long millis) {
+	protected Duration toDuration(long millis) {
 		if (millis < 0) {
 			return null;
 		}
@@ -358,7 +359,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public String toXml(Saml2Object saml2Object) {
+	protected String toXml(Saml2Object saml2Object) {
 		XMLObject result = null;
 		if (saml2Object instanceof AuthenticationRequest) {
 			result = internalToXml((AuthenticationRequest) saml2Object);
@@ -389,7 +390,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
+	protected Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		XMLObject parsed = parse(xml);
 		Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
 		Saml2Object result = null;
@@ -443,7 +444,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	@Override
-	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
+	protected Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
 			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
 		}
@@ -1885,17 +1886,14 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	}
 
 	private <T> T buildSAMLObject(final Class<T> clazz) {
-		T object = null;
 		try {
 			QName defaultElementName = (QName) clazz.getDeclaredField("DEFAULT_ELEMENT_NAME").get(null);
-			object = (T) getBuilderFactory().getBuilder(defaultElementName).buildObject(defaultElementName);
+			return (T) getBuilderFactory().getBuilder(defaultElementName).buildObject(defaultElementName);
 		} catch (IllegalAccessException e) {
 			throw new SamlException("Could not create SAML object", e);
 		} catch (NoSuchFieldException e) {
 			throw new SamlException("Could not create SAML object", e);
 		}
-
-		return object;
 	}
 
 }

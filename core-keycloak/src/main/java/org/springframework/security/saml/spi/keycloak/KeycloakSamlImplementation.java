@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.xml.crypto.dsig.XMLObject;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
@@ -74,8 +73,6 @@ import org.springframework.security.saml.saml2.authentication.Subject;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
-import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.Binding;
@@ -167,8 +164,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlImplementation> {
 
 	private static final Log logger = LogFactory.getLog(KeycloakSamlImplementation.class);
-	private SamlKeyStoreProvider samlKeyStoreProvider = new SamlKeyStoreProvider() {
-	};
+	private SamlKeyStoreProvider samlKeyStoreProvider = new SamlKeyStoreProvider() {};
 	private KeycloakSamlParser samlParser = new KeycloakSamlParser();
 
 	public KeycloakSamlImplementation(Clock time) {
@@ -191,7 +187,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 
-	public SamlKeyStoreProvider getSamlKeyStoreProvider() {
+	private SamlKeyStoreProvider getSamlKeyStoreProvider() {
 		return samlKeyStoreProvider;
 	}
 
@@ -220,7 +216,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public Duration toDuration(long millis) {
+	protected Duration toDuration(long millis) {
 		try {
 			return DatatypeFactory.newInstance().newDuration(millis);
 		} catch (DatatypeConfigurationException e) {
@@ -229,7 +225,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public String toXml(Saml2Object saml2Object) {
+	protected String toXml(Saml2Object saml2Object) {
 		Object result = null;
 		if (saml2Object instanceof Metadata) {
 			result = internalToXml((Metadata) saml2Object);
@@ -264,7 +260,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return xml;
 	}
 
-	public Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
+	@Override
+	protected Saml2Object resolve(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
 		SamlObjectHolder parsed = parse(xml);
 		Map<String, Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
 		Saml2Object result = null;
@@ -328,7 +325,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	}
 
 	@Override
-	public Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
+	protected Signature getValidSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys) {
 		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
 			Map<String, Signature> signatureMap =
 				KeycloakSignatureValidator.validateSignature(
@@ -467,8 +464,8 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		}
 	}
 
-	public String signObject(String xml,
-							 SignableSaml2Object signable) {
+	private String signObject(String xml,
+							  SignableSaml2Object signable) {
 		KeycloakSigner signer = new KeycloakSigner(samlKeyStoreProvider);
 		return signer.signOrEncrypt(signable, xml);
 	}
@@ -659,7 +656,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return getIndexedEndpointType(ep, i);
 	}
 
-	public IndexedEndpointType getSingleLogoutService(Endpoint endpoint) {
+	private IndexedEndpointType getSingleLogoutService(Endpoint endpoint) {
 		return getIndexedEndpointType(endpoint, -1);
 	}
 
@@ -677,11 +674,11 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return service;
 	}
 
-	public IndexedEndpointType getSingleSignOnService(Endpoint endpoint, int index) {
+	private IndexedEndpointType getSingleSignOnService(Endpoint endpoint, int index) {
 		return getIndexedEndpointType(endpoint, index);
 	}
 
-	public KeyDescriptorType getKeyDescriptor(KeyData key) {
+	private KeyDescriptorType getKeyDescriptor(KeyData key) {
 		KeyDescriptorType descriptor = new KeyDescriptorType();
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -724,13 +721,10 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			this.decryptionKey = decryptionKey;
 		}
 
-		public Object getDecryptedData() {
+		Object getDecryptedData() {
 			return decryptedData;
 		}
 
-		public KeyData getDecryptionKey() {
-			return decryptionKey;
-		}
 	}
 
 	private DecryptedData decrypt(EncryptedElementType encrypted, List<KeyData> keys) {
@@ -761,24 +755,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			throw new SamlKeyException("Unable to decrypt object.", last);
 		}
 		return null;
-	}
-
-	private EncryptedAssertionType encryptAssertion(AssertionType assertion,
-													KeyData key,
-													KeyEncryptionMethod keyAlgorithm,
-													DataEncryptionMethod dataAlgorithm) {
-//		Encrypter encrypter = getEncrypter(key, keyAlgorithm, dataAlgorithm);
-//		try {
-//			Encrypter.KeyPlacement keyPlacement =
-//				Encrypter.KeyPlacement.valueOf(
-//					System.getProperty("spring.security.saml.encrypt.key.placement", "PEER")
-//				);
-//			encrypter.setKeyPlacement(keyPlacement);
-//			return encrypter.encrypt(assertion);
-//		} catch (EncryptionException e) {
-//			throw new SamlException("Unable to encrypt assertion.", e);
-//		}
-		throw new UnsupportedOperationException();
 	}
 
 	private SamlObjectHolder parse(byte[] xml) {
@@ -961,14 +937,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				type
 			)
 		);
-
-		//for (X509DataType x509 : ofNullable(desc.getKeyInfo().getC).orElse(emptyList())) {
-//			for (X509Certificate cert : ofNullable(x509.getX509Certificates()).orElse(emptyList())) {
-//				result.add(new KeyData(type.getTypeName() + "-" + (index++), null, cert.getValue(), null,
-//					type
-//				));
-//			}
-//		}
 
 		return result;
 	}
@@ -1694,86 +1662,6 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return result;
 	}
 
-	private XMLObject objectToXmlObject(Object o) {
-		if (o == null) {
-			return null;
-		}
-//		else if (o instanceof String) {
-//			XSStringBuilder builder = (XSStringBuilder) getBuilderFactory().getBuilder(XSString.TYPE_NAME);
-//			XSString s = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
-//			s.setValue((String) o);
-//			return s;
-//		}
-//		else if (o instanceof URI || o instanceof URL) {
-//			XSURIBuilder builder = (XSURIBuilder) getBuilderFactory().getBuilder(XSURI.TYPE_NAME);
-//			XSURI uri = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSURI.TYPE_NAME);
-//			uri.setValue(o.toString());
-//			return uri;
-//		}
-//		else if (o instanceof Boolean) {
-//			XSBooleanBuilder builder = (XSBooleanBuilder) getBuilderFactory().getBuilder(XSBoolean.TYPE_NAME);
-//			XSBoolean b = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSBoolean.TYPE_NAME);
-//			XSBooleanValue v = XSBooleanValue.valueOf(o.toString());
-//			b.setValue(v);
-//			return b;
-//		}
-//		else if (o instanceof DateTime) {
-//			XSDateTimeBuilder builder = (XSDateTimeBuilder) getBuilderFactory().getBuilder(XSDateTime.TYPE_NAME);
-//			XSDateTime dt = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSDateTime.TYPE_NAME);
-//			dt.setValue((DateTime) o);
-//			return dt;
-//		}
-//		else if (o instanceof Integer) {
-//			XSIntegerBuilder builder = (XSIntegerBuilder) getBuilderFactory().getBuilder(XSInteger.TYPE_NAME);
-//			XSInteger i = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSInteger.TYPE_NAME);
-//			i.setValue(((Integer) o).intValue());
-//			return i;
-//		}
-//		else {
-//			XSAnyBuilder builder = (XSAnyBuilder) getBuilderFactory().getBuilder(XSAny.TYPE_NAME);
-//			XSAny any = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSAny.TYPE_NAME);
-//			any.setTextContent(o.toString());
-//			return any;
-//		}
-		throw new UnsupportedOperationException();
-	}
-
-	private String xmlObjectToString(XMLObject o) {
-		String toMatch = null;
-//		if (o instanceof XSString) {
-//			toMatch = ((XSString) o).getValue();
-//		}
-//		else if (o instanceof XSURI) {
-//			toMatch = ((XSURI) o).getValue();
-//		}
-//		else if (o instanceof XSBoolean) {
-//			toMatch = ((XSBoolean) o).getValue().getValue() ? "1" : "0";
-//		}
-//		else if (o instanceof XSInteger) {
-//			toMatch = ((XSInteger) o).getValue().toString();
-//		}
-//		else if (o instanceof XSDateTime) {
-//			final DateTime dt = ((XSDateTime) o).getValue();
-//			if (dt != null) {
-//				toMatch = ((XSDateTime) o).getDateTimeFormatter().print(dt);
-//			}
-//		}
-//		else if (o instanceof XSBase64Binary) {
-//			toMatch = ((XSBase64Binary) o).getValue();
-//		}
-//		else if (o instanceof XSAny) {
-//			final XSAny wc = (XSAny) o;
-//			if (wc.getUnknownAttributes().isEmpty() && wc.getUnknownXMLObjects().isEmpty()) {
-//				toMatch = wc.getTextContent();
-//			}
-//		}
-//		if (toMatch != null) {
-//			return toMatch;
-//		}
-		throw new UnsupportedOperationException();
-//		return null;
-	}
-
 	private Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
 		return
 			new Endpoint()
@@ -1784,15 +1672,4 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				.setIndex(index);
 	}
 
-	public URI getNameIDFormat(NameId nameId) {
-		try {
-			return new URI(nameId.toString());
-		} catch (URISyntaxException e) {
-			throw new SamlException(e);
-		}
-	}
-
-	public IndexedEndpointType getAssertionConsumerService(Endpoint endpoint, int index) {
-		return getIndexedEndpointType(endpoint, index);
-	}
 }

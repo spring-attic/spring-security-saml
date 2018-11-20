@@ -27,6 +27,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
+import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
 import sample.proof_of_concept.ServiceProviderResolver;
 import sample.proof_of_concept.implementation.ServiceProviderMetadataResolver;
 import sample.proof_of_concept.implementation.StaticServiceProviderResolver;

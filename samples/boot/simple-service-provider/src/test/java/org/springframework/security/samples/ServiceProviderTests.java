@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import sample.SampleSamlBootConfiguration;
+import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
 import sample.proof_of_concept.ServiceProviderResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;

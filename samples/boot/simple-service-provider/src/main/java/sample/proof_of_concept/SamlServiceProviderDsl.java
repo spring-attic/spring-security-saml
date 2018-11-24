@@ -69,17 +69,24 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);
 		}
-		String antPattern = "/" + stripSlashes(prefix)+"/**";
-		builder.antMatcher(antPattern)
-			.csrf().ignoringAntMatchers(antPattern).and()
+
+		String matchPrefix = "/" + stripSlashes(prefix);
+		String samlPattern = matchPrefix + "/**";
+		builder
+			.csrf().ignoringAntMatchers(samlPattern)
+			.and()
 			.authorizeRequests()
-			.antMatchers("/**").permitAll();
+			.antMatchers(samlPattern).permitAll()
+		;
+
 	}
 
 	@Override
 	public void configure(HttpSecurity builder) throws Exception {
 		SamlTemplateProcessor template = new SamlTemplateProcessor(samlTemplateEngine);
 		String matchPrefix = "/" + stripSlashes(prefix);
+
+
 
 		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
 			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),

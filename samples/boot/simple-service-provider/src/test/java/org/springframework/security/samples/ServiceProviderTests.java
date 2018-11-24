@@ -65,6 +65,7 @@ import static org.springframework.security.saml.helper.SamlTestObjectHelper.quer
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -104,7 +105,10 @@ public class ServiceProviderTests {
 		mockMvc.perform(
 			get("/")
 
-		).andExpect(status().is4xxClientError());
+		)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("http://localhost/saml/sp/select"))
+		;
 	}
 
 

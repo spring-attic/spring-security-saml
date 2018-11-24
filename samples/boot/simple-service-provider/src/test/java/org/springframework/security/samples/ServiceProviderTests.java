@@ -99,6 +99,16 @@ public class ServiceProviderTests {
 	}
 
 	@Test
+	@DisplayName("Home Page is Secure")
+	void testHomePage() throws Exception {
+		mockMvc.perform(
+			get("/")
+
+		).andExpect(status().is4xxClientError());
+	}
+
+
+	@Test
 	@DisplayName("SP Initiated Login")
 	void getAuthNRequest() throws Exception {
 		AuthenticationRequest authn = getAuthenticationRequest();

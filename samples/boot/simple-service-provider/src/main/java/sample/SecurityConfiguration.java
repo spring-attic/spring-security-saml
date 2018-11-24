@@ -25,7 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
 
 import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
 import sample.proof_of_concept.ServiceProviderResolver;
@@ -39,7 +39,7 @@ public class SecurityConfiguration {
 
 	@Bean //pick the underlying library
 	public SamlTransformer samlTransformer() {
-		return new OpenSamlTransformer();
+		return new KeycloakSamlTransformer();
 	}
 
 	@Bean //implement the resolver

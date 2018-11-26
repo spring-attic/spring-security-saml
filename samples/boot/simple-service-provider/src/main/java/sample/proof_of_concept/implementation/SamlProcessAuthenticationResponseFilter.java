@@ -113,18 +113,18 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 			Signature signature = validator.validateSignature(r, idp.getIdentityProvider().getKeys());
 			r.setSignature(signature);
 			for (Assertion assertion : r.getAssertions()) {
-				signature = validator.validateSignature(assertion, idp.getIdentityProvider().getKeys());
-				assertion.setSignature(signature);
+				if (assertion.getSignature() == null) {
+					signature = validator.validateSignature(assertion, idp.getIdentityProvider().getKeys());
+					assertion.setSignature(signature);
+				}
 			}
 		} catch (SignatureException e) {
 			logger.debug("Unable to validate signature for SAML response.");
 			return null;
 		}
 
-		boolean authenticated = false;
 		try {
 			validator.validate(r, provider);
-			authenticated = true;
 		} catch (ValidationException e) {
 			logger.debug(e.getMessage());
 			return null;
@@ -132,7 +132,7 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 
 		Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);
 		return new DefaultSamlAuthentication(
-			authenticated,//false if validation failed
+			true,
 			assertion,
 			r.getOriginEntityId(),
 			provider.getMetadata().getEntityId(),

@@ -86,8 +86,6 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		SamlTemplateProcessor template = new SamlTemplateProcessor(samlTemplateEngine);
 		String matchPrefix = "/" + stripSlashes(prefix);
 
-
-
 		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
 			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
 			samlTransformer,

@@ -20,10 +20,8 @@ package sample.proof_of_concept;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.HostedServiceProvider;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
 public interface ServiceProviderResolver {
-	HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request);
 
 	HostedServiceProvider resolve(HttpServletRequest request);
 }

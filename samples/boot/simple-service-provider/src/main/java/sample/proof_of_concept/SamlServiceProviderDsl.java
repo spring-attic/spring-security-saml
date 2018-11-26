@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -31,6 +32,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import sample.proof_of_concept.implementation.SamlAuthenticationRequestFilter;
 import sample.proof_of_concept.implementation.SamlProcessAuthenticationResponseFilter;
 import sample.proof_of_concept.implementation.SamlTemplateProcessor;
+import sample.proof_of_concept.implementation.ServiceProviderMetadataResolver;
+import sample.proof_of_concept.implementation.StaticServiceProviderResolver;
 import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
 import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
 
@@ -46,8 +49,8 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	/*
 	 * User required fields
 	 */
-	private ServiceProviderResolver resolver = null;
 	private SamlTransformer samlTransformer = null;
+	private HostedServiceProviderConfiguration configuration;
 
 	/*
 	 * Fields with implementation defaults
@@ -56,18 +59,24 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
+	private ServiceProviderResolver resolver = null;
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
 		notNull(prefix, "SAML path prefix must not be null.");
 		notNull(samlTransformer, "SAML Core Transformer Implementation must not be null.");
-		notNull(resolver, "Service Provider Resolver must not be null.");
+		notNull(configuration, "SAML Service Provider Configuration must not be null.");
 
 		if (samlValidator == null) {
 			samlValidator = new DefaultSamlValidator(samlTransformer);
 		}
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);
+		}
+		if (resolver == null) {
+			ServiceProviderMetadataResolver serviceProviderMetadataResolver =
+				new ServiceProviderMetadataResolver(samlTransformer);
+			resolver = new StaticServiceProviderResolver(serviceProviderMetadataResolver, configuration);
 		}
 
 		String matchPrefix = "/" + stripSlashes(prefix);
@@ -152,4 +161,13 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		return this;
 	}
 
+	public SamlServiceProviderDsl resolver(ServiceProviderResolver resolver) {
+		this.resolver = resolver;
+		return this;
+	}
+
+	public SamlServiceProviderDsl configuration(HostedServiceProviderConfiguration configuration) {
+		this.configuration = configuration;
+		return this;
+	}
 }

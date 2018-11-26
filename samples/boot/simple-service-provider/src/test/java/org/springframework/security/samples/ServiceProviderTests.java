@@ -80,9 +80,6 @@ public class ServiceProviderTests {
 	SamlTransformer transformer;
 
 	@SpyBean
-	ServiceProviderResolver resolver;
-
-	@Autowired
 	SampleSamlBootConfiguration configuration;
 
 	@BeforeEach

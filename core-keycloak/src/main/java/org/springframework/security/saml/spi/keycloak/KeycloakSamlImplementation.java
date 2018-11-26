@@ -332,6 +332,31 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					(SamlObjectHolder) saml2Object.getImplementation(),
 					trustedKeys
 				);
+
+			if (saml2Object instanceof Response) {
+				Response r = (Response)saml2Object;
+				for (Assertion assertion : r.getAssertions()) {
+					if (assertion.getImplementation() != null &&
+						assertion.getSignature() == null) {
+						AssertionType t = (AssertionType) assertion.getImplementation();
+						KeycloakSignatureValidator.assignSignatureToObject(
+							signatureMap,
+							assertion,
+							t.getSignature()
+						);
+					}
+				}
+				ResponseType rt = (ResponseType) ((SamlObjectHolder) saml2Object.getImplementation()).getSamlObject();
+				if (rt.getSignature() != null) {
+					KeycloakSignatureValidator.assignSignatureToObject(
+						signatureMap,
+						saml2Object,
+						rt.getSignature()
+					);
+				}
+				return r.getSignature();
+			}
+
 			if (!signatureMap.isEmpty()) {
 				return signatureMap.entrySet().iterator().next().getValue();
 			}

@@ -18,7 +18,6 @@
 package sample;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,16 +29,12 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 import org.springframework.security.saml.serviceprovider.SpConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.implementation.StaticServiceProviderConfigurationResolver;
 
-import sample.SimpleServiceProviderApplication.BeanConfigurationConditionExample;
-
 import static org.springframework.security.saml.serviceprovider.ServiceProviderDsl.serviceProvider;
 
-@Conditional(BeanConfigurationConditionExample.class)
 @EnableWebSecurity
 public class BootBeanSecurityConfiguration {
 
 	@Configuration
-	@Conditional(BeanConfigurationConditionExample.class)
 	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {}
 
 	@Bean //used as a spy bean during mock tests
@@ -49,7 +44,6 @@ public class BootBeanSecurityConfiguration {
 		return new StaticServiceProviderConfigurationResolver(spConfig);
 	}
 
-	@Conditional(BeanConfigurationConditionExample.class)
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {

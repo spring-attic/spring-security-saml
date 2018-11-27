@@ -16,41 +16,12 @@
  */
 package sample;
 
-import java.util.Arrays;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
-import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 
 @SpringBootApplication
 public class SimpleServiceProviderApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(SimpleServiceProviderApplication.class, args);
-	}
-
-	public static class JavaOnlyConditionExample extends SpringBootCondition {
-		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			String[] profiles = context.getEnvironment().getActiveProfiles();
-			if (profiles!=null && profiles.length==1 && "sample.profile.java".equals(profiles[0])) {
-				return ConditionOutcome.match();
-			}
-			else {
-				return ConditionOutcome.noMatch("Java Only Profile is not enabled:"+ Arrays.toString(profiles));
-			}
-		}
-	}
-
-	public static class BeanConfigurationConditionExample extends SpringBootCondition {
-		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			return ConditionOutcome.inverse(
-				new JavaOnlyConditionExample().getMatchOutcome(context, metadata)
-			);
-		}
 	}
 }

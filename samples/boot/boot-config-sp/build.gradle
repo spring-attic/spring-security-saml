@@ -34,9 +34,9 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 	compile project(':spring-security-saml2-boot-config')
-	compile project(':spring-security-saml2-web-service-provider')
-	compile project(':spring-security-saml2-core-opensaml')
-	compile project(':spring-security-saml2-core-keycloak')
+	compile project(':spring-security-saml2-service-provider')
+	compile project(':spring-security-saml2-transform-opensaml')
+	compile project(':spring-security-saml2-transform-keycloak')
 	compile 'org.springframework:spring-webflux'
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'

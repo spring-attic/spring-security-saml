@@ -16,9 +16,9 @@
  */
 
 include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "web-service-provider"
+include "transform-opensaml"
+include "transform-keycloak"
+include "service-provider"
 include "boot-config"
 include "samples/boot/boot-config-sp"
 include "samples/boot/java-config-sp"

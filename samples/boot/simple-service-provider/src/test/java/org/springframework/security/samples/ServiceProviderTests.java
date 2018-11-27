@@ -54,7 +54,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
-import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.SamlConfigurationResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -79,8 +79,11 @@ public class ServiceProviderTests {
 	@Autowired
 	SamlTransformer transformer;
 
+	@Autowired
+	SampleSamlBootConfiguration bootConfiguration;
+
 	@SpyBean
-	SampleSamlBootConfiguration configuration;
+	SamlConfigurationResolver<HostedServiceProviderConfiguration> configuration;
 
 	@BeforeEach
 	void setUp() {
@@ -152,7 +155,7 @@ public class ServiceProviderTests {
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
 		IdentityProviderMetadata idp =
 			(IdentityProviderMetadata) transformer.fromXml(
-				configuration.getServiceProvider().getProviders().get(0).getMetadata(),
+				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
@@ -194,8 +197,8 @@ public class ServiceProviderTests {
 		String xml = transformer.samlDecode(request, true);
 		Saml2Object saml2Object = transformer.fromXml(
 			xml,
-			configuration.getServiceProvider().getKeys().toList(),
-			configuration.getServiceProvider().getKeys().toList()
+			bootConfiguration.getServiceProvider().getKeys().toList(),
+			bootConfiguration.getServiceProvider().getKeys().toList()
 		);
 		assertNotNull(saml2Object);
 		assertThat(saml2Object.getClass(), equalTo(AuthenticationRequest.class));
@@ -240,7 +243,7 @@ public class ServiceProviderTests {
 				return builder.build();
 			}
 		)
-			.when(resolver).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
+			.when(configuration).resolve(ArgumentMatchers.any(HttpServletRequest.class));
 	}
 
 	private ServiceProviderMetadata getServiceProviderMetadata() throws Exception {

@@ -22,23 +22,25 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
+import sample.proof_of_concept.SamlConfigurationResolver;
+import sample.proof_of_concept.SamlProviderResolver;
+
 import static org.springframework.util.StringUtils.hasText;
 
-public class StaticServiceProviderResolver implements sample.proof_of_concept.ServiceProviderResolver {
+public class ServiceProviderResolver implements SamlProviderResolver<HostedServiceProvider> {
 
-	private final HostedServiceProviderConfiguration configuration;
+	private final SamlConfigurationResolver<HostedServiceProviderConfiguration> configuration;
 	private final ServiceProviderMetadataResolver metadataResolver;
 
-
-	public StaticServiceProviderResolver(ServiceProviderMetadataResolver metadataResolver,
-										 HostedServiceProviderConfiguration configuration) {
+	public ServiceProviderResolver(ServiceProviderMetadataResolver metadataResolver,
+								   SamlConfigurationResolver<HostedServiceProviderConfiguration> configuration) {
 		this.configuration = configuration;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public HostedServiceProvider resolve(HttpServletRequest request) {
-		HostedServiceProviderConfiguration config = getConfiguration(request);
+		HostedServiceProviderConfiguration config = configuration.resolve(request);
 		if (!hasText(config.getBasePath())) {
 			config = HostedServiceProviderConfiguration.Builder.builder(config)
 				.withBasePath(getBasePath(request, false))
@@ -49,11 +51,6 @@ public class StaticServiceProviderResolver implements sample.proof_of_concept.Se
 			metadataResolver.resolveHostedServiceProvider(config),
 			metadataResolver.resolveConfiguredProviders(config)
 		);
-	}
-
-	@Override
-	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
-		return configuration;
 	}
 
 	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {

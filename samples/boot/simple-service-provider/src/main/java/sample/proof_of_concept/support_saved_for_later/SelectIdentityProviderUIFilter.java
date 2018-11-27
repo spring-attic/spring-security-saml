@@ -39,7 +39,7 @@ import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.SamlProviderResolver;
 import sample.proof_of_concept.implementation.SamlTemplateProcessor;
 
 import static java.lang.String.format;
@@ -49,14 +49,14 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderUIFilter.class);
 
-	private final ServiceProviderResolver resolver;
+	private final SamlProviderResolver<HostedServiceProvider> resolver;
 	private final RequestMatcher matcher;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 	private final SamlTemplateProcessor template;
 
 	public SelectIdentityProviderUIFilter(RequestMatcher matcher,
-										  ServiceProviderResolver resolver,
+										  SamlProviderResolver<HostedServiceProvider> resolver,
 										  SamlTemplateProcessor template) {
 		this.template = template;
 		this.matcher = matcher;

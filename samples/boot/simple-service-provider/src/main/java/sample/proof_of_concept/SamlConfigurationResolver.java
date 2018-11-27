@@ -19,9 +19,9 @@ package sample.proof_of_concept;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.registration.HostedProviderConfiguration;
 
-public interface ServiceProviderResolver {
+public interface SamlConfigurationResolver<T extends HostedProviderConfiguration> {
 
-	HostedServiceProvider resolve(HttpServletRequest request);
+	T resolve(HttpServletRequest request);
 }

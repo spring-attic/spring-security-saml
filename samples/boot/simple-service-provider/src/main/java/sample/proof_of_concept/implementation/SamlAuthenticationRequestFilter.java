@@ -48,14 +48,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import org.joda.time.DateTime;
-import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.SamlProviderResolver;
 
 import static org.springframework.util.StringUtils.hasText;
 
 public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
+	private final SamlProviderResolver<HostedServiceProvider> resolver;
 
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
@@ -64,7 +64,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
 										   SamlTransformer transformer,
-										   ServiceProviderResolver resolver,
+										   SamlProviderResolver<HostedServiceProvider> resolver,
 										   SamlTemplateProcessor template) {
 		this.template = template;
 		this.matcher = matcher;

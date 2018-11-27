@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
@@ -33,7 +34,8 @@ import sample.proof_of_concept.implementation.SamlAuthenticationRequestFilter;
 import sample.proof_of_concept.implementation.SamlProcessAuthenticationResponseFilter;
 import sample.proof_of_concept.implementation.SamlTemplateProcessor;
 import sample.proof_of_concept.implementation.ServiceProviderMetadataResolver;
-import sample.proof_of_concept.implementation.StaticServiceProviderResolver;
+import sample.proof_of_concept.implementation.ServiceProviderResolver;
+import sample.proof_of_concept.implementation.StaticServiceProviderConfigurationResolver;
 import sample.proof_of_concept.support_saved_for_later.SamlServiceProviderMetadataFilter;
 import sample.proof_of_concept.support_saved_for_later.SelectIdentityProviderUIFilter;
 
@@ -59,13 +61,13 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
-	private ServiceProviderResolver resolver = null;
+	private SamlProviderResolver<HostedServiceProvider> resolver = null;
+	private SamlConfigurationResolver<HostedServiceProviderConfiguration> configurationResolver;
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
 		notNull(prefix, "SAML path prefix must not be null.");
 		notNull(samlTransformer, "SAML Core Transformer Implementation must not be null.");
-		notNull(configuration, "SAML Service Provider Configuration must not be null.");
 
 		if (samlValidator == null) {
 			samlValidator = new DefaultSamlValidator(samlTransformer);
@@ -73,10 +75,16 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);
 		}
+
+		if (configurationResolver == null) {
+			notNull(configuration, "SAML Service Provider Configuration must not be null.");
+			configurationResolver = new StaticServiceProviderConfigurationResolver(configuration);
+		}
+
 		if (resolver == null) {
 			ServiceProviderMetadataResolver serviceProviderMetadataResolver =
 				new ServiceProviderMetadataResolver(samlTransformer);
-			resolver = new StaticServiceProviderResolver(serviceProviderMetadataResolver, configuration);
+			resolver = new ServiceProviderResolver(serviceProviderMetadataResolver, configurationResolver);
 		}
 
 		String matchPrefix = "/" + stripSlashes(prefix);
@@ -146,7 +154,7 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		return this;
 	}
 
-	public SamlServiceProviderDsl serviceProviderResolver(ServiceProviderResolver resolver) {
+	public SamlServiceProviderDsl serviceProviderResolver(SamlProviderResolver<HostedServiceProvider> resolver) {
 		this.resolver = resolver;
 		return this;
 	}
@@ -161,13 +169,20 @@ public class SamlServiceProviderDsl extends AbstractHttpConfigurer<SamlServicePr
 		return this;
 	}
 
-	public SamlServiceProviderDsl resolver(ServiceProviderResolver resolver) {
+	public SamlServiceProviderDsl configuration(HostedServiceProviderConfiguration configuration) {
+		this.configuration = configuration;
+		return this;
+	}
+
+	public SamlServiceProviderDsl providerResolver(SamlProviderResolver<HostedServiceProvider> resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
-	public SamlServiceProviderDsl configuration(HostedServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
+	public SamlServiceProviderDsl configurationResolver(
+		SamlConfigurationResolver<HostedServiceProviderConfiguration> configurationResolver
+	) {
+		this.configurationResolver = configurationResolver;
 		return this;
 	}
 }

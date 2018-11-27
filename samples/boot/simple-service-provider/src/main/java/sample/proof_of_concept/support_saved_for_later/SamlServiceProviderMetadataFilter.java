@@ -31,7 +31,7 @@ import org.springframework.security.web.header.writers.CacheControlHeadersWriter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.SamlProviderResolver;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
@@ -39,7 +39,7 @@ import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
+	private final SamlProviderResolver<HostedServiceProvider> resolver;
 
 	private final AntPathRequestMatcher matcher;
 	private String filename = "saml-service-provider-metadata.xml";
@@ -47,7 +47,7 @@ public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter {
 
 	public SamlServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
 											 SamlTransformer transformer,
-											 ServiceProviderResolver resolver) {
+											 SamlProviderResolver<HostedServiceProvider> resolver) {
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.matcher = matcher;

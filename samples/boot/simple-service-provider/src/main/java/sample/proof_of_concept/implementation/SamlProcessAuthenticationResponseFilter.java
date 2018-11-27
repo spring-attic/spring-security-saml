@@ -40,7 +40,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sample.proof_of_concept.ServiceProviderResolver;
+import sample.proof_of_concept.SamlProviderResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
@@ -49,12 +49,12 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 	private static Log logger = LogFactory.getLog(SamlProcessAuthenticationResponseFilter.class);
 	private final SamlTransformer transformer;
 	private final SamlValidator validator;
-	private final ServiceProviderResolver resolver;
+	private final SamlProviderResolver<HostedServiceProvider> resolver;
 
 	public SamlProcessAuthenticationResponseFilter(AntPathRequestMatcher matcher,
 												   SamlTransformer transformer,
 												   SamlValidator validator,
-												   ServiceProviderResolver resolver
+												   SamlProviderResolver<HostedServiceProvider> resolver
 	) {
 		super(matcher);
 		this.transformer = transformer;

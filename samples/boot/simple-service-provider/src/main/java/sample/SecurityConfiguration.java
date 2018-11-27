@@ -24,9 +24,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
 import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
+import sample.proof_of_concept.SamlConfigurationResolver;
+import sample.proof_of_concept.implementation.StaticServiceProviderConfigurationResolver;
 
 import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 
@@ -38,16 +41,23 @@ public class SecurityConfiguration {
 		return new OpenSamlTransformer();
 	}
 
+	@Bean
+	public SamlConfigurationResolver<HostedServiceProviderConfiguration> spConfigurationResolver(
+		SampleSamlBootConfiguration configuration) {
+		HostedServiceProviderConfiguration spConfig = configuration.toSamlServerConfiguration().getServiceProvider();
+		return new StaticServiceProviderConfigurationResolver(spConfig);
+	}
+
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private final SampleSamlBootConfiguration bootConfiguration;
+		private final SamlConfigurationResolver<HostedServiceProviderConfiguration> configurationResolver;
 		private final SamlTransformer samlTransformer;
 
-		public SamlSecurity(SampleSamlBootConfiguration configuration,
+		public SamlSecurity(SamlConfigurationResolver<HostedServiceProviderConfiguration> configurationResolver,
 							SamlTransformer samlTransformer) {
-			this.bootConfiguration = configuration;
+			this.configurationResolver = configurationResolver;
 			this.samlTransformer = samlTransformer;
 		}
 
@@ -67,7 +77,7 @@ public class SecurityConfiguration {
 			http.apply(
 				serviceProvider()
 					.prefix("/saml/sp")
-					.configuration(bootConfiguration.toSamlServerConfiguration().getServiceProvider())
+					.configurationResolver(configurationResolver)
 					.samlTransformer(samlTransformer)
 			);
 		}

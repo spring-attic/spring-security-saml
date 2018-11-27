@@ -25,11 +25,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
 import sample.SimpleServiceProviderApplication.BeanConfigurationConditionExample;
-import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
 import sample.proof_of_concept.SamlConfigurationResolver;
 import sample.proof_of_concept.implementation.StaticServiceProviderConfigurationResolver;
 
@@ -39,12 +38,11 @@ import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 @EnableWebSecurity
 public class BootBeanSecurityConfiguration {
 
-	@Bean //pick the underlying library
-	public SamlTransformer samlTransformer() {
-		return new OpenSamlTransformer();
-	}
+	@Configuration
+	@Conditional(BeanConfigurationConditionExample.class)
+	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {}
 
-	@Bean
+	@Bean //used as a spy bean during mock tests
 	public SamlConfigurationResolver<HostedServiceProviderConfiguration> spConfigurationResolver(
 		SampleSamlBootConfiguration configuration) {
 		HostedServiceProviderConfiguration spConfig = configuration.toSamlServerConfiguration().getServiceProvider();

@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
+import sample.BootBeanSecurityConfiguration;
 import sample.proof_of_concept.SamlConfigurationResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,7 +80,7 @@ public class ServiceProviderTests {
 	SamlTransformer transformer;
 
 	@Autowired
-	SampleSamlBootConfiguration bootConfiguration;
+	BootBeanSecurityConfiguration.SampleSamlBootConfiguration bootConfiguration;
 
 	@SpyBean
 	SamlConfigurationResolver<HostedServiceProviderConfiguration> configuration;

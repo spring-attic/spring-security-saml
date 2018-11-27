@@ -23,9 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.security.saml.boot.SamlBootConfiguration;
 
 @SpringBootApplication
 public class SimpleServiceProviderApplication {
@@ -33,9 +31,6 @@ public class SimpleServiceProviderApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SimpleServiceProviderApplication.class, args);
 	}
-
-	@Configuration
-	public class SampleSamlBootConfiguration extends SamlBootConfiguration {}
 
 	public static class JavaOnlyConditionExample extends SpringBootCondition {
 		@Override

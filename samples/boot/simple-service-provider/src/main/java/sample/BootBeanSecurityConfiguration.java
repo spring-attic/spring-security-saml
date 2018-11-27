@@ -18,6 +18,7 @@
 package sample;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,14 +28,16 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
+import sample.SimpleServiceProviderApplication.BeanConfigurationConditionExample;
 import sample.SimpleServiceProviderApplication.SampleSamlBootConfiguration;
 import sample.proof_of_concept.SamlConfigurationResolver;
 import sample.proof_of_concept.implementation.StaticServiceProviderConfigurationResolver;
 
 import static sample.proof_of_concept.SamlServiceProviderDsl.serviceProvider;
 
+@Conditional(BeanConfigurationConditionExample.class)
 @EnableWebSecurity
-public class SecurityConfiguration {
+public class BootBeanSecurityConfiguration {
 
 	@Bean //pick the underlying library
 	public SamlTransformer samlTransformer() {
@@ -48,6 +51,7 @@ public class SecurityConfiguration {
 		return new StaticServiceProviderConfigurationResolver(spConfig);
 	}
 
+	@Conditional(BeanConfigurationConditionExample.class)
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {

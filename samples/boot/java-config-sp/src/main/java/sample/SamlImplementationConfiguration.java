@@ -15,16 +15,18 @@
  *
  */
 
-include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "web-service-provider"
-include "boot-config"
-include "samples/boot/boot-config-sp"
-include "samples/boot/java-config-sp"
+package sample;
 
-rootProject.name = "spring-security-saml2"
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+@Configuration
+public class SamlImplementationConfiguration {
+	@Bean //pick the underlying library
+	public SamlTransformer samlTransformer() {
+		return new OpenSamlTransformer();
+	}
+
 }

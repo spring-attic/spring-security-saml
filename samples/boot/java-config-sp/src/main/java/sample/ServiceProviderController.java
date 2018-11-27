@@ -14,17 +14,23 @@
  *  limitations under the License.
  *
  */
+package sample;
 
-include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "web-service-provider"
-include "boot-config"
-include "samples/boot/boot-config-sp"
-include "samples/boot/java-config-sp"
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-rootProject.name = "spring-security-saml2"
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+@Controller
+public class ServiceProviderController {
+
+	private static final Log logger = LogFactory.getLog(ServiceProviderController.class);
+
+	@RequestMapping(value = {"/", "/index", "/logged-in"})
+	public String home() {
+		logger.info("Sample SP Application - You are logged in!");
+		return "logged-in";
+	}
+
 }

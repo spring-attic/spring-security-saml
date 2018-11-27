@@ -15,16 +15,13 @@
  *
  */
 
-include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "web-service-provider"
-include "boot-config"
-include "samples/boot/boot-config-sp"
-include "samples/boot/java-config-sp"
+package org.springframework.security.saml.serviceprovider;
 
-rootProject.name = "spring-security-saml2"
+import javax.servlet.http.HttpServletRequest;
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+
+public interface SpConfigurationResolver {
+
+	HostedServiceProviderConfiguration resolve(HttpServletRequest request);
 }

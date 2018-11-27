@@ -14,17 +14,15 @@
  *  limitations under the License.
  *
  */
+package sample;
 
-include "core"
-include "core-opensaml"
-include "core-keycloak"
-include "web-service-provider"
-include "boot-config"
-include "samples/boot/boot-config-sp"
-include "samples/boot/java-config-sp"
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-rootProject.name = "spring-security-saml2"
+@SpringBootApplication
+public class SimpleServiceProviderApplication {
 
-rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+	public static void main(String[] args) {
+		SpringApplication.run(SimpleServiceProviderApplication.class, args);
+	}
 }

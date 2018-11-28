@@ -63,8 +63,8 @@ import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT
 import static org.springframework.security.saml.saml2.metadata.NameId.TRANSIENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
 import static org.springframework.security.saml.saml2.metadata.NameId.X509_SUBJECT;
-import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.util.DateUtils.fromZuluTime;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.X509Utilities.keyCleanup;

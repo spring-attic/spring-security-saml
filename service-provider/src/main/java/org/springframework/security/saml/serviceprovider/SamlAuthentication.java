@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml;
+package org.springframework.security.saml.serviceprovider;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.saml2.authentication.Assertion;

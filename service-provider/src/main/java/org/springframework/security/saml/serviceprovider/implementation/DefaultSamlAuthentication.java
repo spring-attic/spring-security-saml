@@ -15,15 +15,15 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.serviceprovider.implementation;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.saml.SamlAuthentication;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.SubjectPrincipal;
+import org.springframework.security.saml.serviceprovider.SamlAuthentication;
 
 public class DefaultSamlAuthentication implements SamlAuthentication {
 	private boolean authenticated;

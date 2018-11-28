@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.keycloak;
+package org.springframework.security.saml.serviceprovider.spi.keycloak;
 
 import java.io.Reader;
 import java.io.StringReader;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.keycloak;
+package org.springframework.security.saml.serviceprovider.spi.keycloak;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -88,7 +88,7 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.SamlKeyStoreProvider;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.serviceprovider.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.DateUtils;
 import org.springframework.security.saml.util.X509Utilities;
 import org.springframework.util.CollectionUtils;

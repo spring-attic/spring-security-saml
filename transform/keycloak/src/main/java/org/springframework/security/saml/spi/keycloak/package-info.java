@@ -18,4 +18,4 @@
 /**
  * OpenSAML 3.x specific code
  */
-package org.springframework.security.saml.spi.opensaml;
+package org.springframework.security.saml.spi.keycloak;

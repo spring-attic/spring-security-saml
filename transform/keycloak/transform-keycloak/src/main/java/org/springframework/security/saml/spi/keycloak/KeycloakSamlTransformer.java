@@ -15,11 +15,11 @@
  *
  */
 
-package org.springframework.security.saml.spi.keycloak;
+package org.springframework.security.saml.serviceprovider.spi.keycloak;
 
 import java.time.Clock;
 
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.serviceprovider.spi.DefaultSamlTransformer;
 
 public class KeycloakSamlTransformer extends DefaultSamlTransformer {
 

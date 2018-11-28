@@ -33,7 +33,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
+import org.springframework.security.saml.serviceprovider.spi.keycloak.KeycloakSamlTransformer;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -49,8 +49,8 @@ import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.
 import static org.springframework.security.saml.saml2.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA512;
-import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.SP_RSA_KEY;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;

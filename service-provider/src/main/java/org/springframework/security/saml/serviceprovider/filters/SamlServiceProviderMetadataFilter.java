@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.implementation;
+package org.springframework.security.saml.serviceprovider.filters;
 
 import java.io.IOException;
 import java.net.URLEncoder;

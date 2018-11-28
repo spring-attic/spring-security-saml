@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.opensaml;
+package org.springframework.security.saml.serviceprovider.spi.opensaml;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -87,7 +87,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.SamlKeyStoreProvider;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.serviceprovider.spi.SpringSecuritySaml;
 import org.springframework.util.CollectionUtils;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;

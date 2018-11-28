@@ -29,8 +29,8 @@ import org.springframework.security.saml.provider.config.SamlConfigurationReposi
 import org.springframework.security.saml.provider.config.SamlServerBeanConfiguration;
 import org.springframework.security.saml.provider.config.StaticSamlConfigurationRepository;
 import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationRepository;
-import org.springframework.security.saml.spi.DefaultSessionAssertionStore;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.serviceprovider.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml.serviceprovider.spi.SpringSecuritySaml;
 import org.springframework.web.client.RestOperations;
 
 @Configuration

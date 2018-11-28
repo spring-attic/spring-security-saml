@@ -15,12 +15,12 @@
  *
  */
 
-package org.springframework.security.saml.spi.opensaml;
+package org.springframework.security.saml.serviceprovider.spi.opensaml;
 
 import java.time.Clock;
 
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.SpringSecuritySaml;
+import org.springframework.security.saml.serviceprovider.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.serviceprovider.spi.SpringSecuritySaml;
 
 public class OpenSamlTransformer extends DefaultSamlTransformer {
 

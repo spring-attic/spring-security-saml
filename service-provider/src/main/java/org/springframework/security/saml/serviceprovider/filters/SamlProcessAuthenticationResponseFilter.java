@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.implementation;
+package org.springframework.security.saml.serviceprovider.filters;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -32,12 +32,13 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationException;
+import org.springframework.security.saml.serviceprovider.implementation.DefaultSamlAuthentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

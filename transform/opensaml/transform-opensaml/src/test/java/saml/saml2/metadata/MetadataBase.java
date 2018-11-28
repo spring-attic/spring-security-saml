@@ -28,8 +28,8 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml.serviceprovider.spi.DefaultSamlTransformer;
+import org.springframework.security.saml.serviceprovider.spi.opensaml.OpenSamlTransformer;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -37,8 +37,8 @@ import org.junit.jupiter.api.BeforeEach;
 import saml.helper.SamlTestObjectHelper;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml.serviceprovider.spi.ExamplePemKey.SP_RSA_KEY;
 
 public abstract class MetadataBase {
 

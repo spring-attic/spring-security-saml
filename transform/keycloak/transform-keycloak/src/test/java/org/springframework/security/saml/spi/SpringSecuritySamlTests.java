@@ -29,12 +29,12 @@
  *
  */
 
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.serviceprovider.spi;
 
 import java.time.Clock;
 import java.util.UUID;
 
-import org.springframework.security.saml.spi.keycloak.KeycloakSamlImplementation;
+import org.springframework.security.saml.serviceprovider.spi.keycloak.KeycloakSamlImplementation;
 
 import org.junit.jupiter.api.Test;
 

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.spi.keycloak;
+package org.springframework.security.saml.serviceprovider.spi.keycloak;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.StartElement;

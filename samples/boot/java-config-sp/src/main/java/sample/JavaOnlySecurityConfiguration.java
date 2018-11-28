@@ -32,7 +32,7 @@ import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml.serviceprovider.ServiceProviderDsl.serviceProvider;
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
 @Order(1)

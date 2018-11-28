@@ -40,10 +40,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
-public class ServiceProviderDsl extends AbstractHttpConfigurer<ServiceProviderDsl, HttpSecurity> {
+public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
-	public static ServiceProviderDsl serviceProvider() {
-		return new ServiceProviderDsl();
+	public static SamlServiceProviderConfigurer serviceProvider() {
+		return new SamlServiceProviderConfigurer();
 	}
 
 	/*
@@ -137,47 +137,47 @@ public class ServiceProviderDsl extends AbstractHttpConfigurer<ServiceProviderDs
 
 	}
 
-	public ServiceProviderDsl samlTransformer(SamlTransformer samlTransformer) {
+	public SamlServiceProviderConfigurer samlTransformer(SamlTransformer samlTransformer) {
 		this.samlTransformer = samlTransformer;
 		return this;
 	}
 
-	public ServiceProviderDsl samlValidator(SamlValidator samlValidator) {
+	public SamlServiceProviderConfigurer samlValidator(SamlValidator samlValidator) {
 		this.samlValidator = samlValidator;
 		return this;
 	}
 
-	public ServiceProviderDsl prefix(String prefix) {
+	public SamlServiceProviderConfigurer prefix(String prefix) {
 		this.prefix = prefix;
 		return this;
 	}
 
-	public ServiceProviderDsl serviceProviderResolver(ServiceProviderResolver resolver) {
+	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
-	public ServiceProviderDsl samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
+	public SamlServiceProviderConfigurer samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return this;
 	}
 
-	public ServiceProviderDsl authenticationManager(AuthenticationManager authenticationManager) {
+	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 		return this;
 	}
 
-	public ServiceProviderDsl configuration(HostedServiceProviderConfiguration configuration) {
+	public SamlServiceProviderConfigurer configuration(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		return this;
 	}
 
-	public ServiceProviderDsl providerResolver(ServiceProviderResolver resolver) {
+	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
-	public ServiceProviderDsl configurationResolver(SpConfigurationResolver configurationResolver) {
+	public SamlServiceProviderConfigurer configurationResolver(SpConfigurationResolver configurationResolver) {
 		this.configurationResolver = configurationResolver;
 		return this;
 	}

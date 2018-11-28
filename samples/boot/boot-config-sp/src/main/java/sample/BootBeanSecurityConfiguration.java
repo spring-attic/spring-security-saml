@@ -29,7 +29,7 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 import org.springframework.security.saml.serviceprovider.SpConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.implementation.StaticServiceProviderConfigurationResolver;
 
-import static org.springframework.security.saml.serviceprovider.ServiceProviderDsl.serviceProvider;
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
 public class BootBeanSecurityConfiguration {

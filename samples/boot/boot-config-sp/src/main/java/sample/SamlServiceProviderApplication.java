@@ -18,10 +18,24 @@ package sample;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @SpringBootApplication
+@Controller
 public class SamlServiceProviderApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SamlServiceProviderApplication.class, args);
+	}
+
+	private static final Log logger = LogFactory.getLog(SamlServiceProviderApplication.class);
+
+	@RequestMapping(value = {"/", "/index", "/logged-in"})
+	public String home() {
+		logger.info("Sample SP Application - You are logged in!");
+		return "logged-in";
 	}
 }

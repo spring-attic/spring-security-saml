@@ -50,12 +50,12 @@ public class ServiceProviderDsl extends AbstractHttpConfigurer<ServiceProviderDs
 	 * User required fields
 	 */
 	private SamlTransformer samlTransformer = null;
-	private HostedServiceProviderConfiguration configuration;
 
 	/*
 	 * Fields with implementation defaults
 	 */
 	private String prefix = "/saml/sp";
+	private HostedServiceProviderConfiguration configuration;
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;

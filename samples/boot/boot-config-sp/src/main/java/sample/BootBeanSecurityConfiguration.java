@@ -38,8 +38,9 @@ public class BootBeanSecurityConfiguration {
 	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {}
 
 	@Bean //used as a spy bean during mock tests
-	public ServiceProviderConfigurationResolver spConfigurationResolver(
-		SampleSamlBootConfiguration configuration) {
+	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver(
+		SampleSamlBootConfiguration configuration
+	) {
 		HostedServiceProviderConfiguration spConfig = configuration.toSamlServerConfiguration().getServiceProvider();
 		return new SingletonServiceProviderConfigurationResolver(spConfig);
 	}

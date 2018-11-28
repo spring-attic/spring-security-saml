@@ -27,11 +27,11 @@ import org.apache.commons.logging.LogFactory;
 @SpringBootApplication
 @Controller
 public class SamlServiceProviderApplication {
+	private static final Log logger = LogFactory.getLog(SamlServiceProviderApplication.class);
+
 	public static void main(String[] args) {
 		SpringApplication.run(SamlServiceProviderApplication.class, args);
 	}
-
-	private static final Log logger = LogFactory.getLog(SamlServiceProviderApplication.class);
 
 	@RequestMapping(value = {"/", "/index", "/logged-in"})
 	public String home() {

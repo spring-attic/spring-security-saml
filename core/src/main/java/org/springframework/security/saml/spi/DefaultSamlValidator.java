@@ -24,6 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.ValidationException;
+import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.provider.HostedIdentityProvider;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -48,7 +51,7 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.spi.ValidationResult.ValidationError;
+import org.springframework.security.saml.ValidationResult.ValidationError;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;

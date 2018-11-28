@@ -33,7 +33,7 @@ import org.springframework.security.saml.serviceprovider.implementation.SelectId
 import org.springframework.security.saml.serviceprovider.implementation.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
-import org.springframework.security.saml.spi.SamlValidator;
+import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;

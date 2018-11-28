@@ -16,8 +16,8 @@
  */
 
 include "core"
-include "transform-opensaml"
-include "transform-keycloak"
+include "transform/opensaml"
+include "transform/keycloak"
 include "service-provider"
 include "boot-config"
 include "samples/boot/boot-config-sp"
@@ -26,5 +26,6 @@ include "samples/boot/java-config-sp"
 rootProject.name = "spring-security-saml2"
 
 rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+	//name the project based on the path
+	p.name = "spring-security-saml2-${p.name.replaceAll("/","-")}"
 }

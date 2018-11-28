@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.boot.SamlBootConfiguration;
+import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
@@ -35,7 +35,8 @@ import static org.springframework.security.saml.serviceprovider.SamlServiceProvi
 public class BootBeanSecurityConfiguration {
 
 	@Configuration
-	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {}
+	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {
+	}
 
 	@Bean //used as a spy bean during mock tests
 	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver(
@@ -70,13 +71,13 @@ public class BootBeanSecurityConfiguration {
 				.logout()
 				.logoutUrl("/logout")
 				.logoutSuccessUrl("/saml/sp/select")
-			;
-			http.apply(
-				serviceProvider()
-					.prefix("/saml/sp")
-					.configurationResolver(configurationResolver)
-					.samlTransformer(samlTransformer)
-			);
+				.and()
+				.apply(
+					serviceProvider()
+						.prefix("/saml/sp")
+						.configurationResolver(configurationResolver)
+						.samlTransformer(samlTransformer)
+				);
 		}
 	}
 }

@@ -1,0 +1,27 @@
+= Spring Security SAML v2
+Filip Hanik <fhanik@pivotal.io>
+v2.0
+
+== Welcome to Spring Security SAML v2
+*We've revised Spring Security SAML and are creating a 2.0 release train.
+TLDR; Here is why*
+
+* Truly abstract away the underlying SAML implementation which can be complex and difficult to use
+* SAML data objects are Plain Old Java Objects (POJO)
+* Unit testing and test driven development must be easy
+* Out of the box support for
+** Hosting a Service Provider (SP)
+** Hosting an Identity Provider (IDP)
+** Receive signed and/or encrypted assertions
+** Send signed and/or encrypted assertions
+** Multi tenancy support for both IDP and SP
+** Key rotation
+* Integration with Spring Security
+* Built in configuration DSL
+* Uncomplicated RSA key handling, no more keystores
+* Intuitive usage requiring less documentation
+* Reducing the foot print of the library
+
+== Getting Started
+
+

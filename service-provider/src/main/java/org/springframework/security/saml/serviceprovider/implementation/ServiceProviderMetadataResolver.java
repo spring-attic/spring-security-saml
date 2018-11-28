@@ -40,7 +40,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.spi.SamlMetadataCache;
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -71,6 +71,11 @@ public class ServiceProviderMetadataResolver {
 
 	public ServiceProviderMetadataResolver(SamlTransformer samlTransformer) {
 		this.samlTransformer = samlTransformer;
+	}
+
+	public ServiceProviderMetadataResolver setCache(SamlMetadataCache cache) {
+		this.cache = cache;
+		return this;
 	}
 
 	public ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration) {

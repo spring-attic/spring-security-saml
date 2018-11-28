@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 
-public interface SpConfigurationResolver {
+public interface ServiceProviderConfigurationResolver {
 
 	HostedServiceProviderConfiguration resolve(HttpServletRequest request);
 }

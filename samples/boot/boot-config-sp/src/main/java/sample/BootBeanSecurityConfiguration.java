@@ -26,8 +26,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.SpConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.implementation.StaticServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
@@ -38,20 +38,20 @@ public class BootBeanSecurityConfiguration {
 	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {}
 
 	@Bean //used as a spy bean during mock tests
-	public SpConfigurationResolver spConfigurationResolver(
+	public ServiceProviderConfigurationResolver spConfigurationResolver(
 		SampleSamlBootConfiguration configuration) {
 		HostedServiceProviderConfiguration spConfig = configuration.toSamlServerConfiguration().getServiceProvider();
-		return new StaticServiceProviderConfigurationResolver(spConfig);
+		return new SingletonServiceProviderConfigurationResolver(spConfig);
 	}
 
 	@Configuration
 	@Order(1)
 	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-		private final SpConfigurationResolver configurationResolver;
+		private final ServiceProviderConfigurationResolver configurationResolver;
 		private final SamlTransformer samlTransformer;
 
-		public SamlSecurity(SpConfigurationResolver configurationResolver,
+		public SamlSecurity(ServiceProviderConfigurationResolver configurationResolver,
 							SamlTransformer samlTransformer) {
 			this.configurationResolver = configurationResolver;
 			this.samlTransformer = samlTransformer;

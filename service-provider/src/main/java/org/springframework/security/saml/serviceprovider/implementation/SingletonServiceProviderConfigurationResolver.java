@@ -20,13 +20,13 @@ package org.springframework.security.saml.serviceprovider.implementation;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.SpConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
-public class StaticServiceProviderConfigurationResolver implements SpConfigurationResolver {
+public class SingletonServiceProviderConfigurationResolver implements ServiceProviderConfigurationResolver {
 
 	private final HostedServiceProviderConfiguration configuration;
 
-	public StaticServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
+	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 	}
 

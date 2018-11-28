@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.serviceprovider;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,7 +31,7 @@ import org.springframework.security.saml.serviceprovider.implementation.SamlServ
 import org.springframework.security.saml.serviceprovider.implementation.SamlTemplateProcessor;
 import org.springframework.security.saml.serviceprovider.implementation.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.implementation.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.implementation.StaticServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.DefaultSamlValidator;
 import org.springframework.security.saml.spi.SamlValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -60,7 +61,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
 	private ServiceProviderResolver resolver = null;
-	private SpConfigurationResolver configurationResolver;
+	private ServiceProviderConfigurationResolver configurationResolver;
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
@@ -76,7 +77,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		if (configurationResolver == null) {
 			notNull(configuration, "SAML Service Provider Configuration must not be null.");
-			configurationResolver = new StaticServiceProviderConfigurationResolver(configuration);
+			configurationResolver = new SingletonServiceProviderConfigurationResolver(configuration);
 		}
 
 		if (resolver == null) {
@@ -137,11 +138,13 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer samlTransformer(SamlTransformer samlTransformer) {
 		this.samlTransformer = samlTransformer;
 		return this;
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer samlValidator(SamlValidator samlValidator) {
 		this.samlValidator = samlValidator;
 		return this;
@@ -152,11 +155,13 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		return this;
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 		return this;
@@ -167,17 +172,22 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		return this;
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer configuration(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		return this;
 	}
 
+	@Autowired(required = false)
 	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
 
-	public SamlServiceProviderConfigurer configurationResolver(SpConfigurationResolver configurationResolver) {
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer configurationResolver(
+		ServiceProviderConfigurationResolver configurationResolver
+	) {
 		this.configurationResolver = configurationResolver;
 		return this;
 	}

@@ -42,7 +42,7 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.serviceprovider.SpConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -83,7 +83,7 @@ public class ServiceProviderTests {
 	BootBeanSecurityConfiguration.SampleSamlBootConfiguration bootConfiguration;
 
 	@SpyBean
-	SpConfigurationResolver configuration;
+	ServiceProviderConfigurationResolver configuration;
 
 	@BeforeEach
 	void setUp() {

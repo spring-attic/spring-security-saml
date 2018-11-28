@@ -19,6 +19,9 @@ package org.springframework.security.saml.boot.registration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.registration.NetworkConfiguration;
 import org.springframework.security.saml.registration.HostedServerConfiguration;
 
@@ -53,5 +56,15 @@ public class SamlBootConfiguration {
 			identityProvider == null ? null : identityProvider.toHostedConfiguration(),
 			new NetworkConfiguration(4000,4000)
 		);
+	}
+
+	@Bean
+	public HostedServiceProviderConfiguration samlServiceProviderConfiguration() {
+		return toSamlServerConfiguration().getServiceProvider();
+	}
+
+	@Bean
+	public HostedIdentityProviderConfiguration samlIdentityProviderConfiguration() {
+		return toSamlServerConfiguration().getIdentityProvider();
 	}
 }

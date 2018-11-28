@@ -27,6 +27,7 @@ import org.springframework.security.saml.registration.ExternalIdentityProviderCo
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.serviceprovider.annotation.EnableOpenSaml;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
@@ -35,6 +36,7 @@ import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIE
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
+@EnableOpenSaml
 @Order(1)
 @Configuration
 public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -47,53 +49,58 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		String prefix = "/saml/sp";
 		http
 			.antMatcher("/**")
-			.authorizeRequests()
-			.antMatchers("/**").authenticated()
+				.authorizeRequests()
+				.antMatchers("/**").authenticated()
 			.and()
-			.formLogin().loginPage("/saml/sp/select")
+				.formLogin().loginPage("/saml/sp/select")
 			.and()
-			.logout()
-			.logoutUrl("/logout")
-			.logoutSuccessUrl("/saml/sp/select")
-		;
-
-		String prefix = "/saml/sp";
-		http.apply(
-			serviceProvider()
-				.prefix(prefix)
-				.samlTransformer(samlTransformer)
-				.configuration(
-					HostedServiceProviderConfiguration.Builder.builder()
-						.withPrefix(prefix)
-						.withEntityId("spring.security.saml.sp.id")
-						.withAlias("boot-sample-sp")
-						.withSignMetadata(true)
-						.withSignRequests(true)
-						.withWantAssertionsSigned(true)
-						.withSingleLogoutEnabled(true)
-						.withNameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
-						.withKeys(
-							asList(
-								new KeyData("sp-signing-key", privateKey, certificate, "sppassword", KeyType.SIGNING)
-							)
-						)
-						.withProviders(
-							asList(
-								new ExternalIdentityProviderConfiguration(
-									"simplesamlphp",
-									"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
-									"Simple SAML PHP IDP (Java Config)",
-									true,
-									false,
-									UNSPECIFIED,
-									0
+				.logout()
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/saml/sp/select")
+			.and()
+				.apply(
+					serviceProvider()
+						.prefix(prefix)
+						.samlTransformer(samlTransformer)
+						.configuration(
+							HostedServiceProviderConfiguration.Builder.builder()
+								.withPrefix(prefix)
+								.withEntityId("spring.security.saml.sp.id")
+								.withAlias("boot-sample-sp")
+								.withSignMetadata(true)
+								.withSignRequests(true)
+								.withWantAssertionsSigned(true)
+								.withSingleLogoutEnabled(true)
+								.withNameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
+								.withKeys(
+									asList(
+										new KeyData(
+											"sp-signing-key",
+											privateKey,
+											certificate,
+											"sppassword",
+											KeyType.SIGNING
+										)
+									)
 								)
-							)
+								.withProviders(
+									asList(
+										new ExternalIdentityProviderConfiguration(
+											"simplesamlphp",
+											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+											"Simple SAML PHP IDP (Java Config)",
+											true,
+											false,
+											UNSPECIFIED,
+											0
+										)
+									)
+								)
+								.build()
 						)
-						.build()
-				)
 
 		);
 	}

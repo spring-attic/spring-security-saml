@@ -19,6 +19,7 @@ package sample;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,57 +28,56 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.annotation.EnableOpenSaml;
 import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
-public class BootBeanSecurityConfiguration {
+@EnableOpenSaml
+@Import({SamlBootConfiguration.class})
+@Configuration
+@Order(1)
+public class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-	@Configuration
-	public static class SampleSamlBootConfiguration extends SamlBootConfiguration {
+	private final HostedServiceProviderConfiguration configuration;
+	private final SamlTransformer samlTransformer;
+
+	public SamlSecurity(HostedServiceProviderConfiguration configuration,
+						SamlTransformer samlTransformer) {
+		this.configuration = configuration;
+		this.samlTransformer = samlTransformer;
 	}
 
-	@Bean //used as a spy bean during mock tests
-	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver(
-		SampleSamlBootConfiguration configuration
-	) {
-		HostedServiceProviderConfiguration spConfig = configuration.toSamlServerConfiguration().getServiceProvider();
-		return new SingletonServiceProviderConfigurationResolver(spConfig);
+	/*
+	 * Exposed as a SpyBean in unit tests
+	 */
+	@Bean
+	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver() {
+		return new SingletonServiceProviderConfigurationResolver(configuration);
 	}
 
-	@Configuration
-	@Order(1)
-	public static class SamlSecurity extends WebSecurityConfigurerAdapter {
-
-		private final ServiceProviderConfigurationResolver configurationResolver;
-		private final SamlTransformer samlTransformer;
-
-		public SamlSecurity(ServiceProviderConfigurationResolver configurationResolver,
-							SamlTransformer samlTransformer) {
-			this.configurationResolver = configurationResolver;
-			this.samlTransformer = samlTransformer;
-		}
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			http
-				.antMatcher("/**")
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		// @formatter:off
+		http
+			.antMatcher("/**")
 				.authorizeRequests()
 				.antMatchers("/**").authenticated()
-				.and()
+			.and()
 				.formLogin().loginPage("/saml/sp/select")
-				.and()
+			.and()
 				.logout()
 				.logoutUrl("/logout")
 				.logoutSuccessUrl("/saml/sp/select")
-				.and()
+			.and()
 				.apply(
 					serviceProvider()
 						.prefix("/saml/sp")
-						.configurationResolver(configurationResolver)
+						.configurationResolver(serviceProviderConfigurationResolver())
 						.samlTransformer(samlTransformer)
-				);
-		}
+			);
+		// @formatter:on
 	}
 }
+

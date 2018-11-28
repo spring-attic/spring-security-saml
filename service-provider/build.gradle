@@ -6,6 +6,9 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 	compile project(':spring-security-saml2-core')
+	provided project(':spring-security-saml2-transform-keycloak')
+	provided project(':spring-security-saml2-transform-opensaml')
+
 	testCompile files(this.project(':spring-security-saml2-core').sourceSets.test.output)
 
 	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion"

@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -54,7 +55,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import sample.BootBeanSecurityConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -80,7 +80,7 @@ public class ServiceProviderTests {
 	SamlTransformer transformer;
 
 	@Autowired
-	BootBeanSecurityConfiguration.SampleSamlBootConfiguration bootConfiguration;
+	SamlBootConfiguration bootConfiguration;
 
 	@SpyBean
 	ServiceProviderConfigurationResolver configuration;

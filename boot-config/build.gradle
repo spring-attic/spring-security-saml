@@ -5,8 +5,6 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 	compile project(':spring-security-saml2-service-provider')
-	provided project(':spring-security-saml2-transform-keycloak')
-	provided project(':spring-security-saml2-transform-opensaml')
 	compile group: "org.springframework.boot", name: "spring-boot-starter-web", version: "${springBootVersion}"
 	compileOnly group: "org.springframework.boot", name: "spring-boot-configuration-processor", version: "${springBootVersion}"
 

@@ -15,19 +15,20 @@
  *
  */
 
-package org.springframework.security.saml.boot.configurations;
+package org.springframework.security.saml.serviceprovider.annotation;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Configuration
-public class OpenSamlTransformerConfiguration {
+import org.springframework.context.annotation.Import;
+import org.springframework.security.saml.serviceprovider.configuration.OpenSamlTransformerConfiguration;
 
-	@Bean(name = "openSamlTransformer")
-	public SamlTransformer samlTransformer() {
-		return new OpenSamlTransformer();
-	}
-
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Import({OpenSamlTransformerConfiguration.class})
+public @interface EnableOpenSaml {
 }

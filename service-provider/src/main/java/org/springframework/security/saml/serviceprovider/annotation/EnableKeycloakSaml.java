@@ -15,19 +15,20 @@
  *
  */
 
-package org.springframework.security.saml.boot.configurations;
+package org.springframework.security.saml.serviceprovider.annotation;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Configuration
-public class KeycloakSamlTransformerConfiguration {
+import org.springframework.context.annotation.Import;
+import org.springframework.security.saml.serviceprovider.configuration.KeycloakSamlTransformerConfiguration;
 
-	@Bean(name = "keycloakSamlTransformer")
-	public SamlTransformer samlTransformer() {
-		return new KeycloakSamlTransformer();
-	}
-
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Import({KeycloakSamlTransformerConfiguration.class})
+public @interface EnableKeycloakSaml {
 }

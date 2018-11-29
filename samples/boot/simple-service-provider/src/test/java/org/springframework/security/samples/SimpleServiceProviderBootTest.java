@@ -51,6 +51,8 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
+import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -211,6 +213,36 @@ public class SimpleServiceProviderBootTest {
 			assertion,
 			sp,
 			idp
+		);
+
+		String encoded = transformer.samlEncode(transformer.toXml(response), false);
+		mockMvc.perform(
+			post("/saml/sp/SSO/alias/boot-sample-sp")
+				.param("SAMLResponse", encoded)
+		)
+			.andExpect(status().isFound())
+			.andExpect(authenticated());
+	}
+
+	@Test
+	public void processResponseSignatureInheritance() throws Exception {
+		ServiceProviderService provider = provisioning.getHostedProvider();
+		config.getServiceProvider().setWantAssertionsSigned(true);
+		String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		AuthenticationRequest authn = getAuthenticationRequest();
+		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+		ServiceProviderMetadata sp = provider.getMetadata();
+		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+		Response response = helper.response(
+			authn,
+			assertion,
+			sp,
+			idp
+		);
+		response.setSigningKey(
+			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
+			AlgorithmMethod.RSA_SHA256,
+			DigestMethod.SHA256
 		);
 
 		String encoded = transformer.samlEncode(transformer.toXml(response), false);

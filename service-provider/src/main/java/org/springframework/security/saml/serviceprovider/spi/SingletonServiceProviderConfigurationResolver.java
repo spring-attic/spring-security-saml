@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
+import static org.springframework.util.StringUtils.hasText;
+
 public class SingletonServiceProviderConfigurationResolver implements ServiceProviderConfigurationResolver {
 
 	private final HostedServiceProviderConfiguration configuration;
@@ -32,6 +34,33 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 
 	@Override
 	public HostedServiceProviderConfiguration resolve(HttpServletRequest request) {
-		return configuration;
+		HostedServiceProviderConfiguration.Builder builder =
+			HostedServiceProviderConfiguration.Builder.builder(configuration);
+		String basePath = getBasePath(request, false);
+		if (!hasText(configuration.getEntityId())) {
+			builder.withEntityId(basePath);
+		}
+		if (!hasText(configuration.getAlias())) {
+			builder.withAlias(request.getServerName());
+		}
+		if (!hasText(configuration.getBasePath())) {
+			builder.withBasePath(basePath);
+		}
+		return builder.build();
+	}
+
+	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
+		boolean includePort = true;
+		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		return request.getScheme() +
+			"://" +
+			request.getServerName() +
+			(includePort ? (":" + request.getServerPort()) : "") +
+			request.getContextPath();
 	}
 }

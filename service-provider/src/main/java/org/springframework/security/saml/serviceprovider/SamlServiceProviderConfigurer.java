@@ -39,6 +39,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
+import static org.springframework.util.StringUtils.hasText;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
@@ -79,6 +80,11 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		if (configurationResolver == null) {
 			notNull(configuration, "SAML Service Provider Configuration must not be null.");
+			if (!hasText(configuration.getPrefix())) {
+				configuration = HostedServiceProviderConfiguration.Builder.builder(configuration)
+					.withPrefix(prefix)
+					.build();
+			}
 			configurationResolver = new SingletonServiceProviderConfigurationResolver(configuration);
 		}
 

@@ -22,6 +22,7 @@ include "service-provider"
 include "boot-config"
 include "samples/boot/boot-config-sp"
 include "samples/boot/java-config-sp"
+include "samples/boot/starter-sp"
 
 rootProject.name = "spring-security-saml2"
 

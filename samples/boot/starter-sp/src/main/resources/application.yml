@@ -1,0 +1,16 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /sample-sp
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.springframework.security.saml: DEBUG
+    sample: DEBUG
+
+spring:
+  thymeleaf:
+    cache: false

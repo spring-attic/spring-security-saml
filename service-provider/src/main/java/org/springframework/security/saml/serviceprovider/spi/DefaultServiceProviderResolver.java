@@ -20,10 +20,8 @@ package org.springframework.security.saml.serviceprovider.spi;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
-
-import static org.springframework.util.StringUtils.hasText;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 
 public class DefaultServiceProviderResolver implements ServiceProviderResolver {
 
@@ -39,11 +37,6 @@ public class DefaultServiceProviderResolver implements ServiceProviderResolver {
 	@Override
 	public HostedServiceProvider resolve(HttpServletRequest request) {
 		HostedServiceProviderConfiguration config = configuration.resolve(request);
-		if (!hasText(config.getBasePath())) {
-			config = HostedServiceProviderConfiguration.Builder.builder(config)
-				.withBasePath(getBasePath(request, false))
-				.build();
-		}
 		return new HostedServiceProvider(
 			config,
 			metadataResolver.resolveHostedServiceProvider(config),
@@ -51,18 +44,4 @@ public class DefaultServiceProviderResolver implements ServiceProviderResolver {
 		);
 	}
 
-	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
-		boolean includePort = true;
-		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		return request.getScheme() +
-			"://" +
-			request.getServerName() +
-			(includePort ? (":" + request.getServerPort()) : "") +
-			request.getContextPath();
-	}
 }

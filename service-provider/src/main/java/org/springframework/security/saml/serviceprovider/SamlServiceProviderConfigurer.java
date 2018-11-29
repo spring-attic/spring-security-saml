@@ -24,15 +24,15 @@ import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.implementation.DefaultServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
-import org.springframework.security.saml.serviceprovider.implementation.SamlTemplateProcessor;
+import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
-import org.springframework.security.saml.serviceprovider.implementation.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.implementation.SingletonServiceProviderConfigurationResolver;
-import org.springframework.security.saml.spi.DefaultSamlValidator;
+import org.springframework.security.saml.serviceprovider.spi.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
+import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -71,7 +71,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		notNull(samlTransformer, "SAML Core Transformer Implementation must not be null.");
 
 		if (samlValidator == null) {
-			samlValidator = new DefaultSamlValidator(samlTransformer);
+			samlValidator = new ServiceProviderSamlValidator(samlTransformer);
 		}
 		if (samlTemplateEngine == null) {
 			samlTemplateEngine = new VelocityTemplateEngine(true);

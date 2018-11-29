@@ -19,7 +19,7 @@ package org.springframework.security.saml.serviceprovider;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
 
 public interface ServiceProviderResolver {
 

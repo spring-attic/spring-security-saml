@@ -22,23 +22,23 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.ValidationException;
-import org.springframework.security.saml.serviceprovider.implementation.DefaultSamlAuthentication;
+import org.springframework.security.saml.serviceprovider.spi.DefaultSamlAuthentication;
+import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,11 +124,9 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 			return null;
 		}
 
-		try {
-			validator.validate(r, provider);
-		} catch (ValidationException e) {
-			logger.debug(e.getMessage());
-			return null;
+		ValidationResult validationResult = validator.validate(r, provider);
+		if (!validationResult.isSuccess()) {
+			throw new AuthenticationServiceException(validationResult.toString());
 		}
 
 		Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);

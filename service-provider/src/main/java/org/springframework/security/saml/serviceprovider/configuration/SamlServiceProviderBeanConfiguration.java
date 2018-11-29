@@ -22,8 +22,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.serviceprovider.implementation.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.spi.DefaultSamlValidator;
+import org.springframework.security.saml.serviceprovider.spi.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 
 @Configuration
@@ -31,7 +31,7 @@ public class SamlServiceProviderBeanConfiguration {
 
 	@Bean(name = "samlServiceProviderValidator")
 	public SamlValidator samlValidator(SamlTransformer transformer) {
-		return new DefaultSamlValidator(transformer);
+		return new ServiceProviderSamlValidator(transformer);
 	}
 
 	@Bean(name = "samlServiceProviderMetadataResolver")

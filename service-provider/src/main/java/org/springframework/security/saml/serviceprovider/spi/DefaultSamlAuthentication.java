@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.implementation;
+package org.springframework.security.saml.serviceprovider.spi;
 
 import java.util.Collection;
 import java.util.Collections;

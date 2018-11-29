@@ -14,30 +14,25 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.spi;
+package org.springframework.security.saml.serviceprovider.spi;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.ValidationException;
 import org.springframework.security.saml.ValidationResult;
-import org.springframework.security.saml.provider.HostedIdentityProvider;
-import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.ValidationResult.ValidationError;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
 import org.springframework.security.saml.saml2.authentication.Conditions;
-import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
@@ -45,27 +40,22 @@ import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
 import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.ValidationResult.ValidationError;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
-import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultSamlValidator implements SamlValidator {
+public class ServiceProviderSamlValidator implements SamlValidator<HostedServiceProvider> {
 
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -73,15 +63,20 @@ public class DefaultSamlValidator implements SamlValidator {
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultSamlValidator(SamlTransformer implementation) {
-		setImplementation(implementation);
+	public ServiceProviderSamlValidator(SamlTransformer implementation) {
+		setTransformer(implementation);
 	}
 
-	private void setImplementation(SamlTransformer implementation) {
+	private void setTransformer(SamlTransformer implementation) {
 		this.implementation = implementation;
 	}
 
-	public DefaultSamlValidator setTime(Clock time) {
+	@Override
+	public SamlTransformer getSamlTransformer() {
+		return implementation;
+	}
+
+	public ServiceProviderSamlValidator setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -102,38 +97,7 @@ public class DefaultSamlValidator implements SamlValidator {
 	}
 
 	@Override
-	public void validate(Saml2Object saml2Object, HostedIdentityProvider provider)
-		throws ValidationException {
-		Assert.notNull(saml2Object, "Object to be validated cannot be null");
-		ValidationResult result;
-		if (saml2Object instanceof ServiceProviderMetadata) {
-			result = validate((ServiceProviderMetadata)saml2Object, provider);
-		}
-		else if (saml2Object instanceof AuthenticationRequest) {
-			result = validate((AuthenticationRequest)saml2Object, provider);
-		}
-		else if (saml2Object instanceof LogoutRequest) {
-			result = validate((LogoutRequest)saml2Object, provider);
-		}
-		else if (saml2Object instanceof LogoutResponse) {
-			result = validate((LogoutResponse)saml2Object, provider);
-		}
-		else {
-			throw new ValidationException(
-				"No validation implemented for class:" + saml2Object.getClass().getName(),
-				new ValidationResult(saml2Object)
-					.addError("Unable to validate SAML object. No implementation.")
-			);
-		}
-		if (!result.isSuccess()) {
-			throw new ValidationException("Unable to validate SAML object.", result);
-		}
-
-	}
-
-	@Override
-	public void validate(Saml2Object saml2Object, HostedServiceProvider provider)
-		throws ValidationException {
+	public ValidationResult validate(Saml2Object saml2Object, HostedServiceProvider provider) {
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
 		ValidationResult result;
 		if (saml2Object instanceof IdentityProviderMetadata) {
@@ -158,42 +122,20 @@ public class DefaultSamlValidator implements SamlValidator {
 			result = validate(a, null, requester, responder);
 		}
 		else {
-			throw new ValidationException(
-				"No validation implemented for class:" + saml2Object.getClass().getName(),
-				new ValidationResult(saml2Object)
-					.addError("Unable to validate SAML object. No implementation.")
-			);
+			throw new SamlException("No validation implemented for class:" + saml2Object.getClass().getName());
 		}
-		if (!result.isSuccess()) {
-			throw new ValidationException("Unable to validate SAML object.", result);
-		}
+		return result;
 	}
 
 	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedServiceProvider provider) {
 		return new ValidationResult(metadata);
 	}
 
-	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedIdentityProvider provider) {
-		return new ValidationResult(metadata);
-	}
-
-	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedIdentityProvider provider) {
-		return new ValidationResult(authnRequest);
-	}
-
 	protected ValidationResult validate(LogoutRequest logoutRequest, HostedServiceProvider provider) {
 		return new ValidationResult(logoutRequest);
 	}
 
-	protected ValidationResult validate(LogoutRequest logoutRequest, HostedIdentityProvider provider) {
-		return new ValidationResult(logoutRequest);
-	}
-
 	protected ValidationResult validate(LogoutResponse logoutResponse, HostedServiceProvider provider) {
-		return new ValidationResult(logoutResponse);
-	}
-
-	protected ValidationResult validate(LogoutResponse logoutResponse, HostedIdentityProvider provider) {
 		return new ValidationResult(logoutResponse);
 	}
 
@@ -476,23 +418,11 @@ public class DefaultSamlValidator implements SamlValidator {
 		return new ValidationResult(response);
 	}
 
-	protected boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
-		if (time == null) {
-			return false;
-		}
-		final DateTime reference = new DateTime();
-		final Interval validTimeInterval = new Interval(
-			reference.minusMillis(skewMillis + forwardMillis),
-			reference.plusMillis(skewMillis)
-		);
-		return validTimeInterval.contains(time);
-	}
-
 	public int getResponseSkewTimeMillis() {
 		return responseSkewTimeMillis;
 	}
 
-	public DefaultSamlValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public ServiceProviderSamlValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -501,49 +431,11 @@ public class DefaultSamlValidator implements SamlValidator {
 		return allowUnsolicitedResponses;
 	}
 
-	public DefaultSamlValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public ServiceProviderSamlValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}
 
-	protected boolean compareURIs(List<Endpoint> endpoints, String uri) {
-		for (Endpoint ep : endpoints) {
-			if (compareURIs(ep.getLocation(), uri)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	protected ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
-		if (issuer != null) {
-			if (!entity.getEntityId().equals(issuer.getValue())) {
-				return new ValidationResult(entity)
-					.addError(
-						new ValidationError(
-							format(
-								"Issuer mismatch. Expected: '%s' Actual: '%s'",
-								entity.getEntityId(),
-								issuer.getValue()
-							)
-						)
-					);
-			}
-			if (issuer.getFormat() != null && !issuer.getFormat().equals(ENTITY)) {
-				return new ValidationResult(entity)
-					.addError(
-						new ValidationError(
-							format(
-								"Issuer name format mismatch. Expected: '%s' Actual: '%s'",
-								ENTITY,
-								issuer.getFormat()
-							)
-						)
-					);
-			}
-		}
-		return null;
-	}
 
 	public int getMaxAuthenticationAgeMillis() {
 		return maxAuthenticationAgeMillis;
@@ -551,27 +443,6 @@ public class DefaultSamlValidator implements SamlValidator {
 
 	public Clock time() {
 		return time;
-	}
-
-	protected boolean compareURIs(String uri1, String uri2) {
-		if (uri1 == null && uri2 == null) {
-			return true;
-		}
-		try {
-			new URI(uri1);
-			new URI(uri2);
-			return removeQueryString(uri1).equalsIgnoreCase(removeQueryString(uri2));
-		} catch (URISyntaxException e) {
-			return false;
-		}
-	}
-
-	public String removeQueryString(String uri) {
-		int queryStringIndex = uri.indexOf('?');
-		if (queryStringIndex >= 0) {
-			return uri.substring(0, queryStringIndex);
-		}
-		return uri;
 	}
 
 	public void setMaxAuthenticationAgeMillis(int maxAuthenticationAgeMillis) {

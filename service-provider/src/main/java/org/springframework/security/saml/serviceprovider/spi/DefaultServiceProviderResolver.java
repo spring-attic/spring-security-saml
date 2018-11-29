@@ -15,11 +15,10 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.implementation;
+package org.springframework.security.saml.serviceprovider.spi;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;

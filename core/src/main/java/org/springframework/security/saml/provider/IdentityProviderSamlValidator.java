@@ -29,6 +29,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.util.Assert;
 
+//TODO Move to Identity Provider module
 public class IdentityProviderSamlValidator implements SamlValidator<HostedIdentityProvider> {
 
 	private SamlTransformer implementation;

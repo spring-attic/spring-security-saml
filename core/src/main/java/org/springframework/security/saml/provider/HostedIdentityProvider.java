@@ -24,6 +24,7 @@ import org.springframework.security.saml.registration.HostedIdentityProviderConf
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
+//TODO Move to Identity Provider module
 public class HostedIdentityProvider extends HostedProvider<
 	HostedIdentityProviderConfiguration,
 	IdentityProviderMetadata,

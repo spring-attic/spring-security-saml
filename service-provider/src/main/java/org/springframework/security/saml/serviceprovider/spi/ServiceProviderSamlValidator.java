@@ -119,7 +119,7 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 			Assertion a = (Assertion) saml2Object;
 			ServiceProviderMetadata requester = provider.getMetadata();
 			IdentityProviderMetadata responder = provider.getRemoteProvider(a.getOriginEntityId());
-			result = validate(a, null, requester, responder);
+			result = validate(a, null, requester, responder, requester.getServiceProvider().isWantAssertionsSigned());
 		}
 		else {
 			throw new SamlException("No validation implemented for class:" + saml2Object.getClass().getName());
@@ -142,12 +142,12 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 	protected ValidationResult validate(Assertion assertion,
 										List<String> mustMatchInResponseTo,
 										ServiceProviderMetadata requester,
-										IdentityProviderMetadata responder) {
-		boolean wantAssertionsSigned = requester.getServiceProvider().isWantAssertionsSigned();
+										IdentityProviderMetadata responder,
+										boolean requireAssertionsSigned) {
 		//verify assertion
 		//issuer
 		//signature
-		if (wantAssertionsSigned && !assertion.isEncrypted()) {
+		if (requireAssertionsSigned && !assertion.isEncrypted()) {
 			if (assertion.getSignature() == null || !assertion.getSignature().isValidated()) {
 				return
 					new ValidationResult(assertion).addError(
@@ -326,15 +326,22 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 			return result;
 		}
 
+		boolean requireAssertionSigned = requester.getServiceProvider().isWantAssertionsSigned();
+		if (response.getSignature() != null) {
+			requireAssertionSigned = requireAssertionSigned && (!response.getSignature().isValidated());
+		}
+
 		Assertion validAssertion = null;
 		ValidationResult assertionValidation = new ValidationResult(response);
 		//DECRYPT ENCRYPTED ASSERTIONS
 		for (Assertion assertion : response.getAssertions()) {
+
 			ValidationResult assertionResult = validate(
 				assertion,
 				mustMatchInResponseTo,
 				requester,
-				responder
+				responder,
+				requireAssertionSigned
 			);
 			if (!assertionResult.hasErrors()) {
 				validAssertion = assertion;

@@ -182,6 +182,39 @@ public class ServiceProviderTests {
 		).andExpect(authenticated());
 	}
 
+	@Test
+	void authenticateWithOnlyResponseSigned() throws Exception {
+		mockConfig(builder -> builder.withWantAssertionsSigned(true));
+		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		IdentityProviderMetadata idp =
+			(IdentityProviderMetadata) transformer.fromXml(
+				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
+				null,
+				null
+			);
+		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
+		Assertion a = helper.assertion(
+			sp,
+			idp,
+			null,
+			"user@test.org",
+			NameId.EMAIL
+		);
+		Response r = helper.response(null, a, sp, idp);
+		r.setSigningKey(
+			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
+			AlgorithmMethod.RSA_SHA256,
+			DigestMethod.SHA256
+		);
+		String xml = transformer.toXml(r);
+		String encoded = transformer.samlEncode(xml, false);
+
+		mockMvc.perform(
+			post("/saml/sp/SSO")
+				.param("SAMLResponse", encoded)
+		).andExpect(authenticated());
+	}
+
 	private AuthenticationRequest getAuthenticationRequest() throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/discovery")

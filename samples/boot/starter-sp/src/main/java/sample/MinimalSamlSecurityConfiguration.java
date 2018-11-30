@@ -23,8 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration.ExternalIdentityProviderConfigurationBuilder;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.key.KeyData.KeyDataBuilder;
 
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
@@ -62,13 +61,12 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 				//need to retain the same key between restarts
 				//we can remove this once we have an IDP
 				//that can dynamically update keys (like Spring Security SAML)
-				new KeyData(
-					"sp-signing-key",
-					privateKey,
-					certificate,
-					"sppassword",
-					KeyType.SIGNING
-				)
+				KeyDataBuilder.builder()
+					.withName("sp-signing-key")
+					.withPrivateKey(privateKey)
+					.withCertificate(certificate)
+					.withPassphrase("sppassword")
+					.build()
 			)
 			.withProviders(
 				ExternalIdentityProviderConfigurationBuilder.builder()

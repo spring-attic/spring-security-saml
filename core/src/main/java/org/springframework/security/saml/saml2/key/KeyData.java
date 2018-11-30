@@ -67,4 +67,57 @@ public class KeyData {
 		return passphrase;
 	}
 
+
+	public static final class KeyDataBuilder {
+		private String name;
+		private String privateKey;
+		private String certificate;
+		private String passphrase;
+		private KeyType type = KeyType.SIGNING;
+
+		private KeyDataBuilder() {
+		}
+
+		public static KeyDataBuilder builder() {
+			return new KeyDataBuilder();
+		}
+
+		public static KeyDataBuilder builder(KeyData data) {
+			return builder()
+				.withCertificate(data.getCertificate())
+				.withName(data.getName())
+				.withPassphrase(data.getPassphrase())
+				.withPrivateKey(data.getPrivateKey())
+				.withType(data.getType());
+		}
+
+		public KeyDataBuilder withName(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public KeyDataBuilder withPrivateKey(String privateKey) {
+			this.privateKey = privateKey;
+			return this;
+		}
+
+		public KeyDataBuilder withCertificate(String certificate) {
+			this.certificate = certificate;
+			return this;
+		}
+
+		public KeyDataBuilder withPassphrase(String passphrase) {
+			this.passphrase = passphrase;
+			return this;
+		}
+
+		public KeyDataBuilder withType(KeyType type) {
+			this.type = type;
+			return this;
+		}
+
+		public KeyData build() {
+			return new KeyData(name, privateKey, certificate, passphrase, type);
+		}
+	}
 }

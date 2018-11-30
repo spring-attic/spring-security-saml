@@ -62,7 +62,7 @@ public class ExternalIdentityProviderConfiguration extends
 		}
 
 		public static ExternalIdentityProviderConfigurationBuilder builder(ExternalIdentityProviderConfiguration idp) {
-			return new ExternalIdentityProviderConfigurationBuilder()
+			return builder()
 				.withAlias(idp.getAlias())
 				.withMetadata(idp.getMetadata())
 				.withAssertionConsumerServiceIndex(idp.getAssertionConsumerServiceIndex())

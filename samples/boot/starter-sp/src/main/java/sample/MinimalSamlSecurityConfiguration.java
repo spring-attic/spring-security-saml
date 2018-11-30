@@ -21,13 +21,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration.ExternalIdentityProviderConfigurationBuilder;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
 
-import static java.util.Arrays.asList;
-import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
@@ -43,45 +41,42 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 		http
 			//application security
 			.authorizeRequests()
-				.antMatchers("/logged-out").permitAll()
-				.antMatchers("/**").authenticated()
+			.antMatchers("/logged-out").permitAll()
+			.antMatchers("/**").authenticated()
 			.and()
-				.logout() //in lieu of SAML logout being implemented
-				.logoutSuccessUrl("/logged-out")
+			.logout() //in lieu of SAML logout being implemented
+			.logoutSuccessUrl("/logged-out")
 			.and()
 			//saml security
-				.apply(
-					saml2Login()
-						.serviceProviderConfiguration(minimalConfig())
-				)
+			.apply(
+				saml2Login()
+					.serviceProviderConfiguration(minimalConfig())
+			)
 		;
 	}
 
 	private HostedServiceProviderConfiguration minimalConfig() {
 		return HostedServiceProviderConfiguration.Builder.builder()
 			.withKeys(
-				asList(
-					new KeyData(
-						"sp-signing-key",
-						privateKey,
-						certificate,
-						"sppassword",
-						KeyType.SIGNING
-					)
+				//sample remote IDP is static,
+				//need to retain the same key between restarts
+				//we can remove this once we have an IDP
+				//that can dynamically update keys (like Spring Security SAML)
+				new KeyData(
+					"sp-signing-key",
+					privateKey,
+					certificate,
+					"sppassword",
+					KeyType.SIGNING
 				)
 			)
 			.withProviders(
-				asList(
-					new ExternalIdentityProviderConfiguration(
-						"simplesamlphp",
-						"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
-						"Simple SAML PHP IDP (Java Config)",
-						true,
-						false,
-						UNSPECIFIED,
-						0
-					)
-				)
+				ExternalIdentityProviderConfigurationBuilder.builder()
+					.withAlias("simplesamlphp")
+					.withMetadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+					.withSkipSslValidation(true)
+					.withLinktext("Simple SAML PHP IDP (Java Config)")
+					.build()
 			)
 			.build();
 	}

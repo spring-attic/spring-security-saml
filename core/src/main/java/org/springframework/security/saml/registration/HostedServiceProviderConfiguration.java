@@ -24,6 +24,8 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
+import static java.util.Arrays.asList;
+
 public class HostedServiceProviderConfiguration extends
 	HostedProviderConfiguration<ExternalIdentityProviderConfiguration> {
 
@@ -157,6 +159,11 @@ public class HostedServiceProviderConfiguration extends
 			return this;
 		}
 
+		public Builder withKeys(KeyData... keys) {
+			this.keys = asList(keys);
+			return this;
+		}
+
 		public Builder withDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
 			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 			return this;
@@ -179,6 +186,11 @@ public class HostedServiceProviderConfiguration extends
 
 		public Builder withProviders(List<ExternalIdentityProviderConfiguration> providers) {
 			this.providers = providers;
+			return this;
+		}
+
+		public Builder withProviders(ExternalIdentityProviderConfiguration... providers) {
+			this.providers = asList(providers);
 			return this;
 		}
 

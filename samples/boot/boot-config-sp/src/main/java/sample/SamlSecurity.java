@@ -29,7 +29,7 @@ import org.springframework.security.saml.serviceprovider.ServiceProviderConfigur
 import org.springframework.security.saml.serviceprovider.configuration.OpenSamlTransformerConfiguration;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 @Import({SamlBootConfiguration.class, OpenSamlTransformerConfiguration.class})
@@ -61,9 +61,8 @@ public class SamlSecurity extends WebSecurityConfigurerAdapter {
 				.logout()
 			.and()
 				.apply(
-					serviceProvider()
+					saml2Login()
 						.prefix("/saml/sp")
-						.saml2Login(false)
 						.configurationResolver(serviceProviderConfigurationResolver())
 			);
 		// @formatter:on

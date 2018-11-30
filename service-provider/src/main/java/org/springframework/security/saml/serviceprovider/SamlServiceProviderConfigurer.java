@@ -17,9 +17,16 @@
 
 package org.springframework.security.saml.serviceprovider;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
@@ -35,6 +42,7 @@ import org.springframework.security.saml.serviceprovider.spi.ServiceProviderMeta
 import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -44,9 +52,9 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
-	public static SamlServiceProviderConfigurer serviceProvider() {
+	public static SamlServiceProviderConfigurer saml2Login() {
 		SamlServiceProviderConfigurer configurer = new SamlServiceProviderConfigurer();
-		//TODO - do we need to post process setters?
+		//TODO - post process setters from beans?
 		//		configurer.postProcess(configurer);
 		return configurer;
 	}
@@ -62,11 +70,9 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	private AuthenticationManager authenticationManager = null;
 	private ServiceProviderResolver resolver = null;
 	private ServiceProviderConfigurationResolver configurationResolver;
-	private boolean enableSaml2Login = false;
-	private boolean loginRedirectWhenSingleProvider = false;
 
 	@Override
-	public void init(HttpSecurity builder) throws Exception {
+	public void init(HttpSecurity http) throws Exception {
 		notNull(prefix, "SAML path prefix must not be null.");
 		if (samlTransformer == null) {
 			samlTransformer = createDefaultSamlTransformer();
@@ -97,13 +103,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		String matchPrefix = "/" + stripSlashes(prefix);
 		String samlPattern = matchPrefix + "/**";
-		if (enableSaml2Login) {
-			builder
-				.formLogin()
-				.loginPage(matchPrefix + "/select")
-			;
-		}
-		builder
+		registerDefaultAuthenticationEntryPoint(http);
+		http
 			.csrf().ignoringAntMatchers(samlPattern)
 			.and()
 			.authorizeRequests()
@@ -112,6 +113,28 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		;
 
 	}
+
+	@SuppressWarnings("unchecked")
+	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http) {
+		ExceptionHandlingConfigurer<HttpSecurity> exceptionHandling =
+			http.getConfigurer(ExceptionHandlingConfigurer.class);
+
+		if (exceptionHandling == null) {
+			return;
+		}
+
+		String entryPointUrl = "/" + stripSlashes(prefix)+"/select?redirect=true";
+		LoginUrlAuthenticationEntryPoint authenticationEntryPoint = new LoginUrlAuthenticationEntryPoint(entryPointUrl) {
+			@Override
+			public void commence(HttpServletRequest request,
+								 HttpServletResponse response,
+								 AuthenticationException authException) throws IOException, ServletException {
+				super.commence(request, response, authException);
+			}
+		};
+		exceptionHandling.authenticationEntryPoint(authenticationEntryPoint);
+	}
+
 
 	private SamlTransformer createDefaultSamlTransformer() {
 		try {
@@ -151,11 +174,12 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		);
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
+			prefix,
 			new AntPathRequestMatcher(matchPrefix + "/select/**"),
 			resolver,
 			template
 		)
-			.setRedirectOnSingleProvider(loginRedirectWhenSingleProvider); //can cause loop until SSO logout
+			.setRedirectOnSingleProvider(false); //can cause loop until SSO logout
 
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
 			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
@@ -217,7 +241,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	}
 
 
-	public SamlServiceProviderConfigurer configuration(HostedServiceProviderConfiguration configuration) {
+	public SamlServiceProviderConfigurer serviceProviderConfiguration(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		return this;
 	}
@@ -233,16 +257,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		ServiceProviderConfigurationResolver configurationResolver
 	) {
 		this.configurationResolver = configurationResolver;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer saml2Login() {
-		return saml2Login(true);
-	}
-
-	public SamlServiceProviderConfigurer saml2Login(boolean loginRedirectWhenSingleProvider) {
-		this.enableSaml2Login = true;
-		this.loginRedirectWhenSingleProvider = loginRedirectWhenSingleProvider;
 		return this;
 	}
 }

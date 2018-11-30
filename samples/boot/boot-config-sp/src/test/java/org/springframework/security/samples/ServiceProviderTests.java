@@ -18,6 +18,8 @@ package org.springframework.security.samples;
 
 import java.net.URI;
 import java.time.Clock;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
@@ -30,8 +32,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.boot.registration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
 import org.springframework.security.saml.helper.SamlTestObjectHelper;
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -57,6 +61,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -65,6 +70,7 @@ import static org.springframework.security.saml.helper.SamlTestObjectHelper.quer
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,14 +106,61 @@ public class ServiceProviderTests {
 	}
 
 	@Test
-	@DisplayName("Home Page is Secure")
-	void testHomePage() throws Exception {
+	@DisplayName("Home Page is Secure and Redirects Automatically")
+	void testHomePageSingleProvider() throws Exception {
 		mockMvc.perform(
 			get("/")
 
 		)
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("http://localhost/saml/sp/select"))
+			.andExpect(redirectedUrl("http://localhost/saml/sp/select?redirect=true"))
+		;
+
+		mockMvc.perform(
+			get("http://localhost/saml/sp/select?redirect=true")
+
+		)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("http://localhost/saml/sp/discovery?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"))
+		;
+
+		//no redirect without redirect parameter
+		mockMvc.perform(
+			get("http://localhost/saml/sp/select")
+
+		)
+			.andExpect(status().is2xxSuccessful())
+		;
+	}
+
+	@Test
+	@DisplayName("Home Page is Secure and Displays IDP Selection")
+	void testHomePageMultipleProvider() throws Exception {
+		List<RemoteIdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
+		List<ExternalIdentityProviderConfiguration> list = new LinkedList<>();
+		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		providers.get(0).setAlias(providers.get(0).getAlias()+"-2");
+		providers.get(0).setLinktext("A Secondary SimpleSAML Provider");
+		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		mockConfig(
+			builder ->
+				builder.withProviders(list)
+		);
+		mockMvc.perform(
+			get("/")
+
+		)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("http://localhost/saml/sp/select?redirect=true"))
+		;
+
+		mockMvc.perform(
+			get("http://localhost/saml/sp/select?redirect=true")
+
+		)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().string(containsString(">Simple SAML PHP IDP<")))
+			.andExpect(content().string(containsString(">A Secondary SimpleSAML Provider<")))
 		;
 	}
 

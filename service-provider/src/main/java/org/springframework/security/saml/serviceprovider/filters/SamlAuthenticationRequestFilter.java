@@ -86,7 +86,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 				Endpoint destination = getPreferredEndpoint(
 					idp.getIdentityProvider().getSingleSignOnService(),
 					Binding.REDIRECT,
-					-1 //would be a configuration option
+					-1 //would be a serviceProviderConfiguration option
 				);
 				sendAuthenticationRequest(authn, destination, request, response);
 			} catch (SamlException x) {

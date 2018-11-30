@@ -30,7 +30,7 @@ import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 @Configuration
@@ -50,10 +50,9 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 				.logout()
 			.and()
 				.apply(
-					serviceProvider()
+					saml2Login()
 						.prefix(prefix)
-						.saml2Login(false)
-						.configuration(
+						.serviceProviderConfiguration(
 							HostedServiceProviderConfiguration.Builder.builder()
 								.withPrefix(prefix)
 								.withEntityId("spring.security.saml.sp.id")

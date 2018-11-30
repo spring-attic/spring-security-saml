@@ -28,11 +28,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
 import org.springframework.security.saml.registration.ExternalProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
@@ -51,13 +52,16 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
 	private final ServiceProviderResolver resolver;
 	private final RequestMatcher matcher;
+	private final String prefix;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 	private final SamlTemplateProcessor template;
 
-	public SelectIdentityProviderUIFilter(RequestMatcher matcher,
+	public SelectIdentityProviderUIFilter(String prefix,
+										  RequestMatcher matcher,
 										  ServiceProviderResolver resolver,
 										  SamlTemplateProcessor template) {
+		this.prefix = prefix;
 		this.template = template;
 		this.matcher = matcher;
 		this.resolver = resolver;
@@ -88,7 +92,8 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 					}
 				}
 			);
-			if (providers.size() == 1 && isRedirectOnSingleProvider()) {
+			if (providers.size() == 1 &&
+				(isRedirectOnSingleProvider() || ("true".equalsIgnoreCase(request.getParameter("redirect"))))) {
 				response.sendRedirect(providers.get(0).getRedirect());
 			}
 			else {
@@ -113,7 +118,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
-		builder.pathSegment("saml/sp/discovery");
+		builder.pathSegment(stripSlashes(prefix) + "/discovery");
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();

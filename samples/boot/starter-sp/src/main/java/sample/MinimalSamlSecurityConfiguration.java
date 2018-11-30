@@ -28,7 +28,7 @@ import org.springframework.security.saml.saml2.key.KeyType;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 @Configuration
@@ -43,6 +43,7 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 		http
 			//application security
 			.authorizeRequests()
+				.antMatchers("/logged-out").permitAll()
 				.antMatchers("/**").authenticated()
 			.and()
 				.logout() //in lieu of SAML logout being implemented
@@ -50,10 +51,10 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 			.and()
 			//saml security
 				.apply(
-					serviceProvider()
-						.saml2Login()
-						.configuration(minimalConfig())
-		);
+					saml2Login()
+						.serviceProviderConfiguration(minimalConfig())
+				)
+		;
 	}
 
 	private HostedServiceProviderConfiguration minimalConfig() {

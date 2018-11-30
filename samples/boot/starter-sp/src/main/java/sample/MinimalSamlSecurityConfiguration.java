@@ -41,7 +41,7 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 			//application security
 			.authorizeRequests()
 				.antMatchers("/logged-out").permitAll()
-				.antMatchers("/**").authenticated()
+				.anyRequest().authenticated()
 			.and()
 				.logout() //in lieu of SAML logout being implemented
 				.logoutSuccessUrl("/logged-out")
@@ -72,8 +72,6 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 				ExternalIdentityProviderConfigurationBuilder.builder()
 					.withAlias("simplesamlphp")
 					.withMetadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
-					.withSkipSslValidation(true)
-					.withLinktext("Simple SAML PHP IDP (Java Config)")
 					.build()
 			)
 			.build();

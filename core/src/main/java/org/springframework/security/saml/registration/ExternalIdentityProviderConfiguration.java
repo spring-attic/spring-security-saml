@@ -18,6 +18,9 @@
 package org.springframework.security.saml.registration;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.util.Assert;
+
+import static org.springframework.util.StringUtils.hasText;
 
 public class ExternalIdentityProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
@@ -110,10 +113,12 @@ public class ExternalIdentityProviderConfiguration extends
 		}
 
 		public ExternalIdentityProviderConfiguration build() {
+			Assert.notNull(alias, "Alias is required");
+			Assert.notNull(metadata, "Metadata is required");
 			return new ExternalIdentityProviderConfiguration(
 				alias,
 				metadata,
-				linktext,
+				hasText(linktext) ? linktext : alias,
 				skipSslValidation,
 				metadataTrustCheck,
 				nameId,

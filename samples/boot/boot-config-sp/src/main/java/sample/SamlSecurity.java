@@ -20,33 +20,26 @@ package sample;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.annotation.EnableOpenSaml;
+import org.springframework.security.saml.serviceprovider.configuration.OpenSamlTransformerConfiguration;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
-@EnableOpenSaml
-@Import({SamlBootConfiguration.class})
+@Import({SamlBootConfiguration.class, OpenSamlTransformerConfiguration.class})
 @Configuration
-@Order(1)
 public class SamlSecurity extends WebSecurityConfigurerAdapter {
 
 	private final HostedServiceProviderConfiguration configuration;
-	private final SamlTransformer samlTransformer;
 
-	public SamlSecurity(HostedServiceProviderConfiguration configuration,
-						SamlTransformer samlTransformer) {
+	public SamlSecurity(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
-		this.samlTransformer = samlTransformer;
 	}
 
 	/*
@@ -65,17 +58,13 @@ public class SamlSecurity extends WebSecurityConfigurerAdapter {
 				.authorizeRequests()
 				.antMatchers("/**").authenticated()
 			.and()
-				.formLogin().loginPage("/saml/sp/select")
-			.and()
 				.logout()
-				.logoutUrl("/logout")
-				.logoutSuccessUrl("/saml/sp/select")
 			.and()
 				.apply(
 					serviceProvider()
 						.prefix("/saml/sp")
+						.saml2Login(false)
 						.configurationResolver(serviceProviderConfigurationResolver())
-						.samlTransformer(samlTransformer)
 			);
 		// @formatter:on
 	}

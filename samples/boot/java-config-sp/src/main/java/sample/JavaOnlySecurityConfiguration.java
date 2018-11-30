@@ -18,16 +18,13 @@
 package sample;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.serviceprovider.annotation.EnableOpenSaml;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
@@ -36,15 +33,10 @@ import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIE
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.serviceProvider;
 
 @EnableWebSecurity
-@EnableOpenSaml
-@Order(1)
 @Configuration
 public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	private final SamlTransformer samlTransformer;
-
-	public JavaOnlySecurityConfiguration(SamlTransformer samlTransformer) {
-		this.samlTransformer = samlTransformer;
+	public JavaOnlySecurityConfiguration() {
 	}
 
 	@Override
@@ -55,16 +47,12 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 				.authorizeRequests()
 				.antMatchers("/**").authenticated()
 			.and()
-				.formLogin().loginPage("/saml/sp/select")
-			.and()
 				.logout()
-				.logoutUrl("/logout")
-				.logoutSuccessUrl("/saml/sp/select")
 			.and()
 				.apply(
 					serviceProvider()
 						.prefix(prefix)
-						.samlTransformer(samlTransformer)
+						.saml2Login(false)
 						.configuration(
 							HostedServiceProviderConfiguration.Builder.builder()
 								.withPrefix(prefix)

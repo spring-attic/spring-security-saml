@@ -20,16 +20,17 @@ package org.springframework.security.saml.serviceprovider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
-import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
+import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
 import org.springframework.security.saml.serviceprovider.spi.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
@@ -51,25 +52,25 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	}
 
 	/*
-	 * User required fields
-	 */
-	private SamlTransformer samlTransformer = null;
-
-	/*
 	 * Fields with implementation defaults
 	 */
 	private String prefix = "/saml/sp";
+	private SamlTransformer samlTransformer = null;
 	private HostedServiceProviderConfiguration configuration;
 	private SamlValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
 	private ServiceProviderResolver resolver = null;
 	private ServiceProviderConfigurationResolver configurationResolver;
+	private boolean enableSaml2Login = false;
+	private boolean loginRedirectWhenSingleProvider = false;
 
 	@Override
 	public void init(HttpSecurity builder) throws Exception {
 		notNull(prefix, "SAML path prefix must not be null.");
-		notNull(samlTransformer, "SAML Core Transformer Implementation must not be null.");
+		if (samlTransformer == null) {
+			samlTransformer = createDefaultSamlTransformer();
+		}
 
 		if (samlValidator == null) {
 			samlValidator = new ServiceProviderSamlValidator(samlTransformer);
@@ -96,13 +97,46 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		String matchPrefix = "/" + stripSlashes(prefix);
 		String samlPattern = matchPrefix + "/**";
+		if (enableSaml2Login) {
+			builder
+				.formLogin()
+				.loginPage(matchPrefix + "/select")
+			;
+		}
 		builder
 			.csrf().ignoringAntMatchers(samlPattern)
 			.and()
 			.authorizeRequests()
-			.antMatchers(samlPattern).permitAll()
+			.antMatchers(samlPattern)
+			.permitAll()
 		;
 
+	}
+
+	private SamlTransformer createDefaultSamlTransformer() {
+		try {
+			return getClassInstance("org.springframework.security.saml.spi.opensaml.OpenSamlTransformer");
+		} catch (SamlException e) {
+			try {
+				return getClassInstance("org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer");
+			} catch (SamlException e2) {
+				throw e;
+			}
+		}
+	}
+
+	private SamlTransformer getClassInstance(String className) {
+		try {
+			Class<?> clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+
+			return (SamlTransformer) clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			throw new SamlException(
+				"Unable to instantiate the default SAML transformer. " +
+					"Have you included the transform-opensaml or transform-keycloak dependency in your project?",
+				e
+			);
+		}
 	}
 
 	@Override
@@ -118,9 +152,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
 			new AntPathRequestMatcher(matchPrefix + "/select/**"),
-			resolver, template
+			resolver,
+			template
 		)
-			.setRedirectOnSingleProvider(false); //avoid redirect loop upon logout
+			.setRedirectOnSingleProvider(loginRedirectWhenSingleProvider); //can cause loop until SSO logout
 
 		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
 			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
@@ -135,6 +170,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			samlValidator,
 			resolver
 		);
+
 		if (authenticationManager != null) {
 			authenticationFilter.setAuthenticationManager(authenticationManager);
 		}
@@ -197,6 +233,16 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		ServiceProviderConfigurationResolver configurationResolver
 	) {
 		this.configurationResolver = configurationResolver;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer saml2Login() {
+		return saml2Login(true);
+	}
+
+	public SamlServiceProviderConfigurer saml2Login(boolean loginRedirectWhenSingleProvider) {
+		this.enableSaml2Login = true;
+		this.loginRedirectWhenSingleProvider = loginRedirectWhenSingleProvider;
 		return this;
 	}
 }

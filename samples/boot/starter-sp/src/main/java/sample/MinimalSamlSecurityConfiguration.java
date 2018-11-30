@@ -41,11 +41,11 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 		http
 			//application security
 			.authorizeRequests()
-			.antMatchers("/logged-out").permitAll()
-			.antMatchers("/**").authenticated()
+				.antMatchers("/logged-out").permitAll()
+				.antMatchers("/**").authenticated()
 			.and()
-			.logout() //in lieu of SAML logout being implemented
-			.logoutSuccessUrl("/logged-out")
+				.logout() //in lieu of SAML logout being implemented
+				.logoutSuccessUrl("/logged-out")
 			.and()
 			//saml security
 			.apply(

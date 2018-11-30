@@ -46,43 +46,46 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 				.antMatchers("/**").authenticated()
 			.and()
 				.logout() //in lieu of SAML logout being implemented
+				.logoutSuccessUrl("/logged-out")
 			.and()
 			//saml security
 				.apply(
 					serviceProvider()
-						.saml2Login(false)
-						.configuration(
-							HostedServiceProviderConfiguration.Builder.builder()
-								.withKeys(
-									asList(
-										new KeyData(
-											"sp-signing-key",
-											privateKey,
-											certificate,
-											"sppassword",
-											KeyType.SIGNING
-										)
-									)
-								)
-								.withProviders(
-									asList(
-										new ExternalIdentityProviderConfiguration(
-											"simplesamlphp",
-											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
-											"Simple SAML PHP IDP (Java Config)",
-											true,
-											false,
-											UNSPECIFIED,
-											0
-										)
-									)
-								)
-								.build()
-						)
+						.saml2Login()
+						.configuration(minimalConfig())
 		);
 	}
 
-	String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +
+	private HostedServiceProviderConfiguration minimalConfig() {
+		return HostedServiceProviderConfiguration.Builder.builder()
+			.withKeys(
+				asList(
+					new KeyData(
+						"sp-signing-key",
+						privateKey,
+						certificate,
+						"sppassword",
+						KeyType.SIGNING
+					)
+				)
+			)
+			.withProviders(
+				asList(
+					new ExternalIdentityProviderConfiguration(
+						"simplesamlphp",
+						"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+						"Simple SAML PHP IDP (Java Config)",
+						true,
+						false,
+						UNSPECIFIED,
+						0
+					)
+				)
+			)
+			.build();
+	}
+
+	private String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +
 		"Proc-Type: 4,ENCRYPTED\n" +
 		"DEK-Info: DES-EDE3-CBC,7C8510E4CED17A9F\n" +
 		"\n" +
@@ -100,7 +103,7 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 		"Afv9BFV943Yp3nHwPC7nYC4FvMxOn4qW4KrHRJl57zcY6VDL4J030CfmvLjqUbuT\n" +
 		"LYiQp/YgFlmoE4bcGuCiaRfUJZCwooPK2dQMoIvMZeVl9ExUGdXVMg==\n" +
 		"-----END RSA PRIVATE KEY-----";
-	String certificate = "-----BEGIN CERTIFICATE-----\n" +
+	private String certificate = "-----BEGIN CERTIFICATE-----\n" +
 		"MIICgTCCAeoCCQCuVzyqFgMSyDANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC\n" +
 		"VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG\n" +
 		"A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQD\n" +

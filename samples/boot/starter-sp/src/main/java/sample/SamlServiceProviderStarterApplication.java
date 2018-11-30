@@ -36,6 +36,12 @@ public class SamlServiceProviderStarterApplication {
 		return "logged-in";
 	}
 
+	@RequestMapping(value = {"/logged-out"})
+	public String loggedOut() {
+		logger.info("Sample SP Application - You are logged out!");
+		return "logged-out";
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(SamlServiceProviderStarterApplication.class, args);
 	}

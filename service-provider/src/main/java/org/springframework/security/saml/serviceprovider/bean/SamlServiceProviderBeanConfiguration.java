@@ -37,11 +37,15 @@ import org.springframework.util.Assert;
 @Configuration
 public class SamlServiceProviderBeanConfiguration {
 
-	@Autowired(required = false)
-	private HostedServiceProviderConfiguration configuration;
+	private final SamlTransformer transformer;
+	private final HostedServiceProviderConfiguration configuration;
 
-	@Autowired
-	private SamlTransformer transformer;
+	public SamlServiceProviderBeanConfiguration(
+		@Autowired SamlTransformer transformer,
+		@Autowired(required = false) HostedServiceProviderConfiguration configuration) {
+		this.transformer = transformer;
+		this.configuration = configuration;
+	}
 
 	@Bean(name = "samlServiceProviderValidator")
 	public SamlValidator samlValidator() {
@@ -73,8 +77,8 @@ public class SamlServiceProviderBeanConfiguration {
 			"Unable to configure a " + ServiceProviderConfigurationResolver.class.getName() +
 				" instance, without an actual configuration. " +
 				"Either expose a " + HostedServiceProviderConfiguration.class.getName() +
-				"bean or override the " + ServiceProviderConfigurationResolver.class.getName() + "()" +
-				" method."
+				"bean or override the " + ServiceProviderConfigurationResolver.class.getName() +
+				" bean."
 		);
 		return new SingletonServiceProviderConfigurationResolver(configuration);
 	}

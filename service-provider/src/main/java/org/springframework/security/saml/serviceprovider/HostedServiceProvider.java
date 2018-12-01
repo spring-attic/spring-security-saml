@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.spi;
+package org.springframework.security.saml.serviceprovider;
 
 import java.util.Map;
 

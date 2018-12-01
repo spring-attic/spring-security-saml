@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,8 +38,8 @@ import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuth
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
-import org.springframework.security.saml.serviceprovider.spi.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
+import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -53,10 +54,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
 	public static SamlServiceProviderConfigurer saml2Login() {
-		SamlServiceProviderConfigurer configurer = new SamlServiceProviderConfigurer();
-		//TODO - post process setters from beans?
-		//		configurer.postProcess(configurer);
-		return configurer;
+		return new SamlServiceProviderConfigurer();
 	}
 
 	/*
@@ -97,7 +95,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		if (resolver == null) {
 			ServiceProviderMetadataResolver serviceProviderMetadataResolver =
-				new ServiceProviderMetadataResolver(samlTransformer);
+				new DefaultServiceProviderMetadataResolver(samlTransformer);
 			resolver = new DefaultServiceProviderResolver(serviceProviderMetadataResolver, configurationResolver);
 		}
 
@@ -112,6 +110,107 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			.permitAll()
 		;
 
+	}
+
+	@Override
+	public void configure(HttpSecurity builder) throws Exception {
+		WebSamlTemplateProcessor template = new WebSamlTemplateProcessor(samlTemplateEngine);
+		String matchPrefix = "/" + stripSlashes(prefix);
+
+		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
+			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
+			samlTransformer,
+			resolver
+		);
+
+		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
+			prefix,
+			new AntPathRequestMatcher(matchPrefix + "/select/**"),
+			resolver,
+			template
+		)
+			.setRedirectOnSingleProvider(false); //can cause loop until SSO logout
+
+		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
+			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
+			samlTransformer,
+			resolver,
+			template
+		);
+
+		SamlProcessAuthenticationResponseFilter authenticationFilter = new SamlProcessAuthenticationResponseFilter(
+			new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
+			samlTransformer,
+			samlValidator,
+			resolver
+		);
+
+		if (authenticationManager != null) {
+			authenticationFilter.setAuthenticationManager(authenticationManager);
+		}
+
+		builder.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
+		builder.addFilterAfter(selectFilter, metadataFilter.getClass());
+		builder.addFilterAfter(authnFilter, selectFilter.getClass());
+		builder.addFilterAfter(authenticationFilter, authnFilter.getClass());
+
+	}
+
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer samlTransformer(SamlTransformer samlTransformer) {
+		this.samlTransformer = samlTransformer;
+		return this;
+	}
+
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer samlValidator(SamlValidator samlValidator) {
+		this.samlValidator = samlValidator;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer prefix(String prefix) {
+		this.prefix = prefix;
+		return this;
+	}
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
+		this.resolver = resolver;
+		return this;
+	}
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
+		this.samlTemplateEngine = samlTemplateEngine;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+		return this;
+	}
+
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer serviceProviderConfiguration(HostedServiceProviderConfiguration configuration) {
+		this.configuration = configuration;
+		return this;
+	}
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
+		this.resolver = resolver;
+		return this;
+	}
+
+	@Autowired(required = false)
+	public SamlServiceProviderConfigurer configurationResolver(
+		ServiceProviderConfigurationResolver configurationResolver
+	) {
+		this.configurationResolver = configurationResolver;
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -162,101 +261,4 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		}
 	}
 
-	@Override
-	public void configure(HttpSecurity builder) throws Exception {
-		SamlTemplateProcessor template = new SamlTemplateProcessor(samlTemplateEngine);
-		String matchPrefix = "/" + stripSlashes(prefix);
-
-		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
-			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
-			samlTransformer,
-			resolver
-		);
-
-		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
-			prefix,
-			new AntPathRequestMatcher(matchPrefix + "/select/**"),
-			resolver,
-			template
-		)
-			.setRedirectOnSingleProvider(false); //can cause loop until SSO logout
-
-		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
-			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
-			samlTransformer,
-			resolver,
-			template
-		);
-
-		SamlProcessAuthenticationResponseFilter authenticationFilter = new SamlProcessAuthenticationResponseFilter(
-			new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
-			samlTransformer,
-			samlValidator,
-			resolver
-		);
-
-		if (authenticationManager != null) {
-			authenticationFilter.setAuthenticationManager(authenticationManager);
-		}
-
-		builder.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
-		builder.addFilterAfter(selectFilter, metadataFilter.getClass());
-		builder.addFilterAfter(authnFilter, selectFilter.getClass());
-		builder.addFilterAfter(authenticationFilter, authnFilter.getClass());
-
-	}
-
-
-	public SamlServiceProviderConfigurer samlTransformer(SamlTransformer samlTransformer) {
-		this.samlTransformer = samlTransformer;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer samlValidator(SamlValidator samlValidator) {
-		this.samlValidator = samlValidator;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer prefix(String prefix) {
-		this.prefix = prefix;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
-		this.resolver = resolver;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
-		this.samlTemplateEngine = samlTemplateEngine;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager authenticationManager) {
-		this.authenticationManager = authenticationManager;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer serviceProviderConfiguration(HostedServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
-		this.resolver = resolver;
-		return this;
-	}
-
-
-	public SamlServiceProviderConfigurer configurationResolver(
-		ServiceProviderConfigurationResolver configurationResolver
-	) {
-		this.configurationResolver = configurationResolver;
-		return this;
-	}
 }

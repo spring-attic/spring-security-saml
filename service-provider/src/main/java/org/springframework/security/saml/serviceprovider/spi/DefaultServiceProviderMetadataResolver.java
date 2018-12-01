@@ -58,8 +58,9 @@ import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
-public class ServiceProviderMetadataResolver {
-	private static Log logger = LogFactory.getLog(ServiceProviderMetadataResolver.class);
+public class DefaultServiceProviderMetadataResolver
+	implements org.springframework.security.saml.serviceprovider.ServiceProviderMetadataResolver {
+	private static Log logger = LogFactory.getLog(DefaultServiceProviderMetadataResolver.class);
 
 	private final SamlTransformer samlTransformer;
 
@@ -69,19 +70,21 @@ public class ServiceProviderMetadataResolver {
 		new RestOperationsUtils(4000, 4000).get(true)
 	);
 
-	public ServiceProviderMetadataResolver(SamlTransformer samlTransformer) {
+	public DefaultServiceProviderMetadataResolver(SamlTransformer samlTransformer) {
 		this.samlTransformer = samlTransformer;
 	}
 
-	public ServiceProviderMetadataResolver setCache(SamlMetadataCache cache) {
+	public DefaultServiceProviderMetadataResolver setCache(SamlMetadataCache cache) {
 		this.cache = cache;
 		return this;
 	}
 
+	@Override
 	public ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration) {
 		return generateMetadata(configuration);
 	}
 
+	@Override
 	public Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
 		HostedServiceProviderConfiguration configuration
 	) {

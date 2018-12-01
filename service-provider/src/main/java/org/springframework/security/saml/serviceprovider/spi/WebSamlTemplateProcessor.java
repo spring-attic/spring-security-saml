@@ -31,13 +31,13 @@ import org.springframework.security.web.header.writers.CacheControlHeadersWriter
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
-public class SamlTemplateProcessor {
+public class WebSamlTemplateProcessor {
 
 	private final SamlTemplateEngine samlTemplateEngine;
 	private String errorTemplate = "/templates/spi/generic-error.vm";
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
-	public SamlTemplateProcessor(SamlTemplateEngine samlTemplateEngine) {
+	public WebSamlTemplateProcessor(SamlTemplateEngine samlTemplateEngine) {
 		this.samlTemplateEngine = samlTemplateEngine;
 	}
 
@@ -65,7 +65,7 @@ public class SamlTemplateProcessor {
 		return errorTemplate;
 	}
 
-	public SamlTemplateProcessor setErrorTemplate(String errorTemplate) {
+	public WebSamlTemplateProcessor setErrorTemplate(String errorTemplate) {
 		this.errorTemplate = errorTemplate;
 		return this;
 	}
@@ -74,7 +74,7 @@ public class SamlTemplateProcessor {
 		return cacheHeaderWriter;
 	}
 
-	public SamlTemplateProcessor setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
+	public WebSamlTemplateProcessor setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
 		this.cacheHeaderWriter = cacheHeaderWriter;
 		return this;
 	}

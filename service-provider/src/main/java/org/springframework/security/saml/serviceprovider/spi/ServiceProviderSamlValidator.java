@@ -44,6 +44,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;

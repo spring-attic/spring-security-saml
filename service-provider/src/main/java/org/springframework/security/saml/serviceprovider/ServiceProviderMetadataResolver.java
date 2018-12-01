@@ -17,9 +17,17 @@
 
 package org.springframework.security.saml.serviceprovider;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
-public interface ServiceProviderResolver {
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
-	HostedServiceProvider resolve(HttpServletRequest request);
+public interface ServiceProviderMetadataResolver {
+	Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
+		HostedServiceProviderConfiguration configuration
+	);
+
+	ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration);
 }

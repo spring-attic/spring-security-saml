@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
@@ -42,7 +42,7 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
+import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -61,12 +61,12 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
 	private final AntPathRequestMatcher matcher;
-	private final SamlTemplateProcessor template;
+	private final WebSamlTemplateProcessor template;
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
 										   SamlTransformer transformer,
 										   ServiceProviderResolver resolver,
-										   SamlTemplateProcessor template) {
+										   WebSamlTemplateProcessor template) {
 		this.template = template;
 		this.matcher = matcher;
 		this.resolver = resolver;

@@ -32,8 +32,8 @@ import org.springframework.security.saml.registration.ExternalProviderConfigurat
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.spi.SamlTemplateProcessor;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
+import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -55,12 +55,12 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 	private final String prefix;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
-	private final SamlTemplateProcessor template;
+	private final WebSamlTemplateProcessor template;
 
 	public SelectIdentityProviderUIFilter(String prefix,
 										  RequestMatcher matcher,
 										  ServiceProviderResolver resolver,
-										  SamlTemplateProcessor template) {
+										  WebSamlTemplateProcessor template) {
 		this.prefix = prefix;
 		this.template = template;
 		this.matcher = matcher;

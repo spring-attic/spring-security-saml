@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.configuration;
+package org.springframework.security.saml.serviceprovider.bean;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

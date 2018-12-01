@@ -24,30 +24,24 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.configuration.OpenSamlTransformerConfiguration;
-import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer;
+import org.springframework.security.saml.serviceprovider.bean.OpenSamlTransformerConfiguration;
+import org.springframework.security.saml.serviceprovider.bean.SamlServiceProviderBeanConfiguration;
 
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
-@Import({SamlBootConfiguration.class, OpenSamlTransformerConfiguration.class})
+@Import
+	({
+		SamlBootConfiguration.class,
+		OpenSamlTransformerConfiguration.class,
+		SamlServiceProviderBeanConfiguration.class
+	})
 @Configuration
 public class SamlSecurity extends WebSecurityConfigurerAdapter {
 
-	private final HostedServiceProviderConfiguration configuration;
-
-	public SamlSecurity(HostedServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
-	}
-
-	/*
-	 * Exposed as a SpyBean in unit tests
-	 */
 	@Bean
-	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver() {
-		return new SingletonServiceProviderConfigurationResolver(configuration);
+	public SamlServiceProviderConfigurer saml2Login() {
+		return SamlServiceProviderConfigurer.saml2Login();
 	}
 
 	@Override
@@ -56,14 +50,12 @@ public class SamlSecurity extends WebSecurityConfigurerAdapter {
 		http
 			.antMatcher("/**")
 				.authorizeRequests()
-				.antMatchers("/**").authenticated()
+				.anyRequest().authenticated()
 			.and()
 				.logout()
 			.and()
-				.apply(
-					saml2Login()
-						.prefix("/saml/sp")
-						.configurationResolver(serviceProviderConfigurationResolver())
+			.apply(
+				saml2Login()
 			);
 		// @formatter:on
 	}

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider;
+package org.springframework.security.config.annotation.web.configurers;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -27,13 +27,15 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;

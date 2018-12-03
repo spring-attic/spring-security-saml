@@ -30,7 +30,7 @@ import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 @Configuration

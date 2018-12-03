@@ -26,7 +26,7 @@ import org.springframework.security.saml.boot.registration.SamlBootConfiguration
 import org.springframework.security.saml.serviceprovider.bean.OpenSamlTransformerConfiguration;
 import org.springframework.security.saml.serviceprovider.bean.SamlServiceProviderBeanConfiguration;
 
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 
 @EnableWebSecurity

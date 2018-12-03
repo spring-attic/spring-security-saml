@@ -25,7 +25,7 @@ import org.springframework.security.saml.registration.ExternalIdentityProviderCo
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 
-import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapter {

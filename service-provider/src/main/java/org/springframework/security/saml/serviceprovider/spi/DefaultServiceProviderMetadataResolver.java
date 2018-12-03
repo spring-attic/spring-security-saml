@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
@@ -40,7 +41,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -50,6 +50,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
@@ -160,15 +161,18 @@ public class DefaultServiceProviderMetadataResolver
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
-							asList(
-								getEndpoint(
-									baseUrl,
-									stripSlashes(prefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
-									REDIRECT,
-									0,
-									true
+							configuration.isSingleLogoutEnabled() ?
+								asList(
+									getEndpoint(
+										baseUrl,
+										stripSlashes(prefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
+										REDIRECT,
+										0,
+										true
+									)
 								)
-							)
+								:
+								emptyList()
 						)
 				)
 			);

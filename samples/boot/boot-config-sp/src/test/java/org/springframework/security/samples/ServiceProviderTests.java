@@ -61,8 +61,11 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -162,6 +165,20 @@ public class ServiceProviderTests {
 			.andExpect(content().string(containsString(">Simple SAML PHP IDP<")))
 			.andExpect(content().string(containsString(">A Secondary SimpleSAML Provider<")))
 		;
+	}
+
+	@Test
+	public void singleLogoutMetadata() throws Exception {
+		mockConfig(builder -> builder.withSingleLogoutEnabled(true));
+		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		assertThat(spm.getServiceProvider().getSingleLogoutService(), not(empty()));
+	}
+
+	@Test
+	public void singleLogoutDisabledMetadata() throws Exception {
+		mockConfig(builder -> builder.withSingleLogoutEnabled(false));
+		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
 
 

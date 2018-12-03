@@ -40,7 +40,7 @@ import org.springframework.security.saml.serviceprovider.filters.SamlServiceProv
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
+import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
@@ -63,7 +63,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 */
 	private SamlTransformer samlTransformer = null;
 	private HostedServiceProviderConfiguration configuration;
-	private ServiceProviderSamlValidator samlValidator = null;
+	private ServiceProviderValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
 	private ServiceProviderResolver serviceProviderResolver = null;
@@ -82,8 +82,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		samlValidator = getSharedObject(
 			http,
-			ServiceProviderSamlValidator.class,
-			() -> new ServiceProviderSamlValidator(samlTransformer),
+			ServiceProviderValidator.class,
+			() -> new DefaultServiceProviderValidator(samlTransformer),
 			samlValidator
 		);
 
@@ -204,7 +204,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		return this;
 	}
 
-	public SamlServiceProviderConfigurer samlValidator(ServiceProviderSamlValidator samlValidator) {
+	public SamlServiceProviderConfigurer samlValidator(ServiceProviderValidator samlValidator) {
 		this.samlValidator = samlValidator;
 		return this;
 	}

@@ -27,9 +27,10 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.ServiceProviderSamlValidator;
+import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.util.Assert;
@@ -48,8 +49,8 @@ public class SamlServiceProviderBeanConfiguration {
 	}
 
 	@Bean(name = "samlServiceProviderValidator")
-	public SamlValidator samlValidator() {
-		return new ServiceProviderSamlValidator(transformer);
+	public ServiceProviderValidator samlValidator() {
+		return new DefaultServiceProviderValidator(transformer);
 	}
 
 	@Bean(name = "samlServiceProviderMetadataResolver")

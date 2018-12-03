@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.ValidationResult.ValidationError;
 import org.springframework.security.saml.saml2.Saml2Object;
@@ -45,6 +44,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
+import org.springframework.security.saml.serviceprovider.ServiceProviderValidator;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;
@@ -56,7 +56,8 @@ import static org.springframework.security.saml.saml2.authentication.SubjectConf
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class ServiceProviderSamlValidator implements SamlValidator<HostedServiceProvider> {
+public class DefaultServiceProviderValidator implements
+	ServiceProviderValidator {
 
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -64,7 +65,7 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public ServiceProviderSamlValidator(SamlTransformer implementation) {
+	public DefaultServiceProviderValidator(SamlTransformer implementation) {
 		setTransformer(implementation);
 	}
 
@@ -77,7 +78,7 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 		return implementation;
 	}
 
-	public ServiceProviderSamlValidator setTime(Clock time) {
+	public DefaultServiceProviderValidator setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -430,7 +431,7 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 		return responseSkewTimeMillis;
 	}
 
-	public ServiceProviderSamlValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public DefaultServiceProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -439,7 +440,7 @@ public class ServiceProviderSamlValidator implements SamlValidator<HostedService
 		return allowUnsolicitedResponses;
 	}
 
-	public ServiceProviderSamlValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public DefaultServiceProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}

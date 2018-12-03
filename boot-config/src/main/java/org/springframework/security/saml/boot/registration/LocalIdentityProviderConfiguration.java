@@ -65,7 +65,7 @@ public class LocalIdentityProviderConfiguration extends
 
 	public HostedIdentityProviderConfiguration toHostedConfiguration() {
 		return new HostedIdentityProviderConfiguration(
-			getPrefix(),
+			getPathPrefix(),
 			getBasePath(),
 			getAlias(),
 			getEntityId(),

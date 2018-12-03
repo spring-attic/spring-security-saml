@@ -19,18 +19,18 @@ package org.springframework.security.saml.saml2.key;
 
 public class KeyData {
 
-	private final String name;
+	private final String id;
 	private final String privateKey;
 	private final String certificate;
 	private final String passphrase;
 	private final KeyType type;
 
-	public KeyData(String name,
+	public KeyData(String id,
 				   String privateKey,
 				   String certificate,
 				   String passphrase,
 				   KeyType type) {
-		this.name = name;
+		this.id = id;
 		this.privateKey = privateKey;
 		this.certificate = certificate;
 		this.passphrase = passphrase;
@@ -39,7 +39,7 @@ public class KeyData {
 
 	public KeyData(KeyData other) {
 		this(
-			other.getName(),
+			other.getId(),
 			other.getPrivateKey(),
 			other.getCertificate(),
 			other.getPassphrase(),
@@ -47,8 +47,8 @@ public class KeyData {
 		);
 	}
 
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
 
 	public KeyType getType() {
@@ -69,7 +69,7 @@ public class KeyData {
 
 
 	public static final class KeyDataBuilder {
-		private String name;
+		private String id;
 		private String privateKey;
 		private String certificate;
 		private String passphrase;
@@ -85,14 +85,14 @@ public class KeyData {
 		public static KeyDataBuilder builder(KeyData data) {
 			return builder()
 				.withCertificate(data.getCertificate())
-				.withName(data.getName())
+				.withId(data.getId())
 				.withPassphrase(data.getPassphrase())
 				.withPrivateKey(data.getPrivateKey())
 				.withType(data.getType());
 		}
 
-		public KeyDataBuilder withName(String name) {
-			this.name = name;
+		public KeyDataBuilder withId(String name) {
+			this.id = name;
 			return this;
 		}
 
@@ -117,7 +117,7 @@ public class KeyData {
 		}
 
 		public KeyData build() {
-			return new KeyData(name, privateKey, certificate, passphrase, type);
+			return new KeyData(id, privateKey, certificate, passphrase, type);
 		}
 	}
 }

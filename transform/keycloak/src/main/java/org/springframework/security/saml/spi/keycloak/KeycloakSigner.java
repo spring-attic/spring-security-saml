@@ -184,7 +184,7 @@ class KeycloakSigner {
 		KeyInfo info = new KeyInfo(provider, so.getSigningKey());
 		sig.setX509Certificate(info.getCertificate());
 		sig.setKeyPair(info.getKeyPair());
-		sig.setKeyName(so.getSigningKey().getName());
+		sig.setKeyName(so.getSigningKey().getId());
 		return sig;
 	}
 

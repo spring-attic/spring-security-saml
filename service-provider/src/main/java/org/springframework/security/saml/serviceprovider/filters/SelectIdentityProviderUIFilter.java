@@ -52,16 +52,16 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
 	private final ServiceProviderResolver resolver;
 	private final RequestMatcher matcher;
-	private final String prefix;
+	private final String pathPrefix;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 	private final WebSamlTemplateProcessor template;
 
-	public SelectIdentityProviderUIFilter(String prefix,
+	public SelectIdentityProviderUIFilter(String pathPrefix,
 										  RequestMatcher matcher,
 										  ServiceProviderResolver resolver,
 										  WebSamlTemplateProcessor template) {
-		this.prefix = prefix;
+		this.pathPrefix = pathPrefix;
 		this.template = template;
 		this.matcher = matcher;
 		this.resolver = resolver;
@@ -118,7 +118,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
-		builder.pathSegment(stripSlashes(prefix) + "/discovery");
+		builder.pathSegment(stripSlashes(pathPrefix) + "/discovery");
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();

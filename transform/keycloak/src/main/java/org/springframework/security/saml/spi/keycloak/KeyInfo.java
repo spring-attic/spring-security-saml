@@ -36,11 +36,11 @@ class KeyInfo {
 
 	KeyInfo(SamlKeyStoreProvider provider, KeyData key) throws UnrecoverableKeyException, NoSuchAlgorithmException,
 															   KeyStoreException {
-		KeyStore keyStore = provider.getKeyStore(key, key.getName().toCharArray());
+		KeyStore keyStore = provider.getKeyStore(key, key.getId().toCharArray());
 		PrivateKey privateKey = hasText(key.getPrivateKey()) ?
-			(PrivateKey) keyStore.getKey(key.getName(), key.getPassphrase().toCharArray()) :
+			(PrivateKey) keyStore.getKey(key.getId(), key.getPassphrase().toCharArray()) :
 			null;
-		certificate = (X509Certificate) keyStore.getCertificate(key.getName());
+		certificate = (X509Certificate) keyStore.getCertificate(key.getId());
 		keyPair = new KeyPair(certificate.getPublicKey(), privateKey);
 	}
 

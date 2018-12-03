@@ -101,14 +101,14 @@ public class SamlTestObjectHelper {
 		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String aliasPath = getAliasPath(configuration);
-		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/sp/";
+		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/sp/";
 
 		ServiceProviderMetadata metadata =
 			serviceProviderMetadata(
 				baseUrl,
 				signingKey,
 				keys,
-				prefix,
+				pathPrefix,
 				aliasPath,
 				configuration.getDefaultSigningAlgorithm(),
 				configuration.getDefaultDigest()
@@ -134,7 +134,7 @@ public class SamlTestObjectHelper {
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
 														   KeyData signingKey,
 														   List<KeyData> keys,
-														   String prefix,
+														   String pathPrefix,
 														   String aliasPath,
 														   AlgorithmMethod algorithmMethod,
 														   DigestMethod digestMethod) {
@@ -155,15 +155,15 @@ public class SamlTestObjectHelper {
 						.setAuthnRequestsSigned(signingKey != null)
 						.setAssertionConsumerService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
+								getEndpoint(baseUrl, pathPrefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)
@@ -191,13 +191,13 @@ public class SamlTestObjectHelper {
 		List<KeyData> keys = configuration.getKeys();
 		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
-		String prefix = hasText(configuration.getPrefix()) ? configuration.getPrefix() : "saml/idp/";
+		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);
 		IdentityProviderMetadata metadata = identityProviderMetadata(
 			baseUrl,
 			signingKey,
 			keys,
-			prefix,
+			pathPrefix,
 			aliasPath,
 			configuration.getDefaultSigningAlgorithm(),
 			configuration.getDefaultDigest()
@@ -211,7 +211,7 @@ public class SamlTestObjectHelper {
 	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
 															 KeyData signingKey,
 															 List<KeyData> keys,
-															 String prefix,
+															 String pathPrefix,
 															 String aliasPath,
 															 AlgorithmMethod algorithmMethod,
 															 DigestMethod digestMethod) {
@@ -230,15 +230,15 @@ public class SamlTestObjectHelper {
 						.setWantAuthnRequestsSigned(true)
 						.setSingleSignOnService(
 							asList(
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
-								getEndpoint(baseUrl, prefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
 						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
-								getEndpoint(baseUrl, prefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
+								getEndpoint(baseUrl, pathPrefix + "logout/alias/" + aliasPath, REDIRECT, 0, true)
 							)
 						)
 				)

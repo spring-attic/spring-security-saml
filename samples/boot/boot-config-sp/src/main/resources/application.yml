@@ -32,7 +32,7 @@ spring:
           - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
         keys:
           active:
-            name: sp-signing-key-1
+            id: sp-signing-key-1
             private-key: |
               -----BEGIN RSA PRIVATE KEY-----
               Proc-Type: 4,ENCRYPTED

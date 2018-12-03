@@ -38,7 +38,7 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		String prefix = "/saml/sp";
+		String pathPrefix = "/saml/sp";
 		// @formatter:off
 		http
 			.mvcMatcher("/**")
@@ -51,7 +51,7 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 				saml2Login()
 					.serviceProviderConfiguration(
 						HostedServiceProviderConfiguration.Builder.builder()
-							.withPrefix(prefix)
+							.withPathPrefix(pathPrefix)
 							.withEntityId("spring.security.saml.sp.id")
 							.withAlias("boot-sample-sp")
 							.withSignMetadata(true)

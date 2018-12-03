@@ -25,7 +25,7 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
-import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public abstract class LocalProviderConfiguration
 	<ExternalConfiguration extends RemoteProviderConfiguration> {
@@ -36,7 +36,7 @@ public abstract class LocalProviderConfiguration
 	private String metadata;
 	@NestedConfigurationProperty
 	private RotatingKeys keys = new RotatingKeys();
-	private String prefix;
+	private String pathPrefix;
 	private boolean singleLogoutEnabled = true;
 	@NestedConfigurationProperty
 	private List<NameId> nameIds = new LinkedList<>();
@@ -47,18 +47,8 @@ public abstract class LocalProviderConfiguration
 	private String basePath;
 
 
-	public LocalProviderConfiguration(String prefix) {
-		setPrefix(prefix);
-	}
-
-	private String cleanPrefix(String prefix) {
-		if (hasText(prefix) && prefix.startsWith("/")) {
-			prefix = prefix.substring(1);
-		}
-		if (hasText(prefix) && !prefix.endsWith("/")) {
-			prefix = prefix + "/";
-		}
-		return prefix;
+	public LocalProviderConfiguration(String pathPrefix) {
+		setPathPrefix(pathPrefix);
 	}
 
 	public String getEntityId() {
@@ -101,12 +91,12 @@ public abstract class LocalProviderConfiguration
 		this.keys = keys;
 	}
 
-	public String getPrefix() {
-		return prefix;
+	public String getPathPrefix() {
+		return pathPrefix;
 	}
 
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+	public void setPathPrefix(String pathPrefix) {
+		this.pathPrefix = stripSlashes(pathPrefix);
 	}
 
 	public boolean isSingleLogoutEnabled() {

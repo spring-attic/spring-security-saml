@@ -51,7 +51,7 @@ public class ToHostedConfigurationTests {
 	}
 
 	private void assertLocalParent(LocalProviderConfiguration lc, HostedProviderConfiguration hc) {
-		assertEquals(lc.getPrefix(), hc.getPrefix(), "prefix");
+		assertEquals(lc.getPathPrefix(), hc.getPathPrefix(), "pathPrefix");
 		assertEquals(lc.getBasePath(), hc.getBasePath(), "basePath");
 		assertEquals(lc.getAlias(), hc.getAlias(), "alias");
 		assertEquals(lc.getEntityId(), hc.getEntityId(), "entityId");

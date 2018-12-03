@@ -122,7 +122,7 @@ public class DefaultServiceProviderMetadataResolver
 
 	private ServiceProviderMetadata generateMetadata(HostedServiceProviderConfiguration configuration) {
 
-		String prefix = configuration.getPrefix();
+		String pathPrefix = configuration.getPathPrefix();
 		List<KeyData> keys = configuration.getKeys();
 		String aliasPath = getAliasPath(configuration);
 		String baseUrl = configuration.getBasePath();
@@ -144,14 +144,14 @@ public class DefaultServiceProviderMetadataResolver
 							asList(
 								getEndpoint(
 									baseUrl,
-									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									stripSlashes(pathPrefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
 									Binding.POST,
 									0,
 									true
 								),
 								getEndpoint(
 									baseUrl,
-									stripSlashes(prefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
+									stripSlashes(pathPrefix) + "/SSO/alias/" + stripStartingSlashes(aliasPath),
 									REDIRECT,
 									1,
 									false
@@ -165,7 +165,7 @@ public class DefaultServiceProviderMetadataResolver
 								asList(
 									getEndpoint(
 										baseUrl,
-										stripSlashes(prefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
+										stripSlashes(pathPrefix) + "/logout/alias/" + stripStartingSlashes(aliasPath),
 										REDIRECT,
 										0,
 										true

@@ -33,7 +33,7 @@ public class LocalServiceProviderConfiguration extends
 
 	public HostedServiceProviderConfiguration toHostedConfiguration() {
 		return new HostedServiceProviderConfiguration(
-			getPrefix(),
+			getPathPrefix(),
 			getBasePath(),
 			getAlias(),
 			getEntityId(),

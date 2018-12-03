@@ -32,12 +32,12 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
-		notNull(configuration.getPrefix(), "HostedServiceProviderConfiguration.prefix must not be null");
+		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
 	}
 
 	@Override
 	public String getPathPrefix() {
-		return configuration.getPrefix();
+		return configuration.getPathPrefix();
 	}
 
 	@Override

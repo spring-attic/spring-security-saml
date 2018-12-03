@@ -25,12 +25,10 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
-import static org.springframework.util.StringUtils.hasText;
-
 public abstract class HostedProviderConfiguration
 	<ExternalConfiguration extends ExternalProviderConfiguration<ExternalConfiguration>> {
 
-	private final String prefix;
+	private final String pathPrefix;
 	private final String basePath;
 	private final String alias;
 	private final String entityId;
@@ -43,7 +41,7 @@ public abstract class HostedProviderConfiguration
 	private final boolean singleLogoutEnabled;
 	private final List<ExternalConfiguration> providers;
 
-	public HostedProviderConfiguration(String prefix,
+	public HostedProviderConfiguration(String pathPrefix,
 									   String basePath,
 									   String alias,
 									   String entityId,
@@ -55,7 +53,7 @@ public abstract class HostedProviderConfiguration
 									   List<NameId> nameIds,
 									   boolean singleLogoutEnabled,
 									   List<ExternalConfiguration> providers) {
-		this.prefix = prefix;
+		this.pathPrefix = pathPrefix;
 		this.basePath = basePath;
 		this.alias = alias;
 		this.entityId = entityId;
@@ -67,17 +65,6 @@ public abstract class HostedProviderConfiguration
 		this.nameIds = nameIds;
 		this.singleLogoutEnabled = singleLogoutEnabled;
 		this.providers = Collections.unmodifiableList(providers);
-	}
-
-
-	protected String cleanPrefix(String prefix) {
-		if (hasText(prefix) && prefix.startsWith("/")) {
-			prefix = prefix.substring(1);
-		}
-		if (hasText(prefix) && !prefix.endsWith("/")) {
-			prefix = prefix + "/";
-		}
-		return prefix;
 	}
 
 	public String getEntityId() {
@@ -100,8 +87,8 @@ public abstract class HostedProviderConfiguration
 		return alias;
 	}
 
-	public String getPrefix() {
-		return prefix;
+	public String getPathPrefix() {
+		return pathPrefix;
 	}
 
 	public boolean isSingleLogoutEnabled() {

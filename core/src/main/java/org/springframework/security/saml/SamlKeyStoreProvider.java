@@ -46,11 +46,11 @@ public interface SamlKeyStoreProvider {
 
 			byte[] certbytes = X509Utilities.getDER(key.getCertificate());
 			Certificate certificate = X509Utilities.getCertificate(certbytes);
-			ks.setCertificateEntry(key.getName(), certificate);
+			ks.setCertificateEntry(key.getId(), certificate);
 
 			if (hasText(key.getPrivateKey())) {
 				PrivateKey pkey = X509Utilities.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
-				ks.setKeyEntry(key.getName(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+				ks.setKeyEntry(key.getId(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
 			}
 
 			return ks;

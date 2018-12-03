@@ -61,7 +61,7 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 				//we can remove this once we have an IDP
 				//that can dynamically update keys (like Spring Security SAML)
 				KeyDataBuilder.builder()
-					.withName("sp-signing-key")
+					.withId("sp-signing-key")
 					.withPrivateKey(privateKey)
 					.withCertificate(certificate)
 					.withPassphrase("sppassword")

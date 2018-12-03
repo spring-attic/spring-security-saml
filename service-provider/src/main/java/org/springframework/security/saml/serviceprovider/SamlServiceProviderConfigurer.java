@@ -115,11 +115,17 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 					ServiceProviderConfigurationResolver.class.getName() + " must not be null"
 			);
 			notNull(
-				configuration.getPrefix(),
-				HostedServiceProviderConfiguration.class.getName() + ".prefix must not be null."
+				configuration.getPathPrefix(),
+				HostedServiceProviderConfiguration.class.getName() + ".getPathPrefix() must not return null."
 			);
 			configurationResolver = new SingletonServiceProviderConfigurationResolver(configuration);
 			setSharedObject(http, ServiceProviderConfigurationResolver.class, configurationResolver);
+		}
+		else {
+			notNull(
+				configurationResolver.getPathPrefix(),
+				ServiceProviderConfigurationResolver.class.getName() + ".getPathPrefix() must not return null."
+			);
 		}
 
 		serviceProviderMetadataResolver = getSharedObject(
@@ -136,10 +142,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			serviceProviderResolver
 		);
 
-		String prefix = configurationResolver.getPathPrefix();
-		String matchPrefix = "/" + stripSlashes(prefix);
+		String pathPrefix = configurationResolver.getPathPrefix();
+		String matchPrefix = "/" + stripSlashes(pathPrefix);
 		String samlPattern = matchPrefix + "/**";
-		registerDefaultAuthenticationEntryPoint(http, prefix);
+		registerDefaultAuthenticationEntryPoint(http, pathPrefix);
 		// @formatter:off
 		http
 			.csrf()
@@ -155,10 +161,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		String prefix = configurationResolver.getPathPrefix();
+		String pathPrefix = configurationResolver.getPathPrefix();
 
 		WebSamlTemplateProcessor template = new WebSamlTemplateProcessor(samlTemplateEngine);
-		String matchPrefix = "/" + stripSlashes(prefix);
+		String matchPrefix = "/" + stripSlashes(pathPrefix);
 
 		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
 			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
@@ -167,7 +173,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		);
 
 		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
-			prefix,
+			pathPrefix,
 			new AntPathRequestMatcher(matchPrefix + "/select/**"),
 			serviceProviderResolver,
 			template
@@ -242,7 +248,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	}
 
 	@SuppressWarnings("unchecked")
-	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http, String prefix) {
+	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http, String pathPrefix) {
 		ExceptionHandlingConfigurer<HttpSecurity> exceptionHandling =
 			http.getConfigurer(ExceptionHandlingConfigurer.class);
 
@@ -250,7 +256,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			return;
 		}
 
-		String entryPointUrl = "/" + stripSlashes(prefix) + "/select?redirect=true";
+		String entryPointUrl = "/" + stripSlashes(pathPrefix) + "/select?redirect=true";
 		LoginUrlAuthenticationEntryPoint authenticationEntryPoint =
 			new LoginUrlAuthenticationEntryPoint(entryPointUrl) {
 				@Override

@@ -32,7 +32,7 @@ public class HostedServiceProviderConfiguration extends
 	private final boolean signRequests;
 	private final boolean wantAssertionsSigned;
 
-	public HostedServiceProviderConfiguration(String prefix,
+	public HostedServiceProviderConfiguration(String pathPrefix,
 											  String basePath,
 											  String alias,
 											  String entityId,
@@ -47,7 +47,7 @@ public class HostedServiceProviderConfiguration extends
 											  boolean signRequests,
 											  boolean wantAssertionsSigned) {
 		super(
-			prefix,
+			pathPrefix,
 			basePath,
 			alias,
 			entityId,
@@ -76,7 +76,7 @@ public class HostedServiceProviderConfiguration extends
 	public static final class Builder {
 		private boolean signRequests = true;
 		private boolean wantAssertionsSigned = true;
-		private String prefix = "/saml/sp";
+		private String pathPrefix = "/saml/sp";
 		private String basePath;
 		private String alias;
 		private String entityId;
@@ -100,7 +100,7 @@ public class HostedServiceProviderConfiguration extends
 			return builder()
 				.withSignRequests(configuration.isSignRequests())
 				.withWantAssertionsSigned(configuration.isWantAssertionsSigned())
-				.withPrefix(configuration.getPrefix())
+				.withPathPrefix(configuration.getPathPrefix())
 				.withBasePath(configuration.getBasePath())
 				.withAlias(configuration.getAlias())
 				.withEntityId(configuration.getEntityId())
@@ -124,8 +124,8 @@ public class HostedServiceProviderConfiguration extends
 			return this;
 		}
 
-		public Builder withPrefix(String prefix) {
-			this.prefix = prefix;
+		public Builder withPathPrefix(String pathPrefix) {
+			this.pathPrefix = pathPrefix;
 			return this;
 		}
 
@@ -196,7 +196,8 @@ public class HostedServiceProviderConfiguration extends
 
 		public HostedServiceProviderConfiguration build() {
 			HostedServiceProviderConfiguration hostedServiceProviderConfiguration =
-				new HostedServiceProviderConfiguration(prefix,
+				new HostedServiceProviderConfiguration(
+					pathPrefix,
 					basePath,
 					alias,
 					entityId,

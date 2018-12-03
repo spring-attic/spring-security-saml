@@ -38,7 +38,7 @@ public class HostedIdentityProviderConfiguration extends
 	private final long notBefore;
 	private final long sessionNotOnOrAfter;
 
-	public HostedIdentityProviderConfiguration(String prefix,
+	public HostedIdentityProviderConfiguration(String pathPrefix,
 											   String basePath,
 											   String alias,
 											   String entityId,
@@ -59,7 +59,7 @@ public class HostedIdentityProviderConfiguration extends
 											   long notBefore,
 											   long sessionNotOnOrAfter) {
 		super(
-			prefix,
+			pathPrefix,
 			basePath,
 			alias,
 			entityId,
@@ -116,7 +116,7 @@ public class HostedIdentityProviderConfiguration extends
 
 
 	public static final class Builder {
-		private String prefix;
+		private String pathPrefix;
 		private String basePath;
 		private boolean wantRequestsSigned;
 		private String alias;
@@ -154,7 +154,7 @@ public class HostedIdentityProviderConfiguration extends
 				.withNotOnOrAfter(configuration.getNotOnOrAfter())
 				.withNotBefore(configuration.getNotBefore())
 				.withSessionNotOnOrAfter(configuration.getSessionNotOnOrAfter())
-				.withPrefix(configuration.getPrefix())
+				.withPathPrefix(configuration.getPathPrefix())
 				.withBasePath(configuration.getBasePath())
 				.withAlias(configuration.getAlias())
 				.withEntityId(configuration.getEntityId())
@@ -169,8 +169,8 @@ public class HostedIdentityProviderConfiguration extends
 
 		}
 
-		public Builder withPrefix(String prefix) {
-			this.prefix = prefix;
+		public Builder withPathPrefix(String pathPrefix) {
+			this.pathPrefix = pathPrefix;
 			return this;
 		}
 
@@ -272,7 +272,7 @@ public class HostedIdentityProviderConfiguration extends
 		public HostedIdentityProviderConfiguration build() {
 			HostedIdentityProviderConfiguration hostedIdentityProviderConfiguration =
 				new HostedIdentityProviderConfiguration(
-					prefix,
+					pathPrefix,
 					basePath,
 					alias,
 					entityId,

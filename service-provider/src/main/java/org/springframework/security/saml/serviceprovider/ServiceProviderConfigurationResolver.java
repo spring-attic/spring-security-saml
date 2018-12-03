@@ -24,4 +24,6 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 public interface ServiceProviderConfigurationResolver {
 
 	HostedServiceProviderConfiguration resolve(HttpServletRequest request);
+
+	String getPathPrefix();
 }

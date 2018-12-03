@@ -17,6 +17,7 @@
 
 package sample;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,30 +32,28 @@ import static org.springframework.security.saml.serviceprovider.SamlServiceProvi
 @Configuration
 public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-
-	public MinimalSamlSecurityConfiguration() {
-	}
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		// @formatter:off
 		http
 			//application security
 			.authorizeRequests()
 				.antMatchers("/logged-out").permitAll()
 				.anyRequest().authenticated()
-			.and()
-				.logout() //in lieu of SAML logout being implemented
+				.and()
+			.logout() //in lieu of SAML logout being implemented
 				.logoutSuccessUrl("/logged-out")
-			.and()
+				.and()
 			//saml security
 			.apply(
 				saml2Login()
-					.serviceProviderConfiguration(minimalConfig())
 			)
 		;
+		// @formatter:on
 	}
 
-	private HostedServiceProviderConfiguration minimalConfig() {
+	@Bean
+	protected HostedServiceProviderConfiguration minimalConfig() {
 		return HostedServiceProviderConfiguration.Builder.builder()
 			.withKeys(
 				//sample remote IDP is static,
@@ -111,7 +110,6 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 		"qK7UFgP1bRl5qksrYX5S0z2iGJh0GvonLUt3e20Ssfl5tTEDDnAEUMLfBkyaxEHD\n" +
 		"RZ/nbTJ7VTeZOSyRoVn5XHhpuJ0B\n" +
 		"-----END CERTIFICATE-----";
-
 
 }
 

@@ -36,59 +36,55 @@ import static org.springframework.security.saml.serviceprovider.SamlServiceProvi
 @Configuration
 public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	public JavaOnlySecurityConfiguration() {
-	}
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String prefix = "/saml/sp";
+		// @formatter:off
 		http
-			.antMatcher("/**")
+			.mvcMatcher("/**")
 				.authorizeRequests()
 				.antMatchers("/**").authenticated()
-			.and()
-				.logout()
-			.and()
-				.apply(
-					saml2Login()
-						.prefix(prefix)
-						.serviceProviderConfiguration(
-							HostedServiceProviderConfiguration.Builder.builder()
-								.withPrefix(prefix)
-								.withEntityId("spring.security.saml.sp.id")
-								.withAlias("boot-sample-sp")
-								.withSignMetadata(true)
-								.withSignRequests(true)
-								.withWantAssertionsSigned(true)
-								.withSingleLogoutEnabled(true)
-								.withNameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
-								.withKeys(
-									asList(
-										new KeyData(
-											"sp-signing-key",
-											privateKey,
-											certificate,
-											"sppassword",
-											KeyType.SIGNING
-										)
+				.and()
+			.logout()
+				.and()
+			.apply(
+				saml2Login()
+					.serviceProviderConfiguration(
+						HostedServiceProviderConfiguration.Builder.builder()
+							.withPrefix(prefix)
+							.withEntityId("spring.security.saml.sp.id")
+							.withAlias("boot-sample-sp")
+							.withSignMetadata(true)
+							.withSignRequests(true)
+							.withWantAssertionsSigned(true)
+							.withSingleLogoutEnabled(true)
+							.withNameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
+							.withKeys(
+								asList(
+									new KeyData(
+										"sp-signing-key",
+										privateKey,
+										certificate,
+										"sppassword",
+										KeyType.SIGNING
 									)
 								)
-								.withProviders(
-									asList(
-										new ExternalIdentityProviderConfiguration(
-											"simplesamlphp",
-											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
-											"Simple SAML PHP IDP (Java Config)",
-											true,
-											false,
-											UNSPECIFIED,
-											0
-										)
+							)
+							.withProviders(
+								asList(
+									new ExternalIdentityProviderConfiguration(
+										"simplesamlphp",
+										"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+										"Simple SAML PHP IDP (Java Config)",
+										true,
+										false,
+										UNSPECIFIED,
+										0
 									)
 								)
-								.build()
-						)
-
+							)
+							.build()
+					)
 		);
 	}
 

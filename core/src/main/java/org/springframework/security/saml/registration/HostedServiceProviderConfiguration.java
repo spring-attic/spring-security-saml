@@ -74,19 +74,19 @@ public class HostedServiceProviderConfiguration extends
 
 
 	public static final class Builder {
-		private boolean signRequests;
-		private boolean wantAssertionsSigned;
-		private String prefix;
+		private boolean signRequests = true;
+		private boolean wantAssertionsSigned = true;
+		private String prefix = "/saml/sp";
 		private String basePath;
 		private String alias;
 		private String entityId;
-		private boolean signMetadata;
+		private boolean signMetadata = true;
 		private String metadata;
 		private List<KeyData> keys;
-		private AlgorithmMethod defaultSigningAlgorithm;
-		private DigestMethod defaultDigest;
-		private List<NameId> nameIds;
-		private boolean singleLogoutEnabled;
+		private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
+		private DigestMethod defaultDigest = DigestMethod.SHA256;
+		private List<NameId> nameIds = asList(NameId.PERSISTENT, NameId.EMAIL);
+		private boolean singleLogoutEnabled = true;
 		private List<ExternalIdentityProviderConfiguration> providers;
 
 		private Builder() {

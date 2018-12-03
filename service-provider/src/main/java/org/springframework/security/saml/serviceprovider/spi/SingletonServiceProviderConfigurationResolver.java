@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
+import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
 
 public class SingletonServiceProviderConfigurationResolver implements ServiceProviderConfigurationResolver {
@@ -30,6 +31,13 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 
 	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
+		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
+		notNull(configuration.getPrefix(), "HostedServiceProviderConfiguration.prefix must not be null");
+	}
+
+	@Override
+	public String getPathPrefix() {
+		return configuration.getPrefix();
 	}
 
 	@Override

@@ -17,46 +17,42 @@
 
 package sample;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
-import org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer;
 import org.springframework.security.saml.serviceprovider.bean.OpenSamlTransformerConfiguration;
 import org.springframework.security.saml.serviceprovider.bean.SamlServiceProviderBeanConfiguration;
+
+import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 
 @EnableWebSecurity
 @Import
 	({
-		SamlBootConfiguration.class,
-		OpenSamlTransformerConfiguration.class,
-		SamlServiceProviderBeanConfiguration.class
-	})
+		 SamlBootConfiguration.class,
+		 OpenSamlTransformerConfiguration.class,
+		 SamlServiceProviderBeanConfiguration.class
+	 })
 @Configuration
 public class SamlSecurity extends WebSecurityConfigurerAdapter {
-
-	@Bean
-	public SamlServiceProviderConfigurer saml2Login() {
-		return SamlServiceProviderConfigurer.saml2Login();
-	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
-			.antMatcher("/**")
+			.mvcMatcher("/**")
 				.authorizeRequests()
 				.anyRequest().authenticated()
 			.and()
 				.logout()
 			.and()
-			.apply(
-				saml2Login()
-			);
+				.apply(
+					saml2Login()
+				)
+		;
 		// @formatter:on
 	}
 }

@@ -67,6 +67,18 @@ public class KeyData {
 		return passphrase;
 	}
 
+	public static KeyDataBuilder builder() {
+		return new KeyDataBuilder();
+	}
+
+	public static KeyDataBuilder builder(KeyData data) {
+		return builder()
+			.certificate(data.getCertificate())
+			.id(data.getId())
+			.passphrase(data.getPassphrase())
+			.privateKey(data.getPrivateKey())
+			.type(data.getType());
+	}
 
 	public static final class KeyDataBuilder {
 		private String id;
@@ -78,40 +90,27 @@ public class KeyData {
 		private KeyDataBuilder() {
 		}
 
-		public static KeyDataBuilder builder() {
-			return new KeyDataBuilder();
-		}
-
-		public static KeyDataBuilder builder(KeyData data) {
-			return builder()
-				.withCertificate(data.getCertificate())
-				.withId(data.getId())
-				.withPassphrase(data.getPassphrase())
-				.withPrivateKey(data.getPrivateKey())
-				.withType(data.getType());
-		}
-
-		public KeyDataBuilder withId(String name) {
+		public KeyDataBuilder id(String name) {
 			this.id = name;
 			return this;
 		}
 
-		public KeyDataBuilder withPrivateKey(String privateKey) {
+		public KeyDataBuilder privateKey(String privateKey) {
 			this.privateKey = privateKey;
 			return this;
 		}
 
-		public KeyDataBuilder withCertificate(String certificate) {
+		public KeyDataBuilder certificate(String certificate) {
 			this.certificate = certificate;
 			return this;
 		}
 
-		public KeyDataBuilder withPassphrase(String passphrase) {
+		public KeyDataBuilder passphrase(String passphrase) {
 			this.passphrase = passphrase;
 			return this;
 		}
 
-		public KeyDataBuilder withType(KeyType type) {
+		public KeyDataBuilder type(KeyType type) {
 			this.type = type;
 			return this;
 		}

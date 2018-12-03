@@ -72,6 +72,27 @@ public class HostedServiceProviderConfiguration extends
 		return wantAssertionsSigned;
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static Builder builder(HostedServiceProviderConfiguration configuration) {
+		return builder()
+			.signRequests(configuration.isSignRequests())
+			.wantAssertionsSigned(configuration.isWantAssertionsSigned())
+			.pathPrefix(configuration.getPathPrefix())
+			.basePath(configuration.getBasePath())
+			.alias(configuration.getAlias())
+			.entityId(configuration.getEntityId())
+			.signMetadata(configuration.isSignMetadata())
+			.metadata(configuration.getMetadata())
+			.keys(configuration.getKeys())
+			.defaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
+			.defaultDigest(configuration.getDefaultDigest())
+			.nameIds(configuration.getNameIds())
+			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
+			.providers(configuration.getProviders());
+	}
 
 	public static final class Builder {
 		private boolean signRequests = true;
@@ -92,104 +113,82 @@ public class HostedServiceProviderConfiguration extends
 		private Builder() {
 		}
 
-		public static Builder builder() {
-			return new Builder();
-		}
-
-		public static Builder builder(HostedServiceProviderConfiguration configuration) {
-			return builder()
-				.withSignRequests(configuration.isSignRequests())
-				.withWantAssertionsSigned(configuration.isWantAssertionsSigned())
-				.withPathPrefix(configuration.getPathPrefix())
-				.withBasePath(configuration.getBasePath())
-				.withAlias(configuration.getAlias())
-				.withEntityId(configuration.getEntityId())
-				.withSignMetadata(configuration.isSignMetadata())
-				.withMetadata(configuration.getMetadata())
-				.withKeys(configuration.getKeys())
-				.withDefaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
-				.withDefaultDigest(configuration.getDefaultDigest())
-				.withNameIds(configuration.getNameIds())
-				.withSingleLogoutEnabled(configuration.isSingleLogoutEnabled())
-				.withProviders(configuration.getProviders());
-		}
-
-		public Builder withSignRequests(boolean signRequests) {
+		public Builder signRequests(boolean signRequests) {
 			this.signRequests = signRequests;
 			return this;
 		}
 
-		public Builder withWantAssertionsSigned(boolean wantAssertionsSigned) {
+		public Builder wantAssertionsSigned(boolean wantAssertionsSigned) {
 			this.wantAssertionsSigned = wantAssertionsSigned;
 			return this;
 		}
 
-		public Builder withPathPrefix(String pathPrefix) {
+		public Builder pathPrefix(String pathPrefix) {
 			this.pathPrefix = pathPrefix;
 			return this;
 		}
 
-		public Builder withBasePath(String basePath) {
+		public Builder basePath(String basePath) {
 			this.basePath = basePath;
 			return this;
 		}
 
-		public Builder withAlias(String alias) {
+		public Builder alias(String alias) {
 			this.alias = alias;
 			return this;
 		}
 
-		public Builder withEntityId(String entityId) {
+		public Builder entityId(String entityId) {
 			this.entityId = entityId;
 			return this;
 		}
 
-		public Builder withSignMetadata(boolean signMetadata) {
+		public Builder signMetadata(boolean signMetadata) {
 			this.signMetadata = signMetadata;
 			return this;
 		}
 
-		public Builder withMetadata(String metadata) {
+		public Builder metadata(String metadata) {
 			this.metadata = metadata;
 			return this;
 		}
 
-		public Builder withKeys(List<KeyData> keys) {
+		public Builder keys(List<KeyData> keys) {
 			this.keys = keys;
 			return this;
 		}
 
-		public Builder withKeys(KeyData... keys) {
+		public Builder keys(KeyData... keys) {
 			this.keys = asList(keys);
 			return this;
 		}
 
-		public Builder withDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+		public Builder defaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
 			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 			return this;
 		}
 
-		public Builder withDefaultDigest(DigestMethod defaultDigest) {
+		public Builder defaultDigest(DigestMethod defaultDigest) {
 			this.defaultDigest = defaultDigest;
 			return this;
 		}
 
-		public Builder withNameIds(List<NameId> nameIds) {
+		public Builder nameIds(List<NameId> nameIds) {
 			this.nameIds = nameIds;
 			return this;
 		}
 
-		public Builder withSingleLogoutEnabled(boolean singleLogoutEnabled) {
+		public Builder singleLogoutEnabled(boolean singleLogoutEnabled) {
 			this.singleLogoutEnabled = singleLogoutEnabled;
 			return this;
 		}
 
-		public Builder withProviders(List<ExternalIdentityProviderConfiguration> providers) {
+		public Builder providers(List<ExternalIdentityProviderConfiguration> providers) {
 			this.providers = providers;
 			return this;
 		}
 
-		public Builder withProviders(ExternalIdentityProviderConfiguration... providers) {
+		public Builder providers(ExternalIdentityProviderConfiguration... providers) {
 			this.providers = asList(providers);
 			return this;
 		}

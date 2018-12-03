@@ -24,11 +24,11 @@ public abstract class ExternalProviderConfiguration<T extends ExternalProviderCo
 	private final boolean skipSslValidation;
 	private final boolean metadataTrustCheck;
 
-	public ExternalProviderConfiguration(String alias,
-										 String metadata,
-										 String linktext,
-										 boolean skipSslValidation,
-										 boolean metadataTrustCheck) {
+	ExternalProviderConfiguration(String alias,
+								  String metadata,
+								  String linktext,
+								  boolean skipSslValidation,
+								  boolean metadataTrustCheck) {
 		this.alias = alias;
 		this.metadata = metadata;
 		this.linktext = linktext;

@@ -47,8 +47,24 @@ public class ExternalIdentityProviderConfiguration extends
 		return assertionConsumerServiceIndex;
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
 
-	public static final class ExternalIdentityProviderConfigurationBuilder {
+	public static Builder builder(ExternalIdentityProviderConfiguration idp) {
+		return builder()
+			.alias(idp.getAlias())
+			.metadata(idp.getMetadata())
+			.assertionConsumerServiceIndex(idp.getAssertionConsumerServiceIndex())
+			.metadataTrustCheck(idp.isMetadataTrustCheck())
+			.skipSslValidation(idp.isSkipSslValidation())
+			.nameId(idp.getNameId())
+			.linktext(idp.getLinktext())
+			;
+
+	}
+
+	public static final class Builder {
 		private String alias;
 		private String metadata;
 		private String linktext;
@@ -57,57 +73,40 @@ public class ExternalIdentityProviderConfiguration extends
 		private int assertionConsumerServiceIndex;
 		private boolean metadataTrustCheck;
 
-		private ExternalIdentityProviderConfigurationBuilder() {
+		private Builder() {
 		}
 
-		public static ExternalIdentityProviderConfigurationBuilder builder() {
-			return new ExternalIdentityProviderConfigurationBuilder();
-		}
-
-		public static ExternalIdentityProviderConfigurationBuilder builder(ExternalIdentityProviderConfiguration idp) {
-			return builder()
-				.withAlias(idp.getAlias())
-				.withMetadata(idp.getMetadata())
-				.withAssertionConsumerServiceIndex(idp.getAssertionConsumerServiceIndex())
-				.withMetadataTrustCheck(idp.isMetadataTrustCheck())
-				.withSkipSslValidation(idp.isSkipSslValidation())
-				.withNameId(idp.getNameId())
-				.withLinktext(idp.getLinktext())
-				;
-
-		}
-
-		public ExternalIdentityProviderConfigurationBuilder withAlias(String alias) {
+		public Builder alias(String alias) {
 			this.alias = alias;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withMetadata(String metadata) {
+		public Builder metadata(String metadata) {
 			this.metadata = metadata;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withLinktext(String linktext) {
+		public Builder linktext(String linktext) {
 			this.linktext = linktext;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withSkipSslValidation(boolean skipSslValidation) {
+		public Builder skipSslValidation(boolean skipSslValidation) {
 			this.skipSslValidation = skipSslValidation;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withNameId(NameId nameId) {
+		public Builder nameId(NameId nameId) {
 			this.nameId = nameId;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withAssertionConsumerServiceIndex(int assertionConsumerServiceIndex) {
+		public Builder assertionConsumerServiceIndex(int assertionConsumerServiceIndex) {
 			this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
 			return this;
 		}
 
-		public ExternalIdentityProviderConfigurationBuilder withMetadataTrustCheck(boolean metadataTrustCheck) {
+		public Builder metadataTrustCheck(boolean metadataTrustCheck) {
 			this.metadataTrustCheck = metadataTrustCheck;
 			return this;
 		}

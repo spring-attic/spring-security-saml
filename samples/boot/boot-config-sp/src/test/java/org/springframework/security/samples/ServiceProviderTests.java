@@ -147,7 +147,7 @@ public class ServiceProviderTests {
 		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
 		mockConfig(
 			builder ->
-				builder.withProviders(list)
+				builder.providers(list)
 		);
 		mockMvc.perform(
 			get("/")
@@ -169,14 +169,14 @@ public class ServiceProviderTests {
 
 	@Test
 	public void singleLogoutMetadata() throws Exception {
-		mockConfig(builder -> builder.withSingleLogoutEnabled(true));
+		mockConfig(builder -> builder.singleLogoutEnabled(true));
 		ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService(), not(empty()));
 	}
 
 	@Test
 	public void singleLogoutDisabledMetadata() throws Exception {
-		mockConfig(builder -> builder.withSingleLogoutEnabled(false));
+		mockConfig(builder -> builder.singleLogoutEnabled(false));
 		ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
@@ -204,7 +204,7 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("SP Initiated Login - Do not Sign requests")
 	void getAuthNRequestNotSigned() throws Exception {
-		mockConfig(builder -> builder.withSignRequests(false));
+		mockConfig(builder -> builder.signRequests(false));
 		AuthenticationRequest authn = getAuthenticationRequest();
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -254,7 +254,7 @@ public class ServiceProviderTests {
 
 	@Test
 	void authenticateWithOnlyResponseSigned() throws Exception {
-		mockConfig(builder -> builder.withWantAssertionsSigned(true));
+		mockConfig(builder -> builder.wantAssertionsSigned(true));
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
 		IdentityProviderMetadata idp =
 			(IdentityProviderMetadata) transformer.fromXml(
@@ -319,7 +319,7 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("Service Provider entity ID is generated")
 	void generateSpEntityId() throws Exception {
-		mockConfig(builder -> builder.withEntityId(null));
+		mockConfig(builder -> builder.entityId(null));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://localhost"));
@@ -328,7 +328,7 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("Service Provider entity ID is based on configured base path")
 	void generateSpEntityIdFromBasePath() throws Exception {
-		mockConfig(builder -> builder.withEntityId(null).withBasePath("http://some.other.host:8080/sample-sp"));
+		mockConfig(builder -> builder.entityId(null).basePath("http://some.other.host:8080/sample-sp"));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://some.other.host:8080/sample-sp"));
@@ -341,7 +341,7 @@ public class ServiceProviderTests {
 				HostedServiceProviderConfiguration config =
 					(HostedServiceProviderConfiguration) invocation.callRealMethod();
 				HostedServiceProviderConfiguration.Builder builder =
-					HostedServiceProviderConfiguration.Builder.builder(config);
+					HostedServiceProviderConfiguration.builder(config);
 				modifier.accept(builder);
 				return builder.build();
 			}

@@ -70,22 +70,22 @@ public class HostedServerConfiguration {
 
 		public static Builder builder(HostedServerConfiguration configuration) {
 			return new Builder()
-				.withIdentityProvider(configuration.getIdentityProvider())
-				.withServiceProvider(configuration.getServiceProvider())
-				.withNetwork(configuration.getNetwork());
+				.identityProvider(configuration.getIdentityProvider())
+				.serviceProvider(configuration.getServiceProvider())
+				.network(configuration.getNetwork());
 		}
 
-		public Builder withServiceProvider(HostedServiceProviderConfiguration serviceProvider) {
+		public Builder serviceProvider(HostedServiceProviderConfiguration serviceProvider) {
 			this.serviceProvider = serviceProvider;
 			return this;
 		}
 
-		public Builder withIdentityProvider(HostedIdentityProviderConfiguration identityProvider) {
+		public Builder identityProvider(HostedIdentityProviderConfiguration identityProvider) {
 			this.identityProvider = identityProvider;
 			return this;
 		}
 
-		public Builder withNetwork(NetworkConfiguration network) {
+		public Builder network(NetworkConfiguration network) {
 			this.network = network;
 			return this;
 		}

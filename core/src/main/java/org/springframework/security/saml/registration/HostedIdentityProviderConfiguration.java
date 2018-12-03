@@ -26,6 +26,8 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
+import static java.util.Arrays.asList;
+
 public class HostedIdentityProviderConfiguration extends
 	HostedProviderConfiguration<ExternalServiceProviderConfiguration> {
 
@@ -114,6 +116,33 @@ public class HostedIdentityProviderConfiguration extends
 		return dataEncryptionAlgorithm;
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static Builder builder(HostedIdentityProviderConfiguration configuration) {
+		return builder()
+			.wantRequestsSigned(configuration.isWantRequestsSigned())
+			.signAssertions(configuration.isSignAssertions())
+			.encryptAssertions(configuration.isEncryptAssertions())
+			.keyEncryptionAlgorithm(configuration.getKeyEncryptionAlgorithm())
+			.dataEncryptionAlgorithm(configuration.getDataEncryptionAlgorithm())
+			.notOnOrAfter(configuration.getNotOnOrAfter())
+			.notBefore(configuration.getNotBefore())
+			.sessionNotOnOrAfter(configuration.getSessionNotOnOrAfter())
+			.pathPrefix(configuration.getPathPrefix())
+			.basePath(configuration.getBasePath())
+			.alias(configuration.getAlias())
+			.entityId(configuration.getEntityId())
+			.signMetadata(configuration.isSignMetadata())
+			.metadata(configuration.getMetadata())
+			.keys(configuration.getKeys())
+			.defaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
+			.defaultDigest(configuration.getDefaultDigest())
+			.nameIds(configuration.getNameIds())
+			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
+			.providers(configuration.getProviders());
+	}
 
 	public static final class Builder {
 		private String pathPrefix;
@@ -140,132 +169,113 @@ public class HostedIdentityProviderConfiguration extends
 		private Builder() {
 		}
 
-		public static Builder builder() {
-			return new Builder();
-		}
-
-		public static Builder builder(HostedIdentityProviderConfiguration configuration) {
-			return builder()
-				.withWantRequestsSigned(configuration.isWantRequestsSigned())
-				.withSignAssertions(configuration.isSignAssertions())
-				.withEncryptAssertions(configuration.isEncryptAssertions())
-				.withKeyEncryptionAlgorithm(configuration.getKeyEncryptionAlgorithm())
-				.withDataEncryptionAlgorithm(configuration.getDataEncryptionAlgorithm())
-				.withNotOnOrAfter(configuration.getNotOnOrAfter())
-				.withNotBefore(configuration.getNotBefore())
-				.withSessionNotOnOrAfter(configuration.getSessionNotOnOrAfter())
-				.withPathPrefix(configuration.getPathPrefix())
-				.withBasePath(configuration.getBasePath())
-				.withAlias(configuration.getAlias())
-				.withEntityId(configuration.getEntityId())
-				.withSignMetadata(configuration.isSignMetadata())
-				.withMetadata(configuration.getMetadata())
-				.withKeys(configuration.getKeys())
-				.withDefaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
-				.withDefaultDigest(configuration.getDefaultDigest())
-				.withNameIds(configuration.getNameIds())
-				.withSingleLogoutEnabled(configuration.isSingleLogoutEnabled())
-				.withProviders(configuration.getProviders());
-
-		}
-
-		public Builder withPathPrefix(String pathPrefix) {
+		public Builder pathPrefix(String pathPrefix) {
 			this.pathPrefix = pathPrefix;
 			return this;
 		}
 
-		public Builder withBasePath(String basePath) {
+		public Builder basePath(String basePath) {
 			this.basePath = basePath;
 			return this;
 		}
 
-		public Builder withWantRequestsSigned(boolean wantRequestsSigned) {
+		public Builder wantRequestsSigned(boolean wantRequestsSigned) {
 			this.wantRequestsSigned = wantRequestsSigned;
 			return this;
 		}
 
-		public Builder withAlias(String alias) {
+		public Builder alias(String alias) {
 			this.alias = alias;
 			return this;
 		}
 
-		public Builder withEntityId(String entityId) {
+		public Builder entityId(String entityId) {
 			this.entityId = entityId;
 			return this;
 		}
 
-		public Builder withSignAssertions(boolean signAssertions) {
+		public Builder signAssertions(boolean signAssertions) {
 			this.signAssertions = signAssertions;
 			return this;
 		}
 
-		public Builder withSignMetadata(boolean signMetadata) {
+		public Builder signMetadata(boolean signMetadata) {
 			this.signMetadata = signMetadata;
 			return this;
 		}
 
-		public Builder withEncryptAssertions(boolean encryptAssertions) {
+		public Builder encryptAssertions(boolean encryptAssertions) {
 			this.encryptAssertions = encryptAssertions;
 			return this;
 		}
 
-		public Builder withMetadata(String metadata) {
+		public Builder metadata(String metadata) {
 			this.metadata = metadata;
 			return this;
 		}
 
-		public Builder withKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+		public Builder keyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
 			this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
 			return this;
 		}
 
-		public Builder withKeys(List<KeyData> keys) {
+		public Builder keys(List<KeyData> keys) {
 			this.keys = keys;
 			return this;
 		}
 
-		public Builder withDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+		public Builder defaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
 			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 			return this;
 		}
 
-		public Builder withDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+		public Builder dataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
 			this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
 			return this;
 		}
 
-		public Builder withDefaultDigest(DigestMethod defaultDigest) {
+		public Builder defaultDigest(DigestMethod defaultDigest) {
 			this.defaultDigest = defaultDigest;
 			return this;
 		}
 
-		public Builder withNotOnOrAfter(long notOnOrAfter) {
+		public Builder notOnOrAfter(long notOnOrAfter) {
 			this.notOnOrAfter = notOnOrAfter;
 			return this;
 		}
 
-		public Builder withNotBefore(long notBefore) {
+		public Builder notBefore(long notBefore) {
 			this.notBefore = notBefore;
 			return this;
 		}
 
-		public Builder withNameIds(List<NameId> nameIds) {
+		public Builder nameIds(List<NameId> nameIds) {
 			this.nameIds = nameIds;
 			return this;
 		}
 
-		public Builder withSessionNotOnOrAfter(long sessionNotOnOrAfter) {
+		public Builder nameIds(NameId... nameIds) {
+			this.nameIds = asList(nameIds);
+			return this;
+		}
+
+		public Builder sessionNotOnOrAfter(long sessionNotOnOrAfter) {
 			this.sessionNotOnOrAfter = sessionNotOnOrAfter;
 			return this;
 		}
 
-		public Builder withSingleLogoutEnabled(boolean singleLogoutEnabled) {
+		public Builder singleLogoutEnabled(boolean singleLogoutEnabled) {
 			this.singleLogoutEnabled = singleLogoutEnabled;
 			return this;
 		}
 
-		public Builder withProviders(List<ExternalServiceProviderConfiguration> providers) {
+		public Builder providers(List<ExternalServiceProviderConfiguration> providers) {
 			this.providers = providers;
+			return this;
+		}
+
+		public Builder providers(ExternalServiceProviderConfiguration... providers) {
+			this.providers = asList(providers);
 			return this;
 		}
 

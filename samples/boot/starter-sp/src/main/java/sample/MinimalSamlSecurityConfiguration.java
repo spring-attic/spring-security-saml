@@ -18,18 +18,16 @@
 package sample;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration.ExternalIdentityProviderConfigurationBuilder;
+import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.key.KeyData.KeyDataBuilder;
+import org.springframework.security.saml.saml2.key.KeyData;
 
 import static org.springframework.security.saml.serviceprovider.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
-@Configuration
 public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
@@ -54,23 +52,23 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 
 	@Bean
 	protected HostedServiceProviderConfiguration minimalConfig() {
-		return HostedServiceProviderConfiguration.Builder.builder()
-			.withKeys(
+		return HostedServiceProviderConfiguration.builder()
+			.keys(
 				//sample remote IDP is static,
 				//need to retain the same key between restarts
 				//we can remove this once we have an IDP
 				//that can dynamically update keys (like Spring Security SAML)
-				KeyDataBuilder.builder()
-					.withId("sp-signing-key")
-					.withPrivateKey(privateKey)
-					.withCertificate(certificate)
-					.withPassphrase("sppassword")
+				KeyData.builder()
+					.id("sp-signing-key")
+					.privateKey(privateKey)
+					.certificate(certificate)
+					.passphrase("sppassword")
 					.build()
 			)
-			.withProviders(
-				ExternalIdentityProviderConfigurationBuilder.builder()
-					.withAlias("simplesamlphp")
-					.withMetadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+			.providers(
+				ExternalIdentityProviderConfiguration.builder()
+					.alias("simplesamlphp")
+					.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
 					.build()
 			)
 			.build();

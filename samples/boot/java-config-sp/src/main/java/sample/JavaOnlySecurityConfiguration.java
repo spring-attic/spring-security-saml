@@ -50,16 +50,16 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 			.apply(
 				saml2Login()
 					.serviceProviderConfiguration(
-						HostedServiceProviderConfiguration.Builder.builder()
-							.withPathPrefix(pathPrefix)
-							.withEntityId("spring.security.saml.sp.id")
-							.withAlias("boot-sample-sp")
-							.withSignMetadata(true)
-							.withSignRequests(true)
-							.withWantAssertionsSigned(true)
-							.withSingleLogoutEnabled(true)
-							.withNameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
-							.withKeys(
+						HostedServiceProviderConfiguration.builder()
+							.pathPrefix(pathPrefix)
+							.entityId("spring.security.saml.sp.id")
+							.alias("boot-sample-sp")
+							.signMetadata(true)
+							.signRequests(true)
+							.wantAssertionsSigned(true)
+							.singleLogoutEnabled(true)
+							.nameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
+							.keys(
 								asList(
 									new KeyData(
 										"sp-signing-key",
@@ -70,7 +70,7 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 									)
 								)
 							)
-							.withProviders(
+							.providers(
 								asList(
 									new ExternalIdentityProviderConfiguration(
 										"simplesamlphp",

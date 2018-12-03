@@ -41,18 +41,18 @@ public abstract class HostedProviderConfiguration
 	private final boolean singleLogoutEnabled;
 	private final List<ExternalConfiguration> providers;
 
-	public HostedProviderConfiguration(String pathPrefix,
-									   String basePath,
-									   String alias,
-									   String entityId,
-									   boolean signMetadata,
-									   String metadata,
-									   List<KeyData> keys,
-									   AlgorithmMethod defaultSigningAlgorithm,
-									   DigestMethod defaultDigest,
-									   List<NameId> nameIds,
-									   boolean singleLogoutEnabled,
-									   List<ExternalConfiguration> providers) {
+	HostedProviderConfiguration(String pathPrefix,
+								String basePath,
+								String alias,
+								String entityId,
+								boolean signMetadata,
+								String metadata,
+								List<KeyData> keys,
+								AlgorithmMethod defaultSigningAlgorithm,
+								DigestMethod defaultDigest,
+								List<NameId> nameIds,
+								boolean singleLogoutEnabled,
+								List<ExternalConfiguration> providers) {
 		this.pathPrefix = pathPrefix;
 		this.basePath = basePath;
 		this.alias = alias;

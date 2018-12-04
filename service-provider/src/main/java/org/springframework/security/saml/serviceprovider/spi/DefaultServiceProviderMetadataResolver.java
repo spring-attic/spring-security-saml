@@ -37,9 +37,12 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
@@ -51,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
@@ -111,12 +115,25 @@ public class DefaultServiceProviderMetadataResolver
 			if (isUri(idp.getMetadata())) {
 				data = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
 			}
-			IdentityProviderMetadata metadata = (IdentityProviderMetadata) samlTransformer.fromXml(data, null, null);
+			Metadata metadata = (Metadata) samlTransformer.fromXml(data, null, null);
 			metadata.setEntityAlias(idp.getAlias());
-			return metadata;
+			return transform(metadata);
 		} catch (SamlMetadataException e) {
 			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
 			return null;
+		}
+	}
+
+	private IdentityProviderMetadata transform(Metadata metadata) {
+		if (metadata instanceof IdentityProviderMetadata) {
+			return (IdentityProviderMetadata)metadata;
+		}
+		else {
+			List<SsoProvider> providers = metadata.getSsoProviders();
+			providers = providers.stream().filter(p -> p instanceof IdentityProvider).collect(toList());
+			IdentityProviderMetadata result = new IdentityProviderMetadata(metadata);
+			result.setProviders(providers);
+			return result;
 		}
 	}
 

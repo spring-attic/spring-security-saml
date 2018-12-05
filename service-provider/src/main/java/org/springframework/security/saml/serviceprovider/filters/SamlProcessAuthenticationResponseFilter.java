@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlTransformer;
@@ -33,9 +34,9 @@ import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultSamlAuthentication;
-import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -68,10 +69,11 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		Response samlResponse = super.requiresAuthentication(request, response) ? getSamlWebResponse(
-			request,
-			resolver.resolve(request)
-		) : null;
+		Response samlResponse = super.requiresAuthentication(request, response) ?
+			getSamlWebResponse(
+				request,
+				resolver.resolve(request)
+			) : null;
 		return samlResponse != null;
 	}
 
@@ -108,7 +110,7 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 		IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		if (idp == null) {
 			logger.debug("Unable to find configured provider for SAML response.");
-			return null;
+			throw new ProviderNotFoundException(r.getIssuer().getValue());
 		}
 		try {
 			Signature signature = validator.validateSignature(r, idp.getIdentityProvider().getKeys());
@@ -121,7 +123,7 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 			}
 		} catch (SignatureException e) {
 			logger.debug("Unable to validate signature for SAML response.");
-			return null;
+			throw new AuthenticationServiceException("Failed to validate SAML authentication signature.");
 		}
 
 		ValidationResult validationResult = validator.validate(r, provider);
@@ -130,13 +132,14 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 		}
 
 		Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);
-		return new DefaultSamlAuthentication(
+		DefaultSamlAuthentication auth = new DefaultSamlAuthentication(
 			true,
 			assertion,
 			r.getOriginEntityId(),
 			provider.getMetadata().getEntityId(),
 			request.getParameter("RelayState")
 		);
+		return getAuthenticationManager().authenticate(auth);
 	}
 
 	private IdentityProviderMetadata getIdentityProvider(Response r, HostedServiceProvider sp) {

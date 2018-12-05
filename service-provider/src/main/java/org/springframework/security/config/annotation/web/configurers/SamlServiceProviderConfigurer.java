@@ -43,9 +43,11 @@ import org.springframework.security.saml.serviceprovider.filters.SelectIdentityP
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.spi.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -71,6 +73,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	private ServiceProviderResolver serviceProviderResolver = null;
 	private ServiceProviderMetadataResolver serviceProviderMetadataResolver = null;
 	private ServiceProviderConfigurationResolver configurationResolver;
+	private AuthenticationFailureHandler failureHandler;
 
 	@Override
 	public void init(HttpSecurity http) throws Exception {
@@ -195,6 +198,11 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			samlValidator,
 			serviceProviderResolver
 		);
+		WebSamlTemplateProcessor processor = new WebSamlTemplateProcessor(samlTemplateEngine);
+		if (failureHandler == null) {
+			failureHandler = new SamlAuthenticationFailureHandler(processor);
+		}
+		authenticationFilter.setAuthenticationFailureHandler(failureHandler);
 
 		if (authenticationManager != null) {
 			authenticationFilter.setAuthenticationManager(authenticationManager);
@@ -246,6 +254,13 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		ServiceProviderConfigurationResolver configurationResolver
 	) {
 		this.configurationResolver = configurationResolver;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer failureHandler(
+		AuthenticationFailureHandler failureHandler
+	) {
+		this.failureHandler = failureHandler;
 		return this;
 	}
 

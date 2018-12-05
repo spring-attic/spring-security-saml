@@ -43,13 +43,13 @@ public class WebSamlTemplateProcessor {
 
 	public void processHtmlBody(HttpServletRequest request,
 								HttpServletResponse response,
-								String html,
+								String htmlTemplate,
 								Map<String, Object> model) {
 		getCacheHeaderWriter().writeHeaders(request, response);
 		response.setContentType(TEXT_HTML_VALUE);
 		response.setCharacterEncoding(UTF_8.name());
 		StringWriter out = new StringWriter();
-		getSamlTemplateEngine().process(request, html, model, out);
+		getSamlTemplateEngine().process(request, htmlTemplate, model, out);
 		try {
 			response.getWriter().write(out.toString());
 		} catch (IOException e) {

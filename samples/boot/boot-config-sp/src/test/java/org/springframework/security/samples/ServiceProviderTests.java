@@ -75,6 +75,7 @@ import static org.springframework.security.saml.helper.SamlTestObjectHelper.quer
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -188,7 +189,8 @@ public class ServiceProviderTests {
 	@Test
 	@DisplayName("SP Initiated Login")
 	void getAuthNRequest() throws Exception {
-		AuthenticationRequest authn = getAuthenticationRequest();
+		AuthenticationRequest authn = getAuthenticationRequest(
+			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
 			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
@@ -208,7 +210,8 @@ public class ServiceProviderTests {
 	@DisplayName("SP Initiated Login - Do not Sign requests")
 	void getAuthNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
-		AuthenticationRequest authn = getAuthenticationRequest();
+		AuthenticationRequest authn = getAuthenticationRequest(
+			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
 			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
@@ -288,10 +291,10 @@ public class ServiceProviderTests {
 		).andExpect(authenticated());
 	}
 
-	private AuthenticationRequest getAuthenticationRequest() throws Exception {
+	private AuthenticationRequest getAuthenticationRequest(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/discovery")
-				.param("idp", "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+				.param("idp", idpEntityId)
 		)
 			.andExpect(status().is3xxRedirection())
 			.andReturn();
@@ -361,6 +364,167 @@ public class ServiceProviderTests {
 			.andExpect(content().string(containsString("Dual IDP/SP Metadata")))
 			.andReturn();
 	}
+
+	@Test
+	public void invalidResponse() throws Exception {
+		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
+		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		IdentityProviderMetadata idp =
+			(IdentityProviderMetadata) transformer.fromXml(
+				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
+				null,
+				null
+			);
+		Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", NameId.PERSISTENT);
+		Response response = helper.response(
+			null,
+			assertion,
+			sp,
+			idp
+		);
+		response.setDestination("invalid SP");
+
+		String encoded = transformer.samlEncode(transformer.toXml(response), false);
+		mockMvc.perform(
+			post("/saml/sp/SSO/alias/boot-sample-sp")
+				.param("SAMLResponse", encoded)
+		)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(content().string(containsString("Destination mismatch: invalid SP")));
+	}
+
+//	@Test
+//	public void initiateLogout() throws Exception {
+//		ServiceProviderService provider = provisioning.getHostedProvider();
+//		AuthenticationRequest authn = getAuthenticationRequest(
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+//		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+//		ServiceProviderMetadata sp = provider.getMetadata();
+//		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+//		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+//			true,
+//			assertion,
+//			idpEntityId,
+//			sp.getEntityId(),
+//			null
+//		);
+//
+//		String location = sp.getServiceProvider().getSingleLogoutService().get(0).getLocation();
+//		location = location.substring(location.indexOf("/saml/sp"));
+//		String redirect = mockMvc.perform(
+//			get(location)
+//				.with(authentication(authentication))
+//		)
+//			.andExpect(status().isFound())
+//			.andReturn()
+//			.getResponse()
+//			.getHeader("Location");
+//
+//		Map<String, String> params = queryParams(new URI(redirect));
+//		String request = params.get("SAMLRequest");
+//		assertNotNull(request);
+//		LogoutRequest lr = (LogoutRequest) transformer.fromXml(
+//			transformer.samlDecode(request, true),
+//			null,
+//			null
+//		);
+//		assertNotNull(lr);
+//	}
+//
+//	@Test
+//	public void receiveLogoutRequest() throws Exception {
+//		ServiceProviderService provider = provisioning.getHostedProvider();
+//		AuthenticationRequest authn = getAuthenticationRequest(
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+//		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+//		ServiceProviderMetadata sp = provider.getMetadata();
+//		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+//		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+//			true,
+//			assertion,
+//			idpEntityId,
+//			sp.getEntityId(),
+//			null
+//		);
+//		LogoutRequest request = helper.logoutRequest(
+//			sp,
+//			idp,
+//			assertion.getSubject().getPrincipal()
+//		);
+//
+//		String xml = transformer.toXml(request);
+//		String param = transformer.samlEncode(xml, true);
+//
+//		String location = sp.getServiceProvider().getSingleLogoutService().get(0).getLocation();
+//		location = location.substring(location.indexOf("/saml/sp"));
+//		String redirect = mockMvc.perform(
+//			get(location)
+//				.param("SAMLRequest", param)
+//				.with(authentication(authentication))
+//		)
+//			.andExpect(status().isFound())
+//			.andExpect(unauthenticated())
+//			.andReturn()
+//			.getResponse()
+//			.getHeader("Location");
+//
+//		Map<String, String> params = queryParams(new URI(redirect));
+//		String response = params.get("SAMLResponse");
+//		assertNotNull(response);
+//		LogoutResponse lr = (LogoutResponse) transformer.fromXml(
+//			transformer.samlDecode(response, true),
+//			null,
+//			null
+//		);
+//		assertNotNull(lr);
+//		assertThat(lr.getStatus().getCode(), equalTo(StatusCode.SUCCESS));
+//
+//	}
+//
+//	@Test
+//	public void receiveLogoutResponse() throws Exception {
+//		ServiceProviderService provider = provisioning.getHostedProvider();
+//		AuthenticationRequest authn = getAuthenticationRequest(
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+//			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+//		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+//		ServiceProviderMetadata sp = provider.getMetadata();
+//		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
+//		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+//			true,
+//			assertion,
+//			idpEntityId,
+//			sp.getEntityId(),
+//			null
+//		);
+//		LogoutRequest request = helper.logoutRequest(
+//			idp,
+//			sp,
+//			assertion.getSubject().getPrincipal()
+//		);
+//
+//		LogoutResponse response = helper.logoutResponse(request, sp, idp);
+//
+//		String xml = transformer.toXml(response);
+//		String param = transformer.samlEncode(xml, true);
+//
+//		String location = sp.getServiceProvider().getSingleLogoutService().get(0).getLocation();
+//		location = location.substring(location.indexOf("/saml/sp"));
+//		String redirect = mockMvc.perform(
+//			get(location)
+//				.param("SAMLResponse", param)
+//				.with(authentication(authentication))
+//		)
+//			.andExpect(status().isFound())
+//			.andExpect(unauthenticated())
+//			.andReturn()
+//			.getResponse()
+//			.getHeader("Location");
+//		assertEquals(redirect, "/");
+//	}
 
 	private void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
 		Mockito.doAnswer(

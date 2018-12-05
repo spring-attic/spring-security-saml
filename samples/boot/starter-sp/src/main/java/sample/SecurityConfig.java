@@ -28,7 +28,7 @@ import org.springframework.security.saml.saml2.key.KeyData;
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
-public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -51,7 +51,7 @@ public class MinimalSamlSecurityConfiguration extends WebSecurityConfigurerAdapt
 	}
 
 	@Bean
-	protected HostedServiceProviderConfiguration minimalConfig() {
+	protected HostedServiceProviderConfiguration hostedServiceProviderConfiguration() {
 		return HostedServiceProviderConfiguration.builder()
 			.keys(
 				//sample remote IDP is static,

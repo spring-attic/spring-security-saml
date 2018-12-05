@@ -257,7 +257,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		return this;
 	}
 
-	public SamlServiceProviderConfigurer failureHandler(
+	public SamlServiceProviderConfigurer authenticationFailureHandler(
 		AuthenticationFailureHandler failureHandler
 	) {
 		this.failureHandler = failureHandler;

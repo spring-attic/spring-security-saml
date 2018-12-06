@@ -91,11 +91,9 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 			String logoutResponse = request.getParameter("SAMLResponse");
 			try {
 				if (hasText(logoutRequest)) {
-					doLogout(request, response,authentication );
 					receivedLogoutRequest(request, response, authentication, logoutRequest);
 				}
 				else if (hasText(logoutResponse)) {
-					doLogout(request, response,authentication );
 					receivedLogoutResponse(request, response, authentication, logoutResponse);
 				}
 				else if (authentication instanceof SamlAuthentication) {
@@ -145,6 +143,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 			"SAMLResponse",
 			request.getParameter("RelayState")
 		);
+		doLogout(request, response,authentication);
 		response.sendRedirect(url);
 	}
 
@@ -152,6 +151,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 										HttpServletResponse response,
 										Authentication authentication,
 										String logoutResponse) throws IOException {
+		doLogout(request, response,authentication );
 		//TODO - logout success handler invocation
 		response.sendRedirect("/");
 	}

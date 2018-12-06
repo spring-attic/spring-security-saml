@@ -40,6 +40,7 @@ import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticat
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
+import org.springframework.security.saml.serviceprovider.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderValidator;
@@ -208,10 +209,19 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			authenticationFilter.setAuthenticationManager(authenticationManager);
 		}
 
+		ServiceProviderLogoutFilter logoutFilter = new ServiceProviderLogoutFilter(
+			new AntPathRequestMatcher(matchPrefix + "/logout/**"),
+			samlTransformer,
+			serviceProviderResolver,
+			samlValidator
+		);
+
 		http.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
 		http.addFilterAfter(selectFilter, metadataFilter.getClass());
 		http.addFilterAfter(authnFilter, selectFilter.getClass());
 		http.addFilterAfter(authenticationFilter, authnFilter.getClass());
+		http.addFilterAfter(logoutFilter, authenticationFilter.getClass());
+
 
 	}
 

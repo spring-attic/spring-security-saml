@@ -28,12 +28,12 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 
 public class RestOperationsUtils {
 
@@ -62,7 +62,7 @@ public class RestOperationsUtils {
 			.useSystemProperties()
 			.setRedirectStrategy(new DefaultRedirectStrategy());
 		if (skipSslValidation) {
-			builder.setSslcontext(getNonValidatingSslContext());
+			builder.setSSLContext(getNonValidatingSslContext());
 		}
 		builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
 		RequestConfig config = RequestConfig.custom()

@@ -19,6 +19,7 @@ package org.springframework.security.config.annotation.web.configurers;
 
 import java.io.IOException;
 import java.util.function.Supplier;
+import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,8 +49,10 @@ import org.springframework.security.saml.serviceprovider.spi.SamlAuthenticationF
 import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -75,6 +78,15 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	private ServiceProviderMetadataResolver serviceProviderMetadataResolver = null;
 	private ServiceProviderConfigurationResolver configurationResolver;
 	private AuthenticationFailureHandler failureHandler;
+
+	/*
+	 * Filters for handling requests
+	 */
+	private Filter metadataFilter;
+	private Filter selectIdentityProviderFilter;
+	private Filter authenticationRequestFilter;
+	private AbstractAuthenticationProcessingFilter authenticationFilter;
+	private Filter logoutFilter;
 
 	@Override
 	public void init(HttpSecurity http) throws Exception {
@@ -172,54 +184,86 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		WebSamlTemplateProcessor template = new WebSamlTemplateProcessor(samlTemplateEngine);
 		String matchPrefix = "/" + stripSlashes(pathPrefix);
 
-		SamlServiceProviderMetadataFilter metadataFilter = new SamlServiceProviderMetadataFilter(
-			new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
-			samlTransformer,
-			serviceProviderResolver
+		metadataFilter = getSharedObject(
+			http,
+			SamlServiceProviderMetadataFilter.class,
+			() -> new SamlServiceProviderMetadataFilter(
+				new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
+				samlTransformer,
+				serviceProviderResolver
+			),
+			metadataFilter
 		);
 
-		SelectIdentityProviderUIFilter selectFilter = new SelectIdentityProviderUIFilter(
-			pathPrefix,
-			new AntPathRequestMatcher(matchPrefix + "/select/**"),
-			serviceProviderResolver,
-			template
-		)
-			.setRedirectOnSingleProvider(false); //can cause loop until SSO logout
-
-		SamlAuthenticationRequestFilter authnFilter = new SamlAuthenticationRequestFilter(
-			new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
-			samlTransformer,
-			serviceProviderResolver,
-			template
+		selectIdentityProviderFilter = getSharedObject(
+			http,
+			SelectIdentityProviderUIFilter.class,
+			() ->
+				new SelectIdentityProviderUIFilter(
+					pathPrefix,
+					new AntPathRequestMatcher(matchPrefix + "/select/**"),
+					serviceProviderResolver,
+					template
+				)
+					.setRedirectOnSingleProvider(false),
+			selectIdentityProviderFilter
 		);
 
-		SamlProcessAuthenticationResponseFilter authenticationFilter = new SamlProcessAuthenticationResponseFilter(
-			new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
-			samlTransformer,
-			samlValidator,
-			serviceProviderResolver
+		authenticationRequestFilter = getSharedObject(
+			http,
+			SamlAuthenticationRequestFilter.class,
+			() -> new SamlAuthenticationRequestFilter(
+				new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
+				samlTransformer,
+				serviceProviderResolver,
+				template
+			),
+			authenticationRequestFilter
 		);
-		WebSamlTemplateProcessor processor = new WebSamlTemplateProcessor(samlTemplateEngine);
-		if (failureHandler == null) {
-			failureHandler = new SamlAuthenticationFailureHandler(processor);
-		}
-		authenticationFilter.setAuthenticationFailureHandler(failureHandler);
+
+		authenticationFilter = getSharedObject(
+			http,
+			SamlProcessAuthenticationResponseFilter.class,
+			() -> new SamlProcessAuthenticationResponseFilter(
+				new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
+				samlTransformer,
+				samlValidator,
+				serviceProviderResolver
+			),
+			authenticationFilter
+		);
 
 		if (authenticationManager != null) {
 			authenticationFilter.setAuthenticationManager(authenticationManager);
 		}
 
-		ServiceProviderLogoutFilter logoutFilter = new ServiceProviderLogoutFilter(
-			new AntPathRequestMatcher(matchPrefix + "/logout/**"),
-			samlTransformer,
-			serviceProviderResolver,
-			samlValidator
+		if (failureHandler == null) {
+			WebSamlTemplateProcessor processor = new WebSamlTemplateProcessor(samlTemplateEngine);
+			failureHandler = new SamlAuthenticationFailureHandler(processor);
+		}
+		authenticationFilter.setAuthenticationFailureHandler(failureHandler);
+
+		logoutFilter = getSharedObject(
+			http,
+			ServiceProviderLogoutFilter.class,
+			() -> {
+				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+				logoutSuccessHandler.setDefaultTargetUrl(matchPrefix + "/select");
+				return new ServiceProviderLogoutFilter(
+					new AntPathRequestMatcher(matchPrefix + "/logout/**"),
+					samlTransformer,
+					serviceProviderResolver,
+					samlValidator
+				)
+					.setLogoutSuccessHandler(logoutSuccessHandler);
+			},
+			logoutFilter
 		);
 
 		http.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
-		http.addFilterAfter(selectFilter, metadataFilter.getClass());
-		http.addFilterAfter(authnFilter, selectFilter.getClass());
-		http.addFilterAfter(authenticationFilter, authnFilter.getClass());
+		http.addFilterAfter(selectIdentityProviderFilter, metadataFilter.getClass());
+		http.addFilterAfter(authenticationRequestFilter, selectIdentityProviderFilter.getClass());
+		http.addFilterAfter(authenticationFilter, authenticationRequestFilter.getClass());
 		http.addFilterAfter(logoutFilter, authenticationFilter.getClass());
 
 
@@ -271,6 +315,31 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		AuthenticationFailureHandler failureHandler
 	) {
 		this.failureHandler = failureHandler;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer metadataFilter(Filter metadataFilter) {
+		this.metadataFilter = metadataFilter;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer selectIdentityProviderFilter(Filter selectIdentityProviderFilter) {
+		this.selectIdentityProviderFilter = selectIdentityProviderFilter;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer authenticationRequestFilter(Filter authenticationRequestFilter) {
+		this.authenticationRequestFilter = authenticationRequestFilter;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer authenticationFilter(AbstractAuthenticationProcessingFilter authenticationFilter) {
+		this.authenticationFilter = authenticationFilter;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer logoutFilter(Filter logoutFilter) {
+		this.logoutFilter = logoutFilter;
 		return this;
 	}
 
@@ -334,9 +403,9 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	private <C> C getSharedObject(HttpSecurity http,
 								  Class<C> clazz,
-								  Supplier<C> creator,
-								  C existingInstance) {
-		C result = ofNullable(existingInstance).orElseGet(() -> getSharedObject(http, clazz));
+								  Supplier<? extends C> creator,
+								  Object existingInstance) {
+		C result = ofNullable((C) existingInstance).orElseGet(() -> getSharedObject(http, clazz));
 		if (result == null) {
 			ApplicationContext context = getSharedObject(http, ApplicationContext.class);
 			try {

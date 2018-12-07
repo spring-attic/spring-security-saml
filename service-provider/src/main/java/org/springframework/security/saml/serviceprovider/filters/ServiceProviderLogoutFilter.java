@@ -49,7 +49,9 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.SamlAuthentication;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -70,6 +72,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private final SamlTransformer transformer;
 	private final ServiceProviderResolver resolver;
 	private final SamlValidator<HostedServiceProvider> validator;
+	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
 	public ServiceProviderLogoutFilter(RequestMatcher matcher,
 									   SamlTransformer transformer,
@@ -79,6 +82,15 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.validator = validator;
+	}
+
+	public LogoutSuccessHandler getLogoutSuccessHandler() {
+		return logoutSuccessHandler;
+	}
+
+	public ServiceProviderLogoutFilter setLogoutSuccessHandler(LogoutSuccessHandler logoutSuccessHandler) {
+		this.logoutSuccessHandler = logoutSuccessHandler;
+		return this;
 	}
 
 	@Override
@@ -150,10 +162,10 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private void receivedLogoutResponse(HttpServletRequest request,
 										HttpServletResponse response,
 										Authentication authentication,
-										String logoutResponse) throws IOException {
+										String logoutResponse) throws IOException, ServletException {
 		doLogout(request, response,authentication );
 		//TODO - logout success handler invocation
-		response.sendRedirect("/");
+		logoutSuccessHandler.onLogoutSuccess(request, response, authentication);
 	}
 
 	private void spInitiatedLogout(HttpServletRequest request,

@@ -19,6 +19,7 @@ package org.springframework.security.saml.serviceprovider.filters;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +36,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter {
+public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter implements Filter {
 
 	private final SamlTransformer transformer;
 	private final ServiceProviderResolver resolver;

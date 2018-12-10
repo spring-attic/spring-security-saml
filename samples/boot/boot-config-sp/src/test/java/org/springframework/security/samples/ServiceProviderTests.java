@@ -74,7 +74,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -526,17 +525,17 @@ public class ServiceProviderTests {
 
 		String location = sp.getServiceProvider().getSingleLogoutService().get(0).getLocation();
 		location = location.substring(location.indexOf("/saml/sp"));
-		String redirect = mockMvc.perform(
+		mockMvc.perform(
 			get(location)
 				.param("SAMLResponse", param)
 				.with(authentication(authentication))
 		)
 			.andExpect(status().isFound())
 			.andExpect(unauthenticated())
+			.andExpect(redirectedUrl("/saml/sp/select"))
 			.andReturn()
 			.getResponse()
 			.getHeader("Location");
-		assertEquals(redirect, "/");
 	}
 
 	private void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {

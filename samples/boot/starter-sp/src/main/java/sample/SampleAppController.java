@@ -32,10 +32,4 @@ public class SampleAppController {
 		logger.info("Sample SP Application - You are logged in!");
 		return "logged-in";
 	}
-
-	@RequestMapping(value = {"/logged-out"})
-	public String loggedOut() {
-		logger.info("Sample SP Application - You are logged out!");
-		return "logged-out";
-	}
 }

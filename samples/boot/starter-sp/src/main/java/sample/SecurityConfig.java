@@ -36,11 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 			//application security
 			.authorizeRequests()
-				.antMatchers("/logged-out").permitAll()
 				.anyRequest().authenticated()
-				.and()
-			.logout() //in lieu of SAML logout being implemented
-				.logoutSuccessUrl("/logged-out")
 				.and()
 			//saml security
 			.apply(

@@ -62,6 +62,8 @@ import static org.springframework.util.Assert.notNull;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
+	private WebSamlTemplateProcessor htmlTemplateProcessor;
+
 	public static SamlServiceProviderConfigurer saml2Login() {
 		return new SamlServiceProviderConfigurer();
 	}
@@ -111,6 +113,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			() -> new VelocityTemplateEngine(true),
 			samlTemplateEngine
 		);
+
+		htmlTemplateProcessor = new WebSamlTemplateProcessor(samlTemplateEngine);
 
 		//do we have a configurationResolver?
 		configurationResolver = getSharedObject(
@@ -181,7 +185,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	public void configure(HttpSecurity http) throws Exception {
 		String pathPrefix = configurationResolver.getPathPrefix();
 
-		WebSamlTemplateProcessor template = new WebSamlTemplateProcessor(samlTemplateEngine);
 		String matchPrefix = "/" + stripSlashes(pathPrefix);
 
 		metadataFilter = getSharedObject(
@@ -203,7 +206,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 					pathPrefix,
 					new AntPathRequestMatcher(matchPrefix + "/select/**"),
 					serviceProviderResolver,
-					template
+					htmlTemplateProcessor
 				)
 					.setRedirectOnSingleProvider(false),
 			selectIdentityProviderFilter
@@ -216,7 +219,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 				new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
 				samlTransformer,
 				serviceProviderResolver,
-				template
+				htmlTemplateProcessor
 			),
 			authenticationRequestFilter
 		);

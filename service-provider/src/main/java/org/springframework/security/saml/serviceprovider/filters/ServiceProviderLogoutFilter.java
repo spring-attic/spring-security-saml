@@ -112,12 +112,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 					spInitiatedLogout(request, response, authentication);
 				}
 				else { //just perform a simple logout
-					receivedLogoutResponse(
-						request,
-						response,
-						SecurityContextHolder.getContext().getAuthentication(),
-						null
-					);
+					receivedLogoutResponse(request, response, authentication, logoutResponse);
 				}
 			} catch (IOException x) {
 				throw new SamlException(x);

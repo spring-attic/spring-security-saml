@@ -47,8 +47,8 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.SamlAuthentication;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.authentication.SamlAuthentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -154,7 +154,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 			"SAMLResponse",
 			request.getParameter("RelayState")
 		);
-		doLogout(request, response,authentication);
+		doLogout(request, response, authentication);
 		response.sendRedirect(url);
 	}
 
@@ -162,7 +162,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 										HttpServletResponse response,
 										Authentication authentication,
 										String logoutResponse) throws IOException, ServletException {
-		doLogout(request, response,authentication );
+		doLogout(request, response, authentication);
 		//TODO - logout success handler invocation
 		logoutSuccessHandler.onLogoutSuccess(request, response, authentication);
 	}
@@ -217,7 +217,6 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 
 		return result;
 	}
-
 
 
 	private LogoutResponse logoutResponse(

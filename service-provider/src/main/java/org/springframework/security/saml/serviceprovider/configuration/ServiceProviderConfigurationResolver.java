@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider;
+package org.springframework.security.saml.serviceprovider.configuration;
 
 import javax.servlet.http.HttpServletRequest;
 

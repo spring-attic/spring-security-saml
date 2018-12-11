@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.spi;
+package org.springframework.security.saml.serviceprovider.metadata;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -63,8 +63,7 @@ import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultServiceProviderMetadataResolver
-	implements org.springframework.security.saml.serviceprovider.ServiceProviderMetadataResolver {
+public class DefaultServiceProviderMetadataResolver implements ServiceProviderMetadataResolver {
 	private static Log logger = LogFactory.getLog(DefaultServiceProviderMetadataResolver.class);
 
 	private final SamlTransformer samlTransformer;
@@ -126,7 +125,7 @@ public class DefaultServiceProviderMetadataResolver
 
 	private IdentityProviderMetadata transform(Metadata metadata) {
 		if (metadata instanceof IdentityProviderMetadata) {
-			return (IdentityProviderMetadata)metadata;
+			return (IdentityProviderMetadata) metadata;
 		}
 		else {
 			List<SsoProvider> providers = metadata.getSsoProviders();
@@ -155,7 +154,7 @@ public class DefaultServiceProviderMetadataResolver
 				asList(
 					new org.springframework.security.saml.saml2.metadata.ServiceProvider()
 						.setKeys(keys)
-						.setWantAssertionsSigned(true)
+						.setWantAssertionsSigned(configuration.isWantAssertionsSigned())
 						.setAuthnRequestsSigned(keys.size() > 0 && configuration.isSignRequests())
 						.setAssertionConsumerService(
 							asList(

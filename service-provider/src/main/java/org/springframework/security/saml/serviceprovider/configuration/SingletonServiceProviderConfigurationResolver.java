@@ -15,12 +15,11 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.spi;
+package org.springframework.security.saml.serviceprovider.configuration;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;

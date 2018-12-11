@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.serviceprovider.spi;
+package org.springframework.security.saml.serviceprovider.validation;
 
 import java.time.Clock;
 import java.util.Arrays;
@@ -44,7 +44,6 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderValidator;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;
@@ -103,13 +102,13 @@ public class DefaultServiceProviderValidator implements
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
 		ValidationResult result;
 		if (saml2Object instanceof IdentityProviderMetadata) {
-			result = validate((IdentityProviderMetadata)saml2Object, provider);
+			result = validate((IdentityProviderMetadata) saml2Object, provider);
 		}
 		else if (saml2Object instanceof LogoutRequest) {
-			result = validate((LogoutRequest)saml2Object, provider);
+			result = validate((LogoutRequest) saml2Object, provider);
 		}
 		else if (saml2Object instanceof LogoutResponse) {
-			result = validate((LogoutResponse)saml2Object, provider);
+			result = validate((LogoutResponse) saml2Object, provider);
 		}
 		else if (saml2Object instanceof Response) {
 			Response r = (Response) saml2Object;

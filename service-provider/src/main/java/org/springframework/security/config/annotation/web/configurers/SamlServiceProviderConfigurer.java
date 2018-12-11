@@ -33,21 +33,21 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.ServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler;
+import org.springframework.security.saml.serviceprovider.configuration.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.filters.ServiceProviderLogoutFilter;
-import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.spi.DefaultServiceProviderValidator;
-import org.springframework.security.saml.serviceprovider.spi.SamlAuthenticationFailureHandler;
-import org.springframework.security.saml.serviceprovider.spi.SingletonServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.spi.WebSamlTemplateProcessor;
+import org.springframework.security.saml.serviceprovider.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.validation.DefaultServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -62,7 +62,7 @@ import static org.springframework.util.Assert.notNull;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
-	private WebSamlTemplateProcessor htmlTemplateProcessor;
+	private HtmlWriter htmlTemplateProcessor;
 
 	public static SamlServiceProviderConfigurer saml2Login() {
 		return new SamlServiceProviderConfigurer();
@@ -114,7 +114,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			samlTemplateEngine
 		);
 
-		htmlTemplateProcessor = new WebSamlTemplateProcessor(samlTemplateEngine);
+		htmlTemplateProcessor = new HtmlWriter(samlTemplateEngine);
 
 		//do we have a configurationResolver?
 		configurationResolver = getSharedObject(
@@ -241,7 +241,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		}
 
 		if (failureHandler == null) {
-			WebSamlTemplateProcessor processor = new WebSamlTemplateProcessor(samlTemplateEngine);
+			HtmlWriter processor = new HtmlWriter(samlTemplateEngine);
 			failureHandler = new SamlAuthenticationFailureHandler(processor);
 		}
 		authenticationFilter.setAuthenticationFailureHandler(failureHandler);

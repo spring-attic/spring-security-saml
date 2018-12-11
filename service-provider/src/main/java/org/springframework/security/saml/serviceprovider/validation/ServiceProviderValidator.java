@@ -15,9 +15,10 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider;
+package org.springframework.security.saml.serviceprovider.validation;
 
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 
 public interface ServiceProviderValidator extends SamlValidator<HostedServiceProvider> {
 }

@@ -24,6 +24,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.serviceprovider.configuration.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
@@ -47,27 +49,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	protected HostedServiceProviderConfiguration hostedServiceProviderConfiguration() {
-		return HostedServiceProviderConfiguration.builder()
-			.keys(
-				//sample remote IDP is static,
-				//need to retain the same key between restarts
-				//we can remove this once we have an IDP
-				//that can dynamically update keys (like Spring Security SAML)
-				KeyData.builder()
-					.id("sp-signing-key")
-					.privateKey(privateKey)
-					.certificate(certificate)
-					.passphrase("sppassword")
-					.build()
-			)
-			.providers(
-				ExternalIdentityProviderConfiguration.builder()
-					.alias("simplesamlphp")
-					.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
-					.build()
-			)
-			.build();
+	protected ServiceProviderConfigurationResolver configurationResolver() {
+		return new SingletonServiceProviderConfigurationResolver(
+			HostedServiceProviderConfiguration.builder()
+				.keys(
+					//sample remote IDP is static,
+					//need to retain the same key between restarts
+					//we can remove this once we have an IDP
+					//that can dynamically update keys (like Spring Security SAML)
+					KeyData.builder()
+						.id("sp-signing-key")
+						.privateKey(privateKey)
+						.certificate(certificate)
+						.passphrase("sppassword")
+						.build()
+				)
+				.providers(
+					ExternalIdentityProviderConfiguration.builder()
+						.alias("simplesamlphp")
+						.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+						.build()
+				)
+				.build());
 	}
 
 	private String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +

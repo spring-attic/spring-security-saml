@@ -25,12 +25,13 @@ import org.springframework.security.saml.registration.ExternalIdentityProviderCo
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static java.util.Arrays.asList;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 @EnableWebSecurity
 @Configuration
@@ -39,53 +40,54 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		String pathPrefix = "/saml/sp";
-		// @formatter:off
 		http
 			.mvcMatcher("/**")
-				.authorizeRequests()
-				.antMatchers("/**").authenticated()
-				.and()
+			.authorizeRequests()
+			.antMatchers("/**").authenticated()
+			.and()
 			.logout()
-				.and()
+			.and()
 			.apply(
 				saml2Login()
-					.serviceProviderConfiguration(
-						HostedServiceProviderConfiguration.builder()
-							.pathPrefix(pathPrefix)
-							.entityId("spring.security.saml.sp.id")
-							.alias("boot-sample-sp")
-							.signMetadata(true)
-							.signRequests(true)
-							.wantAssertionsSigned(true)
-							.singleLogoutEnabled(true)
-							.nameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
-							.keys(
-								asList(
-									new KeyData(
-										"sp-signing-key",
-										privateKey,
-										certificate,
-										"sppassword",
-										KeyType.SIGNING
+					.configurationResolver(
+						new SingletonServiceProviderConfigurationResolver(
+							HostedServiceProviderConfiguration.builder()
+								.pathPrefix(pathPrefix)
+								.entityId("spring.security.saml.sp.id")
+								.alias("boot-sample-sp")
+								.signMetadata(true)
+								.signRequests(true)
+								.wantAssertionsSigned(true)
+								.singleLogoutEnabled(true)
+								.nameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
+								.keys(
+									asList(
+										new KeyData(
+											"sp-signing-key",
+											privateKey,
+											certificate,
+											"sppassword",
+											KeyType.SIGNING
+										)
 									)
 								)
-							)
-							.providers(
-								asList(
-									new ExternalIdentityProviderConfiguration(
-										"simplesamlphp",
-										"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
-										"Simple SAML PHP IDP (Java Config)",
-										true,
-										false,
-										UNSPECIFIED,
-										0
+								.providers(
+									asList(
+										new ExternalIdentityProviderConfiguration(
+											"simplesamlphp",
+											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+											"Simple SAML PHP IDP (Java Config)",
+											true,
+											false,
+											UNSPECIFIED,
+											0
+										)
 									)
 								)
-							)
-							.build()
+								.build()
+						)
 					)
-		);
+			);
 	}
 
 	String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +

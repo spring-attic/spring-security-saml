@@ -37,7 +37,6 @@ import org.springframework.security.saml.serviceprovider.DefaultServiceProviderR
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.configuration.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
@@ -62,8 +61,6 @@ import static org.springframework.util.Assert.notNull;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
 
-	private HtmlWriter htmlTemplateProcessor;
-
 	public static SamlServiceProviderConfigurer saml2Login() {
 		return new SamlServiceProviderConfigurer();
 	}
@@ -71,14 +68,14 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * Fields with implementation defaults
 	 */
+	private ServiceProviderResolver serviceProviderResolver = null;
 	private SamlTransformer samlTransformer = null;
-	private HostedServiceProviderConfiguration configuration;
 	private ServiceProviderValidator samlValidator = null;
 	private SamlTemplateEngine samlTemplateEngine = null;
 	private AuthenticationManager authenticationManager = null;
-	private ServiceProviderResolver serviceProviderResolver = null;
 	private ServiceProviderMetadataResolver serviceProviderMetadataResolver = null;
 	private ServiceProviderConfigurationResolver configurationResolver;
+	private HtmlWriter htmlTemplateProcessor;
 	private AuthenticationFailureHandler failureHandler;
 
 	/*
@@ -90,13 +87,41 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	private AbstractAuthenticationProcessingFilter authenticationFilter;
 	private Filter logoutFilter;
 
+	/*
+	 * Setters
+	 */
+	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
+		this.serviceProviderResolver = resolver;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer configurationResolver(
+		ServiceProviderConfigurationResolver configurationResolver
+	) {
+		this.configurationResolver = configurationResolver;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer samlValidator(ServiceProviderValidator samlValidator) {
+		this.samlValidator = samlValidator;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+		return this;
+	}
+
+	/*
+	 * Configuration
+	 */
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 
 		samlTransformer = getSharedObject(
 			http,
 			SamlTransformer.class,
-			() -> createDefaultSamlTransformer(),
+			this::createDefaultSamlTransformer,
 			samlTransformer
 		);
 
@@ -124,31 +149,16 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			configurationResolver
 		);
 
-		if (configurationResolver == null) {
-			configuration = getSharedObject(
-				http,
-				HostedServiceProviderConfiguration.class,
-				null,
-				configuration
-			);
-			notNull(
-				configuration,
-				HostedServiceProviderConfiguration.class.getName() + " or " +
-					ServiceProviderConfigurationResolver.class.getName() + " must not be null"
-			);
-			notNull(
-				configuration.getPathPrefix(),
-				HostedServiceProviderConfiguration.class.getName() + ".getPathPrefix() must not return null."
-			);
-			configurationResolver = new SingletonServiceProviderConfigurationResolver(configuration);
-			setSharedObject(http, ServiceProviderConfigurationResolver.class, configurationResolver);
-		}
-		else {
-			notNull(
-				configurationResolver.getPathPrefix(),
-				ServiceProviderConfigurationResolver.class.getName() + ".getPathPrefix() must not return null."
-			);
-		}
+		notNull(
+			configurationResolver,
+			HostedServiceProviderConfiguration.class.getName() + " or " +
+				ServiceProviderConfigurationResolver.class.getName() + " must not be null"
+		);
+
+		notNull(
+			configurationResolver.getPathPrefix(),
+			ServiceProviderConfigurationResolver.class.getName() + ".getPathPrefix() must not return null."
+		);
 
 		serviceProviderMetadataResolver = getSharedObject(
 			http,
@@ -163,6 +173,9 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			() -> new DefaultServiceProviderResolver(serviceProviderMetadataResolver, configurationResolver),
 			serviceProviderResolver
 		);
+
+		htmlTemplateProcessor = new HtmlWriter(samlTemplateEngine);
+		failureHandler = new SamlAuthenticationFailureHandler(htmlTemplateProcessor);;
 
 		String pathPrefix = configurationResolver.getPathPrefix();
 		String matchPrefix = "/" + stripSlashes(pathPrefix);
@@ -235,15 +248,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			),
 			authenticationFilter
 		);
-
-		if (authenticationManager != null) {
-			authenticationFilter.setAuthenticationManager(authenticationManager);
-		}
-
-		if (failureHandler == null) {
-			HtmlWriter processor = new HtmlWriter(samlTemplateEngine);
-			failureHandler = new SamlAuthenticationFailureHandler(processor);
-		}
+		authenticationFilter.setAuthenticationManager(ofNullable(authenticationManager).orElse(a -> a));
 		authenticationFilter.setAuthenticationFailureHandler(failureHandler);
 
 		logoutFilter = getSharedObject(
@@ -268,82 +273,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		http.addFilterAfter(authenticationRequestFilter, selectIdentityProviderFilter.getClass());
 		http.addFilterAfter(authenticationFilter, authenticationRequestFilter.getClass());
 		http.addFilterAfter(logoutFilter, authenticationFilter.getClass());
-
-
-	}
-
-	public SamlServiceProviderConfigurer samlTransformer(SamlTransformer samlTransformer) {
-		this.samlTransformer = samlTransformer;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer samlValidator(ServiceProviderValidator samlValidator) {
-		this.samlValidator = samlValidator;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
-		this.serviceProviderResolver = resolver;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer samlTemplateEngine(SamlTemplateEngine samlTemplateEngine) {
-		this.samlTemplateEngine = samlTemplateEngine;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager authenticationManager) {
-		this.authenticationManager = authenticationManager;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer serviceProviderConfiguration(HostedServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
-		this.serviceProviderResolver = resolver;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer configurationResolver(
-		ServiceProviderConfigurationResolver configurationResolver
-	) {
-		this.configurationResolver = configurationResolver;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer authenticationFailureHandler(
-		AuthenticationFailureHandler failureHandler
-	) {
-		this.failureHandler = failureHandler;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer metadataFilter(Filter metadataFilter) {
-		this.metadataFilter = metadataFilter;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer selectIdentityProviderFilter(Filter selectIdentityProviderFilter) {
-		this.selectIdentityProviderFilter = selectIdentityProviderFilter;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer authenticationRequestFilter(Filter authenticationRequestFilter) {
-		this.authenticationRequestFilter = authenticationRequestFilter;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer authenticationFilter(AbstractAuthenticationProcessingFilter authenticationFilter) {
-		this.authenticationFilter = authenticationFilter;
-		return this;
-	}
-
-	public SamlServiceProviderConfigurer logoutFilter(Filter logoutFilter) {
-		this.logoutFilter = logoutFilter;
-		return this;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -23,8 +23,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
-import org.springframework.security.saml.serviceprovider.bean.OpenSamlTransformerConfiguration;
-import org.springframework.security.saml.serviceprovider.bean.SamlServiceProviderBeanConfiguration;
+import org.springframework.security.saml.serviceprovider.bean.OpenSamlTransformerBeans;
+import org.springframework.security.saml.serviceprovider.bean.SamlServiceProviderBeans;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
@@ -33,8 +33,8 @@ import static org.springframework.security.config.annotation.web.configurers.Sam
 @Import
 	({
 		 SamlBootConfiguration.class,
-		 OpenSamlTransformerConfiguration.class,
-		 SamlServiceProviderBeanConfiguration.class
+		 OpenSamlTransformerBeans.class,
+		 SamlServiceProviderBeans.class
 	 })
 @Configuration
 public class SamlSecurity extends WebSecurityConfigurerAdapter {

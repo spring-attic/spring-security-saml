@@ -20,14 +20,14 @@ package org.springframework.security.saml.serviceprovider.bean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer;
 
 @Configuration
-public class OpenSamlTransformerConfiguration {
+public class KeycloakSamlTransformerBeans {
 
-	@Bean(name = "openSamlTransformer")
+	@Bean(name = "keycloakSamlTransformer")
 	public SamlTransformer samlTransformer() {
-		return new OpenSamlTransformer();
+		return new KeycloakSamlTransformer();
 	}
 
 }

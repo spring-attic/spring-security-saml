@@ -36,12 +36,12 @@ import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.util.Assert;
 
 @Configuration
-public class SamlServiceProviderBeanConfiguration {
+public class SamlServiceProviderBeans {
 
 	private final SamlTransformer transformer;
 	private final HostedServiceProviderConfiguration configuration;
 
-	public SamlServiceProviderBeanConfiguration(
+	public SamlServiceProviderBeans(
 		@Autowired SamlTransformer transformer,
 		@Autowired(required = false) HostedServiceProviderConfiguration configuration) {
 		this.transformer = transformer;

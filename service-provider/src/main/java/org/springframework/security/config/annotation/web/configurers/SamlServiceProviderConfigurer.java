@@ -32,7 +32,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler;
@@ -90,15 +89,15 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * Setters
 	 */
-	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
-		this.serviceProviderResolver = resolver;
-		return this;
-	}
-
 	public SamlServiceProviderConfigurer configurationResolver(
 		ServiceProviderConfigurationResolver configurationResolver
 	) {
 		this.configurationResolver = configurationResolver;
+		return this;
+	}
+
+	public SamlServiceProviderConfigurer serviceProviderResolver(ServiceProviderResolver resolver) {
+		this.serviceProviderResolver = resolver;
 		return this;
 	}
 
@@ -139,8 +138,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			samlTemplateEngine
 		);
 
-		htmlTemplateProcessor = new HtmlWriter(samlTemplateEngine);
-
 		//do we have a configurationResolver?
 		configurationResolver = getSharedObject(
 			http,
@@ -151,8 +148,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		notNull(
 			configurationResolver,
-			HostedServiceProviderConfiguration.class.getName() + " or " +
-				ServiceProviderConfigurationResolver.class.getName() + " must not be null"
+			ServiceProviderConfigurationResolver.class.getName() + " must not be null"
 		);
 
 		notNull(
@@ -248,7 +244,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			),
 			authenticationFilter
 		);
-		authenticationFilter.setAuthenticationManager(ofNullable(authenticationManager).orElse(a -> a));
+		authenticationFilter.setAuthenticationManager(ofNullable(authenticationManager).orElseGet(() -> a -> a));
 		authenticationFilter.setAuthenticationFailureHandler(failureHandler);
 
 		logoutFilter = getSharedObject(

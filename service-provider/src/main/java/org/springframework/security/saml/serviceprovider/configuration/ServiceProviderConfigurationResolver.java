@@ -23,7 +23,7 @@ import org.springframework.security.saml.registration.HostedServiceProviderConfi
 
 public interface ServiceProviderConfigurationResolver {
 
-	HostedServiceProviderConfiguration resolve(HttpServletRequest request);
+	HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request);
 
 	String getPathPrefix();
 }

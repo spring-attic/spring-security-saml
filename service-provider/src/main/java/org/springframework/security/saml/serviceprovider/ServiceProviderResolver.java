@@ -21,5 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface ServiceProviderResolver {
 
-	HostedServiceProvider resolve(HttpServletRequest request);
+	HostedServiceProvider getServiceProvider(HttpServletRequest request);
+
 }

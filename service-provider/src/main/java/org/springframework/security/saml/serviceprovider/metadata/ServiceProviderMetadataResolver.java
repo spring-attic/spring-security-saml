@@ -25,9 +25,9 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
 public interface ServiceProviderMetadataResolver {
-	Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
+	Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> getIdentityProviders(
 		HostedServiceProviderConfiguration configuration
 	);
 
-	ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration);
+	ServiceProviderMetadata getMetadata(HostedServiceProviderConfiguration configuration);
 }

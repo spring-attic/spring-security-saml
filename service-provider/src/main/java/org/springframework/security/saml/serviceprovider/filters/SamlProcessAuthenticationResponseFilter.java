@@ -72,7 +72,7 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 		Response samlResponse = super.requiresAuthentication(request, response) ?
 			getSamlWebResponse(
 				request,
-				resolver.resolve(request)
+				resolver.getServiceProvider(request)
 			) : null;
 		return samlResponse != null;
 	}
@@ -104,7 +104,7 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 		throws AuthenticationException, IOException, ServletException {
-		HostedServiceProvider provider = resolver.resolve(request);
+		HostedServiceProvider provider = resolver.getServiceProvider(request);
 		Response r = getSamlWebResponse(request, provider);
 		notNull(r, "The response should never be null");
 		IdentityProviderMetadata idp = getIdentityProvider(r, provider);

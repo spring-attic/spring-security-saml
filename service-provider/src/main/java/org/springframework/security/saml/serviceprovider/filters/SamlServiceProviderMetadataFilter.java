@@ -58,7 +58,7 @@ public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter impl
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedServiceProvider provider = resolver.resolve(request);
+			HostedServiceProvider provider = resolver.getServiceProvider(request);
 			String xml = transformer.toXml(provider.getMetadata());
 			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);

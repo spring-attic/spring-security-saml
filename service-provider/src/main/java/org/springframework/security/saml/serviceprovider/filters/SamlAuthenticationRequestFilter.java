@@ -78,7 +78,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			try {
-				HostedServiceProvider provider = resolver.resolve(request);
+				HostedServiceProvider provider = resolver.getServiceProvider(request);
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 				IdentityProviderMetadata idp = getIdentityProvider(request, provider);
 				ServiceProviderMetadata localSp = provider.getMetadata();

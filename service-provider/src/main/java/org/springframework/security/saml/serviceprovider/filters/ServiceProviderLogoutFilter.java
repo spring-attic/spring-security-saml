@@ -134,7 +134,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 									   Authentication authentication,
 									   String logoutRequest) throws IOException {
 		String xml = transformer.samlDecode(logoutRequest, HttpMethod.GET.name().equalsIgnoreCase(request.getMethod()));
-		HostedServiceProvider provider = resolver.resolve(request);
+		HostedServiceProvider provider = resolver.getServiceProvider(request);
 		LogoutRequest lr = transformer.fromXml(
 			xml,
 			null,
@@ -173,7 +173,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		if (authentication instanceof SamlAuthentication) {
 			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
-			HostedServiceProvider provider = resolver.resolve(request);
+			HostedServiceProvider provider = resolver.getServiceProvider(request);
 			ServiceProviderMetadata sp = provider.getMetadata();
 			IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			LogoutRequest lr = logoutRequest(provider.getMetadata(), idp, (NameIdPrincipal) sa.getSamlPrincipal());

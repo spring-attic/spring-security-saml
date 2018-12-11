@@ -84,12 +84,12 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 	}
 
 	@Override
-	public ServiceProviderMetadata resolveHostedServiceProvider(HostedServiceProviderConfiguration configuration) {
+	public ServiceProviderMetadata getMetadata(HostedServiceProviderConfiguration configuration) {
 		return generateMetadata(configuration);
 	}
 
 	@Override
-	public Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> resolveConfiguredProviders(
+	public Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> getIdentityProviders(
 		HostedServiceProviderConfiguration configuration
 	) {
 		return getProviders(configuration);

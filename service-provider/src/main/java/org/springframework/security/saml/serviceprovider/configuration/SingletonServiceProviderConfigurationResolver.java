@@ -40,7 +40,7 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 	}
 
 	@Override
-	public HostedServiceProviderConfiguration resolve(HttpServletRequest request) {
+	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		HostedServiceProviderConfiguration.Builder builder =
 			HostedServiceProviderConfiguration.builder(configuration);
 		String basePath = getBasePath(request, false);

@@ -25,23 +25,22 @@ import org.springframework.security.saml.serviceprovider.metadata.ServiceProvide
 
 public class DefaultServiceProviderResolver implements ServiceProviderResolver {
 
-	private final ServiceProviderConfigurationResolver configuration;
 	private final ServiceProviderMetadataResolver metadataResolver;
+	private final ServiceProviderConfigurationResolver configResolver;
 
 	public DefaultServiceProviderResolver(ServiceProviderMetadataResolver metadataResolver,
-										  ServiceProviderConfigurationResolver configuration) {
-		this.configuration = configuration;
+										  ServiceProviderConfigurationResolver configResolver) {
+		this.configResolver = configResolver;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
-	public HostedServiceProvider resolve(HttpServletRequest request) {
-		HostedServiceProviderConfiguration config = configuration.resolve(request);
+	public HostedServiceProvider getServiceProvider(HttpServletRequest request) {
+		HostedServiceProviderConfiguration config = configResolver.getConfiguration(request);
 		return new HostedServiceProvider(
 			config,
-			metadataResolver.resolveHostedServiceProvider(config),
-			metadataResolver.resolveConfiguredProviders(config)
+			metadataResolver.getMetadata(config),
+			metadataResolver.getIdentityProviders(config)
 		);
 	}
-
 }

@@ -102,7 +102,7 @@ abstract class AbstractServiceProviderTestBase {
 				return builder.build();
 			}
 		)
-			.when(configuration).resolve(ArgumentMatchers.any(HttpServletRequest.class));
+			.when(configuration).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
 	}
 
 	ServiceProviderMetadata getServiceProviderMetadata() throws Exception {

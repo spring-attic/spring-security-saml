@@ -72,7 +72,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedServiceProvider provider = resolver.resolve(request);
+			HostedServiceProvider provider = resolver.getServiceProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
 			configuration.getProviders().stream().forEach(

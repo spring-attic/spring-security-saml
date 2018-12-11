@@ -111,9 +111,13 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 				else if (authentication instanceof SamlAuthentication) {
 					spInitiatedLogout(request, response, authentication);
 				}
-				else {
-					//TODO - return 400?
-					response.sendError(400, "not authenticated");
+				else { //just perform a simple logout
+					receivedLogoutResponse(
+						request,
+						response,
+						SecurityContextHolder.getContext().getAuthentication(),
+						null
+					);
 				}
 			} catch (IOException x) {
 				throw new SamlException(x);

@@ -18,6 +18,7 @@ package org.springframework.security.samples;
 
 import java.net.URI;
 import java.time.Clock;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.boot.registration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
@@ -358,7 +360,7 @@ public class ServiceProviderTests {
 				.alias("dual")
 				.linktext("Dual IDP/SP Metadata")
 				.metadata(IDP_DUAL_METADATA)
-			.build()
+				.build()
 		);
 		mockConfig(builder -> builder.providers(providers));
 		mockMvc.perform(
@@ -533,10 +535,36 @@ public class ServiceProviderTests {
 			.andExpect(status().isFound())
 			.andExpect(unauthenticated())
 			.andExpect(redirectedUrl("/saml/sp/select"))
-			.andReturn()
-			.getResponse()
-			.getHeader("Location");
+		;
 	}
+
+	@Test
+	void notLoggedInLoggingOut() throws Exception {
+		mockMvc.perform(
+			get("/saml/sp/logout")
+		)
+			.andExpect(status().isFound())
+			.andExpect(unauthenticated())
+			.andExpect(redirectedUrl("/saml/sp/select"))
+		;
+	}
+
+	@Test
+	void nonSamlSessionLoggingOut() throws Exception {
+		mockMvc.perform(
+			get("/saml/sp/logout")
+			.with(
+				authentication(
+					new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList())
+				)
+			)
+		)
+			.andExpect(status().isFound())
+			.andExpect(unauthenticated())
+			.andExpect(redirectedUrl("/saml/sp/select"))
+		;
+	}
+
 
 	private void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
 		Mockito.doAnswer(

@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@DisplayName("SAML Service Provider Single Logout")
+@DisplayName("SAML Service Provider Metadata")
 public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBase {
 
 	@SpringBootConfiguration

@@ -25,7 +25,7 @@ import org.springframework.security.saml.registration.ExternalIdentityProviderCo
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;

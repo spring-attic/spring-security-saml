@@ -24,8 +24,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.serviceprovider.configuration.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.configuration.SingletonServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 

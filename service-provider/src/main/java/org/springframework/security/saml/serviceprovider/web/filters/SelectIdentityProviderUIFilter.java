@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.filters;
+package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,7 +32,7 @@ import org.springframework.security.saml.registration.ExternalProviderConfigurat
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;

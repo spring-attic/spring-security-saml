@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.authentication;
+package org.springframework.security.saml.serviceprovider.web;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.serviceprovider.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 public class SamlAuthenticationFailureHandler implements AuthenticationFailureHandler {

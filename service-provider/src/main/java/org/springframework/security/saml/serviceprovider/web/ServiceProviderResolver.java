@@ -15,14 +15,16 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.configuration;
+package org.springframework.security.saml.serviceprovider.web;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 
-public interface ServiceProviderConfigurationResolver {
-	HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request);
+public interface ServiceProviderResolver {
+
+	HostedServiceProvider getServiceProvider(HttpServletRequest request);
 
 	String getConfiguredPathPrefix();
+
 }

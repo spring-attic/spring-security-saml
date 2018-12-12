@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.html;
+package org.springframework.security.saml.serviceprovider.web.html;
 
 import java.io.IOException;
 import java.io.StringWriter;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.filters;
+package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

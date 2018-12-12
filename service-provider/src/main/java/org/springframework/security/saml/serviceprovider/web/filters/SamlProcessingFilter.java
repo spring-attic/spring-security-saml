@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.filters;
+package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -32,14 +32,14 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.validation.ServiceProviderValidator;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import static org.springframework.security.saml.serviceprovider.filters.SamlFilter.SAML_PROVIDER;
-import static org.springframework.security.saml.serviceprovider.filters.SamlFilter.SAML_REQUEST;
-import static org.springframework.security.saml.serviceprovider.filters.SamlFilter.SAML_RESPONSE;
+import static org.springframework.security.saml.serviceprovider.web.filters.SamlFilter.SAML_PROVIDER;
+import static org.springframework.security.saml.serviceprovider.web.filters.SamlFilter.SAML_REQUEST;
+import static org.springframework.security.saml.serviceprovider.web.filters.SamlFilter.SAML_RESPONSE;
 import static org.springframework.util.StringUtils.hasText;
 
 public class SamlProcessingFilter extends OncePerRequestFilter {

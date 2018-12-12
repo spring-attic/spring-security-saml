@@ -17,7 +17,6 @@
 
 package sample;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,14 +28,13 @@ import org.springframework.security.saml.serviceprovider.bean.SamlServiceProvide
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 
 
-@EnableWebSecurity
 @Import
 	({
 		 SamlBootConfiguration.class,
 		 OpenSamlTransformerBeans.class,
 		 SamlServiceProviderBeans.class
 	 })
-@Configuration
+@EnableWebSecurity
 public class SamlSecurity extends WebSecurityConfigurerAdapter {
 
 	@Override

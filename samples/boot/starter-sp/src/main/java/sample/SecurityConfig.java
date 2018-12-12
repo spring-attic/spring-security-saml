@@ -22,12 +22,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -50,8 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	protected ServiceProviderConfigurationResolver configurationResolver() {
-		return new SingletonServiceProviderConfigurationResolver(
-			HostedServiceProviderConfiguration.builder()
+		return fromConfiguration(
+			config -> config
 				.keys(
 					//sample remote IDP is static,
 					//need to retain the same key between restarts
@@ -70,7 +69,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
 						.build()
 				)
-				.build());
+		);
 	}
 
 	private String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +

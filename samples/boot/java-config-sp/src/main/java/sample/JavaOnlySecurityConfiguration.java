@@ -22,16 +22,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
+import static org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
 @Configuration
@@ -41,17 +40,16 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 	protected void configure(HttpSecurity http) throws Exception {
 		String pathPrefix = "/saml/sp";
 		http
-			.mvcMatcher("/**")
 			.authorizeRequests()
-			.antMatchers("/**").authenticated()
-			.and()
+				.mvcMatchers("/**").authenticated()
+				.and()
 			.logout()
-			.and()
+				.and()
 			.apply(
 				saml2Login()
 					.configurationResolver(
-						new SingletonServiceProviderConfigurationResolver(
-							HostedServiceProviderConfiguration.builder()
+						fromConfiguration(
+							config -> config
 								.pathPrefix(pathPrefix)
 								.entityId("spring.security.saml.sp.id")
 								.alias("boot-sample-sp")
@@ -84,7 +82,6 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 										)
 									)
 								)
-								.build()
 						)
 					)
 			);

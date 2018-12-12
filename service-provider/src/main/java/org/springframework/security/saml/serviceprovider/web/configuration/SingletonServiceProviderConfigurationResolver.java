@@ -17,18 +17,30 @@
 
 package org.springframework.security.saml.serviceprovider.web.configuration;
 
+import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.registration.HostedServiceProviderConfiguration.Builder;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
 
 public class SingletonServiceProviderConfigurationResolver implements ServiceProviderConfigurationResolver {
 
+	public static SingletonServiceProviderConfigurationResolver fromConfiguration(Consumer<Builder> config) {
+		Builder builder = HostedServiceProviderConfiguration.builder();
+		config.accept(builder);
+		return fromConfiguration(builder.build());
+	}
+
+	public static SingletonServiceProviderConfigurationResolver fromConfiguration(HostedServiceProviderConfiguration c) {
+		return new SingletonServiceProviderConfigurationResolver(c);
+	}
+
 	private final HostedServiceProviderConfiguration configuration;
 
-	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
+	private SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
 		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
@@ -41,7 +53,7 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 
 	@Override
 	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
-		HostedServiceProviderConfiguration.Builder builder =
+		Builder builder =
 			HostedServiceProviderConfiguration.builder(configuration);
 		String basePath = getBasePath(request, false);
 		if (!hasText(configuration.getEntityId())) {
@@ -70,4 +82,5 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 			(includePort ? (":" + request.getServerPort()) : "") +
 			request.getContextPath();
 	}
+
 }

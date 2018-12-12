@@ -80,7 +80,7 @@ public class SamlServiceProviderBeans {
 				"bean or override the " + ServiceProviderConfigurationResolver.class.getName() +
 				" bean."
 		);
-		return new SingletonServiceProviderConfigurationResolver(configuration);
+		return SingletonServiceProviderConfigurationResolver.fromConfiguration(configuration);
 	}
 
 }

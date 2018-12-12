@@ -43,4 +43,9 @@ public class DefaultServiceProviderResolver implements ServiceProviderResolver {
 			metadataResolver.getIdentityProviders(config)
 		);
 	}
+
+	@Override
+	public String getConfiguredPathPrefix() {
+		return configResolver.getConfiguredPathPrefix();
+	}
 }

@@ -23,4 +23,6 @@ public interface ServiceProviderResolver {
 
 	HostedServiceProvider getServiceProvider(HttpServletRequest request);
 
+	String getConfiguredPathPrefix();
+
 }

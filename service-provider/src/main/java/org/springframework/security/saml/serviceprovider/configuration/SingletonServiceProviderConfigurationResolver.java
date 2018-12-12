@@ -35,7 +35,7 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 	}
 
 	@Override
-	public String getPathPrefix() {
+	public String getConfiguredPathPrefix() {
 		return configuration.getPathPrefix();
 	}
 

@@ -58,6 +58,13 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultServiceProviderValidator implements
 	ServiceProviderValidator {
 
+	private final Signature invalidSignature = new Signature() {
+		@Override
+		public boolean isValidated() {
+			return false;
+		}
+	};
+
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;
@@ -86,7 +93,18 @@ public class DefaultServiceProviderValidator implements
 	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
-			return implementation.validateSignature(saml2Object, verificationKeys);
+			Signature main = implementation.validateSignature(saml2Object, verificationKeys);
+			if (saml2Object instanceof Response && main == null) {
+				for (Assertion a : ((Response)saml2Object).getAssertions()) {
+					try {
+						Signature sig = implementation.validateSignature(a, verificationKeys);
+						a.setSignature(sig);
+					} catch (SignatureException e){
+						a.setSignature(invalidSignature);
+					}
+				}
+			}
+			return main;
 		} catch (Exception x) {
 			if (x instanceof SignatureException) {
 				throw x;

@@ -108,10 +108,11 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		configuration.validate(http);
+
 		String pathPrefix = configuration.getPathPrefix();
-		String samlPattern = pathPrefix + "/**";
 		registerDefaultAuthenticationEntryPoint(http, pathPrefix);
 
+		String samlPattern = pathPrefix + "/**";
 		http
 			// @formatter:off
 			.csrf()
@@ -126,12 +127,12 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		SamlProcessingFilter processingFilter = configuration.getSamlProcessingFilter();
 		Filter metadataFilter = configuration.getMetadataFilter();
 		Filter selectIdentityProviderFilter = configuration.getSelectIdentityProviderFilter();
 		Filter authenticationRequestFilter = configuration.getIdentityProviderDiscoveryFilter();
 		AbstractAuthenticationProcessingFilter authenticationFilter = configuration.getWebSsoAuthenticationFilter();
 		Filter logoutFilter = configuration.getLogoutFilter();
-		SamlProcessingFilter processingFilter = configuration.getSamlProcessingFilter();
 
 		http.addFilterAfter(processingFilter, BasicAuthenticationFilter.class);
 		http.addFilterAfter(metadataFilter, processingFilter.getClass());

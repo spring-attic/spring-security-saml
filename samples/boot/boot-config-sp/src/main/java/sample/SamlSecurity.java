@@ -47,8 +47,6 @@ public class SamlSecurity extends WebSecurityConfigurerAdapter {
 				.authorizeRequests()
 				.anyRequest().authenticated()
 			.and()
-				.logout()
-			.and()
 				.apply(
 					saml2Login()
 				)

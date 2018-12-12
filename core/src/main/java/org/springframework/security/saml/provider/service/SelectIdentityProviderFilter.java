@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderService> {
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
@@ -117,6 +118,7 @@ public class SelectIdentityProviderFilter extends SamlFilter<ServiceProviderServ
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
+		builder.pathSegment(stripSlashes(provider.getConfiguration().getPrefix()) + "/discovery");
 		builder.pathSegment("saml/sp/discovery");
 		IdentityProviderMetadata metadata = provider.getRemoteProvider(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));

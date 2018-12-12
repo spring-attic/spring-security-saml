@@ -17,8 +17,6 @@
 
 package org.springframework.security.saml.serviceprovider.filters;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,16 +24,15 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationResult;
+import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
@@ -45,23 +42,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.util.Assert.notNull;
-import static org.springframework.util.StringUtils.hasText;
 
-public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticationProcessingFilter {
-	private static Log logger = LogFactory.getLog(SamlProcessAuthenticationResponseFilter.class);
-	private final SamlTransformer transformer;
+public class SamlWebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
+	implements SamlFilter<HostedServiceProvider> {
+
+	private static Log logger = LogFactory.getLog(SamlWebSsoAuthenticationFilter.class);
 	private final SamlValidator validator;
-	private final ServiceProviderResolver resolver;
 
-	public SamlProcessAuthenticationResponseFilter(AntPathRequestMatcher matcher,
-												   SamlTransformer transformer,
-												   SamlValidator validator,
-												   ServiceProviderResolver resolver
+	public SamlWebSsoAuthenticationFilter(AntPathRequestMatcher matcher,
+										  SamlValidator validator
 	) {
 		super(matcher);
-		this.transformer = transformer;
 		this.validator = validator;
-		this.resolver = resolver;
 		setAllowSessionCreation(true);
 		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		setAuthenticationManager(authentication -> authentication);
@@ -70,42 +62,29 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
 		Response samlResponse = super.requiresAuthentication(request, response) ?
-			getSamlWebResponse(
-				request,
-				resolver.getServiceProvider(request)
-			) : null;
+			getSamlWebResponse(request) :
+			null;
 		return samlResponse != null;
 	}
 
-	private Response getSamlWebResponse(HttpServletRequest request, HostedServiceProvider provider) {
-		String samlResponseParameter = request.getParameter("SAMLResponse");
-		Response result = null;
-		if (hasText(samlResponseParameter)) {
-			try {
-				String decoded = transformer.samlDecode(
-					samlResponseParameter,
-					"GET".equalsIgnoreCase(request.getMethod())
-				);
-				result = (Response) transformer.fromXml(
-					decoded,
-					null,
-					provider.getMetadata().getServiceProvider().getKeys()
-				);
-			} catch (Exception x) {
-				logger.debug("Unable to parse response");
-			}
+	private Response getSamlWebResponse(HttpServletRequest request) {
+		Saml2Object object = getSamlResponse(request);
+		if (object == null) {
+			return null;
+		}
+		if (object instanceof Response) {
+			return (Response)object;
 		}
 		else {
-			logger.debug("SAMLResponse parameter is missing from request.");
+			return null;
 		}
-		return result;
 	}
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-		throws AuthenticationException, IOException, ServletException {
-		HostedServiceProvider provider = resolver.getServiceProvider(request);
-		Response r = getSamlWebResponse(request, provider);
+		throws AuthenticationException {
+		HostedServiceProvider provider = getProvider(request);
+		Response r = getSamlWebResponse(request);
 		notNull(r, "The response should never be null");
 		IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		if (idp == null) {
@@ -148,6 +127,4 @@ public class SamlProcessAuthenticationResponseFilter extends AbstractAuthenticat
 		}
 		return sp.getRemoteProvider(r.getAssertions().get(0).getOriginEntityId());
 	}
-
-
 }

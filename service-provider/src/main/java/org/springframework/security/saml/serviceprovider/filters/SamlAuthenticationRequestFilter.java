@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.FilterChain;
@@ -41,7 +40,6 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
@@ -53,10 +51,9 @@ import org.joda.time.DateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
+public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
 	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
 
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
@@ -65,11 +62,9 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
 										   SamlTransformer transformer,
-										   ServiceProviderResolver resolver,
 										   HtmlWriter template) {
 		this.template = template;
 		this.matcher = matcher;
-		this.resolver = resolver;
 		this.transformer = transformer;
 	}
 
@@ -78,7 +73,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			try {
-				HostedServiceProvider provider = resolver.getServiceProvider(request);
+				HostedServiceProvider provider = getProvider(request);
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 				IdentityProviderMetadata idp = getIdentityProvider(request, provider);
 				ServiceProviderMetadata localSp = provider.getMetadata();
@@ -208,48 +203,6 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter {
 			));
 		}
 		return request;
-	}
-
-	private Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-										  Binding preferredBinding,
-										  int preferredIndex) {
-		if (endpoints == null || endpoints.isEmpty()) {
-			return null;
-		}
-		List<Endpoint> eps = endpoints;
-		Endpoint result = null;
-		//find the preferred binding
-		if (preferredBinding != null) {
-			for (Endpoint e : eps) {
-				if (preferredBinding == e.getBinding()) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//find the configured index
-		if (result == null) {
-			for (Endpoint e : eps) {
-				if (e.getIndex() == preferredIndex) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//find the default endpoint
-		if (result == null) {
-			for (Endpoint e : eps) {
-				if (e.isDefault()) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//fallback to the very first available endpoint
-		if (result == null) {
-			result = eps.get(0);
-		}
-		return result;
 	}
 
 	public Clock getClock() {

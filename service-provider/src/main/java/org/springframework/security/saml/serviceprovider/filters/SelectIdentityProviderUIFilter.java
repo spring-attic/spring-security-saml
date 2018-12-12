@@ -32,7 +32,6 @@ import org.springframework.security.saml.registration.ExternalProviderConfigurat
 import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -46,11 +45,10 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
+public class SelectIdentityProviderUIFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderUIFilter.class);
 
-	private final ServiceProviderResolver resolver;
 	private final RequestMatcher matcher;
 	private final String pathPrefix;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
@@ -59,12 +57,10 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 
 	public SelectIdentityProviderUIFilter(String pathPrefix,
 										  RequestMatcher matcher,
-										  ServiceProviderResolver resolver,
 										  HtmlWriter template) {
 		this.pathPrefix = pathPrefix;
 		this.template = template;
 		this.matcher = matcher;
-		this.resolver = resolver;
 	}
 
 
@@ -72,7 +68,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedServiceProvider provider = resolver.getServiceProvider(request);
+			HostedServiceProvider provider = getProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
 			configuration.getProviders().stream().forEach(

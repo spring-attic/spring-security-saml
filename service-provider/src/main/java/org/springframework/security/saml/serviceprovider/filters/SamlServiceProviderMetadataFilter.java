@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -36,29 +35,27 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter implements Filter {
+public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter
+	implements Filter, SamlFilter<HostedServiceProvider> {
 
 	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
 
 	private final AntPathRequestMatcher matcher;
 	private String filename = "saml-service-provider-metadata.xml";
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
 	public SamlServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
-											 SamlTransformer transformer,
-											 ServiceProviderResolver resolver) {
+											 SamlTransformer transformer) {
 		this.transformer = transformer;
-		this.resolver = resolver;
 		this.matcher = matcher;
 	}
 
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedServiceProvider provider = resolver.getServiceProvider(request);
+			HostedServiceProvider provider = getProvider(request);
 			String xml = transformer.toXml(provider.getMetadata());
 			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);
@@ -67,7 +64,7 @@ public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter impl
 			response.getWriter().write(xml);
 		}
 		else {
-			filterChain.doFilter(request, response);
+			chain.doFilter(request, response);
 		}
 	}
 }

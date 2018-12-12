@@ -37,7 +37,8 @@ import org.springframework.security.saml.serviceprovider.ServiceProviderResolver
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.configuration.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.filters.SamlAuthenticationRequestFilter;
-import org.springframework.security.saml.serviceprovider.filters.SamlProcessAuthenticationResponseFilter;
+import org.springframework.security.saml.serviceprovider.filters.SamlWebSsoAuthenticationFilter;
+import org.springframework.security.saml.serviceprovider.filters.SamlProcessingFilter;
 import org.springframework.security.saml.serviceprovider.filters.SamlServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.filters.ServiceProviderLogoutFilter;
@@ -201,8 +202,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			SamlServiceProviderMetadataFilter.class,
 			() -> new SamlServiceProviderMetadataFilter(
 				new AntPathRequestMatcher(matchPrefix + "/metadata/**"),
-				samlTransformer,
-				serviceProviderResolver
+				samlTransformer
 			),
 			metadataFilter
 		);
@@ -214,7 +214,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 				new SelectIdentityProviderUIFilter(
 					pathPrefix,
 					new AntPathRequestMatcher(matchPrefix + "/select/**"),
-					serviceProviderResolver,
 					htmlTemplateProcessor
 				)
 					.setRedirectOnSingleProvider(false),
@@ -227,7 +226,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			() -> new SamlAuthenticationRequestFilter(
 				new AntPathRequestMatcher(matchPrefix + "/discovery/**"),
 				samlTransformer,
-				serviceProviderResolver,
 				htmlTemplateProcessor
 			),
 			authenticationRequestFilter
@@ -235,12 +233,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 		authenticationFilter = getSharedObject(
 			http,
-			SamlProcessAuthenticationResponseFilter.class,
-			() -> new SamlProcessAuthenticationResponseFilter(
+			SamlWebSsoAuthenticationFilter.class,
+			() -> new SamlWebSsoAuthenticationFilter(
 				new AntPathRequestMatcher(matchPrefix + "/SSO/**"),
-				samlTransformer,
-				samlValidator,
-				serviceProviderResolver
+				samlValidator
 			),
 			authenticationFilter
 		);
@@ -256,7 +252,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 				return new ServiceProviderLogoutFilter(
 					new AntPathRequestMatcher(matchPrefix + "/logout/**"),
 					samlTransformer,
-					serviceProviderResolver,
 					samlValidator
 				)
 					.setLogoutSuccessHandler(logoutSuccessHandler);
@@ -264,7 +259,15 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			logoutFilter
 		);
 
-		http.addFilterAfter(metadataFilter, BasicAuthenticationFilter.class);
+		SamlProcessingFilter processingFilter = new SamlProcessingFilter(
+			samlTransformer,
+			serviceProviderResolver,
+			samlValidator,
+			new AntPathRequestMatcher(matchPrefix + "/**")
+		);
+
+		http.addFilterAfter(processingFilter, BasicAuthenticationFilter.class);
+		http.addFilterAfter(metadataFilter, processingFilter.getClass());
 		http.addFilterAfter(selectIdentityProviderFilter, metadataFilter.getClass());
 		http.addFilterAfter(authenticationRequestFilter, selectIdentityProviderFilter.getClass());
 		http.addFilterAfter(authenticationFilter, authenticationRequestFilter.getClass());

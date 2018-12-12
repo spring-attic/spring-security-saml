@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlException;
@@ -41,13 +40,11 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.Status;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
-import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -62,25 +59,23 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
-public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
+public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
 	private static Log logger = LogFactory.getLog(ServiceProviderLogoutFilter.class);
 
 	private final RequestMatcher matcher;
 	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
 	private final SamlValidator<HostedServiceProvider> validator;
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
 	public ServiceProviderLogoutFilter(RequestMatcher matcher,
 									   SamlTransformer transformer,
-									   ServiceProviderResolver resolver,
 									   SamlValidator<HostedServiceProvider> validator) {
 		this.matcher = matcher;
 		this.transformer = transformer;
-		this.resolver = resolver;
 		this.validator = validator;
 	}
 
@@ -99,13 +94,14 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		if (matcher.matches(request)) {
 
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String logoutRequest = request.getParameter("SAMLRequest");
-			String logoutResponse = request.getParameter("SAMLResponse");
+			Saml2Object logoutRequest = getSamlRequest(request);
+			Saml2Object logoutResponse = getSamlResponse(request);
 			try {
-				if (hasText(logoutRequest)) {
+
+				if (ofNullable(logoutRequest).isPresent()) {
 					receivedLogoutRequest(request, response, authentication, logoutRequest);
 				}
-				else if (hasText(logoutResponse)) {
+				else if (ofNullable(logoutResponse).isPresent()) {
 					receivedLogoutResponse(request, response, authentication, logoutResponse);
 				}
 				else if (authentication instanceof SamlAuthentication) {
@@ -132,15 +128,13 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private void receivedLogoutRequest(HttpServletRequest request,
 									   HttpServletResponse response,
 									   Authentication authentication,
-									   String logoutRequest) throws IOException {
-		String xml = transformer.samlDecode(logoutRequest, HttpMethod.GET.name().equalsIgnoreCase(request.getMethod()));
-		HostedServiceProvider provider = resolver.getServiceProvider(request);
-		LogoutRequest lr = transformer.fromXml(
-			xml,
-			null,
-			provider.getConfiguration().getKeys(),
-			LogoutRequest.class
-		);
+									   Saml2Object logoutRequest) throws IOException {
+
+		if (! (logoutRequest instanceof LogoutRequest)) {
+			throw new SamlException("Invalid logout request:"+logoutRequest);
+		}
+		LogoutRequest lr = (LogoutRequest)logoutRequest;
+		HostedServiceProvider provider = getProvider(request);
 		ValidationResult validate = validator.validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new SamlException(validate.toString());
@@ -161,7 +155,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private void receivedLogoutResponse(HttpServletRequest request,
 										HttpServletResponse response,
 										Authentication authentication,
-										String logoutResponse) throws IOException, ServletException {
+										Saml2Object logoutResponse) throws IOException, ServletException {
 		doLogout(request, response, authentication);
 		//TODO - logout success handler invocation
 		logoutSuccessHandler.onLogoutSuccess(request, response, authentication);
@@ -173,7 +167,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		if (authentication instanceof SamlAuthentication) {
 			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
-			HostedServiceProvider provider = resolver.getServiceProvider(request);
+			HostedServiceProvider provider = getProvider(request);
 			ServiceProviderMetadata sp = provider.getMetadata();
 			IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			LogoutRequest lr = logoutRequest(provider.getMetadata(), idp, (NameIdPrincipal) sa.getSamlPrincipal());
@@ -263,47 +257,5 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
 			.build()
 			.toUriString();
-	}
-
-	private Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-										  Binding preferredBinding,
-										  int preferredIndex) {
-		if (endpoints == null || endpoints.isEmpty()) {
-			return null;
-		}
-		List<Endpoint> eps = endpoints;
-		Endpoint result = null;
-		//find the preferred binding
-		if (preferredBinding != null) {
-			for (Endpoint e : eps) {
-				if (preferredBinding == e.getBinding()) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//find the configured index
-		if (result == null) {
-			for (Endpoint e : eps) {
-				if (e.getIndex() == preferredIndex) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//find the default endpoint
-		if (result == null) {
-			for (Endpoint e : eps) {
-				if (e.isDefault()) {
-					result = e;
-					break;
-				}
-			}
-		}
-		//fallback to the very first available endpoint
-		if (result == null) {
-			result = eps.get(0);
-		}
-		return result;
 	}
 }

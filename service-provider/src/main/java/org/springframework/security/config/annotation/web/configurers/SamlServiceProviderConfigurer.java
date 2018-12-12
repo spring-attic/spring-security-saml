@@ -20,13 +20,7 @@ package org.springframework.security.config.annotation.web.configurers;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -57,9 +51,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
-import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 import static org.springframework.util.Assert.notNull;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
@@ -146,24 +138,20 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		String samlPattern = getPathPrefix(providerResolver.getConfiguredPathPrefix()) + "/**";
 		registerDefaultAuthenticationEntryPoint(http, getPathPrefix(providerResolver.getConfiguredPathPrefix()));
 
-		if (!isPreviouslyInitialized(http)) {
-			http
-				// @formatter:off
-				.csrf()
-					.ignoringAntMatchers(samlPattern)
-					.and()
-				.authorizeRequests()
-					.mvcMatchers(samlPattern)
-					.permitAll()
-				// @formatter:on
-			;
-			setInitializationCompleted(http);
-		}
+		http
+			// @formatter:off
+			.csrf()
+				.ignoringAntMatchers(samlPattern)
+				.and()
+			.authorizeRequests()
+				.mvcMatchers(samlPattern)
+				.permitAll()
+			// @formatter:on
+		;
 	}
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		if (!isPreviouslyConfigured(http)) {
 			String pathPrefix = getPathPrefix(providerResolver.getConfiguredPathPrefix());
 			Filter metadataFilter = getMetadataFilter(http, pathPrefix, samlTransformer);
 			Filter selectIdentityProviderFilter = getSelectIdentityProviderFilter(
@@ -188,8 +176,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			http.addFilterAfter(authenticationRequestFilter, selectIdentityProviderFilter.getClass());
 			http.addFilterAfter(authenticationFilter, authenticationRequestFilter.getClass());
 			http.addFilterAfter(logoutFilter, authenticationFilter.getClass());
-			setConfigurationCompleted(http);
-		}
 	}
 
 	private void validateSamlConfiguration(HttpSecurity http) {
@@ -453,71 +439,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		if (ofNullable(configuredObject).isPresent()) {
 			throw new IllegalStateException(identifier +" should be null if you wish to configure a "+ alternate);
 		}
-	}
-
-	/*
-	 * ================== INITIALIZATION STATE==================
-	 * Avoid setting up multiple SAML filters
-	 */
-
-	private boolean isPreviouslyInitialized(HttpSecurity http) {
-		return getConfigurationState(http) != SharedConfigurationState.NOT_INITIALIZED;
-	}
-
-	private void setInitializationCompleted(HttpSecurity http) {
-		setConfigurationState(http, SharedConfigurationState.INITIALIZED);
-	}
-
-	private boolean isPreviouslyConfigured(HttpSecurity http) {
-		return getConfigurationState(http) == SharedConfigurationState.CONFIGURED;
-	}
-
-	private void setConfigurationCompleted(HttpSecurity http) {
-		setConfigurationState(http, SharedConfigurationState.CONFIGURED);
-	}
-
-	private SharedConfigurationState getConfigurationState(HttpSecurity http) {
-		BeanDefinition definition = getConfigurationStateBeanDefinition(http);
-		return (SharedConfigurationState) definition.getPropertyValues().get(SharedConfigurationState.class.getName());
-	}
-
-	private void setConfigurationState(HttpSecurity http, SharedConfigurationState state) {
-		BeanDefinition definition = getConfigurationStateBeanDefinition(http);
-		((GenericBeanDefinition)definition).setPropertyValues(getStatePropertyValues(state));
-	}
-
-	private BeanDefinition getConfigurationStateBeanDefinition(HttpSecurity http) {
-		ApplicationContext context = getSharedObject(http, ApplicationContext.class);
-		AutowireCapableBeanFactory beanFactory = context.getAutowireCapableBeanFactory();
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry)beanFactory;
-		BeanDefinition definition = null;
-		try {
-			definition = registry.getBeanDefinition(SharedConfigurationState.class.getName());
-		} catch (NoSuchBeanDefinitionException e) {
-			definition = getStateBean(SharedConfigurationState.NOT_INITIALIZED);
-			registry.registerBeanDefinition(SharedConfigurationState.class.getName(), definition);
-		}
-		return definition;
-	}
-
-	private GenericBeanDefinition getStateBean(SharedConfigurationState state) {
-		GenericBeanDefinition definition = new GenericBeanDefinition();
-		definition.setBeanClass(SharedConfigurationState.class);
-		definition.setScope(SCOPE_SINGLETON);
-		MutablePropertyValues values = getStatePropertyValues(state);
-		definition.setPropertyValues(values);
-		return definition;
-	}
-
-	private MutablePropertyValues getStatePropertyValues(SharedConfigurationState state) {
-		PropertyValue stateValue = new PropertyValue(SharedConfigurationState.class.getName(),state);
-		return new MutablePropertyValues(asList(stateValue));
-	}
-
-	private enum SharedConfigurationState {
-		NOT_INITIALIZED,
-		INITIALIZED,
-		CONFIGURED
 	}
 
 }

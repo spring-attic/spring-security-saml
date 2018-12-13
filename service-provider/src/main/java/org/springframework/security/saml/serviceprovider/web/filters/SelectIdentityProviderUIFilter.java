@@ -28,8 +28,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.registration.ExternalProviderConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;

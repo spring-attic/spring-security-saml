@@ -19,7 +19,7 @@ package org.springframework.security.saml.boot.registration;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
 import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
 

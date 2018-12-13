@@ -19,7 +19,7 @@ package org.springframework.security.saml.serviceprovider.web.configuration;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 
 public interface ServiceProviderConfigurationResolver {
 	HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request);

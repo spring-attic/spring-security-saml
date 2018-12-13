@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.registration;
+package org.springframework.security.saml.configuration;
 
 /**
  * Represents a configuration for a host or domain.

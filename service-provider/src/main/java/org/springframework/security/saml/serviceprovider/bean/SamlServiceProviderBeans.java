@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;

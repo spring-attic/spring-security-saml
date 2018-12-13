@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.registration;
+package org.springframework.security.saml.configuration;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.util.Assert;

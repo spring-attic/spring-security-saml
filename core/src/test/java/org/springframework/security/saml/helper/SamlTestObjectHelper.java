@@ -30,9 +30,9 @@ import java.util.UUID;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.registration.HostedProviderConfiguration;
-import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;

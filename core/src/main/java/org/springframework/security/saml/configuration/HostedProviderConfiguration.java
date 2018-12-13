@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.registration;
+package org.springframework.security.saml.configuration;
 
 import java.util.Collections;
 import java.util.List;

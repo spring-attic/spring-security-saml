@@ -23,12 +23,12 @@ import org.springframework.security.saml.boot.registration.LocalServiceProviderC
 import org.springframework.security.saml.boot.registration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.boot.registration.RemoteProviderConfiguration;
 import org.springframework.security.saml.boot.registration.RemoteServiceProviderConfiguration;
-import org.springframework.security.saml.registration.ExternalProviderConfiguration;
-import org.springframework.security.saml.registration.HostedProviderConfiguration;
-import org.springframework.security.saml.registration.ExternalServiceProviderConfiguration;
-import org.springframework.security.saml.registration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.registration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.registration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedProviderConfiguration;
+import org.springframework.security.saml.configuration.ExternalServiceProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
+import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 
 import org.junit.jupiter.api.Test;
 

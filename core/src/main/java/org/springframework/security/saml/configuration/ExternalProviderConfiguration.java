@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.registration;
+package org.springframework.security.saml.configuration;
 
 public abstract class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
 	private final String alias;

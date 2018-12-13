@@ -19,8 +19,8 @@ package org.springframework.security.saml.provider;
 
 import java.util.Map;
 
-import org.springframework.security.saml.registration.ExternalProviderConfiguration;
-import org.springframework.security.saml.registration.HostedProviderConfiguration;
+import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
+import org.springframework.security.saml.configuration.HostedProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.util.Assert;
 

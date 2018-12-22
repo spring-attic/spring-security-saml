@@ -102,14 +102,22 @@ Nud1HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==
     <md:SingleSignOnService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
       Location="https://idp.saml.spring.io/saml/idp/sso" />
+    <md:SingleSignOnService
+      Binding="urn:mace:shibboleth:2.0:profiles:AuthnRequest"
+      Location="https://shibbolethidp/idp/profile/SAML2/Unsolicited/SSO" />
 
-    <md:SingleLogoutService
+
+      <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
       Location="https://idp.saml.spring.io/saml/idp/sso/logout"/>
 
     <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
       Location="https://idp.saml.spring.io/saml/idp/sso/logout"/>
+
+    <md:SingleLogoutService
+      Binding="urn:mace:shibboleth:2.0:profiles:LogoutRequest"
+      Location="https://idp.saml.spring.io/saml/idp/sso/logout" />
 
   </md:IDPSSODescriptor>
 

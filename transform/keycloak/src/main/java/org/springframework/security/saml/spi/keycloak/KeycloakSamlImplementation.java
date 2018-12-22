@@ -568,7 +568,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				if (requestInitiation != null) {
 					try {
 						EndpointType ri = new EndpointType(
-							requestInitiation.getBinding().toUri(),
+							requestInitiation.getBinding(),
 							new URI(requestInitiation.getLocation())
 						);
 						if (hasText(requestInitiation.getResponseLocation())) {
@@ -582,7 +582,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				if (discovery != null) {
 					try {
 						IndexedEndpointType d = new IndexedEndpointType(
-							discovery.getBinding().toUri(),
+							discovery.getBinding(),
 							new URI(discovery.getLocation())
 						);
 						if (hasText(discovery.getResponseLocation())) {
@@ -664,7 +664,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	private IndexedEndpointType getIndexedEndpointType(Endpoint endpoint, int index) {
 		try {
 			IndexedEndpointType result = new IndexedEndpointType(
-				endpoint.getBinding().toUri(),
+				endpoint.getBinding(),
 				new URI(endpoint.getLocation())
 			);
 			if (index > 0) {
@@ -901,7 +901,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					result = new Endpoint()
 						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
 						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
-						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.REQUEST_INITIATOR)
+						.setBinding(hasText(binding) ? binding : Binding.REQUEST_INITIATOR.toString())
 						.setLocation(location)
 						.setResponseLocation(responseLocation);
 				}
@@ -927,7 +927,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					result = new Endpoint()
 						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
 						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
-						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.DISCOVERY)
+						.setBinding(hasText(binding) ? binding : Binding.DISCOVERY.toString())
 						.setLocation(location)
 						.setResponseLocation(responseLocation);
 				}
@@ -973,7 +973,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				.stream()
 				.forEach(s -> {
 						Endpoint endpoint = new Endpoint()
-							.setBinding(Binding.fromUrn(s.getBinding().toString()))
+							.setBinding(s.getBinding())
 							.setLocation(s.getLocation().toString());
 						if (s.getResponseLocation() != null) {
 							endpoint.setResponseLocation(s.getResponseLocation().toString());
@@ -1691,7 +1691,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding)
+				.setBinding(binding.toUri())
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);

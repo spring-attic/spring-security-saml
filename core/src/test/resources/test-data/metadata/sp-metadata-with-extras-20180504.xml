@@ -86,6 +86,9 @@ RpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=
     <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
       Location="https://sp.saml.spring.io/saml/sp/logout"/>
+    <md:SingleLogoutService
+      Binding="urn:mace:shibboleth:2.0:profiles:LogoutRequest"
+      Location="https://sp.saml.spring.io/saml/sp/logout" />
 
     <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>

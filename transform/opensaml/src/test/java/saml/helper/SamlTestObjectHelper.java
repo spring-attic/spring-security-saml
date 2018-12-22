@@ -180,7 +180,7 @@ public class SamlTestObjectHelper {
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding)
+				.setBinding(binding.toUri())
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);
@@ -381,7 +381,7 @@ public class SamlTestObjectHelper {
 		}
 		Endpoint result = null;
 		for (Endpoint e : eps) {
-			if (e.isDefault() && preferred.contains(e.getBinding())) {
+			if (e.isDefault() && preferred.contains(e.getBindingType())) {
 				result = e;
 				break;
 			}
@@ -393,7 +393,7 @@ public class SamlTestObjectHelper {
 			}
 		}
 		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
-			if (preferred.contains(e.getBinding())) {
+			if (preferred.contains(e.getBindingType())) {
 				result = e;
 				break;
 			}
@@ -431,7 +431,7 @@ public class SamlTestObjectHelper {
 				result = e;
 				break;
 			}
-			else if (REDIRECT.equals(e.getBinding())) {
+			else if (REDIRECT.equals(e.getBindingType())) {
 				result = e;
 				break;
 			}

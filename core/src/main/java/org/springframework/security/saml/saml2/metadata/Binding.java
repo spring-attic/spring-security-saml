@@ -40,7 +40,9 @@ public enum Binding {
 	DISCOVERY("urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"),
 	REQUEST_INITIATOR("urn:oasis:names:tc:SAML:profiles:SSO:request-init"),
 	SAML_1_0_BROWSER_POST("urn:oasis:names:tc:SAML:1.0:profiles:browser-post"),
-	SAML_1_0_BROWSER_ARTIFACT("urn:oasis:names:tc:SAML:1.0:profiles:artifact-01"),;
+	SAML_1_0_BROWSER_ARTIFACT("urn:oasis:names:tc:SAML:1.0:profiles:artifact-01"),
+	CUSTOM("urn:spring-security:SAML:2.0:custom"),
+	;
 
 
 	private final String urn;
@@ -50,13 +52,21 @@ public enum Binding {
 		this.urn = urn;
 	}
 
-	public static Binding fromUrn(String other) {
+	public static Binding fromUrn(URI other) {
 		for (Binding binding : values()) {
-			if (binding.urn.equalsIgnoreCase(other)) {
+			if (binding.toUri().equals(other)) {
 				return binding;
 			}
 		}
-		throw new SamlException("No Binding enum for:" + other);
+		return CUSTOM;
+	}
+
+	public static Binding fromUrn(String other) {
+		try {
+			return fromUrn(new URI(other));
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
 	}
 
 	@Override

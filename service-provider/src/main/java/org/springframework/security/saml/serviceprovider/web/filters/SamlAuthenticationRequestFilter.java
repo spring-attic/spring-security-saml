@@ -98,7 +98,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 										   HttpServletRequest request,
 										   HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
-		if (destination.getBinding().equals(Binding.REDIRECT)) {
+		if (destination.getBindingType().equals(Binding.REDIRECT)) {
 			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
@@ -108,7 +108,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			String redirect = url.build(true).toUriString();
 			response.sendRedirect(redirect);
 		}
-		else if (destination.getBinding().equals(Binding.POST)) {
+		else if (destination.getBindingType().equals(Binding.POST)) {
 			String encoded = transformer.samlEncode(transformer.toXml(authn), false);
 			Map<String, Object> model = new HashMap<>();
 			model.put("action", destination.getLocation());
@@ -124,7 +124,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			);
 		}
 		else {
-			displayError(request, response, "Unsupported binding:" + destination.getBinding().toString());
+			displayError(request, response, "Unsupported binding:" + destination.getBindingType().toString());
 		}
 	}
 

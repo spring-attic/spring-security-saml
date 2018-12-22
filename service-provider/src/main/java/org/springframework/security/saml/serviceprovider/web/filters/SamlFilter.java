@@ -59,7 +59,7 @@ public interface SamlFilter<T extends HostedProvider> {
 		//find the preferred binding
 		if (preferredBinding != null) {
 			for (Endpoint e : eps) {
-				if (preferredBinding == e.getBinding()) {
+				if (preferredBinding == e.getBindingType()) {
 					result = e;
 					break;
 				}

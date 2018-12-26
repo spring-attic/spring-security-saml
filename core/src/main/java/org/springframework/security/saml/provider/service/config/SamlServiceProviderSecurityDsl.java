@@ -19,6 +19,7 @@ package org.springframework.security.saml.provider.service.config;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.Filter;
 
 import org.springframework.context.ApplicationContext;
@@ -164,7 +165,7 @@ public class SamlServiceProviderSecurityDsl
 
 	public SamlServiceProviderSecurityDsl nameIds(List<NameId> nameIds) {
 		configuration.getServiceProvider()
-			.setNameIds(nameIds);
+			.setNameIds(nameIds.stream().collect(Collectors.toList()));
 		return this;
 	}
 

@@ -17,55 +17,105 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
-import java.lang.reflect.Field;
-import javax.annotation.Nonnull;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.springframework.security.saml.SamlException;
 
+import static org.springframework.util.StringUtils.hasText;
+
 /**
  * Attribute Name Format Identifiers
- * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
- * Page 82, Line 3528
  */
-public enum NameId {
+public class NameId {
 
-	UNSPECIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"),
-	EMAIL("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"),
-	TRANSIENT("urn:oasis:names:tc:SAML:2.0:nameid-format:transient"),
-	PERSISTENT("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"),
-	X509_SUBJECT("urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"),
-	WIN_DOMAIN_QUALIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName"),
-	KERBEROS("urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos"),
-	ENTITY("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"),
-	ENCRYPTED("urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted");
+	public static final NameId UNSPECIFIED = new NameId(NameIdFormat.UNSPECIFIED.toUri());
+	public static final NameId EMAIL = new NameId(NameIdFormat.EMAIL.toUri());
+	public static final NameId TRANSIENT = new NameId(NameIdFormat.TRANSIENT.toUri());
+	public static final NameId PERSISTENT = new NameId(NameIdFormat.PERSISTENT.toUri());
+	public static final NameId X509_SUBJECT = new NameId(NameIdFormat.X509_SUBJECT.toUri());
+	public static final NameId WIN_DOMAIN_QUALIFIED = new NameId(NameIdFormat.WIN_DOMAIN_QUALIFIED.toUri());
+	public static final NameId KERBEROS = new NameId(NameIdFormat.KERBEROS.toUri());
+	public static final NameId ENTITY = new NameId(NameIdFormat.ENTITY.toUri());
+	public static final NameId ENCRYPTED = new NameId(NameIdFormat.ENCRYPTED.toUri());
 
-	private final String urn;
+	private final URI value;
+	private final NameIdFormat format;
 
-	NameId(@Nonnull String urn) {
-		this.urn = urn;
-		//Spring introspection calls valueOf(..) on enums
-		//so we have to overwrite the name
-		try {
-			Field fieldName = getClass().getSuperclass().getDeclaredField("name");
-			fieldName.setAccessible(true);
-			fieldName.set(this, urn);
-			fieldName.setAccessible(false);
-		} catch (Exception e) {
-			throw new SamlException(e);
-		}
+	protected NameId(String uri) throws URISyntaxException {
+		this(new URI(uri));
+	}
+
+	public NameId(URI uri) {
+		this(uri, NameIdFormat.fromUrn(uri.toString()));
+	}
+
+	public NameId(URI uri, NameIdFormat format) {
+		this.value = uri;
+		this.format = format;
 	}
 
 	public static NameId fromUrn(String other) {
-		for (NameId name : values()) {
-			if (name.urn.equalsIgnoreCase(other)) {
-				return name;
-			}
+		if (!hasText(other)) {
+			return null;
 		}
-		return null;
+
+		URI uri;
+		try {
+			uri = new URI(other);
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+		NameIdFormat format = NameIdFormat.fromUrn(other);
+		switch (format) {
+			case UNSPECIFIED: return UNSPECIFIED;
+			case PERSISTENT: return PERSISTENT;
+			case EMAIL: return EMAIL;
+			case ENTITY: return ENTITY;
+			case KERBEROS: return KERBEROS;
+			case ENCRYPTED: return ENCRYPTED;
+			case TRANSIENT: return TRANSIENT;
+			case X509_SUBJECT: return X509_SUBJECT;
+			case WIN_DOMAIN_QUALIFIED: return WIN_DOMAIN_QUALIFIED;
+			case CUSTOM: return new NameId(uri, NameIdFormat.CUSTOM);
+		}
+		throw new SamlException("Unknown NameIdFormat: "+other);
+	}
+
+	public URI getValue() {
+		return value;
+	}
+
+	public NameIdFormat getFormat() {
+		return format;
 	}
 
 	@Override
 	public String toString() {
-		return this.urn;
+		return getValue().toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof NameId)) {
+			return false;
+		}
+
+		NameId nameId = (NameId) o;
+
+		if (!getValue().equals(nameId.getValue())) {
+			return false;
+		}
+		return getFormat() == nameId.getFormat();
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getValue().hashCode();
+		result = 31 * result + getFormat().hashCode();
+		return result;
 	}
 }

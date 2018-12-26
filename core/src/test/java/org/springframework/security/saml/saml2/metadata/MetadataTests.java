@@ -149,12 +149,13 @@ public class MetadataTests extends MetadataBase {
 			);
 		}
 
-		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 3).iterator();
+		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 4).iterator();
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.EMAIL.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.UNSPECIFIED.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo("urn:mace:shibboleth:1.0:nameIdentifier"));
 
-		nodeIterator = assertNodeCount(xml, "//md:AssertionConsumerService", 4).iterator();
+		nodeIterator = assertNodeCount(xml, "//md:AssertionConsumerService", 5).iterator();
 		for (int i = 0; i < 4; i++) {
 			Node n = nodeIterator.next();
 			assertNodeAttribute(
@@ -262,7 +263,7 @@ public class MetadataTests extends MetadataBase {
 			);
 		}
 
-		nodeIterator = assertNodeCount(xml, "//md:SingleSignOnService", 3).iterator();
+		nodeIterator = assertNodeCount(xml, "//md:SingleSignOnService", 4).iterator();
 		for (int i = 0; i < 3; i++) {
 			Node n = nodeIterator.next();
 			assertNodeAttribute(
@@ -277,9 +278,10 @@ public class MetadataTests extends MetadataBase {
 			);
 		}
 
-		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 2).iterator();
+		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 3).iterator();
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.TRANSIENT.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo("urn:mace:shibboleth:1.0:nameIdentifier"));
 
 
 	}
@@ -429,11 +431,11 @@ public class MetadataTests extends MetadataBase {
 
 		List<NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
-		assertThat(nameIds, containsInAnyOrder(EMAIL, PERSISTENT, UNSPECIFIED));
+		assertThat(nameIds, containsInAnyOrder(EMAIL, PERSISTENT, UNSPECIFIED, NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
 
 		List<Endpoint> consumerService = provider.getAssertionConsumerService();
 		assertNotNull(consumerService);
-		assertThat(consumerService.size(), equalTo(4));
+		assertThat(consumerService.size(), equalTo(5));
 
 		Endpoint acs1 = consumerService.get(0);
 		assertNotNull(acs1);
@@ -462,6 +464,13 @@ public class MetadataTests extends MetadataBase {
 		assertThat(acs4.getBinding(), equalTo(PAOS));
 		assertThat(acs4.getIndex(), equalTo(3));
 		assertThat(acs4.isDefault(), equalTo(false));
+
+		Endpoint acs5 = consumerService.get(4);
+		assertNotNull(acs5);
+		assertThat(acs5.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso/assertion"));
+		assertThat(acs5.getBinding(), equalTo(Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:Assertion")));
+		assertThat(acs5.getIndex(), equalTo(4));
+		assertThat(acs5.isDefault(), equalTo(false));
 
 		List<Attribute> attributes = provider.getRequestedAttributes();
 		assertNotNull(attributes);
@@ -548,11 +557,11 @@ public class MetadataTests extends MetadataBase {
 
 		List<NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
-		assertThat(nameIds, containsInAnyOrder(TRANSIENT, PERSISTENT));
+		assertThat(nameIds, containsInAnyOrder(TRANSIENT, PERSISTENT, NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
 
 		List<Endpoint> singleSignOnServices = provider.getSingleSignOnService();
 		assertNotNull(singleSignOnServices);
-		assertThat(singleSignOnServices.size(), equalTo(3));
+		assertThat(singleSignOnServices.size(), equalTo(4));
 		Endpoint sso0 = singleSignOnServices.get(0);
 		assertNotNull(sso0);
 		assertThat(sso0.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
@@ -567,6 +576,11 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(sso2);
 		assertThat(sso2.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
 		assertThat(sso2.getBinding(), equalTo(REDIRECT));
+
+		Endpoint sso3 = singleSignOnServices.get(3);
+		assertNotNull(sso3);
+		assertThat(sso3.getLocation(), equalTo("https://shibbolethidp/idp/profile/SAML2/Unsolicited/SSO"));
+		assertThat(sso3.getBinding(), equalTo(Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:AuthnRequest")));
 	}
 
 	@Test

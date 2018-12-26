@@ -90,6 +90,7 @@ RpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=
     <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+    <md:NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</md:NameIDFormat>
 
     <md:AssertionConsumerService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
@@ -108,6 +109,10 @@ RpuRBwn3Ei+jCRouxTbzKPsuCVB+1sNyxMTXzf0=
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS"
       Location="https://sp.saml.spring.io/saml/sp/sso/ecp"
       index="3"/>
+    <md:AssertionConsumerService
+      Binding="urn:mace:shibboleth:2.0:profiles:Assertion"
+      Location="https://sp.saml.spring.io/saml/sp/sso/assertion"
+      index="4"/>
 
     <md:AttributeConsumingService index="0" isDefault="true">
 

@@ -92,6 +92,7 @@ Nud1HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==
 
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+    <md:NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</md:NameIDFormat>
 
     <md:SingleSignOnService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
@@ -102,6 +103,9 @@ Nud1HItVxaexFvoreh+D1+bBE0fLZ9K+Sw==
     <md:SingleSignOnService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
       Location="https://idp.saml.spring.io/saml/idp/sso" />
+    <md:SingleSignOnService
+      Binding="urn:mace:shibboleth:2.0:profiles:AuthnRequest"
+      Location="https://shibbolethidp/idp/profile/SAML2/Unsolicited/SSO" />
 
     <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"

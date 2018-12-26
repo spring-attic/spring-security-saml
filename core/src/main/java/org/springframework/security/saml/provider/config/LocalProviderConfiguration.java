@@ -19,6 +19,7 @@ package org.springframework.security.saml.provider.config;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
@@ -132,8 +133,10 @@ public class LocalProviderConfiguration<
 		return nameIds;
 	}
 
-	public LocalConfiguration setNameIds(List<NameId> nameIds) {
-		this.nameIds = nameIds;
+	public LocalConfiguration setNameIds(List<Object> nameIds) {
+		this.nameIds = nameIds.stream().map(
+			n -> n instanceof String ? NameId.fromUrn((String)n) : (NameId)n).collect(Collectors.toList()
+		);
 		return _this();
 	}
 

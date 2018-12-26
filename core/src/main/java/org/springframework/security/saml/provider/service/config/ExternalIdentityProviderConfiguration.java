@@ -17,6 +17,7 @@
 
 package org.springframework.security.saml.provider.service.config;
 
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
@@ -30,8 +31,20 @@ public class ExternalIdentityProviderConfiguration extends
 		return nameId;
 	}
 
-	public ExternalIdentityProviderConfiguration setNameId(NameId nameId) {
-		this.nameId = nameId;
+	public ExternalIdentityProviderConfiguration setNameId(Object nameId) {
+		if (nameId == null) {
+			this.nameId = null;
+		}
+		else if (nameId instanceof String) {
+			this.nameId = NameId.fromUrn((String)nameId);
+		}
+		else if (nameId instanceof NameId) {
+			this.nameId = (NameId)nameId;
+		}
+		else {
+			throw new SamlException("Unknown NameId type:"+nameId.getClass().getName());
+		}
+
 		return this;
 	}
 

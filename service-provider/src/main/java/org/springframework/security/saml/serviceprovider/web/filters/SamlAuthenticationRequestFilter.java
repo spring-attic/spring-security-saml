@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
@@ -76,15 +77,16 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			try {
 				HostedServiceProvider provider = getProvider(request);
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
-				IdentityProviderMetadata idp = getIdentityProvider(request, provider);
+				Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entity =
+					getIdentityProvider(request, provider);
+				IdentityProviderMetadata idp = entity.getValue();
 				ServiceProviderMetadata localSp = provider.getMetadata();
-				AuthenticationRequest authn = getAuthenticationRequest(localSp, idp);
-				Endpoint destination = getPreferredEndpoint(
-					idp.getIdentityProvider().getSingleSignOnService(),
-					BindingType.REDIRECT,
-					-1 //would be a serviceProviderConfiguration option
+				AuthenticationRequest authn = getAuthenticationRequest(
+					localSp,
+					idp,
+					entity.getKey().getAssertionConsumerServiceIndex()
 				);
-				sendAuthenticationRequest(authn, destination, request, response);
+				sendAuthenticationRequest(authn, authn.getDestination(), request, response);
 			} catch (SamlException x) {
 				displayError(request, response, x.getMessage());
 			}
@@ -94,10 +96,10 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		}
 	}
 
-	private void sendAuthenticationRequest(AuthenticationRequest authn,
-										   Endpoint destination,
-										   HttpServletRequest request,
-										   HttpServletResponse response) throws IOException {
+	protected void sendAuthenticationRequest(AuthenticationRequest authn,
+											 Endpoint destination,
+											 HttpServletRequest request,
+											 HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
 		if (destination.getBinding().equals(Binding.REDIRECT)) {
 			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
@@ -144,13 +146,15 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 	 * UAA would want to override this as the entities are referred to by alias rather
 	 * than ID
 	 */
-	private IdentityProviderMetadata getIdentityProvider(HttpServletRequest request, HostedServiceProvider sp) {
-		IdentityProviderMetadata result = null;
+	protected Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> getIdentityProvider(
+		HttpServletRequest request,
+		HostedServiceProvider sp
+	) {
+		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> result = null;
 		String idp = request.getParameter("idp");
 		if (hasText(idp)) {
 			result = sp.getRemoteProviders().entrySet().stream()
 				.filter(p -> idp.equals(p.getValue().getEntityId()))
-				.map(p -> p.getValue())
 				.findFirst()
 				.orElse(null);
 		}
@@ -158,7 +162,6 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			result = sp.getRemoteProviders()
 				.entrySet()
 				.stream()
-				.map(e -> e.getValue())
 				.findFirst()
 				.orElse(null);
 		}
@@ -168,7 +171,14 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		return result;
 	}
 
-	private AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
+	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp,
+															 IdentityProviderMetadata idp,
+															 int preferredEndpointIndex) {
+		Endpoint endpoint = getPreferredEndpoint(
+			idp.getIdentityProvider().getSingleSignOnService(),
+			BindingType.REDIRECT,
+			preferredEndpointIndex
+		);
 		AuthenticationRequest request = new AuthenticationRequest()
 			// Some service providers will not accept first character if 0..9
 			// Azure AD IdP for example.
@@ -176,7 +186,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			.setIssueInstant(new DateTime(getClock().millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
-			.setBinding(Binding.POST)
+			.setBinding(endpoint.getBinding())
 			.setAssertionConsumerService(
 				getPreferredEndpoint(
 					sp.getServiceProvider().getAssertionConsumerService(),
@@ -185,7 +195,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 				)
 			)
 			.setIssuer(new Issuer().setValue(sp.getEntityId()))
-			.setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
+			.setDestination(endpoint);
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
@@ -206,7 +216,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		return request;
 	}
 
-	public Clock getClock() {
+	protected Clock getClock() {
 		return clock;
 	}
 
@@ -215,7 +225,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		return this;
 	}
 
-	public String getPostTemplate() {
+	protected String getPostTemplate() {
 		return postTemplate;
 	}
 

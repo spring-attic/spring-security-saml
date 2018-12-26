@@ -130,10 +130,10 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 									   Authentication authentication,
 									   Saml2Object logoutRequest) throws IOException {
 
-		if (! (logoutRequest instanceof LogoutRequest)) {
-			throw new SamlException("Invalid logout request:"+logoutRequest);
+		if (!(logoutRequest instanceof LogoutRequest)) {
+			throw new SamlException("Invalid logout request:" + logoutRequest);
 		}
-		LogoutRequest lr = (LogoutRequest)logoutRequest;
+		LogoutRequest lr = (LogoutRequest) logoutRequest;
 		HostedServiceProvider provider = getProvider(request);
 		ValidationResult validate = validator.validate(lr, provider);
 		if (validate.hasErrors()) {

@@ -23,8 +23,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -54,10 +52,12 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * =========== Setters ============
 	 */
+
 	/**
 	 * Sets the configuration resolver for the SAML filter chain.
 	 * This provides SAML Service Provider configuration based on an HTTP request
 	 * and allows for tenant hosting based on {@link javax.servlet.http.HttpServletRequest}
+	 *
 	 * @param resolver - the configuration resolver to use
 	 * @return this object to be used in a builder pattern
 	 * @throws IllegalStateException if {@link #providerResolver(ServiceProviderResolver)} has been previously invoked
@@ -73,10 +73,11 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * Sets the service provider resolver for the SAML filter chain.
 	 * This provides SAML Service Provider configuration and metadata based on an HTTP request
 	 * and allows for tenant hosting based on {@link javax.servlet.http.HttpServletRequest}
+	 *
 	 * @param resolver - the SAML service provider resolver to use
 	 * @return this object to be used in a builder pattern
 	 * @throws IllegalStateException if {@link #configurationResolver(ServiceProviderConfigurationResolver)}
-	 * has been previously invoked
+	 *                               has been previously invoked
 	 */
 	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
 		configuration.setProviderResolver(resolver);
@@ -85,6 +86,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	/**
 	 * Overrides the default authentication manager
+	 *
 	 * @param manager the manager that will be invoked after an assertion has been successfully parsed
 	 */
 	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager manager) {
@@ -95,6 +97,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/**
 	 * Overrides the default authentication failure handler to be invoked if we receive an invalid
 	 * response or assertion
+	 *
 	 * @param handler the manager that will be invoked after an assertion has been successfully parsed
 	 */
 	public SamlServiceProviderConfigurer authenticationFailureHandler(AuthenticationFailureHandler handler) {
@@ -127,19 +130,25 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		SamlProcessingFilter processingFilter = configuration.getSamlProcessingFilter();
-		Filter metadataFilter = configuration.getMetadataFilter();
-		Filter selectIdentityProviderFilter = configuration.getSelectIdentityProviderFilter();
-		Filter authenticationRequestFilter = configuration.getIdentityProviderDiscoveryFilter();
-		AbstractAuthenticationProcessingFilter authenticationFilter = configuration.getWebSsoAuthenticationFilter();
-		Filter logoutFilter = configuration.getLogoutFilter();
+		configureFilters(
+			http,
+			BasicAuthenticationFilter.class,
+			configuration.getSamlProcessingFilter(),
+			configuration.getMetadataFilter(),
+			configuration.getSelectIdentityProviderFilter(),
+			configuration.getIdentityProviderDiscoveryFilter(),
+			configuration.getWebSsoAuthenticationFilter(),
+			configuration.getLogoutFilter()
+		);
+	}
 
-		http.addFilterAfter(processingFilter, BasicAuthenticationFilter.class);
-		http.addFilterAfter(metadataFilter, processingFilter.getClass());
-		http.addFilterAfter(selectIdentityProviderFilter, metadataFilter.getClass());
-		http.addFilterAfter(authenticationRequestFilter, selectIdentityProviderFilter.getClass());
-		http.addFilterAfter(authenticationFilter, authenticationRequestFilter.getClass());
-		http.addFilterAfter(logoutFilter, authenticationFilter.getClass());
+	private void configureFilters(HttpSecurity http,
+								  Class<? extends Filter> afterFilter,
+								  Filter... filters) {
+		for (Filter f : filters) {
+			http.addFilterAfter(f, afterFilter);
+			afterFilter = f.getClass();
+		}
 	}
 
 	@SuppressWarnings("unchecked")

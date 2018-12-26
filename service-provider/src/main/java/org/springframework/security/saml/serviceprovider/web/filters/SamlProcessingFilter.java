@@ -26,14 +26,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -63,7 +63,7 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
+		if (getMatcher().matches(request)) {
 			HostedServiceProvider provider = resolveProvider(request);
 			parseSamlRequest(request, provider);
 			parseSamlResponse(request, provider);
@@ -80,7 +80,7 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 	}
 
 	protected HostedServiceProvider resolveProvider(HttpServletRequest request) {
-		HostedServiceProvider serviceProvider = resolver.getServiceProvider(request);
+		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
 		if (serviceProvider == null) {
 			throw new SamlProviderNotFoundException("hosted");
 		}
@@ -89,13 +89,13 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 	}
 
 	private Saml2Object parseSamlObject(HttpServletRequest request,
-								 HostedServiceProvider provider,
-								 String parameterName, String attributeName) {
+										HostedServiceProvider provider,
+										String parameterName, String attributeName) {
 		Saml2Object result = null;
 		String rs = request.getParameter(parameterName);
 		if (hasText(rs)) {
-			String xml = transformer.samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
-			result = transformer.fromXml(xml, null, provider.getConfiguration().getKeys());
+			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
+			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
 			if (result instanceof SignableSaml2Object) {
 				SignableSaml2Object signableSaml2Object = (SignableSaml2Object) result;
 				IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
@@ -104,7 +104,7 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 				}
 				try {
 					Signature signature =
-						validator.validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
+						getValidator().validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
 					signableSaml2Object.setSignature(signature);
 				} catch (SignatureException e) {
 				}
@@ -112,5 +112,21 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 			request.setAttribute(attributeName, result);
 		}
 		return result;
+	}
+
+	protected SamlTransformer getTransformer() {
+		return transformer;
+	}
+
+	protected ServiceProviderResolver getResolver() {
+		return resolver;
+	}
+
+	protected ServiceProviderValidator getValidator() {
+		return validator;
+	}
+
+	protected RequestMatcher getMatcher() {
+		return matcher;
 	}
 }

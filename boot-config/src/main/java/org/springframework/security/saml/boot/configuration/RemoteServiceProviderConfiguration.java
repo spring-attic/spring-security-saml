@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.boot.registration;
+package org.springframework.security.saml.boot.configuration;
 
 import org.springframework.security.saml.configuration.ExternalServiceProviderConfiguration;
 

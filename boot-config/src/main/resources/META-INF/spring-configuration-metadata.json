@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "spring.security.saml2",
-      "type": "org.springframework.security.saml.boot.registration.SamlBootConfiguration",
-      "sourceType": "org.springframework.security.saml.boot.registration.SamlBootConfiguration"
+      "type": "org.springframework.security.saml.boot.configuration.SamlBootConfiguration",
+      "sourceType": "org.springframework.security.saml.boot.configuration.SamlBootConfiguration"
     },
     {
       "name": "spring.security.saml2.service-provider",

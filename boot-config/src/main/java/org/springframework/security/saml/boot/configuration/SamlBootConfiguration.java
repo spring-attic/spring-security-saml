@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.boot.registration;
+package org.springframework.security.saml.boot.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;

@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.saml.boot.registration.RemoteIdentityProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;

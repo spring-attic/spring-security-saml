@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.boot.registration;
+package org.springframework.security.saml.boot.configuration;
 
 public abstract class RemoteProviderConfiguration {
 	private String alias;

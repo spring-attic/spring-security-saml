@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.boot.registration;
+package org.springframework.security.saml.boot.configuration;
 
 import java.util.Collections;
 import java.util.LinkedList;

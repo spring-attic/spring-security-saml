@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml.boot;
 
-import org.springframework.security.saml.boot.registration.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml.boot.registration.LocalProviderConfiguration;
-import org.springframework.security.saml.boot.registration.LocalServiceProviderConfiguration;
-import org.springframework.security.saml.boot.registration.RemoteIdentityProviderConfiguration;
-import org.springframework.security.saml.boot.registration.RemoteProviderConfiguration;
-import org.springframework.security.saml.boot.registration.RemoteServiceProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.LocalProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.LocalServiceProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.RemoteIdentityProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.RemoteProviderConfiguration;
+import org.springframework.security.saml.boot.configuration.RemoteServiceProviderConfiguration;
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedProviderConfiguration;
 import org.springframework.security.saml.configuration.ExternalServiceProviderConfiguration;

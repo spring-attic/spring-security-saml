@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.boot.registration.SamlBootConfiguration;
+import org.springframework.security.saml.boot.configuration.SamlBootConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;

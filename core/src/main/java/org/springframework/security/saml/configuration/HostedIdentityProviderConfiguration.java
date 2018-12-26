@@ -40,26 +40,26 @@ public class HostedIdentityProviderConfiguration extends
 	private final long notBefore;
 	private final long sessionNotOnOrAfter;
 
-	public HostedIdentityProviderConfiguration(String pathPrefix,
-											   String basePath,
-											   String alias,
-											   String entityId,
-											   boolean signMetadata,
-											   boolean signAssertions,
-											   boolean wantRequestsSigned,
-											   String metadata,
-											   List<KeyData> keys,
-											   AlgorithmMethod defaultSigningAlgorithm,
-											   DigestMethod defaultDigest,
-											   List<NameId> nameIds,
-											   boolean singleLogoutEnabled,
-											   List<ExternalServiceProviderConfiguration> providers,
-											   boolean encryptAssertions,
-											   KeyEncryptionMethod keyEncryptionAlgorithm,
-											   DataEncryptionMethod dataEncryptionAlgorithm,
-											   long notOnOrAfter,
-											   long notBefore,
-											   long sessionNotOnOrAfter) {
+	HostedIdentityProviderConfiguration(String pathPrefix,
+										String basePath,
+										String alias,
+										String entityId,
+										boolean signMetadata,
+										boolean signAssertions,
+										boolean wantRequestsSigned,
+										String metadata,
+										List<KeyData> keys,
+										AlgorithmMethod defaultSigningAlgorithm,
+										DigestMethod defaultDigest,
+										List<NameId> nameIds,
+										boolean singleLogoutEnabled,
+										List<ExternalServiceProviderConfiguration> providers,
+										boolean encryptAssertions,
+										KeyEncryptionMethod keyEncryptionAlgorithm,
+										DataEncryptionMethod dataEncryptionAlgorithm,
+										long notOnOrAfter,
+										long notBefore,
+										long sessionNotOnOrAfter) {
 		super(
 			pathPrefix,
 			basePath,
@@ -84,42 +84,6 @@ public class HostedIdentityProviderConfiguration extends
 		this.sessionNotOnOrAfter = sessionNotOnOrAfter;
 	}
 
-	public boolean isWantRequestsSigned() {
-		return wantRequestsSigned;
-	}
-
-	public boolean isSignAssertions() {
-		return signAssertions;
-	}
-
-	public long getNotOnOrAfter() {
-		return notOnOrAfter;
-	}
-
-	public long getNotBefore() {
-		return notBefore;
-	}
-
-	public long getSessionNotOnOrAfter() {
-		return sessionNotOnOrAfter;
-	}
-
-	public boolean isEncryptAssertions() {
-		return encryptAssertions;
-	}
-
-	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
-		return keyEncryptionAlgorithm;
-	}
-
-	public DataEncryptionMethod getDataEncryptionAlgorithm() {
-		return dataEncryptionAlgorithm;
-	}
-
-	public static Builder builder() {
-		return new Builder();
-	}
-
 	public static Builder builder(HostedIdentityProviderConfiguration configuration) {
 		return builder()
 			.wantRequestsSigned(configuration.isWantRequestsSigned())
@@ -142,6 +106,42 @@ public class HostedIdentityProviderConfiguration extends
 			.nameIds(configuration.getNameIds())
 			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
 			.providers(configuration.getProviders());
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public boolean isWantRequestsSigned() {
+		return wantRequestsSigned;
+	}
+
+	public boolean isSignAssertions() {
+		return signAssertions;
+	}
+
+	public boolean isEncryptAssertions() {
+		return encryptAssertions;
+	}
+
+	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
+		return keyEncryptionAlgorithm;
+	}
+
+	public DataEncryptionMethod getDataEncryptionAlgorithm() {
+		return dataEncryptionAlgorithm;
+	}
+
+	public long getNotOnOrAfter() {
+		return notOnOrAfter;
+	}
+
+	public long getNotBefore() {
+		return notBefore;
+	}
+
+	public long getSessionNotOnOrAfter() {
+		return sessionNotOnOrAfter;
 	}
 
 	public static final class Builder {

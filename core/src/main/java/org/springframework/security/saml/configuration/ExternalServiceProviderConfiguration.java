@@ -19,11 +19,11 @@ package org.springframework.security.saml.configuration;
 
 public class ExternalServiceProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
-	public ExternalServiceProviderConfiguration(String alias,
-												String metadata,
-												String linktext,
-												boolean skipSslValidation,
-												boolean metadataTrustCheck) {
+	ExternalServiceProviderConfiguration(String alias,
+										 String metadata,
+										 String linktext,
+										 boolean skipSslValidation,
+										 boolean metadataTrustCheck) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
 	}
 }

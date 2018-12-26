@@ -28,27 +28,15 @@ public class ExternalIdentityProviderConfiguration extends
 	private final NameId nameId;
 	private final int assertionConsumerServiceIndex;
 
-	public ExternalIdentityProviderConfiguration(String alias,
-												 String metadata,
-												 String linktext,
-												 boolean skipSslValidation,
-												 boolean metadataTrustCheck,
-												 NameId nameId, int assertionConsumerServiceIndex) {
+	ExternalIdentityProviderConfiguration(String alias,
+										  String metadata,
+										  String linktext,
+										  boolean skipSslValidation,
+										  boolean metadataTrustCheck,
+										  NameId nameId, int assertionConsumerServiceIndex) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
 		this.nameId = nameId;
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
-	}
-
-	public NameId getNameId() {
-		return nameId;
-	}
-
-	public int getAssertionConsumerServiceIndex() {
-		return assertionConsumerServiceIndex;
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 	public static Builder builder(ExternalIdentityProviderConfiguration idp) {
@@ -62,6 +50,18 @@ public class ExternalIdentityProviderConfiguration extends
 			.linktext(idp.getLinktext())
 			;
 
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public int getAssertionConsumerServiceIndex() {
+		return assertionConsumerServiceIndex;
+	}
+
+	public NameId getNameId() {
+		return nameId;
 	}
 
 	public static final class Builder {

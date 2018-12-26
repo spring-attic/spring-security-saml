@@ -35,6 +35,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -109,6 +110,8 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 
 	@Override
 	public AuthenticationRequest authenticationRequest(IdentityProviderMetadata idp) {
+		Endpoint endpoint =
+			getPreferredEndpoint(idp.getIdentityProvider().getSingleSignOnService(), Binding.REDIRECT, 0);
 		ServiceProviderMetadata sp = getMetadata();
 		AuthenticationRequest request = new AuthenticationRequest()
 				// Some service providers will not accept first character if 0..9
@@ -117,7 +120,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 			.setIssueInstant(new DateTime(getClock().millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
-			.setBinding(Binding.POST)
+			.setBinding(endpoint.getBinding())
 			.setAssertionConsumerService(
 				getPreferredEndpoint(
 					sp.getServiceProvider().getAssertionConsumerService(),
@@ -126,7 +129,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 				)
 			)
 			.setIssuer(new Issuer().setValue(sp.getEntityId()))
-			.setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
+			.setDestination(endpoint);
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}

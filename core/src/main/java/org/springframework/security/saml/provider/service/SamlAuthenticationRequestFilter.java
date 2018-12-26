@@ -81,13 +81,13 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			ServiceProviderService provider = provisioning.getHostedProvider();
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
 			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
-			//TODO - this can be better
-			Endpoint location = provider.getPreferredEndpoint(
-				idp.getIdentityProvider().getSingleSignOnService(),
-				authenticationRequest.getBinding(),
-				-1
+			sendAuthenticationRequest(
+				provider,
+				request,
+				response,
+				authenticationRequest,
+				authenticationRequest.getDestination()
 			);
-			sendAuthenticationRequest(provider, request, response, authenticationRequest, location);
 		}
 		else {
 			filterChain.doFilter(request, response);

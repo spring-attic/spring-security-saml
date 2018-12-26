@@ -119,16 +119,10 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 		}
 	}
 
-	private void doLogout(HttpServletRequest request,
-						  HttpServletResponse response, Authentication authentication) {
-		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-		logoutHandler.logout(request, response, authentication);
-	}
-
-	private void receivedLogoutRequest(HttpServletRequest request,
-									   HttpServletResponse response,
-									   Authentication authentication,
-									   Saml2Object logoutRequest) throws IOException {
+	protected void receivedLogoutRequest(HttpServletRequest request,
+										 HttpServletResponse response,
+										 Authentication authentication,
+										 Saml2Object logoutRequest) throws IOException {
 
 		if (!(logoutRequest instanceof LogoutRequest)) {
 			throw new SamlException("Invalid logout request:" + logoutRequest);
@@ -152,18 +146,17 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 		response.sendRedirect(url);
 	}
 
-	private void receivedLogoutResponse(HttpServletRequest request,
-										HttpServletResponse response,
-										Authentication authentication,
-										Saml2Object logoutResponse) throws IOException, ServletException {
+	protected void receivedLogoutResponse(HttpServletRequest request,
+										  HttpServletResponse response,
+										  Authentication authentication,
+										  Saml2Object logoutResponse) throws IOException, ServletException {
 		doLogout(request, response, authentication);
-		//TODO - logout success handler invocation
 		logoutSuccessHandler.onLogoutSuccess(request, response, authentication);
 	}
 
-	private void spInitiatedLogout(HttpServletRequest request,
-								   HttpServletResponse response,
-								   Authentication authentication) throws IOException {
+	protected void spInitiatedLogout(HttpServletRequest request,
+									 HttpServletResponse response,
+									 Authentication authentication) throws IOException {
 		if (authentication instanceof SamlAuthentication) {
 			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
@@ -190,30 +183,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 		}
 	}
 
-	private LogoutRequest logoutRequest(
-		ServiceProviderMetadata local,
-		IdentityProviderMetadata idp,
-		NameIdPrincipal principal) {
-		List<SsoProvider> ssoProviders = idp.getSsoProviders();
-		LogoutRequest result = new LogoutRequest()
-			.setId(UUID.randomUUID().toString())
-			.setDestination(
-				getPreferredEndpoint(
-					ssoProviders.get(0).getSingleLogoutService(),
-					null,
-					-1
-				)
-			)
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
-			.setIssueInstant(DateTime.now())
-			.setNameId(principal)
-			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
-
-		return result;
-	}
-
-
-	private LogoutResponse logoutResponse(
+	protected LogoutResponse logoutResponse(
 		HostedServiceProvider local,
 		LogoutRequest request,
 		IdentityProviderMetadata recipient) {
@@ -238,15 +208,10 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 			.setVersion("2.0");
 	}
 
-
-	private String getLogoutRelayState(HttpServletRequest request, IdentityProviderMetadata idp) {
-		return null;
-	}
-
-	private String getRedirectUrl(Saml2Object lr,
-								  String location,
-								  String paramName,
-								  String relayState)
+	protected String getRedirectUrl(Saml2Object lr,
+									String location,
+									String paramName,
+									String relayState)
 		throws UnsupportedEncodingException {
 		String xml = transformer.toXml(lr);
 		String value = transformer.samlEncode(xml, true);
@@ -257,5 +222,37 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 		return builder.queryParam(paramName, UriUtils.encode(value, StandardCharsets.UTF_8.name()))
 			.build()
 			.toUriString();
+	}
+
+	protected void doLogout(HttpServletRequest request,
+							HttpServletResponse response, Authentication authentication) {
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(request, response, authentication);
+	}
+
+	protected LogoutRequest logoutRequest(
+		ServiceProviderMetadata local,
+		IdentityProviderMetadata idp,
+		NameIdPrincipal principal) {
+		List<SsoProvider> ssoProviders = idp.getSsoProviders();
+		LogoutRequest result = new LogoutRequest()
+			.setId(UUID.randomUUID().toString())
+			.setDestination(
+				getPreferredEndpoint(
+					ssoProviders.get(0).getSingleLogoutService(),
+					null,
+					-1
+				)
+			)
+			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setIssueInstant(DateTime.now())
+			.setNameId(principal)
+			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
+
+		return result;
+	}
+
+	protected String getLogoutRelayState(HttpServletRequest request, IdentityProviderMetadata idp) {
+		return request.getParameter("RelayState");
 	}
 }

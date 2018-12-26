@@ -49,8 +49,8 @@ public interface SamlFilter<T extends HostedProvider> {
 	}
 
 	default Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-								  BindingType preferredBinding,
-								  int preferredIndex) {
+										  BindingType preferredBinding,
+										  int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
 		}

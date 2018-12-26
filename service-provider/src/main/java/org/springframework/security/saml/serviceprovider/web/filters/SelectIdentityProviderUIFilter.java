@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -51,9 +51,9 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 
 	private final RequestMatcher matcher;
 	private final String pathPrefix;
+	private final HtmlWriter template;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
-	private final HtmlWriter template;
 
 	public SelectIdentityProviderUIFilter(String pathPrefix,
 										  RequestMatcher matcher,
@@ -63,6 +63,18 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		this.matcher = matcher;
 	}
 
+	public RequestMatcher getMatcher() {
+		return matcher;
+	}
+
+	public String getSelectTemplate() {
+		return selectTemplate;
+	}
+
+	public SelectIdentityProviderUIFilter setSelectTemplate(String selectTemplate) {
+		this.selectTemplate = selectTemplate;
+		return this;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -109,8 +121,8 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		}
 	}
 
-	private String getDiscoveryRedirect(HostedServiceProvider provider,
-										ExternalProviderConfiguration p) throws UnsupportedEncodingException {
+	protected String getDiscoveryRedirect(HostedServiceProvider provider,
+										  ExternalProviderConfiguration p) throws UnsupportedEncodingException {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
@@ -118,19 +130,6 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();
-	}
-
-	public RequestMatcher getMatcher() {
-		return matcher;
-	}
-
-	public String getSelectTemplate() {
-		return selectTemplate;
-	}
-
-	public SelectIdentityProviderUIFilter setSelectTemplate(String selectTemplate) {
-		this.selectTemplate = selectTemplate;
-		return this;
 	}
 
 	public boolean isRedirectOnSingleProvider() {

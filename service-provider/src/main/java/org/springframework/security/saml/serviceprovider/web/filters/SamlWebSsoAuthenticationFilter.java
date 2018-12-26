@@ -73,7 +73,7 @@ public class SamlWebSsoAuthenticationFilter extends AbstractAuthenticationProces
 			return null;
 		}
 		if (object instanceof Response) {
-			return (Response)object;
+			return (Response) object;
 		}
 		else {
 			return null;

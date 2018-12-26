@@ -60,34 +60,6 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 		this.matcher = matcher;
 	}
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-		throws ServletException, IOException {
-		if (getMatcher().matches(request)) {
-			HostedServiceProvider provider = resolveProvider(request);
-			parseSamlRequest(request, provider);
-			parseSamlResponse(request, provider);
-		}
-		chain.doFilter(request, response);
-	}
-
-	protected Saml2Object parseSamlRequest(HttpServletRequest request, HostedServiceProvider provider) {
-		return parseSamlObject(request, provider, "SAMLRequest", SAML_REQUEST);
-	}
-
-	protected Saml2Object parseSamlResponse(HttpServletRequest request, HostedServiceProvider provider) {
-		return parseSamlObject(request, provider, "SAMLResponse", SAML_RESPONSE);
-	}
-
-	protected HostedServiceProvider resolveProvider(HttpServletRequest request) {
-		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
-		if (serviceProvider == null) {
-			throw new SamlProviderNotFoundException("hosted");
-		}
-		request.setAttribute(SAML_PROVIDER, serviceProvider);
-		return serviceProvider;
-	}
-
 	private Saml2Object parseSamlObject(HttpServletRequest request,
 										HostedServiceProvider provider,
 										String parameterName, String attributeName) {
@@ -128,5 +100,33 @@ public class SamlProcessingFilter extends OncePerRequestFilter {
 
 	protected RequestMatcher getMatcher() {
 		return matcher;
+	}
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+		throws ServletException, IOException {
+		if (getMatcher().matches(request)) {
+			HostedServiceProvider provider = resolveProvider(request);
+			parseSamlRequest(request, provider);
+			parseSamlResponse(request, provider);
+		}
+		chain.doFilter(request, response);
+	}
+
+	protected Saml2Object parseSamlRequest(HttpServletRequest request, HostedServiceProvider provider) {
+		return parseSamlObject(request, provider, "SAMLRequest", SAML_REQUEST);
+	}
+
+	protected Saml2Object parseSamlResponse(HttpServletRequest request, HostedServiceProvider provider) {
+		return parseSamlObject(request, provider, "SAMLResponse", SAML_RESPONSE);
+	}
+
+	protected HostedServiceProvider resolveProvider(HttpServletRequest request) {
+		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
+		if (serviceProvider == null) {
+			throw new SamlProviderNotFoundException("hosted");
+		}
+		request.setAttribute(SAML_PROVIDER, serviceProvider);
+		return serviceProvider;
 	}
 }

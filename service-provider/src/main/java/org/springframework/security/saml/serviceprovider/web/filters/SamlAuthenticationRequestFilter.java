@@ -33,6 +33,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
@@ -41,7 +42,6 @@ import org.springframework.security.saml.saml2.metadata.BindingType;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
@@ -56,11 +56,10 @@ import static org.springframework.util.StringUtils.hasText;
 public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
 	private final SamlTransformer transformer;
-
-	private Clock clock = Clock.systemUTC();
-	private String postTemplate = "/templates/saml2-post-binding.vm";
 	private final AntPathRequestMatcher matcher;
 	private final HtmlWriter template;
+	private Clock clock = Clock.systemUTC();
+	private String postTemplate = "/templates/saml2-post-binding.vm";
 
 	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
 										   SamlTransformer transformer,
@@ -94,52 +93,6 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		else {
 			filterChain.doFilter(request, response);
 		}
-	}
-
-	protected void sendAuthenticationRequest(AuthenticationRequest authn,
-											 Endpoint destination,
-											 HttpServletRequest request,
-											 HttpServletResponse response) throws IOException {
-		String relayState = request.getParameter("RelayState");
-		if (destination.getBinding().equals(Binding.REDIRECT)) {
-			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
-			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
-			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
-			if (hasText(relayState)) {
-				url.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
-			}
-			String redirect = url.build(true).toUriString();
-			response.sendRedirect(redirect);
-		}
-		else if (destination.getBinding().equals(Binding.POST)) {
-			String encoded = transformer.samlEncode(transformer.toXml(authn), false);
-			Map<String, Object> model = new HashMap<>();
-			model.put("action", destination.getLocation());
-			model.put("SAMLRequest", encoded);
-			if (hasText(relayState)) {
-				model.put("RelayState", relayState);
-			}
-			template.processHtmlBody(
-				request,
-				response,
-				getPostTemplate(),
-				model
-			);
-		}
-		else {
-			displayError(request, response, "Unsupported binding:" + destination.getBinding().toString());
-		}
-	}
-
-	private void displayError(HttpServletRequest request,
-							  HttpServletResponse response,
-							  String message) {
-		template.processHtmlBody(
-			request,
-			response,
-			template.getErrorTemplate(),
-			Collections.singletonMap("message", message)
-		);
 	}
 
 	/*
@@ -214,6 +167,52 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			));
 		}
 		return request;
+	}
+
+	protected void sendAuthenticationRequest(AuthenticationRequest authn,
+											 Endpoint destination,
+											 HttpServletRequest request,
+											 HttpServletResponse response) throws IOException {
+		String relayState = request.getParameter("RelayState");
+		if (destination.getBinding().equals(Binding.REDIRECT)) {
+			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
+			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
+			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
+			if (hasText(relayState)) {
+				url.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
+			}
+			String redirect = url.build(true).toUriString();
+			response.sendRedirect(redirect);
+		}
+		else if (destination.getBinding().equals(Binding.POST)) {
+			String encoded = transformer.samlEncode(transformer.toXml(authn), false);
+			Map<String, Object> model = new HashMap<>();
+			model.put("action", destination.getLocation());
+			model.put("SAMLRequest", encoded);
+			if (hasText(relayState)) {
+				model.put("RelayState", relayState);
+			}
+			template.processHtmlBody(
+				request,
+				response,
+				getPostTemplate(),
+				model
+			);
+		}
+		else {
+			displayError(request, response, "Unsupported binding:" + destination.getBinding().toString());
+		}
+	}
+
+	private void displayError(HttpServletRequest request,
+							  HttpServletResponse response,
+							  String message) {
+		template.processHtmlBody(
+			request,
+			response,
+			template.getErrorTemplate(),
+			Collections.singletonMap("message", message)
+		);
 	}
 
 	protected Clock getClock() {

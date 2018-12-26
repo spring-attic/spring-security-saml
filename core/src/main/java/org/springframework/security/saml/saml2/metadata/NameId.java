@@ -68,7 +68,6 @@ public class NameId {
 		}
 		NameIdFormat format = NameIdFormat.fromUrn(other);
 		switch (format) {
-			case UNSPECIFIED: return UNSPECIFIED;
 			case PERSISTENT: return PERSISTENT;
 			case EMAIL: return EMAIL;
 			case ENTITY: return ENTITY;
@@ -77,9 +76,11 @@ public class NameId {
 			case TRANSIENT: return TRANSIENT;
 			case X509_SUBJECT: return X509_SUBJECT;
 			case WIN_DOMAIN_QUALIFIED: return WIN_DOMAIN_QUALIFIED;
-			case CUSTOM: return new NameId(uri, NameIdFormat.CUSTOM);
 		}
-		throw new SamlException("Unknown NameIdFormat: "+other);
+		if (uri.equals(NameIdFormat.UNSPECIFIED.toUri())) {
+			return UNSPECIFIED;
+		}
+		return new NameId(uri, NameIdFormat.UNSPECIFIED);
 	}
 
 	public URI getValue() {

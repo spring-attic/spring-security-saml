@@ -40,8 +40,7 @@ public enum NameIdFormat {
 	WIN_DOMAIN_QUALIFIED("urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName"),
 	KERBEROS("urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos"),
 	ENTITY("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"),
-	ENCRYPTED("urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted"),
-	CUSTOM("urn:spring-security:SAML:2.0:custom"),;
+	ENCRYPTED("urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted");
 
 	private final String urn;
 
@@ -66,7 +65,7 @@ public enum NameIdFormat {
 				return name;
 			}
 		}
-		return CUSTOM;
+		return UNSPECIFIED;
 	}
 
 	@Override

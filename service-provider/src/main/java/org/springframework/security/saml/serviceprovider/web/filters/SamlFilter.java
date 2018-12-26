@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.provider.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.BindingType;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -49,7 +49,7 @@ public interface SamlFilter<T extends HostedProvider> {
 	}
 
 	default Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-								  Binding preferredBinding,
+								  BindingType preferredBinding,
 								  int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
@@ -59,7 +59,7 @@ public interface SamlFilter<T extends HostedProvider> {
 		//find the preferred binding
 		if (preferredBinding != null) {
 			for (Endpoint e : eps) {
-				if (preferredBinding == e.getBindingType()) {
+				if (preferredBinding == e.getBinding().getType()) {
 					result = e;
 					break;
 				}

@@ -36,6 +36,7 @@ import org.springframework.security.saml.saml2.authentication.AuthenticationRequ
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.BindingType;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
@@ -80,7 +81,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 				AuthenticationRequest authn = getAuthenticationRequest(localSp, idp);
 				Endpoint destination = getPreferredEndpoint(
 					idp.getIdentityProvider().getSingleSignOnService(),
-					Binding.REDIRECT,
+					BindingType.REDIRECT,
 					-1 //would be a serviceProviderConfiguration option
 				);
 				sendAuthenticationRequest(authn, destination, request, response);
@@ -98,7 +99,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 										   HttpServletRequest request,
 										   HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
-		if (destination.getBindingType().equals(Binding.REDIRECT)) {
+		if (destination.getBinding().equals(Binding.REDIRECT)) {
 			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
@@ -108,7 +109,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			String redirect = url.build(true).toUriString();
 			response.sendRedirect(redirect);
 		}
-		else if (destination.getBindingType().equals(Binding.POST)) {
+		else if (destination.getBinding().equals(Binding.POST)) {
 			String encoded = transformer.samlEncode(transformer.toXml(authn), false);
 			Map<String, Object> model = new HashMap<>();
 			model.put("action", destination.getLocation());
@@ -124,7 +125,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 			);
 		}
 		else {
-			displayError(request, response, "Unsupported binding:" + destination.getBindingType().toString());
+			displayError(request, response, "Unsupported binding:" + destination.getBinding().toString());
 		}
 	}
 

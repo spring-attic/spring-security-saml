@@ -51,6 +51,7 @@ import org.springframework.security.saml.saml2.authentication.SubjectConfirmatio
 import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.BindingType;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProvider;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
@@ -67,7 +68,6 @@ import org.joda.time.DateTime;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
 import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA1;
@@ -180,7 +180,7 @@ public class SamlTestObjectHelper {
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding.toUri())
+				.setBinding(binding)
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);
@@ -366,7 +366,7 @@ public class SamlTestObjectHelper {
 			.setVersion("2.0");
 		Endpoint acs = (authn != null ? authn.getAssertionConsumerService() : null);
 		if (acs == null) {
-			acs = getPreferredACS(recipient.getServiceProvider().getAssertionConsumerService(), asList(POST));
+			acs = getPreferredACS(recipient.getServiceProvider().getAssertionConsumerService(), asList(BindingType.POST));
 		}
 		if (acs != null) {
 			result.setDestination(acs.getLocation());
@@ -375,13 +375,13 @@ public class SamlTestObjectHelper {
 	}
 
 	public Endpoint getPreferredACS(List<Endpoint> eps,
-									List<Binding> preferred) {
+									List<BindingType> preferred) {
 		if (eps == null || eps.isEmpty()) {
 			return null;
 		}
 		Endpoint result = null;
 		for (Endpoint e : eps) {
-			if (e.isDefault() && preferred.contains(e.getBindingType())) {
+			if (e.isDefault() && preferred.contains(e.getBinding().getType())) {
 				result = e;
 				break;
 			}
@@ -393,7 +393,7 @@ public class SamlTestObjectHelper {
 			}
 		}
 		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
-			if (preferred.contains(e.getBindingType())) {
+			if (preferred.contains(e.getBinding().getType())) {
 				result = e;
 				break;
 			}
@@ -431,7 +431,7 @@ public class SamlTestObjectHelper {
 				result = e;
 				break;
 			}
-			else if (REDIRECT.equals(e.getBindingType())) {
+			else if (BindingType.REDIRECT == e.getBinding().getType()) {
 				result = e;
 				break;
 			}

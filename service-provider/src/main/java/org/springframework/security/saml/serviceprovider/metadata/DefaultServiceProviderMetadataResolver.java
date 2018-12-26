@@ -209,7 +209,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding.toUri())
+				.setBinding(binding)
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);

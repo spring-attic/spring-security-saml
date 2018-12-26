@@ -16,13 +16,6 @@
  */
 package org.springframework.security.saml.saml2.metadata;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.springframework.security.saml.SamlException;
-
-import static java.util.Optional.ofNullable;
-
 /**
  * Defines EndpointType as defined by
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
@@ -32,8 +25,7 @@ public class Endpoint {
 
 	private int index = 0;
 	private boolean isDefault;
-	private Binding bindingType;
-	private URI bindingValue;
+	private Binding binding;
 	private String location;
 	private String responseLocation;
 
@@ -55,30 +47,12 @@ public class Endpoint {
 		return this;
 	}
 
-	public Binding getBindingType() {
-		return bindingType;
+	public Binding getBinding() {
+		return binding;
 	}
 
-	public Endpoint setBindingType(Binding bindingType) {
-		this.bindingType = bindingType;
-		return this;
-	}
-
-	public URI getBinding() {
-		return ofNullable(bindingValue).orElseGet(() -> bindingType.toUri());
-	}
-
-	public Endpoint setBinding(String binding) {
-		try {
-			return setBinding(new URI(binding));
-		} catch (URISyntaxException e) {
-			throw new SamlException(e);
-		}
-	}
-
-	public Endpoint setBinding(URI binding) {
-		this.bindingValue = binding;
-		this.bindingType = Binding.fromUrn(binding);
+	public Endpoint setBinding(Binding binding) {
+		this.binding = binding;
 		return this;
 	}
 

@@ -21,44 +21,41 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.util.Assert;
 
 /**
  * Defines binding type as part of an Endpoint as defined by
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  * Page 8, Line 271
+ * This holds the actual value (in case of a custom binding) and the type
  */
-public enum Binding {
+public class Binding {
 
-	POST("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"),
-	REDIRECT("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"),
-	URI("urn:oasis:names:tc:SAML:2.0:bindings:URI"),
-	ARTIFACT("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"),
-	POST_SIMPLE_SIGN("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"),
-	PAOS("urn:oasis:names:tc:SAML:2.0:bindings:PAOS"),
-	SOAP("urn:oasis:names:tc:SAML:2.0:bindings:SOAP"),
-	DISCOVERY("urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"),
-	REQUEST_INITIATOR("urn:oasis:names:tc:SAML:profiles:SSO:request-init"),
-	SAML_1_0_BROWSER_POST("urn:oasis:names:tc:SAML:1.0:profiles:browser-post"),
-	SAML_1_0_BROWSER_ARTIFACT("urn:oasis:names:tc:SAML:1.0:profiles:artifact-01"),
-	CUSTOM("urn:spring-security:SAML:2.0:custom"),
-	;
+	public static final Binding POST = new Binding(BindingType.POST.toUri());
+	public static final Binding REDIRECT = new Binding(BindingType.REDIRECT.toUri());
+	public static final Binding URI = new Binding(BindingType.URI.toUri());
+	public static final Binding ARTIFACT = new Binding(BindingType.ARTIFACT.toUri());
+	public static final Binding POST_SIMPLE_SIGN = new Binding(BindingType.POST_SIMPLE_SIGN.toUri());
+	public static final Binding PAOS = new Binding(BindingType.PAOS.toUri());
+	public static final Binding SOAP = new Binding(BindingType.SOAP.toUri());
+	public static final Binding DISCOVERY = new Binding(BindingType.DISCOVERY.toUri());
+	public static final Binding REQUEST_INITIATOR = new Binding(BindingType.REQUEST_INITIATOR.toUri());
+	public static final Binding SAML_1_0_BROWSER_POST = new Binding(BindingType.SAML_1_0_BROWSER_POST.toUri());
+	public static final Binding SAML_1_0_BROWSER_ARTIFACT = new Binding(BindingType.SAML_1_0_BROWSER_ARTIFACT.toUri());
 
+	private final java.net.URI value;
+	private final BindingType type;
 
-	private final String urn;
-
-	Binding(String urn) {
-		Assert.notNull(urn, "URN cannot be null for enum: "+getClass().getSimpleName());
-		this.urn = urn;
+	protected Binding(String uri) throws URISyntaxException {
+		this(new URI(uri));
 	}
 
-	public static Binding fromUrn(URI other) {
-		for (Binding binding : values()) {
-			if (binding.toUri().equals(other)) {
-				return binding;
-			}
-		}
-		return CUSTOM;
+	public Binding(URI uri) {
+		this(uri, BindingType.fromUrn(uri.toString()));
+	}
+
+	public Binding(URI uri, BindingType type) {
+		this.value = uri;
+		this.type = type;
 	}
 
 	public static Binding fromUrn(String other) {
@@ -69,16 +66,63 @@ public enum Binding {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return this.urn;
+	public static Binding fromUrn(URI uri) {
+		if (uri == null) {
+			return null;
+		}
+
+		BindingType type = BindingType.fromUrn(uri.toString());
+		switch (type) {
+			case REDIRECT: return Binding.REDIRECT;
+			case POST: return Binding.POST;
+			case URI: return Binding.URI;
+			case ARTIFACT: return Binding.ARTIFACT;
+			case POST_SIMPLE_SIGN: return Binding.POST_SIMPLE_SIGN;
+			case PAOS: return Binding.PAOS;
+			case SOAP: return Binding.SOAP;
+			case DISCOVERY: return Binding.DISCOVERY;
+			case REQUEST_INITIATOR: return Binding.REQUEST_INITIATOR;
+			case SAML_1_0_BROWSER_ARTIFACT: return Binding.SAML_1_0_BROWSER_ARTIFACT;
+			case SAML_1_0_BROWSER_POST: return Binding.SAML_1_0_BROWSER_POST;
+			case CUSTOM: return new Binding(uri, type);
+		}
+		throw new SamlException("Unknown binding type:"+uri.toString());
 	}
 
-	public java.net.URI toUri() {
-		try {
-			return new URI(this.urn);
-		} catch (URISyntaxException e) {
-			throw new SamlException(e);
+	public java.net.URI getValue() {
+		return value;
+	}
+
+	public BindingType getType() {
+		return type;
+	}
+
+	@Override
+	public String toString() {
+		return getValue().toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
 		}
+		if (!(o instanceof Binding)) {
+			return false;
+		}
+
+		Binding binding = (Binding) o;
+
+		if (!getValue().equals(binding.getValue())) {
+			return false;
+		}
+		return getType() == binding.getType();
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getValue().hashCode();
+		result = 31 * result + getType().hashCode();
+		return result;
 	}
 }

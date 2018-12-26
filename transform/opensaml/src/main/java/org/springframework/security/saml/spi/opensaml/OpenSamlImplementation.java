@@ -712,7 +712,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				result = new Endpoint()
 					.setIndex(0)
 					.setDefault(false)
-					.setBinding(req.getBinding())
+					.setBinding(Binding.fromUrn(req.getBinding()))
 					.setLocation(req.getLocation())
 					.setResponseLocation(req.getResponseLocation());
 			}
@@ -731,7 +731,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				result = new Endpoint()
 					.setDefault(resp.isDefault())
 					.setIndex(resp.getIndex())
-					.setBinding(resp.getBinding())
+					.setBinding(Binding.fromUrn(resp.getBinding()))
 					.setLocation(resp.getLocation())
 					.setResponseLocation(resp.getResponseLocation());
 			}
@@ -777,7 +777,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.stream()
 				.forEach(s -> {
 						Endpoint endpoint = new Endpoint()
-							.setBinding(s.getBinding())
+							.setBinding(Binding.fromUrn(s.getBinding()))
 							.setLocation(s.getLocation())
 							.setResponseLocation(s.getResponseLocation());
 						result.add(endpoint);
@@ -1775,7 +1775,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding.toUri())
+				.setBinding(binding)
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);

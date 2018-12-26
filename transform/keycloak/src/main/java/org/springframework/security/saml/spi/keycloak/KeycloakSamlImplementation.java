@@ -402,7 +402,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		auth.setForceAuthn(request.isForceAuth());
 		auth.setIsPassive(request.isPassive());
 		try {
-			auth.setProtocolBinding(request.getBinding().toUri());
+			auth.setProtocolBinding(request.getBinding().getValue());
 			auth.setAssertionConsumerServiceURL(new URI(request.getAssertionConsumerService().getLocation()));
 			auth.setDestination(new URI(request.getDestination().getLocation()));
 		} catch (URISyntaxException e) {
@@ -568,7 +568,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				if (requestInitiation != null) {
 					try {
 						EndpointType ri = new EndpointType(
-							requestInitiation.getBinding(),
+							requestInitiation.getBinding().getValue(),
 							new URI(requestInitiation.getLocation())
 						);
 						if (hasText(requestInitiation.getResponseLocation())) {
@@ -582,7 +582,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				if (discovery != null) {
 					try {
 						IndexedEndpointType d = new IndexedEndpointType(
-							discovery.getBinding(),
+							discovery.getBinding().getValue(),
 							new URI(discovery.getLocation())
 						);
 						if (hasText(discovery.getResponseLocation())) {
@@ -616,7 +616,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		if (nameIdPolicy != null) {
 			result = new NameIDPolicyType();
 			result.setAllowCreate(nameIdPolicy.getAllowCreate());
-			result.setFormat(nameIdPolicy.getFormat().toUri());
+			result.setFormat(nameIdPolicy.getFormat().getValue());
 			result.setSPNameQualifier(nameIdPolicy.getSpNameQualifier());
 		}
 		return result;
@@ -654,7 +654,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		NameIDType result = new NameIDType();
 		result.setValue(issuer.getValue());
 		if (issuer.getFormat() != null) {
-			result.setFormat(issuer.getFormat().toUri());
+			result.setFormat(issuer.getFormat().getValue());
 		}
 		result.setSPNameQualifier(issuer.getSpNameQualifier());
 		result.setNameQualifier(issuer.getNameQualifier());
@@ -664,7 +664,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 	private IndexedEndpointType getIndexedEndpointType(Endpoint endpoint, int index) {
 		try {
 			IndexedEndpointType result = new IndexedEndpointType(
-				endpoint.getBinding(),
+				endpoint.getBinding().getValue(),
 				new URI(endpoint.getLocation())
 			);
 			if (index > 0) {
@@ -901,7 +901,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					result = new Endpoint()
 						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
 						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
-						.setBinding(hasText(binding) ? binding : Binding.REQUEST_INITIATOR.toString())
+						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.REQUEST_INITIATOR)
 						.setLocation(location)
 						.setResponseLocation(responseLocation);
 				}
@@ -927,7 +927,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 					result = new Endpoint()
 						.setIndex(hasText(index) ? Integer.valueOf(index) : 0)
 						.setDefault(hasText(isDefault) ? Boolean.valueOf(isDefault) : false)
-						.setBinding(hasText(binding) ? binding : Binding.DISCOVERY.toString())
+						.setBinding(hasText(binding) ? Binding.fromUrn(binding) : Binding.DISCOVERY)
 						.setLocation(location)
 						.setResponseLocation(responseLocation);
 				}
@@ -973,7 +973,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 				.stream()
 				.forEach(s -> {
 						Endpoint endpoint = new Endpoint()
-							.setBinding(s.getBinding())
+							.setBinding(Binding.fromUrn(s.getBinding()))
 							.setLocation(s.getLocation().toString());
 						if (s.getResponseLocation() != null) {
 							endpoint.setResponseLocation(s.getResponseLocation().toString());
@@ -1101,7 +1101,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		lr.setNotOnOrAfter(getXmlGregorianCalendar(request.getNotOnOrAfter()));
 
 		NameIDType nameID = new NameIDType();
-		nameID.setFormat(request.getNameId().getFormat().toUri());
+		nameID.setFormat(request.getNameId().getFormat().getValue());
 		nameID.setValue(request.getNameId().getValue());
 		nameID.setSPNameQualifier(request.getNameId().getSpNameQualifier());
 		nameID.setNameQualifier(request.getNameId().getNameQualifier());
@@ -1691,7 +1691,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 		return
 			new Endpoint()
 				.setIndex(index)
-				.setBinding(binding.toUri())
+				.setBinding(binding)
 				.setLocation(url)
 				.setDefault(isDefault)
 				.setIndex(index);

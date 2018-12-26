@@ -33,6 +33,10 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 		this.nameId = nameId;
 	}
 
+	public void setNameId(String nameId) {
+		setNameId(NameId.fromUrn(nameId));
+	}
+
 	public int getAssertionConsumerServiceIndex() {
 		return assertionConsumerServiceIndex;
 	}

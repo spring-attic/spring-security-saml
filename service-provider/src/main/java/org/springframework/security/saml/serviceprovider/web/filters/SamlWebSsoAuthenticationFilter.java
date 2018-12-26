@@ -24,15 +24,15 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationResult;
+import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
@@ -47,10 +47,10 @@ public class SamlWebSsoAuthenticationFilter extends AbstractAuthenticationProces
 	implements SamlFilter<HostedServiceProvider> {
 
 	private static Log logger = LogFactory.getLog(SamlWebSsoAuthenticationFilter.class);
-	private final SamlValidator validator;
+	private final ServiceProviderValidator validator;
 
 	public SamlWebSsoAuthenticationFilter(AntPathRequestMatcher matcher,
-										  SamlValidator validator
+										  ServiceProviderValidator validator
 	) {
 		super(matcher);
 		this.validator = validator;

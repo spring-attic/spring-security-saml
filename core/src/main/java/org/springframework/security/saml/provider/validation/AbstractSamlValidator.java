@@ -15,16 +15,22 @@
  *
  */
 
-package org.springframework.security.saml;
+package org.springframework.security.saml.provider.validation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.provider.HostedProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.LogoutRequest;
+import org.springframework.security.saml.saml2.authentication.LogoutResponse;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.Metadata;
@@ -37,10 +43,18 @@ import org.joda.time.Interval;
 import static java.lang.String.format;
 import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
 
-public interface SamlValidator<ProviderType extends HostedProvider> {
+public abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 
-	SamlTransformer getSamlTransformer();
+	protected final Signature invalidSignature = new Signature() {
+		@Override
+		public boolean isValidated() {
+			return false;
+		}
+	};
 
+	protected abstract SamlTransformer getSamlTransformer();
+
+	protected abstract ValidationResult validate(Saml2Object saml2Object, ProviderType provider);
 	/**
 	 * Validates a signature on a SAML object. Returns the key that validated the signature
 	 *
@@ -49,10 +63,22 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 	 * @return the key that successfully validated the signature
 	 * @throws SignatureException if object failed signature validation
 	 */
-	default Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
+	protected Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
 		try {
-			return getSamlTransformer().validateSignature(saml2Object, verificationKeys);
+			Signature main = getSamlTransformer().validateSignature(saml2Object, verificationKeys);
+			if (saml2Object instanceof Response && main == null) {
+				for (Assertion a : ((Response)saml2Object).getAssertions()) {
+					try {
+						Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
+						a.setSignature(sig);
+					} catch (SignatureException e){
+						a.setSignature(invalidSignature);
+					}
+				}
+			}
+			saml2Object.setSignature(main);
+			return main;
 		} catch (Exception x) {
 			if (x instanceof SignatureException) {
 				throw x;
@@ -63,15 +89,7 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 		}
 	}
 
-	/**
-	 * Performs an object validation on behalf of a service or identity provider on the respective object
-	 *
-	 * @param saml2Object the object to be validated according to SAML specification rules
-	 * @param provider    the object used to resolve metadata
-	 */
-	ValidationResult validate(Saml2Object saml2Object, ProviderType provider);
-
-	default boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
+	protected boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
 		if (time == null) {
 			return false;
 		}
@@ -83,7 +101,7 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 		return validTimeInterval.contains(time);
 	}
 
-	default ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
+	protected ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
 		if (issuer != null) {
 			if (!entity.getEntityId().equals(issuer.getValue())) {
 				return new ValidationResult(entity)
@@ -113,7 +131,7 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 		return null;
 	}
 
-	default boolean compareURIs(List<Endpoint> endpoints, String uri) {
+	protected boolean compareURIs(List<Endpoint> endpoints, String uri) {
 		for (Endpoint ep : endpoints) {
 			if (compareURIs(ep.getLocation(), uri)) {
 				return true;
@@ -122,7 +140,7 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 		return false;
 	}
 
-	default boolean compareURIs(String uri1, String uri2) {
+	protected boolean compareURIs(String uri1, String uri2) {
 		if (uri1 == null && uri2 == null) {
 			return true;
 		}
@@ -135,11 +153,33 @@ public interface SamlValidator<ProviderType extends HostedProvider> {
 		}
 	}
 
-	default String removeQueryString(String uri) {
+	protected String removeQueryString(String uri) {
 		int queryStringIndex = uri.indexOf('?');
 		if (queryStringIndex >= 0) {
 			return uri.substring(0, queryStringIndex);
 		}
 		return uri;
 	}
+
+	protected ValidationResult validate(LogoutRequest logoutRequest, ProviderType provider) {
+		ValidationResult result = new ValidationResult(logoutRequest);
+		checkValidSignature(logoutRequest, result);
+		return result;
+	}
+
+	protected ValidationResult validate(LogoutResponse logoutResponse, ProviderType provider) {
+		ValidationResult result = new ValidationResult(logoutResponse);
+		checkValidSignature(logoutResponse, result);
+		return result;
+	}
+
+	protected void checkValidSignature(SignableSaml2Object saml2Object, ValidationResult result) {
+		Signature signature = saml2Object.getSignature();
+		if (signature != null && !signature.isValidated()) {
+			result.addError(
+				new ValidationResult.ValidationError("Invalid signature on "+saml2Object.getClass().getSimpleName())
+			);
+		}
+	}
+
 }

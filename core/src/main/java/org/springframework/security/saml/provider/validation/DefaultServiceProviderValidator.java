@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.serviceprovider.validation;
+package org.springframework.security.saml.provider.validation;
 
 import java.time.Clock;
 import java.util.Arrays;
@@ -25,6 +25,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.ValidationResult.ValidationError;
+import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -43,7 +44,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;
@@ -55,15 +55,10 @@ import static org.springframework.security.saml.saml2.authentication.SubjectConf
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultServiceProviderValidator implements
-	ServiceProviderValidator {
+public class DefaultServiceProviderValidator extends AbstractSamlValidator<HostedServiceProvider>
+	implements ServiceProviderValidator {
 
-	private final Signature invalidSignature = new Signature() {
-		@Override
-		public boolean isValidated() {
-			return false;
-		}
-	};
+
 
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -92,27 +87,7 @@ public class DefaultServiceProviderValidator implements
 	@Override
 	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
 		throws SignatureException {
-		try {
-			Signature main = implementation.validateSignature(saml2Object, verificationKeys);
-			if (saml2Object instanceof Response && main == null) {
-				for (Assertion a : ((Response)saml2Object).getAssertions()) {
-					try {
-						Signature sig = implementation.validateSignature(a, verificationKeys);
-						a.setSignature(sig);
-					} catch (SignatureException e){
-						a.setSignature(invalidSignature);
-					}
-				}
-			}
-			return main;
-		} catch (Exception x) {
-			if (x instanceof SignatureException) {
-				throw x;
-			}
-			else {
-				throw new SignatureException(x.getMessage(), x);
-			}
-		}
+		return super.validateSignature(saml2Object, verificationKeys);
 	}
 
 	@Override
@@ -148,14 +123,6 @@ public class DefaultServiceProviderValidator implements
 
 	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedServiceProvider provider) {
 		return new ValidationResult(metadata);
-	}
-
-	protected ValidationResult validate(LogoutRequest logoutRequest, HostedServiceProvider provider) {
-		return new ValidationResult(logoutRequest);
-	}
-
-	protected ValidationResult validate(LogoutResponse logoutResponse, HostedServiceProvider provider) {
-		return new ValidationResult(logoutResponse);
 	}
 
 	protected ValidationResult validate(Assertion assertion,

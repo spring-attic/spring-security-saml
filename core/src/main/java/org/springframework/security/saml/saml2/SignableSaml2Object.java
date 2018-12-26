@@ -35,4 +35,6 @@ public interface SignableSaml2Object<T extends Saml2Object> extends Saml2Object 
 	String getId();
 
 	T setSignature(Signature signature);
+
+	Signature getSignature();
 }

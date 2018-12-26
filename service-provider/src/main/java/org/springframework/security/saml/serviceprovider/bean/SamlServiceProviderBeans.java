@@ -29,8 +29,8 @@ import org.springframework.security.saml.serviceprovider.web.configuration.Servi
 import org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.validation.DefaultServiceProviderValidator;
-import org.springframework.security.saml.serviceprovider.validation.ServiceProviderValidator;
+import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.util.Assert;
 

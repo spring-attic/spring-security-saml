@@ -14,23 +14,28 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.saml.provider;
+package org.springframework.security.saml.provider.validation;
 
 import java.time.Clock;
+import java.util.List;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationResult;
+import org.springframework.security.saml.provider.HostedIdentityProvider;
 import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.saml2.SignableSaml2Object;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module
-public class IdentityProviderSamlValidator implements SamlValidator<HostedIdentityProvider> {
+public class DefaultIdentityProviderValidator extends AbstractSamlValidator<HostedIdentityProvider>
+	implements IdentityProviderValidator {
 
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -38,7 +43,7 @@ public class IdentityProviderSamlValidator implements SamlValidator<HostedIdenti
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public IdentityProviderSamlValidator(SamlTransformer implementation) {
+	public DefaultIdentityProviderValidator(SamlTransformer implementation) {
 		setSamlTransformer(implementation);
 	}
 
@@ -51,9 +56,14 @@ public class IdentityProviderSamlValidator implements SamlValidator<HostedIdenti
 		return implementation;
 	}
 
-	public IdentityProviderSamlValidator setTime(Clock time) {
+	public DefaultIdentityProviderValidator setTime(Clock time) {
 		this.time = time;
 		return this;
+	}
+
+	@Override
+	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys) {
+		return super.validateSignature(saml2Object, verificationKeys);
 	}
 
 	@Override
@@ -84,22 +94,16 @@ public class IdentityProviderSamlValidator implements SamlValidator<HostedIdenti
 	}
 
 	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedIdentityProvider provider) {
-		return new ValidationResult(authnRequest);
-	}
-
-	protected ValidationResult validate(LogoutRequest logoutRequest, HostedIdentityProvider provider) {
-		return new ValidationResult(logoutRequest);
-	}
-
-	protected ValidationResult validate(LogoutResponse logoutResponse, HostedIdentityProvider provider) {
-		return new ValidationResult(logoutResponse);
+		ValidationResult result = new ValidationResult(authnRequest);
+		checkValidSignature(authnRequest, result);
+		return result;
 	}
 
 	public int getResponseSkewTimeMillis() {
 		return responseSkewTimeMillis;
 	}
 
-	public IdentityProviderSamlValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public DefaultIdentityProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -108,7 +112,7 @@ public class IdentityProviderSamlValidator implements SamlValidator<HostedIdenti
 		return allowUnsolicitedResponses;
 	}
 
-	public IdentityProviderSamlValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public DefaultIdentityProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}

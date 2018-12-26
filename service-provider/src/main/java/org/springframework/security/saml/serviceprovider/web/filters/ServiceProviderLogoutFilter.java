@@ -31,8 +31,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.ValidationResult;
+import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
@@ -44,7 +45,6 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
-import org.springframework.security.saml.serviceprovider.HostedServiceProvider;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -68,12 +68,12 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 
 	private final RequestMatcher matcher;
 	private final SamlTransformer transformer;
-	private final SamlValidator<HostedServiceProvider> validator;
+	private final ServiceProviderValidator validator;
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
 	public ServiceProviderLogoutFilter(RequestMatcher matcher,
 									   SamlTransformer transformer,
-									   SamlValidator<HostedServiceProvider> validator) {
+									   ServiceProviderValidator validator) {
 		this.matcher = matcher;
 		this.transformer = transformer;
 		this.validator = validator;

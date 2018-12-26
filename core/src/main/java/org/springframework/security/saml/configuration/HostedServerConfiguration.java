@@ -27,13 +27,34 @@ public class HostedServerConfiguration {
 	private final HostedIdentityProviderConfiguration identityProvider;
 	private final NetworkConfiguration network;
 
-	HostedServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
-							  HostedIdentityProviderConfiguration identityProvider,
-							  NetworkConfiguration network) {
+	public HostedServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
+									 HostedIdentityProviderConfiguration identityProvider,
+									 NetworkConfiguration network) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
 		this.network = network;
 	}
+
+	public HostedServiceProviderConfiguration getServiceProvider() {
+		return serviceProvider;
+	}
+
+	public HostedIdentityProviderConfiguration getIdentityProvider() {
+		return identityProvider;
+	}
+
+	public NetworkConfiguration getNetwork() {
+		return network;
+	}
+
+	public HostedServerConfiguration transfer(HostedServerConfiguration external) {
+		return new HostedServerConfiguration(
+			external.getServiceProvider(),
+			external.getIdentityProvider(),
+			external.getNetwork()
+		);
+	}
+
 
 	public static final class Builder {
 		private HostedServiceProviderConfiguration serviceProvider;
@@ -54,11 +75,6 @@ public class HostedServerConfiguration {
 				.network(configuration.getNetwork());
 		}
 
-		public Builder network(NetworkConfiguration network) {
-			this.network = network;
-			return this;
-		}
-
 		public Builder serviceProvider(HostedServiceProviderConfiguration serviceProvider) {
 			this.serviceProvider = serviceProvider;
 			return this;
@@ -69,28 +85,13 @@ public class HostedServerConfiguration {
 			return this;
 		}
 
+		public Builder network(NetworkConfiguration network) {
+			this.network = network;
+			return this;
+		}
+
 		public HostedServerConfiguration build() {
 			return new HostedServerConfiguration(serviceProvider, identityProvider, network);
 		}
-	}
-
-	public HostedServerConfiguration transfer(HostedServerConfiguration external) {
-		return new HostedServerConfiguration(
-			external.getServiceProvider(),
-			external.getIdentityProvider(),
-			external.getNetwork()
-		);
-	}
-
-	public HostedServiceProviderConfiguration getServiceProvider() {
-		return serviceProvider;
-	}
-
-	public HostedIdentityProviderConfiguration getIdentityProvider() {
-		return identityProvider;
-	}
-
-	public NetworkConfiguration getNetwork() {
-		return network;
 	}
 }

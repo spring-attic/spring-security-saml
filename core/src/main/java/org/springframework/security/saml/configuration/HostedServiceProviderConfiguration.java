@@ -32,20 +32,20 @@ public class HostedServiceProviderConfiguration extends
 	private final boolean signRequests;
 	private final boolean wantAssertionsSigned;
 
-	HostedServiceProviderConfiguration(String pathPrefix,
-									   String basePath,
-									   String alias,
-									   String entityId,
-									   boolean signMetadata,
-									   String metadata,
-									   List<KeyData> keys,
-									   AlgorithmMethod defaultSigningAlgorithm,
-									   DigestMethod defaultDigest,
-									   List<NameId> nameIds,
-									   boolean singleLogoutEnabled,
-									   List<ExternalIdentityProviderConfiguration> providers,
-									   boolean signRequests,
-									   boolean wantAssertionsSigned) {
+	public HostedServiceProviderConfiguration(String pathPrefix,
+											  String basePath,
+											  String alias,
+											  String entityId,
+											  boolean signMetadata,
+											  String metadata,
+											  List<KeyData> keys,
+											  AlgorithmMethod defaultSigningAlgorithm,
+											  DigestMethod defaultDigest,
+											  List<NameId> nameIds,
+											  boolean singleLogoutEnabled,
+											  List<ExternalIdentityProviderConfiguration> providers,
+											  boolean signRequests,
+											  boolean wantAssertionsSigned) {
 		super(
 			pathPrefix,
 			basePath,
@@ -64,6 +64,18 @@ public class HostedServiceProviderConfiguration extends
 		this.wantAssertionsSigned = wantAssertionsSigned;
 	}
 
+	public boolean isSignRequests() {
+		return signRequests;
+	}
+
+	public boolean isWantAssertionsSigned() {
+		return wantAssertionsSigned;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	public static Builder builder(HostedServiceProviderConfiguration configuration) {
 		return builder()
 			.signRequests(configuration.isSignRequests())
@@ -80,18 +92,6 @@ public class HostedServiceProviderConfiguration extends
 			.nameIds(configuration.getNameIds())
 			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
 			.providers(configuration.getProviders());
-	}
-
-	public static Builder builder() {
-		return new Builder();
-	}
-
-	public boolean isSignRequests() {
-		return signRequests;
-	}
-
-	public boolean isWantAssertionsSigned() {
-		return wantAssertionsSigned;
 	}
 
 	public static final class Builder {
@@ -209,8 +209,7 @@ public class HostedServiceProviderConfiguration extends
 					singleLogoutEnabled,
 					providers,
 					signRequests,
-					wantAssertionsSigned
-				);
+					wantAssertionsSigned);
 			return hostedServiceProviderConfiguration;
 		}
 	}

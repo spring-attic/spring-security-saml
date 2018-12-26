@@ -21,7 +21,7 @@ public class NetworkConfiguration {
 	private final int readTimeout;
 	private final int connectTimeout;
 
-	NetworkConfiguration(int readTimeout, int connectTimeout) {
+	public NetworkConfiguration(int readTimeout, int connectTimeout) {
 		this.readTimeout = readTimeout;
 		this.connectTimeout = connectTimeout;
 	}

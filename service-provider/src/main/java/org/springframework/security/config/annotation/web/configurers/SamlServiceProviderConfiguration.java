@@ -34,10 +34,10 @@ import org.springframework.security.saml.serviceprovider.web.DefaultServiceProvi
 import org.springframework.security.saml.serviceprovider.web.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationRequestFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlServiceProviderMetadataFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlWebSsoAuthenticationFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
@@ -146,12 +146,12 @@ class SamlServiceProviderConfiguration {
 		);
 	}
 
-	SamlWebSsoAuthenticationFilter getWebSsoAuthenticationFilter() {
+	WebSsoAuthenticationFilter getWebSsoAuthenticationFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
-		SamlWebSsoAuthenticationFilter filter = getSharedObject(
+		WebSsoAuthenticationFilter filter = getSharedObject(
 			http,
-			SamlWebSsoAuthenticationFilter.class,
-			() -> new SamlWebSsoAuthenticationFilter(
+			WebSsoAuthenticationFilter.class,
+			() -> new WebSsoAuthenticationFilter(
 				new AntPathRequestMatcher(pathPrefix + "/SSO/**"),
 				validator
 			),
@@ -162,12 +162,12 @@ class SamlServiceProviderConfiguration {
 		return filter;
 	}
 
-	SamlAuthenticationRequestFilter getIdentityProviderDiscoveryFilter() {
+	AuthenticationRequestFilter getIdentityProviderDiscoveryFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			SamlAuthenticationRequestFilter.class,
-			() -> new SamlAuthenticationRequestFilter(
+			AuthenticationRequestFilter.class,
+			() -> new AuthenticationRequestFilter(
 				new AntPathRequestMatcher(pathPrefix + "/discovery/**"),
 				transformer,
 				htmlWriter
@@ -192,12 +192,12 @@ class SamlServiceProviderConfiguration {
 		);
 	}
 
-	SamlServiceProviderMetadataFilter getMetadataFilter() {
+	ServiceProviderMetadataFilter getMetadataFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			SamlServiceProviderMetadataFilter.class,
-			() -> new SamlServiceProviderMetadataFilter(
+			ServiceProviderMetadataFilter.class,
+			() -> new ServiceProviderMetadataFilter(
 				new AntPathRequestMatcher(pathPrefix + "/metadata/**"),
 				transformer
 			),

@@ -25,14 +25,11 @@ public class HostedServerConfiguration {
 
 	private final HostedServiceProviderConfiguration serviceProvider;
 	private final HostedIdentityProviderConfiguration identityProvider;
-	private final NetworkConfiguration network;
 
 	public HostedServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
-									 HostedIdentityProviderConfiguration identityProvider,
-									 NetworkConfiguration network) {
+									 HostedIdentityProviderConfiguration identityProvider) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
-		this.network = network;
 	}
 
 	public HostedServiceProviderConfiguration getServiceProvider() {
@@ -43,23 +40,9 @@ public class HostedServerConfiguration {
 		return identityProvider;
 	}
 
-	public NetworkConfiguration getNetwork() {
-		return network;
-	}
-
-	public HostedServerConfiguration transfer(HostedServerConfiguration external) {
-		return new HostedServerConfiguration(
-			external.getServiceProvider(),
-			external.getIdentityProvider(),
-			external.getNetwork()
-		);
-	}
-
-
 	public static final class Builder {
 		private HostedServiceProviderConfiguration serviceProvider;
 		private HostedIdentityProviderConfiguration identityProvider;
-		private NetworkConfiguration network;
 
 		private Builder() {
 		}
@@ -72,7 +55,7 @@ public class HostedServerConfiguration {
 			return new Builder()
 				.identityProvider(configuration.getIdentityProvider())
 				.serviceProvider(configuration.getServiceProvider())
-				.network(configuration.getNetwork());
+				;
 		}
 
 		public Builder serviceProvider(HostedServiceProviderConfiguration serviceProvider) {
@@ -85,13 +68,8 @@ public class HostedServerConfiguration {
 			return this;
 		}
 
-		public Builder network(NetworkConfiguration network) {
-			this.network = network;
-			return this;
-		}
-
 		public HostedServerConfiguration build() {
-			return new HostedServerConfiguration(serviceProvider, identityProvider, network);
+			return new HostedServerConfiguration(serviceProvider, identityProvider);
 		}
 	}
 }

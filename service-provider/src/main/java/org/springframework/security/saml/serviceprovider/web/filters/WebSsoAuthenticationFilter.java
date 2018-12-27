@@ -43,14 +43,14 @@ import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.util.Assert.notNull;
 
-public class SamlWebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
+public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
 	implements SamlFilter<HostedServiceProvider> {
 
-	private static Log logger = LogFactory.getLog(SamlWebSsoAuthenticationFilter.class);
+	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
 	private final ServiceProviderValidator validator;
 
-	public SamlWebSsoAuthenticationFilter(AntPathRequestMatcher matcher,
-										  ServiceProviderValidator validator
+	public WebSsoAuthenticationFilter(AntPathRequestMatcher matcher,
+									  ServiceProviderValidator validator
 	) {
 		super(matcher);
 		this.validator = validator;

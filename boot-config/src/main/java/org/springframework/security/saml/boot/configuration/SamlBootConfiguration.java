@@ -22,7 +22,6 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.configuration.NetworkConfiguration;
 import org.springframework.security.saml.configuration.HostedServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
@@ -53,8 +52,7 @@ public class SamlBootConfiguration {
 	public HostedServerConfiguration toSamlServerConfiguration() {
 		return new HostedServerConfiguration(
 			serviceProvider == null ? null : serviceProvider.toHostedConfiguration(),
-			identityProvider == null ? null : identityProvider.toHostedConfiguration(),
-			new NetworkConfiguration(4000,4000)
+			identityProvider == null ? null : identityProvider.toHostedConfiguration()
 		);
 	}
 

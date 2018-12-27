@@ -17,8 +17,22 @@
 
 package org.springframework.security.saml.configuration;
 
+/**
+ * Immutable configuration object that represents an external service provider
+ */
 public class ExternalServiceProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalServiceProviderConfiguration> {
+
+	/**
+	 * Creates a configuration representation of an external service provider
+	 *
+	 * @param alias              - the alias for this provider. should be unique within the local system
+	 * @param metadata           - XML metadata or URL location of XML metadata of this provider
+	 * @param linktext           - Text to be displayed on the provider selection page
+	 * @param skipSslValidation  - set to true if you wish to disable TLS/SSL certificate validation when fetching
+	 *                           metadata
+	 * @param metadataTrustCheck - set to true if you wish to validate metadata against known keys (not used)
+	 */
 	public ExternalServiceProviderConfiguration(String alias,
 												String metadata,
 												String linktext,

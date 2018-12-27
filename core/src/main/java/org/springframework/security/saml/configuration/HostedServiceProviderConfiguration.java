@@ -26,6 +26,9 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 
 import static java.util.Arrays.asList;
 
+/**
+ * Immutable configuration object that represents a local service provider (SP) service.
+ */
 public class HostedServiceProviderConfiguration extends
 	HostedProviderConfiguration<ExternalIdentityProviderConfiguration> {
 

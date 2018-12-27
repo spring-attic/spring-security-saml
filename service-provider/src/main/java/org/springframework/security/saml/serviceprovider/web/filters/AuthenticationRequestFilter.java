@@ -41,6 +41,7 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.BindingType;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -53,7 +54,7 @@ import org.joda.time.DateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class AuthenticationRequestFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
 	private final SamlTransformer transformer;
 	private final AntPathRequestMatcher matcher;
@@ -61,9 +62,9 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 	private Clock clock = Clock.systemUTC();
 	private String postTemplate = "/templates/saml2-post-binding.vm";
 
-	public SamlAuthenticationRequestFilter(AntPathRequestMatcher matcher,
-										   SamlTransformer transformer,
-										   HtmlWriter template) {
+	public AuthenticationRequestFilter(AntPathRequestMatcher matcher,
+									   SamlTransformer transformer,
+									   HtmlWriter template) {
 		this.template = template;
 		this.matcher = matcher;
 		this.transformer = transformer;
@@ -78,12 +79,14 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 				Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entity =
 					getIdentityProvider(request, provider);
+				ExternalIdentityProviderConfiguration idpConfig = entity.getKey();
 				IdentityProviderMetadata idp = entity.getValue();
 				ServiceProviderMetadata localSp = provider.getMetadata();
 				AuthenticationRequest authn = getAuthenticationRequest(
 					localSp,
 					idp,
-					entity.getKey().getAssertionConsumerServiceIndex()
+					entity.getKey().getAssertionConsumerServiceIndex(),
+					idpConfig.getNameId()
 				);
 				sendAuthenticationRequest(authn, authn.getDestination(), request, response);
 			} catch (SamlException x) {
@@ -126,7 +129,8 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 
 	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp,
 															 IdentityProviderMetadata idp,
-															 int preferredEndpointIndex) {
+															 int preferredEndpointIndex,
+															 NameId requestedNameId) {
 		Endpoint endpoint = getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
 			BindingType.REDIRECT,
@@ -152,17 +156,24 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
-		if (idp.getDefaultNameId() != null) {
+		if (requestedNameId != null) {
+			request.setNameIdPolicy(new NameIdPolicy(
+				requestedNameId,
+				sp.getEntityId(),
+				true
+			));
+		}
+		else if (idp.getDefaultNameId() != null) {
 			request.setNameIdPolicy(new NameIdPolicy(
 				idp.getDefaultNameId(),
-				sp.getEntityAlias(),
+				sp.getEntityId(),
 				true
 			));
 		}
 		else if (idp.getIdentityProvider().getNameIds().size() > 0) {
 			request.setNameIdPolicy(new NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
-				sp.getEntityAlias(),
+				sp.getEntityId(),
 				true
 			));
 		}
@@ -219,7 +230,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		return clock;
 	}
 
-	public SamlAuthenticationRequestFilter setClock(Clock clock) {
+	public AuthenticationRequestFilter setClock(Clock clock) {
 		this.clock = clock;
 		return this;
 	}
@@ -228,7 +239,7 @@ public class SamlAuthenticationRequestFilter extends OncePerRequestFilter implem
 		return postTemplate;
 	}
 
-	public SamlAuthenticationRequestFilter setPostTemplate(String postTemplate) {
+	public AuthenticationRequestFilter setPostTemplate(String postTemplate) {
 		this.postTemplate = postTemplate;
 		return this;
 	}

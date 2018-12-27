@@ -22,18 +22,34 @@ import org.springframework.util.Assert;
 
 import static org.springframework.util.StringUtils.hasText;
 
+/**
+ * Immutable configuration object that represents an external identity provider
+ */
 public class ExternalIdentityProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
 
 	private final NameId nameId;
 	private final int assertionConsumerServiceIndex;
 
+	/**
+	 * Creates a configuration representation of an external identity provider
+	 *
+	 * @param alias              - the alias for this provider. should be unique within the local system
+	 * @param metadata           - XML metadata or URL location of XML metadata of this provider
+	 * @param linktext           - Text to be displayed on the
+	 * @param skipSslValidation  - set to true if you wish to disable TLS/SSL certificate validation when fetching
+	 *                           metadata
+	 * @param metadataTrustCheck - set to true if you wish to validate metadata against known keys (not used)
+	 * @param nameId             - set to a non null value if a specific NameId format is to be used in the
+	 *                           authentication request
+	 */
 	public ExternalIdentityProviderConfiguration(String alias,
 												 String metadata,
 												 String linktext,
 												 boolean skipSslValidation,
 												 boolean metadataTrustCheck,
-												 NameId nameId, int assertionConsumerServiceIndex) {
+												 NameId nameId,
+												 int assertionConsumerServiceIndex) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
 		this.nameId = nameId;
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;

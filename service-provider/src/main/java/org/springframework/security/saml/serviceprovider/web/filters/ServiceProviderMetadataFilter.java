@@ -35,7 +35,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter
+public class ServiceProviderMetadataFilter extends OncePerRequestFilter
 	implements Filter, SamlFilter<HostedServiceProvider> {
 
 	private final SamlTransformer transformer;
@@ -44,8 +44,8 @@ public class SamlServiceProviderMetadataFilter extends OncePerRequestFilter
 	private String filename = "saml-service-provider-metadata.xml";
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
-	public SamlServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
-											 SamlTransformer transformer) {
+	public ServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
+										 SamlTransformer transformer) {
 		this.transformer = transformer;
 		this.matcher = matcher;
 	}

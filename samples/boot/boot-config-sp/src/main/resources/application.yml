@@ -16,9 +16,6 @@ spring:
     cache: false
   security:
     saml2:
-      network:
-        read-timeout: 10000
-        connect-timeout: 5000
       service-provider:
         entity-id: spring.security.saml.sp.id
         alias: boot-sample-sp

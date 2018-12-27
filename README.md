@@ -10,17 +10,17 @@ By participating, you are expected to uphold this code. Please report unacceptab
 
 ## Getting Started
 
-We have provided [samples](samples/boot) to get started with. 
-These samples are meant to be very [simple](samples/boot).
+We have provided [samples](samples) to get started with. 
+These samples are meant to be very [simple](samples).
 
 ## Links 
 Web: http://projects.spring.io/spring-security-saml/
 
 Sources: https://github.com/spring-projects/spring-security-saml
 
-Documentation: http://docs.spring.io/spring-security-saml/docs/1.0.x-SNAPSHOT/reference/
+Documentation: See [samples](samples)
 
-CI: https://build.springsource.org/browse/SES
+CI: https://build.spring.io/browse/SES
 
 Releases:
 - Final: http://repo.spring.io/list/release/org/springframework/security/extensions/

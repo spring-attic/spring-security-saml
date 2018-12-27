@@ -58,6 +58,7 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 		return assertion.getSubject().getPrincipal();
 	}
 
+	@Override
 	public Assertion getAssertion() {
 		return assertion;
 	}

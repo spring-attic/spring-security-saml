@@ -40,7 +40,7 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 
-public class X509Utilities {
+public class X509Utils {
 
 	public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
 	public static final String END_CERT = "-----END CERTIFICATE-----";

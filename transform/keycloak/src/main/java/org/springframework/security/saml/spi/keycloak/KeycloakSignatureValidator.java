@@ -42,7 +42,7 @@ import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.util.X509Utilities;
+import org.springframework.security.saml.util.X509Utils;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -192,8 +192,8 @@ class KeycloakSignatureValidator {
 		}
 
 		try {
-			byte[] certbytes = X509Utilities.getDER(certPem);
-			Certificate cert = X509Utilities.getCertificate(certbytes);
+			byte[] certbytes = X509Utils.getDER(certPem);
+			Certificate cert = X509Utils.getCertificate(certbytes);
 			//TODO - should be based off of config
 			//((X509Certificate) cert).checkValidity();
 			return cert.getPublicKey();

@@ -27,7 +27,7 @@ import java.security.cert.CertificateException;
 import java.util.UUID;
 
 import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.util.X509Utilities;
+import org.springframework.security.saml.util.X509Utils;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -44,12 +44,12 @@ public interface SamlKeyStoreProvider {
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(null, keystorePassword);
 
-			byte[] certbytes = X509Utilities.getDER(key.getCertificate());
-			Certificate certificate = X509Utilities.getCertificate(certbytes);
+			byte[] certbytes = X509Utils.getDER(key.getCertificate());
+			Certificate certificate = X509Utils.getCertificate(certbytes);
 			ks.setCertificateEntry(key.getId(), certificate);
 
 			if (hasText(key.getPrivateKey())) {
-				PrivateKey pkey = X509Utilities.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
+				PrivateKey pkey = X509Utils.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
 				ks.setKeyEntry(key.getId(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
 			}
 

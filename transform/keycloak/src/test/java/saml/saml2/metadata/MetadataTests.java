@@ -68,7 +68,7 @@ import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml.util.DateUtils.toZuluTime;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
-import static org.springframework.security.saml.util.X509Utilities.keyCleanup;
+import static org.springframework.security.saml.util.X509Utils.keyCleanup;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
 

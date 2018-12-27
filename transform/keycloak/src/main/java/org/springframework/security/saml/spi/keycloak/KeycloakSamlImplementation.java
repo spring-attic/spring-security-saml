@@ -90,7 +90,7 @@ import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.security.saml.util.DateUtils;
-import org.springframework.security.saml.util.X509Utilities;
+import org.springframework.security.saml.util.X509Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -710,7 +710,7 @@ public class KeycloakSamlImplementation extends SpringSecuritySaml<KeycloakSamlI
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document doc = db.newDocument();
 			Element x509Cert = doc.createElementNS(NS_SIGNATURE, "ds:X509Certificate");
-			x509Cert.setTextContent(X509Utilities.keyCleanup(key.getCertificate()));
+			x509Cert.setTextContent(X509Utils.keyCleanup(key.getCertificate()));
 			Element x509Data = doc.createElementNS(NS_SIGNATURE, "ds:X509Data");
 			x509Data.appendChild(x509Cert);
 			Element keyInfo = doc.createElementNS(NS_SIGNATURE, "ds:KeyInfo");

@@ -14,13 +14,12 @@
  *  limitations under the License.
  *
  */
-package sample;
+package org.springframework.security.saml.samples;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-
 public class SamlServiceProviderStarterApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SamlServiceProviderStarterApplication.class, args);

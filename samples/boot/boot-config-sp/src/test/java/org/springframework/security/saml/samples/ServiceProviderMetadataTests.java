@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.samples;
+package org.springframework.security.saml.samples;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +52,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
-	@ComponentScan(basePackages = "sample")
+	@ComponentScan(basePackages = "org/springframework/security/saml/samples")
 	public static class SpringBootApplicationTestConfig {
 	}
 

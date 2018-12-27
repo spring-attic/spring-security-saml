@@ -34,10 +34,6 @@ integration tests using external SAML providers making the test dependent on ext
 
 Test driven development is a desired feature that we wish to highlight.
 
- 
-
-### Java DSL
-
 ### Spring Boot Configuration
 
 ### Independent SAML Core Library

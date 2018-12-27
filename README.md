@@ -10,11 +10,11 @@ By participating, you are expected to uphold this code. Please report unacceptab
 
 ## Getting Started
 
-We have provided [samples](https://github.com/spring-projects/spring-security-saml/tree/develop/samples/boot) to get started with. These samples are meant to be very [simple](https://github.com/spring-projects/spring-security-saml/tree/develop/samples/boot).
+We have provided [samples](samples/boot) to get started with. 
+These samples are meant to be very [simple](samples/boot).
 
 ## Links 
-Web:
-http://projects.spring.io/spring-security-saml/
+Web: http://projects.spring.io/spring-security-saml/
 
 Sources: https://github.com/spring-projects/spring-security-saml
 
@@ -29,6 +29,4 @@ Releases:
 
 Support:
 - Stackoverflow: http://stackoverflow.com/questions/tagged/spring-saml
-- Forum: http://forum.spring.io/forum/spring-projects/security/saml
-- Commercial: vladimir@v7security.com
-- Online demo: http://saml-federation.appspot.com/
+- Gitter: https://gitter.im/spring-projects/spring-security

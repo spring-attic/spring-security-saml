@@ -15,7 +15,7 @@
  *
  */
 
-package sample;
+package org.springframework.security.saml.samples;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

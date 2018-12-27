@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.samples;
+package org.springframework.security.saml.samples;
 
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;

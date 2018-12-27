@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.springframework.security.samples;
+package org.springframework.security.saml.samples;
 
 import java.time.Clock;
 
@@ -52,7 +52,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
-	@ComponentScan(basePackages = "sample")
+	@ComponentScan(basePackages = "org/springframework/security/saml/samples")
 	public static class SpringBootApplicationTestConfig {
 	}
 

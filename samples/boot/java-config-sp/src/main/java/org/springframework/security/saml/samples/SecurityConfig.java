@@ -15,7 +15,7 @@
  *
  */
 
-package sample;
+package org.springframework.security.saml.samples;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +34,7 @@ import static org.springframework.security.saml.serviceprovider.web.configuratio
 
 @EnableWebSecurity
 @Configuration
-public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -42,8 +42,6 @@ public class JavaOnlySecurityConfiguration extends WebSecurityConfigurerAdapter 
 		http
 			.authorizeRequests()
 				.mvcMatchers("/**").authenticated()
-				.and()
-			.logout()
 				.and()
 			.apply(
 				saml2Login()

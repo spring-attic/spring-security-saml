@@ -15,7 +15,7 @@
  *
  */
 
-package sample;
+package org.springframework.security.saml.samples;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 @Controller
 public class SampleAppController {
-	private static final Log logger = LogFactory.getLog(SamlServiceProviderStarterApplication.class);
+	private static final Log logger = LogFactory.getLog(SampleAppController.class);
 
 	@RequestMapping(value = {"/", "/index", "/logged-in"})
 	public String home() {

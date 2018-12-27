@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.samples;
+package org.springframework.security.saml.samples;
 
 import java.net.URI;
 import java.util.Map;

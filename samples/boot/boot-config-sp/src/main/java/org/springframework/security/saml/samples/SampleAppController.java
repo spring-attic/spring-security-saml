@@ -14,28 +14,38 @@
  *  limitations under the License.
  *
  */
-package sample;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.springframework.security.saml.samples;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SpringBootApplication
 @Controller
-public class SamlServiceProviderApplication {
-	private static final Log logger = LogFactory.getLog(SamlServiceProviderApplication.class);
-
-	public static void main(String[] args) {
-		SpringApplication.run(SamlServiceProviderApplication.class, args);
-	}
+public class SampleAppController {
+	private static final Log logger = LogFactory.getLog(SampleAppController.class);
 
 	@RequestMapping(value = {"/", "/index", "/logged-in"})
 	public String home() {
 		logger.info("Sample SP Application - You are logged in!");
 		return "logged-in";
+	}
+
+	@RequestMapping(value = {"/local/logout"})
+	public View logout(HttpServletRequest request,
+					   HttpServletResponse response, Authentication authentication) {
+		logger.info("Sample SP Application - Logging out locally!");
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(request, response, authentication);
+		return new RedirectView("/saml/sp/select", true);
 	}
 }

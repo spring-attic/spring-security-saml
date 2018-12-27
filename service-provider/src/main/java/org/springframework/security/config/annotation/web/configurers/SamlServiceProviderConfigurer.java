@@ -142,9 +142,9 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 		);
 	}
 
-	private void configureFilters(HttpSecurity http,
-								  Class<? extends Filter> afterFilter,
-								  Filter... filters) {
+	protected void configureFilters(HttpSecurity http,
+									Class<? extends Filter> afterFilter,
+									Filter... filters) {
 		for (Filter f : filters) {
 			http.addFilterAfter(f, afterFilter);
 			afterFilter = f.getClass();

@@ -30,7 +30,7 @@ import org.springframework.security.saml.provider.service.SelectIdentityProvider
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.authentication.GenericErrorAuthenticationFailureHandler;
-import org.springframework.security.saml.provider.service.authentication.SamlResponseAuthenticationFilter;
+import org.springframework.security.saml.provider.service.authentication.SamlAuthenticationResponseFilter;
 import org.springframework.security.saml.provider.service.authentication.ServiceProviderLogoutHandler;
 import org.springframework.security.saml.provider.service.authentication.SimpleAuthenticationManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -60,8 +60,8 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 	}
 
 	public Filter spAuthenticationResponseFilter() {
-		SamlResponseAuthenticationFilter authenticationFilter =
-			new SamlResponseAuthenticationFilter(getSamlProvisioning());
+		SamlAuthenticationResponseFilter authenticationFilter =
+			new SamlAuthenticationResponseFilter(getSamlProvisioning());
 		authenticationFilter.setAuthenticationManager(new SimpleAuthenticationManager());
 		authenticationFilter.setAuthenticationSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
 		authenticationFilter.setAuthenticationFailureHandler(new GenericErrorAuthenticationFailureHandler());

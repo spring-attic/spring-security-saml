@@ -43,17 +43,17 @@ import org.apache.commons.logging.LogFactory;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.util.StringUtils.hasText;
 
-public class SamlResponseAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class SamlAuthenticationResponseFilter extends AbstractAuthenticationProcessingFilter {
 
-	private static Log logger = LogFactory.getLog(SamlResponseAuthenticationFilter.class);
+	private static Log logger = LogFactory.getLog(SamlAuthenticationResponseFilter.class);
 
 	private final SamlProviderProvisioning<ServiceProviderService> provisioning;
 
-	public SamlResponseAuthenticationFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
+	public SamlAuthenticationResponseFilter(SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		this(new SamlRequestMatcher(provisioning, "SSO"), provisioning);
 	}
 
-	private SamlResponseAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
+	private SamlAuthenticationResponseFilter(RequestMatcher requiresAuthenticationRequestMatcher,
 											 SamlProviderProvisioning<ServiceProviderService> provisioning) {
 		super(requiresAuthenticationRequestMatcher);
 		this.provisioning = provisioning;

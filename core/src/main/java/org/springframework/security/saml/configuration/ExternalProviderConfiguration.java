@@ -17,23 +17,30 @@
 
 package org.springframework.security.saml.configuration;
 
+import java.util.List;
+
+import org.springframework.security.saml.saml2.key.KeyData;
+
 public abstract class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
 	private final String alias;
 	private final String metadata;
 	private final String linktext;
 	private final boolean skipSslValidation;
 	private final boolean metadataTrustCheck;
+	private final List<KeyData> verificationKeys;
 
 	ExternalProviderConfiguration(String alias,
 								  String metadata,
 								  String linktext,
 								  boolean skipSslValidation,
-								  boolean metadataTrustCheck) {
+								  boolean metadataTrustCheck,
+								  List<KeyData> verificationKeys) {
 		this.alias = alias;
 		this.metadata = metadata;
 		this.linktext = linktext;
 		this.skipSslValidation = skipSslValidation;
 		this.metadataTrustCheck = metadataTrustCheck;
+		this.verificationKeys = verificationKeys;
 	}
 
 	public String getAlias() {
@@ -56,4 +63,7 @@ public abstract class ExternalProviderConfiguration<T extends ExternalProviderCo
 		return metadataTrustCheck;
 	}
 
+	public List<KeyData> getVerificationKeys() {
+		return verificationKeys;
+	}
 }

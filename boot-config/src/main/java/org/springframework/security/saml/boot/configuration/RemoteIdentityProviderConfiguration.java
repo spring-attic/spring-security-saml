@@ -53,9 +53,9 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 			isSkipSslValidation(),
 			isMetadataTrustCheck(),
 			getNameId(),
-			getAssertionConsumerServiceIndex()
+			getAssertionConsumerServiceIndex(),
+			getVerificationKeyData()
 		);
 	}
-
 
 }

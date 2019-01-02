@@ -17,6 +17,14 @@
 
 package org.springframework.security.saml.configuration;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.util.Assert;
+
+import static org.springframework.util.StringUtils.hasText;
+
 /**
  * Immutable configuration object that represents an external service provider
  */
@@ -31,13 +39,91 @@ public class ExternalServiceProviderConfiguration extends
 	 * @param linktext           - Text to be displayed on the provider selection page
 	 * @param skipSslValidation  - set to true if you wish to disable TLS/SSL certificate validation when fetching
 	 *                           metadata
-	 * @param metadataTrustCheck - set to true if you wish to validate metadata against known keys (not used)
+	 * @param metadataTrustCheck - set to true if you wish to validate metadata signature against known keys
+	 * @param verificationKeys   - list of certificates, required if metadataTrustCheck is set to true
 	 */
 	public ExternalServiceProviderConfiguration(String alias,
 												String metadata,
 												String linktext,
 												boolean skipSslValidation,
-												boolean metadataTrustCheck) {
-		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
+												boolean metadataTrustCheck,
+												List<KeyData> verificationKeys) {
+		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck, verificationKeys);
+	}
+
+	public static ExternalServiceProviderConfiguration.Builder builder() {
+		return new ExternalServiceProviderConfiguration.Builder();
+	}
+
+	public static ExternalServiceProviderConfiguration.Builder builder(ExternalServiceProviderConfiguration idp) {
+		return builder()
+			.alias(idp.getAlias())
+			.metadata(idp.getMetadata())
+			.metadataTrustCheck(idp.isMetadataTrustCheck())
+			.skipSslValidation(idp.isSkipSslValidation())
+			.linktext(idp.getLinktext())
+			.verificationKeys(idp.getVerificationKeys())
+			;
+
+	}
+
+	public static final class Builder {
+		private String alias;
+		private String metadata;
+		private String linktext;
+		private boolean skipSslValidation;
+		private boolean metadataTrustCheck;
+		private List<KeyData> verificationKeys = new LinkedList<>();
+
+		private Builder() {
+		}
+
+		public ExternalServiceProviderConfiguration.Builder alias(String alias) {
+			this.alias = alias;
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder metadata(String metadata) {
+			this.metadata = metadata;
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder linktext(String linktext) {
+			this.linktext = linktext;
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder skipSslValidation(boolean skipSslValidation) {
+			this.skipSslValidation = skipSslValidation;
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder metadataTrustCheck(boolean metadataTrustCheck) {
+			this.metadataTrustCheck = metadataTrustCheck;
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder verificationKeys(List<KeyData> verificationKeys) {
+			this.verificationKeys = new LinkedList<>(verificationKeys);
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration.Builder addVerificationKey(KeyData verificationKey) {
+			this.verificationKeys.add(verificationKey);
+			return this;
+		}
+
+		public ExternalServiceProviderConfiguration build() {
+			Assert.notNull(alias, "Alias is required");
+			Assert.notNull(metadata, "Metadata is required");
+			return new ExternalServiceProviderConfiguration(
+				alias,
+				metadata,
+				hasText(linktext) ? linktext : alias,
+				skipSslValidation,
+				metadataTrustCheck,
+				verificationKeys
+			);
+		}
 	}
 }

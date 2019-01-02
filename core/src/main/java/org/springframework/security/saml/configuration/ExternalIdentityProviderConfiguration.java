@@ -17,6 +17,10 @@
 
 package org.springframework.security.saml.configuration;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.util.Assert;
 
@@ -39,9 +43,10 @@ public class ExternalIdentityProviderConfiguration extends
 	 * @param linktext           - Text to be displayed on the
 	 * @param skipSslValidation  - set to true if you wish to disable TLS/SSL certificate validation when fetching
 	 *                           metadata
-	 * @param metadataTrustCheck - set to true if you wish to validate metadata against known keys (not used)
+	 * @param metadataTrustCheck - set to true if you wish to validate metadata signature against known keys
 	 * @param nameId             - set to a non null value if a specific NameId format is to be used in the
 	 *                           authentication request
+	 * @param verificationKeys   - list of certificates, required if metadataTrustCheck is set to true
 	 */
 	public ExternalIdentityProviderConfiguration(String alias,
 												 String metadata,
@@ -49,8 +54,9 @@ public class ExternalIdentityProviderConfiguration extends
 												 boolean skipSslValidation,
 												 boolean metadataTrustCheck,
 												 NameId nameId,
-												 int assertionConsumerServiceIndex) {
-		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck);
+												 int assertionConsumerServiceIndex,
+												 List<KeyData> verificationKeys) {
+		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck, verificationKeys);
 		this.nameId = nameId;
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
 	}
@@ -76,6 +82,7 @@ public class ExternalIdentityProviderConfiguration extends
 			.skipSslValidation(idp.isSkipSslValidation())
 			.nameId(idp.getNameId())
 			.linktext(idp.getLinktext())
+			.verificationKeys(idp.getVerificationKeys())
 			;
 
 	}
@@ -88,6 +95,7 @@ public class ExternalIdentityProviderConfiguration extends
 		private NameId nameId;
 		private int assertionConsumerServiceIndex;
 		private boolean metadataTrustCheck;
+		private List<KeyData> verificationKeys = new LinkedList<>();
 
 		private Builder() {
 		}
@@ -127,6 +135,16 @@ public class ExternalIdentityProviderConfiguration extends
 			return this;
 		}
 
+		public Builder verificationKeys(List<KeyData> verificationKeys) {
+			this.verificationKeys = new LinkedList<>(verificationKeys);
+			return this;
+		}
+
+		public Builder addVerificationKey(KeyData verificationKey) {
+			this.verificationKeys.add(verificationKey);
+			return this;
+		}
+
 		public ExternalIdentityProviderConfiguration build() {
 			Assert.notNull(alias, "Alias is required");
 			Assert.notNull(metadata, "Metadata is required");
@@ -137,7 +155,8 @@ public class ExternalIdentityProviderConfiguration extends
 				skipSslValidation,
 				metadataTrustCheck,
 				nameId,
-				assertionConsumerServiceIndex
+				assertionConsumerServiceIndex,
+				verificationKeys
 			);
 		}
 	}

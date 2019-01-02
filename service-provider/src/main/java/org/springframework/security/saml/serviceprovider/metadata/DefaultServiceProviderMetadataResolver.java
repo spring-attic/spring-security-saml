@@ -43,6 +43,8 @@ import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
+import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
@@ -101,11 +103,37 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 		List<ExternalIdentityProviderConfiguration> providers = configuration.getProviders();
 		for (ExternalIdentityProviderConfiguration idpConfig : providers) {
 			IdentityProviderMetadata idp = getIdentityProviderMetadata(idpConfig);
+			idp = metadataTrustCheck(idpConfig, idp);
 			if (idp != null) {
 				result.put(idpConfig, idp);
 			}
 		}
 		return result;
+	}
+
+	private IdentityProviderMetadata metadataTrustCheck(ExternalIdentityProviderConfiguration idpConfig,
+														IdentityProviderMetadata idp) {
+		if (!idpConfig.isMetadataTrustCheck()) {
+			return idp;
+		}
+		if (idpConfig.getVerificationKeys().isEmpty()) {
+			logger.warn("No keys to verify metadata for "+idpConfig.getMetadata() + " with. Unable to trust.");
+			return null;
+		}
+		try {
+			Signature signature = samlTransformer.validateSignature(idp, idpConfig.getVerificationKeys());
+			if (signature != null &&
+				signature.isValidated() &&
+				signature.getValidatingKey() != null) {
+				return idp;
+			}
+			else {
+				logger.warn("Missing signature for "+idpConfig.getMetadata() + ". Unable to trust.");
+			}
+		} catch (SignatureException e) {
+			logger.warn("Invalid signature for IDP metadata "+idpConfig.getMetadata() + ". Unable to trust.", e);
+		}
+		return null;
 	}
 
 	private IdentityProviderMetadata getIdentityProviderMetadata(ExternalIdentityProviderConfiguration idp) {
@@ -132,6 +160,8 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			providers = providers.stream().filter(p -> p instanceof IdentityProvider).collect(toList());
 			IdentityProviderMetadata result = new IdentityProviderMetadata(metadata);
 			result.setProviders(providers);
+			result.setImplementation(metadata.getImplementation());
+			result.setOriginalXML(metadata.getOriginalXML());
 			return result;
 		}
 	}

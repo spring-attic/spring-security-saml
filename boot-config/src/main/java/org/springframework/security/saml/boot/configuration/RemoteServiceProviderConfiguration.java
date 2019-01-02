@@ -27,7 +27,8 @@ public class RemoteServiceProviderConfiguration extends RemoteProviderConfigurat
 			getMetadata(),
 			getLinktext(),
 			isSkipSslValidation(),
-			isMetadataTrustCheck()
+			isMetadataTrustCheck(),
+			getVerificationKeyData()
 		);
 	}
 }

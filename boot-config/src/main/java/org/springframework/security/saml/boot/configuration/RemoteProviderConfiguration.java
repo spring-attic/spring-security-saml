@@ -17,12 +17,24 @@
 
 package org.springframework.security.saml.boot.configuration;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.key.KeyType;
+
+import static java.util.Optional.ofNullable;
+
 public abstract class RemoteProviderConfiguration {
 	private String alias;
 	private String metadata;
 	private String linktext;
 	private boolean skipSslValidation = false;
 	private boolean metadataTrustCheck = false;
+	private List<String> verificationKeys = new LinkedList<>();
 
 	public String getAlias() {
 		return alias;
@@ -64,5 +76,26 @@ public abstract class RemoteProviderConfiguration {
 		this.metadataTrustCheck = metadataTrustCheck;
 	}
 
+	public List<String> getVerificationKeys() {
+		return verificationKeys;
+	}
 
+	public void setVerificationKeys(List<String> verificationKeys) {
+		this.verificationKeys = verificationKeys;
+	}
+
+	protected List<KeyData> getVerificationKeyData() {
+		return ofNullable(getVerificationKeys()).orElse(Collections.emptyList())
+			.stream()
+			.map(
+				s -> new KeyData(
+					"from-config-"+UUID.randomUUID().toString(),
+					null,
+					s,
+					null,
+					KeyType.SIGNING
+				)
+			)
+			.collect(Collectors.toList());
+	}
 }

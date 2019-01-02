@@ -17,12 +17,23 @@
 
 package org.springframework.security.saml.provider.config;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.security.saml.key.SimpleKey;
+
+import static java.util.Optional.ofNullable;
+
 public class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> implements Cloneable {
 	private String alias;
 	private String metadata;
 	private String linktext;
 	private boolean skipSslValidation = false;
 	private boolean metadataTrustCheck = false;
+	private List<String> verificationKeys = new LinkedList<>();
 
 	public ExternalProviderConfiguration() {
 	}
@@ -75,6 +86,26 @@ public class ExternalProviderConfiguration<T extends ExternalProviderConfigurati
 	public T setMetadataTrustCheck(boolean metadataTrustCheck) {
 		this.metadataTrustCheck = metadataTrustCheck;
 		return _this();
+	}
+
+	public List<String> getVerificationKeys() {
+		return ofNullable(verificationKeys).orElse(Collections.emptyList());
+	}
+
+	public T setVerificationKeys(List<String> verificationKeys) {
+		this.verificationKeys = verificationKeys;
+		return _this();
+	}
+
+	public List<SimpleKey> getVerificationKeyData() {
+		return getVerificationKeys()
+			.stream()
+			.map(
+				s -> new SimpleKey()
+					.setName("from-config-"+UUID.randomUUID().toString())
+					.setCertificate(s)
+			)
+			.collect(Collectors.toList());
 	}
 
 	@Override

@@ -47,6 +47,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.Metadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
+import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.validation.ValidationException;
 import org.springframework.security.saml.validation.ValidationResult;
@@ -138,6 +139,7 @@ public abstract class AbstractHostedProviderService<
 				RemoteMetadata m = getRemoteProvider(c);
 				if (m != null) {
 					m.setEntityAlias(c.getAlias());
+
 					result.add(m);
 				}
 			} catch (SamlException x) {
@@ -212,7 +214,35 @@ public abstract class AbstractHostedProviderService<
 	@Override
 	public RemoteMetadata getRemoteProvider(ExternalProviderConfiguration c) {
 		String metadata = c.getMetadata();
-		return resolve(metadata, c.isSkipSslValidation());
+		RemoteMetadata result = resolve(metadata, c.isSkipSslValidation());
+		if (c.isMetadataTrustCheck()) {
+			result = metadataTrustCheck(c, result);
+		}
+		return result;
+	}
+
+	private RemoteMetadata metadataTrustCheck(ExternalProviderConfiguration c, RemoteMetadata result) {
+		if (!c.isMetadataTrustCheck()) {
+			return result;
+		}
+		if (c.getVerificationKeys().isEmpty()) {
+			logger.warn("No keys to verify metadata for "+c.getMetadata() + " with. Unable to trust.");
+			return null;
+		}
+		try {
+			Signature signature = validator.validateSignature(result, c.getVerificationKeyData());
+			if (signature != null &&
+				signature.isValidated() &&
+				signature.getValidatingKey() != null) {
+				return result;
+			}
+			else {
+				logger.warn("Missing signature for "+c.getMetadata() + ". Unable to trust.");
+			}
+		} catch (SignatureException e) {
+			logger.warn("Invalid signature for remote provider metadata "+c.getMetadata() + ". Unable to trust.", e);
+		}
+		return null;
 	}
 
 	@Override

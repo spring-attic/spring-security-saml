@@ -24,8 +24,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.ServiceProviderService;
 import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,6 +41,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +59,10 @@ public class MetadataTrustCheckBootTest {
 	@Autowired
 	@Qualifier("spSamlServerConfiguration")
 	private SamlServerConfiguration config;
+
+	@Autowired(required = false)
+	@Qualifier("samlServiceProviderProvisioning")
+	SamlProviderProvisioning<ServiceProviderService> samlProvisioning;
 
 	private List<ExternalIdentityProviderConfiguration> providers;
 	private ExternalIdentityProviderConfiguration trustCheckProvider;
@@ -105,6 +114,33 @@ public class MetadataTrustCheckBootTest {
 			.andExpect(content().string(containsString("<h1>Select an Identity Provider</h1>")))
 			.andExpect(content().string(not(containsString("Metadata Trust Check IDP/SP Metadata"))))
 			.andReturn();
+	}
+
+	@Test
+	public void staticKeysAreAdded() throws Exception {
+		trustCheckProvider
+			.setVerificationKeys(asList(SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData().getCertificate()))
+			.setMetadataTrustCheck(false);
+		mockMvc.perform(
+			get("/saml/sp/select")
+				.accept(MediaType.TEXT_HTML)
+		)
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("<h1>Select an Identity Provider</h1>")))
+			.andExpect(content().string(containsString("Metadata Trust Check IDP/SP Metadata")))
+			.andReturn();
+
+		IdentityProviderMetadata provider =
+			samlProvisioning.getHostedProvider().getRemoteProvider("login.run.pivotal.io");
+		List<SimpleKey> keys = provider.getIdentityProvider().getKeys();
+		assertTrue(hasKey(keys, SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData().getCertificate()));
+		assertTrue(hasKey(keys, METADATA_TRUST_CHECK_KEY));
+	}
+
+	private boolean hasKey(List<SimpleKey> keys, String certificate) {
+		return keys
+			.stream()
+			.anyMatch(k -> certificate.equals(k.getCertificate()));
 	}
 
 	private static String METADATA_TRUST_CHECK = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"login.run.pivotal.io\" entityID=\"login.run.pivotal.io\"><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/><ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><ds:Reference URI=\"#login.run.pivotal.io\"><ds:Transforms><ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/></ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><ds:DigestValue>cayGaIpGtYkEXMr0g+scVayzxMI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EPu6XnPsdMNNY4fuQczAdGB8029i/t+7tZ2w6xaX1WzutRji76PL2e6zfiZvcBGRrcPYmqVJZC6BorBcvMCIVxE+MxKWp4JE9qsQUMoXGpovbBmiKzMfqaO+lcusCmX6CRyqni6P75L1Sff2j31Sp/QxgXkA3ZHvrcaNynMCWdYaqFUuk/L44CI3FllceGlmWDNEM7gPIEYAlQ6A0ct7y5+Dj+aZxDofS8bTCR3dgf4fw6+gu2Cxf+zbSflQ2kT4jTW0GBsOJ6NBZZCP5f7+WCTWD4YFGSbCk/KisM/FS7i7seedoTJplYLyn+2YYUO1xKnFF8wNL5Uqi92lC1hgGw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +

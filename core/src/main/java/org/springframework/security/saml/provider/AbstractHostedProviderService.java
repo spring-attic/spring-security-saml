@@ -218,7 +218,20 @@ public abstract class AbstractHostedProviderService<
 		if (c.isMetadataTrustCheck()) {
 			result = metadataTrustCheck(c, result);
 		}
+		if (result != null) {
+			addStaticKeys(c, result);
+		}
 		return result;
+	}
+
+	private void addStaticKeys(ExternalProviderConfiguration config, RemoteMetadata metadata) {
+		if (!config.getVerificationKeys().isEmpty() && metadata != null) {
+			for (SsoProvider provider : metadata.getSsoProviders()) {
+				List<SimpleKey> keys = new LinkedList(provider.getKeys());
+				keys.addAll(config.getVerificationKeyData());
+				provider.setKeys(keys);
+			}
+		}
 	}
 
 	private RemoteMetadata metadataTrustCheck(ExternalProviderConfiguration c, RemoteMetadata result) {

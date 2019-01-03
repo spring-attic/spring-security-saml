@@ -40,7 +40,7 @@ public class SingletonServiceProviderConfigurationResolver implements ServicePro
 
 	private final HostedServiceProviderConfiguration configuration;
 
-	private SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
+	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
 		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");

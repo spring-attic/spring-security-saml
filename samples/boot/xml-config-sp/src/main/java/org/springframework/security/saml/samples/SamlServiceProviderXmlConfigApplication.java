@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,16 @@
  *  limitations under the License.
  *
  */
+package org.springframework.security.saml.samples;
 
-include "core"
-include "transform/opensaml"
-include "transform/keycloak"
-include "service-provider"
-include "boot-config"
-include "samples/boot/boot-config-sp"
-include "samples/boot/java-config-sp"
-include "samples/boot/xml-config-sp"
-include "samples/boot/starter-sp"
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
 
-rootProject.name = "spring-security-saml2"
-
-rootProject.children.each { p ->
-	//name the project based on the path
-	p.name = "spring-security-saml2-${p.name.replaceAll("/","-")}"
+@SpringBootApplication
+@ImportResource({"classpath*:applicationContext.xml"})
+public class SamlServiceProviderXmlConfigApplication {
+	public static void main(String[] args) {
+		SpringApplication.run(SamlServiceProviderXmlConfigApplication.class, args);
+	}
 }

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2002-2019 the original author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <bean id="samlConfiguration"
+          class="org.springframework.security.saml.boot.configuration.SamlBootConfiguration"/>
+
+    <bean id="samlServiceProviderConfiguration"
+          factory-bean="samlConfiguration"
+          factory-method="samlServiceProviderConfiguration">
+    </bean>
+
+    <bean id="samlTransformer"
+          class="org.springframework.security.saml.spi.opensaml.OpenSamlTransformer"/>
+
+    <bean id="samlServiceProviderValidator"
+          class="org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator">
+        <constructor-arg ref="samlTransformer"/>
+    </bean>
+
+    <bean id="samlServiceProviderMetadataResolver"
+          class="org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver">
+        <constructor-arg ref="samlTransformer"/>
+    </bean>
+
+    <bean id="samlServiceProviderTemplateEngine"
+          class="org.springframework.security.saml.spi.VelocityTemplateEngine">
+    </bean>
+
+    <bean id="samlServiceProviderConfigurationResolver"
+          class="org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver">
+        <constructor-arg ref="samlServiceProviderConfiguration"/>
+    </bean>
+
+    <bean id="samlServiceProviderResolver"
+          class="org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver">
+        <constructor-arg ref="samlServiceProviderMetadataResolver"/>
+        <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
+    </bean>
+
+    <bean id="pathPrefix"
+          factory-bean="samlServiceProviderConfiguration"
+          factory-method="getPathPrefix"
+          class="java.lang.String"
+    />
+
+    <bean id="samlAuthenticationEntryPoint"
+          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg value="#{'/' + pathPrefix + '/select?redirect=true'}"/>
+    </bean>
+
+    <bean id="samlProcessingFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter">
+        <constructor-arg ref="samlTransformer"/>
+        <constructor-arg ref="samlServiceProviderResolver"/>
+        <constructor-arg ref="samlServiceProviderValidator"/>
+        <constructor-arg>
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/**'}"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="samlSpMetadataFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter">
+
+        <constructor-arg index="0">
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/metadata/**'}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg index="1" ref="samlTransformer"/>
+    </bean>
+
+    <bean id="samlHtmlWriter" class="org.springframework.security.saml.serviceprovider.web.html.HtmlWriter">
+        <constructor-arg ref="samlServiceProviderTemplateEngine"/>
+    </bean>
+
+    <bean id="selectIdentityProviderUIFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderUIFilter">
+        <constructor-arg ref="pathPrefix"/>
+        <constructor-arg>
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/select/**'}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="samlHtmlWriter"/>
+        <property name="redirectOnSingleProvider" value="false"/>
+    </bean>
+
+    <bean id="samlAuthenticationRequestFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter">
+        <constructor-arg>
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/discovery/**'}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="samlTransformer"/>
+        <constructor-arg ref="samlHtmlWriter"/>
+    </bean>
+
+    <bean id="samlAuthenticationManager"
+          class="org.springframework.security.saml.serviceprovider.authentication.NoOpAuthenticationManager"/>
+
+    <bean id="samlWebSsoAuthenticationFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter">
+        <constructor-arg>
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/SSO/**'}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="samlServiceProviderValidator"/>
+        <property name="authenticationManager" ref="samlAuthenticationManager"/>
+        <property name="authenticationFailureHandler">
+            <bean class="org.springframework.security.saml.serviceprovider.web.SamlAuthenticationFailureHandler">
+                <constructor-arg ref="samlHtmlWriter"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="serviceProviderLogoutFilter"
+          class="org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter">
+        <constructor-arg>
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="samlTransformer"/>
+        <constructor-arg ref="samlServiceProviderValidator"/>
+        <property name="logoutSuccessHandler">
+            <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+                <property name="defaultTargetUrl"
+                          value="#{'/' + pathPrefix + '/select'}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="samlCsrfIgnoreMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/**'}"/>
+    </bean>
+
+    <security:http pattern="/**"
+                   use-expressions="true"
+                   entry-point-ref="samlAuthenticationEntryPoint"
+                   authentication-manager-ref="samlAuthenticationManager">
+        <security:intercept-url pattern="#{'/' + pathPrefix + '/**'}" access="permitAll()"/>
+        <security:intercept-url pattern="/error" access="permitAll()"/>
+        <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="GET"/>
+        <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="POST"/>
+        <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+        <security:custom-filter ref="samlProcessingFilter" before="DIGEST_AUTH_FILTER"/>
+        <security:custom-filter ref="samlSpMetadataFilter" position="DIGEST_AUTH_FILTER"/>
+        <security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>
+        <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
+        <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
+        <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>
+        <security:csrf request-matcher-ref="samlCsrfIgnoreMatcher" disabled="true"/>
+    </security:http>
+
+</beans>

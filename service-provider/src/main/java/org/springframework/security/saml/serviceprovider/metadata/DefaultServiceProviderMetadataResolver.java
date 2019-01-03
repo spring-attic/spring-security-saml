@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -137,6 +138,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 	}
 
 	private IdentityProviderMetadata getIdentityProviderMetadata(ExternalIdentityProviderConfiguration idp) {
+		IdentityProviderMetadata result = null;
 		try {
 			byte[] data = idp.getMetadata().getBytes(StandardCharsets.UTF_8);
 			if (isUri(idp.getMetadata())) {
@@ -144,10 +146,19 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			}
 			Metadata metadata = (Metadata) samlTransformer.fromXml(data, null, null);
 			metadata.setEntityAlias(idp.getAlias());
-			return transform(metadata);
+			result = transform(metadata);
+			addStaticKeys(idp, result);
 		} catch (SamlMetadataException e) {
 			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
-			return null;
+		}
+		return result;
+	}
+
+	private void addStaticKeys(ExternalIdentityProviderConfiguration idp, IdentityProviderMetadata metadata) {
+		if (!idp.getVerificationKeys().isEmpty() && metadata != null) {
+			List<KeyData> keys = new LinkedList(metadata.getIdentityProvider().getKeys());
+			keys.addAll(idp.getVerificationKeys());
+			metadata.getIdentityProvider().setKeys(keys);
 		}
 	}
 

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml.serviceprovider.authentication;
+package org.springframework.security.saml.samples;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -23,6 +23,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.Assert;
 
+/**
+ * Used with XML configuration where a
+ * Spring Security filter chain requires an authentication manager to
+ * be configured.
+ */
 public final class NoOpAuthenticationManager implements AuthenticationManager {
 	@Override
 	public final Authentication authenticate(Authentication authentication) throws AuthenticationException {

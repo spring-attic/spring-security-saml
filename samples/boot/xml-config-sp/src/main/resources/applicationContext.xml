@@ -122,7 +122,7 @@
     </bean>
 
     <bean id="samlAuthenticationManager"
-          class="org.springframework.security.saml.serviceprovider.authentication.NoOpAuthenticationManager"/>
+          class="org.springframework.security.saml.samples.NoOpAuthenticationManager"/>
 
     <bean id="samlWebSsoAuthenticationFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter">

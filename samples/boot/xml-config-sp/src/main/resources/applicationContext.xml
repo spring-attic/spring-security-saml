@@ -65,6 +65,25 @@
           factory-method="getPathPrefix"
           class="java.lang.String"
     />
+    <bean id="samlMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/**'}"/>
+    </bean>
+
+    <bean id="metadataMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/metadata/**'}"/>
+    </bean>
+
+    <bean id="selectIdpMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/select/**'}"/>
+    </bean>
+
+    <bean id="idpDiscoveryMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/discovery/**'}"/>
+    </bean>
 
     <bean id="samlAuthenticationEntryPoint"
           class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
@@ -76,22 +95,18 @@
         <constructor-arg ref="samlTransformer"/>
         <constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlServiceProviderValidator"/>
-        <constructor-arg>
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/**'}"/>
-            </bean>
-        </constructor-arg>
+        <constructor-arg ref="samlMatcher"/>
     </bean>
 
     <bean id="samlSpMetadataFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter">
+        <constructor-arg ref="metadataMatcher"/>
+        <constructor-arg ref="samlTransformer"/>
+    </bean>
 
-        <constructor-arg index="0">
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/metadata/**'}"/>
-            </bean>
-        </constructor-arg>
-        <constructor-arg index="1" ref="samlTransformer"/>
+    <bean id="logoutMatcher"
+          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+        <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
     </bean>
 
     <bean id="samlHtmlWriter" class="org.springframework.security.saml.serviceprovider.web.html.HtmlWriter">
@@ -101,22 +116,14 @@
     <bean id="selectIdentityProviderUIFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderUIFilter">
         <constructor-arg ref="pathPrefix"/>
-        <constructor-arg>
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/select/**'}"/>
-            </bean>
-        </constructor-arg>
+        <constructor-arg ref="selectIdpMatcher"/>
         <constructor-arg ref="samlHtmlWriter"/>
         <property name="redirectOnSingleProvider" value="false"/>
     </bean>
 
     <bean id="samlAuthenticationRequestFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter">
-        <constructor-arg>
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/discovery/**'}"/>
-            </bean>
-        </constructor-arg>
+        <constructor-arg ref="idpDiscoveryMatcher"/>
         <constructor-arg ref="samlTransformer"/>
         <constructor-arg ref="samlHtmlWriter"/>
     </bean>
@@ -142,24 +149,14 @@
 
     <bean id="serviceProviderLogoutFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter">
-        <constructor-arg>
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
-            </bean>
-        </constructor-arg>
+        <constructor-arg ref="logoutMatcher"/>
         <constructor-arg ref="samlTransformer"/>
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="logoutSuccessHandler">
             <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
-                <property name="defaultTargetUrl"
-                          value="#{'/' + pathPrefix + '/select'}"/>
+                <property name="defaultTargetUrl" value="#{'/' + pathPrefix + '/select'}"/>
             </bean>
         </property>
-    </bean>
-
-    <bean id="samlCsrfIgnoreMatcher"
-          class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-        <constructor-arg value="#{'/' + pathPrefix + '/**'}"/>
     </bean>
 
     <security:http pattern="/**"
@@ -177,7 +174,7 @@
         <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>
-        <security:csrf request-matcher-ref="samlCsrfIgnoreMatcher" disabled="true"/>
+        <security:csrf request-matcher-ref="samlMatcher" disabled="true"/>
     </security:http>
 
 </beans>

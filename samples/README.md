@@ -19,7 +19,7 @@ Please use
     
 **Try it out**
 
-***Againt a running SimpleSamlPHP Server***
+***Against a running SimpleSamlPHP Server***
 
 * Spring Security SAML [as a Service Provider](http://localhost:8080/sample-sp)
 * Spring Security SAML [as an initiating Service Provider](http://localhost:8080/sample-sp/saml/sp/discovery?idp=http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php)

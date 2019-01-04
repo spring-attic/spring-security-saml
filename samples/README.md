@@ -10,7 +10,7 @@ How to run a simple sample of an Identity Provider (IDP) and Service Provider (S
 
 Service Provider runs on `http://localhost:8080/sample-sp`
 
-    ./gradlew :spring-security-saml2-samples-boot-boot-config-sp:bootRun &
+    ./gradlew :spring-security-saml2-samples-boot-boot-config-sp:bootRun
 
 Please use
 
@@ -40,7 +40,7 @@ to configure the SAML Service Provider.
 
 Service Provider runs on `http://localhost:8080/sample-sp`
 
-    ./gradlew :spring-security-saml2-samples-boot-starter-sp:bootRun &
+    ./gradlew :spring-security-saml2-samples-boot-starter-sp:bootRun
 
 In order to have the sample run, we need to configure at least a private key/certificate
 along with one remote Identity Provider (IDP). 
@@ -57,7 +57,7 @@ This sample also showcases the difference between SAML Single(federated) logout 
 
 Service Provider runs on `http://localhost:8080/sample-sp`
 
-    ./gradlew :spring-security-saml2-samples-boot-boot-config-sp:bootRun &
+    ./gradlew :spring-security-saml2-samples-boot-boot-config-sp:bootRun
 
 ***Java Only Configuration Sample***
 
@@ -68,4 +68,26 @@ to configure the SAML Service Provider
 
 Service Provider runs on `http://localhost:8080/sample-sp`
 
-    ./gradlew :spring-security-saml2-samples-boot-java-config-sp:bootRun &
+    ./gradlew :spring-security-saml2-samples-boot-java-config-sp:bootRun
+
+***Java Only Configuration Sample***
+
+The [Spring Boot sample](boot/java-config-sp) showcases the use of 
+a Spring Boot application where all the configurations are set 
+[programmatically]((boot/java-config-sp/src/main/java/org/springframework/security/saml/samples/SecurityConfig.java))
+to configure the SAML Service Provider
+
+Service Provider runs on `http://localhost:8080/sample-sp`
+
+    ./gradlew :spring-security-saml2-samples-boot-java-config-sp:bootRun
+
+***XML Configuration Sample***
+
+The [Spring XML sample](boot/xml-config-sp) showcases the use of 
+a Spring Boot application where all the beans are configured via
+[an XML configuration file]((boot/xml-config-sp/src/main/resources/applicationContext.xml))
+to configure the SAML Service Provider
+
+Service Provider runs on `http://localhost:8080/sample-sp`
+
+    ./gradlew :spring-security-saml2-samples-boot-xml-config-sp:bootRun

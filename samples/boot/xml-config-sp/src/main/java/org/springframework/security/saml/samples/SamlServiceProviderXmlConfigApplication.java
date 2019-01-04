@@ -19,9 +19,11 @@ package org.springframework.security.saml.samples;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @SpringBootApplication
 @ImportResource({"classpath*:applicationContext.xml"})
+@EnableWebSecurity
 public class SamlServiceProviderXmlConfigApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SamlServiceProviderXmlConfigApplication.class, args);

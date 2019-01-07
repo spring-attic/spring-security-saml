@@ -28,7 +28,7 @@ dependencies {
 	}
 
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "$bcprovVersion"
-	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcpkixVersion"
+	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcprovVersion"
 
 	compile group: 'joda-time', name: 'joda-time', version: "$jodaTimeVersion"
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: "$httpClientVersion"

@@ -40,7 +40,7 @@ dependencies {
 	compile 'org.springframework:spring-webflux'
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'
-	compile 'org.thymeleaf.extras:thymeleaf-extras-springsecurity4'
+	compile 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 	testCompile 'org.springframework.security:spring-security-test'

@@ -20,7 +20,6 @@ package saml.helper;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
@@ -61,6 +59,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProvider;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -122,13 +121,7 @@ public class SamlTestObjectHelper {
 	}
 
 	protected String getAliasPath(HostedProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
+		return StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId());
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,

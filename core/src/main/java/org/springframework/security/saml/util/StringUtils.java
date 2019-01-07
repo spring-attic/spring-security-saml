@@ -18,10 +18,14 @@ package org.springframework.security.saml.util;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.security.saml.SamlException;
+import org.springframework.web.util.UriUtils;
 
 import org.apache.http.client.utils.URIBuilder;
+
+import static org.springframework.util.StringUtils.hasText;
 
 public class StringUtils {
 
@@ -97,6 +101,12 @@ public class StringUtils {
 			path = path.substring(1);
 		}
 		return path;
+	}
+
+	public static String getAliasPath(String alias, String entityId) {
+		return hasText(alias) ?
+			UriUtils.encode(alias, StandardCharsets.ISO_8859_1.name()) :
+			UriUtils.encode(entityId, StandardCharsets.ISO_8859_1.name());
 	}
 
 }

@@ -17,7 +17,6 @@
 
 package org.springframework.security.saml.serviceprovider.metadata;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlMetadataException;
 import org.springframework.security.saml.SamlTransformer;
@@ -50,7 +48,6 @@ import org.springframework.security.saml.spi.DefaultMetadataCache;
 import org.springframework.security.saml.util.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -257,13 +254,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 	}
 
 	private String getAliasPath(HostedProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
+		return StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId());
 	}
 
 	private boolean isUri(String uri) {

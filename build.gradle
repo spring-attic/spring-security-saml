@@ -37,7 +37,7 @@ configure(allprojects) { project ->
 
 	ext.slf4jVersion = "1.7.25"
 	ext.springVersion = "4.3.14.RELEASE"
-	ext.springSecurityVersion = "4.2.4.RELEASE"
+	ext.springSecurityVersion = "5.1.2.RELEASE"
 	ext.bcprovVersion = "1.59"
 	ext.bcpkixVersion = "1.59"
 	ext.openSamlVersion = "3.3.0"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,12 @@ configure(allprojects) { project ->
 	ext.junitVersion = "5.3.2"
 	ext.jodaTimeVersion = "2.10.1"
 	ext.httpClientVersion = "4.5.6"
+	ext.thymeleafExtrasSpringSecurityVersion = "3.0.4.RELEASE" 
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
+	apply plugin: "eclipse"
+	apply plugin: "idea"
 	apply from: "${gradleScriptDir}/ide.gradle"
 	apply plugin: 'org.junit.platform.gradle.plugin'
 

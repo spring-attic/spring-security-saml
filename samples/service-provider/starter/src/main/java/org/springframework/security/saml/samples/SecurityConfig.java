@@ -21,11 +21,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.samlServiceProvider;
 import static org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
@@ -41,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			//saml security
 			.apply(
-				saml2Login()
+				SamlServiceProviderConfigurer.samlServiceProvider()
 			)
 		;
 		// @formatter:on

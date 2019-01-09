@@ -32,16 +32,16 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * =========== Builders ============
 	 */
-	public static SamlServiceProviderConfigurer saml2Login() {
+	public static SamlServiceProviderConfigurer samlServiceProvider() {
 		return new SamlServiceProviderConfigurer();
 	}
 
-	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderResolver resolver) {
-		return saml2Login().providerResolver(resolver);
+	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderResolver resolver) {
+		return samlServiceProvider().providerResolver(resolver);
 	}
 
-	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderConfigurationResolver resolver) {
-		return saml2Login().configurationResolver(resolver);
+	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderConfigurationResolver resolver) {
+		return samlServiceProvider().configurationResolver(resolver);
 	}
 
 	/*

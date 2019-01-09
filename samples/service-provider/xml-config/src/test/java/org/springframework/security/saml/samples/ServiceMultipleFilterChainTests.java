@@ -28,6 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.samlServiceProvider;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -65,7 +66,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							saml2Login()
+							SamlServiceProviderConfigurer.samlServiceProvider()
 						)
 				;
 				// @formatter:on
@@ -84,7 +85,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							saml2Login()
+							SamlServiceProviderConfigurer.samlServiceProvider()
 						)
 				;
 				// @formatter:on

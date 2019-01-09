@@ -37,7 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.samlServiceProvider;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -66,7 +65,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.samlServiceProvider()
+							SamlServiceProviderConfigurer.saml2Login()
 						)
 				;
 				// @formatter:on
@@ -85,7 +84,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.samlServiceProvider()
+							SamlServiceProviderConfigurer.saml2Login()
 						)
 				;
 				// @formatter:on

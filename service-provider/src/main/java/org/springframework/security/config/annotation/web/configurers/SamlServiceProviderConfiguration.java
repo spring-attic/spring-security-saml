@@ -26,24 +26,26 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
+import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderUIFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.saml.util.StringUtils;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -62,6 +64,7 @@ class SamlServiceProviderConfiguration {
 	private HtmlWriter htmlWriter;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
+	private AuthenticationEntryPoint authenticationEntryPoint;
 	private String pathPrefix;
 
 	SamlServiceProviderConfiguration() {
@@ -273,6 +276,18 @@ class SamlServiceProviderConfiguration {
 		return transformer;
 	}
 
+	AuthenticationEntryPoint getAuthenticationEntryPoint() {
+		notNull(this.http, "Call validate(HttpSecurity) first.");
+		authenticationEntryPoint = getSharedObject(
+			http,
+			AuthenticationEntryPoint.class,
+			() -> new LoginUrlAuthenticationEntryPoint(getPathPrefix() + "/select?redirect=true"),
+			authenticationEntryPoint
+		);
+
+		return authenticationEntryPoint;
+	}
+
 	private boolean hasHttp() {
 		return http != null;
 	}
@@ -372,5 +387,4 @@ class SamlServiceProviderConfiguration {
 			throw new IllegalStateException(identifier + " should be null if you wish to configure a " + alternate);
 		}
 	}
-
 }

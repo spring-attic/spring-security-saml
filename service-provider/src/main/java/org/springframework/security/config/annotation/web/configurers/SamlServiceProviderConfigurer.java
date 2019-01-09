@@ -23,8 +23,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
@@ -32,22 +32,59 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * =========== Builders ============
 	 */
+
+	/**
+	 * Creates a SAML service provider and installs all the service endpoints
+	 * in the filter chain this configurer is applied to
+	 * @return configuration spec for a SAML service provider to be applied to a filter chain
+	 */
 	public static SamlServiceProviderConfigurer samlServiceProvider() {
 		return new SamlServiceProviderConfigurer();
 	}
 
+	/**
+	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
+	 * in the filter chain this configurer is applied to
+	 * This is a mutually exclusive option to {@link #samlServiceProvider(ServiceProviderConfigurationResolver)}
+	 * @param resolver pre configures the {@link ServiceProviderResolver}. This is the minimum the
+	 *                 configuration needed for a service provider to run in a servlet container
+	 * @return configuration spec for a SAML service provider to be applied to a filter chain
+	 */
 	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderResolver resolver) {
 		return samlServiceProvider().providerResolver(resolver);
 	}
 
+	/**
+	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
+	 * in the filter chain this configurer is applied to
+	 * This is a mutually exclusive option to {@link #samlServiceProvider(ServiceProviderResolver)}
+	 * @param resolver pre configures the {@link ServiceProviderConfigurationResolver}. This is the minimum the
+	 *                 configuration needed for a service provider to run in a servlet container
+	 * @return configuration spec for a SAML service provider to be applied to a filter chain
+	 */
 	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderConfigurationResolver resolver) {
 		return samlServiceProvider().configurationResolver(resolver);
+	}
+
+	/**
+	 * Installs an {@link AuthenticationEntryPoint} in the filter chain this configurer is applied to
+	 * This is used for filterchains that should redirect for SAML login but do not service up the SAML
+	 * endpoints under the configured SAML prefix path.
+	 * You only use this option if you have more than one filter chain in your application.
+	 * @return configuration spec for a SAML service provider {@link AuthenticationEntryPoint}
+	 *         to be applied to a filter chain
+	 */
+	public static SamlServiceProviderConfigurer saml2Login() {
+		final SamlServiceProviderConfigurer configurer = samlServiceProvider();
+		configurer.installEndpoints = false;
+		return configurer;
 	}
 
 	/*
 	 * =========== Builder configuration ============
 	 */
 	private SamlServiceProviderConfiguration configuration = new SamlServiceProviderConfiguration();
+	private boolean installEndpoints = true;
 
 	/*
 	 * =========== Setters ============
@@ -111,13 +148,13 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	@Override
 	public void init(HttpSecurity http) throws Exception {
 		configuration.validate(http);
+		registerDefaultAuthenticationEntryPoint(http, configuration.getAuthenticationEntryPoint());
 
-		String pathPrefix = configuration.getPathPrefix();
-		registerDefaultAuthenticationEntryPoint(http, pathPrefix);
-
-		String samlPattern = pathPrefix + "/**";
-		http
-			// @formatter:off
+		if (installEndpoints) {
+			String pathPrefix = configuration.getPathPrefix();
+			String samlPattern = pathPrefix + "/**";
+			http
+				// @formatter:off
 			.csrf()
 				.ignoringAntMatchers(samlPattern)
 				.and()
@@ -125,21 +162,24 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 				.mvcMatchers(samlPattern)
 				.permitAll()
 			// @formatter:on
-		;
+			;
+		}
 	}
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		configureFilters(
-			http,
-			BasicAuthenticationFilter.class,
-			configuration.getSamlProcessingFilter(),
-			configuration.getMetadataFilter(),
-			configuration.getSelectIdentityProviderFilter(),
-			configuration.getIdentityProviderDiscoveryFilter(),
-			configuration.getWebSsoAuthenticationFilter(),
-			configuration.getLogoutFilter()
-		);
+		if (installEndpoints) {
+			configureFilters(
+				http,
+				BasicAuthenticationFilter.class,
+				configuration.getSamlProcessingFilter(),
+				configuration.getMetadataFilter(),
+				configuration.getSelectIdentityProviderFilter(),
+				configuration.getIdentityProviderDiscoveryFilter(),
+				configuration.getWebSsoAuthenticationFilter(),
+				configuration.getLogoutFilter()
+			);
+		}
 	}
 
 	protected void configureFilters(HttpSecurity http,
@@ -152,7 +192,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	}
 
 	@SuppressWarnings("unchecked")
-	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http, String pathPrefix) {
+	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http, AuthenticationEntryPoint entryPoint) {
 		ExceptionHandlingConfigurer<HttpSecurity> exceptionHandling =
 			http.getConfigurer(ExceptionHandlingConfigurer.class);
 
@@ -160,10 +200,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			return;
 		}
 
-		String entryPointUrl = pathPrefix + "/select?redirect=true";
-		LoginUrlAuthenticationEntryPoint authenticationEntryPoint =
-			new LoginUrlAuthenticationEntryPoint(entryPointUrl);
-		exceptionHandling.authenticationEntryPoint(authenticationEntryPoint);
+		exceptionHandling.authenticationEntryPoint(entryPoint);
 	}
 
 }

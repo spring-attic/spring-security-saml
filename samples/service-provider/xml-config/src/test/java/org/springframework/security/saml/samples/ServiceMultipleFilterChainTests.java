@@ -23,12 +23,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -53,44 +48,6 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 	@EnableAutoConfiguration
 	@ComponentScan(basePackages = "org/springframework/security/saml/samples")
 	public static class SpringBootApplicationTestConfig {
-		@EnableWebSecurity
-		@Order(1)
-		public static class ResourceSecurity extends WebSecurityConfigurerAdapter {
-			@Override
-			protected void configure(HttpSecurity http) throws Exception {
-				// @formatter:off
-				http
-					.mvcMatcher("/resources/**")
-						.authorizeRequests()
-						.anyRequest().authenticated()
-					.and()
-						.apply(
-							SamlServiceProviderConfigurer.saml2Login()
-						)
-				;
-				// @formatter:on
-			}
-		}
-		@EnableWebSecurity
-		@Order(2)
-		public static class TestSecurity extends WebSecurityConfigurerAdapter {
-
-			@Override
-			protected void configure(HttpSecurity http) throws Exception {
-				// @formatter:off
-				http
-					.mvcMatcher("/test/**")
-						.authorizeRequests()
-						.anyRequest().authenticated()
-					.and()
-						.apply(
-							SamlServiceProviderConfigurer.saml2Login()
-						)
-				;
-				// @formatter:on
-			}
-		}
-
 	}
 
 	@Test

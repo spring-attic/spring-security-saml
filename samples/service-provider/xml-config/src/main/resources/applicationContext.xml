@@ -159,6 +159,22 @@
         </property>
     </bean>
 
+    <!-- BEGIN - the following two chains are used by integration tests -->
+    <security:http pattern="/resources/**"
+                   use-expressions="true"
+                   entry-point-ref="samlAuthenticationEntryPoint"
+                   authentication-manager-ref="samlAuthenticationManager">
+        <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+    </security:http>
+
+    <security:http pattern="/test/**"
+                   use-expressions="true"
+                   entry-point-ref="samlAuthenticationEntryPoint"
+                   authentication-manager-ref="samlAuthenticationManager">
+        <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+    </security:http>
+    <!-- END - the previous two chains are used by integration tests -->
+
     <security:http pattern="/**"
                    use-expressions="true"
                    entry-point-ref="samlAuthenticationEntryPoint"

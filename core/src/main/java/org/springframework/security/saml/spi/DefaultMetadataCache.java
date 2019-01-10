@@ -19,10 +19,11 @@ package org.springframework.security.saml.spi;
 import java.time.Clock;
 
 import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlMetadataException;
+import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.web.client.RestOperations;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 
 /**
  * Caches metadata that has been retrieved over the network
@@ -35,16 +36,46 @@ public class DefaultMetadataCache implements SamlMetadataCache {
 	private final RestOperations nonValidatingNetwork;
 
 	private TimebasedMap<String, byte[]> cache;
+	private TimebasedMap<String, SamlProviderNotFoundException> misses;
 
 	public DefaultMetadataCache(Clock time,
 								RestOperations validatingNetwork,
 								RestOperations nonValidatingNetwork) {
 		cache = new TimebasedMap<>(time);
+		cache.setFrequencyIntervalMills(1000 * 60 * 2);
+		cache.setExpirationTimeMills(1000 * 60 * 10); //10 minutes default for hits
+		misses = new TimebasedMap<>(time);
+		misses.setFrequencyIntervalMills(1000 * 60 * 2);
+		misses.setExpirationTimeMills(1000 * 60 * 5); //5 minutes default for misses
 		this.validatingNetwork = validatingNetwork;
 		this.nonValidatingNetwork = nonValidatingNetwork;
 	}
 
+	public long getCacheHitDurationMillis() {
+		return cache.getExpirationTimeMills();
+	}
+
+	public DefaultMetadataCache setCacheHitDurationMillis(long cacheHitDurationMillis) {
+		cache.setExpirationTimeMills(cacheHitDurationMillis);
+		cache.setFrequencyIntervalMills(Math.round((double)cacheHitDurationMillis / 2.0d));
+		return this;
+	}
+
+	public long getCacheMissDurationMillis() {
+		return misses.getExpirationTimeMills();
+	}
+
+	public DefaultMetadataCache setCacheMissDurationMillis(long cacheMissDurationMillis) {
+		misses.setExpirationTimeMills(cacheMissDurationMillis);
+		misses.setFrequencyIntervalMills(Math.round((double)cacheMissDurationMillis / 2.0d));
+		return this;
+	}
+
 	public byte[] getMetadata(String uri, boolean skipSslValidation) {
+		final SamlProviderNotFoundException hasMiss = misses.get(uri);
+		if (nonNull(hasMiss)) {
+			throw hasMiss;
+		}
 		byte[] data = cache.get(uri);
 		if (data == null) {
 			try {
@@ -56,10 +87,12 @@ public class DefaultMetadataCache implements SamlMetadataCache {
 				}
 				cache.put(uri, data);
 			} catch (Exception x) {
-				throw new SamlMetadataException(
+				SamlProviderNotFoundException ex = new SamlProviderNotFoundException(
 					format("Unable to download SAML metadata[%s]", uri),
 					x
 				);
+				misses.put(uri, ex);
+				throw ex;
 			}
 		}
 		return data;

@@ -68,7 +68,7 @@ class TimebasedMap<K, V> implements Map<K, V> {
 		return this;
 	}
 
-	protected V access(MapEntry<V> value) {
+	private V access(MapEntry<V> value) {
 		V result = null;
 		if (value != null) {
 			value.setLastAccessTime(System.currentTimeMillis());
@@ -77,12 +77,12 @@ class TimebasedMap<K, V> implements Map<K, V> {
 		return result;
 	}
 
-	protected boolean isExpired(MapEntry<V> entry) {
+	private boolean isExpired(MapEntry<V> entry) {
 		long now = getTime().millis();
 		return (now - entry.getLastAccessTime()) > expirationTimeMills;
 	}
 
-	protected void scanAndRemove() {
+	private void scanAndRemove() {
 		long now = getTime().millis();
 		long last = lastScan.get();
 		boolean remove = false;
@@ -105,47 +105,6 @@ class TimebasedMap<K, V> implements Map<K, V> {
 				.forEach(
 					key -> remove(key)
 				);
-		}
-	}
-
-	protected class MapEntry<V> {
-
-		private V value;
-		private long creationTime;
-		private long lastAccessTime;
-
-		public MapEntry(V value) {
-			long now = getTime().millis();
-			setValue(value);
-			setCreationTime(now);
-			setLastAccessTime(now);
-		}
-
-		public V getValue() {
-			return value;
-		}
-
-		public MapEntry<V> setValue(V value) {
-			this.value = value;
-			return this;
-		}
-
-		public long getCreationTime() {
-			return creationTime;
-		}
-
-		public MapEntry<V> setCreationTime(long creationTime) {
-			this.creationTime = creationTime;
-			return this;
-		}
-
-		public long getLastAccessTime() {
-			return lastAccessTime;
-		}
-
-		public MapEntry<V> setLastAccessTime(long lastAccessTime) {
-			this.lastAccessTime = lastAccessTime;
-			return this;
 		}
 	}
 
@@ -257,5 +216,46 @@ class TimebasedMap<K, V> implements Map<K, V> {
 					e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().getValue())
 				)
 				.collect(Collectors.toSet());
+	}
+
+	class MapEntry<V> {
+
+		private V value;
+		private long creationTime;
+		private long lastAccessTime;
+
+		MapEntry(V value) {
+			long now = getTime().millis();
+			setValue(value);
+			setCreationTime(now);
+			setLastAccessTime(now);
+		}
+
+		public V getValue() {
+			return value;
+		}
+
+		public MapEntry<V> setValue(V value) {
+			this.value = value;
+			return this;
+		}
+
+		public long getCreationTime() {
+			return creationTime;
+		}
+
+		MapEntry<V> setCreationTime(long creationTime) {
+			this.creationTime = creationTime;
+			return this;
+		}
+
+		long getLastAccessTime() {
+			return lastAccessTime;
+		}
+
+		MapEntry<V> setLastAccessTime(long lastAccessTime) {
+			this.lastAccessTime = lastAccessTime;
+			return this;
+		}
 	}
 }

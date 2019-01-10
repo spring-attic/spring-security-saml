@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlMetadataException;
+import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedProviderConfiguration;
@@ -115,7 +115,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			return idp;
 		}
 		if (idpConfig.getVerificationKeys().isEmpty()) {
-			logger.warn("No keys to verify metadata for "+idpConfig.getMetadata() + " with. Unable to trust.");
+			logger.warn("No keys to verify metadata for " + idpConfig.getMetadata() + " with. Unable to trust.");
 			return null;
 		}
 		try {
@@ -126,10 +126,10 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 				return idp;
 			}
 			else {
-				logger.warn("Missing signature for "+idpConfig.getMetadata() + ". Unable to trust.");
+				logger.warn("Missing signature for " + idpConfig.getMetadata() + ". Unable to trust.");
 			}
 		} catch (SignatureException e) {
-			logger.warn("Invalid signature for IDP metadata "+idpConfig.getMetadata() + ". Unable to trust.", e);
+			logger.warn("Invalid signature for IDP metadata " + idpConfig.getMetadata() + ". Unable to trust.", e);
 		}
 		return null;
 	}
@@ -145,7 +145,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			metadata.setEntityAlias(idp.getAlias());
 			result = transform(metadata);
 			addStaticKeys(idp, result);
-		} catch (SamlMetadataException e) {
+		} catch (SamlProviderNotFoundException e) {
 			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
 		}
 		return result;

@@ -1,0 +1,22 @@
+# EditorConfig for Spring Security
+# see https://github.com/spring-projects/spring-security-saml/blob/master/CONTRIBUTING.md#mind-the-whitespace
+
+root = true
+
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 120
+
+[*.java]
+indent_style = tab
+indent_size = 4
+charset = latin1
+continuation_indent_size = 4
+
+[*.xml]
+indent_style = tab
+indent_size = 4
+charset = latin1
+continuation_indent_size = 4

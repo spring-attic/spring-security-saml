@@ -65,7 +65,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.saml2Login()
+							SamlServiceProviderConfigurer.saml2AuthenticationEntryPoint()
 						)
 				;
 				// @formatter:on
@@ -84,7 +84,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.saml2Login()
+							SamlServiceProviderConfigurer.saml2AuthenticationEntryPoint()
 						)
 				;
 				// @formatter:on

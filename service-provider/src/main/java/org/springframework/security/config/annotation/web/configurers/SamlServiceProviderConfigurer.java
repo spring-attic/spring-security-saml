@@ -38,32 +38,32 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * in the filter chain this configurer is applied to
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer samlServiceProvider() {
+	public static SamlServiceProviderConfigurer saml2Login() {
 		return new SamlServiceProviderConfigurer();
 	}
 
 	/**
 	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
 	 * in the filter chain this configurer is applied to
-	 * This is a mutually exclusive option to {@link #samlServiceProvider(ServiceProviderConfigurationResolver)}
+	 * This is a mutually exclusive option to {@link #saml2Login(ServiceProviderConfigurationResolver)}
 	 * @param resolver pre configures the {@link ServiceProviderResolver}. This is the minimum the
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderResolver resolver) {
-		return samlServiceProvider().providerResolver(resolver);
+	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderResolver resolver) {
+		return saml2Login().providerResolver(resolver);
 	}
 
 	/**
 	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
 	 * in the filter chain this configurer is applied to
-	 * This is a mutually exclusive option to {@link #samlServiceProvider(ServiceProviderResolver)}
+	 * This is a mutually exclusive option to {@link #saml2Login(ServiceProviderResolver)}
 	 * @param resolver pre configures the {@link ServiceProviderConfigurationResolver}. This is the minimum the
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer samlServiceProvider(ServiceProviderConfigurationResolver resolver) {
-		return samlServiceProvider().configurationResolver(resolver);
+	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderConfigurationResolver resolver) {
+		return saml2Login().configurationResolver(resolver);
 	}
 
 	/**
@@ -74,8 +74,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * @return configuration spec for a SAML service provider {@link AuthenticationEntryPoint}
 	 *         to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login() {
-		final SamlServiceProviderConfigurer configurer = samlServiceProvider();
+	public static SamlServiceProviderConfigurer saml2AuthenticationEntryPoint() {
+		final SamlServiceProviderConfigurer configurer = saml2Login();
 		configurer.installEndpoints = false;
 		return configurer;
 	}

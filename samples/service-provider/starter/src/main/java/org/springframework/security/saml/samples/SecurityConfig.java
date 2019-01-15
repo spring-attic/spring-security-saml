@@ -26,7 +26,7 @@ import org.springframework.security.saml.configuration.ExternalIdentityProviderC
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.samlServiceProvider;
+import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 import static org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			//saml security
 			.apply(
-				SamlServiceProviderConfigurer.samlServiceProvider()
+				SamlServiceProviderConfigurer.saml2Login()
 			)
 		;
 		// @formatter:on

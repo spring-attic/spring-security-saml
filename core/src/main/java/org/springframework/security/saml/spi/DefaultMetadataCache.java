@@ -98,12 +98,15 @@ public class DefaultMetadataCache implements SamlMetadataCache {
 		return data;
 	}
 
+	@Override
 	public void clear() {
+		misses.clear();
 		cache.clear();
 	}
 
 	@Override
 	public byte[] remove(String uri) {
+		misses.remove(uri);
 		return cache.remove(uri);
 	}
 }

@@ -121,11 +121,11 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 		return result;
 	}
 
-	protected ValidationResult validate(IdentityProviderMetadata metadata, HostedServiceProvider provider) {
+	private ValidationResult validate(IdentityProviderMetadata metadata, HostedServiceProvider provider) {
 		return new ValidationResult(metadata);
 	}
 
-	protected ValidationResult validate(Assertion assertion,
+	private ValidationResult validate(Assertion assertion,
 										List<String> mustMatchInResponseTo,
 										ServiceProviderMetadata requester,
 										IdentityProviderMetadata responder,
@@ -241,7 +241,7 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 		return new ValidationResult(assertion);
 	}
 
-	protected ValidationResult validate(Response response,
+	private ValidationResult validate(Response response,
 										List<String> mustMatchInResponseTo,
 										ServiceProviderMetadata requester,
 										IdentityProviderMetadata responder) {

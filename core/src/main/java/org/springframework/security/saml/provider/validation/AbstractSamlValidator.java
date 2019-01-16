@@ -45,7 +45,7 @@ import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
 
 public abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 
-	protected final Signature invalidSignature = new Signature() {
+	final Signature INVALID_SIGNATURE = new Signature() {
 		@Override
 		public boolean isValidated() {
 			return false;
@@ -73,7 +73,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 						Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
 						a.setSignature(sig);
 					} catch (SignatureException e){
-						a.setSignature(invalidSignature);
+						a.setSignature(INVALID_SIGNATURE);
 					}
 				}
 			}
@@ -89,7 +89,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		}
 	}
 
-	protected boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
+	boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
 		if (time == null) {
 			return false;
 		}
@@ -101,7 +101,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		return validTimeInterval.contains(time);
 	}
 
-	protected ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
+	ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
 		if (issuer != null) {
 			if (!entity.getEntityId().equals(issuer.getValue())) {
 				return new ValidationResult(entity)
@@ -131,7 +131,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		return null;
 	}
 
-	protected boolean compareURIs(List<Endpoint> endpoints, String uri) {
+	boolean compareURIs(List<Endpoint> endpoints, String uri) {
 		for (Endpoint ep : endpoints) {
 			if (compareURIs(ep.getLocation(), uri)) {
 				return true;
@@ -140,7 +140,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		return false;
 	}
 
-	protected boolean compareURIs(String uri1, String uri2) {
+	boolean compareURIs(String uri1, String uri2) {
 		if (uri1 == null && uri2 == null) {
 			return true;
 		}
@@ -153,7 +153,7 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		}
 	}
 
-	protected String removeQueryString(String uri) {
+	String removeQueryString(String uri) {
 		int queryStringIndex = uri.indexOf('?');
 		if (queryStringIndex >= 0) {
 			return uri.substring(0, queryStringIndex);
@@ -161,19 +161,19 @@ public abstract class AbstractSamlValidator<ProviderType extends HostedProvider>
 		return uri;
 	}
 
-	protected ValidationResult validate(LogoutRequest logoutRequest, ProviderType provider) {
+	ValidationResult validate(LogoutRequest logoutRequest, ProviderType provider) {
 		ValidationResult result = new ValidationResult(logoutRequest);
 		checkValidSignature(logoutRequest, result);
 		return result;
 	}
 
-	protected ValidationResult validate(LogoutResponse logoutResponse, ProviderType provider) {
+	ValidationResult validate(LogoutResponse logoutResponse, ProviderType provider) {
 		ValidationResult result = new ValidationResult(logoutResponse);
 		checkValidSignature(logoutResponse, result);
 		return result;
 	}
 
-	protected void checkValidSignature(SignableSaml2Object saml2Object, ValidationResult result) {
+	void checkValidSignature(SignableSaml2Object saml2Object, ValidationResult result) {
 		Signature signature = saml2Object.getSignature();
 		if (signature != null && !signature.isValidated()) {
 			result.addError(

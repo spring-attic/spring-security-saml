@@ -89,11 +89,11 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 
 	}
 
-	protected ValidationResult validate(ServiceProviderMetadata metadata, HostedIdentityProvider provider) {
+	private ValidationResult validate(ServiceProviderMetadata metadata, HostedIdentityProvider provider) {
 		return new ValidationResult(metadata);
 	}
 
-	protected ValidationResult validate(AuthenticationRequest authnRequest, HostedIdentityProvider provider) {
+	private ValidationResult validate(AuthenticationRequest authnRequest, HostedIdentityProvider provider) {
 		ValidationResult result = new ValidationResult(authnRequest);
 		checkValidSignature(authnRequest, result);
 		return result;

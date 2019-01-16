@@ -200,6 +200,14 @@ public class SimpleServiceProviderBootTest {
 	}
 
 	@Test
+	public void authnRequestWithConfiguredNameId() throws Exception {
+		config.getServiceProvider().getProviders().stream()
+			.forEach(p -> p.setNameId(NameId.PERSISTENT));
+		AuthenticationRequest authn = getAuthenticationRequest();
+		assertThat(authn.getNameIdPolicy().getFormat(), equalTo(NameId.PERSISTENT));
+	}
+
+	@Test
 	public void processResponse() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		config.getServiceProvider().setWantAssertionsSigned(false);

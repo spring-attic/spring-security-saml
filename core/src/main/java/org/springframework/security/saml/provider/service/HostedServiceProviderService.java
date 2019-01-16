@@ -25,6 +25,8 @@ import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.AbstractHostedProviderService;
+import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
+import org.springframework.security.saml.provider.service.config.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.config.LocalServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.Assertion;
@@ -56,6 +58,18 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 										SamlValidator validator,
 										SamlMetadataCache cache) {
 		super(configuration, metadata, transformer, validator, cache);
+	}
+
+	@Override
+	public IdentityProviderMetadata getRemoteProvider(ExternalProviderConfiguration c) {
+		IdentityProviderMetadata metadata = super.getRemoteProvider(c);
+		if (metadata != null && c instanceof ExternalIdentityProviderConfiguration) {
+			ExternalIdentityProviderConfiguration ec = (ExternalIdentityProviderConfiguration)c;
+			if (ec.getNameId() != null) {
+				metadata.setDefaultNameId(ec.getNameId());
+			}
+		}
+		return metadata;
 	}
 
 	@Override

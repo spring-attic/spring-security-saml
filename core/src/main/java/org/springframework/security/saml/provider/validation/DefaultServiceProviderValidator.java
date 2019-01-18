@@ -58,8 +58,6 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultServiceProviderValidator extends AbstractSamlValidator<HostedServiceProvider>
 	implements ServiceProviderValidator {
 
-
-
 	private SamlTransformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;

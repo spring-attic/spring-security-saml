@@ -45,9 +45,9 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SelectIdentityProviderUIFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class SelectIdentityProviderFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
 
-	private static Log logger = LogFactory.getLog(SelectIdentityProviderUIFilter.class);
+	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
 
 	private final RequestMatcher matcher;
 	private final String pathPrefix;
@@ -55,9 +55,9 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 	private String selectTemplate = "/templates/spi/select-provider.vm";
 	private boolean redirectOnSingleProvider = true;
 
-	public SelectIdentityProviderUIFilter(String pathPrefix,
-										  RequestMatcher matcher,
-										  HtmlWriter template) {
+	public SelectIdentityProviderFilter(String pathPrefix,
+										RequestMatcher matcher,
+										HtmlWriter template) {
 		this.pathPrefix = pathPrefix;
 		this.template = template;
 		this.matcher = matcher;
@@ -71,7 +71,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		return selectTemplate;
 	}
 
-	public SelectIdentityProviderUIFilter setSelectTemplate(String selectTemplate) {
+	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
 		this.selectTemplate = selectTemplate;
 		return this;
 	}
@@ -88,7 +88,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 					try {
 						ModelProvider mp = new ModelProvider()
 							.setLinkText(p.getLinktext())
-							.setRedirect(getDiscoveryRedirect(provider, p));
+							.setRedirect(getAuthenticationRequestRedirectUrl(provider, p));
 						providers.add(mp);
 					} catch (Exception x) {
 						logger.debug(format(
@@ -121,8 +121,8 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		}
 	}
 
-	protected String getDiscoveryRedirect(HostedServiceProvider provider,
-										  ExternalProviderConfiguration p) throws UnsupportedEncodingException {
+	protected String getAuthenticationRequestRedirectUrl(HostedServiceProvider provider,
+														 ExternalProviderConfiguration p) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
@@ -136,7 +136,7 @@ public class SelectIdentityProviderUIFilter extends OncePerRequestFilter impleme
 		return redirectOnSingleProvider;
 	}
 
-	public SelectIdentityProviderUIFilter setRedirectOnSingleProvider(boolean redirectOnSingleProvider) {
+	public SelectIdentityProviderFilter setRedirectOnSingleProvider(boolean redirectOnSingleProvider) {
 		this.redirectOnSingleProvider = redirectOnSingleProvider;
 		return this;
 	}

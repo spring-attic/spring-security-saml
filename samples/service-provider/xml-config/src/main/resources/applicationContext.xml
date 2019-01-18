@@ -114,7 +114,7 @@
     </bean>
 
     <bean id="selectIdentityProviderUIFilter"
-          class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderUIFilter">
+          class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter">
         <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
         <constructor-arg ref="samlHtmlWriter"/>
@@ -141,7 +141,7 @@
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml.serviceprovider.web.SamlAuthenticationFailureHandler">
+            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler">
                 <constructor-arg ref="samlHtmlWriter"/>
             </bean>
         </property>

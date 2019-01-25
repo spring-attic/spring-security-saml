@@ -23,7 +23,7 @@ import org.springframework.security.saml.serviceprovider.web.ServiceProviderReso
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter implements
+abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter implements
 	SamlServiceProviderFilter {
 
 

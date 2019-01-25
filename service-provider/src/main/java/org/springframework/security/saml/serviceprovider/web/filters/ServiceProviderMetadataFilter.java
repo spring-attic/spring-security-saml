@@ -19,7 +19,6 @@ package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,36 +26,34 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
-public class ServiceProviderMetadataFilter extends OncePerRequestFilter
-	implements Filter, SamlFilter<HostedServiceProvider> {
+public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFilter {
 
-	private final SamlTransformer transformer;
-
-	private final AntPathRequestMatcher matcher;
 	private String filename = "saml-service-provider-metadata.xml";
 	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
-	public ServiceProviderMetadataFilter(AntPathRequestMatcher matcher,
-										 SamlTransformer transformer) {
-		this.transformer = transformer;
-		this.matcher = matcher;
+	public ServiceProviderMetadataFilter(SamlTransformer transformer,
+										 ServiceProviderResolver resolver,
+										 ServiceProviderValidator validator,
+										 RequestMatcher matcher) {
+		super(transformer, resolver, validator, matcher);
 	}
 
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
-			HostedServiceProvider provider = getProvider(request);
-			String xml = transformer.toXml(provider.getMetadata());
+		if (getMatcher().matches(request)) {
+			HostedServiceProvider provider = resolveProvider(request);
+			String xml = getTransformer().toXml(provider.getMetadata());
 			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");

@@ -201,8 +201,10 @@ class SamlServiceProviderConfiguration {
 			http,
 			ServiceProviderMetadataFilter.class,
 			() -> new ServiceProviderMetadataFilter(
-				new AntPathRequestMatcher(pathPrefix + "/metadata/**"),
-				transformer
+				transformer,
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/metadata/**")
 			),
 			null
 		);

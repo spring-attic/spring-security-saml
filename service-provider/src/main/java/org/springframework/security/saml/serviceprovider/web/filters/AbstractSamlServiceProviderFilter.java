@@ -17,25 +17,13 @@
 
 package org.springframework.security.saml.serviceprovider.web.filters;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import static org.springframework.util.StringUtils.hasText;
-
-public abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter {
+public abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter implements TempSamlFilter {
 
 
 	private final SamlTransformer transformer;
@@ -53,61 +41,24 @@ public abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFi
 		this.matcher = matcher;
 	}
 
-	protected Saml2Object parseSamlObject(HttpServletRequest request,
-										HostedServiceProvider provider,
-										String parameterName) {
-		Saml2Object result = null;
-		String rs = request.getParameter(parameterName);
-		if (hasText(rs)) {
-			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
-			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
-			if (result instanceof SignableSaml2Object) {
-				SignableSaml2Object signableSaml2Object = (SignableSaml2Object) result;
-				IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
-				if (idp == null) {
-					throw new SamlProviderNotFoundException(result.getOriginEntityId());
-				}
-				try {
-					Signature signature =
-						getValidator().validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
-					signableSaml2Object.setSignature(signature);
-				} catch (SignatureException e) {
-				}
-			}
-		}
-		return result;
-	}
 
-	protected SamlTransformer getTransformer() {
-		return transformer;
-	}
-
-	protected ServiceProviderResolver getResolver() {
-		return resolver;
-	}
-
-	protected ServiceProviderValidator getValidator() {
-		return validator;
-	}
 
 	protected RequestMatcher getMatcher() {
 		return matcher;
 	}
 
-
-	protected Saml2Object parseSamlRequest(HttpServletRequest request, HostedServiceProvider provider) {
-		return parseSamlObject(request, provider, "SAMLRequest");
+	@Override
+	public SamlTransformer getTransformer() {
+		return transformer;
 	}
 
-	protected Saml2Object parseSamlResponse(HttpServletRequest request, HostedServiceProvider provider) {
-		return parseSamlObject(request, provider, "SAMLResponse");
+	@Override
+	public ServiceProviderResolver getResolver() {
+		return resolver;
 	}
 
-	protected HostedServiceProvider resolveProvider(HttpServletRequest request) {
-		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
-		if (serviceProvider == null) {
-			throw new SamlProviderNotFoundException("hosted");
-		}
-		return serviceProvider;
+	@Override
+	public ServiceProviderValidator getValidator() {
+		return validator;
 	}
 }

@@ -155,8 +155,10 @@ class SamlServiceProviderConfiguration {
 			http,
 			WebSsoAuthenticationFilter.class,
 			() -> new WebSsoAuthenticationFilter(
-				new AntPathRequestMatcher(pathPrefix + "/SSO/**"),
-				validator
+				transformer,
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/SSO/**")
 			),
 			null
 		);

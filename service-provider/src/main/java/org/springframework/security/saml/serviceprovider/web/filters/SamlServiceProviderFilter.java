@@ -37,7 +37,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.springframework.util.StringUtils.hasText;
 
-interface TempSamlFilter {
+interface SamlServiceProviderFilter {
 
 	SamlTransformer getTransformer();
 

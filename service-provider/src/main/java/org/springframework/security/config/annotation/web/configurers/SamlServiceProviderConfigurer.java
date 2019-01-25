@@ -172,7 +172,6 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 			configureFilters(
 				http,
 				BasicAuthenticationFilter.class,
-				configuration.getSamlProcessingFilter(),
 				configuration.getMetadataFilter(),
 				configuration.getSelectIdentityProviderFilter(),
 				configuration.getIdentityProviderDiscoveryFilter(),

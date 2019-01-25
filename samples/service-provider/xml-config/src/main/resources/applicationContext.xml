@@ -90,14 +90,6 @@
         <constructor-arg value="#{'/' + pathPrefix + '/select?redirect=true'}"/>
     </bean>
 
-    <bean id="samlProcessingFilter"
-          class="org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter">
-        <constructor-arg ref="samlTransformer"/>
-        <constructor-arg ref="samlServiceProviderResolver"/>
-        <constructor-arg ref="samlServiceProviderValidator"/>
-        <constructor-arg ref="samlMatcher"/>
-    </bean>
-
     <bean id="samlSpMetadataFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter">
         <constructor-arg ref="metadataMatcher"/>
@@ -184,7 +176,6 @@
         <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="GET"/>
         <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="POST"/>
         <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
-        <security:custom-filter ref="samlProcessingFilter" before="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlSpMetadataFilter" position="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>

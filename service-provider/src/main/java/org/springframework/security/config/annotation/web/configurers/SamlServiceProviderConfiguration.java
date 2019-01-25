@@ -35,7 +35,6 @@ import org.springframework.security.saml.serviceprovider.authentication.SamlAuth
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
@@ -118,16 +117,6 @@ class SamlServiceProviderConfiguration {
 	AuthenticationManager getAuthenticationManager() {
 		authenticationManager = ofNullable(authenticationManager).orElseGet(() -> a -> a);
 		return authenticationManager;
-	}
-
-	SamlProcessingFilter getSamlProcessingFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		return new SamlProcessingFilter(
-			transformer,
-			providerResolver,
-			validator,
-			new AntPathRequestMatcher(pathPrefix + "/**")
-		);
 	}
 
 	ServiceProviderLogoutFilter getLogoutFilter() {

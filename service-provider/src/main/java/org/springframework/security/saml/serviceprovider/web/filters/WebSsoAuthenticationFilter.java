@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import static org.springframework.util.Assert.notNull;
 
 public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
-	implements TempSamlFilter {
+	implements SamlServiceProviderFilter {
 
 	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
 	private final ServiceProviderValidator validator;

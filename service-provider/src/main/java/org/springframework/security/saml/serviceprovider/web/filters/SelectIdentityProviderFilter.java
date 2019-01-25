@@ -27,13 +27,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -44,11 +46,10 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SelectIdentityProviderFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFilter {
 
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
 
-	private final RequestMatcher matcher;
 	private final String pathPrefix;
 	private final HtmlWriter template;
 	private String selectTemplate = "/templates/spi/select-provider.vm";
@@ -56,14 +57,13 @@ public class SelectIdentityProviderFilter extends OncePerRequestFilter implement
 
 	public SelectIdentityProviderFilter(String pathPrefix,
 										RequestMatcher matcher,
-										HtmlWriter template) {
+										HtmlWriter template,
+										SamlTransformer transformer,
+										ServiceProviderResolver resolver,
+										ServiceProviderValidator validator) {
+		super(transformer, resolver, validator, matcher);
 		this.pathPrefix = pathPrefix;
 		this.template = template;
-		this.matcher = matcher;
-	}
-
-	public RequestMatcher getMatcher() {
-		return matcher;
 	}
 
 	public String getSelectTemplate() {
@@ -78,7 +78,7 @@ public class SelectIdentityProviderFilter extends OncePerRequestFilter implement
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
+		if (getMatcher().matches(request)) {
 			HostedServiceProvider provider = getProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();

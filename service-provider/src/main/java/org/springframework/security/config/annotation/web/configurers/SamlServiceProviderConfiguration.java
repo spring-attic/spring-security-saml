@@ -190,7 +190,10 @@ class SamlServiceProviderConfiguration {
 				new SelectIdentityProviderFilter(
 					pathPrefix,
 					new AntPathRequestMatcher(pathPrefix + "/select/**"),
-					htmlWriter
+					htmlWriter,
+					transformer,
+					providerResolver,
+					validator
 				)
 					.setRedirectOnSingleProvider(false),
 			null

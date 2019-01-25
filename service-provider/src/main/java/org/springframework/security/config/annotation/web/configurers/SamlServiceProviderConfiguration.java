@@ -139,9 +139,10 @@ class SamlServiceProviderConfiguration {
 				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
 				return new ServiceProviderLogoutFilter(
-					new AntPathRequestMatcher(pathPrefix + "/logout/**"),
 					transformer,
-					validator
+					providerResolver,
+					validator,
+					new AntPathRequestMatcher(pathPrefix + "/logout/**")
 				)
 					.setLogoutSuccessHandler(logoutSuccessHandler);
 			},
@@ -173,8 +174,10 @@ class SamlServiceProviderConfiguration {
 			http,
 			AuthenticationRequestFilter.class,
 			() -> new AuthenticationRequestFilter(
-				new AntPathRequestMatcher(pathPrefix + "/discovery/**"),
 				transformer,
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/discovery/**"),
 				htmlWriter
 			),
 			null

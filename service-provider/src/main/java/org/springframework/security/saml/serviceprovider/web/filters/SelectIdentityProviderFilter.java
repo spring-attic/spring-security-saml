@@ -116,7 +116,7 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
-		builder.pathSegment(stripSlashes(pathPrefix) + "/discovery");
+		builder.pathSegment(stripSlashes(pathPrefix) + "/authenticate");
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();

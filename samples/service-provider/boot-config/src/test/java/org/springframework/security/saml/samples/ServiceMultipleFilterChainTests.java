@@ -130,7 +130,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 		)
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl(
-				"http://localhost/saml/sp/discovery?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"))
+				"http://localhost/saml/sp/authenticate?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"))
 		;
 	}
 
@@ -143,7 +143,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/discovery?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
+				"http://localhost/saml/sp/authenticate?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
 			)))
 		;
 	}

@@ -150,7 +150,7 @@ class SamlServiceProviderConfiguration {
 		return filter;
 	}
 
-	AuthenticationRequestFilter getIdentityProviderDiscoveryFilter() {
+	AuthenticationRequestFilter getAuthenticationRequestFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
@@ -159,7 +159,7 @@ class SamlServiceProviderConfiguration {
 				transformer,
 				providerResolver,
 				validator,
-				new AntPathRequestMatcher(pathPrefix + "/discovery/**")
+				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 			),
 			null
 		);

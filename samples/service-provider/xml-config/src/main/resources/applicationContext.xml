@@ -78,7 +78,7 @@
 
     <bean id="idpDiscoveryMatcher"
           class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-        <constructor-arg value="#{'/' + pathPrefix + '/discovery/**'}"/>
+        <constructor-arg value="#{'/' + pathPrefix + '/authenticate/**'}"/>
     </bean>
 
     <bean id="samlAuthenticationEntryPoint"

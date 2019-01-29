@@ -44,7 +44,7 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter im
 
 
 
-	protected RequestMatcher getMatcher() {
+	RequestMatcher getMatcher() {
 		return matcher;
 	}
 
@@ -62,4 +62,5 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter im
 	public ServiceProviderValidator getValidator() {
 		return validator;
 	}
+
 }

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.FilterChain;
@@ -45,7 +44,9 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.html.ErrorHtml;
+import org.springframework.security.saml.serviceprovider.web.html.PostBindingHtml;
+import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -57,17 +58,14 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilter {
 
-	private final HtmlWriter template;
+	private final StandaloneHtmlWriter writer = new StandaloneHtmlWriter();
 	private Clock clock = Clock.systemUTC();
-	private String postTemplate = "/templates/saml2-post-binding.vm";
 
 	public AuthenticationRequestFilter(SamlTransformer transformer,
 									   ServiceProviderResolver resolver,
 									   ServiceProviderValidator validator,
-									   RequestMatcher matcher,
-									   HtmlWriter template) {
+									   RequestMatcher matcher) {
 		super(transformer, resolver, validator, matcher);
-		this.template = template;
 	}
 
 
@@ -198,17 +196,16 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 		}
 		else if (destination.getBinding().equals(Binding.POST)) {
 			String encoded = getTransformer().samlEncode(getTransformer().toXml(authn), false);
-			Map<String, Object> model = new HashMap<>();
-			model.put("action", destination.getLocation());
-			model.put("SAMLRequest", encoded);
-			if (hasText(relayState)) {
-				model.put("RelayState", relayState);
-			}
-			template.processHtmlBody(
+			PostBindingHtml html = new PostBindingHtml(
+				destination.getLocation(),
+				encoded,
+				null,
+				relayState
+			);
+			writer.processHtmlBody(
 				request,
 				response,
-				getPostTemplate(),
-				model
+				html
 			);
 		}
 		else {
@@ -219,11 +216,10 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 	private void displayError(HttpServletRequest request,
 							  HttpServletResponse response,
 							  String message) {
-		template.processHtmlBody(
+		writer.processHtmlBody(
 			request,
 			response,
-			template.getErrorTemplate(),
-			Collections.singletonMap("message", message)
+			new ErrorHtml(Collections.singletonList(message))
 		);
 	}
 
@@ -236,12 +232,4 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 		return this;
 	}
 
-	protected String getPostTemplate() {
-		return postTemplate;
-	}
-
-	public AuthenticationRequestFilter setPostTemplate(String postTemplate) {
-		this.postTemplate = postTemplate;
-		return this;
-	}
 }

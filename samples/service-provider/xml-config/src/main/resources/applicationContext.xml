@@ -45,10 +45,6 @@
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
-    <bean id="samlServiceProviderTemplateEngine"
-          class="org.springframework.security.saml.spi.VelocityTemplateEngine">
-    </bean>
-
     <bean id="samlServiceProviderConfigurationResolver"
           class="org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver">
         <constructor-arg ref="samlServiceProviderConfiguration"/>
@@ -101,15 +97,10 @@
         <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
     </bean>
 
-    <bean id="samlHtmlWriter" class="org.springframework.security.saml.serviceprovider.web.html.HtmlWriter">
-        <constructor-arg ref="samlServiceProviderTemplateEngine"/>
-    </bean>
-
     <bean id="selectIdentityProviderUIFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter">
         <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
-        <constructor-arg ref="samlHtmlWriter"/>
         <property name="redirectOnSingleProvider" value="false"/>
     </bean>
 
@@ -117,7 +108,6 @@
           class="org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter">
         <constructor-arg ref="idpDiscoveryMatcher"/>
         <constructor-arg ref="samlTransformer"/>
-        <constructor-arg ref="samlHtmlWriter"/>
     </bean>
 
     <bean id="samlAuthenticationManager"
@@ -133,9 +123,7 @@
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler">
-                <constructor-arg ref="samlHtmlWriter"/>
-            </bean>
+            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler"/>
         </property>
     </bean>
 

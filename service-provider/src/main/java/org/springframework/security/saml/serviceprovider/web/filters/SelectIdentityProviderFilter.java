@@ -34,7 +34,9 @@ import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.html.ModelProvider;
+import org.springframework.security.saml.serviceprovider.web.html.SelectIdentityProviderHtml;
+import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -51,28 +53,16 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
 
 	private final String pathPrefix;
-	private final HtmlWriter template;
-	private String selectTemplate = "/templates/spi/select-provider.vm";
+	private final StandaloneHtmlWriter template = new StandaloneHtmlWriter();
 	private boolean redirectOnSingleProvider = true;
 
 	public SelectIdentityProviderFilter(String pathPrefix,
 										RequestMatcher matcher,
-										HtmlWriter template,
 										SamlTransformer transformer,
 										ServiceProviderResolver resolver,
 										ServiceProviderValidator validator) {
 		super(transformer, resolver, validator, matcher);
 		this.pathPrefix = pathPrefix;
-		this.template = template;
-	}
-
-	public String getSelectTemplate() {
-		return selectTemplate;
-	}
-
-	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
-		this.selectTemplate = selectTemplate;
-		return this;
 	}
 
 	@Override
@@ -104,14 +94,15 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 				response.sendRedirect(providers.get(0).getRedirect());
 			}
 			else {
-				Map<String, Object> model = new HashMap<>();
-				model.put("title", "Select an Identity Provider");
-				model.put("providers", providers);
+				Map<String, String> providerUrls = new HashMap<>();
+				providers.forEach(
+					p -> providerUrls.put(p.getLinkText(), p.getRedirect())
+				);
+
 				template.processHtmlBody(
 					request,
 					response,
-					selectTemplate,
-					model
+					new SelectIdentityProviderHtml(providerUrls)
 				);
 			}
 		}
@@ -140,26 +131,4 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 		return this;
 	}
 
-	public static class ModelProvider {
-		private String linkText;
-		private String redirect;
-
-		public String getLinkText() {
-			return linkText;
-		}
-
-		public ModelProvider setLinkText(String linkText) {
-			this.linkText = linkText;
-			return this;
-		}
-
-		public String getRedirect() {
-			return redirect;
-		}
-
-		public ModelProvider setRedirect(String redirect) {
-			this.redirect = redirect;
-			return this;
-		}
-	}
 }

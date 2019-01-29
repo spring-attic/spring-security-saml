@@ -81,6 +81,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			assertion,
 			idp.getEntityId(),
 			sp.getEntityId(),
+			null,
 			null
 		);
 
@@ -123,6 +124,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			assertion,
 			idp.getEntityId(),
 			sp.getEntityId(),
+			null,
 			null
 		);
 		LogoutRequest request = helper.logoutRequest(
@@ -177,6 +179,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			assertion,
 			idp.getEntityId(),
 			sp.getEntityId(),
+			null,
 			null
 		);
 		LogoutRequest request = helper.logoutRequest(

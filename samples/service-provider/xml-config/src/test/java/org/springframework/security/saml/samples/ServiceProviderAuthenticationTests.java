@@ -31,6 +31,7 @@ import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -86,7 +89,13 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 		mockMvc.perform(
 			post("/saml/sp/SSO")
 				.param("SAMLResponse", encoded)
-		).andExpect(authenticated());
+		).andExpect(
+			authenticated()
+				.withAuthentication(authentication -> {
+					assertTrue(authentication instanceof DefaultSamlAuthentication);
+					assertNotNull(((DefaultSamlAuthentication) authentication).getResponseXml());
+				})
+		);
 	}
 
 	@Test

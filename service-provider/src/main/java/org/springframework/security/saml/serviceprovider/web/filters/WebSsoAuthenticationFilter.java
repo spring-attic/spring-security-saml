@@ -124,7 +124,8 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 			assertion,
 			r.getOriginEntityId(),
 			provider.getMetadata().getEntityId(),
-			request.getParameter("RelayState")
+			request.getParameter("RelayState"),
+			r.getOriginalXML()
 		);
 		return getAuthenticationManager().authenticate(auth);
 	}

@@ -93,13 +93,14 @@ public class SamlAuthenticationResponseFilter extends AbstractAuthenticationProc
 			);
 		}
 
-		Authentication authentication = new DefaultSamlAuthentication(
+		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			r.getAssertions().get(0),
 			remote.getEntityId(),
 			provider.getMetadata().getEntityId(),
 			request.getParameter("RelayState")
 		);
+		authentication.setResponseXml(r.getOriginalXML());
 
 		return getAuthenticationManager().authenticate(authentication);
 

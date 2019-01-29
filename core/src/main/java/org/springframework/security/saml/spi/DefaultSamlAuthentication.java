@@ -31,6 +31,7 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	private String assertingEntityId;
 	private String holdingEntityId;
 	private String relayState;
+	private String responseXml;
 
 	public DefaultSamlAuthentication(boolean authenticated,
 									 Assertion assertion,
@@ -119,5 +120,14 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	@Override
 	public String getName() {
 		return getSamlPrincipal().getValue();
+	}
+
+	public String getResponseXml() {
+		return responseXml;
+	}
+
+	public DefaultSamlAuthentication setResponseXml(String responseXml) {
+		this.responseXml = responseXml;
+		return this;
 	}
 }

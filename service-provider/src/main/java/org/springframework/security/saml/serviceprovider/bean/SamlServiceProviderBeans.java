@@ -20,7 +20,6 @@ package org.springframework.security.saml.serviceprovider.bean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver;
@@ -31,7 +30,6 @@ import org.springframework.security.saml.serviceprovider.metadata.DefaultService
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
-import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.util.Assert;
 
 @Configuration
@@ -63,11 +61,6 @@ public class SamlServiceProviderBeans {
 			serviceProviderMetadataResolver(),
 			serviceProviderConfigurationResolver()
 		);
-	}
-
-	@Bean(name = "samlServiceProviderTemplateEngine")
-	public SamlTemplateEngine samlTemplateEngine() {
-		return new VelocityTemplateEngine(true);
 	}
 
 	@Bean(name = "samlServiceProviderConfigurationResolver")

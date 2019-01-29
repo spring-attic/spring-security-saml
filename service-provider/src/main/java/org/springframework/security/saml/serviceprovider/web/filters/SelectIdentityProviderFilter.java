@@ -27,13 +27,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.web.html.ModelProvider;
+import org.springframework.security.saml.serviceprovider.web.html.SelectIdentityProviderHtml;
+import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -44,41 +48,27 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SelectIdentityProviderFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFilter {
 
 	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
 
-	private final RequestMatcher matcher;
 	private final String pathPrefix;
-	private final HtmlWriter template;
-	private String selectTemplate = "/templates/spi/select-provider.vm";
+	private final StandaloneHtmlWriter template = new StandaloneHtmlWriter();
 	private boolean redirectOnSingleProvider = true;
 
 	public SelectIdentityProviderFilter(String pathPrefix,
 										RequestMatcher matcher,
-										HtmlWriter template) {
+										SamlTransformer transformer,
+										ServiceProviderResolver resolver,
+										ServiceProviderValidator validator) {
+		super(transformer, resolver, validator, matcher);
 		this.pathPrefix = pathPrefix;
-		this.template = template;
-		this.matcher = matcher;
-	}
-
-	public RequestMatcher getMatcher() {
-		return matcher;
-	}
-
-	public String getSelectTemplate() {
-		return selectTemplate;
-	}
-
-	public SelectIdentityProviderFilter setSelectTemplate(String selectTemplate) {
-		this.selectTemplate = selectTemplate;
-		return this;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
+		if (getMatcher().matches(request)) {
 			HostedServiceProvider provider = getProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
@@ -104,14 +94,15 @@ public class SelectIdentityProviderFilter extends OncePerRequestFilter implement
 				response.sendRedirect(providers.get(0).getRedirect());
 			}
 			else {
-				Map<String, Object> model = new HashMap<>();
-				model.put("title", "Select an Identity Provider");
-				model.put("providers", providers);
+				Map<String, String> providerUrls = new HashMap<>();
+				providers.forEach(
+					p -> providerUrls.put(p.getLinkText(), p.getRedirect())
+				);
+
 				template.processHtmlBody(
 					request,
 					response,
-					selectTemplate,
-					model
+					new SelectIdentityProviderHtml(providerUrls)
 				);
 			}
 		}
@@ -125,7 +116,7 @@ public class SelectIdentityProviderFilter extends OncePerRequestFilter implement
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			provider.getConfiguration().getBasePath()
 		);
-		builder.pathSegment(stripSlashes(pathPrefix) + "/discovery");
+		builder.pathSegment(stripSlashes(pathPrefix) + "/authenticate");
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();
@@ -140,26 +131,4 @@ public class SelectIdentityProviderFilter extends OncePerRequestFilter implement
 		return this;
 	}
 
-	public static class ModelProvider {
-		private String linkText;
-		private String redirect;
-
-		public String getLinkText() {
-			return linkText;
-		}
-
-		public ModelProvider setLinkText(String linkText) {
-			this.linkText = linkText;
-			return this;
-		}
-
-		public String getRedirect() {
-			return redirect;
-		}
-
-		public ModelProvider setRedirect(String redirect) {
-			this.redirect = redirect;
-			return this;
-		}
-	}
 }

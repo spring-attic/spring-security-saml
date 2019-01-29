@@ -46,11 +46,11 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthentication;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -62,22 +62,19 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
-public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilter {
 
 	private static Log logger = LogFactory.getLog(ServiceProviderLogoutFilter.class);
 
-	private final RequestMatcher matcher;
-	private final SamlTransformer transformer;
-	private final ServiceProviderValidator validator;
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
-	public ServiceProviderLogoutFilter(RequestMatcher matcher,
-									   SamlTransformer transformer,
-									   ServiceProviderValidator validator) {
-		this.matcher = matcher;
-		this.transformer = transformer;
-		this.validator = validator;
+	public ServiceProviderLogoutFilter(SamlTransformer transformer,
+									   ServiceProviderResolver resolver,
+									   ServiceProviderValidator validator,
+									   RequestMatcher matcher) {
+		super(transformer, resolver, validator, matcher);
 	}
+
 
 	public LogoutSuccessHandler getLogoutSuccessHandler() {
 		return logoutSuccessHandler;
@@ -91,7 +88,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
+		if (getMatcher().matches(request)) {
 
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			Saml2Object logoutRequest = getSamlRequest(request);
@@ -129,7 +126,7 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 		}
 		LogoutRequest lr = (LogoutRequest) logoutRequest;
 		HostedServiceProvider provider = getProvider(request);
-		ValidationResult validate = validator.validate(lr, provider);
+		ValidationResult validate = getValidator().validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new SamlException(validate.toString());
 		}
@@ -213,8 +210,8 @@ public class ServiceProviderLogoutFilter extends OncePerRequestFilter implements
 									String paramName,
 									String relayState)
 		throws UnsupportedEncodingException {
-		String xml = transformer.toXml(lr);
-		String value = transformer.samlEncode(xml, true);
+		String xml = getTransformer().toXml(lr);
+		String value = getTransformer().samlEncode(xml, true);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 		if (hasText(relayState)) {
 			builder.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));

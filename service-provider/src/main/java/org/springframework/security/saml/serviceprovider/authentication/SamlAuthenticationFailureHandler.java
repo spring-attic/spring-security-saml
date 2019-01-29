@@ -19,34 +19,32 @@ package org.springframework.security.saml.serviceprovider.authentication;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
+import org.springframework.security.saml.serviceprovider.web.html.ErrorHtml;
+import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 public class SamlAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-	private final HtmlWriter processor;
+	private StandaloneHtmlWriter processor = new StandaloneHtmlWriter();
 
-	public SamlAuthenticationFailureHandler(HtmlWriter processor) {
-		this.processor = processor;
+	public SamlAuthenticationFailureHandler() {
 	}
 
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request,
 										HttpServletResponse response,
 										AuthenticationException exception) throws IOException, ServletException {
-		Map<String, Object> model = Collections.singletonMap("message", exception.getMessage());
+		ErrorHtml html = new ErrorHtml(Collections.singletonList(exception.getMessage()));
 		response.setStatus(400);
 		processor.processHtmlBody(
 			request,
 			response,
-			processor.getErrorTemplate(),
-			model
+			html
 		);
 	}
 }

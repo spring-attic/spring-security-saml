@@ -24,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
@@ -34,9 +35,10 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.authentication.DefaultSamlAuthentication;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,16 +46,22 @@ import org.apache.commons.logging.LogFactory;
 import static org.springframework.util.Assert.notNull;
 
 public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
-	implements SamlFilter<HostedServiceProvider> {
+	implements SamlServiceProviderFilter {
 
 	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
 	private final ServiceProviderValidator validator;
+	private final SamlTransformer transformer;
+	private final ServiceProviderResolver resolver;
 
-	public WebSsoAuthenticationFilter(AntPathRequestMatcher matcher,
-									  ServiceProviderValidator validator
+	public WebSsoAuthenticationFilter(SamlTransformer transformer,
+									  ServiceProviderResolver resolver,
+									  ServiceProviderValidator validator,
+									  RequestMatcher matcher
 	) {
 		super(matcher);
 		this.validator = validator;
+		this.resolver = resolver;
+		this.transformer = transformer;
 		setAllowSessionCreation(true);
 		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		setAuthenticationManager(authentication -> authentication);
@@ -126,5 +134,20 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 			return null;
 		}
 		return sp.getRemoteProvider(r.getAssertions().get(0).getOriginEntityId());
+	}
+
+	@Override
+	public SamlTransformer getTransformer() {
+		return transformer;
+	}
+
+	@Override
+	public ServiceProviderResolver getResolver() {
+		return resolver;
+	}
+
+	@Override
+	public ServiceProviderValidator getValidator() {
+		return validator;
 	}
 }

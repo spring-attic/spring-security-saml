@@ -70,7 +70,7 @@ abstract class AbstractServiceProviderTestBase {
 
 	AuthenticationRequest getAuthenticationRequest(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
-			get("/saml/sp/discovery")
+			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
 		)
 			.andExpect(status().is3xxRedirection())

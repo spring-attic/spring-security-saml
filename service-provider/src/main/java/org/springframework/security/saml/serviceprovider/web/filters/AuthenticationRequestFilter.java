@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.FilterChain;
@@ -34,6 +33,7 @@ import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.HostedServiceProvider;
+import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
@@ -43,10 +43,12 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.web.html.ErrorHtml;
+import org.springframework.security.saml.serviceprovider.web.html.PostBindingHtml;
+import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -54,26 +56,23 @@ import org.joda.time.DateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 
-public class AuthenticationRequestFilter extends OncePerRequestFilter implements SamlFilter<HostedServiceProvider> {
+public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilter {
 
-	private final SamlTransformer transformer;
-	private final AntPathRequestMatcher matcher;
-	private final HtmlWriter template;
+	private final StandaloneHtmlWriter writer = new StandaloneHtmlWriter();
 	private Clock clock = Clock.systemUTC();
-	private String postTemplate = "/templates/saml2-post-binding.vm";
 
-	public AuthenticationRequestFilter(AntPathRequestMatcher matcher,
-									   SamlTransformer transformer,
-									   HtmlWriter template) {
-		this.template = template;
-		this.matcher = matcher;
-		this.transformer = transformer;
+	public AuthenticationRequestFilter(SamlTransformer transformer,
+									   ServiceProviderResolver resolver,
+									   ServiceProviderValidator validator,
+									   RequestMatcher matcher) {
+		super(transformer, resolver, validator, matcher);
 	}
+
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (matcher.matches(request)) {
+		if (getMatcher().matches(request)) {
 			try {
 				HostedServiceProvider provider = getProvider(request);
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
@@ -186,7 +185,7 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter implements
 											 HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
 		if (destination.getBinding().equals(Binding.REDIRECT)) {
-			String encoded = transformer.samlEncode(transformer.toXml(authn), true);
+			String encoded = getTransformer().samlEncode(getTransformer().toXml(authn), true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
 			if (hasText(relayState)) {
@@ -196,18 +195,17 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter implements
 			response.sendRedirect(redirect);
 		}
 		else if (destination.getBinding().equals(Binding.POST)) {
-			String encoded = transformer.samlEncode(transformer.toXml(authn), false);
-			Map<String, Object> model = new HashMap<>();
-			model.put("action", destination.getLocation());
-			model.put("SAMLRequest", encoded);
-			if (hasText(relayState)) {
-				model.put("RelayState", relayState);
-			}
-			template.processHtmlBody(
+			String encoded = getTransformer().samlEncode(getTransformer().toXml(authn), false);
+			PostBindingHtml html = new PostBindingHtml(
+				destination.getLocation(),
+				encoded,
+				null,
+				relayState
+			);
+			writer.processHtmlBody(
 				request,
 				response,
-				getPostTemplate(),
-				model
+				html
 			);
 		}
 		else {
@@ -218,11 +216,10 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter implements
 	private void displayError(HttpServletRequest request,
 							  HttpServletResponse response,
 							  String message) {
-		template.processHtmlBody(
+		writer.processHtmlBody(
 			request,
 			response,
-			template.getErrorTemplate(),
-			Collections.singletonMap("message", message)
+			new ErrorHtml(Collections.singletonList(message))
 		);
 	}
 
@@ -235,12 +232,4 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter implements
 		return this;
 	}
 
-	protected String getPostTemplate() {
-		return postTemplate;
-	}
-
-	public AuthenticationRequestFilter setPostTemplate(String postTemplate) {
-		this.postTemplate = postTemplate;
-		return this;
-	}
 }

@@ -391,7 +391,7 @@ public class SimpleServiceProviderBootTest {
 
 	protected AuthenticationRequest getAuthenticationRequest(String idpEntityId) throws Exception {
 		String redirect = mockMvc.perform(
-			get("/saml/sp/discovery/alias/" + config.getServiceProvider().getAlias())
+			get("/saml/sp/authenticate/alias/" + config.getServiceProvider().getAlias())
 				.param("idp", idpEntityId)
 		)
 			.andExpect(status().isFound())

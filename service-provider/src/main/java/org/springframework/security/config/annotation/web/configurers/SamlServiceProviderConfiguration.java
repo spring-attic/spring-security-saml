@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.SamlTemplateEngine;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
@@ -35,13 +34,10 @@ import org.springframework.security.saml.serviceprovider.authentication.SamlAuth
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
-import org.springframework.security.saml.serviceprovider.web.html.HtmlWriter;
-import org.springframework.security.saml.spi.VelocityTemplateEngine;
 import org.springframework.security.saml.util.StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -57,11 +53,9 @@ class SamlServiceProviderConfiguration {
 	private HttpSecurity http;
 	private SamlTransformer transformer;
 	private ServiceProviderValidator validator;
-	private SamlTemplateEngine engine;
 	private ServiceProviderMetadataResolver metadataResolver;
 	private ServiceProviderResolver providerResolver;
 	private ServiceProviderConfigurationResolver configurationResolver;
-	private HtmlWriter htmlWriter;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
@@ -100,10 +94,8 @@ class SamlServiceProviderConfiguration {
 		this.http = http;
 		getSamlTransformer();
 		getSamlValidator();
-		getSamlTemplateEngine();
 		getSamlMetadataResolver();
 		getServiceProviderResolver();
-		getHtmlTemplateWriter();
 		getAuthenticationFailureHandler();
 		getAuthenticationManager();
 		validateSamlConfiguration(http);
@@ -120,16 +112,6 @@ class SamlServiceProviderConfiguration {
 		return authenticationManager;
 	}
 
-	SamlProcessingFilter getSamlProcessingFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		return new SamlProcessingFilter(
-			transformer,
-			providerResolver,
-			validator,
-			new AntPathRequestMatcher(pathPrefix + "/**")
-		);
-	}
-
 	ServiceProviderLogoutFilter getLogoutFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
@@ -139,9 +121,10 @@ class SamlServiceProviderConfiguration {
 				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
 				return new ServiceProviderLogoutFilter(
-					new AntPathRequestMatcher(pathPrefix + "/logout/**"),
 					transformer,
-					validator
+					providerResolver,
+					validator,
+					new AntPathRequestMatcher(pathPrefix + "/logout/**")
 				)
 					.setLogoutSuccessHandler(logoutSuccessHandler);
 			},
@@ -155,8 +138,10 @@ class SamlServiceProviderConfiguration {
 			http,
 			WebSsoAuthenticationFilter.class,
 			() -> new WebSsoAuthenticationFilter(
-				new AntPathRequestMatcher(pathPrefix + "/SSO/**"),
-				validator
+				transformer,
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/SSO/**")
 			),
 			null
 		);
@@ -165,15 +150,16 @@ class SamlServiceProviderConfiguration {
 		return filter;
 	}
 
-	AuthenticationRequestFilter getIdentityProviderDiscoveryFilter() {
+	AuthenticationRequestFilter getAuthenticationRequestFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			AuthenticationRequestFilter.class,
 			() -> new AuthenticationRequestFilter(
-				new AntPathRequestMatcher(pathPrefix + "/discovery/**"),
 				transformer,
-				htmlWriter
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 			),
 			null
 		);
@@ -188,7 +174,9 @@ class SamlServiceProviderConfiguration {
 				new SelectIdentityProviderFilter(
 					pathPrefix,
 					new AntPathRequestMatcher(pathPrefix + "/select/**"),
-					htmlWriter
+					transformer,
+					providerResolver,
+					validator
 				)
 					.setRedirectOnSingleProvider(false),
 			null
@@ -201,8 +189,10 @@ class SamlServiceProviderConfiguration {
 			http,
 			ServiceProviderMetadataFilter.class,
 			() -> new ServiceProviderMetadataFilter(
-				new AntPathRequestMatcher(pathPrefix + "/metadata/**"),
-				transformer
+				transformer,
+				providerResolver,
+				validator,
+				new AntPathRequestMatcher(pathPrefix + "/metadata/**")
 			),
 			null
 		);
@@ -211,14 +201,8 @@ class SamlServiceProviderConfiguration {
 	AuthenticationFailureHandler getAuthenticationFailureHandler() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		failureHandler = ofNullable(failureHandler)
-			.orElseGet(() -> new SamlAuthenticationFailureHandler(htmlWriter));
+			.orElseGet(() -> new SamlAuthenticationFailureHandler());
 		return failureHandler;
-	}
-
-	HtmlWriter getHtmlTemplateWriter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		htmlWriter = ofNullable(htmlWriter).orElseGet(() -> new HtmlWriter(engine));
-		return htmlWriter;
 	}
 
 	ServiceProviderResolver getServiceProviderResolver() {
@@ -241,17 +225,6 @@ class SamlServiceProviderConfiguration {
 			metadataResolver
 		);
 		return metadataResolver;
-	}
-
-	SamlTemplateEngine getSamlTemplateEngine() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		engine = getSharedObject(
-			http,
-			SamlTemplateEngine.class,
-			() -> new VelocityTemplateEngine(true),
-			engine
-		);
-		return engine;
 	}
 
 	ServiceProviderValidator getSamlValidator() {

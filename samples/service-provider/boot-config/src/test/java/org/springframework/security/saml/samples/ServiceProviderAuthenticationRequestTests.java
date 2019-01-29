@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("SAML Service Provider IDP Discovery")
-public class ServiceProviderIdpDiscoveryTests extends AbstractServiceProviderTestBase {
+public class ServiceProviderAuthenticationRequestTests extends AbstractServiceProviderTestBase {
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
@@ -75,7 +75,7 @@ public class ServiceProviderIdpDiscoveryTests extends AbstractServiceProviderTes
 		)
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl(
-				"http://localhost/saml/sp/discovery?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"))
+				"http://localhost/saml/sp/authenticate?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"))
 		;
 	}
 
@@ -89,7 +89,7 @@ public class ServiceProviderIdpDiscoveryTests extends AbstractServiceProviderTes
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/discovery?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
+				"http://localhost/saml/sp/authenticate?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
 			)))
 		;
 	}

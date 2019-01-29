@@ -45,10 +45,6 @@
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
-    <bean id="samlServiceProviderTemplateEngine"
-          class="org.springframework.security.saml.spi.VelocityTemplateEngine">
-    </bean>
-
     <bean id="samlServiceProviderConfigurationResolver"
           class="org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver">
         <constructor-arg ref="samlServiceProviderConfiguration"/>
@@ -82,20 +78,12 @@
 
     <bean id="idpDiscoveryMatcher"
           class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-        <constructor-arg value="#{'/' + pathPrefix + '/discovery/**'}"/>
+        <constructor-arg value="#{'/' + pathPrefix + '/authenticate/**'}"/>
     </bean>
 
     <bean id="samlAuthenticationEntryPoint"
           class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
         <constructor-arg value="#{'/' + pathPrefix + '/select?redirect=true'}"/>
-    </bean>
-
-    <bean id="samlProcessingFilter"
-          class="org.springframework.security.saml.serviceprovider.web.filters.SamlProcessingFilter">
-        <constructor-arg ref="samlTransformer"/>
-        <constructor-arg ref="samlServiceProviderResolver"/>
-        <constructor-arg ref="samlServiceProviderValidator"/>
-        <constructor-arg ref="samlMatcher"/>
     </bean>
 
     <bean id="samlSpMetadataFilter"
@@ -109,15 +97,10 @@
         <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
     </bean>
 
-    <bean id="samlHtmlWriter" class="org.springframework.security.saml.serviceprovider.web.html.HtmlWriter">
-        <constructor-arg ref="samlServiceProviderTemplateEngine"/>
-    </bean>
-
     <bean id="selectIdentityProviderUIFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter">
         <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
-        <constructor-arg ref="samlHtmlWriter"/>
         <property name="redirectOnSingleProvider" value="false"/>
     </bean>
 
@@ -125,7 +108,6 @@
           class="org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter">
         <constructor-arg ref="idpDiscoveryMatcher"/>
         <constructor-arg ref="samlTransformer"/>
-        <constructor-arg ref="samlHtmlWriter"/>
     </bean>
 
     <bean id="samlAuthenticationManager"
@@ -141,9 +123,7 @@
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler">
-                <constructor-arg ref="samlHtmlWriter"/>
-            </bean>
+            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler"/>
         </property>
     </bean>
 
@@ -184,7 +164,6 @@
         <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="GET"/>
         <security:intercept-url pattern="/saml/sp/**" access="permitAll()" method="POST"/>
         <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
-        <security:custom-filter ref="samlProcessingFilter" before="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlSpMetadataFilter" position="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>

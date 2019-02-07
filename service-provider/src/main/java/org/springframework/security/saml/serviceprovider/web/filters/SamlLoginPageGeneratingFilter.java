@@ -34,9 +34,6 @@ import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.html.ModelProvider;
-import org.springframework.security.saml.serviceprovider.web.html.SelectIdentityProviderHtml;
-import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -48,19 +45,19 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFilter {
+public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFilter {
 
-	private static Log logger = LogFactory.getLog(SelectIdentityProviderFilter.class);
+	private static Log logger = LogFactory.getLog(SamlLoginPageGeneratingFilter.class);
 
 	private final String pathPrefix;
 	private final StandaloneHtmlWriter template = new StandaloneHtmlWriter();
 	private boolean redirectOnSingleProvider = true;
 
-	public SelectIdentityProviderFilter(String pathPrefix,
-										RequestMatcher matcher,
-										SamlTransformer transformer,
-										ServiceProviderResolver resolver,
-										ServiceProviderValidator validator) {
+	public SamlLoginPageGeneratingFilter(String pathPrefix,
+										 RequestMatcher matcher,
+										 SamlTransformer transformer,
+										 ServiceProviderResolver resolver,
+										 ServiceProviderValidator validator) {
 		super(transformer, resolver, validator, matcher);
 		this.pathPrefix = pathPrefix;
 	}
@@ -100,9 +97,8 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 				);
 
 				template.processHtmlBody(
-					request,
 					response,
-					new SelectIdentityProviderHtml(providerUrls)
+					new SamlLoginPageHtml(providerUrls)
 				);
 			}
 		}
@@ -126,7 +122,7 @@ public class SelectIdentityProviderFilter extends AbstractSamlServiceProviderFil
 		return redirectOnSingleProvider;
 	}
 
-	public SelectIdentityProviderFilter setRedirectOnSingleProvider(boolean redirectOnSingleProvider) {
+	public SamlLoginPageGeneratingFilter setRedirectOnSingleProvider(boolean redirectOnSingleProvider) {
 		this.redirectOnSingleProvider = redirectOnSingleProvider;
 		return this;
 	}

@@ -43,7 +43,7 @@ import org.joda.time.Interval;
 import static java.lang.String.format;
 import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
 
-public abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
+abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 
 	final Signature INVALID_SIGNATURE = new Signature() {
 		@Override

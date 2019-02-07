@@ -30,11 +30,11 @@ import org.springframework.security.saml.provider.validation.ServiceProviderVali
 import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler;
+import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
@@ -165,13 +165,13 @@ class SamlServiceProviderConfiguration {
 		);
 	}
 
-	SelectIdentityProviderFilter getSelectIdentityProviderFilter() {
+	SamlLoginPageGeneratingFilter getSelectIdentityProviderFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			SelectIdentityProviderFilter.class,
+			SamlLoginPageGeneratingFilter.class,
 			() ->
-				new SelectIdentityProviderFilter(
+				new SamlLoginPageGeneratingFilter(
 					pathPrefix,
 					new AntPathRequestMatcher(pathPrefix + "/select/**"),
 					transformer,

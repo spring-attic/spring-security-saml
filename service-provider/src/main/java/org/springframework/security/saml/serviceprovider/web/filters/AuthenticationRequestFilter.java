@@ -44,9 +44,6 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.html.ErrorHtml;
-import org.springframework.security.saml.serviceprovider.web.html.PostBindingHtml;
-import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -203,7 +200,6 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 				relayState
 			);
 			writer.processHtmlBody(
-				request,
 				response,
 				html
 			);
@@ -217,7 +213,6 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 							  HttpServletResponse response,
 							  String message) {
 		writer.processHtmlBody(
-			request,
 			response,
 			new ErrorHtml(Collections.singletonList(message))
 		);

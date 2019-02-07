@@ -98,7 +98,7 @@
     </bean>
 
     <bean id="selectIdentityProviderUIFilter"
-          class="org.springframework.security.saml.serviceprovider.web.filters.SelectIdentityProviderFilter">
+          class="org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter">
         <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
         <property name="redirectOnSingleProvider" value="false"/>
@@ -123,7 +123,7 @@
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml.serviceprovider.authentication.SamlAuthenticationFailureHandler"/>
+            <bean class="org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler"/>
         </property>
     </bean>
 

@@ -7,15 +7,15 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  *
  */
 
-package org.springframework.security.saml.serviceprovider.authentication;
+package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.serviceprovider.web.html.ErrorHtml;
-import org.springframework.security.saml.serviceprovider.web.html.StandaloneHtmlWriter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 public class SamlAuthenticationFailureHandler implements AuthenticationFailureHandler {
@@ -42,7 +40,6 @@ public class SamlAuthenticationFailureHandler implements AuthenticationFailureHa
 		ErrorHtml html = new ErrorHtml(Collections.singletonList(exception.getMessage()));
 		response.setStatus(400);
 		processor.processHtmlBody(
-			request,
 			response,
 			html
 		);

@@ -71,7 +71,7 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 		throws ServletException, IOException {
 		if (getMatcher().matches(request)) {
 			try {
-				HostedServiceProvider provider = getProvider(request);
+				HostedServiceProvider provider = getSpUtils().getProvider(request);
 				Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 				Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entity =
 					getIdentityProvider(request, provider);
@@ -127,7 +127,7 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 															 IdentityProviderMetadata idp,
 															 int preferredEndpointIndex,
 															 NameId requestedNameId) {
-		Endpoint endpoint = getPreferredEndpoint(
+		Endpoint endpoint = getSpUtils().getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
 			BindingType.REDIRECT,
 			preferredEndpointIndex
@@ -141,7 +141,7 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 			.setPassive(Boolean.FALSE)
 			.setBinding(endpoint.getBinding())
 			.setAssertionConsumerService(
-				getPreferredEndpoint(
+				getSpUtils().getPreferredEndpoint(
 					sp.getServiceProvider().getAssertionConsumerService(),
 					null,
 					-1

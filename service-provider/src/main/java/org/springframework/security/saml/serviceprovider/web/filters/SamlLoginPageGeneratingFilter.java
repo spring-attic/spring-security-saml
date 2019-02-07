@@ -66,7 +66,7 @@ public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFi
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (getMatcher().matches(request)) {
-			HostedServiceProvider provider = getProvider(request);
+			HostedServiceProvider provider = getSpUtils().getProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
 			List<ModelProvider> providers = new LinkedList<>();
 			configuration.getProviders().stream().forEach(

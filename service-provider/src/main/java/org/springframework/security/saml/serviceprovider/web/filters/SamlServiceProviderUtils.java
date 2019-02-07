@@ -37,19 +37,38 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.springframework.util.StringUtils.hasText;
 
-interface SamlServiceProviderFilter {
+class SamlServiceProviderUtils {
 
-	SamlTransformer getTransformer();
+	private final SamlTransformer transformer;
+	private final ServiceProviderResolver resolver;
+	private final ServiceProviderValidator validator;
 
-	ServiceProviderResolver getResolver();
+	SamlServiceProviderUtils(SamlTransformer transformer,
+							 ServiceProviderResolver resolver,
+							 ServiceProviderValidator validator) {
+		this.transformer = transformer;
+		this.resolver = resolver;
+		this.validator = validator;
+	}
 
-	ServiceProviderValidator getValidator();
 
-	default String getEndpointPath(HttpServletRequest request) {
+	private SamlTransformer getTransformer() {
+		return transformer;
+	}
+
+	private ServiceProviderResolver getResolver() {
+		return resolver;
+	}
+
+	private ServiceProviderValidator getValidator() {
+		return validator;
+	}
+
+	String getEndpointPath(HttpServletRequest request) {
 		return new UrlPathHelper().getPathWithinApplication(request);
 	}
 
-	default HostedServiceProvider getProvider(HttpServletRequest request) {
+	HostedServiceProvider getProvider(HttpServletRequest request) {
 		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
 		if (serviceProvider == null) {
 			throw new SamlProviderNotFoundException("hosted");
@@ -57,17 +76,17 @@ interface SamlServiceProviderFilter {
 		return serviceProvider;
 	}
 
-	default Saml2Object getSamlRequest(HttpServletRequest request) {
+	Saml2Object getSamlRequest(HttpServletRequest request) {
 		return parseSamlObject(request, getProvider(request), "SAMLRequest");
 	}
 
-	default Saml2Object getSamlResponse(HttpServletRequest request) {
+	Saml2Object getSamlResponse(HttpServletRequest request) {
 		return parseSamlObject(request, getProvider(request), "SAMLResponse");
 	}
 
-	default Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-										  BindingType preferredBinding,
-										  int preferredIndex) {
+	Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
+								  BindingType preferredBinding,
+								  int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
 		}
@@ -107,9 +126,9 @@ interface SamlServiceProviderFilter {
 		return result;
 	}
 
-	default Saml2Object parseSamlObject(HttpServletRequest request,
-										HostedServiceProvider provider,
-										String parameterName) {
+	Saml2Object parseSamlObject(HttpServletRequest request,
+								HostedServiceProvider provider,
+								String parameterName) {
 		Saml2Object result = null;
 		String rs = request.getParameter(parameterName);
 		if (hasText(rs)) {

@@ -91,8 +91,8 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		if (getMatcher().matches(request)) {
 
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			Saml2Object logoutRequest = getSamlRequest(request);
-			Saml2Object logoutResponse = getSamlResponse(request);
+			Saml2Object logoutRequest = getSpUtils().getSamlRequest(request);
+			Saml2Object logoutResponse = getSpUtils().getSamlResponse(request);
 			try {
 
 				if (ofNullable(logoutRequest).isPresent()) {
@@ -125,7 +125,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 			throw new SamlException("Invalid logout request:" + logoutRequest);
 		}
 		LogoutRequest lr = (LogoutRequest) logoutRequest;
-		HostedServiceProvider provider = getProvider(request);
+		HostedServiceProvider provider = getSpUtils().getProvider(request);
 		ValidationResult validate = getValidator().validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new SamlException(validate.toString());
@@ -157,7 +157,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		if (authentication instanceof SamlAuthentication) {
 			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
-			HostedServiceProvider provider = getProvider(request);
+			HostedServiceProvider provider = getSpUtils().getProvider(request);
 			ServiceProviderMetadata sp = provider.getMetadata();
 			IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			LogoutRequest lr = logoutRequest(provider.getMetadata(), idp, (NameIdPrincipal) sa.getSamlPrincipal());
@@ -185,7 +185,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		LogoutRequest request,
 		IdentityProviderMetadata recipient) {
 		List<SsoProvider> ssoProviders = recipient.getSsoProviders();
-		Endpoint destination = getPreferredEndpoint(
+		Endpoint destination = getSpUtils().getPreferredEndpoint(
 			ssoProviders.get(0).getSingleLogoutService(),
 			null,
 			-1
@@ -235,7 +235,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		LogoutRequest result = new LogoutRequest()
 			.setId(UUID.randomUUID().toString())
 			.setDestination(
-				getPreferredEndpoint(
+				getSpUtils().getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),
 					null,
 					-1

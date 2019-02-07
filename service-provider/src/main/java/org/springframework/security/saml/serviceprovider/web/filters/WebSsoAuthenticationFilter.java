@@ -45,13 +45,11 @@ import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.util.Assert.notNull;
 
-public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter
-	implements SamlServiceProviderFilter {
+public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
 	private final ServiceProviderValidator validator;
-	private final SamlTransformer transformer;
-	private final ServiceProviderResolver resolver;
+	private final SamlServiceProviderUtils spUtils;
 
 	public WebSsoAuthenticationFilter(SamlTransformer transformer,
 									  ServiceProviderResolver resolver,
@@ -60,8 +58,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 	) {
 		super(matcher);
 		this.validator = validator;
-		this.resolver = resolver;
-		this.transformer = transformer;
+		this.spUtils = new SamlServiceProviderUtils(transformer, resolver, validator);
 		setAllowSessionCreation(true);
 		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		setAuthenticationManager(authentication -> authentication);
@@ -76,7 +73,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 	}
 
 	private Response getSamlWebResponse(HttpServletRequest request) {
-		Saml2Object object = getSamlResponse(request);
+		Saml2Object object = spUtils.getSamlResponse(request);
 		if (object == null) {
 			return null;
 		}
@@ -91,7 +88,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 		throws AuthenticationException {
-		HostedServiceProvider provider = getProvider(request);
+		HostedServiceProvider provider = spUtils.getProvider(request);
 		Response r = getSamlWebResponse(request);
 		notNull(r, "The response should never be null");
 		IdentityProviderMetadata idp = getIdentityProvider(r, provider);
@@ -137,18 +134,4 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 		return sp.getRemoteProvider(r.getAssertions().get(0).getOriginEntityId());
 	}
 
-	@Override
-	public SamlTransformer getTransformer() {
-		return transformer;
-	}
-
-	@Override
-	public ServiceProviderResolver getResolver() {
-		return resolver;
-	}
-
-	@Override
-	public ServiceProviderValidator getValidator() {
-		return validator;
-	}
 }

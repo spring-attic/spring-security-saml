@@ -52,7 +52,7 @@ public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFi
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (getMatcher().matches(request)) {
-			HostedServiceProvider provider = getProvider(request);
+			HostedServiceProvider provider = getSpUtils().getProvider(request);
 			String xml = getTransformer().toXml(provider.getMetadata());
 			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);

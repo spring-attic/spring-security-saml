@@ -23,14 +23,13 @@ import org.springframework.security.saml.serviceprovider.web.ServiceProviderReso
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter implements
-	SamlServiceProviderFilter {
-
+abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter {
 
 	private final SamlTransformer transformer;
 	private final ServiceProviderResolver resolver;
 	private final ServiceProviderValidator validator;
 	private final RequestMatcher matcher;
+	private final SamlServiceProviderUtils spUtils;
 
 	public AbstractSamlServiceProviderFilter(SamlTransformer transformer,
 											 ServiceProviderResolver resolver,
@@ -40,6 +39,7 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter im
 		this.resolver = resolver;
 		this.validator = validator;
 		this.matcher = matcher;
+		this.spUtils = new SamlServiceProviderUtils(transformer, resolver, validator);
 	}
 
 
@@ -48,18 +48,19 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter im
 		return matcher;
 	}
 
-	@Override
-	public SamlTransformer getTransformer() {
+	protected SamlServiceProviderUtils getSpUtils() {
+		return spUtils;
+	}
+
+	protected SamlTransformer getTransformer() {
 		return transformer;
 	}
 
-	@Override
-	public ServiceProviderResolver getResolver() {
+	protected ServiceProviderResolver getResolver() {
 		return resolver;
 	}
 
-	@Override
-	public ServiceProviderValidator getValidator() {
+	protected ServiceProviderValidator getValidator() {
 		return validator;
 	}
 

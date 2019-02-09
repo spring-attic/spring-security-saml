@@ -77,11 +77,13 @@ public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFi
 							.setRedirect(getAuthenticationRequestRedirectUrl(provider, p));
 						providers.add(mp);
 					} catch (Exception x) {
-						logger.debug(format(
-							"Unable to retrieve metadata for provider:%s with message:",
-							p.getMetadata(),
-							x.getMessage()
-							)
+						logger.debug(
+							format(
+								"Unable to retrieve metadata for provider:%s with message:%s",
+								p.getMetadata(),
+								x.getMessage()
+							),
+							x
 						);
 					}
 				}

@@ -32,7 +32,6 @@ import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.identity.HostedIdentityProviderService;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
 import org.springframework.security.saml.provider.service.HostedServiceProviderService;
@@ -74,50 +73,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 	}
 
 	protected IdentityProviderService getHostedIdentityProvider(LocalIdentityProviderConfiguration idpConfig) {
-		String basePath = idpConfig.getBasePath();
-		List<SimpleKey> keys = new LinkedList<>();
-		SimpleKey activeKey = idpConfig.getKeys().getActive();
-		keys.add(activeKey);
-		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
-		keys.addAll(idpConfig.getKeys().getStandBy());
-		SimpleKey signingKey = idpConfig.isSignMetadata() ? activeKey : null;
-
-		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
-		String aliasPath = getAliasPath(idpConfig);
-		IdentityProviderMetadata metadata =
-			identityProviderMetadata(
-				basePath,
-				signingKey,
-				keys,
-				prefix,
-				aliasPath,
-				idpConfig.getDefaultSigningAlgorithm(),
-				idpConfig.getDefaultDigest()
-			);
-
-		if (!idpConfig.getNameIds().isEmpty()) {
-			metadata.getIdentityProvider().setNameIds(idpConfig.getNameIds());
-		}
-
-		if (!idpConfig.isSingleLogoutEnabled()) {
-			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
-		}
-		if (hasText(idpConfig.getEntityId())) {
-			metadata.setEntityId(idpConfig.getEntityId());
-		}
-		if (hasText(idpConfig.getAlias())) {
-			metadata.setEntityAlias(idpConfig.getAlias());
-		}
-
-		metadata.getIdentityProvider().setWantAuthnRequestsSigned(idpConfig.isWantRequestsSigned());
-
-		return new HostedIdentityProviderService(
-			idpConfig,
-			metadata,
-			getTransformer(),
-			getValidator(),
-			getCache()
-		);
+		return null;
 	}
 
 	protected String getAliasPath(LocalProviderConfiguration configuration) {
@@ -130,13 +86,13 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		}
 	}
 
-	private IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-															  SimpleKey signingKey,
-															  List<SimpleKey> keys,
-															  String prefix,
-															  String aliasPath,
-															  AlgorithmMethod signAlgorithm,
-															  DigestMethod signDigest) {
+	protected IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+																SimpleKey signingKey,
+																List<SimpleKey> keys,
+																String prefix,
+																String aliasPath,
+																AlgorithmMethod signAlgorithm,
+																DigestMethod signDigest) {
 
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
@@ -198,7 +154,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 		List<SimpleKey> keys = new LinkedList<>();
 		SimpleKey activeKey = spConfig.getKeys().getActive();
 		keys.add(activeKey);
-		keys.add(activeKey.clone(activeKey.getName()+"-encryption",KeyType.ENCRYPTION));
+		keys.add(activeKey.clone(activeKey.getName() + "-encryption", KeyType.ENCRYPTION));
 		keys.addAll(spConfig.getKeys().getStandBy());
 		SimpleKey signingKey = spConfig.isSignMetadata() ? spConfig.getKeys().getActive() : null;
 

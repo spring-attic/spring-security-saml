@@ -57,6 +57,7 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.joda.time.DateTime;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml.key.KeyType.ENCRYPTION;
 import static org.springframework.security.saml.saml2.metadata.Binding.POST;
 
@@ -66,12 +67,21 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 	ServiceProviderMetadata>
 	implements IdentityProviderService {
 
+	private AssertionEnhancer assertionEnhancer;
+	private ResponseEnhancer responseEnhancer;
+
 	public HostedIdentityProviderService(LocalIdentityProviderConfiguration configuration,
 										 IdentityProviderMetadata metadata,
 										 SamlTransformer transformer,
 										 SamlValidator validator,
-										 SamlMetadataCache cache) {
+										 SamlMetadataCache cache,
+										 AssertionEnhancer assertionEnhancer,
+										 ResponseEnhancer responseEnhancer) {
 		super(configuration, metadata, transformer, validator, cache);
+		this.assertionEnhancer = ofNullable(assertionEnhancer)
+			.orElseGet(() -> assertion -> assertion);
+		this.responseEnhancer = ofNullable(responseEnhancer)
+			.orElseGet(() -> response -> response);
 	}
 
 	@Override
@@ -205,7 +215,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 		}
 
 
-		return assertion;
+		return assertionEnhancer.enhance(assertion);
 	}
 
 	@Override
@@ -236,7 +246,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 		if (acs != null) {
 			result.setDestination(acs.getLocation());
 		}
-		return result;
+		return responseEnhancer.enhance(result);
 	}
 
 }

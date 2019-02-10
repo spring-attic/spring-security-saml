@@ -42,8 +42,12 @@ import org.springframework.security.saml.helper.SamlTestObjectHelper;
 import org.springframework.security.saml.key.KeyType;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.SamlServerConfiguration;
+import org.springframework.security.saml.provider.identity.AssertionEnhancer;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
+import org.springframework.security.saml.provider.identity.ResponseEnhancer;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
@@ -64,6 +68,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.stubbing.Answer;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -74,9 +79,13 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
@@ -98,6 +107,12 @@ public class SimpleIdentityProviderBootTests {
 
 	@MockBean
 	private SamlMetadataCache cache;
+
+	@MockBean
+	private AssertionEnhancer samlAssertionEnhancer;
+
+	@MockBean
+	private ResponseEnhancer samlResponseEnhancer;
 
 	@Autowired
 	@Qualifier("idpSamlServerConfiguration")
@@ -135,10 +150,25 @@ public class SimpleIdentityProviderBootTests {
 		).willReturn(CACHED_SSS_META_DATA.getBytes());
 
 		helper = new SamlTestObjectHelper(samlTime);
+		given(
+			samlAssertionEnhancer.enhance(
+				any(Assertion.class)
+			)
+		).willAnswer(
+			(Answer<Assertion>) invocation -> invocation.getArgument(0)
+		);
+
+		given(
+			samlResponseEnhancer.enhance(
+				any(Response.class)
+			)
+		).willAnswer(
+			(Answer<Response>) invocation -> invocation.getArgument(0)
+		);
 	}
 
 	@AfterEach
-	public void reset() {
+	public void resetConfiguration() {
 		config.getIdentityProvider().setEncryptAssertions(false);
 		config.getIdentityProvider().setSingleLogoutEnabled(true);
 	}
@@ -422,6 +452,40 @@ public class SimpleIdentityProviderBootTests {
 		assertNotNull(r);
 		assertThat(r.getAssertions(), notNullValue());
 		assertThat(r.getAssertions().size(), equalTo(1));
+	}
+
+	@Test
+	public void enhancedAssertion() throws Exception {
+		reset(samlAssertionEnhancer);
+		given(samlAssertionEnhancer.enhance(any(Assertion.class)))
+			.willAnswer(
+				invocation -> {
+					Assertion original = invocation.getArgument(0);
+					original.addAttribute(
+						new Attribute()
+							.setName("test")
+							.setFriendlyName("testFriendly")
+							.setValues(asList("testValue1", "testValue2"))
+						);
+					return original;
+				}
+			);
+		UsernamePasswordAuthenticationToken token =
+			new UsernamePasswordAuthenticationToken("user", null, Collections.emptyList());
+		MvcResult result = idpToSpLogin(token, "spring.security.saml.xml.sp.id");
+		String html = result.getResponse().getContentAsString();
+		assertThat(html, containsString("name=\"SAMLResponse\""));
+		String response = extractResponse(html, "SAMLResponse");
+		Response r = (Response) transformer.fromXml(transformer.samlDecode(response, false), null, null);
+		assertNotNull(r);
+		assertThat(r.getAssertions(), notNullValue());
+		assertThat(r.getAssertions().size(), equalTo(1));
+		Attribute test = r.getAssertions().get(0).getFirstAttribute("test");
+		assertNotNull(test);
+		assertThat(test.getName(), equalTo("test"));
+		assertThat(test.getFriendlyName(), equalTo("testFriendly"));
+		assertThat(test.getValues(), containsInAnyOrder("testValue1", "testValue2"));
+		verify(samlResponseEnhancer, times(1)).enhance(any(Response.class));
 	}
 
 	@Test

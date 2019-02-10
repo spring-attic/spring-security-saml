@@ -17,23 +17,42 @@
 
 package org.springframework.security.saml.provider.provisioning;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
+import org.springframework.security.saml.key.KeyType;
+import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml.provider.identity.AssertionEnhancer;
+import org.springframework.security.saml.provider.identity.HostedIdentityProviderService;
 import org.springframework.security.saml.provider.identity.IdentityProviderService;
+import org.springframework.security.saml.provider.identity.ResponseEnhancer;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+
+import static org.springframework.util.StringUtils.hasText;
 
 public class HostBasedSamlIdentityProviderProvisioning
 	extends AbstractHostbasedSamlProviderProvisioning
 	implements SamlProviderProvisioning<IdentityProviderService> {
 
 
+	private AssertionEnhancer assertionEnhancer;
+	private ResponseEnhancer responseEnhancer;
+
 	public HostBasedSamlIdentityProviderProvisioning(SamlConfigurationRepository configuration,
 													 SamlTransformer transformer,
 													 SamlValidator validator,
-													 SamlMetadataCache cache) {
+													 SamlMetadataCache cache,
+													 AssertionEnhancer assertionEnhancer,
+													 ResponseEnhancer responseEnhancer) {
 		super(configuration, transformer, validator, cache);
+		this.assertionEnhancer = assertionEnhancer;
+		this.responseEnhancer = responseEnhancer;
 	}
 
 
@@ -42,6 +61,56 @@ public class HostBasedSamlIdentityProviderProvisioning
 		LocalIdentityProviderConfiguration config =
 			getConfigurationRepository().getServerConfiguration().getIdentityProvider();
 		return getHostedIdentityProvider(config);
+	}
+
+	@Override
+	protected IdentityProviderService getHostedIdentityProvider(LocalIdentityProviderConfiguration idpConfig) {
+		String basePath = idpConfig.getBasePath();
+		List<SimpleKey> keys = new LinkedList<>();
+		SimpleKey activeKey = idpConfig.getKeys().getActive();
+		keys.add(activeKey);
+		keys.add(activeKey.clone(activeKey.getName()+"-encryption", KeyType.ENCRYPTION));
+		keys.addAll(idpConfig.getKeys().getStandBy());
+		SimpleKey signingKey = idpConfig.isSignMetadata() ? activeKey : null;
+
+		String prefix = hasText(idpConfig.getPrefix()) ? idpConfig.getPrefix() : "saml/idp/";
+		String aliasPath = getAliasPath(idpConfig);
+		IdentityProviderMetadata metadata =
+			identityProviderMetadata(
+				basePath,
+				signingKey,
+				keys,
+				prefix,
+				aliasPath,
+				idpConfig.getDefaultSigningAlgorithm(),
+				idpConfig.getDefaultDigest()
+			);
+
+		if (!idpConfig.getNameIds().isEmpty()) {
+			metadata.getIdentityProvider().setNameIds(idpConfig.getNameIds());
+		}
+
+		if (!idpConfig.isSingleLogoutEnabled()) {
+			metadata.getIdentityProvider().setSingleLogoutService(Collections.emptyList());
+		}
+		if (hasText(idpConfig.getEntityId())) {
+			metadata.setEntityId(idpConfig.getEntityId());
+		}
+		if (hasText(idpConfig.getAlias())) {
+			metadata.setEntityAlias(idpConfig.getAlias());
+		}
+
+		metadata.getIdentityProvider().setWantAuthnRequestsSigned(idpConfig.isWantRequestsSigned());
+
+		return new HostedIdentityProviderService(
+			idpConfig,
+			metadata,
+			getTransformer(),
+			getValidator(),
+			getCache(),
+			assertionEnhancer,
+			responseEnhancer
+		);
 	}
 
 

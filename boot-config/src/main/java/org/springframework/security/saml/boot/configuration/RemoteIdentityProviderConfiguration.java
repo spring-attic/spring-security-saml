@@ -17,13 +17,17 @@
 
 package org.springframework.security.saml.boot.configuration;
 
+import java.net.URI;
+
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
+import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
 public class RemoteIdentityProviderConfiguration extends RemoteProviderConfiguration {
 
 	private NameId nameId;
 	private int assertionConsumerServiceIndex;
+	private URI authenticationRequestBinding = null;
 
 	public NameId getNameId() {
 		return nameId;
@@ -45,6 +49,14 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
 	}
 
+	public URI getAuthenticationRequestBinding() {
+		return authenticationRequestBinding;
+	}
+
+	public void setAuthenticationRequestBinding(URI authenticationRequestBinding) {
+		this.authenticationRequestBinding = authenticationRequestBinding;
+	}
+
 	public ExternalIdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
 		return new ExternalIdentityProviderConfiguration(
 			getAlias(),
@@ -54,7 +66,8 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 			isMetadataTrustCheck(),
 			getNameId(),
 			getAssertionConsumerServiceIndex(),
-			getVerificationKeyData()
+			getVerificationKeyData(),
+			Binding.fromUrn(getAuthenticationRequestBinding())
 		);
 	}
 

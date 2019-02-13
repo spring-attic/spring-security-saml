@@ -27,6 +27,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
+import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -111,7 +112,6 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 
 		mockMvc.perform(
 			get("http://localhost/saml/sp/select?redirect=true")
-
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(">Simple SAML PHP IDP<")))
@@ -122,7 +122,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
-		AuthenticationRequest authn = getAuthenticationRequest(
+		AuthenticationRequest authn = getAuthenticationRequestRedirect(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -143,20 +143,71 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("authentication request is not signed")
 	void authNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
-		AuthenticationRequest authn = getAuthenticationRequest(
-			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
-		assertThat(
-			authn.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
-		);
-		assertThat(
-			authn.getOriginEntityId(),
-			equalTo("spring.security.saml.sp.id")
-		);
+		AuthenticationRequest authn = validateAuthenticationRequest(Binding.REDIRECT);
 		assertThat(
 			authn.getSignature(),
 			nullValue()
 		);
 	}
 
+	@Test
+	@DisplayName("authentication request uses only available endpoint [HTTP REDIRECT]")
+	void authNRequestWithRedirectOnly() throws Exception {
+		final List<ExternalIdentityProviderConfiguration> providers = modifyIdpProviders(
+			p -> p.setAuthenticationRequestBinding(Binding.POST.getValue())
+		);
+		mockConfig(builder -> builder.providers(providers));
+		validateAuthenticationRequest(Binding.POST);
+	}
+
+	@Test
+	@DisplayName("authentication request uses only available endpoint [HTTP POST]")
+	void authNRequestWithPostOnly() throws Exception {
+		final List<ExternalIdentityProviderConfiguration> providers = modifyIdpProviders(
+			p -> p.setMetadata(p.getMetadata().replace(
+				"md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\"",
+				"md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\""
+			))
+		);
+		mockConfig(builder -> builder.providers(providers));
+		validateAuthenticationRequest(Binding.POST);
+	}
+
+	@Test
+	@DisplayName("authentication request uses preferred available endpoint [HTTP POST]")
+	void authNRequestWithPostPreferred() throws Exception {
+		final List<ExternalIdentityProviderConfiguration> providers = modifyIdpProviders(
+			p -> {
+				p.setAuthenticationRequestBinding(Binding.POST.getValue());
+				p.setMetadata(p.getMetadata().replace(
+					"  </md:IDPSSODescriptor>\n",
+					"    <md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php\"/>\n" +
+						"  </md:IDPSSODescriptor>\n"
+				));
+			}
+		);
+		mockConfig(builder -> builder.providers(providers));
+		validateAuthenticationRequest(Binding.POST);
+	}
+
+
+	private AuthenticationRequest validateAuthenticationRequest(Binding binding) throws Exception {
+		final String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		AuthenticationRequest authn = binding == Binding.REDIRECT ?
+			getAuthenticationRequestRedirect(idpEntityId) :
+			getAuthenticationRequestPost(idpEntityId);
+		assertThat(
+			authn.getDestination().getLocation(),
+			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+		);
+		assertThat(
+			authn.getDestination().getBinding(),
+			equalTo(binding)
+		);
+		assertThat(
+			authn.getOriginEntityId(),
+			equalTo("spring.security.saml.sp.id")
+		);
+		return authn;
+	}
 }

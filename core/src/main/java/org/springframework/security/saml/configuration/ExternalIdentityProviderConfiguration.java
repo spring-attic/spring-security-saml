@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.util.Assert;
 
@@ -34,6 +35,7 @@ public class ExternalIdentityProviderConfiguration extends
 
 	private final NameId nameId;
 	private final int assertionConsumerServiceIndex;
+	private final Binding authenticationRequestBinding;
 
 	/**
 	 * Creates a configuration representation of an external identity provider
@@ -55,10 +57,12 @@ public class ExternalIdentityProviderConfiguration extends
 												 boolean metadataTrustCheck,
 												 NameId nameId,
 												 int assertionConsumerServiceIndex,
-												 List<KeyData> verificationKeys) {
+												 List<KeyData> verificationKeys,
+												 Binding authenticationRequestBinding) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck, verificationKeys);
 		this.nameId = nameId;
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
+		this.authenticationRequestBinding = authenticationRequestBinding;
 	}
 
 	public NameId getNameId() {
@@ -67,6 +71,10 @@ public class ExternalIdentityProviderConfiguration extends
 
 	public int getAssertionConsumerServiceIndex() {
 		return assertionConsumerServiceIndex;
+	}
+
+	public Binding getAuthenticationRequestBinding() {
+		return authenticationRequestBinding;
 	}
 
 	public static Builder builder() {
@@ -96,6 +104,7 @@ public class ExternalIdentityProviderConfiguration extends
 		private int assertionConsumerServiceIndex;
 		private boolean metadataTrustCheck;
 		private List<KeyData> verificationKeys = new LinkedList<>();
+		private Binding authenticationRequestBinding = Binding.REDIRECT;
 
 		private Builder() {
 		}
@@ -145,6 +154,11 @@ public class ExternalIdentityProviderConfiguration extends
 			return this;
 		}
 
+		public Builder authenticationRequestBinding(Binding binding) {
+			this.authenticationRequestBinding = binding;
+			return this;
+		}
+
 		public ExternalIdentityProviderConfiguration build() {
 			Assert.notNull(alias, "Alias is required");
 			Assert.notNull(metadata, "Metadata is required");
@@ -156,7 +170,8 @@ public class ExternalIdentityProviderConfiguration extends
 				metadataTrustCheck,
 				nameId,
 				assertionConsumerServiceIndex,
-				verificationKeys
+				verificationKeys,
+				authenticationRequestBinding
 			);
 		}
 	}

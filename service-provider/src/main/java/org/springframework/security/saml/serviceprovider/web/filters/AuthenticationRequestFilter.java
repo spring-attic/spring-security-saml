@@ -51,6 +51,7 @@ import org.springframework.web.util.UriUtils;
 
 import org.joda.time.DateTime;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
 public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilter {
@@ -78,11 +79,16 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 				ExternalIdentityProviderConfiguration idpConfig = entity.getKey();
 				IdentityProviderMetadata idp = entity.getValue();
 				ServiceProviderMetadata localSp = provider.getMetadata();
+				final BindingType preferredSSOBinding =
+					ofNullable(idpConfig.getAuthenticationRequestBinding())
+						.orElse(Binding.REDIRECT)
+						.getType();
 				AuthenticationRequest authn = getAuthenticationRequest(
 					localSp,
 					idp,
-					entity.getKey().getAssertionConsumerServiceIndex(),
-					idpConfig.getNameId()
+					idpConfig.getNameId(),
+					idpConfig.getAssertionConsumerServiceIndex(),
+					preferredSSOBinding
 				);
 				sendAuthenticationRequest(authn, authn.getDestination(), request, response);
 			} catch (SamlException x) {
@@ -125,12 +131,13 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 
 	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp,
 															 IdentityProviderMetadata idp,
-															 int preferredEndpointIndex,
-															 NameId requestedNameId) {
+															 NameId requestedNameId,
+															 int preferredACSEndpointIndex,
+															 BindingType preferredSSOBinding) {
 		Endpoint endpoint = getSpUtils().getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
-			BindingType.REDIRECT,
-			preferredEndpointIndex
+			preferredSSOBinding,
+			-1
 		);
 		AuthenticationRequest request = new AuthenticationRequest()
 			// Some service providers will not accept first character if 0..9
@@ -144,7 +151,7 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 				getSpUtils().getPreferredEndpoint(
 					sp.getServiceProvider().getAssertionConsumerService(),
 					null,
-					-1
+					preferredACSEndpointIndex
 				)
 			)
 			.setIssuer(new Issuer().setValue(sp.getEntityId()))

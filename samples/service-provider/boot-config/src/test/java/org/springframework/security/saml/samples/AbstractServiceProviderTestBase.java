@@ -18,14 +18,20 @@
 package org.springframework.security.saml.samples;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.boot.configuration.SamlBootConfiguration;
+import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.saml2.Saml2Object;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
@@ -68,7 +74,7 @@ abstract class AbstractServiceProviderTestBase {
 	void reset() {
 	}
 
-	AuthenticationRequest getAuthenticationRequest(String idpEntityId) throws Exception {
+	AuthenticationRequest getAuthenticationRequestRedirect(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
@@ -81,6 +87,30 @@ abstract class AbstractServiceProviderTestBase {
 		String request = params.get("SAMLRequest");
 		assertNotNull(request);
 		String xml = transformer.samlDecode(request, true);
+		Saml2Object saml2Object = transformer.fromXml(
+			xml,
+			bootConfiguration.getServiceProvider().getKeys().toList(),
+			bootConfiguration.getServiceProvider().getKeys().toList()
+		);
+		assertNotNull(saml2Object);
+		assertThat(saml2Object.getClass(), equalTo(AuthenticationRequest.class));
+		return (AuthenticationRequest) saml2Object;
+	}
+
+	AuthenticationRequest getAuthenticationRequestPost(String idpEntityId) throws Exception {
+		MvcResult result = mockMvc.perform(
+			get("/saml/sp/authenticate")
+				.param("idp", idpEntityId)
+		)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String content = result.getResponse().getContentAsString();
+		String request = extractResponse(content, "SAMLRequest");
+
+
+		assertNotNull(request);
+		String xml = transformer.samlDecode(request, false);
 		Saml2Object saml2Object = transformer.fromXml(
 			xml,
 			bootConfiguration.getServiceProvider().getKeys().toList(),
@@ -116,5 +146,27 @@ abstract class AbstractServiceProviderTestBase {
 		assertNotNull(m);
 		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
 		return (ServiceProviderMetadata) m;
+	}
+
+	String extractResponse(String html, String name) {
+		Pattern p = Pattern.compile(" name=\"(.*?)\" value=\"(.*?)\"");
+		Matcher m = p.matcher(html);
+		while (m.find()) {
+			String pname = m.group(1);
+			String value = m.group(2);
+			if (name.equals(pname)) {
+				return value;
+			}
+		}
+		return null;
+	}
+
+	List<ExternalIdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteIdentityProviderConfiguration> c) {
+		return bootConfiguration.getServiceProvider().getProviders().stream()
+			.map(p -> {
+				c.accept(p);
+				return p.toExternalIdentityProviderConfiguration();
+			})
+			.collect(Collectors.toList());
 	}
 }

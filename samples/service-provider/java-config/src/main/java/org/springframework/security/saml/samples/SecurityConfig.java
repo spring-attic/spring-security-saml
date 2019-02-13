@@ -25,10 +25,10 @@ import org.springframework.security.config.annotation.web.configurers.SamlServic
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
+import org.springframework.security.saml.saml2.metadata.Binding;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
@@ -79,7 +79,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 											false,
 											UNSPECIFIED,
 											0,
-											emptyList()
+											emptyList(),
+											Binding.REDIRECT
 										)
 									)
 								)

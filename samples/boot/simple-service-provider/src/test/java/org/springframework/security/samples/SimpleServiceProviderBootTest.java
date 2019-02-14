@@ -46,11 +46,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.*;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlAuthentication;
@@ -73,6 +69,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.springframework.security.saml.helper.SamlTestObjectHelper.queryParams;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
@@ -206,6 +204,28 @@ public class SimpleServiceProviderBootTest {
 		AuthenticationRequest authn = getAuthenticationRequest();
 		assertThat(authn.getNameIdPolicy().getFormat(), equalTo(NameId.PERSISTENT));
 	}
+
+	@Test
+	public void authnRequestWithDefaultBinding() {
+		ServiceProviderService provider = provisioning.getHostedProvider();
+		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+		AuthenticationRequest request = provisioning.getHostedProvider().authenticationRequest(idp);
+		assertThat(request.getBinding(), equalTo(Binding.REDIRECT));
+	}
+
+	@Test
+	public void authnRequestWithPreferredBinding()  {
+		ServiceProviderService provider = provisioning.getHostedProvider();
+		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
+		// necessary since reference server doesn't provide a Endpoint with HTTP-POST binding.
+		idp.getIdentityProvider().getSingleSignOnService().add(new Endpoint().setBinding(Binding.POST));
+		config.getServiceProvider().getProviders().forEach(p -> p.setAuthenticationRequestBinding(Binding.POST.getValue()));
+		// call directly to utilize the metadata we had to modify.
+		// would be great to have a reference idp with HTTP-POST (and other) bindings...
+		AuthenticationRequest request = provisioning.getHostedProvider().authenticationRequest(idp);
+		assertThat(request.getBinding(), equalTo(Binding.POST));
+	}
+
 
 	@Test
 	public void processResponse() throws Exception {
@@ -478,6 +498,7 @@ public class SimpleServiceProviderBootTest {
 		"    <md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SingleLogoutService.php\"/>\n" +
 		"    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>\n" +
 		"    <md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php\"/>\n" +
+		"    <md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php\"/>\n" +
 		"  </md:IDPSSODescriptor>\n" +
 		"  <md:ContactPerson contactType=\"technical\">\n" +
 		"    <md:GivenName>Filip</md:GivenName>\n" +

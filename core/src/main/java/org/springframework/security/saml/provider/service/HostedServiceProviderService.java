@@ -36,13 +36,7 @@ import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.IdentityProvider;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.SsoProvider;
+import org.springframework.security.saml.saml2.metadata.*;
 
 import org.joda.time.DateTime;
 
@@ -124,12 +118,16 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 
 	@Override
 	public AuthenticationRequest authenticationRequest(IdentityProviderMetadata idp) {
+		ExternalIdentityProviderConfiguration configuration = getIdentityProviderConfigurationForMetadata(idp);
+		Binding preferredBinding = configuration.getAuthenticationRequestBinding() == null
+			? Binding.REDIRECT
+			: new Binding(configuration.getAuthenticationRequestBinding());
 		Endpoint endpoint =
-			getPreferredEndpoint(idp.getIdentityProvider().getSingleSignOnService(), Binding.REDIRECT, 0);
+			getPreferredEndpoint(idp.getIdentityProvider().getSingleSignOnService(), preferredBinding, 0);
 		ServiceProviderMetadata sp = getMetadata();
 		AuthenticationRequest request = new AuthenticationRequest()
-				// Some service providers will not accept first character if 0..9
-				// Azure AD IdP for example.
+			// Some service providers will not accept first character if 0..9
+			// Azure AD IdP for example.
 			.setId("_" + UUID.randomUUID().toString().substring(1))
 			.setIssueInstant(new DateTime(getClock().millis()))
 			.setForceAuth(Boolean.FALSE)
@@ -164,4 +162,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		return request;
 	}
 
+	private ExternalIdentityProviderConfiguration getIdentityProviderConfigurationForMetadata(IdentityProviderMetadata idp){
+		return getConfiguration().getProviders().stream().filter(i->i.getAlias().equals(idp.getEntityAlias())).findFirst().orElse(null);
+	}
 }

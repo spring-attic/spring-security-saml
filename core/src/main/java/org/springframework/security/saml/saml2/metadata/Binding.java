@@ -64,14 +64,15 @@ public class Binding {
 		if (!hasText(other)) {
 			return null;
 		}
-
-		URI uri;
 		try {
-			uri = new URI(other);
+			return fromUrn(new URI(other));
 		} catch (URISyntaxException e) {
 			throw new SamlException(e);
 		}
-		BindingType type = BindingType.fromUrn(other);
+	}
+
+	public static Binding fromUrn(URI other) {
+		BindingType type = BindingType.fromUrn(other.toString());
 		switch (type) {
 			case REDIRECT: return Binding.REDIRECT;
 			case POST: return Binding.POST;
@@ -84,7 +85,7 @@ public class Binding {
 			case REQUEST_INITIATOR: return Binding.REQUEST_INITIATOR;
 			case SAML_1_0_BROWSER_ARTIFACT: return Binding.SAML_1_0_BROWSER_ARTIFACT;
 			case SAML_1_0_BROWSER_POST: return Binding.SAML_1_0_BROWSER_POST;
-			case CUSTOM: return new Binding(uri, type);
+			case CUSTOM: return new Binding(other, type);
 		}
 		throw new SamlException("Unknown binding type:"+other);
 	}

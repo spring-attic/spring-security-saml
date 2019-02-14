@@ -165,3 +165,4 @@ spring:
         - alias: simplesamlphp
           metadata: http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php
           link-text: Simple SAML PHP IDP
+          authentication-request-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST

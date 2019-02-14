@@ -21,11 +21,14 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.provider.config.ExternalProviderConfiguration;
 import org.springframework.security.saml.saml2.metadata.NameId;
 
+import java.net.URI;
+
 public class ExternalIdentityProviderConfiguration extends
 	ExternalProviderConfiguration<ExternalIdentityProviderConfiguration> {
 
 	private NameId nameId;
 	private int assertionConsumerServiceIndex;
+	private URI authenticationRequestBinding;
 
 	public NameId getNameId() {
 		return nameId;
@@ -54,6 +57,15 @@ public class ExternalIdentityProviderConfiguration extends
 
 	public ExternalIdentityProviderConfiguration setAssertionConsumerServiceIndex(int assertionConsumerServiceIndex) {
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
+		return this;
+	}
+
+	public URI getAuthenticationRequestBinding(){
+		return authenticationRequestBinding;
+	}
+
+	public ExternalIdentityProviderConfiguration setAuthenticationRequestBinding(URI binding){
+		this.authenticationRequestBinding = binding;
 		return this;
 	}
 }

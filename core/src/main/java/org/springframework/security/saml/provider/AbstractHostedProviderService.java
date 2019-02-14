@@ -336,7 +336,7 @@ public abstract class AbstractHostedProviderService<
 		//find the preferred binding
 		if (preferredBinding != null) {
 			for (Endpoint e : eps) {
-				if (preferredBinding == e.getBinding()) {
+				if (preferredBinding.equals(e.getBinding())) {
 					result = e;
 					break;
 				}

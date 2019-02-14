@@ -17,11 +17,13 @@
 
 package org.springframework.security.saml.provider.service;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.security.saml.SamlMetadataCache;
+import org.springframework.security.saml.SamlProviderNotFoundException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.AbstractHostedProviderService;
@@ -36,7 +38,13 @@ import org.springframework.security.saml.saml2.authentication.LogoutRequest;
 import org.springframework.security.saml.saml2.authentication.LogoutResponse;
 import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
 import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.metadata.*;
+import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.IdentityProvider;
+import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.saml2.metadata.SsoProvider;
 
 import org.joda.time.DateTime;
 
@@ -58,7 +66,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 	public IdentityProviderMetadata getRemoteProvider(ExternalProviderConfiguration c) {
 		IdentityProviderMetadata metadata = super.getRemoteProvider(c);
 		if (metadata != null && c instanceof ExternalIdentityProviderConfiguration) {
-			ExternalIdentityProviderConfiguration ec = (ExternalIdentityProviderConfiguration)c;
+			ExternalIdentityProviderConfiguration ec = (ExternalIdentityProviderConfiguration) c;
 			if (ec.getNameId() != null) {
 				metadata.setDefaultNameId(ec.getNameId());
 			}
@@ -68,11 +76,12 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 
 	@Override
 	protected IdentityProviderMetadata transformMetadata(String data) {
-		Metadata metadata = (Metadata)getTransformer().fromXml(data, null, null);
+		Metadata metadata = (Metadata) getTransformer().fromXml(data, null, null);
 		IdentityProviderMetadata result;
 		if (metadata instanceof IdentityProviderMetadata) {
-			result =  (IdentityProviderMetadata)metadata;
-		} else {
+			result = (IdentityProviderMetadata) metadata;
+		}
+		else {
 			List<SsoProvider> providers = metadata.getSsoProviders();
 			providers = providers.stream().filter(p -> p instanceof IdentityProvider).collect(Collectors.toList());
 			result = new IdentityProviderMetadata(metadata);
@@ -119,11 +128,15 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 	@Override
 	public AuthenticationRequest authenticationRequest(IdentityProviderMetadata idp) {
 		ExternalIdentityProviderConfiguration configuration = getIdentityProviderConfigurationForMetadata(idp);
-		Binding preferredBinding = configuration.getAuthenticationRequestBinding() == null
-			? Binding.REDIRECT
-			: new Binding(configuration.getAuthenticationRequestBinding());
-		Endpoint endpoint =
-			getPreferredEndpoint(idp.getIdentityProvider().getSingleSignOnService(), preferredBinding, 0);
+		final URI authnBinding = configuration.getAuthenticationRequestBinding();
+		Binding preferredBinding = authnBinding == null ?
+			Binding.REDIRECT :
+			Binding.fromUrn(authnBinding);
+		Endpoint endpoint = getPreferredEndpoint(
+			idp.getIdentityProvider().getSingleSignOnService(),
+			preferredBinding,
+			0
+		);
 		ServiceProviderMetadata sp = getMetadata();
 		AuthenticationRequest request = new AuthenticationRequest()
 			// Some service providers will not accept first character if 0..9
@@ -152,7 +165,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 				true
 			));
 		}
-		else if (idp.getIdentityProvider().getNameIds().size() > 0){
+		else if (idp.getIdentityProvider().getNameIds().size() > 0) {
 			request.setNameIdPolicy(new NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
 				sp.getEntityAlias(),
@@ -162,7 +175,13 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		return request;
 	}
 
-	private ExternalIdentityProviderConfiguration getIdentityProviderConfigurationForMetadata(IdentityProviderMetadata idp){
-		return getConfiguration().getProviders().stream().filter(i->i.getAlias().equals(idp.getEntityAlias())).findFirst().orElse(null);
+	private ExternalIdentityProviderConfiguration getIdentityProviderConfigurationForMetadata(
+		IdentityProviderMetadata idp) {
+		return getConfiguration()
+			.getProviders()
+			.stream()
+			.filter(i -> i.getAlias().equals(idp.getEntityAlias()))
+			.findFirst()
+			.orElseThrow(() -> new SamlProviderNotFoundException("alias:" + idp.getEntityAlias()));
 	}
 }

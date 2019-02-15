@@ -182,11 +182,6 @@ configure(rootProject) {
 
 	apply plugin: "docbook-reference"
 
-	reference {
-		sourceDir = file("docs/reference/docbook")
-		pdfFilename = "spring-security-saml-reference.pdf"
-	}
-
 	// don't publish the default jar for the root project
 	configurations.archives.artifacts.clear()
 

@@ -17,7 +17,6 @@
 
 package org.springframework.security.saml.saml2.metadata;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -46,16 +45,6 @@ public enum NameIdFormat {
 	NameIdFormat(String urn) {
 		Assert.notNull(urn, "URN must not be null");
 		this.urn = urn;
-		//Spring introspection calls valueOf(..) on enums
-		//so we have to overwrite the name
-		try {
-			Field fieldName = getClass().getSuperclass().getDeclaredField("name");
-			fieldName.setAccessible(true);
-			fieldName.set(this, urn);
-			fieldName.setAccessible(false);
-		} catch (Exception e) {
-			throw new SamlException(e);
-		}
 	}
 
 	public static NameIdFormat fromUrn(URI other) {

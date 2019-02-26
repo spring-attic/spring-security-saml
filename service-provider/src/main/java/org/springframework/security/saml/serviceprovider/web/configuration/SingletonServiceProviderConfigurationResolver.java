@@ -22,11 +22,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration.Builder;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
 
-public class SingletonServiceProviderConfigurationResolver implements ServiceProviderConfigurationResolver {
+public class SingletonServiceProviderConfigurationResolver
+	implements ServiceProviderConfigurationResolver<HttpServletRequest> {
 
 	public static SingletonServiceProviderConfigurationResolver fromConfiguration(Consumer<Builder> config) {
 		Builder builder = HostedServiceProviderConfiguration.builder();

@@ -35,7 +35,7 @@ import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;

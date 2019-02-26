@@ -33,7 +33,7 @@ import org.springframework.security.saml.configuration.HostedServiceProviderConf
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;

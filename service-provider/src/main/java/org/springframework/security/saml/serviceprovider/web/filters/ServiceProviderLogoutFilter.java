@@ -46,7 +46,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.serviceprovider.authentication.SamlAuthentication;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;

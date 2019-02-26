@@ -51,7 +51,7 @@
     </bean>
 
     <bean id="samlServiceProviderResolver"
-          class="org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver">
+          class="org.springframework.security.saml.serviceprovider.web.WebServiceProviderResolver">
         <constructor-arg ref="samlServiceProviderMetadataResolver"/>
         <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
     </bean>

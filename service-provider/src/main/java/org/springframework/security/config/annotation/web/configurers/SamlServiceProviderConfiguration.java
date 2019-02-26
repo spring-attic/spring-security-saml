@@ -29,10 +29,10 @@ import org.springframework.security.saml.provider.validation.DefaultServiceProvi
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.web.DefaultServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.configuration.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
@@ -292,7 +292,7 @@ class SamlServiceProviderConfiguration {
 			);
 
 			metadataResolver = getSamlMetadataResolver();
-			providerResolver = new DefaultServiceProviderResolver(metadataResolver, configurationResolver);
+			providerResolver = new WebServiceProviderResolver(metadataResolver, configurationResolver);
 			setSharedObject(http, ServiceProviderResolver.class, providerResolver);
 		}
 	}

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;

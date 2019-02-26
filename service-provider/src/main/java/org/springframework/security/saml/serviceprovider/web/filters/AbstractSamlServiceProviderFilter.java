@@ -19,7 +19,7 @@ package org.springframework.security.saml.serviceprovider.web.filters;
 
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
-import org.springframework.security.saml.serviceprovider.web.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 

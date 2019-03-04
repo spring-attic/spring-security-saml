@@ -19,22 +19,21 @@ package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.provider.HostedServiceProvider;
-import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -43,39 +42,39 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFilter {
+public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 
 	private static Log logger = LogFactory.getLog(SamlLoginPageGeneratingFilter.class);
 
 	private final String pathPrefix;
-	private final StandaloneHtmlWriter template = new StandaloneHtmlWriter();
-	private boolean redirectOnSingleProvider = true;
+	private final RequestMatcher matcher;
+	private final ServiceProviderResolver<HttpServletRequest> resolver;
 
 	public SamlLoginPageGeneratingFilter(String pathPrefix,
 										 RequestMatcher matcher,
-										 SamlTransformer transformer,
-										 ServiceProviderResolver resolver,
-										 ServiceProviderValidator validator) {
-		super(transformer, resolver, validator, matcher);
+										 ServiceProviderResolver<HttpServletRequest> resolver) {
 		this.pathPrefix = pathPrefix;
+		this.matcher = matcher;
+		this.resolver = resolver;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (getMatcher().matches(request)) {
-			HostedServiceProvider provider = getSpUtils().getProvider(request);
+		if (matcher.matches(request)) {
+			HostedServiceProvider provider = resolver.getServiceProvider(request);
 			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
-			List<ModelProvider> providers = new LinkedList<>();
+			Map<String, String> providerUrls = new HashMap<>();
 			configuration.getProviders().stream().forEach(
 				p -> {
 					try {
-						ModelProvider mp = new ModelProvider()
-							.setLinkText(p.getLinktext())
-							.setRedirect(getAuthenticationRequestRedirectUrl(provider, p));
-						providers.add(mp);
+						String linkText = p.getLinktext();
+						String url = getAuthenticationRequestRedirectUrl(provider, p);
+						providerUrls.put(linkText, url);
 					} catch (Exception x) {
 						logger.debug(
 							format(
@@ -88,25 +87,44 @@ public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFi
 					}
 				}
 			);
-			if (providers.size() == 1 &&
-				(isRedirectOnSingleProvider() || ("true".equalsIgnoreCase(request.getParameter("redirect"))))) {
-				response.sendRedirect(providers.get(0).getRedirect());
+			response.setContentType(TEXT_HTML_VALUE);
+			response.setCharacterEncoding(UTF_8.name());
+			try {
+				response.getWriter().write(getSamlLoginPageHtml(providerUrls));
+			} catch (IOException e) {
+				throw new SamlException(e);
 			}
-			else {
-				Map<String, String> providerUrls = new HashMap<>();
-				providers.forEach(
-					p -> providerUrls.put(p.getLinkText(), p.getRedirect())
-				);
 
-				template.processHtmlBody(
-					response,
-					new SamlLoginPageHtml(providerUrls)
-				);
-			}
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
+	}
+
+	protected String getSamlLoginPageHtml(Map<String, String> providers) {
+		return
+			"<html>\n" +
+				"<head>\n" +
+				"    <meta charset=\"utf-8\" />\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"<h1>Select an Identity Provider</h1>\n" +
+				"<div>\n" +
+				"    <ul>\n" +
+				providers.entrySet().stream()
+					.map(
+						entry ->
+							"        <li>\n" +
+								"            <a href=\"" + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
+								escapeHtml(entry.getKey()) + "</span></a>\n" +
+								"        </li>\n"
+					)
+					.collect(Collectors.joining()) +
+				"    </ul>\n" +
+				"</div>\n" +
+				"</body>\n" +
+				"</html>"
+			;
 	}
 
 	protected String getAuthenticationRequestRedirectUrl(HostedServiceProvider provider,
@@ -115,18 +133,10 @@ public class SamlLoginPageGeneratingFilter extends AbstractSamlServiceProviderFi
 			provider.getConfiguration().getBasePath()
 		);
 		builder.pathSegment(stripSlashes(pathPrefix) + "/authenticate");
+		builder.pathSegment(UriUtils.encode(p.getAlias(), UTF_8.toString()));
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
 		return builder.build().toUriString();
-	}
-
-	public boolean isRedirectOnSingleProvider() {
-		return redirectOnSingleProvider;
-	}
-
-	public SamlLoginPageGeneratingFilter setRedirectOnSingleProvider(boolean redirectOnSingleProvider) {
-		this.redirectOnSingleProvider = redirectOnSingleProvider;
-		return this;
 	}
 
 }

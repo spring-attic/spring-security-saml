@@ -101,7 +101,6 @@
           class="org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter">
         <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
-        <property name="redirectOnSingleProvider" value="false"/>
     </bean>
 
     <bean id="samlAuthenticationRequestFilter"

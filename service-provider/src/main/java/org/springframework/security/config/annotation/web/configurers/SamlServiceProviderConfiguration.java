@@ -174,11 +174,8 @@ class SamlServiceProviderConfiguration {
 				new SamlLoginPageGeneratingFilter(
 					pathPrefix,
 					new AntPathRequestMatcher(pathPrefix + "/select/**"),
-					transformer,
-					providerResolver,
-					validator
-				)
-					.setRedirectOnSingleProvider(false),
+					providerResolver
+				),
 			null
 		);
 	}

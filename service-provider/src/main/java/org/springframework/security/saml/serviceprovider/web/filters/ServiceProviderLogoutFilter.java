@@ -191,7 +191,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 			-1
 		);
 		return new LogoutResponse()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRP" + UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
 			.setDestination(destination != null ? destination.getLocation() : null)
 			.setStatus(new Status().setCode(StatusCode.SUCCESS))
@@ -233,7 +233,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		NameIdPrincipal principal) {
 		List<SsoProvider> ssoProviders = idp.getSsoProviders();
 		LogoutRequest result = new LogoutRequest()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRQ" + UUID.randomUUID().toString())
 			.setDestination(
 				getSpUtils().getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),

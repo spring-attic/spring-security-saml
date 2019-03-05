@@ -133,7 +133,7 @@ public class SamlTestObjectHelper {
 
 		return new ServiceProviderMetadata()
 			.setEntityId(baseUrl)
-			.setId(UUID.randomUUID().toString())
+			.setId("SPM"+UUID.randomUUID().toString())
 			.setSigningKey(
 				signingKey,
 				algorithmMethod == null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
@@ -210,7 +210,7 @@ public class SamlTestObjectHelper {
 
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
-			.setId(UUID.randomUUID().toString())
+			.setId("IDPM"+UUID.randomUUID().toString())
 			.setSigningKey(
 				signingKey,
 				algorithmMethod == null ? DEFAULT_SIGN_ALGORITHM : algorithmMethod,
@@ -241,7 +241,7 @@ public class SamlTestObjectHelper {
 	public AuthenticationRequest authenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
 
 		AuthenticationRequest request = new AuthenticationRequest()
-			.setId(UUID.randomUUID().toString())
+			.setId("ARQ"+UUID.randomUUID().toString())
 			.setIssueInstant(new DateTime(time.millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
@@ -292,7 +292,7 @@ public class SamlTestObjectHelper {
 			.setSigningKey(idp.getSigningKey(), idp.getAlgorithm(), idp.getDigest())
 			.setVersion("2.0")
 			.setIssueInstant(new DateTime(now))
-			.setId(UUID.randomUUID().toString())
+			.setId("A"+UUID.randomUUID().toString())
 			.setIssuer(idp.getEntityId())
 			.setSubject(
 				new Subject()
@@ -335,7 +335,7 @@ public class SamlTestObjectHelper {
 			.addAuthenticationStatement(
 				new AuthenticationStatement()
 					.setAuthInstant(new DateTime(now))
-					.setSessionIndex(UUID.randomUUID().toString())
+					.setSessionIndex("IDX"+UUID.randomUUID().toString())
 					.setSessionNotOnOrAfter(new DateTime(now + SESSION_NOT_AFTER))
 
 			);
@@ -348,7 +348,7 @@ public class SamlTestObjectHelper {
 							 IdentityProviderMetadata local) {
 		Response result = new Response()
 			.setAssertions(asList(assertion))
-			.setId(UUID.randomUUID().toString())
+			.setId("RP"+UUID.randomUUID().toString())
 			.setInResponseTo(authn != null ? authn.getId() : null)
 			.setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
@@ -402,7 +402,7 @@ public class SamlTestObjectHelper {
 
 
 		LogoutRequest result = new LogoutRequest()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRQ"+UUID.randomUUID().toString())
 			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
 			.setIssuer(new Issuer().setValue(local.getEntityId()))
 			.setIssueInstant(DateTime.now())
@@ -451,7 +451,7 @@ public class SamlTestObjectHelper {
 										 Endpoint destination) {
 
 		return new LogoutResponse()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRP"+UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
 			.setDestination(destination != null ? destination.getLocation() : null)
 			.setStatus(new Status().setCode(StatusCode.SUCCESS))

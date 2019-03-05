@@ -34,7 +34,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 public interface SamlKeyStoreProvider {
 
-	char[] DEFAULT_KS_PASSWD = UUID.randomUUID().toString().toCharArray();
+	char[] DEFAULT_KS_PASSWD = ("ks-"+UUID.randomUUID().toString()).toCharArray();
 
 	default KeyStore getKeyStore(SimpleKey key) {
 		try {

@@ -60,7 +60,7 @@ public class SpringSecuritySamlTests {
 	@Test
 	public void deflate_inflate() {
 		SpringSecuritySaml saml = instance.init();
-		String s = UUID.randomUUID().toString();
+		String s = "inflate_deflate_tests_"+UUID.randomUUID().toString();
 		String deflated = saml.encode(saml.deflate(s));
 		String inflated = saml.inflate(saml.decode(deflated));
 		assertThat(inflated, equalTo(s));

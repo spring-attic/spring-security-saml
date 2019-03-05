@@ -96,7 +96,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 
 		return new IdentityProviderMetadata()
 			.setEntityId(baseUrl)
-			.setId(UUID.randomUUID().toString())
+			.setId("IDPM"+UUID.randomUUID().toString())
 			.setSigningKey(signingKey, signAlgorithm, signDigest)
 			.setProviders(
 				asList(
@@ -205,7 +205,7 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 
 		return new ServiceProviderMetadata()
 			.setEntityId(baseUrl)
-			.setId(UUID.randomUUID().toString())
+			.setId("SPM"+UUID.randomUUID().toString())
 			.setSigningKey(signingKey, signAlgorithm, signDigest)
 			.setProviders(
 				asList(

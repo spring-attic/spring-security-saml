@@ -141,7 +141,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 		AuthenticationRequest request = new AuthenticationRequest()
 			// Some service providers will not accept first character if 0..9
 			// Azure AD IdP for example.
-			.setId("_" + UUID.randomUUID().toString().substring(1))
+			.setId("ARQ" + UUID.randomUUID().toString().substring(1))
 			.setIssueInstant(new DateTime(getClock().millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)

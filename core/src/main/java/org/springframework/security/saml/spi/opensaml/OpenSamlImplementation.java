@@ -826,7 +826,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	protected org.opensaml.saml.saml2.core.Response internalToXml(Response response) {
 		org.opensaml.saml.saml2.core.Response result = buildSAMLObject(org.opensaml.saml.saml2.core.Response.class);
 		result.setConsent(response.getConsent());
-		result.setID(ofNullable(response.getId()).orElse("a" + UUID.randomUUID().toString()));
+		result.setID(ofNullable(response.getId()).orElse("RP" + UUID.randomUUID().toString()));
 		result.setInResponseTo(response.getInResponseTo());
 		result.setVersion(SAMLVersion.VERSION_20);
 		result.setIssueInstant(response.getIssueInstant());
@@ -873,7 +873,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			desc.setID(metadata.getId());
 		}
 		else {
-			desc.setID(UUID.randomUUID().toString());
+			desc.setID("M"+UUID.randomUUID().toString());
 		}
 		List<RoleDescriptor> descriptors = getRoleDescriptors(metadata);
 		desc.getRoleDescriptors().addAll(descriptors);
@@ -944,7 +944,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			}
 			roleDescriptor.setValidUntil(p.getValidUntil());
 			roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
-			roleDescriptor.setID(ofNullable(p.getId()).orElse(UUID.randomUUID().toString()));
+			roleDescriptor.setID(ofNullable(p.getId()).orElse("RD"+UUID.randomUUID().toString()));
 
 			for (SimpleKey key : p.getKeys()) {
 				roleDescriptor.getKeyDescriptors().add(getKeyDescriptor(key));

@@ -155,7 +155,7 @@ public abstract class AbstractHostedProviderService<
 
 		List<SsoProvider> ssoProviders = recipient.getSsoProviders();
 		LogoutRequest result = new LogoutRequest()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRQ"+UUID.randomUUID().toString())
 			.setDestination(
 				getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),
@@ -180,7 +180,7 @@ public abstract class AbstractHostedProviderService<
 			-1
 		);
 		return new LogoutResponse()
-			.setId(UUID.randomUUID().toString())
+			.setId("LRP"+UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
 			.setDestination(destination != null ? destination.getLocation() : null)
 			.setStatus(new Status().setCode(StatusCode.SUCCESS))

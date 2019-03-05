@@ -152,7 +152,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 			.setSigningKey(getMetadata().getSigningKey(), getMetadata().getAlgorithm(), getMetadata().getDigest())
 			.setVersion("2.0")
 			.setIssueInstant(new DateTime(now))
-			.setId(UUID.randomUUID().toString())
+			.setId("A"+UUID.randomUUID().toString())
 			.setIssuer(getMetadata().getEntityId())
 			.setSubject(
 				new Subject()
@@ -196,7 +196,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 			.addAuthenticationStatement(
 				new AuthenticationStatement()
 					.setAuthInstant(new DateTime(now))
-					.setSessionIndex(UUID.randomUUID().toString())
+					.setSessionIndex("IDX"+UUID.randomUUID().toString())
 					.setSessionNotOnOrAfter(new DateTime(now + getConfiguration().getSessionNotOnOrAfter()))
 
 			);
@@ -227,7 +227,7 @@ public class HostedIdentityProviderService extends AbstractHostedProviderService
 	public Response response(AuthenticationRequest authn, Assertion assertion, ServiceProviderMetadata recipient) {
 		Response result = new Response()
 			.setAssertions(asList(assertion))
-			.setId(UUID.randomUUID().toString())
+			.setId("RP"+UUID.randomUUID().toString())
 			.setInResponseTo(authn != null ? authn.getId() : null)
 			.setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
 			.setIssuer(new Issuer().setValue(getMetadata().getEntityId()))

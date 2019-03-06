@@ -41,12 +41,12 @@ def customizePom(pom, gradleProject) {
 			url = "https://github.com/SpringSource/spring-security-saml"
 			organization {
 				name = "SpringSource"
-				url = "http://springsource.org/spring-security-saml"
+				url = "https://projects.spring.io/spring-security-saml"
 			}
 			licenses {
 				license {
 					name "The Apache Software License, Version 2.0"
-					url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+					url "https://www.apache.org/licenses/LICENSE-2.0.txt"
 					distribution "repo"
 				}
 			}
@@ -79,13 +79,13 @@ def customizePom(pom, gradleProject) {
 			}
 			issueManagement {
 				system = "jira"
-				url = "http://jira.springsource.org/browse/SES"
+				url = "https://jira.springsource.org/browse/SES"
 			}
 			mailingLists {
 				mailingList {
 					name = "Spring Security SAML Forum"
-					post = "http://forum.springsource.org/forumdisplay.php?86-SAML"
-					archive = "http://forum.springsource.org/forumdisplay.php?86-SAML"
+					post = "http://forum.spring.io/forum/spring-projects/security/saml"
+					archive = "http://forum.spring.io/forum/spring-projects/security/saml"
 				}
 			}
 		}

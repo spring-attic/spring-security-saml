@@ -11,20 +11,20 @@
   <url>https://github.com/SpringSource/spring-security-saml</url>
   <organization>
     <name>SpringSource</name>
-    <url>http://springsource.org/spring-security-saml</url>
+    <url>https://projects.spring.io/spring-security-saml</url>
   </organization>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
   <mailingLists>
     <mailingList>
       <name>Spring Security SAML Forum</name>
-      <post>http://forum.springsource.org/forumdisplay.php?86-SAML</post>
-      <archive>http://forum.springsource.org/forumdisplay.php?86-SAML</archive>
+      <post>http://forum.spring.io/forum/spring-projects/security/saml</post>
+      <archive>http://forum.spring.io/forum/spring-projects/security/saml</archive>
     </mailingList>
   </mailingLists>
   <developers>
@@ -51,7 +51,7 @@
   </contributors>
   <issueManagement>
     <system>jira</system>
-    <url>http://jira.springsource.org/browse/SES</url>
+    <url>https://jira.springsource.org/browse/SES</url>
   </issueManagement>
   <scm>
     <connection>scm:git:git://github.com/SpringSource/spring-security-saml</connection>
@@ -68,7 +68,7 @@
       </snapshots>
       <id>com.springsource.repository.maven.snapshot</id>
       <name>SpringSource Enterprise Bundle Maven Repository - SpringSource Snapshot Releases</name>
-      <url>http://maven.springframework.org/snapshot</url>
+      <url>https://maven.springframework.org/snapshot</url>
     </repository>
     <repository>
       <releases>
@@ -79,7 +79,7 @@
       </snapshots>
       <id>com.springsource.repository.maven.milestone</id>
       <name>Spring Framework Maven Milestone Releases (Maven Central Format)</name>
-      <url>http://maven.springframework.org/milestone</url>
+      <url>https://maven.springframework.org/milestone</url>
     </repository>
   </repositories>
   <build>

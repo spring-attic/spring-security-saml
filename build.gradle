@@ -51,12 +51,12 @@ configure(allprojects) { project ->
 	repositories {
 		mavenCentral()
 		maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases/' }
-		maven { url 'http://repository.mulesoft.org/releases/'}
+		maven { url 'https://repository.mulesoft.org/releases/'}
 	}
 
 	ext.javadocLinks = [
-		"http://docs.oracle.com/javase/6/docs/api",
-		"http://docs.oracle.com/javaee/6/api",
+		"https://docs.oracle.com/javase/6/docs/api",
+		"https://docs.oracle.com/javaee/6/api",
 	] as String[]
 }
 
@@ -195,7 +195,7 @@ configure(rootProject) {
 		baseName = "spring-security-saml"
 		classifier = "docs"
 		description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://static.springframework.org/spring-security-saml/docs."
+			"for deployment at https://docs.spring.io/spring-security-saml/docs."
 
 		from (api) {
 			into "api"

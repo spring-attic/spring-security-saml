@@ -20,7 +20,7 @@ package org.springframework.security.saml.serviceprovider.web.filters;
 abstract class AbstractHtmlContent {
 	private final String content;
 
-	protected AbstractHtmlContent(String content) {
+	AbstractHtmlContent(String content) {
 		this.content = content;
 	}
 

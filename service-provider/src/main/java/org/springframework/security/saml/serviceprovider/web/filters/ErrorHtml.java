@@ -22,7 +22,7 @@ import java.util.List;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 class ErrorHtml extends AbstractHtmlContent {
-	public ErrorHtml(List<String> messages) {
+	ErrorHtml(List<String> messages) {
 		super(
 			"<!DOCTYPE html>\n" +
 				"<html>\n" +

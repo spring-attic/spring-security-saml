@@ -22,10 +22,10 @@ import static org.springframework.util.StringUtils.hasText;
 
 class PostBindingHtml extends AbstractHtmlContent {
 
-	public PostBindingHtml(String postUrl,
-						   String request,
-						   String response,
-						   String relayState) {
+	PostBindingHtml(String postUrl,
+					String request,
+					String response,
+					String relayState) {
 
 		super("<!DOCTYPE html>\n" +
 			"<html>\n" +

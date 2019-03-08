@@ -28,8 +28,6 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.provider.HostedServiceProvider;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.web.header.HeaderWriter;
-import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -38,7 +36,6 @@ import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFilter {
 
 	private String filename = "saml-service-provider-metadata.xml";
-	private HeaderWriter cacheHeaderWriter = new CacheControlHeadersWriter();
 
 	public ServiceProviderMetadataFilter(SamlTransformer transformer,
 										 ServiceProviderResolver resolver,
@@ -54,7 +51,6 @@ public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFi
 		if (getMatcher().matches(request)) {
 			HostedServiceProvider provider = getSpUtils().getProvider(request);
 			String xml = getTransformer().toXml(provider.getMetadata());
-			cacheHeaderWriter.writeHeaders(request, response);
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");
 			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"" + ";");

@@ -24,6 +24,8 @@ dependencies {
 	compile group: 'org.keycloak', name: 'keycloak-common', version: '4.5.0.Final'
 	compile group: 'org.jboss.logging', name: 'jboss-logging', version: '3.3.2.Final'
 
+	testCompile group: "org.springframework", name: "spring-web", version: "$springVersion"
+	testCompile group: "org.springframework.security", name: "spring-security-web", version: "$springSecurityVersion"
 
 	testCompile group: "org.slf4j", name: "slf4j-log4j12", version: "$slf4jVersion"
 	testCompile group: "commons-logging", name: "commons-logging", version: "$commonsLoggingVersion"

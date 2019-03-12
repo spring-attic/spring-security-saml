@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,10 +44,11 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.SsoProvider;
 import org.springframework.security.saml.saml2.signature.Signature;
 import org.springframework.security.saml.saml2.signature.SignatureException;
-import org.springframework.security.saml.spi.DefaultMetadataCache;
-import org.springframework.security.saml.util.RestOperationsUtils;
+import org.springframework.security.saml.serviceprovider.web.cache.DefaultMetadataCache;
+import org.springframework.security.saml.serviceprovider.web.cache.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -254,7 +255,10 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 	}
 
 	private String getAliasPath(HostedProviderConfiguration configuration) {
-		return StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId());
+		return UriUtils.encode(
+			StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
+			StandardCharsets.ISO_8859_1.name()
+		);
 	}
 
 	private boolean isUri(String uri) {

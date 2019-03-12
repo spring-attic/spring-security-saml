@@ -13,6 +13,9 @@ dependencies {
 	compile(group: "org.opensaml", name: "opensaml-saml-impl", version: "$openSamlVersion")
 
 
+    testCompile group: "org.springframework", name: "spring-web", version: "$springVersion"
+    testCompile group: "org.springframework.security", name: "spring-security-web", version: "$springSecurityVersion"
+
     testCompile group: "org.slf4j", name: "slf4j-log4j12", version: "$slf4jVersion"
     testCompile group: "commons-logging", name: "commons-logging", version: "$commonsLoggingVersion"
 

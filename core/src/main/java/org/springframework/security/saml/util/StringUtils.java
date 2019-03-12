@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,8 @@ package org.springframework.security.saml.util;
 
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.web.util.UriUtils;
 
 import org.apache.http.client.utils.URIBuilder;
 
@@ -104,9 +102,7 @@ public class StringUtils {
 	}
 
 	public static String getAliasPath(String alias, String entityId) {
-		return hasText(alias) ?
-			UriUtils.encode(alias, StandardCharsets.ISO_8859_1.name()) :
-			UriUtils.encode(entityId, StandardCharsets.ISO_8859_1.name());
+		return hasText(alias) ? alias : entityId;
 	}
 
 }

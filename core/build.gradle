@@ -21,11 +21,6 @@ dependencies {
 	compile group: "org.springframework.security", name: "spring-security-core", version: "$springSecurityVersion"
 	compile group: "org.springframework.security", name: "spring-security-config", version: "$springSecurityVersion"
 
-	compile (group: "org.springframework.security", name: "spring-security-web", version: "$springSecurityVersion") {
-		exclude group: "org.springframework", module: "spring-jdbc"
-		exclude group: "org.springframework", module: "spring-tx"
-	}
-
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "$bcprovVersion"
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcprovVersion"
 	compile group: 'joda-time', name: 'joda-time', version: "$jodaTimeVersion"
@@ -41,6 +36,10 @@ dependencies {
 
 	testCompile ("org.springframework:spring-test:$springVersion") {
 		exclude group: "commons-logging", module: "commons-logging"
+	}
+	testCompile (group: "org.springframework.security", name: "spring-security-web", version: "$springSecurityVersion") {
+		exclude group: "org.springframework", module: "spring-jdbc"
+		exclude group: "org.springframework", module: "spring-tx"
 	}
 
 	testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.5.1'

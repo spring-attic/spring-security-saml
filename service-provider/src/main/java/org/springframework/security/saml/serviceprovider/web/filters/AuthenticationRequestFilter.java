@@ -46,6 +46,7 @@ import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -109,10 +110,10 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 		HostedServiceProvider sp
 	) {
 		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> result = null;
-		String idp = request.getParameter("idp");
-		if (hasText(idp)) {
+		String idpAlias = getIdpAlias(request);
+		if (hasText(idpAlias)) {
 			result = sp.getRemoteProviders().entrySet().stream()
-				.filter(p -> idp.equals(p.getValue().getEntityId()))
+				.filter(p -> idpAlias.equals(p.getKey().getAlias()))
 				.findFirst()
 				.orElse(null);
 		}
@@ -127,6 +128,18 @@ public class AuthenticationRequestFilter extends AbstractSamlServiceProviderFilt
 			throw new SamlProviderNotFoundException("Unable to identify a configured identity provider.");
 		}
 		return result;
+	}
+
+	private String getIdpAlias(HttpServletRequest request) {
+		String path = request.getRequestURI().substring(request.getContextPath().length());
+		if (!hasText(path)) {
+			return null;
+		}
+		String[] paths = StringUtils.split(path, "/");
+		if (paths.length < 3) {
+			return null;
+		}
+		return paths[2];
 	}
 
 	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp,

@@ -75,7 +75,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 		)
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
+				"http://localhost/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}
@@ -90,7 +90,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp?idp=http%3A%2F%2Fsimplesaml-for-spring-saml.cfapps.io%2Fsaml2%2Fidp%2Fmetadata.php"
+				"http://localhost/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}

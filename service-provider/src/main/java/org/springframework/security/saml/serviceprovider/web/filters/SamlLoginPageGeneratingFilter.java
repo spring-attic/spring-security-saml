@@ -34,6 +34,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -42,7 +43,6 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
@@ -66,39 +66,38 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedServiceProvider provider = resolver.getServiceProvider(request);
-			HostedServiceProviderConfiguration configuration = provider.getConfiguration();
-			Map<String, String> providerUrls = new HashMap<>();
-			configuration.getProviders().stream().forEach(
-				p -> {
-					try {
-						String linkText = p.getLinktext();
-						String url = getAuthenticationRequestRedirectUrl(provider, p);
-						providerUrls.put(linkText, url);
-					} catch (Exception x) {
-						logger.debug(
-							format(
-								"Unable to retrieve metadata for provider:%s with message:%s",
-								p.getMetadata(),
-								x.getMessage()
-							),
-							x
-						);
-					}
-				}
-			);
-			response.setContentType(TEXT_HTML_VALUE);
-			response.setCharacterEncoding(UTF_8.name());
-			try {
-				response.getWriter().write(getSamlLoginPageHtml(providerUrls));
-			} catch (IOException e) {
-				throw new SamlException(e);
-			}
-
+			generateLoginPage(request, response);
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
+	}
+
+	protected void generateLoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		HostedServiceProvider provider = resolver.getServiceProvider(request);
+		HostedServiceProviderConfiguration configuration = provider.getConfiguration();
+		Map<String, String> providerUrls = new HashMap<>();
+		configuration.getProviders().stream().forEach(
+			p -> {
+				try {
+					String linkText = p.getLinktext();
+					String url = getAuthenticationRequestRedirectUrl(provider, p);
+					providerUrls.put(linkText, url);
+				} catch (Exception x) {
+					logger.debug(
+						format(
+							"Unable to retrieve metadata for provider:%s with message:%s",
+							p.getMetadata(),
+							x.getMessage()
+						),
+						x
+					);
+				}
+			}
+		);
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		response.getWriter().write(getSamlLoginPageHtml(providerUrls));
 	}
 
 	protected String getSamlLoginPageHtml(Map<String, String> providers) {
@@ -116,7 +115,7 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 						entry ->
 							"        <li>\n" +
 								"            <a href=\"" + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
-								escapeHtml(entry.getKey()) + "</span></a>\n" +
+								HtmlUtils.htmlEscape(entry.getKey()) + "</span></a>\n" +
 								"        </li>\n"
 					)
 					.collect(Collectors.joining()) +
@@ -135,7 +134,10 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 		builder.pathSegment(stripSlashes(pathPrefix) + "/authenticate");
 		builder.pathSegment(UriUtils.encode(p.getAlias(), UTF_8.toString()));
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
-		builder.queryParam("idp", UriUtils.encode(metadata.getEntityId(), UTF_8.toString()));
+		//make sure provider is available
+		if (metadata == null) {
+			throw new SamlException("Unable to fetch metadata for alias:"+p.getAlias());
+		}
 		return builder.build().toUriString();
 	}
 

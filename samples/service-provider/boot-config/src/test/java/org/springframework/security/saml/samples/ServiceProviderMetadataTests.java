@@ -194,6 +194,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 		)
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("<h1>Select an Identity Provider</h1>")))
+			.andExpect(content().string(containsString(">Simple SAML PHP IDP<")))
 			.andExpect(content().string(not(containsString("Remote Trust Check Metadata"))))
 			.andReturn();
 	}

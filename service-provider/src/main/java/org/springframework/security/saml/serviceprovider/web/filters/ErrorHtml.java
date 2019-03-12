@@ -19,7 +19,7 @@ package org.springframework.security.saml.serviceprovider.web.filters;
 
 import java.util.List;
 
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import org.springframework.web.util.HtmlUtils;
 
 class ErrorHtml extends AbstractHtmlContent {
 	ErrorHtml(List<String> messages) {
@@ -32,7 +32,7 @@ class ErrorHtml extends AbstractHtmlContent {
 				"<body>\n" +
 				"    <p>\n" +
 				"        <strong>Error:</strong> A SAML error occurred<br/><br/>\n" +
-				messages.stream().reduce((s1, s2) -> escapeHtml(s1) + "<br/>" + escapeHtml(s2)) +
+				messages.stream().reduce((s1, s2) -> HtmlUtils.htmlEscape(s1) + "<br/>" + HtmlUtils.htmlEscape(s2)) +
 				"    </p>\n" +
 				"    #parse ( \"/templates/add-html-body-content.vm\" )\n" +
 				"</body>\n" +

@@ -17,7 +17,8 @@
 
 package org.springframework.security.saml.serviceprovider.web.filters;
 
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import org.springframework.web.util.HtmlUtils;
+
 import static org.springframework.util.StringUtils.hasText;
 
 class PostBindingHtml extends AbstractHtmlContent {
@@ -44,19 +45,19 @@ class PostBindingHtml extends AbstractHtmlContent {
 			"            <div>\n" +
 			(hasText(relayState) ?
 				("                <input type=\"hidden\" name=\"RelayState\" value=\"" +
-					escapeHtml(relayState) +
+					HtmlUtils.htmlEscape(relayState) +
 					"\"/>\n"
 				) : ""
 			) +
 			(hasText(request) ?
 				("                <input type=\"hidden\" name=\"SAMLRequest\" value=\"" +
-					escapeHtml(request) +
+					HtmlUtils.htmlEscape(request) +
 					"\"/>\n"
 				) : ""
 			) +
 			(hasText(response) ?
 				("                <input type=\"hidden\" name=\"SAMLResponse\" value=\"" +
-					escapeHtml(response) +
+					HtmlUtils.htmlEscape(response) +
 					"\"/>\n"
 				) : ""
 			) +

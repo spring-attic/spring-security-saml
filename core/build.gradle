@@ -32,7 +32,7 @@ dependencies {
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: "$commonsBeanUtilsVersion"
 	compile group: 'org.owasp.antisamy', name: 'antisamy', version: "$antisamyVersion"
 	compile group: 'xalan', name: 'xalan', version:"$xalanVersion"
-	compile group: "ca.juliusdavies", name: "not-yet-commons-ssl", version: "0.3.17"
+	compile group: "com.narupley", name: "not-going-to-be-commons-ssl", version: "0.3.19"
 	compile group: "xml-apis", name: "xml-apis", version: "$xmlApisVersion"
 
 	provided "javax.servlet:javax.servlet-api:3.0.1"

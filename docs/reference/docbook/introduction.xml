@@ -159,16 +159,16 @@
 		<title>Source code</title>
 
 		<para>Source code for the project is maintained on <link
-				xlink:href="https://github.com/SpringSource/spring-security-saml">Github</link>.</para> 
+				xlink:href="https://github.com/SpringSource/spring-security-saml">Github</link>.</para>
 	</section>
-  
+
 	<section id="section-build">
 		<title>Builds</title>
 
-    <para>Snapshot builds of the project are available in the 
+    <para>Snapshot builds of the project are available in the
     <link xlink:href="http://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link>.
-    We use <link xlink:href="https://build.springsource.org/browse/SES">Bamboo</link> for continuous integration. 
-    </para>     
+    We use <link xlink:href="https://build.springsource.org/browse/SES">Bamboo</link> for continuous integration.
+    </para>
 	</section>
 
 	<section id="section-license">
@@ -189,14 +189,14 @@
 		<title>Contributions</title>
 
 		<para>Please send your pull requests directly to GitHub and preferably also open issue in Jira.</para>
-	</section>  
+	</section>
 
 	<section id="section-commercial-support">
 		<title>Commercial support</title>
-	
+
 <para>For commercial support and consulting services please contact <link xlink:href="vladimir@v7security.com">sales@v7security.com</link></para>
 	</section>
-	
+
 	<section id="section-support">
 		<title>Community support</title>
 
@@ -212,7 +212,7 @@
             Internal processing of SAML messages, marshalling and unmarshalling is handled by <link
                 xlink:href="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home">OpenSAML</link>.
         </para>
-        <para>Spring SAML has a transitive dependency to library <link xlink:href="http://juliusdavies.ca/commons-ssl/">not-yet-commons-ssl</link>.
+        <para>Spring SAML has a transitive dependency to library <link xlink:href="https://github.com/narupley/not-going-to-be-commons-ssl">Not-Going-To-Be-Commons-SSL</link>.
             Inside Spring SAML this library is only used for hostname verifications and will be removed in case OpenSAML removes the dependency.</para>
     </section>
 

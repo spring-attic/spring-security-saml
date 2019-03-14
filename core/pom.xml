@@ -59,9 +59,9 @@
   </issueManagement>
   <dependencies>
     <dependency>
-      <groupId>ca.juliusdavies</groupId>
-      <artifactId>not-yet-commons-ssl</artifactId>
-      <version>0.3.17</version>
+      <groupId>com.narupley</groupId>
+      <artifactId>not-going-to-be-commons-ssl</artifactId>
+      <version>0.3.19</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

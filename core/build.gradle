@@ -13,9 +13,10 @@ dependencies {
 	compile(group: "org.opensaml", name: "opensaml", version: "$openSamlVersion") {
 		exclude(module: 'bcprov-jdk15on')
 		exclude(group: 'org.slf4j', module: 'log4j-over-slf4j')
+		exclude(group: 'org.slf4j', module: 'jcl-over-slf4j')
+		exclude(group: 'org.slf4j', module: 'jul-to-slf4j')
 		exclude(group: 'org.owasp.esapi', module: 'esapi')
 		exclude(group: 'ca.juliusdavies', module: 'not-yet-commons-ssl')
-		exclude(group: 'org.beanshell', module: 'beanshell')
 		exclude(group: "org.apache.velocity", module: 'velocity')
 	}
 	compile group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.0'
@@ -23,21 +24,23 @@ dependencies {
 	compile group:'org.bouncycastle', name:'bcpkix-jdk15on', version: "$bcpkixVersion"
 	compile group: 'org.apache.santuario', name: 'xmlsec', version: "$openSamlXmlSec"
 	compile (group:'org.owasp.esapi', name:'esapi', version: "$esapiVersion") {
+		exclude(group: 'org.beanshell', module: 'bsh-core')
 		exclude(group: 'xalan', module: 'xalan')
+		exclude(group: 'xom', module: 'xom')
+		exclude(group: 'log4j', module: 'log4j')
+		exclude(group: 'commons-configuration', module: 'commons-configuration')
 		exclude(group: 'commons-beanutils', module: 'commons-beanutils-core')
 		exclude(group: 'commons-fileupload', module: 'commons-fileupload')
 		exclude(group: 'org.owasp.antisamy', module: 'antisamy')
+		exclude(group: 'org.apache.xmlgraphics', module: 'batik-css')
 	}
-	compile group: 'commons-fileupload', name: 'commons-fileupload', version: "$commonsFileuploadVersion"
-	compile group: 'commons-beanutils', name: 'commons-beanutils', version: "$commonsBeanUtilsVersion"
-	compile group: 'org.owasp.antisamy', name: 'antisamy', version: "$antisamyVersion"
 	compile group: 'xalan', name: 'xalan', version:"$xalanVersion"
-	compile group: "com.narupley", name: "not-going-to-be-commons-ssl", version: "0.3.19"
+	compile group: "com.narupley", name: "not-going-to-be-commons-ssl", version: "0.3.20"
 	compile group: "xml-apis", name: "xml-apis", version: "$xmlApisVersion"
 
 	provided "javax.servlet:javax.servlet-api:3.0.1"
 
-	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion",
+	testCompile "org.slf4j:slf4j-simple:$slf4jVersion",
 		"org.easymock:easymock:3.5.1",
 		"junit:junit:4.12",
 		"commons-logging:commons-logging:1.2",

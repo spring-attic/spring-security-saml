@@ -17,6 +17,8 @@
 
 package org.springframework.security.config.annotation.web.configurers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -25,15 +27,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
+import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
 import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.web.WebServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
+import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
@@ -44,11 +47,19 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.util.UriUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
+import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
 class SamlServiceProviderConfiguration {
+
+	private static Log logger = LogFactory.getLog(SamlServiceProviderConfiguration.class);
 
 	private HttpSecurity http;
 	private SamlTransformer transformer;
@@ -172,9 +183,8 @@ class SamlServiceProviderConfiguration {
 			SamlLoginPageGeneratingFilter.class,
 			() ->
 				new SamlLoginPageGeneratingFilter(
-					pathPrefix,
 					new AntPathRequestMatcher(pathPrefix + "/select/**"),
-					providerResolver
+					getStaticLoginUrls()
 				),
 			null
 		);
@@ -256,6 +266,29 @@ class SamlServiceProviderConfiguration {
 		);
 
 		return authenticationEntryPoint;
+	}
+
+	private Map<String, String> getStaticLoginUrls() {
+		final ServiceProviderConfigurationResolver configResolver = getSharedObject(
+			http,
+			ServiceProviderConfigurationResolver.class,
+			() -> null,
+			configurationResolver
+		);
+		HostedServiceProviderConfiguration configuration = configResolver.getConfiguration(null);
+		Map<String, String> providerUrls = new HashMap<>();
+		configuration.getProviders().stream().forEach(
+			p -> {
+				String linkText = p.getLinktext();
+				String url = "/" +
+					stripSlashes(pathPrefix) +
+					"/authenticate/" +
+					UriUtils.encode(p.getAlias(), UTF_8.toString());
+				providerUrls.put(linkText, url);
+
+			}
+		);
+		return providerUrls;
 	}
 
 	private boolean hasHttp() {

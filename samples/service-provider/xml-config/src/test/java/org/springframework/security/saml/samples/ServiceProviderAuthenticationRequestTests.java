@@ -29,6 +29,7 @@ import org.springframework.security.saml.configuration.ExternalIdentityProviderC
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@DisplayName("SAML Service Provider IDP Discovery")
+@DisplayName("SAML Service Provider XML Login Page")
 public class ServiceProviderAuthenticationRequestTests extends AbstractServiceProviderTestBase {
 
 	@SpringBootConfiguration
@@ -98,6 +99,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 
 	@Test
 	@DisplayName("multiple IDPs are always displayed")
+	@Disabled("login page is static")
 	void multipleIdpSelection() throws Exception {
 		List<RemoteIdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
 		List<ExternalIdentityProviderConfiguration> list = new LinkedList<>();

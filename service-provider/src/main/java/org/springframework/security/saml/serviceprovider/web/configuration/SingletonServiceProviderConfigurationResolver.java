@@ -57,15 +57,17 @@ public class SingletonServiceProviderConfigurationResolver
 	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		Builder builder =
 			HostedServiceProviderConfiguration.builder(configuration);
-		String basePath = getBasePath(request, false);
-		if (!hasText(configuration.getEntityId())) {
-			builder.entityId(basePath);
-		}
-		if (!hasText(configuration.getAlias())) {
-			builder.alias(request.getServerName());
-		}
-		if (!hasText(configuration.getBasePath())) {
-			builder.basePath(basePath);
+		if (request != null) {
+			String basePath = getBasePath(request, false);
+			if (!hasText(configuration.getEntityId())) {
+				builder.entityId(basePath);
+			}
+			if (!hasText(configuration.getAlias())) {
+				builder.alias(request.getServerName());
+			}
+			if (!hasText(configuration.getBasePath())) {
+				builder.basePath(basePath);
+			}
 		}
 		return builder.build();
 	}

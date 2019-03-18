@@ -97,10 +97,14 @@
         <constructor-arg value="#{'/' + pathPrefix + '/logout/**'}"/>
     </bean>
 
+	<bean id="staticLoginPageUrls" class="org.springframework.security.saml.samples.LoginPageUrlGenerator">
+		<constructor-arg ref="samlServiceProviderConfiguration"/>
+	</bean>
+
     <bean id="selectIdentityProviderUIFilter"
           class="org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter">
-        <constructor-arg ref="pathPrefix"/>
         <constructor-arg ref="selectIdpMatcher"/>
+		<constructor-arg value="#{@staticLoginPageUrls.getStaticLoginUrls()}"/>
     </bean>
 
     <bean id="samlAuthenticationRequestFilter"

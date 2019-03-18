@@ -26,40 +26,24 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
-import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.provider.HostedServiceProvider;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
 public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 
-	private static Log logger = LogFactory.getLog(SamlLoginPageGeneratingFilter.class);
-
-	private final String pathPrefix;
 	private final RequestMatcher matcher;
-	private final ServiceProviderResolver<HttpServletRequest> resolver;
+	private final Map<String, String> providerUrls;
 
-	public SamlLoginPageGeneratingFilter(String pathPrefix,
-										 RequestMatcher matcher,
-										 ServiceProviderResolver<HttpServletRequest> resolver) {
-		this.pathPrefix = pathPrefix;
+	public SamlLoginPageGeneratingFilter(RequestMatcher matcher,
+										 Map<String, String> providerUrls) {
 		this.matcher = matcher;
-		this.resolver = resolver;
+		this.providerUrls = providerUrls;
 	}
 
 	@Override
@@ -74,30 +58,17 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 	}
 
 	protected void generateLoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		HostedServiceProvider provider = resolver.getServiceProvider(request);
-		HostedServiceProviderConfiguration configuration = provider.getConfiguration();
-		Map<String, String> providerUrls = new HashMap<>();
-		configuration.getProviders().stream().forEach(
-			p -> {
-				try {
-					String linkText = p.getLinktext();
-					String url = getAuthenticationRequestRedirectUrl(provider, p);
-					providerUrls.put(linkText, url);
-				} catch (Exception x) {
-					logger.debug(
-						format(
-							"Unable to retrieve metadata for provider:%s with message:%s",
-							p.getMetadata(),
-							x.getMessage()
-						),
-						x
-					);
-				}
+		Map<String, String> urls = new HashMap<>();
+		providerUrls.entrySet().stream().forEach(
+			e -> {
+				String linkText = e.getKey();
+				String url = getAuthenticationRequestRedirectUrl(e.getValue(), request);
+				urls.put(linkText, url);
 			}
 		);
 		response.setContentType(TEXT_HTML_VALUE);
 		response.setCharacterEncoding(UTF_8.name());
-		response.getWriter().write(getSamlLoginPageHtml(providerUrls));
+		response.getWriter().write(getSamlLoginPageHtml(urls));
 	}
 
 	protected String getSamlLoginPageHtml(Map<String, String> providers) {
@@ -126,19 +97,27 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 			;
 	}
 
-	protected String getAuthenticationRequestRedirectUrl(HostedServiceProvider provider,
-														 ExternalProviderConfiguration p) {
+	protected String getAuthenticationRequestRedirectUrl(String url,
+														 HttpServletRequest request) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
-			provider.getConfiguration().getBasePath()
+			getBasePath(request, false)
 		);
-		builder.pathSegment(stripSlashes(pathPrefix) + "/authenticate");
-		builder.pathSegment(UriUtils.encode(p.getAlias(), UTF_8.toString()));
-		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
-		//make sure provider is available
-		if (metadata == null) {
-			throw new SamlException("Unable to fetch metadata for alias:"+p.getAlias());
-		}
+		builder.pathSegment(stripSlashes(url));
 		return builder.build().toUriString();
 	}
 
+	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
+		boolean includePort = true;
+		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
+			includePort = includeStandardPorts;
+		}
+		return request.getScheme() +
+			"://" +
+			request.getServerName() +
+			(includePort ? (":" + request.getServerPort()) : "") +
+			request.getContextPath();
+	}
 }

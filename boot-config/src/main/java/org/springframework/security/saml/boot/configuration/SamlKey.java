@@ -17,8 +17,8 @@
 
 package org.springframework.security.saml.boot.configuration;
 
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.model.key.KeyType;
+import org.springframework.security.saml.model.key.KeyData;
 
 public class SamlKey {
 	private String name;

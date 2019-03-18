@@ -20,8 +20,8 @@ package org.springframework.security.saml.boot.configuration;
 import java.util.stream.Collectors;
 
 import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.model.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.model.encrypt.KeyEncryptionMethod;
 
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<RemoteServiceProviderConfiguration> {

@@ -40,52 +40,52 @@ import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlKeyException;
-import org.springframework.security.saml.saml2.ImplementationHolder;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.attribute.Attribute;
-import org.springframework.security.saml.saml2.attribute.AttributeNameFormat;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.AssertionCondition;
-import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
-import org.springframework.security.saml.saml2.authentication.AuthenticationContext;
-import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
-import org.springframework.security.saml.saml2.authentication.Conditions;
-import org.springframework.security.saml.saml2.authentication.Issuer;
-import org.springframework.security.saml.saml2.authentication.LogoutReason;
-import org.springframework.security.saml.saml2.authentication.LogoutRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutResponse;
-import org.springframework.security.saml.saml2.authentication.NameIdPolicy;
-import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
-import org.springframework.security.saml.saml2.authentication.OneTimeUse;
-import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
-import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.authentication.Status;
-import org.springframework.security.saml.saml2.authentication.StatusCode;
-import org.springframework.security.saml.saml2.authentication.Subject;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmation;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmationData;
-import org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod;
-import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.IdentityProvider;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.metadata.Provider;
-import org.springframework.security.saml.saml2.metadata.ServiceProvider;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.SsoProvider;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.model.ImplementationHolder;
+import org.springframework.security.saml.model.Saml2Object;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.attribute.Attribute;
+import org.springframework.security.saml.model.attribute.AttributeNameFormat;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.AssertionCondition;
+import org.springframework.security.saml.model.authentication.AudienceRestriction;
+import org.springframework.security.saml.model.authentication.AuthenticationContext;
+import org.springframework.security.saml.model.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml.model.authentication.AuthenticationStatement;
+import org.springframework.security.saml.model.authentication.Conditions;
+import org.springframework.security.saml.model.authentication.Issuer;
+import org.springframework.security.saml.model.authentication.LogoutReason;
+import org.springframework.security.saml.model.authentication.LogoutRequest;
+import org.springframework.security.saml.model.authentication.LogoutResponse;
+import org.springframework.security.saml.model.authentication.NameIdPolicy;
+import org.springframework.security.saml.model.authentication.NameIdPrincipal;
+import org.springframework.security.saml.model.authentication.OneTimeUse;
+import org.springframework.security.saml.model.authentication.RequestedAuthenticationContext;
+import org.springframework.security.saml.model.authentication.Response;
+import org.springframework.security.saml.model.authentication.Status;
+import org.springframework.security.saml.model.authentication.StatusCode;
+import org.springframework.security.saml.model.authentication.Subject;
+import org.springframework.security.saml.model.authentication.SubjectConfirmation;
+import org.springframework.security.saml.model.authentication.SubjectConfirmationData;
+import org.springframework.security.saml.model.authentication.SubjectConfirmationMethod;
+import org.springframework.security.saml.model.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.model.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.key.KeyType;
+import org.springframework.security.saml.model.metadata.Binding;
+import org.springframework.security.saml.model.metadata.Endpoint;
+import org.springframework.security.saml.model.metadata.IdentityProvider;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.Metadata;
+import org.springframework.security.saml.model.metadata.NameId;
+import org.springframework.security.saml.model.metadata.Provider;
+import org.springframework.security.saml.model.metadata.ServiceProvider;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.metadata.SsoProvider;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.CanonicalizationMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
+import org.springframework.security.saml.model.signature.Signature;
 import org.springframework.security.saml.SamlKeyStoreProvider;
 import org.springframework.security.saml.spi.SpringSecuritySaml;
 import org.springframework.util.CollectionUtils;
@@ -213,7 +213,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
 import static org.opensaml.security.crypto.KeySupport.generateKey;
-import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
+import static org.springframework.security.saml.model.Namespace.NS_PROTOCOL;
 import static org.springframework.security.saml.util.StringUtils.getHostFromUrl;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.util.StringUtils.hasText;
@@ -449,7 +449,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
 		}
 		else {
-			throw new org.springframework.security.saml.saml2.signature.SignatureException(
+			throw new org.springframework.security.saml.model.signature.SignatureException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}
@@ -473,7 +473,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				}
 			}
 			if (last != null) {
-				throw new org.springframework.security.saml.saml2.signature.SignatureException(
+				throw new org.springframework.security.saml.model.signature.SignatureException(
 					"Signature validation against a " + object.getClass().getName() +
 						" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
 					last

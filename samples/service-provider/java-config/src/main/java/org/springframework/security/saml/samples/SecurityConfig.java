@@ -23,15 +23,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.key.KeyType;
+import org.springframework.security.saml.model.metadata.Binding;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
-import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
-import static org.springframework.security.saml.saml2.metadata.NameId.UNSPECIFIED;
+import static org.springframework.security.saml.model.metadata.NameId.EMAIL;
+import static org.springframework.security.saml.model.metadata.NameId.PERSISTENT;
+import static org.springframework.security.saml.model.metadata.NameId.UNSPECIFIED;
 import static org.springframework.security.saml.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity

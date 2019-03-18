@@ -19,7 +19,7 @@ package org.springframework.security.saml.configuration;
 
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.model.key.KeyData;
 
 public abstract class ExternalProviderConfiguration<T extends ExternalProviderConfiguration> {
 	private final String alias;

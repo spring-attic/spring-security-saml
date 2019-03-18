@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.security.saml.SamlMessageStore;
-import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.Assertion;
 
 /**
  * Manages assertion objects stored in the HTTP session object.

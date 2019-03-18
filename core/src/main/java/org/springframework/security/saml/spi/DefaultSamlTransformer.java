@@ -21,12 +21,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.model.Saml2Object;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.signature.Signature;
+import org.springframework.security.saml.model.signature.SignatureException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

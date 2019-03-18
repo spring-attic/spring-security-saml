@@ -19,12 +19,12 @@ package org.springframework.security.saml.configuration;
 
 import java.util.List;
 
-import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml.saml2.encrypt.KeyEncryptionMethod;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.model.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.model.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.metadata.NameId;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
 
 import static java.util.Arrays.asList;
 

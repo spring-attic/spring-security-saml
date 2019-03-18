@@ -26,7 +26,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.UUID;
 
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.model.key.KeyData;
 import org.springframework.security.saml.util.X509Utils;
 
 import static org.springframework.util.StringUtils.hasText;

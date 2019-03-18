@@ -24,24 +24,24 @@ import java.util.List;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.provider.HostedProvider;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.Issuer;
-import org.springframework.security.saml.saml2.authentication.LogoutRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutResponse;
-import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.model.Saml2Object;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.Issuer;
+import org.springframework.security.saml.model.authentication.LogoutRequest;
+import org.springframework.security.saml.model.authentication.LogoutResponse;
+import org.springframework.security.saml.model.authentication.Response;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.metadata.Endpoint;
+import org.springframework.security.saml.model.metadata.Metadata;
+import org.springframework.security.saml.model.signature.Signature;
+import org.springframework.security.saml.model.signature.SignatureException;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import static java.lang.String.format;
-import static org.springframework.security.saml.saml2.metadata.NameId.ENTITY;
+import static org.springframework.security.saml.model.metadata.NameId.ENTITY;
 
 abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 

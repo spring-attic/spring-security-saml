@@ -22,12 +22,12 @@ import java.util.Arrays;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.key.KeyType;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.key.KeyType;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
 import org.springframework.security.saml.spi.DefaultSamlTransformer;
 import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
 import org.springframework.util.StreamUtils;

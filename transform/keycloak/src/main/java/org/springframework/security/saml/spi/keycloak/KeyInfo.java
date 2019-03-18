@@ -25,7 +25,7 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.model.key.KeyData;
 import org.springframework.security.saml.SamlKeyStoreProvider;
 
 import static org.springframework.util.StringUtils.hasText;

@@ -26,8 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.metadata.Binding;
+import org.springframework.security.saml.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml.model.metadata.Binding;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;

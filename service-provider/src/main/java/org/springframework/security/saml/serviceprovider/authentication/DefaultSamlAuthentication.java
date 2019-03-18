@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.SubjectPrincipal;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.SubjectPrincipal;
 
 public class DefaultSamlAuthentication implements SamlAuthentication {
 	private boolean authenticated;

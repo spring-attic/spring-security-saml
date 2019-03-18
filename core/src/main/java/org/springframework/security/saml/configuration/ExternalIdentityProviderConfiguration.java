@@ -20,9 +20,9 @@ package org.springframework.security.saml.configuration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.NameId;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.metadata.Binding;
+import org.springframework.security.saml.model.metadata.NameId;
 import org.springframework.util.Assert;
 
 import static org.springframework.util.StringUtils.hasText;

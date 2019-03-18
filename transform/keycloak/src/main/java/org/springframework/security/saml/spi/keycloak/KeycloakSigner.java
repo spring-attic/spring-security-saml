@@ -35,14 +35,14 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.namespace.QName;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutResponse;
-import org.springframework.security.saml.saml2.authentication.Response;
-import org.springframework.security.saml.saml2.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml.model.authentication.LogoutRequest;
+import org.springframework.security.saml.model.authentication.LogoutResponse;
+import org.springframework.security.saml.model.authentication.Response;
+import org.springframework.security.saml.model.encrypt.DataEncryptionMethod;
+import org.springframework.security.saml.model.metadata.Metadata;
 import org.springframework.security.saml.SamlKeyStoreProvider;
 import org.springframework.util.Assert;
 
@@ -66,7 +66,7 @@ import static org.keycloak.saml.common.util.DocumentUtil.getDocumentAsString;
 import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
 import static org.keycloak.saml.processing.core.util.XMLEncryptionUtil.DS_KEY_INFO;
 import static org.keycloak.saml.processing.core.util.XMLEncryptionUtil.encryptKey;
-import static org.springframework.security.saml.saml2.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
+import static org.springframework.security.saml.model.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
 import static org.springframework.util.StringUtils.hasText;
 
 class KeycloakSigner {

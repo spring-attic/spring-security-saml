@@ -24,8 +24,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.Metadata;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;

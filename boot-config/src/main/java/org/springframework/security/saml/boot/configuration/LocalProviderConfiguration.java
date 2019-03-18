@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.model.metadata.NameId;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
 
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 

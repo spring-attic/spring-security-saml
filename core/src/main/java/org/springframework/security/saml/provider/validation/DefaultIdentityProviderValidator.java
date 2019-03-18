@@ -23,14 +23,14 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.ValidationResult;
 import org.springframework.security.saml.provider.HostedIdentityProvider;
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutRequest;
-import org.springframework.security.saml.saml2.authentication.LogoutResponse;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saml2.signature.Signature;
+import org.springframework.security.saml.model.Saml2Object;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml.model.authentication.LogoutRequest;
+import org.springframework.security.saml.model.authentication.LogoutResponse;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.signature.Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module

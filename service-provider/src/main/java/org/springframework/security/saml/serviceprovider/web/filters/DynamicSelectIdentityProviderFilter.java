@@ -30,7 +30,7 @@ import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.configuration.ExternalProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml.provider.HostedServiceProvider;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;

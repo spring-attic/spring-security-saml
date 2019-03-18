@@ -20,11 +20,11 @@ package org.springframework.security.saml;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.Saml2Object;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.model.Saml2Object;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.signature.Signature;
+import org.springframework.security.saml.model.signature.SignatureException;
 
 public interface SamlTransformer {
 
@@ -46,7 +46,7 @@ public interface SamlTransformer {
 	 *                         The implementation will attempt each key until one succeeds
 	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
+	 * @throws org.springframework.security.saml.model.signature.SignatureException if signature validation
 	 *                                                                              fails
 	 * @throws IllegalArgumentException                                             if the XML object
 	 *                                                                              structure
@@ -65,7 +65,7 @@ public interface SamlTransformer {
 	 *                         The implementation will attempt each key until one succeeds
 	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml.saml2.signature.SignatureException if signature validation
+	 * @throws org.springframework.security.saml.model.signature.SignatureException if signature validation
 	 *                                                                              fails
 	 * @throws IllegalArgumentException                                             if the XML object
 	 *                                                                              structure

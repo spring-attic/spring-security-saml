@@ -26,7 +26,7 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
 import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
 import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
-import org.springframework.security.saml.saml2.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlServiceProviderServerBeanConfiguration {

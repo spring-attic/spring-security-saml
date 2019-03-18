@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
 
 public class HostedServiceProvider extends HostedProvider<
 	HostedServiceProviderConfiguration,

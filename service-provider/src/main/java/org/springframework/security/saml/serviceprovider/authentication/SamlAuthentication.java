@@ -18,8 +18,8 @@
 package org.springframework.security.saml.serviceprovider.authentication;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.saml.saml2.authentication.Assertion;
-import org.springframework.security.saml.saml2.authentication.SubjectPrincipal;
+import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml.model.authentication.SubjectPrincipal;
 
 /**
  * An authentication containing SAML information

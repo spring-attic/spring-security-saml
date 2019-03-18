@@ -18,13 +18,13 @@ package saml.saml2.authentication;
 
 import java.util.Collections;
 
-import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
+import org.springframework.security.saml.model.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml.model.authentication.RequestedAuthenticationContext;
+import org.springframework.security.saml.model.metadata.Binding;
+import org.springframework.security.saml.model.metadata.NameId;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
+import static org.springframework.security.saml.model.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml.util.XmlTestUtil.assertTextNodeValue;

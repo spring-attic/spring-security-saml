@@ -33,17 +33,17 @@ import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.metadata.Binding;
-import org.springframework.security.saml.saml2.metadata.Endpoint;
-import org.springframework.security.saml.saml2.metadata.IdentityProvider;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.Metadata;
-import org.springframework.security.saml.saml2.metadata.NameId;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.SsoProvider;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.metadata.Binding;
+import org.springframework.security.saml.model.metadata.Endpoint;
+import org.springframework.security.saml.model.metadata.IdentityProvider;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.Metadata;
+import org.springframework.security.saml.model.metadata.NameId;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.metadata.SsoProvider;
+import org.springframework.security.saml.model.signature.Signature;
+import org.springframework.security.saml.model.signature.SignatureException;
 import org.springframework.security.saml.serviceprovider.web.cache.DefaultMetadataCache;
 import org.springframework.security.saml.serviceprovider.web.cache.RestOperationsUtils;
 import org.springframework.security.saml.util.StringUtils;
@@ -56,9 +56,9 @@ import org.apache.commons.logging.LogFactory;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
-import static org.springframework.security.saml.saml2.signature.AlgorithmMethod.RSA_SHA256;
-import static org.springframework.security.saml.saml2.signature.DigestMethod.SHA256;
+import static org.springframework.security.saml.model.metadata.Binding.REDIRECT;
+import static org.springframework.security.saml.model.signature.AlgorithmMethod.RSA_SHA256;
+import static org.springframework.security.saml.model.signature.DigestMethod.SHA256;
 import static org.springframework.security.saml.util.StringUtils.isUrl;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 import static org.springframework.security.saml.util.StringUtils.stripStartingSlashes;
@@ -191,7 +191,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			.setSigningKey(keys.get(0), RSA_SHA256, SHA256)
 			.setProviders(
 				asList(
-					new org.springframework.security.saml.saml2.metadata.ServiceProvider()
+					new org.springframework.security.saml.model.metadata.ServiceProvider()
 						.setKeys(keys)
 						.setWantAssertionsSigned(configuration.isWantAssertionsSigned())
 						.setAuthnRequestsSigned(keys.size() > 0 && configuration.isSignRequests())

@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.springframework.security.saml.configuration.ExternalServiceProviderConfiguration;
 import org.springframework.security.saml.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
 
 //TODO Move to Identity Provider module
 public class HostedIdentityProvider extends HostedProvider<

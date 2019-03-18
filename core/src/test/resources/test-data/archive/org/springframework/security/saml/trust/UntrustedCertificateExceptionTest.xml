@@ -3,7 +3,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.saml2.key.JKSKeyManager">
+    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
         <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>

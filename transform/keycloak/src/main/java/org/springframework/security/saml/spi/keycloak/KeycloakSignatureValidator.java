@@ -35,13 +35,13 @@ import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
 import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.saml2.SignableSaml2Object;
-import org.springframework.security.saml.saml2.key.KeyData;
-import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
-import org.springframework.security.saml.saml2.signature.CanonicalizationMethod;
-import org.springframework.security.saml.saml2.signature.DigestMethod;
-import org.springframework.security.saml.saml2.signature.Signature;
-import org.springframework.security.saml.saml2.signature.SignatureException;
+import org.springframework.security.saml.model.SignableSaml2Object;
+import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml.model.signature.AlgorithmMethod;
+import org.springframework.security.saml.model.signature.CanonicalizationMethod;
+import org.springframework.security.saml.model.signature.DigestMethod;
+import org.springframework.security.saml.model.signature.Signature;
+import org.springframework.security.saml.model.signature.SignatureException;
 import org.springframework.security.saml.util.X509Utils;
 
 import org.w3c.dom.Element;
@@ -51,7 +51,7 @@ import org.w3c.dom.NodeList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
-import static org.springframework.security.saml.saml2.Namespace.NS_SIGNATURE;
+import static org.springframework.security.saml.model.Namespace.NS_SIGNATURE;
 
 class KeycloakSignatureValidator {
 	static Map<String, Signature> validateSignature(SamlObjectHolder parsed, List<KeyData> keys) {

@@ -23,7 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.security.saml.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml.saml2.key.KeyData;
+import org.springframework.security.saml.model.key.KeyData;
 import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;

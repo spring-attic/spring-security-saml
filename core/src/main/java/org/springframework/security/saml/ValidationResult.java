@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml.saml2.Saml2Object;
+import org.springframework.security.saml.model.Saml2Object;
 
 public class ValidationResult {
 

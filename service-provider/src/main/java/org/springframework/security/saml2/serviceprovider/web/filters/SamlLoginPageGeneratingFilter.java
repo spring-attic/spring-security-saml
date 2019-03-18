@@ -18,7 +18,6 @@
 package org.springframework.security.saml2.serviceprovider.web.filters;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
@@ -29,11 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
-import static org.springframework.security.saml2.util.StringUtils.stripSlashes;
 
 /**
  * Filter that generates a static SAML SP login page.
@@ -54,28 +51,16 @@ public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			generateLoginPage(request, response);
+			response.setContentType(TEXT_HTML_VALUE);
+			response.setCharacterEncoding(UTF_8.name());
+			response.getWriter().write(getSamlLoginPageHtml(providerUrls, request.getContextPath()));
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
 	}
 
-	private void generateLoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		Map<String, String> urls = new HashMap<>();
-		providerUrls.entrySet().stream().forEach(
-			e -> {
-				String linkText = e.getKey();
-				String url = getAuthenticationRequestRedirectUrl(e.getValue(), request);
-				urls.put(linkText, url);
-			}
-		);
-		response.setContentType(TEXT_HTML_VALUE);
-		response.setCharacterEncoding(UTF_8.name());
-		response.getWriter().write(getSamlLoginPageHtml(urls));
-	}
-
-	private String getSamlLoginPageHtml(Map<String, String> providers) {
+	private String getSamlLoginPageHtml(Map<String, String> providers, String contextPath) {
 		return
 			"<html>\n" +
 				"<head>\n" +
@@ -89,7 +74,7 @@ public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 					.map(
 						entry ->
 							"        <li>\n" +
-								"            <a href=\"" + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
+								"            <a href=\"" + contextPath + "/" + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
 								HtmlUtils.htmlEscape(entry.getKey()) + "</span></a>\n" +
 								"        </li>\n"
 					)
@@ -99,29 +84,5 @@ public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 				"</body>\n" +
 				"</html>"
 			;
-	}
-
-	private String getAuthenticationRequestRedirectUrl(String url,
-														 HttpServletRequest request) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
-			getBasePath(request, false)
-		);
-		builder.pathSegment(stripSlashes(url));
-		return builder.build().toUriString();
-	}
-
-	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {
-		boolean includePort = true;
-		if (443 == request.getServerPort() && "https".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		else if (80 == request.getServerPort() && "http".equals(request.getScheme())) {
-			includePort = includeStandardPorts;
-		}
-		return request.getScheme() +
-			"://" +
-			request.getServerName() +
-			(includePort ? (":" + request.getServerPort()) : "") +
-			request.getContextPath();
 	}
 }

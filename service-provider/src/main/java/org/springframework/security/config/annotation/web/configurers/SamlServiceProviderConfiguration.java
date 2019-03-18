@@ -277,7 +277,7 @@ class SamlServiceProviderConfiguration {
 		authenticationEntryPoint = getSharedObject(
 			http,
 			AuthenticationEntryPoint.class,
-			() -> new LoginUrlAuthenticationEntryPoint(getPathPrefix() + "/select?redirect=true"),
+			() -> new LoginUrlAuthenticationEntryPoint(getPathPrefix() + "/login"),
 			authenticationEntryPoint
 		);
 

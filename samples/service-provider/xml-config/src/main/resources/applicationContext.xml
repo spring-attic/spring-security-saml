@@ -88,7 +88,7 @@
 
     <bean id="samlAuthenticationEntryPoint"
           class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-        <constructor-arg value="#{'/' + pathPrefix + '/select?redirect=true'}"/>
+        <constructor-arg value="#{'/' + pathPrefix + '/login'}"/>
     </bean>
 
     <bean id="samlSpMetadataFilter"

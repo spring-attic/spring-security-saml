@@ -62,7 +62,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 			get("/")
 		)
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("http://localhost/saml/sp/select?redirect=true"))
+			.andExpect(redirectedUrl("http://localhost/saml/sp/login"))
 		;
 	}
 

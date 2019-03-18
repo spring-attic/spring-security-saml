@@ -101,7 +101,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 				get(s)
 			)
 				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrl("http://localhost/saml/sp/select?redirect=true"))
+				.andExpect(redirectedUrl("http://localhost/saml/sp/login"))
 			;
 		}
 

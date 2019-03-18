@@ -17,8 +17,8 @@
 package sample.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
-import org.springframework.security.saml.provider.service.ServiceProviderService;
+import org.springframework.security.saml2.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml2.provider.service.ServiceProviderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 

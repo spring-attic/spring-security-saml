@@ -32,7 +32,7 @@
 package sample.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.boot.SamlBootConfiguration;
+import org.springframework.security.saml2.boot.SamlBootConfiguration;
 
 @Configuration
 public class SamlPropertyConfiguration extends SamlBootConfiguration  {

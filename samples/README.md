@@ -35,7 +35,7 @@ Please use
 
 The [Spring Boot Starter sample](service-provider/starter) showcases the use of 
 a Spring Boot application with the use of a minimal 
-[default configuration](service-provider/starter/src/main/java/org/springframework/security/saml/samples/SecurityConfig.java)
+[default configuration](service-provider/starter/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java)
 to configure the SAML Service Provider. 
 
 Service Provider runs on `http://localhost:8080/sample-sp`
@@ -50,7 +50,7 @@ along with one remote Identity Provider (IDP).
 The [Spring Boot Configuration sample](service-provider/boot-config) showcases the use of 
 a Spring Boot [application.yml](service-provider/boot-config/src/main/resources/application.yml) file
 to configure the SAML Service Provider. The sample also uses 
-[bean dependency injection](service-provider/boot-config/src/main/java/org/springframework/security/saml/samples/SecurityConfig.java)
+[bean dependency injection](service-provider/boot-config/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java)
 to configure all the SAML components  .
 
 This sample also showcases the difference between SAML Single(federated) logout and local(server only) logout.
@@ -63,7 +63,7 @@ Service Provider runs on `http://localhost:8080/sample-sp`
 
 The [Spring Boot sample](service-provider/java-config) showcases the use of 
 a Spring Boot application where all the configurations are set 
-[programmatically]((service-provider/java-config/src/main/java/org/springframework/security/saml/samples/SecurityConfig.java))
+[programmatically]((service-provider/java-config/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java))
 to configure the SAML Service Provider
 
 Service Provider runs on `http://localhost:8080/sample-sp`
@@ -74,7 +74,7 @@ Service Provider runs on `http://localhost:8080/sample-sp`
 
 The [Spring Boot sample](service-provider/java-config) showcases the use of 
 a Spring Boot application where all the configurations are set 
-[programmatically]((service-provider/java-config/src/main/java/org/springframework/security/saml/samples/SecurityConfig.java))
+[programmatically]((service-provider/java-config/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java))
 to configure the SAML Service Provider
 
 Service Provider runs on `http://localhost:8080/sample-sp`

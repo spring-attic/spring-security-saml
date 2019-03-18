@@ -6,14 +6,14 @@
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Enable autowiring -->
-    <context:component-scan base-package="org.springframework.security.saml"/>
+    <context:component-scan base-package="org.springframework.security.saml2"/>
 
     <!-- Initialization of OpenSAML library-->
     <bean id="bootstrap" class="org.opensaml.PaosBootstrap" init-method="bootstrap" lazy-init="false"/>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
-        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+    <bean id="keyManager" class="org.springframework.security.saml2.model.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml2/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>
@@ -23,23 +23,23 @@
         <constructor-arg type="java.lang.String" value="apollo"/>
     </bean>
 
-    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
+    <bean id="contextProvider" class="org.springframework.security.saml2.context.SAMLContextProviderImpl"/>
 
     <!-- Factory which disables message storage capabilities -->
-    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    <bean class="org.springframework.security.saml2.storage.EmptyStorageFactory"/>
 
     <!-- Entry point to initialize authentication -->
-    <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl" depends-on="bootstrap">
+    <bean id="webSSOprofile" class="org.springframework.security.saml2.websso.WebSSOProfileImpl" depends-on="bootstrap">
         <constructor-arg ref="processor"/>
         <constructor-arg ref="metadata"/>
     </bean>
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.MetadataManager" depends-on="bootstrap">
+    <bean id="metadata" class="org.springframework.security.saml2.metadata.MetadataManager" depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testIDP.xml"/>
@@ -47,7 +47,7 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testSP.xml"/>
@@ -55,7 +55,7 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testSPMissingDescriptor.xml"/>
@@ -63,7 +63,7 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testIDPNoSigning.xml"/>
@@ -71,7 +71,7 @@
                     </constructor-arg>
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testIDPNoSSOBinding.xml"/>
@@ -90,13 +90,13 @@
     <bean id="parserPool" class="org.opensaml.PaosBootstrap" factory-method="createParserPool" scope="singleton"/>
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
-    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl" depends-on="bootstrap">
+    <bean id="processor" class="org.springframework.security.saml2.processor.SAMLProcessorImpl" depends-on="bootstrap">
         <constructor-arg ref="bindings"/>
     </bean>
 
     <!-- Bindings, encoders and decoders used for creating and parsing messages -->
     <util:list id="bindings">
-        <bean class="org.springframework.security.saml.processor.HTTPPostBinding">
+        <bean class="org.springframework.security.saml2.processor.HTTPPostBinding">
             <constructor-arg ref="parserPool"/>
             <constructor-arg>
                 <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder">
@@ -110,7 +110,7 @@
                 </bean>
             </constructor-arg>
         </bean>
-        <bean class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
+        <bean class="org.springframework.security.saml2.processor.HTTPRedirectDeflateBinding">
             <constructor-arg>
                 <bean class="org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder">
                     <property name="parserPool" ref="parserPool"/>
@@ -120,7 +120,7 @@
                 <bean class="org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder"/>
             </constructor-arg>
         </bean>
-        <bean class="org.springframework.security.saml.processor.HTTPSOAP11Binding">
+        <bean class="org.springframework.security.saml2.processor.HTTPSOAP11Binding">
             <constructor-arg>
                 <bean class="org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl">
                     <constructor-arg ref="parserPool"/>
@@ -132,7 +132,7 @@
         </bean>
     </util:list>
 
-    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
+    <bean id="velocityEngine" class="org.springframework.security.saml2.util.VelocityFactory"
           factory-method="getEngine"/>
 
 </beans>

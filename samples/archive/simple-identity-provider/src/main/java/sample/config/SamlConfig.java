@@ -21,16 +21,16 @@ import java.time.Clock;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlTemplateEngine;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.config.SamlServerBeanConfiguration;
-import org.springframework.security.saml.provider.config.StaticSamlConfigurationRepository;
-import org.springframework.security.saml.provider.config.ThreadLocalSamlConfigurationRepository;
-import org.springframework.security.saml.serviceprovider.spi.DefaultSessionAssertionStore;
-import org.springframework.security.saml.serviceprovider.spi.SpringSecuritySaml;
+import org.springframework.security.saml2.SamlMetadataCache;
+import org.springframework.security.saml2.SamlTemplateEngine;
+import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.SamlValidator;
+import org.springframework.security.saml2.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml2.provider.config.SamlServerBeanConfiguration;
+import org.springframework.security.saml2.provider.config.StaticSamlConfigurationRepository;
+import org.springframework.security.saml2.provider.config.ThreadLocalSamlConfigurationRepository;
+import org.springframework.security.saml2.serviceprovider.spi.DefaultSessionAssertionStore;
+import org.springframework.security.saml2.serviceprovider.spi.SpringSecuritySaml;
 import org.springframework.web.client.RestOperations;
 
 @Configuration

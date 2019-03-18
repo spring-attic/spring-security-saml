@@ -18,15 +18,15 @@ package saml.spi;
 
 import java.time.Clock;
 
-import org.springframework.security.saml.SamlKeyStoreProvider;
-import org.springframework.security.saml.spi.keycloak.KeycloakSamlImplementation;
+import org.springframework.security.saml2.SamlKeyStoreProvider;
+import org.springframework.security.saml2.spi.keycloak.KeycloakSamlImplementation;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.RSA_TEST_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 
 public class SamlKeyStoreProviderTests {
 

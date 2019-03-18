@@ -4,14 +4,14 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="org.springframework.security.saml"/>
+    <context:component-scan base-package="org.springframework.security.saml2"/>
 
     <!-- Initialization of OpenSAML library-->
     <bean id="bootstrap" class="org.opensaml.PaosBootstrap" init-method="bootstrap" lazy-init="false"/>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
-        <constructor-arg value="org/springframework/security/saml/key/keystore.jks"/>
+    <bean id="keyManager" class="org.springframework.security.saml2.model.key.JKSKeyManager">
+        <constructor-arg value="org/springframework/security/saml2/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>
@@ -23,11 +23,11 @@
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager"
+    <bean id="metadata" class="org.springframework.security.saml2.metadata.CachingMetadataManager"
           depends-on="bootstrap">
         <constructor-arg index="0">
             <list>
-                <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                     <constructor-arg index="0">
                         <bean class="org.springframework.core.io.ClassPathResource">
                             <constructor-arg value="testIDP.xml"/>
@@ -36,9 +36,9 @@
                     <property name="parserPool" ref="parserPool"/>
                 </bean>
 
-                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+                <bean class="org.springframework.security.saml2.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                        <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
 
                             <constructor-arg index="0">
                                 <bean class="org.springframework.core.io.ClassPathResource">
@@ -50,7 +50,7 @@
                     </constructor-arg>
                     <constructor-arg>
                         <!-- Default alias -->
-                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                        <bean class="org.springframework.security.saml2.metadata.ExtendedMetadata">
                             <property name="alias" value="myAliasDefault"/>
                         </bean>
                     </constructor-arg>
@@ -58,13 +58,13 @@
                         <map>
                             <!-- Unrelated (not provided by this instance), should be ignored -->
                             <entry key="http://localhost:8081/spring-security-saml2-webapp">
-                                <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                                <bean class="org.springframework.security.saml2.metadata.ExtendedMetadata">
                                     <property name="alias" value="myAliasSpecific"/>
                                 </bean>
                             </entry>
                             <!-- Related to exactly one -->
                             <entry key="nest2">
-                                <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                                <bean class="org.springframework.security.saml2.metadata.ExtendedMetadata">
                                     <property name="alias" value="nest2alias"/>
                                 </bean>
                             </entry>
@@ -75,9 +75,9 @@
                 </bean>
 
                 <!-- Default extended -->
-                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+                <bean class="org.springframework.security.saml2.metadata.ExtendedMetadataDelegate">
                     <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.FileMetadataProvider">
+                        <bean class="org.springframework.security.saml2.metadata.FileMetadataProvider">
                             <constructor-arg index="0">
                                 <bean class="org.springframework.core.io.ClassPathResource">
                                     <constructor-arg value="testSP.xml"/>
@@ -87,7 +87,7 @@
                         </bean>
                     </constructor-arg>
                     <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
+                        <bean class="org.springframework.security.saml2.metadata.ExtendedMetadata">
                             <property name="alias" value="myAlias"/>
                         </bean>
                     </constructor-arg>
@@ -102,7 +102,7 @@
     </bean>
 
     <!-- A provider we will add/remove from metadata manager -->
-    <bean id="singleProvider" class="org.springframework.security.saml.metadata.FileMetadataProvider">
+    <bean id="singleProvider" class="org.springframework.security.saml2.metadata.FileMetadataProvider">
         <constructor-arg index="0">
             <bean class="org.springframework.core.io.ClassPathResource">
                 <constructor-arg value="testIDPNoSSOBinding.xml"/>

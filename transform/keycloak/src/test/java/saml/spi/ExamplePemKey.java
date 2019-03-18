@@ -16,7 +16,7 @@
  */
 package saml.spi;
 
-import org.springframework.security.saml.model.key.KeyData;
+import org.springframework.security.saml2.model.key.KeyData;
 
 /*
 

@@ -25,24 +25,24 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml.SamlException;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml.provider.validation.DefaultServiceProviderValidator;
-import org.springframework.security.saml.provider.validation.ServiceProviderValidator;
-import org.springframework.security.saml.serviceprovider.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
-import org.springframework.security.saml.serviceprovider.web.WebServiceProviderResolver;
-import org.springframework.security.saml.serviceprovider.web.filters.AuthenticationRequestFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
-import org.springframework.security.saml.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderLogoutFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.ServiceProviderMetadataFilter;
-import org.springframework.security.saml.serviceprovider.web.filters.WebSsoAuthenticationFilter;
-import org.springframework.security.saml.util.StringUtils;
+import org.springframework.security.saml2.SamlException;
+import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.filters.AuthenticationRequestFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
+import org.springframework.security.saml2.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderMetadataFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter;
+import org.springframework.security.saml2.util.StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
-import static org.springframework.security.saml.util.StringUtils.stripSlashes;
+import static org.springframework.security.saml2.util.StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
 class SamlServiceProviderConfiguration {
@@ -346,10 +346,10 @@ class SamlServiceProviderConfiguration {
 
 	private SamlTransformer createDefaultSamlTransformer() {
 		try {
-			return getClassInstance("org.springframework.security.saml.spi.opensaml.OpenSamlTransformer");
+			return getClassInstance("org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer");
 		} catch (SamlException e) {
 			try {
-				return getClassInstance("org.springframework.security.saml.spi.keycloak.KeycloakSamlTransformer");
+				return getClassInstance("org.springframework.security.saml2.spi.keycloak.KeycloakSamlTransformer");
 			} catch (SamlException e2) {
 				throw e;
 			}

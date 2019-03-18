@@ -22,9 +22,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityConfiguration;
+import org.springframework.security.saml2.provider.identity.config.SamlIdentityProviderSecurityConfiguration;
 
-import static org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityDsl.identityProvider;
+import static org.springframework.security.saml2.provider.identity.config.SamlIdentityProviderSecurityDsl.identityProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {

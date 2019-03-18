@@ -4,8 +4,8 @@
 <beans>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
-        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+    <bean id="keyManager" class="org.springframework.security.saml2.model.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml2/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>

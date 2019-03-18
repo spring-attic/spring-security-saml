@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.xml.transform.stream.StreamSource;
 
-import org.springframework.security.saml.model.Namespace;
+import org.springframework.security.saml2.model.Namespace;
 
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;

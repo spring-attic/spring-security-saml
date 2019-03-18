@@ -4,11 +4,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="org.springframework.security.saml"/>
+    <context:component-scan base-package="org.springframework.security.saml2"/>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
-        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+    <bean id="keyManager" class="org.springframework.security.saml2.model.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml2/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>
@@ -20,7 +20,7 @@
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <bean id="metadata" class="org.springframework.security.saml2.metadata.CachingMetadataManager">
         <constructor-arg index="0">
             <list/>
         </constructor-arg>
@@ -37,6 +37,6 @@
           factory-method="createParserPool"/>
 
     <!-- Initialization of OpenSAML library-->
-    <bean class="org.springframework.security.saml.SAMLBootstrap"/>
+    <bean class="org.springframework.security.saml2.SAMLBootstrap"/>
 
 </beans>

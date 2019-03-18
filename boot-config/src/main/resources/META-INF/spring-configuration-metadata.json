@@ -2,18 +2,18 @@
   "groups": [
     {
       "name": "spring.security.saml2",
-      "type": "org.springframework.security.saml.boot.configuration.SamlBootConfiguration",
-      "sourceType": "org.springframework.security.saml.boot.configuration.SamlBootConfiguration"
+      "type": "org.springframework.security.saml2.boot.configuration.SamlBootConfiguration",
+      "sourceType": "org.springframework.security.saml2.boot.configuration.SamlBootConfiguration"
     },
     {
       "name": "spring.security.saml2.service-provider",
-      "type": "org.springframework.security.saml.boot.ServiceProviderConfiguration",
-      "sourceType": "org.springframework.security.saml.boot.ServiceProviderConfiguration"
+      "type": "org.springframework.security.saml2.boot.ServiceProviderConfiguration",
+      "sourceType": "org.springframework.security.saml2.boot.ServiceProviderConfiguration"
     },
     {
       "name": "spring.security.saml2.identity-provider",
-      "type": "org.springframework.security.saml.boot.IdentityProviderConfiguration",
-      "sourceType": "org.springframework.security.saml.boot.IdentityProviderConfiguration"
+      "type": "org.springframework.security.saml2.boot.IdentityProviderConfiguration",
+      "sourceType": "org.springframework.security.saml2.boot.IdentityProviderConfiguration"
     }
   ],
   "properties" : [

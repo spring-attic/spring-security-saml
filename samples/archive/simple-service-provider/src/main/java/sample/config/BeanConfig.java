@@ -20,13 +20,13 @@ package sample.config;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml.SamlMessageStore;
-import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.provider.service.config.SamlServiceProviderServerBeanConfiguration;
-import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml2.SamlMessageStore;
+import org.springframework.security.saml2.SamlMetadataCache;
+import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.SamlValidator;
+import org.springframework.security.saml2.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml2.provider.service.config.SamlServiceProviderServerBeanConfiguration;
+import org.springframework.security.saml2.model.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlServiceProviderServerBeanConfiguration {

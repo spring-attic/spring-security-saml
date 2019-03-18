@@ -25,14 +25,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.saml.SamlMessageStore;
-import org.springframework.security.saml.SamlMetadataCache;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.SamlValidator;
-import org.springframework.security.saml.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml.configuration.SamlServerConfiguration;
-import org.springframework.security.saml.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
-import org.springframework.security.saml.model.authentication.Assertion;
+import org.springframework.security.saml2.SamlMessageStore;
+import org.springframework.security.saml2.SamlMetadataCache;
+import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.SamlValidator;
+import org.springframework.security.saml2.provider.config.SamlConfigurationRepository;
+import org.springframework.security.saml2.configuration.SamlServerConfiguration;
+import org.springframework.security.saml2.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
+import org.springframework.security.saml2.model.authentication.Assertion;
 
 @Configuration
 public class BeanConfig extends SamlIdentityProviderServerBeanConfiguration {

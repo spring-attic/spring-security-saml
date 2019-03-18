@@ -6,11 +6,11 @@
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="org.springframework.security.saml"/>
+    <context:component-scan base-package="org.springframework.security.saml2"/>
 
     <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.model.key.JKSKeyManager">
-        <constructor-arg value="classpath:org/springframework/security/saml/key/keystore.jks"/>
+    <bean id="keyManager" class="org.springframework.security.saml2.model.key.JKSKeyManager">
+        <constructor-arg value="classpath:org/springframework/security/saml2/key/keystore.jks"/>
         <constructor-arg type="java.lang.String" value="nalle123"/>
         <constructor-arg>
             <map>
@@ -22,7 +22,7 @@
 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <!-- Do no forget to call iniitalize method on providers -->
-    <bean id="metadata" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <bean id="metadata" class="org.springframework.security.saml2.metadata.CachingMetadataManager">
         <constructor-arg index="0">
             <list/>
         </constructor-arg>
@@ -33,9 +33,9 @@
     </bean>
 
     <!-- Entry point to initialize authentication, default values taken from properties file -->
-    <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
+    <bean id="samlEntryPoint" class="org.springframework.security.saml2.SAMLEntryPoint">
         <property name="defaultProfileOptions">
-            <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+            <bean class="org.springframework.security.saml2.websso.WebSSOProfileOptions">
                 <property name="includeScoping" value="false"/>
             </bean>
         </property>
@@ -46,7 +46,7 @@
         <security:authentication-provider ref="samlAuthenticationProvider"/>
     </security:authentication-manager>
 
-    <bean id="samlProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
+    <bean id="samlProcessingFilter" class="org.springframework.security.saml2.SAMLProcessingFilter">
         <property name="authenticationManager" ref="authenticationManager"/>
         <property name="authenticationSuccessHandler" ref="successRedirectHandler"/>
     </bean>
@@ -56,7 +56,7 @@
         <property name="defaultTargetUrl" value="/"/>
     </bean>
 
-    <bean id="samlLogoutProcessingFilter" class="org.springframework.security.saml.SAMLLogoutProcessingFilter">
+    <bean id="samlLogoutProcessingFilter" class="org.springframework.security.saml2.SAMLLogoutProcessingFilter">
         <constructor-arg ref="successLogoutHandler"/>
         <constructor-arg ref="logoutHandler"/>
     </bean>
@@ -76,16 +76,16 @@
     <bean id="parserPool" class="org.opensaml.PaosBootstrap" factory-method="createParserPool" scope="singleton"/>
 
     <!-- Initialization of OpenSAML library-->
-    <bean class="org.springframework.security.saml.SAMLBootstrap"/>
+    <bean class="org.springframework.security.saml2.SAMLBootstrap"/>
 
     <!-- Class is capable of generating SP metadata describing the currently running environnment -->
-    <bean id="metadataGenerator" class="org.springframework.security.saml.metadata.MetadataGenerator"/>
+    <bean id="metadataGenerator" class="org.springframework.security.saml2.metadata.MetadataGenerator"/>
 
     <!-- SAML 2.0 Web SSO profile -->
-    <bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl"/>
+    <bean id="webSSOprofile" class="org.springframework.security.saml2.websso.WebSSOProfileImpl"/>
 
     <!-- Class loading incoming SAML messages from httpRequest stream -->
-    <bean id="processor" class="org.springframework.security.saml.processor.SAMLProcessorImpl">
+    <bean id="processor" class="org.springframework.security.saml2.processor.SAMLProcessorImpl">
         <constructor-arg>
             <list>
                 <ref bean="redirectBinding"/>
@@ -93,28 +93,28 @@
         </constructor-arg>
     </bean>
 
-    <bean id="redirectBinding" class="org.springframework.security.saml.processor.HTTPRedirectDeflateBinding">
+    <bean id="redirectBinding" class="org.springframework.security.saml2.processor.HTTPRedirectDeflateBinding">
         <constructor-arg ref="parserPool"/>
     </bean>
 
     <!-- Logger for SAML messages and events -->
-    <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>
+    <bean id="samlLogger" class="org.springframework.security.saml2.log.SAMLDefaultLogger"/>
 
     <!-- Provider of default SAML Context -->
-    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
+    <bean id="contextProvider" class="org.springframework.security.saml2.context.SAMLContextProviderImpl"/>
 
     <!-- Factory which disables message storage capabilities -->
-    <bean class="org.springframework.security.saml.storage.EmptyStorageFactory"/>
+    <bean class="org.springframework.security.saml2.storage.EmptyStorageFactory"/>
 
-    <bean id="samlAuthenticationProvider" class="org.springframework.security.saml.SAMLAuthenticationProvider">
+    <bean id="samlAuthenticationProvider" class="org.springframework.security.saml2.SAMLAuthenticationProvider">
     </bean>
 
     <!-- SAML 2.0 Assertion Consumer -->
-    <bean id="webSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl"/>
+    <bean id="webSSOprofileConsumer" class="org.springframework.security.saml2.websso.WebSSOProfileConsumerImpl"/>
 
-    <bean id="hokWebSSOprofileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl"/>
+    <bean id="hokWebSSOprofileConsumer" class="org.springframework.security.saml2.websso.WebSSOProfileConsumerHoKImpl"/>
 
     <!-- SAML 2.0 Logout Profile -->
-    <bean id="logoutprofile" class="org.springframework.security.saml.websso.SingleLogoutProfileImpl"/>
+    <bean id="logoutprofile" class="org.springframework.security.saml2.websso.SingleLogoutProfileImpl"/>
 
 </beans>

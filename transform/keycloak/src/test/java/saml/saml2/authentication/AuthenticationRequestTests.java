@@ -18,13 +18,13 @@ package saml.saml2.authentication;
 
 import java.util.Collections;
 
-import org.springframework.security.saml.model.authentication.AuthenticationContextClassReference;
-import org.springframework.security.saml.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml.model.authentication.RequestedAuthenticationContext;
-import org.springframework.security.saml.model.metadata.Binding;
-import org.springframework.security.saml.model.metadata.NameId;
-import org.springframework.security.saml.model.signature.AlgorithmMethod;
-import org.springframework.security.saml.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.model.authentication.RequestedAuthenticationContext;
+import org.springframework.security.saml2.model.metadata.Binding;
+import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.signature.AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.DigestMethod;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -39,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.model.metadata.NameId.PERSISTENT;
-import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
-import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
-import static org.springframework.security.saml.util.XmlTestUtil.assertTextNodeValue;
-import static org.springframework.security.saml.util.XmlTestUtil.getNodes;
+import static org.springframework.security.saml2.model.metadata.NameId.PERSISTENT;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
+import static org.springframework.security.saml2.util.XmlTestUtil.assertTextNodeValue;
+import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
 class AuthenticationRequestTests extends MetadataBase {
 

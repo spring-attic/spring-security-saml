@@ -21,15 +21,15 @@ import java.time.Clock;
 import java.util.Arrays;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml.SamlTransformer;
-import org.springframework.security.saml.model.key.KeyData;
-import org.springframework.security.saml.model.key.KeyType;
-import org.springframework.security.saml.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.model.signature.AlgorithmMethod;
-import org.springframework.security.saml.model.signature.DigestMethod;
-import org.springframework.security.saml.spi.DefaultSamlTransformer;
-import org.springframework.security.saml.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.key.KeyType;
+import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.signature.AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.spi.DefaultSamlTransformer;
+import org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -37,8 +37,8 @@ import org.junit.jupiter.api.BeforeEach;
 import saml.helper.SamlTestObjectHelper;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml.spi.ExamplePemKey.IDP_RSA_KEY;
-import static org.springframework.security.saml.spi.ExamplePemKey.SP_RSA_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
+import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 
 public abstract class MetadataBase {
 

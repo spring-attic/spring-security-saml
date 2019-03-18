@@ -23,9 +23,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityConfiguration;
+import org.springframework.security.saml2.provider.service.config.SamlServiceProviderSecurityConfiguration;
 
-import static org.springframework.security.saml.provider.service.config.SamlServiceProviderSecurityDsl.serviceProvider;
+import static org.springframework.security.saml2.provider.service.config.SamlServiceProviderSecurityDsl.serviceProvider;
 
 @EnableWebSecurity
 public class SecurityConfiguration {

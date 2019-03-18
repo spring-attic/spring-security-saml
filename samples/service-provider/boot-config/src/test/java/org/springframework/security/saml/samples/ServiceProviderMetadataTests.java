@@ -34,11 +34,10 @@ import org.springframework.security.saml.saml2.key.KeyData;
 import org.springframework.security.saml.saml2.key.KeyType;
 import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,7 +133,6 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 	@Test
 	@DisplayName("remote party metadata contains both IDP and SP descriptors")
-	@Disabled("login page is now static")
 	void parseDualRemoteMetadata() throws Exception {
 		final List<ExternalIdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()
@@ -160,7 +158,6 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 	@Test
 	@DisplayName("signed remote metadata is verified through signature")
-	@Disabled("login page is now static")
 	void remoteMetadataTrustCheck() throws Exception {
 		final List<ExternalIdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()

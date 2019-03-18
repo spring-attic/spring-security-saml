@@ -173,6 +173,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 				http,
 				BasicAuthenticationFilter.class,
 				configuration.getMetadataFilter(),
+				configuration.getStaticLoginPageFilter(),
 				configuration.getSelectIdentityProviderFilter(),
 				configuration.getAuthenticationRequestFilter(),
 				configuration.getWebSsoAuthenticationFilter(),

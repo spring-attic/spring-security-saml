@@ -51,7 +51,7 @@ import static org.springframework.security.saml.util.StringUtils.stripSlashes;
  * some tests expect a dynamic IDP selection
  * this code will most likely be removed once those tests are converted
  */
-class DynamicSelectIdentityProviderFilter extends OncePerRequestFilter {
+public class DynamicSelectIdentityProviderFilter extends OncePerRequestFilter {
 
 	private static Log logger = LogFactory.getLog(SamlLoginPageGeneratingFilter.class);
 
@@ -60,8 +60,8 @@ class DynamicSelectIdentityProviderFilter extends OncePerRequestFilter {
 	private final ServiceProviderResolver<HttpServletRequest> resolver;
 
 	public DynamicSelectIdentityProviderFilter(String pathPrefix,
-										 RequestMatcher matcher,
-										 ServiceProviderResolver<HttpServletRequest> resolver) {
+											   RequestMatcher matcher,
+											   ServiceProviderResolver<HttpServletRequest> resolver) {
 		this.pathPrefix = pathPrefix;
 		this.matcher = matcher;
 		this.resolver = resolver;
@@ -141,7 +141,7 @@ class DynamicSelectIdentityProviderFilter extends OncePerRequestFilter {
 		IdentityProviderMetadata metadata = provider.getRemoteProviders().get(p);
 		//make sure provider is available
 		if (metadata == null) {
-			throw new SamlException("Unable to fetch metadata for alias:"+p.getAlias());
+			throw new SamlException("Unable to fetch metadata for alias:" + p.getAlias());
 		}
 		return builder.build().toUriString();
 	}

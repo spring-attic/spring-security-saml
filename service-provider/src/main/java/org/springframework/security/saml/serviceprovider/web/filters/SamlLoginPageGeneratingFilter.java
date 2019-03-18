@@ -35,7 +35,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.security.saml.util.StringUtils.stripSlashes;
 
-public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
+/**
+ * Filter that generates a static SAML SP login page.
+ * It displays a list of identity providers whether they are online or not.
+ */
+public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 
 	private final RequestMatcher matcher;
 	private final Map<String, String> providerUrls;
@@ -57,7 +61,7 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 		}
 	}
 
-	protected void generateLoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void generateLoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Map<String, String> urls = new HashMap<>();
 		providerUrls.entrySet().stream().forEach(
 			e -> {
@@ -71,7 +75,7 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 		response.getWriter().write(getSamlLoginPageHtml(urls));
 	}
 
-	protected String getSamlLoginPageHtml(Map<String, String> providers) {
+	private String getSamlLoginPageHtml(Map<String, String> providers) {
 		return
 			"<html>\n" +
 				"<head>\n" +
@@ -97,7 +101,7 @@ public class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 			;
 	}
 
-	protected String getAuthenticationRequestRedirectUrl(String url,
+	private String getAuthenticationRequestRedirectUrl(String url,
 														 HttpServletRequest request) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
 			getBasePath(request, false)

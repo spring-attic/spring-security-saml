@@ -59,7 +59,7 @@ public class Saml2WebAuthenticationRequestResolver
 	}
 
 	@Override
-	public AuthenticationRequest convert(HttpServletRequest request) {
+	public AuthenticationRequest resolve(HttpServletRequest request) {
 		HostedServiceProvider provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entity =
@@ -84,11 +84,6 @@ public class Saml2WebAuthenticationRequestResolver
 	public String encode(AuthenticationRequest authn, boolean deflate) {
 		String xml = serviceProviderMethods.getTransformer().toXml(authn);
 		return serviceProviderMethods.getTransformer().samlEncode(xml, deflate);
-	}
-
-	@Override
-	public AuthenticationRequest decode(String data, boolean inflate) {
-		return null;
 	}
 
 	/*

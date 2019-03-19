@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml2.serviceprovider.authentication;
 
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
 
-public interface Saml2AuthenticationRequestResolver<HttpRequest> extends Converter<HttpRequest, AuthenticationRequest> {
+public interface Saml2AuthenticationRequestResolver<HttpRequest> {
 
 	String encode(AuthenticationRequest authn, boolean deflate);
 
-	AuthenticationRequest decode(String data, boolean inflate);
+	AuthenticationRequest resolve(HttpRequest source);
+
 }

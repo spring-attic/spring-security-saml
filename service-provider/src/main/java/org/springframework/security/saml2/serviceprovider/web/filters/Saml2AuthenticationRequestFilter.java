@@ -54,7 +54,7 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			try {
-				AuthenticationRequest authn = resolver.convert(request);
+				AuthenticationRequest authn = resolver.resolve(request);
 				sendAuthenticationRequest(authn, authn.getDestination(), request, response);
 			} catch (SamlException x) {
 				displayError(response, x.getMessage());

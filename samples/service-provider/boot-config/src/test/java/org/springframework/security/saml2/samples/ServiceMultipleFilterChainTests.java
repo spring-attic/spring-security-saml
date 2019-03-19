@@ -126,11 +126,11 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 	@DisplayName("single provider no longer redirects automatically")
 	void singleProviderNoAutomaticRedirect() throws Exception {
 		mockMvc.perform(
-			get("http://localhost/saml/sp/select?redirect=true")
+			get("http://localhost/saml/sp/login")
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp"
+				"/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}
@@ -140,11 +140,11 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 	void idpSelection() throws Exception {
 		//no redirect without redirect parameter
 		mockMvc.perform(
-			get("http://localhost/saml/sp/select")
+			get("http://localhost/saml/sp/login")
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp"
+				"/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}

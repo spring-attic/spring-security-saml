@@ -29,6 +29,7 @@ import org.springframework.security.saml2.configuration.ExternalIdentityProvider
 import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +69,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 
 	@Test
 	@DisplayName("single provider no longer redirects automatically")
+	@Disabled("login page is now static - need to replace with unit test")
 	void singleProviderNoAutomaticRedirect() throws Exception {
 		mockMvc.perform(
 			get("http://localhost/saml/sp/select?redirect=true")
@@ -75,7 +77,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 		)
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp"
+				"/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}
@@ -85,12 +87,12 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	void idpSelection() throws Exception {
 		//no redirect without redirect parameter
 		mockMvc.perform(
-			get("http://localhost/saml/sp/select")
+			get("http://localhost/saml/sp/login")
 
 		)
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().string(containsString(
-				"http://localhost/saml/sp/authenticate/simplesamlphp"
+				"/saml/sp/authenticate/simplesamlphp"
 			)))
 		;
 	}
@@ -98,6 +100,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 
 	@Test
 	@DisplayName("multiple IDPs are always displayed")
+	@Disabled("login page is now static - need to replace with unit test")
 	void multipleIdpSelection() throws Exception {
 		List<RemoteIdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
 		List<ExternalIdentityProviderConfiguration> list = new LinkedList<>();

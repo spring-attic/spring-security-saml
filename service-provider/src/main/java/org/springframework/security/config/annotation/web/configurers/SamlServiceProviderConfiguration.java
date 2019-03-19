@@ -36,7 +36,6 @@ import org.springframework.security.saml2.serviceprovider.metadata.DefaultServic
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.AuthenticationRequestFilter;
-import org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
@@ -186,21 +185,6 @@ class SamlServiceProviderConfiguration {
 				new SamlLoginPageGeneratingFilter(
 					new AntPathRequestMatcher(pathPrefix + "/login/**"),
 					getStaticLoginUrls()
-				),
-			null
-		);
-	}
-
-	DynamicSelectIdentityProviderFilter getSelectIdentityProviderFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			DynamicSelectIdentityProviderFilter.class,
-			() ->
-				new DynamicSelectIdentityProviderFilter(
-					getPathPrefix(),
-					new AntPathRequestMatcher(pathPrefix + "/select/**"),
-					providerResolver
 				),
 			null
 		);

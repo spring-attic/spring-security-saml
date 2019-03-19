@@ -74,7 +74,7 @@ public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 					.map(
 						entry ->
 							"        <li>\n" +
-								"            <a href=\"" + contextPath + "/" + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
+								"            <a href=\"" + contextPath + entry.getValue() + "\"><span style=\"font-weight:bold\">" +
 								HtmlUtils.htmlEscape(entry.getKey()) + "</span></a>\n" +
 								"        </li>\n"
 					)

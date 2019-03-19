@@ -112,11 +112,11 @@
 		<constructor-arg value="#{@staticLoginPageUrls.getStaticLoginUrls()}"/>
     </bean>
 
-	<bean id="selectIdentityProviderUIFilter"
-		  class="org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter">
-		<constructor-arg ref="pathPrefix"/>
-		<constructor-arg ref="selectIdpMatcher"/>
-	</bean>
+	<!--<bean id="selectIdentityProviderUIFilter"-->
+		  <!--class="org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter">-->
+		<!--<constructor-arg ref="pathPrefix"/>-->
+		<!--<constructor-arg ref="selectIdpMatcher"/>-->
+	<!--</bean>-->
 
 	<bean id="samlAuthenticationRequestFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filters.AuthenticationRequestFilter">
@@ -180,7 +180,7 @@
         <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
         <security:custom-filter ref="samlSpMetadataFilter" before="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlLoginPageGeneratingFilter" position="DIGEST_AUTH_FILTER"/>
-        <security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>
+        <!--<security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>-->
         <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>

@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.ValidationResult;
 import org.springframework.security.saml2.provider.HostedServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
@@ -68,7 +68,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
-	public ServiceProviderLogoutFilter(SamlTransformer transformer,
+	public ServiceProviderLogoutFilter(Saml2Transformer transformer,
 									   ServiceProviderResolver resolver,
 									   ServiceProviderValidator validator,
 									   RequestMatcher matcher) {

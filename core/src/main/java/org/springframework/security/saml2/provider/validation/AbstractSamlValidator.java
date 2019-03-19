@@ -21,7 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.ValidationResult;
 import org.springframework.security.saml2.provider.HostedProvider;
 import org.springframework.security.saml2.model.Saml2Object;
@@ -52,7 +52,7 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 		}
 	};
 
-	protected abstract SamlTransformer getSamlTransformer();
+	protected abstract Saml2Transformer getSamlTransformer();
 
 	protected abstract ValidationResult validate(Saml2Object saml2Object, ProviderType provider);
 	/**

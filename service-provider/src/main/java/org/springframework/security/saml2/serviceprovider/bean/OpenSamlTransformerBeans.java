@@ -19,15 +19,15 @@ package org.springframework.security.saml2.serviceprovider.bean;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml2.SamlTransformer;
-import org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 
 @Configuration
 public class OpenSamlTransformerBeans {
 
 	@Bean(name = "openSamlTransformer")
-	public SamlTransformer samlTransformer() {
-		return new OpenSamlTransformer();
+	public Saml2Transformer samlTransformer() {
+		return new OpenSaml2Transformer();
 	}
 
 }

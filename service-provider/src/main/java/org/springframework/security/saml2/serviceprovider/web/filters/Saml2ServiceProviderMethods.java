@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.SamlProviderNotFoundException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.HostedServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml2.model.Saml2Object;
@@ -37,30 +37,30 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.springframework.util.StringUtils.hasText;
 
-class SamlServiceProviderUtils {
+class Saml2ServiceProviderMethods {
 
-	private final SamlTransformer transformer;
+	private final Saml2Transformer transformer;
 	private final ServiceProviderResolver resolver;
 	private final ServiceProviderValidator validator;
 
-	SamlServiceProviderUtils(SamlTransformer transformer,
-							 ServiceProviderResolver resolver,
-							 ServiceProviderValidator validator) {
+	Saml2ServiceProviderMethods(Saml2Transformer transformer,
+								ServiceProviderResolver resolver,
+								ServiceProviderValidator validator) {
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.validator = validator;
 	}
 
 
-	private SamlTransformer getTransformer() {
+	public Saml2Transformer getTransformer() {
 		return transformer;
 	}
 
-	private ServiceProviderResolver getResolver() {
+	public ServiceProviderResolver getResolver() {
 		return resolver;
 	}
 
-	private ServiceProviderValidator getValidator() {
+	public ServiceProviderValidator getValidator() {
 		return validator;
 	}
 

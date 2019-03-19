@@ -20,7 +20,7 @@ package org.springframework.security.saml2.spi;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.SignableSaml2Object;
 import org.springframework.security.saml2.model.authentication.Assertion;
@@ -30,15 +30,15 @@ import org.springframework.security.saml2.model.signature.SignatureException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public abstract class DefaultSamlTransformer implements SamlTransformer, InitializingBean {
+public abstract class DefaultSaml2Transformer implements Saml2Transformer, InitializingBean {
 
 	private SpringSecuritySaml implementation;
 
-	public DefaultSamlTransformer(SpringSecuritySaml implementation) {
+	public DefaultSaml2Transformer(SpringSecuritySaml implementation) {
 		setImplementation(implementation);
 	}
 
-	public SamlTransformer setImplementation(SpringSecuritySaml implementation) {
+	public Saml2Transformer setImplementation(SpringSecuritySaml implementation) {
 		this.implementation = implementation;
 		return this;
 	}

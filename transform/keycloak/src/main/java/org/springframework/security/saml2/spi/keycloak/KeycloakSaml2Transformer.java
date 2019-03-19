@@ -19,15 +19,15 @@ package org.springframework.security.saml2.spi.keycloak;
 
 import java.time.Clock;
 
-import org.springframework.security.saml2.spi.DefaultSamlTransformer;
+import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
 
-public class KeycloakSamlTransformer extends DefaultSamlTransformer {
+public class KeycloakSaml2Transformer extends DefaultSaml2Transformer {
 
-	public KeycloakSamlTransformer() {
+	public KeycloakSaml2Transformer() {
 		this(new KeycloakSamlImplementation(Clock.systemUTC()).init());
 	}
 
-	public KeycloakSamlTransformer(KeycloakSamlImplementation implementation) {
+	public KeycloakSaml2Transformer(KeycloakSamlImplementation implementation) {
 		super(implementation);
 	}
 

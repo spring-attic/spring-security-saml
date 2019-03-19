@@ -20,7 +20,7 @@ package org.springframework.security.saml2.serviceprovider.bean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
@@ -35,11 +35,11 @@ import org.springframework.util.Assert;
 @Configuration
 public class SamlServiceProviderBeans {
 
-	private final SamlTransformer transformer;
+	private final Saml2Transformer transformer;
 	private final HostedServiceProviderConfiguration configuration;
 
 	public SamlServiceProviderBeans(
-		@Autowired SamlTransformer transformer,
+		@Autowired Saml2Transformer transformer,
 		@Autowired(required = false) HostedServiceProviderConfiguration configuration) {
 		this.transformer = transformer;
 		this.configuration = configuration;

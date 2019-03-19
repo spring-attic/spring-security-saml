@@ -20,7 +20,7 @@ import java.time.Clock;
 import java.util.List;
 
 import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.ValidationResult;
 import org.springframework.security.saml2.provider.HostedIdentityProvider;
 import org.springframework.security.saml2.model.Saml2Object;
@@ -37,22 +37,22 @@ import org.springframework.util.Assert;
 public class DefaultIdentityProviderValidator extends AbstractSamlValidator<HostedIdentityProvider>
 	implements IdentityProviderValidator {
 
-	private SamlTransformer implementation;
+	private Saml2Transformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultIdentityProviderValidator(SamlTransformer implementation) {
+	public DefaultIdentityProviderValidator(Saml2Transformer implementation) {
 		setSamlTransformer(implementation);
 	}
 
-	private void setSamlTransformer(SamlTransformer implementation) {
+	private void setSamlTransformer(Saml2Transformer implementation) {
 		this.implementation = implementation;
 	}
 
 	@Override
-	public SamlTransformer getSamlTransformer() {
+	public Saml2Transformer getSamlTransformer() {
 		return implementation;
 	}
 

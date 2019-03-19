@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml2.serviceprovider.web.filters;
 
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -25,13 +25,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter {
 
-	private final SamlTransformer transformer;
+	private final Saml2Transformer transformer;
 	private final ServiceProviderResolver resolver;
 	private final ServiceProviderValidator validator;
 	private final RequestMatcher matcher;
-	private final SamlServiceProviderUtils spUtils;
+	private final Saml2ServiceProviderMethods spUtils;
 
-	public AbstractSamlServiceProviderFilter(SamlTransformer transformer,
+	public AbstractSamlServiceProviderFilter(Saml2Transformer transformer,
 											 ServiceProviderResolver resolver,
 											 ServiceProviderValidator validator,
 											 RequestMatcher matcher) {
@@ -39,7 +39,7 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter {
 		this.resolver = resolver;
 		this.validator = validator;
 		this.matcher = matcher;
-		this.spUtils = new SamlServiceProviderUtils(transformer, resolver, validator);
+		this.spUtils = new Saml2ServiceProviderMethods(transformer, resolver, validator);
 	}
 
 
@@ -48,11 +48,11 @@ abstract class AbstractSamlServiceProviderFilter extends OncePerRequestFilter {
 		return matcher;
 	}
 
-	protected SamlServiceProviderUtils getSpUtils() {
+	protected Saml2ServiceProviderMethods getSpUtils() {
 		return spUtils;
 	}
 
-	protected SamlTransformer getTransformer() {
+	protected Saml2Transformer getTransformer() {
 		return transformer;
 	}
 

@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import org.springframework.security.saml2.SamlMetadataCache;
 import org.springframework.security.saml2.SamlProviderNotFoundException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
@@ -67,7 +67,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultServiceProviderMetadataResolver implements ServiceProviderMetadataResolver {
 	private static Log logger = LogFactory.getLog(DefaultServiceProviderMetadataResolver.class);
 
-	private final SamlTransformer samlTransformer;
+	private final Saml2Transformer saml2Transformer;
 
 	private SamlMetadataCache cache = new DefaultMetadataCache(
 		Clock.systemUTC(),
@@ -75,8 +75,8 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 		new RestOperationsUtils(4000, 4000).get(true)
 	);
 
-	public DefaultServiceProviderMetadataResolver(SamlTransformer samlTransformer) {
-		this.samlTransformer = samlTransformer;
+	public DefaultServiceProviderMetadataResolver(Saml2Transformer saml2Transformer) {
+		this.saml2Transformer = saml2Transformer;
 	}
 
 	public DefaultServiceProviderMetadataResolver setCache(SamlMetadataCache cache) {
@@ -120,7 +120,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			return null;
 		}
 		try {
-			Signature signature = samlTransformer.validateSignature(idp, idpConfig.getVerificationKeys());
+			Signature signature = saml2Transformer.validateSignature(idp, idpConfig.getVerificationKeys());
 			if (signature != null &&
 				signature.isValidated() &&
 				signature.getValidatingKey() != null) {
@@ -142,7 +142,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			if (isUri(idp.getMetadata())) {
 				data = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
 			}
-			Metadata metadata = (Metadata) samlTransformer.fromXml(data, null, null);
+			Metadata metadata = (Metadata) saml2Transformer.fromXml(data, null, null);
 			metadata.setEntityAlias(idp.getAlias());
 			result = transform(metadata);
 			addStaticKeys(idp, result);

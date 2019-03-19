@@ -21,15 +21,15 @@ import java.time.Clock;
 import java.util.Arrays;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.key.KeyData;
 import org.springframework.security.saml2.model.key.KeyType;
 import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.spi.DefaultSamlTransformer;
-import org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -42,7 +42,7 @@ import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 
 public abstract class MetadataBase {
 
-	protected static SamlTransformer config;
+	protected static Saml2Transformer config;
 	protected static Clock time;
 	protected KeyData spSigning;
 	protected KeyData idpSigning;
@@ -57,8 +57,8 @@ public abstract class MetadataBase {
 	@BeforeAll
 	public static void init() {
 		time = Clock.systemUTC();
-		config = new OpenSamlTransformer();
-		((DefaultSamlTransformer) config).afterPropertiesSet();
+		config = new OpenSaml2Transformer();
+		((DefaultSaml2Transformer) config).afterPropertiesSet();
 	}
 
 	protected byte[] getFileBytes(String path) throws IOException {

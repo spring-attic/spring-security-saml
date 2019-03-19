@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
@@ -35,7 +35,8 @@ import org.springframework.security.saml2.serviceprovider.ServiceProviderResolve
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.web.filters.AuthenticationRequestFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebAuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
@@ -62,7 +63,7 @@ class SamlServiceProviderConfiguration {
 	private static Log logger = LogFactory.getLog(SamlServiceProviderConfiguration.class);
 
 	private HttpSecurity http;
-	private SamlTransformer transformer;
+	private Saml2Transformer transformer;
 	private ServiceProviderValidator validator;
 	private ServiceProviderMetadataResolver metadataResolver;
 	private ServiceProviderResolver providerResolver;
@@ -161,15 +162,17 @@ class SamlServiceProviderConfiguration {
 		return filter;
 	}
 
-	AuthenticationRequestFilter getAuthenticationRequestFilter() {
+	Saml2AuthenticationRequestFilter getAuthenticationRequestFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			AuthenticationRequestFilter.class,
-			() -> new AuthenticationRequestFilter(
-				transformer,
-				providerResolver,
-				validator,
+			Saml2AuthenticationRequestFilter.class,
+			() -> new Saml2AuthenticationRequestFilter(
+				new Saml2WebAuthenticationRequestResolver(
+					transformer,
+					providerResolver,
+					validator
+				),
 				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 			),
 			null
@@ -245,11 +248,11 @@ class SamlServiceProviderConfiguration {
 		return validator;
 	}
 
-	SamlTransformer getSamlTransformer() {
+	Saml2Transformer getSamlTransformer() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		transformer = getSharedObject(
 			http,
-			SamlTransformer.class,
+			Saml2Transformer.class,
 			this::createDefaultSamlTransformer,
 			transformer
 		);
@@ -328,7 +331,7 @@ class SamlServiceProviderConfiguration {
 	}
 
 
-	private SamlTransformer createDefaultSamlTransformer() {
+	private Saml2Transformer createDefaultSamlTransformer() {
 		try {
 			return getClassInstance("org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer");
 		} catch (SamlException e) {
@@ -340,10 +343,10 @@ class SamlServiceProviderConfiguration {
 		}
 	}
 
-	private SamlTransformer getClassInstance(String className) {
+	private Saml2Transformer getClassInstance(String className) {
 		try {
 			Class<?> clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-			return (SamlTransformer) clazz.newInstance();
+			return (Saml2Transformer) clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			throw new SamlException(
 				"Unable to instantiate the default SAML transformer. " +

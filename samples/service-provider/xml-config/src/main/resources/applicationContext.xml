@@ -33,7 +33,7 @@
     </bean>
 
     <bean id="samlTransformer"
-          class="org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer"/>
+          class="org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer"/>
 
     <bean id="samlServiceProviderValidator"
           class="org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator">
@@ -118,10 +118,17 @@
 		<!--<constructor-arg ref="selectIdpMatcher"/>-->
 	<!--</bean>-->
 
-	<bean id="samlAuthenticationRequestFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.AuthenticationRequestFilter">
+	<bean id="saml2AuthenticationRequestResolver"
+		  class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebAuthenticationRequestResolver">
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
+	</bean>
+
+	<bean id="saml2AuthenticationRequestFilter"
+          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter">
         <constructor-arg ref="idpDiscoveryMatcher"/>
-        <constructor-arg ref="samlTransformer"/>
+        <constructor-arg ref="saml2AuthenticationRequestResolver"/>
     </bean>
 
     <bean id="samlAuthenticationManager"
@@ -181,7 +188,7 @@
         <security:custom-filter ref="samlSpMetadataFilter" before="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlLoginPageGeneratingFilter" position="DIGEST_AUTH_FILTER"/>
         <!--<security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>-->
-        <security:custom-filter ref="samlAuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
+        <security:custom-filter ref="saml2AuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>
         <security:csrf request-matcher-ref="samlMatcher" disabled="true"/>

@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.ValidationResult;
 import org.springframework.security.saml2.ValidationResult.ValidationError;
 import org.springframework.security.saml2.provider.HostedServiceProvider;
@@ -58,22 +58,22 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultServiceProviderValidator extends AbstractSamlValidator<HostedServiceProvider>
 	implements ServiceProviderValidator {
 
-	private SamlTransformer implementation;
+	private Saml2Transformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultServiceProviderValidator(SamlTransformer implementation) {
+	public DefaultServiceProviderValidator(Saml2Transformer implementation) {
 		setTransformer(implementation);
 	}
 
-	private void setTransformer(SamlTransformer implementation) {
+	private void setTransformer(Saml2Transformer implementation) {
 		this.implementation = implementation;
 	}
 
 	@Override
-	public SamlTransformer getSamlTransformer() {
+	public Saml2Transformer getSamlTransformer() {
 		return implementation;
 	}
 

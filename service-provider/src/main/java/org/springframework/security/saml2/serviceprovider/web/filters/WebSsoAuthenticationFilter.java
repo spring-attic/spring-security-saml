@@ -24,7 +24,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml2.SamlTransformer;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.ValidationResult;
 import org.springframework.security.saml2.provider.HostedServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
@@ -49,16 +49,16 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 
 	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
 	private final ServiceProviderValidator validator;
-	private final SamlServiceProviderUtils spUtils;
+	private final Saml2ServiceProviderMethods spUtils;
 
-	public WebSsoAuthenticationFilter(SamlTransformer transformer,
+	public WebSsoAuthenticationFilter(Saml2Transformer transformer,
 									  ServiceProviderResolver resolver,
 									  ServiceProviderValidator validator,
 									  RequestMatcher matcher
 	) {
 		super(matcher);
 		this.validator = validator;
-		this.spUtils = new SamlServiceProviderUtils(transformer, resolver, validator);
+		this.spUtils = new Saml2ServiceProviderMethods(transformer, resolver, validator);
 		setAllowSessionCreation(true);
 		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		setAuthenticationManager(authentication -> authentication);

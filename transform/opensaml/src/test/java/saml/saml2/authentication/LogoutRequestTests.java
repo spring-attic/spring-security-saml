@@ -33,7 +33,7 @@ import org.springframework.security.saml2.model.signature.CanonicalizationMethod
 import org.springframework.security.saml2.model.signature.DigestMethod;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
-import org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
 class LogoutObjectTests {
 
-	OpenSamlTransformer saml = new OpenSamlTransformer();
+	OpenSaml2Transformer saml = new OpenSaml2Transformer();
 	private String issuer = "http://sp.test.org";
 	private DateTime instant = new DateTime();
 	private String destination = "http://idp.test.org";

@@ -26,7 +26,7 @@ import org.springframework.security.saml2.model.key.KeyData;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
 
-public interface SamlTransformer {
+public interface Saml2Transformer {
 
 	/**
 	 * Converts a SAML object into an XML string.

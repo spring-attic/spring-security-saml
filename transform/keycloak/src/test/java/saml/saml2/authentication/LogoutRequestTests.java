@@ -33,7 +33,7 @@ import org.springframework.security.saml2.model.signature.CanonicalizationMethod
 import org.springframework.security.saml2.model.signature.DigestMethod;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
-import org.springframework.security.saml2.spi.keycloak.KeycloakSamlTransformer;
+import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ import static org.springframework.security.saml2.util.XmlTestUtil.getNodes;
 
 class LogoutObjectTests {
 
-	KeycloakSamlTransformer saml = new KeycloakSamlTransformer();
+	KeycloakSaml2Transformer saml = new KeycloakSaml2Transformer();
 	private String issuer = "http://sp.test.org";
 	private DateTime instant = new DateTime();
 	private String destination = "http://idp.test.org";

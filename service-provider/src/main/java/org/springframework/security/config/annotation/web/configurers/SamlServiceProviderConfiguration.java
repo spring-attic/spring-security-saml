@@ -38,7 +38,7 @@ import org.springframework.security.saml2.serviceprovider.web.WebServiceProvider
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebAuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
-import org.springframework.security.saml2.serviceprovider.web.filters.SamlLoginPageGeneratingFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderMetadataFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter;
@@ -179,13 +179,13 @@ class SamlServiceProviderConfiguration {
 		);
 	}
 
-	SamlLoginPageGeneratingFilter getStaticLoginPageFilter() {
+	Saml2LoginPageGeneratingFilter getStaticLoginPageFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			SamlLoginPageGeneratingFilter.class,
+			Saml2LoginPageGeneratingFilter.class,
 			() ->
-				new SamlLoginPageGeneratingFilter(
+				new Saml2LoginPageGeneratingFilter(
 					new AntPathRequestMatcher(pathPrefix + "/login/**"),
 					getStaticLoginUrls()
 				),

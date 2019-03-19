@@ -36,13 +36,13 @@ import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
  * Filter that generates a static SAML SP login page.
  * It displays a list of identity providers whether they are online or not.
  */
-public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
+public final class Saml2LoginPageGeneratingFilter extends OncePerRequestFilter {
 
 	private final RequestMatcher matcher;
 	private final Map<String, String> providerUrls;
 
-	public SamlLoginPageGeneratingFilter(RequestMatcher matcher,
-										 Map<String, String> providerUrls) {
+	public Saml2LoginPageGeneratingFilter(RequestMatcher matcher,
+										  Map<String, String> providerUrls) {
 		this.matcher = matcher;
 		this.providerUrls = providerUrls;
 	}
@@ -53,14 +53,14 @@ public final class SamlLoginPageGeneratingFilter extends OncePerRequestFilter {
 		if (matcher.matches(request)) {
 			response.setContentType(TEXT_HTML_VALUE);
 			response.setCharacterEncoding(UTF_8.name());
-			response.getWriter().write(getSamlLoginPageHtml(providerUrls, request.getContextPath()));
+			response.getWriter().write(getSaml2LoginPageHtml(providerUrls, request.getContextPath()));
 		}
 		else {
 			filterChain.doFilter(request, response);
 		}
 	}
 
-	private String getSamlLoginPageHtml(Map<String, String> providers, String contextPath) {
+	private String getSaml2LoginPageHtml(Map<String, String> providers, String contextPath) {
 		return
 			"<html>\n" +
 				"<head>\n" +

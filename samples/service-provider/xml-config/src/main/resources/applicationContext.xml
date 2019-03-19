@@ -107,7 +107,7 @@
 	</bean>
 
     <bean id="samlLoginPageGeneratingFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.SamlLoginPageGeneratingFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter">
         <constructor-arg ref="staticIdpLoginMatcher"/>
 		<constructor-arg value="#{@staticLoginPageUrls.getStaticLoginUrls()}"/>
     </bean>

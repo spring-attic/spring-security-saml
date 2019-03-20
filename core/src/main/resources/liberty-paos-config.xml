@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <XMLTooling xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.opensaml.org/xmltooling-config ../../src/schema/xmltooling-config.xsd"
+ xsi:schemaLocation="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home/xmltooling-config ../../src/schema/xmltooling-config.xsd"
  xmlns:paos="urn:liberty:paos:2003-08"
- xmlns="http://www.opensaml.org/xmltooling-config">
+ xmlns="https://wiki.shibboleth.net/confluence/display/OpenSAML/Home/xmltooling-config">
  
     <!-- Liberty PAOS Object providers -->
     <ObjectProviders>

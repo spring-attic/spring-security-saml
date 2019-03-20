@@ -84,7 +84,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 			IdentityProviderService provider = getProvisioning().getHostedProvider();
 			ServiceProviderMetadata recipient = getTargetProvider(request);
 			AuthenticationRequest authenticationRequest = getAuthenticationRequest(request);
-			Assertion assertion = getAssertion(authentication, provider, recipient);
+			Assertion assertion = getAssertion(authentication, authenticationRequest, provider, recipient);
 			assertionStore.addMessage(request, assertion.getId(), assertion);
 			Response r = provider.response(authenticationRequest, assertion, recipient);
 
@@ -142,9 +142,10 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 	}
 
 	protected Assertion getAssertion(Authentication authentication,
+									 AuthenticationRequest authenticationRequest,
 									 IdentityProviderService provider,
 									 ServiceProviderMetadata recipient) {
-		return provider.assertion(recipient, authentication.getName(), NameId.PERSISTENT);
+		return provider.assertion(recipient, authenticationRequest, authentication.getName(), NameId.PERSISTENT);
 	}
 
 	public String getPostBindingTemplate() {

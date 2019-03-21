@@ -38,7 +38,7 @@ public class ResponseTest extends BaseSAMLObjectProviderTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        expectedSOAP11Actor = "http://schemas.xmlsoap.org/soap/actor/next";
+        expectedSOAP11Actor = "http://schemas.xmlsoap.org/soap/actor/next/";
         expectedSOAP11MustUnderstand = true;
         expectedRefToMessageID = "6c3a4f8b9c2d";
     }

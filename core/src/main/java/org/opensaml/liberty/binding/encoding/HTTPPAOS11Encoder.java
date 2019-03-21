@@ -91,7 +91,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             HTTPTransportUtils.addNoCacheHeaders(outTransport);
             HTTPTransportUtils.setUTF8Encoding(outTransport);
             HTTPTransportUtils.setContentType(outTransport, "text/xml");
-            outTransport.setHeader("SOAPAction", "http://www.oasis-open.org/committees/security");
+            outTransport.setHeader("SOAPAction", "https://www.oasis-open.org/committees/security");
             Writer out = new OutputStreamWriter(outTransport.getOutgoingStream(), "UTF-8");
             XMLHelper.writeNode(envelopeElem, out);
             out.flush();

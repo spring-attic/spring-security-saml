@@ -1,7 +1,7 @@
 <%@ page import="org.springframework.security.saml.web.MetadataController" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 <jsp:include page="/WEB-INF/templates/head.jsp"/>
 <body>
@@ -126,7 +126,7 @@
                                         Security profile determines how is trust of digital signatures handled:
                                         <ul>
                                             <li>
-                                                In <a href="http://wiki.oasis-open.org/security/SAML2MetadataIOP">MetaIOP</a> mode certificate is
+                                                In <a href="https://wiki.oasis-open.org/security/SAML2MetadataIOP">MetaIOP</a> mode certificate is
                                                 deemed
                                                 valid when it's declared in the metadata or extended metadata of the peer entity. No validation of
                                                 the certificate is
@@ -240,8 +240,8 @@
                                 <td></td>
                                 <td>
                                     <small>Algorithm used for creation of digital signature on metadata. Typical values are
-                                        "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" and "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"
+                                        "https://www.w3.org/2000/09/xmldsig#rsa-sha1",
+                                        "https://www.w3.org/2001/04/xmldsig-more#rsa-sha256" and "https://www.w3.org/2001/04/xmldsig-more#rsa-sha512"
                                     </small>
                                 </td>
                             </tr>
@@ -392,7 +392,7 @@
                                 <td></td>
                                 <td>
                                     <small>
-                                        <a href="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Discovery
+                                        <a href="https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Discovery
                                             profile</a> enables service provider to determine which identity provider should be used
                                         for a particular user. Spring Security SAML contains it's own discovery service which presents
                                         user with an IDP list to select from.

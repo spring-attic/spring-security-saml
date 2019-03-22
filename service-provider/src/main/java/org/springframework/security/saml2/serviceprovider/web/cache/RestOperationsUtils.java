@@ -23,7 +23,7 @@ import javax.net.ssl.SSLContext;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.saml2.SamlKeyException;
+import org.springframework.security.saml2.Saml2KeyException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -78,11 +78,11 @@ public class RestOperationsUtils {
 		try {
 			return new SSLContextBuilder().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
 		} catch (KeyManagementException e) {
-			throw new SamlKeyException(e);
+			throw new Saml2KeyException(e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new SamlKeyException(e);
+			throw new Saml2KeyException(e);
 		} catch (KeyStoreException e) {
-			throw new SamlKeyException(e);
+			throw new Saml2KeyException(e);
 		}
 	}
 }

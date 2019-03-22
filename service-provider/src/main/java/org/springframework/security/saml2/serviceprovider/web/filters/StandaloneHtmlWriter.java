@@ -20,7 +20,7 @@ package org.springframework.security.saml2.serviceprovider.web.filters;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml2.SamlException;
+import org.springframework.security.saml2.Saml2Exception;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
@@ -36,7 +36,7 @@ class StandaloneHtmlWriter {
 		try {
 			response.getWriter().write(content.getHtml());
 		} catch (IOException e) {
-			throw new SamlException(e);
+			throw new Saml2Exception(e);
 		}
 	}
 

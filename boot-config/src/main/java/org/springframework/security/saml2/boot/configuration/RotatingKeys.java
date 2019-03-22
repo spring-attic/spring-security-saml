@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
@@ -35,11 +35,11 @@ public class RotatingKeys {
 	@NestedConfigurationProperty
 	private List<SamlKey> standBy = new LinkedList<>();
 
-	public List<KeyData> toList() {
-		LinkedList<KeyData> result = new LinkedList<>();
+	public List<Saml2KeyData> toList() {
+		LinkedList<Saml2KeyData> result = new LinkedList<>();
 		if (getActive()!=null) {
 			result.add(getActive().toKeyData());
-			result.add(getActive().toKeyData(getActive().getName()+"-encrypt", KeyType.ENCRYPTION));
+			result.add(getActive().toKeyData(getActive().getName()+"-encrypt", Saml2KeyType.ENCRYPTION));
 		}
 		result.addAll(
 			ofNullable(getStandBy()).orElse(Collections.emptyList())

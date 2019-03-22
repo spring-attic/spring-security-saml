@@ -19,7 +19,7 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 
 public class LocalServiceProviderConfiguration extends
 	LocalProviderConfiguration<RemoteIdentityProviderConfiguration> {
@@ -31,8 +31,8 @@ public class LocalServiceProviderConfiguration extends
 		super("saml/sp");
 	}
 
-	public HostedServiceProviderConfiguration toHostedConfiguration() {
-		return new HostedServiceProviderConfiguration(
+	public HostedSaml2ServiceProviderConfiguration toHostedConfiguration() {
+		return new HostedSaml2ServiceProviderConfiguration(
 			getPathPrefix(),
 			getBasePath(),
 			getAlias(),

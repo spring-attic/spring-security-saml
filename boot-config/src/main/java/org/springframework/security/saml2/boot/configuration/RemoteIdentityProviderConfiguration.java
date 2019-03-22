@@ -19,26 +19,26 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.net.URI;
 
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 
 public class RemoteIdentityProviderConfiguration extends RemoteProviderConfiguration {
 
-	private NameId nameId;
+	private Saml2NameId nameId;
 	private int assertionConsumerServiceIndex;
 	private URI authenticationRequestBinding = null;
 
-	public NameId getNameId() {
+	public Saml2NameId getNameId() {
 		return nameId;
 	}
 
-	public void setNameId(NameId nameId) {
+	public void setNameId(Saml2NameId nameId) {
 		this.nameId = nameId;
 	}
 
 	public void setNameId(String nameId) {
-		setNameId(NameId.fromUrn(nameId));
+		setNameId(Saml2NameId.fromUrn(nameId));
 	}
 
 	public int getAssertionConsumerServiceIndex() {
@@ -57,8 +57,8 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 		this.authenticationRequestBinding = authenticationRequestBinding;
 	}
 
-	public ExternalIdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
-		return new ExternalIdentityProviderConfiguration(
+	public ExternalSaml2IdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
+		return new ExternalSaml2IdentityProviderConfiguration(
 			getAlias(),
 			getMetadata(),
 			getLinktext(),
@@ -67,7 +67,7 @@ public class RemoteIdentityProviderConfiguration extends RemoteProviderConfigura
 			getNameId(),
 			getAssertionConsumerServiceIndex(),
 			getVerificationKeyData(),
-			Binding.fromUrn(getAuthenticationRequestBinding())
+			Saml2Binding.fromUrn(getAuthenticationRequestBinding())
 		);
 	}
 

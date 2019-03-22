@@ -28,12 +28,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml2.helper.SamlTestObjectHelper;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.LogoutRequest;
-import org.springframework.security.saml2.model.authentication.LogoutResponse;
-import org.springframework.security.saml2.model.authentication.StatusCode;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -69,13 +69,13 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	void initiateLogout() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
-		Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", NameId.PERSISTENT);
+		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -99,7 +99,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 		Map<String, String> params = queryParams(new URI(redirect));
 		String request = params.get("SAMLRequest");
 		assertNotNull(request);
-		LogoutRequest lr = (LogoutRequest) transformer.fromXml(
+		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) transformer.fromXml(
 			transformer.samlDecode(request, true),
 			null,
 			null
@@ -112,13 +112,13 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	void receiveLogoutRequest() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
-		Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", NameId.PERSISTENT);
+		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -127,7 +127,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			null,
 			null
 		);
-		LogoutRequest request = helper.logoutRequest(
+		Saml2LogoutSaml2Request request = helper.logoutRequest(
 			sp,
 			idp,
 			assertion.getSubject().getPrincipal()
@@ -152,13 +152,13 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 		Map<String, String> params = queryParams(new URI(redirect));
 		String response = params.get("SAMLResponse");
 		assertNotNull(response);
-		LogoutResponse lr = (LogoutResponse) transformer.fromXml(
+		Saml2LogoutResponseSaml2 lr = (Saml2LogoutResponseSaml2) transformer.fromXml(
 			transformer.samlDecode(response, true),
 			null,
 			null
 		);
 		assertNotNull(lr);
-		assertThat(lr.getStatus().getCode(), equalTo(StatusCode.SUCCESS));
+		assertThat(lr.getStatus().getCode(), equalTo(Saml2StatusCode.SUCCESS));
 
 	}
 
@@ -167,13 +167,13 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	void receiveLogoutResponse() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
-		Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", NameId.PERSISTENT);
+		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
 		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
 			true,
 			assertion,
@@ -182,13 +182,13 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			null,
 			null
 		);
-		LogoutRequest request = helper.logoutRequest(
+		Saml2LogoutSaml2Request request = helper.logoutRequest(
 			idp,
 			sp,
 			assertion.getSubject().getPrincipal()
 		);
 
-		LogoutResponse response = helper.logoutResponse(request, sp, idp);
+		Saml2LogoutResponseSaml2 response = helper.logoutResponse(request, sp, idp);
 
 		String xml = transformer.toXml(response);
 		String param = transformer.samlEncode(xml, true);

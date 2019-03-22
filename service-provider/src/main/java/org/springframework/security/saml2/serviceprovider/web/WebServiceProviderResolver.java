@@ -19,8 +19,8 @@ package org.springframework.security.saml2.serviceprovider.web;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml2.provider.HostedServiceProvider;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
@@ -37,9 +37,9 @@ public class WebServiceProviderResolver implements ServiceProviderResolver<HttpS
 	}
 
 	@Override
-	public HostedServiceProvider getServiceProvider(HttpServletRequest request) {
-		HostedServiceProviderConfiguration config = configResolver.getConfiguration(request);
-		return new HostedServiceProvider(
+	public HostedSaml2ServiceProvider getServiceProvider(HttpServletRequest request) {
+		HostedSaml2ServiceProviderConfiguration config = configResolver.getConfiguration(request);
+		return new HostedSaml2ServiceProvider(
 			config,
 			metadataResolver.getMetadata(config),
 			metadataResolver.getIdentityProviders(config)

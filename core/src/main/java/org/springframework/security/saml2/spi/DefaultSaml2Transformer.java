@@ -22,9 +22,9 @@ import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
 
@@ -32,13 +32,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class DefaultSaml2Transformer implements Saml2Transformer, InitializingBean {
 
-	private SpringSecuritySaml implementation;
+	private SpringSecuritySaml2 implementation;
 
-	public DefaultSaml2Transformer(SpringSecuritySaml implementation) {
+	public DefaultSaml2Transformer(SpringSecuritySaml2 implementation) {
 		setImplementation(implementation);
 	}
 
-	public Saml2Transformer setImplementation(SpringSecuritySaml implementation) {
+	public Saml2Transformer setImplementation(SpringSecuritySaml2 implementation) {
 		this.implementation = implementation;
 		return this;
 	}
@@ -63,7 +63,7 @@ public abstract class DefaultSaml2Transformer implements Saml2Transformer, Initi
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Saml2Object fromXml(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
+	public Saml2Object fromXml(byte[] xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys) {
 		return implementation.resolve(xml, verificationKeys, localKeys);
 	}
 
@@ -97,13 +97,13 @@ public abstract class DefaultSaml2Transformer implements Saml2Transformer, Initi
 	}
 
 	@Override
-	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+	public Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
 		throws SignatureException {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
 			throw new SignatureException("No object to validate signature against.");
 		}
 
-		if (saml2Object instanceof Assertion && ((Assertion) saml2Object).isEncrypted()) {
+		if (saml2Object instanceof Saml2Assertion && ((Saml2Assertion) saml2Object).isEncrypted()) {
 			//we don't need to validate the signature
 			//of an assertion that was successfully decrypted
 			try {

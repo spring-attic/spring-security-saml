@@ -53,7 +53,7 @@ import org.keycloak.saml.processing.core.saml.v2.writers.SAMLAssertionWriter;
 import org.w3c.dom.Element;
 
 import static org.keycloak.saml.common.constants.JBossSAMLURIConstants.ASSERTION_NSURI;
-import static org.springframework.security.saml2.util.DateUtils.toZuluTime;
+import static org.springframework.security.saml2.util.Saml2DateUtils.toZuluTime;
 
 public class KeycloakSamlAssertionWriter extends SAMLAssertionWriter {
 	public KeycloakSamlAssertionWriter(XMLStreamWriter writer) {

@@ -18,8 +18,8 @@
 package org.springframework.security.saml2.serviceprovider.authentication;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.SubjectPrincipal;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectPrincipal;
 
 /**
  * An authentication containing SAML information
@@ -45,14 +45,14 @@ public interface SamlAuthentication extends Authentication {
 	 *
 	 * @return principal with user information
 	 */
-	SubjectPrincipal<? extends SubjectPrincipal> getSamlPrincipal();
+	Saml2SubjectPrincipal<? extends Saml2SubjectPrincipal> getSamlPrincipal();
 
 	/**
 	 * returns the assertion object that was used to create this authentication object
 	 *
 	 * @return assertion representing authentication
 	 */
-	Assertion getAssertion();
+	Saml2Assertion getAssertion();
 
 	/**
 	 * If the POST or REDIRECT contained a RelayState parameter this will be the value of it

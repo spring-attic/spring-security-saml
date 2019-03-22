@@ -21,19 +21,19 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.SubjectPrincipal;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectPrincipal;
 
 public class DefaultSamlAuthentication implements SamlAuthentication {
 	private boolean authenticated;
-	private Assertion assertion;
+	private Saml2Assertion assertion;
 	private String assertingEntityId;
 	private String holdingEntityId;
 	private String relayState;
 	private String responseXml;
 
 	public DefaultSamlAuthentication(boolean authenticated,
-									 Assertion assertion,
+									 Saml2Assertion assertion,
 									 String assertingEntityId,
 									 String holdingEntityId,
 									 String relayState,
@@ -57,16 +57,16 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	}
 
 	@Override
-	public SubjectPrincipal<? extends SubjectPrincipal> getSamlPrincipal() {
+	public Saml2SubjectPrincipal<? extends Saml2SubjectPrincipal> getSamlPrincipal() {
 		return assertion.getSubject().getPrincipal();
 	}
 
 	@Override
-	public Assertion getAssertion() {
+	public Saml2Assertion getAssertion() {
 		return assertion;
 	}
 
-	protected void setAssertion(Assertion assertion) {
+	protected void setAssertion(Saml2Assertion assertion) {
 		this.assertion = assertion;
 	}
 

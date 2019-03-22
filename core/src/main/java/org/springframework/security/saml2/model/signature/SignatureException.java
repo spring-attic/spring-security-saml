@@ -16,9 +16,9 @@
  */
 package org.springframework.security.saml2.model.signature;
 
-import org.springframework.security.saml2.SamlException;
+import org.springframework.security.saml2.Saml2Exception;
 
-public class SignatureException extends SamlException {
+public class SignatureException extends Saml2Exception {
 
 	public SignatureException(String message) {
 		super(message);

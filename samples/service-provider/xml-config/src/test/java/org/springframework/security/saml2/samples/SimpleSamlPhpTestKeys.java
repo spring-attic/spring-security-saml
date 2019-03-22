@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml2.samples;
 
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
 
 public class SimpleSamlPhpTestKeys {
-	public static KeyData getSimpleSamlPhpKeyData() {
-		return new KeyData(
+	public static Saml2KeyData getSimpleSamlPhpKeyData() {
+		return new Saml2KeyData(
 			"simplesamlphp-key",
 			"-----BEGIN RSA PRIVATE KEY-----\n" +
 				"MIIEowIBAAKCAQEAuHJ+thNcS6qTd+D5m6ygW5DlxY81oCfW/qV7mkX7egN9/bri\n" +
@@ -76,7 +76,7 @@ public class SimpleSamlPhpTestKeys {
 				"lx13Y1YlQ4/tlpgTgfIJxKV6nyPiLoK0nywbMd+vpAirDt2Oc+hk\n" +
 				"-----END CERTIFICATE-----",
 			"",
-			KeyType.SIGNING
+			Saml2KeyType.SIGNING
 		);
 	}
 }

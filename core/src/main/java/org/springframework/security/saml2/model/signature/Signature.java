@@ -16,7 +16,7 @@
  */
 package org.springframework.security.saml2.model.signature;
 
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 
 public class Signature {
 
@@ -26,7 +26,7 @@ public class Signature {
 	private String digestValue;
 	private String signatureValue;
 	private boolean validated = false;
-	private KeyData validatingKey;
+	private Saml2KeyData validatingKey;
 
 	public CanonicalizationMethod getCanonicalizationAlgorithm() {
 		return canonicalizationAlgorithm;
@@ -82,11 +82,11 @@ public class Signature {
 		return this;
 	}
 
-	public KeyData getValidatingKey() {
+	public Saml2KeyData getValidatingKey() {
 		return validatingKey;
 	}
 
-	public Signature setValidatingKey(KeyData validatingKey) {
+	public Signature setValidatingKey(Saml2KeyData validatingKey) {
 		this.validatingKey = validatingKey;
 		return this;
 	}

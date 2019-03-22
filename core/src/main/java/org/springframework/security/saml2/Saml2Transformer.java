@@ -21,8 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
 
@@ -53,7 +53,7 @@ public interface Saml2Transformer {
 	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
-	default Saml2Object fromXml(String xml, List<KeyData> verificationKeys, List<KeyData> localKeys) {
+	default Saml2Object fromXml(String xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys) {
 		return fromXml(xml.getBytes(StandardCharsets.UTF_8), verificationKeys, localKeys);
 	}
 
@@ -72,20 +72,20 @@ public interface Saml2Transformer {
 	 *                                                                              is not
 	 *                                                                              recognized or implemeted
 	 */
-	Saml2Object fromXml(byte[] xml, List<KeyData> verificationKeys, List<KeyData> localKeys);
+	Saml2Object fromXml(byte[] xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys);
 
 	default <T extends Saml2Object> T fromXml(
 		byte[] xml,
-		List<KeyData> verificationKeys,
-		List<KeyData> localKeys,
+		List<Saml2KeyData> verificationKeys,
+		List<Saml2KeyData> localKeys,
 		Class<T> type) {
 		return type.cast(fromXml(xml, verificationKeys, localKeys));
 	}
 
 	default <T extends Saml2Object> T fromXml(
 		String xml,
-		List<KeyData> verificationKeys,
-		List<KeyData> localKeys,
+		List<Saml2KeyData> verificationKeys,
+		List<Saml2KeyData> localKeys,
 		Class<T> type) {
 		return type.cast(fromXml(xml, verificationKeys, localKeys));
 	}
@@ -109,7 +109,7 @@ public interface Saml2Transformer {
 	 */
 	String samlDecode(String s, boolean inflate);
 
-	Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> trustedKeys)
+	Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
 		throws SignatureException;
 
 }

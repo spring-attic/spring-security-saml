@@ -19,22 +19,22 @@ package org.springframework.security.saml2.provider.validation;
 import java.time.Clock;
 import java.util.List;
 
-import org.springframework.security.saml2.SamlException;
+import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.ValidationResult;
-import org.springframework.security.saml2.provider.HostedIdentityProvider;
+import org.springframework.security.saml2.Saml2ValidationResult;
+import org.springframework.security.saml2.provider.HostedSaml2IdentityProvider;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.LogoutRequest;
-import org.springframework.security.saml2.model.authentication.LogoutResponse;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module
-public class DefaultIdentityProviderValidator extends AbstractSamlValidator<HostedIdentityProvider>
+public class DefaultIdentityProviderValidator extends AbstractSamlValidator<HostedSaml2IdentityProvider>
 	implements IdentityProviderValidator {
 
 	private Saml2Transformer implementation;
@@ -62,39 +62,39 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 	}
 
 	@Override
-	public Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys) {
+	public Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys) {
 		return super.validateSignature(saml2Object, verificationKeys);
 	}
 
 	@Override
-	public ValidationResult validate(Saml2Object saml2Object, HostedIdentityProvider provider) {
+	public Saml2ValidationResult validate(Saml2Object saml2Object, HostedSaml2IdentityProvider provider) {
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
-		ValidationResult result;
+		Saml2ValidationResult result;
 		if (saml2Object instanceof ServiceProviderMetadata) {
 			result = validate((ServiceProviderMetadata)saml2Object, provider);
 		}
-		else if (saml2Object instanceof AuthenticationRequest) {
-			result = validate((AuthenticationRequest)saml2Object, provider);
+		else if (saml2Object instanceof Saml2AuthenticationSaml2Request) {
+			result = validate((Saml2AuthenticationSaml2Request)saml2Object, provider);
 		}
-		else if (saml2Object instanceof LogoutRequest) {
-			result = validate((LogoutRequest)saml2Object, provider);
+		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
+			result = validate((Saml2LogoutSaml2Request)saml2Object, provider);
 		}
-		else if (saml2Object instanceof LogoutResponse) {
-			result = validate((LogoutResponse)saml2Object, provider);
+		else if (saml2Object instanceof Saml2LogoutResponseSaml2) {
+			result = validate((Saml2LogoutResponseSaml2)saml2Object, provider);
 		}
 		else {
-			throw new SamlException("No validation implemented for class:" + saml2Object.getClass().getName());
+			throw new Saml2Exception("No validation implemented for class:" + saml2Object.getClass().getName());
 		}
 		return result;
 
 	}
 
-	private ValidationResult validate(ServiceProviderMetadata metadata, HostedIdentityProvider provider) {
-		return new ValidationResult(metadata);
+	private Saml2ValidationResult validate(ServiceProviderMetadata metadata, HostedSaml2IdentityProvider provider) {
+		return new Saml2ValidationResult(metadata);
 	}
 
-	private ValidationResult validate(AuthenticationRequest authnRequest, HostedIdentityProvider provider) {
-		ValidationResult result = new ValidationResult(authnRequest);
+	private Saml2ValidationResult validate(Saml2AuthenticationSaml2Request authnRequest, HostedSaml2IdentityProvider provider) {
+		Saml2ValidationResult result = new Saml2ValidationResult(authnRequest);
 		checkValidSignature(authnRequest, result);
 		return result;
 	}

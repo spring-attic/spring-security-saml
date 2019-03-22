@@ -22,16 +22,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.metadata.Binding;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.springframework.security.saml2.model.metadata.NameId.EMAIL;
-import static org.springframework.security.saml2.model.metadata.NameId.PERSISTENT;
-import static org.springframework.security.saml2.model.metadata.NameId.UNSPECIFIED;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.EMAIL;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.UNSPECIFIED;
 import static org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
@@ -60,18 +60,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 								.nameIds(asList(UNSPECIFIED, EMAIL, PERSISTENT))
 								.keys(
 									asList(
-										new KeyData(
+										new Saml2KeyData(
 											"sp-signing-key",
 											privateKey,
 											certificate,
 											"sppassword",
-											KeyType.SIGNING
+											Saml2KeyType.SIGNING
 										)
 									)
 								)
 								.providers(
 									asList(
-										new ExternalIdentityProviderConfiguration(
+										new ExternalSaml2IdentityProviderConfiguration(
 											"simplesamlphp",
 											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
 											"Simple SAML PHP IDP (Java Config)",
@@ -80,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 											UNSPECIFIED,
 											0,
 											emptyList(),
-											Binding.REDIRECT
+											Saml2Binding.REDIRECT
 										)
 									)
 								)

@@ -37,9 +37,9 @@ import org.keycloak.saml.common.exceptions.ProcessingException;
 import org.keycloak.saml.common.util.StaxUtil;
 import org.keycloak.saml.processing.core.saml.v2.writers.SAMLMetadataWriter;
 
-import static org.springframework.security.saml2.model.Namespace.NS_METADATA;
-import static org.springframework.security.saml2.model.metadata.Binding.DISCOVERY;
-import static org.springframework.security.saml2.model.metadata.Binding.REQUEST_INITIATOR;
+import static org.springframework.security.saml2.model.Saml2Namespace.NS_METADATA;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.DISCOVERY;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.REQUEST_INITIATOR;
 import static org.springframework.util.StringUtils.hasText;
 
 public class KeycloakSamlMetadataWriter extends SAMLMetadataWriter {

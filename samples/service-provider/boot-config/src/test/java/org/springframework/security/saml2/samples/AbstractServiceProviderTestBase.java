@@ -31,11 +31,11 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml2.boot.configuration.SamlBootConfiguration;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.metadata.Metadata;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.test.web.servlet.MockMvc;
@@ -74,7 +74,7 @@ abstract class AbstractServiceProviderTestBase {
 	void reset() {
 	}
 
-	AuthenticationRequest getAuthenticationRequestRedirect(String idpEntityId) throws Exception {
+	Saml2AuthenticationSaml2Request getAuthenticationRequestRedirect(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
@@ -93,11 +93,11 @@ abstract class AbstractServiceProviderTestBase {
 			bootConfiguration.getServiceProvider().getKeys().toList()
 		);
 		assertNotNull(saml2Object);
-		assertThat(saml2Object.getClass(), equalTo(AuthenticationRequest.class));
-		return (AuthenticationRequest) saml2Object;
+		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationSaml2Request.class));
+		return (Saml2AuthenticationSaml2Request) saml2Object;
 	}
 
-	AuthenticationRequest getAuthenticationRequestPost(String idpEntityId) throws Exception {
+	Saml2AuthenticationSaml2Request getAuthenticationRequestPost(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
@@ -117,17 +117,17 @@ abstract class AbstractServiceProviderTestBase {
 			bootConfiguration.getServiceProvider().getKeys().toList()
 		);
 		assertNotNull(saml2Object);
-		assertThat(saml2Object.getClass(), equalTo(AuthenticationRequest.class));
-		return (AuthenticationRequest) saml2Object;
+		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationSaml2Request.class));
+		return (Saml2AuthenticationSaml2Request) saml2Object;
 	}
 
-	void mockConfig(Consumer<HostedServiceProviderConfiguration.Builder> modifier) {
+	void mockConfig(Consumer<HostedSaml2ServiceProviderConfiguration.Builder> modifier) {
 		Mockito.doAnswer(
 			invocation -> {
-				HostedServiceProviderConfiguration config =
-					(HostedServiceProviderConfiguration) invocation.callRealMethod();
-				HostedServiceProviderConfiguration.Builder builder =
-					HostedServiceProviderConfiguration.builder(config);
+				HostedSaml2ServiceProviderConfiguration config =
+					(HostedSaml2ServiceProviderConfiguration) invocation.callRealMethod();
+				HostedSaml2ServiceProviderConfiguration.Builder builder =
+					HostedSaml2ServiceProviderConfiguration.builder(config);
 				modifier.accept(builder);
 				return builder.build();
 			}
@@ -142,7 +142,7 @@ abstract class AbstractServiceProviderTestBase {
 			.getResponse()
 			.getContentAsString();
 		assertNotNull(xml);
-		Metadata m = (Metadata) transformer.fromXml(xml, null, null);
+		Saml2Metadata m = (Saml2Metadata) transformer.fromXml(xml, null, null);
 		assertNotNull(m);
 		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
 		return (ServiceProviderMetadata) m;
@@ -161,7 +161,7 @@ abstract class AbstractServiceProviderTestBase {
 		return null;
 	}
 
-	List<ExternalIdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteIdentityProviderConfiguration> c) {
+	List<ExternalSaml2IdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteIdentityProviderConfiguration> c) {
 		return bootConfiguration.getServiceProvider().getProviders().stream()
 			.map(p -> {
 				c.accept(p);

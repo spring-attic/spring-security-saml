@@ -19,7 +19,7 @@ package org.springframework.security.saml2.model.metadata;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.security.saml2.model.attribute.Attribute;
+import org.springframework.security.saml2.model.attribute.Saml2Attribute;
 
 /**
  * Defines md:SPSSODescriptorType as defined by
@@ -30,9 +30,9 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 
 	private boolean authnRequestsSigned;
 	private boolean wantAssertionsSigned;
-	private List<Endpoint> assertionConsumerService = new LinkedList<>();
-	private Endpoint configuredAssertionConsumerService;
-	private List<Attribute> requestedAttributes = new LinkedList<>();
+	private List<Saml2Endpoint> assertionConsumerService = new LinkedList<>();
+	private Saml2Endpoint configuredAssertionConsumerService;
+	private List<Saml2Attribute> requestedAttributes = new LinkedList<>();
 
 	//private List<AttributeConsumingService> attributeConsumingService;
 
@@ -44,7 +44,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return wantAssertionsSigned;
 	}
 
-	public List<Endpoint> getAssertionConsumerService() {
+	public List<Saml2Endpoint> getAssertionConsumerService() {
 		return assertionConsumerService;
 	}
 
@@ -52,7 +52,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 //        return attributeConsumingService;
 //    }
 
-	public ServiceProvider setAssertionConsumerService(List<Endpoint> assertionConsumerService) {
+	public ServiceProvider setAssertionConsumerService(List<Saml2Endpoint> assertionConsumerService) {
 		this.assertionConsumerService = assertionConsumerService;
 		return _this();
 	}
@@ -75,23 +75,23 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return _this();
 	}
 
-	public Endpoint getConfiguredAssertionConsumerService() {
+	public Saml2Endpoint getConfiguredAssertionConsumerService() {
 		return configuredAssertionConsumerService;
 	}
 
 	public ServiceProvider setConfiguredAssertionConsumerService(
-		Endpoint
+		Saml2Endpoint
 			configuredAssertionConsumerService
 	) {
 		this.configuredAssertionConsumerService = configuredAssertionConsumerService;
 		return _this();
 	}
 
-	public List<Attribute> getRequestedAttributes() {
+	public List<Saml2Attribute> getRequestedAttributes() {
 		return requestedAttributes;
 	}
 
-	public ServiceProvider setRequestedAttributes(List<Attribute> requestedAttributes) {
+	public ServiceProvider setRequestedAttributes(List<Saml2Attribute> requestedAttributes) {
 		this.requestedAttributes = requestedAttributes;
 		return this;
 	}

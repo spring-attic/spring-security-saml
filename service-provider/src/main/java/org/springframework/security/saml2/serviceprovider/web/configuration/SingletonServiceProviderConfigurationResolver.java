@@ -20,8 +20,8 @@ package org.springframework.security.saml2.serviceprovider.web.configuration;
 import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration.Builder;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration.Builder;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 
 import static org.springframework.util.Assert.notNull;
@@ -31,18 +31,19 @@ public class SingletonServiceProviderConfigurationResolver
 	implements ServiceProviderConfigurationResolver<HttpServletRequest> {
 
 	public static SingletonServiceProviderConfigurationResolver fromConfiguration(Consumer<Builder> config) {
-		Builder builder = HostedServiceProviderConfiguration.builder();
+		Builder builder = HostedSaml2ServiceProviderConfiguration.builder();
 		config.accept(builder);
 		return fromConfiguration(builder.build());
 	}
 
-	public static SingletonServiceProviderConfigurationResolver fromConfiguration(HostedServiceProviderConfiguration c) {
+	public static SingletonServiceProviderConfigurationResolver fromConfiguration(
+		HostedSaml2ServiceProviderConfiguration c) {
 		return new SingletonServiceProviderConfigurationResolver(c);
 	}
 
-	private final HostedServiceProviderConfiguration configuration;
+	private final HostedSaml2ServiceProviderConfiguration configuration;
 
-	public SingletonServiceProviderConfigurationResolver(HostedServiceProviderConfiguration configuration) {
+	public SingletonServiceProviderConfigurationResolver(HostedSaml2ServiceProviderConfiguration configuration) {
 		this.configuration = configuration;
 		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
 		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
@@ -54,9 +55,9 @@ public class SingletonServiceProviderConfigurationResolver
 	}
 
 	@Override
-	public HostedServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
+	public HostedSaml2ServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
 		Builder builder =
-			HostedServiceProviderConfiguration.builder(configuration);
+			HostedSaml2ServiceProviderConfiguration.builder(configuration);
 		if (request != null) {
 			String basePath = getBasePath(request, false);
 			if (!hasText(configuration.getEntityId())) {

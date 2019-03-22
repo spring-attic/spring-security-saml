@@ -34,16 +34,16 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.namespace.QName;
 
-import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.LogoutRequest;
-import org.springframework.security.saml2.model.authentication.LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Response;
-import org.springframework.security.saml2.model.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml2.model.metadata.Metadata;
-import org.springframework.security.saml2.SamlKeyStoreProvider;
+import org.springframework.security.saml2.Saml2Exception;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
+import org.springframework.security.saml2.model.metadata.Saml2Metadata;
+import org.springframework.security.saml2.Saml2KeyStoreProvider;
 import org.springframework.util.Assert;
 
 import org.apache.xml.security.encryption.EncryptedKey;
@@ -71,18 +71,18 @@ import static org.springframework.util.StringUtils.hasText;
 
 class KeycloakSigner {
 
-	private final SamlKeyStoreProvider provider;
+	private final Saml2KeyStoreProvider provider;
 
-	KeycloakSigner(SamlKeyStoreProvider provider) {
+	KeycloakSigner(Saml2KeyStoreProvider provider) {
 		this.provider = provider;
 	}
 
-	private String signOrEncrypt(Response response, Document document) {
+	private String signOrEncrypt(Saml2ResponseSaml2 response, Document document) {
 		try {
 			Map<String, Element> assertions = getAssertions(document);
 
 			//signOrEncrypt each assertion
-			for (Assertion a : response.getAssertions()) {
+			for (Saml2Assertion a : response.getAssertions()) {
 				if (a.getSigningKey() != null) {
 					Element e = assertions.get(a.getId());
 					SignatureUtilTransferObject sig = getSignatureObject(a);
@@ -92,7 +92,7 @@ class KeycloakSigner {
 				}
 			}
 			//encrypt each assertion
-			for (Assertion a : response.getAssertions()) {
+			for (Saml2Assertion a : response.getAssertions()) {
 				if (a.getEncryptionKey() != null) {
 					Element e = assertions.get(a.getId());
 					encryptAssertion(a, e, document);
@@ -108,11 +108,11 @@ class KeycloakSigner {
 			}
 			return getDocumentAsString(document);
 		} catch (Exception e) {
-			throw new SamlException(e);
+			throw new Saml2Exception(e);
 		}
 	}
 
-	String signOrEncrypt(SignableSaml2Object signable, String xml) {
+	String signOrEncrypt(Saml2SignableObject signable, String xml) {
 		try {
 
 			Reader xmlReader = new StringReader(xml);
@@ -120,37 +120,37 @@ class KeycloakSigner {
 			configureIdAttribute(document);
 
 			//response may have nested objects to be signed
-			if (signable instanceof Response) {
-				return signOrEncrypt((Response) signable, document);
+			if (signable instanceof Saml2ResponseSaml2) {
+				return signOrEncrypt((Saml2ResponseSaml2) signable, document);
 			}
 
 			if (signable.getSigningKey() == null) {
 				return xml;
 			}
-			if (signable instanceof Metadata) {
-				return sign((Metadata) signable, document);
+			if (signable instanceof Saml2Metadata) {
+				return sign((Saml2Metadata) signable, document);
 			}
-			else if (signable instanceof AuthenticationRequest) {
+			else if (signable instanceof Saml2AuthenticationSaml2Request) {
 				return sign(signable, document);
 			}
-			else if (signable instanceof Assertion) {
+			else if (signable instanceof Saml2Assertion) {
 				return sign(signable, document);
 			}
-			else if (signable instanceof LogoutRequest) {
+			else if (signable instanceof Saml2LogoutSaml2Request) {
 				return sign(signable, document);
 			}
-			else if (signable instanceof LogoutResponse) {
+			else if (signable instanceof Saml2LogoutResponseSaml2) {
 				return sign(signable, document);
 			}
 			else {
 				throw new UnsupportedOperationException("Unable to signOrEncrypt class:" + signable.getClass());
 			}
 		} catch (Exception e) {
-			throw new SamlException(e);
+			throw new Saml2Exception(e);
 		}
 	}
 
-	private String sign(SignableSaml2Object signable, Document document)
+	private String sign(Saml2SignableObject signable, Document document)
 		throws GeneralSecurityException, MarshalException, XMLSignatureException {
 		SignatureUtilTransferObject sig = getSignatureObject(signable);
 		sig.setDocumentToBeSigned(document);
@@ -159,7 +159,7 @@ class KeycloakSigner {
 		return getDocumentAsString(document);
 	}
 
-	private String sign(Metadata signable, Document document)
+	private String sign(Saml2Metadata signable, Document document)
 		throws GeneralSecurityException, MarshalException, XMLSignatureException {
 		SignatureUtilTransferObject sig = getSignatureObject(signable);
 		document = XMLSignatureUtil.sign(
@@ -175,7 +175,7 @@ class KeycloakSigner {
 		return getDocumentAsString(document);
 	}
 
-	private SignatureUtilTransferObject getSignatureObject(SignableSaml2Object so)
+	private SignatureUtilTransferObject getSignatureObject(Saml2SignableObject so)
 		throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
 		SignatureUtilTransferObject sig = new SignatureUtilTransferObject();
 		sig.setDigestMethod(so.getDigest().toString());
@@ -229,7 +229,7 @@ class KeycloakSigner {
 		return result;
 	}
 
-	private int getKeySize(DataEncryptionMethod method) {
+	private int getKeySize(Saml2DataEncryptionMethod method) {
 		switch (method) {
 			case AES128_CBC:
 				return 128;
@@ -242,7 +242,7 @@ class KeycloakSigner {
 		}
 	}
 
-	private void encryptAssertion(Assertion assertion,
+	private void encryptAssertion(Saml2Assertion assertion,
 								  Element assertionElement,
 								  Document document) {
 		Assert.notNull(assertion, "Assertion cannot be null");
@@ -275,14 +275,14 @@ class KeycloakSigner {
 				cipher = XMLCipher.getInstance(encryptionAlgorithm);
 				cipher.init(XMLCipher.ENCRYPT_MODE, secretKey);
 			} catch (XMLEncryptionException e) {
-				throw new SamlException(e);
+				throw new Saml2Exception(e);
 			}
 
 			Document encryptedDoc;
 			try {
 				encryptedDoc = cipher.doFinal(document, assertionElement);
 			} catch (Exception e) {
-				throw new SamlException(e);
+				throw new Saml2Exception(e);
 			}
 
 			// The EncryptedKey element is added
@@ -314,7 +314,7 @@ class KeycloakSigner {
 				EncryptionConstants._TAG_ENCRYPTEDDATA
 			);
 			if (cipherElements == null || cipherElements.getLength() == 0) {
-				throw new SamlException("Missing cipher elements.");
+				throw new Saml2Exception("Missing cipher elements.");
 			}
 			Element encryptedDataElement = (Element) cipherElements.item(0);
 
@@ -334,14 +334,14 @@ class KeycloakSigner {
 				EncryptionConstants._TAG_CIPHERDATA
 			);
 			if (nodeList == null || nodeList.getLength() == 0) {
-				throw new SamlException("Missing cipher data");
+				throw new Saml2Exception("Missing cipher data");
 			}
 			Element cipherDataElement = (Element) nodeList.item(0);
 			Node cipherParent = cipherDataElement.getParentNode();
 			cipherParent.insertBefore(sigElement, cipherDataElement);
 
 		} catch (Exception x) {
-			throw new SamlException("failed to encrypt", x);
+			throw new Saml2Exception("failed to encrypt", x);
 		}
 
 	}
@@ -360,7 +360,7 @@ class KeycloakSigner {
 		if (algo.contains("RSA")) {
 			return XMLCipher.RSA_v1dot5;
 		}
-		throw new SamlException("Secret Key with unsupported algorithm:" + algo);
+		throw new Saml2Exception("Secret Key with unsupported algorithm:" + algo);
 	}
 
 

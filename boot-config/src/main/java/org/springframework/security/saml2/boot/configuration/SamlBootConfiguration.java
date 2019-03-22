@@ -20,8 +20,8 @@ package org.springframework.security.saml2.boot.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.saml2.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedServerConfiguration;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
@@ -57,12 +57,12 @@ public class SamlBootConfiguration {
 	}
 
 	@Bean
-	public HostedServiceProviderConfiguration samlServiceProviderConfiguration() {
+	public HostedSaml2ServiceProviderConfiguration samlServiceProviderConfiguration() {
 		return toSamlServerConfiguration().getServiceProvider();
 	}
 
 	@Bean
-	public HostedIdentityProviderConfiguration samlIdentityProviderConfiguration() {
+	public HostedSaml2IdentityProviderConfiguration samlIdentityProviderConfiguration() {
 		return toSamlServerConfiguration().getIdentityProvider();
 	}
 }

@@ -21,15 +21,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.security.saml2.SamlProviderNotFoundException;
+import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.provider.HostedServiceProvider;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.metadata.BindingType;
-import org.springframework.security.saml2.model.metadata.Endpoint;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.metadata.Saml2BindingType;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
@@ -68,10 +68,10 @@ class Saml2ServiceProviderMethods {
 		return new UrlPathHelper().getPathWithinApplication(request);
 	}
 
-	HostedServiceProvider getProvider(HttpServletRequest request) {
-		HostedServiceProvider serviceProvider = getResolver().getServiceProvider(request);
+	HostedSaml2ServiceProvider getProvider(HttpServletRequest request) {
+		HostedSaml2ServiceProvider serviceProvider = getResolver().getServiceProvider(request);
 		if (serviceProvider == null) {
-			throw new SamlProviderNotFoundException("hosted");
+			throw new Saml2ProviderNotFoundException("hosted");
 		}
 		return serviceProvider;
 	}
@@ -84,17 +84,17 @@ class Saml2ServiceProviderMethods {
 		return parseSamlObject(request, getProvider(request), "SAMLResponse");
 	}
 
-	Endpoint getPreferredEndpoint(List<Endpoint> endpoints,
-								  BindingType preferredBinding,
-								  int preferredIndex) {
+	Saml2Endpoint getPreferredEndpoint(List<Saml2Endpoint> endpoints,
+									   Saml2BindingType preferredBinding,
+									   int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
 		}
-		List<Endpoint> eps = endpoints;
-		Endpoint result = null;
+		List<Saml2Endpoint> eps = endpoints;
+		Saml2Endpoint result = null;
 		//find the preferred binding
 		if (preferredBinding != null) {
-			for (Endpoint e : eps) {
+			for (Saml2Endpoint e : eps) {
 				if (preferredBinding == e.getBinding().getType()) {
 					result = e;
 					break;
@@ -103,7 +103,7 @@ class Saml2ServiceProviderMethods {
 		}
 		//find the configured index
 		if (result == null) {
-			for (Endpoint e : eps) {
+			for (Saml2Endpoint e : eps) {
 				if (e.getIndex() == preferredIndex) {
 					result = e;
 					break;
@@ -112,7 +112,7 @@ class Saml2ServiceProviderMethods {
 		}
 		//find the default endpoint
 		if (result == null) {
-			for (Endpoint e : eps) {
+			for (Saml2Endpoint e : eps) {
 				if (e.isDefault()) {
 					result = e;
 					break;
@@ -127,18 +127,18 @@ class Saml2ServiceProviderMethods {
 	}
 
 	Saml2Object parseSamlObject(HttpServletRequest request,
-								HostedServiceProvider provider,
+								HostedSaml2ServiceProvider provider,
 								String parameterName) {
 		Saml2Object result = null;
 		String rs = request.getParameter(parameterName);
 		if (hasText(rs)) {
 			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
 			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
-			if (result instanceof SignableSaml2Object) {
-				SignableSaml2Object signableSaml2Object = (SignableSaml2Object) result;
-				IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
+			if (result instanceof Saml2SignableObject) {
+				Saml2SignableObject signableSaml2Object = (Saml2SignableObject) result;
+				Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
 				if (idp == null) {
-					throw new SamlProviderNotFoundException(result.getOriginEntityId());
+					throw new Saml2ProviderNotFoundException(result.getOriginEntityId());
 				}
 				try {
 					Signature signature =

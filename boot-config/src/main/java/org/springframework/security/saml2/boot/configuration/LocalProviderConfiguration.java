@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
 
-import static org.springframework.security.saml2.util.StringUtils.stripSlashes;
+import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
 
 public abstract class LocalProviderConfiguration
 	<ExternalConfiguration extends RemoteProviderConfiguration> {
@@ -40,7 +40,7 @@ public abstract class LocalProviderConfiguration
 	private String pathPrefix;
 	private boolean singleLogoutEnabled = true;
 	@NestedConfigurationProperty
-	private List<NameId> nameIds = new LinkedList<>();
+	private List<Saml2NameId> nameIds = new LinkedList<>();
 	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
 	private DigestMethod defaultDigest = DigestMethod.SHA256;
 	@NestedConfigurationProperty
@@ -108,13 +108,13 @@ public abstract class LocalProviderConfiguration
 		this.singleLogoutEnabled = singleLogoutEnabled;
 	}
 
-	public List<NameId> getNameIds() {
+	public List<Saml2NameId> getNameIds() {
 		return nameIds;
 	}
 
 	public void setNameIds(List<Object> nameIds) {
 		this.nameIds = nameIds.stream().map(
-			n -> (n instanceof String) ? NameId.fromUrn((String)n) : (NameId)n
+			n -> (n instanceof String) ? Saml2NameId.fromUrn((String)n) : (Saml2NameId)n
 		)
 			.collect(Collectors.toList());
 	}

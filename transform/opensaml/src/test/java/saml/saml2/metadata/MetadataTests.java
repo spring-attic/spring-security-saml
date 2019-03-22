@@ -22,23 +22,23 @@ import java.util.Iterator;
 import java.util.List;
 import javax.xml.datatype.Duration;
 
-import org.springframework.security.saml2.model.attribute.Attribute;
-import org.springframework.security.saml2.model.attribute.AttributeNameFormat;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.BindingType;
-import org.springframework.security.saml2.model.metadata.Endpoint;
-import org.springframework.security.saml2.model.metadata.IdentityProvider;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.Metadata;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.attribute.Saml2Attribute;
+import org.springframework.security.saml2.model.attribute.Saml2AttributeNameFormat;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2BindingType;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProvider;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2Metadata;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
 import org.springframework.security.saml2.model.signature.SignatureException;
-import org.springframework.security.saml2.util.StringUtils;
+import org.springframework.security.saml2.util.Saml2StringUtils;
 
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
@@ -51,30 +51,30 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml2.model.Namespace.NS_PROTOCOL;
-import static org.springframework.security.saml2.model.metadata.Binding.ARTIFACT;
-import static org.springframework.security.saml2.model.metadata.Binding.PAOS;
-import static org.springframework.security.saml2.model.metadata.Binding.POST;
-import static org.springframework.security.saml2.model.metadata.Binding.POST_SIMPLE_SIGN;
-import static org.springframework.security.saml2.model.metadata.Binding.REDIRECT;
-import static org.springframework.security.saml2.model.metadata.Binding.SOAP;
-import static org.springframework.security.saml2.model.metadata.Binding.URI;
-import static org.springframework.security.saml2.model.metadata.NameId.EMAIL;
-import static org.springframework.security.saml2.model.metadata.NameId.PERSISTENT;
-import static org.springframework.security.saml2.model.metadata.NameId.TRANSIENT;
-import static org.springframework.security.saml2.model.metadata.NameId.UNSPECIFIED;
-import static org.springframework.security.saml2.model.metadata.NameId.X509_SUBJECT;
+import static org.springframework.security.saml2.model.Saml2Namespace.NS_PROTOCOL;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.ARTIFACT;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.PAOS;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.POST;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.POST_SIMPLE_SIGN;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.REDIRECT;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.SOAP;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.URI;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.EMAIL;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.TRANSIENT;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.UNSPECIFIED;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.X509_SUBJECT;
 import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
-import static org.springframework.security.saml2.util.DateUtils.toZuluTime;
-import static org.springframework.security.saml2.util.StringUtils.getHostFromUrl;
-import static org.springframework.security.saml2.util.X509Utils.keyCleanup;
+import static org.springframework.security.saml2.util.Saml2DateUtils.toZuluTime;
+import static org.springframework.security.saml2.util.Saml2StringUtils.getHostFromUrl;
+import static org.springframework.security.saml2.util.Saml2X509Utils.keyCleanup;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 
 public class MetadataTests extends MetadataBase {
 
-	private KeyData keyLoginRunPivotalIo = new KeyData(
+	private Saml2KeyData keyLoginRunPivotalIo = new Saml2KeyData(
 		"test",
 		null,
 		"MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
@@ -94,7 +94,7 @@ public class MetadataTests extends MetadataBase {
 			"FTv9CtDt9VfblSuHdRw4uFwat5e1Fb7LtEjATi4cKaG1+zZ80QyuChfC08for83TeQgjq7TA10FA\n" +
 			"kKe5nrXyHOORz+ttXkYkp5uEBhpZ",
 		null,
-		KeyType.SIGNING
+		Saml2KeyType.SIGNING
 	);
 
 	@Test
@@ -110,12 +110,12 @@ public class MetadataTests extends MetadataBase {
 		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
-		KeyData key = new KeyData(
+		Saml2KeyData key = new Saml2KeyData(
 			"signing",
 			spSigning.getPrivateKey(),
 			spSigning.getCertificate(),
 			spSigning.getPassphrase(),
-			KeyType.SIGNING
+			Saml2KeyType.SIGNING
 		);
 
 		spm.getServiceProvider().setKeys(Arrays.asList(key));
@@ -143,7 +143,7 @@ public class MetadataTests extends MetadataBase {
 		assertNodeCount(xml, "//md:SPSSODescriptor/md:Extensions/init:RequestInitiator", 1);
 
 		nodes = assertNodeCount(xml, "//md:KeyDescriptor", 1);
-		assertNodeAttribute(nodes.iterator().next(), "use", KeyType.SIGNING.getTypeName());
+		assertNodeAttribute(nodes.iterator().next(), "use", Saml2KeyType.SIGNING.getTypeName());
 
 		nodes = assertNodeCount(xml, "//md:KeyDescriptor/ds:KeyInfo/ds:X509Data/ds:X509Certificate", 1);
 		String textContent = nodes.iterator().next().getTextContent();
@@ -175,9 +175,9 @@ public class MetadataTests extends MetadataBase {
 		}
 
 		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 4).iterator();
-		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.EMAIL.toString()));
-		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
-		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.UNSPECIFIED.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo(Saml2NameId.EMAIL.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo(Saml2NameId.PERSISTENT.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo(Saml2NameId.UNSPECIFIED.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo("urn:mace:shibboleth:1.0:nameIdentifier"));
 
 
@@ -235,15 +235,15 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void idp_to_xml() throws Exception {
-		IdentityProviderMetadata ipm = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+		Saml2IdentityProviderMetadata ipm = (Saml2IdentityProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 
-		KeyData key = new KeyData(
+		Saml2KeyData key = new Saml2KeyData(
 			"signing",
 			spSigning.getPrivateKey(),
 			spSigning.getCertificate(),
 			spSigning.getPassphrase(),
-			KeyType.SIGNING
+			Saml2KeyType.SIGNING
 		);
 
 		ipm.getIdentityProvider().setKeys(Arrays.asList(key));
@@ -270,7 +270,7 @@ public class MetadataTests extends MetadataBase {
 		assertNodeCount(xml, "//md:IDPSSODescriptor/md:Extensions/init:RequestInitiator", 1);
 
 		nodes = assertNodeCount(xml, "//md:KeyDescriptor", 1);
-		assertNodeAttribute(nodes.iterator().next(), "use", KeyType.SIGNING.getTypeName());
+		assertNodeAttribute(nodes.iterator().next(), "use", Saml2KeyType.SIGNING.getTypeName());
 
 		nodes = assertNodeCount(xml, "//md:KeyDescriptor/ds:KeyInfo/ds:X509Data/ds:X509Certificate", 1);
 		String textContent = nodes.iterator().next().getTextContent();
@@ -317,8 +317,8 @@ public class MetadataTests extends MetadataBase {
 		}
 
 		nodeIterator = assertNodeCount(xml, "//md:NameIDFormat", 3).iterator();
-		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.TRANSIENT.toString()));
-		assertThat(nodeIterator.next().getTextContent(), equalTo(NameId.PERSISTENT.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo(Saml2NameId.TRANSIENT.toString()));
+		assertThat(nodeIterator.next().getTextContent(), equalTo(Saml2NameId.PERSISTENT.toString()));
 		assertThat(nodeIterator.next().getTextContent(), equalTo("urn:mace:shibboleth:1.0:nameIdentifier"));
 
 		assertNodeCount(xml, "//ds:Signature", 1);
@@ -349,17 +349,17 @@ public class MetadataTests extends MetadataBase {
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		KeyData spSigning = provider.getKeys().get(0);
-		KeyData spEncryption = provider.getKeys().get(1);
-		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
+		Saml2KeyData spSigning = provider.getKeys().get(0);
+		Saml2KeyData spEncryption = provider.getKeys().get(1);
+		assertThat(spSigning.getType(), equalTo(Saml2KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
-		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
+		assertThat(spEncryption.getType(), equalTo(Saml2KeyType.ENCRYPTION));
 		assertThat(spEncryption.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
 
-		List<Endpoint> logoutServices = provider.getSingleLogoutService();
+		List<Saml2Endpoint> logoutServices = provider.getSingleLogoutService();
 		assertNotNull(logoutServices);
 		assertThat(logoutServices.size(), equalTo(2));
-		Endpoint logout1 = logoutServices.get(0);
+		Saml2Endpoint logout1 = logoutServices.get(0);
 		assertNotNull(logout1);
 		assertThat(
 			logout1.getLocation(),
@@ -367,30 +367,30 @@ public class MetadataTests extends MetadataBase {
 		);
 		assertThat(logout1.getBinding(), equalTo(POST));
 
-		Endpoint logout2 = logoutServices.get(1);
+		Saml2Endpoint logout2 = logoutServices.get(1);
 		assertNotNull(logout2);
 		assertThat(
 			logout2.getLocation(),
 			equalTo("https://login.run.pivotal.io/saml/SingleLogout/alias/login.run.pivotal.io")
 		);
-		assertThat(logout2.getBinding(), equalTo(Binding.REDIRECT));
+		assertThat(logout2.getBinding(), equalTo(Saml2Binding.REDIRECT));
 
-		List<NameId> nameIds = provider.getNameIds();
+		List<Saml2NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
 		assertThat(nameIds, containsInAnyOrder(EMAIL, TRANSIENT, PERSISTENT, UNSPECIFIED, X509_SUBJECT));
 
-		List<Endpoint> consumerService = provider.getAssertionConsumerService();
+		List<Saml2Endpoint> consumerService = provider.getAssertionConsumerService();
 		assertNotNull(consumerService);
 		assertThat(consumerService.size(), equalTo(2));
 
-		Endpoint acs1 = consumerService.get(0);
+		Saml2Endpoint acs1 = consumerService.get(0);
 		assertNotNull(acs1);
 		assertThat(acs1.getLocation(), equalTo("https://login.run.pivotal.io/saml/SSO/alias/login.run.pivotal.io"));
 		assertThat(acs1.getBinding(), equalTo(POST));
 		assertThat(acs1.getIndex(), equalTo(0));
 		assertThat(acs1.isDefault(), equalTo(true));
 
-		Endpoint acs2 = consumerService.get(1);
+		Saml2Endpoint acs2 = consumerService.get(1);
 		assertNotNull(acs2);
 		assertThat(acs2.getLocation(), equalTo("https://login.run.pivotal.io/oauth/token/alias/login.run.pivotal.io"));
 		assertThat(acs2.getBinding(), equalTo(URI));
@@ -406,7 +406,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
 		assertThat(sp.getEntityId(), equalTo("https://sp.saml.spring.io/sp"));
-		assertThat(sp.getEntityAlias(), equalTo(StringUtils.getHostFromUrl(sp.getEntityId())));
+		assertThat(sp.getEntityAlias(), equalTo(Saml2StringUtils.getHostFromUrl(sp.getEntityId())));
 		assertNotNull(sp.getProviders());
 		assertThat(sp.getProviders().size(), equalTo(1));
 
@@ -426,116 +426,116 @@ public class MetadataTests extends MetadataBase {
 		assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(toZuluTime(provider.getValidUntil()), equalTo("2028-05-02T20:07:06.785Z"));
 
-		Endpoint requestInitiation = provider.getRequestInitiation();
+		Saml2Endpoint requestInitiation = provider.getRequestInitiation();
 		assertNotNull(requestInitiation);
 		assertThat(requestInitiation.isDefault(), equalTo(false));
-		assertThat(requestInitiation.getBinding(), equalTo(Binding.REQUEST_INITIATOR));
+		assertThat(requestInitiation.getBinding(), equalTo(Saml2Binding.REQUEST_INITIATOR));
 		assertThat(requestInitiation.getIndex(), equalTo(0));
 		assertThat(requestInitiation.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/init"));
 
-		Endpoint discovery = provider.getDiscovery();
+		Saml2Endpoint discovery = provider.getDiscovery();
 		assertNotNull(discovery);
 		assertThat(discovery.isDefault(), equalTo(true));
-		assertThat(discovery.getBinding(), equalTo(Binding.DISCOVERY));
+		assertThat(discovery.getBinding(), equalTo(Saml2Binding.DISCOVERY));
 		assertThat(discovery.getIndex(), equalTo(0));
 		assertThat(discovery.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/discovery"));
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(1));
-		KeyData spSigning = provider.getKeys().get(0);
-		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
+		Saml2KeyData spSigning = provider.getKeys().get(0);
+		assertThat(spSigning.getType(), equalTo(Saml2KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(RSA_TEST_KEY.getSimpleKey("test").getCertificate()));
 
 
-		List<Endpoint> logoutServices = provider.getSingleLogoutService();
+		List<Saml2Endpoint> logoutServices = provider.getSingleLogoutService();
 		assertNotNull(logoutServices);
 		assertThat(logoutServices.size(), equalTo(5));
 		for (int i = 0; i < logoutServices.size(); i++) {
-			Endpoint logout = logoutServices.get(i);
+			Saml2Endpoint logout = logoutServices.get(i);
 			assertNotNull(logout);
 			assertThat(logout.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/logout"));
-			BindingType b = null;
+			Saml2BindingType b = null;
 			switch (i) {
 				case 0:
-					b = BindingType.SOAP;
+					b = Saml2BindingType.SOAP;
 					break;
 				case 1:
-					b = BindingType.REDIRECT;
+					b = Saml2BindingType.REDIRECT;
 					break;
 				case 2:
-					b = BindingType.POST;
+					b = Saml2BindingType.POST;
 					break;
 				case 3:
-					b = BindingType.ARTIFACT;
+					b = Saml2BindingType.ARTIFACT;
 					break;
 				case 4:
-					b = BindingType.CUSTOM;
+					b = Saml2BindingType.CUSTOM;
 					break;
 			}
 			assertThat(logout.getBinding().getType(), equalTo(b));
 		}
 
 
-		List<NameId> nameIds = provider.getNameIds();
+		List<Saml2NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
-		assertThat(nameIds, containsInAnyOrder(EMAIL, PERSISTENT, UNSPECIFIED, NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
+		assertThat(nameIds, containsInAnyOrder(EMAIL, PERSISTENT, UNSPECIFIED, Saml2NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
 
-		List<Endpoint> consumerService = provider.getAssertionConsumerService();
+		List<Saml2Endpoint> consumerService = provider.getAssertionConsumerService();
 		assertNotNull(consumerService);
 		assertThat(consumerService.size(), equalTo(5));
 
-		Endpoint acs1 = consumerService.get(0);
+		Saml2Endpoint acs1 = consumerService.get(0);
 		assertNotNull(acs1);
 		assertThat(acs1.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso"));
 		assertThat(acs1.getBinding(), equalTo(POST));
 		assertThat(acs1.getIndex(), equalTo(0));
 		assertThat(acs1.isDefault(), equalTo(true));
 
-		Endpoint acs2 = consumerService.get(1);
+		Saml2Endpoint acs2 = consumerService.get(1);
 		assertNotNull(acs2);
 		assertThat(acs2.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso/simple"));
 		assertThat(acs2.getBinding(), equalTo(POST_SIMPLE_SIGN));
 		assertThat(acs2.getIndex(), equalTo(1));
 		assertThat(acs2.isDefault(), equalTo(false));
 
-		Endpoint acs3 = consumerService.get(2);
+		Saml2Endpoint acs3 = consumerService.get(2);
 		assertNotNull(acs3);
 		assertThat(acs3.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso/artifact"));
 		assertThat(acs3.getBinding(), equalTo(ARTIFACT));
 		assertThat(acs3.getIndex(), equalTo(2));
 		assertThat(acs3.isDefault(), equalTo(false));
 
-		Endpoint acs4 = consumerService.get(3);
+		Saml2Endpoint acs4 = consumerService.get(3);
 		assertNotNull(acs4);
 		assertThat(acs4.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso/ecp"));
 		assertThat(acs4.getBinding(), equalTo(PAOS));
 		assertThat(acs4.getIndex(), equalTo(3));
 		assertThat(acs4.isDefault(), equalTo(false));
 
-		Endpoint acs5 = consumerService.get(4);
+		Saml2Endpoint acs5 = consumerService.get(4);
 		assertNotNull(acs5);
 		assertThat(acs5.getLocation(), equalTo("https://sp.saml.spring.io/saml/sp/sso/assertion"));
-		assertThat(acs5.getBinding(), equalTo(Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:Assertion")));
+		assertThat(acs5.getBinding(), equalTo(Saml2Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:Assertion")));
 		assertThat(acs5.getIndex(), equalTo(4));
 		assertThat(acs5.isDefault(), equalTo(false));
 
-		List<Attribute> attributes = provider.getRequestedAttributes();
+		List<Saml2Attribute> attributes = provider.getRequestedAttributes();
 		assertNotNull(attributes);
 
 		assertThat(attributes.size(), equalTo(2));
 
-		Attribute a1 = attributes.get(0);
+		Saml2Attribute a1 = attributes.get(0);
 		assertNotNull(a1);
 		assertThat(a1.getFriendlyName(), equalTo("mail"));
 		assertThat(a1.getName(), equalTo("urn:oid:0.9.2342.19200300.100.1.3"));
-		assertThat(a1.getNameFormat(), equalTo(AttributeNameFormat.URI));
+		assertThat(a1.getNameFormat(), equalTo(Saml2AttributeNameFormat.URI));
 		assertThat(a1.isRequired(), equalTo(true));
 
-		Attribute a2 = attributes.get(1);
+		Saml2Attribute a2 = attributes.get(1);
 		assertNotNull(a2);
 		assertThat(a2.getFriendlyName(), equalTo("eppn"));
 		assertThat(a2.getName(), equalTo("urn:oid:1.3.6.1.4.1.5923.1.1.1.6"));
-		assertThat(a2.getNameFormat(), equalTo(AttributeNameFormat.BASIC));
+		assertThat(a2.getNameFormat(), equalTo(Saml2AttributeNameFormat.BASIC));
 		assertThat(a2.isRequired(), equalTo(false));
 
 
@@ -555,7 +555,7 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_idp_complete() throws Exception {
-		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+		Saml2IdentityProviderMetadata idp = (Saml2IdentityProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/idp-metadata-with-extras-20180507.xml"), null, null);
 		assertNotNull(idp);
 		assertNotNull(idp.getImplementation());
@@ -564,7 +564,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(idp.getProviders());
 		assertThat(idp.getProviders().size(), equalTo(1));
 
-		IdentityProvider provider = idp.getIdentityProvider();
+		Saml2IdentityProvider provider = idp.getIdentityProvider();
 		assertNotNull(provider);
 		assertTrue(provider.getWantAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
@@ -579,62 +579,62 @@ public class MetadataTests extends MetadataBase {
 		assertThat(cacheDuration.getSeconds(), equalTo(30));
 		assertThat(toZuluTime(provider.getValidUntil()), equalTo("2028-05-02T20:07:06.785Z"));
 
-		Endpoint requestInitiation = provider.getRequestInitiation();
+		Saml2Endpoint requestInitiation = provider.getRequestInitiation();
 		assertNotNull(requestInitiation);
 		assertThat(requestInitiation.isDefault(), equalTo(false));
-		assertThat(requestInitiation.getBinding(), equalTo(Binding.REQUEST_INITIATOR));
+		assertThat(requestInitiation.getBinding(), equalTo(Saml2Binding.REQUEST_INITIATOR));
 		assertThat(requestInitiation.getIndex(), equalTo(0));
 		assertThat(requestInitiation.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/init"));
 
-		Endpoint discovery = provider.getDiscovery();
+		Saml2Endpoint discovery = provider.getDiscovery();
 		assertNotNull(discovery);
 		assertThat(discovery.isDefault(), equalTo(true));
-		assertThat(discovery.getBinding(), equalTo(Binding.DISCOVERY));
+		assertThat(discovery.getBinding(), equalTo(Saml2Binding.DISCOVERY));
 		assertThat(discovery.getIndex(), equalTo(0));
 		assertThat(discovery.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/discovery"));
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		KeyData spSigning = provider.getKeys().get(0);
-		KeyData spEncryption = provider.getKeys().get(1);
-		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
+		Saml2KeyData spSigning = provider.getKeys().get(0);
+		Saml2KeyData spEncryption = provider.getKeys().get(1);
+		assertThat(spSigning.getType(), equalTo(Saml2KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(IDP_RSA_KEY.getSimpleKey("alias").getCertificate()));
-		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
+		assertThat(spEncryption.getType(), equalTo(Saml2KeyType.ENCRYPTION));
 		assertThat(spEncryption.getCertificate(), equalTo(IDP_RSA_KEY.getSimpleKey("alias").getCertificate()));
 
-		List<NameId> nameIds = provider.getNameIds();
+		List<Saml2NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
-		assertThat(nameIds, containsInAnyOrder(TRANSIENT, PERSISTENT, NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
+		assertThat(nameIds, containsInAnyOrder(TRANSIENT, PERSISTENT, Saml2NameId.fromUrn("urn:mace:shibboleth:1.0:nameIdentifier")));
 
-		List<Endpoint> singleSignOnServices = provider.getSingleSignOnService();
+		List<Saml2Endpoint> singleSignOnServices = provider.getSingleSignOnService();
 		assertNotNull(singleSignOnServices);
 		assertThat(singleSignOnServices.size(), equalTo(4));
-		Endpoint sso0 = singleSignOnServices.get(0);
+		Saml2Endpoint sso0 = singleSignOnServices.get(0);
 		assertNotNull(sso0);
 		assertThat(sso0.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
 		assertThat(sso0.getBinding(), equalTo(POST));
 
-		Endpoint sso1 = singleSignOnServices.get(1);
+		Saml2Endpoint sso1 = singleSignOnServices.get(1);
 		assertNotNull(sso1);
 		assertThat(sso1.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
 		assertThat(sso1.getBinding(), equalTo(POST_SIMPLE_SIGN));
 
-		Endpoint sso2 = singleSignOnServices.get(2);
+		Saml2Endpoint sso2 = singleSignOnServices.get(2);
 		assertNotNull(sso2);
 		assertThat(sso2.getLocation(), equalTo("https://idp.saml.spring.io/saml/idp/sso"));
 		assertThat(sso2.getBinding(), equalTo(REDIRECT));
 
-		Endpoint sso3 = singleSignOnServices.get(3);
+		Saml2Endpoint sso3 = singleSignOnServices.get(3);
 		assertNotNull(sso3);
 		assertThat(sso3.getLocation(), equalTo("https://shibbolethidp/idp/profile/SAML2/Unsolicited/SSO"));
-		assertThat(sso3.getBinding(), equalTo(Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:AuthnRequest")));
+		assertThat(sso3.getBinding(), equalTo(Saml2Binding.fromUrn("urn:mace:shibboleth:2.0:profiles:AuthnRequest")));
 
 
 	}
 
 	@Test
 	public void xml_to_idp_external() throws Exception {
-		IdentityProviderMetadata idp = (IdentityProviderMetadata) config.fromXml(getFileBytes(
+		Saml2IdentityProviderMetadata idp = (Saml2IdentityProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
 		assertNotNull(idp);
 		assertNotNull(idp.getImplementation());
@@ -643,33 +643,33 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(idp.getProviders());
 		assertThat(idp.getProviders().size(), equalTo(1));
 
-		IdentityProvider provider = idp.getIdentityProvider();
+		Saml2IdentityProvider provider = idp.getIdentityProvider();
 		assertNotNull(provider);
 		assertFalse(provider.getWantAuthnRequestsSigned());
 		assertThat(provider.getProtocolSupportEnumeration(), containsInAnyOrder(NS_PROTOCOL));
 
 		assertNotNull(provider.getKeys());
 		assertThat(provider.getKeys().size(), equalTo(2));
-		KeyData spSigning = provider.getKeys().get(0);
-		KeyData spEncryption = provider.getKeys().get(1);
-		assertThat(spSigning.getType(), equalTo(KeyType.SIGNING));
+		Saml2KeyData spSigning = provider.getKeys().get(0);
+		Saml2KeyData spEncryption = provider.getKeys().get(1);
+		assertThat(spSigning.getType(), equalTo(Saml2KeyType.SIGNING));
 		assertThat(spSigning.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
-		assertThat(spEncryption.getType(), equalTo(KeyType.ENCRYPTION));
+		assertThat(spEncryption.getType(), equalTo(Saml2KeyType.ENCRYPTION));
 		assertThat(spEncryption.getCertificate(), equalTo(keyLoginRunPivotalIo.getCertificate()));
 
-		List<NameId> nameIds = provider.getNameIds();
+		List<Saml2NameId> nameIds = provider.getNameIds();
 		assertNotNull(nameIds);
 		assertThat(nameIds, containsInAnyOrder(EMAIL, PERSISTENT, UNSPECIFIED));
 
-		List<Endpoint> singleSignOnServices = provider.getSingleSignOnService();
+		List<Saml2Endpoint> singleSignOnServices = provider.getSingleSignOnService();
 		assertNotNull(singleSignOnServices);
 		assertThat(singleSignOnServices.size(), equalTo(2));
-		Endpoint sso1 = singleSignOnServices.get(0);
+		Saml2Endpoint sso1 = singleSignOnServices.get(0);
 		assertNotNull(sso1);
 		assertThat(sso1.getLocation(), equalTo("https://login.run.pivotal.io/saml/idp/SSO/alias/login.run.pivotal.io"));
 		assertThat(sso1.getBinding(), equalTo(POST));
 
-		Endpoint sso2 = singleSignOnServices.get(1);
+		Saml2Endpoint sso2 = singleSignOnServices.get(1);
 		assertNotNull(sso2);
 		assertThat(sso2.getLocation(), equalTo("https://login.run.pivotal.io/saml/idp/SSO/alias/login.run.pivotal.io"));
 		assertThat(sso2.getBinding(), equalTo(REDIRECT));
@@ -689,28 +689,28 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void entities_descriptor() throws IOException {
-		Metadata entities =
-			(Metadata) config.fromXml(
+		Saml2Metadata entities =
+			(Saml2Metadata) config.fromXml(
 				getFileBytes("/test-data/metadata/entities-descriptor-example.xml"),
 				asList(), //no verification here yet
 				null
 			);
 		assertNotNull(entities);
-		assertThat(entities.getClass(), equalTo(IdentityProviderMetadata.class));
+		assertThat(entities.getClass(), equalTo(Saml2IdentityProviderMetadata.class));
 		assertTrue(entities.hasNext());
 		assertThat(entities.getNext().getClass(), equalTo(ServiceProviderMetadata.class));
 	}
 
 	@Test
 	public void multiple_descriptors() throws IOException {
-		Metadata entities =
-			(Metadata) config.fromXml(
+		Saml2Metadata entities =
+			(Saml2Metadata) config.fromXml(
 				getFileBytes("/test-data/metadata/multi-descriptor-metadata.xml"),
 				asList(), //no verification here yet
 				null
 			);
 		assertNotNull(entities);
-		assertThat(entities.getClass(), equalTo(Metadata.class));
+		assertThat(entities.getClass(), equalTo(Saml2Metadata.class));
 		assertFalse(entities.hasNext());
 	}
 

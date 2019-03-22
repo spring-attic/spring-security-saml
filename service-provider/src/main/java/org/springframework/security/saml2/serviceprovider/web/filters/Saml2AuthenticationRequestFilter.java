@@ -25,10 +25,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.Endpoint;
+import org.springframework.security.saml2.Saml2Exception;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -54,9 +54,9 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			try {
-				AuthenticationRequest authn = resolver.resolve(request);
+				Saml2AuthenticationSaml2Request authn = resolver.resolve(request);
 				sendAuthenticationRequest(authn, authn.getDestination(), request, response);
-			} catch (SamlException x) {
+			} catch (Saml2Exception x) {
 				displayError(response, x.getMessage());
 			}
 		}
@@ -65,12 +65,12 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 		}
 	}
 
-	protected void sendAuthenticationRequest(AuthenticationRequest authn,
-											 Endpoint destination,
+	protected void sendAuthenticationRequest(Saml2AuthenticationSaml2Request authn,
+											 Saml2Endpoint destination,
 											 HttpServletRequest request,
 											 HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
-		if (destination.getBinding().equals(Binding.REDIRECT)) {
+		if (destination.getBinding().equals(Saml2Binding.REDIRECT)) {
 			String encoded = resolver.encode(authn, true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());
 			url.queryParam("SAMLRequest", UriUtils.encode(encoded, StandardCharsets.UTF_8.name()));
@@ -80,7 +80,7 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 			String redirect = url.build(true).toUriString();
 			response.sendRedirect(redirect);
 		}
-		else if (destination.getBinding().equals(Binding.POST)) {
+		else if (destination.getBinding().equals(Saml2Binding.POST)) {
 			String encoded = resolver.encode(authn, false);
 			PostBindingHtml html = new PostBindingHtml(
 				destination.getLocation(),

@@ -22,18 +22,18 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.ValidationResult;
-import org.springframework.security.saml2.provider.HostedProvider;
+import org.springframework.security.saml2.Saml2ValidationResult;
+import org.springframework.security.saml2.provider.HostedSaml2Provider;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.Issuer;
-import org.springframework.security.saml2.model.authentication.LogoutRequest;
-import org.springframework.security.saml2.model.authentication.LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Response;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.metadata.Endpoint;
-import org.springframework.security.saml2.model.metadata.Metadata;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2Issuer;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
 
@@ -41,9 +41,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import static java.lang.String.format;
-import static org.springframework.security.saml2.model.metadata.NameId.ENTITY;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.ENTITY;
 
-abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
+abstract class AbstractSamlValidator<ProviderType extends HostedSaml2Provider> {
 
 	final Signature INVALID_SIGNATURE = new Signature() {
 		@Override
@@ -54,7 +54,7 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 
 	protected abstract Saml2Transformer getSamlTransformer();
 
-	protected abstract ValidationResult validate(Saml2Object saml2Object, ProviderType provider);
+	protected abstract Saml2ValidationResult validate(Saml2Object saml2Object, ProviderType provider);
 	/**
 	 * Validates a signature on a SAML object. Returns the key that validated the signature
 	 *
@@ -63,12 +63,12 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 	 * @return the key that successfully validated the signature
 	 * @throws SignatureException if object failed signature validation
 	 */
-	protected Signature validateSignature(SignableSaml2Object saml2Object, List<KeyData> verificationKeys)
+	protected Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys)
 		throws SignatureException {
 		try {
 			Signature main = getSamlTransformer().validateSignature(saml2Object, verificationKeys);
-			if (saml2Object instanceof Response && main == null) {
-				for (Assertion a : ((Response)saml2Object).getAssertions()) {
+			if (saml2Object instanceof Saml2ResponseSaml2 && main == null) {
+				for (Saml2Assertion a : ((Saml2ResponseSaml2)saml2Object).getAssertions()) {
 					try {
 						Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
 						a.setSignature(sig);
@@ -101,12 +101,12 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 		return validTimeInterval.contains(time);
 	}
 
-	ValidationResult verifyIssuer(Issuer issuer, Metadata entity) {
+	Saml2ValidationResult verifyIssuer(Saml2Issuer issuer, Saml2Metadata entity) {
 		if (issuer != null) {
 			if (!entity.getEntityId().equals(issuer.getValue())) {
-				return new ValidationResult(entity)
+				return new Saml2ValidationResult(entity)
 					.addError(
-						new ValidationResult.ValidationError(
+						new Saml2ValidationResult.ValidationError(
 							format(
 								"Issuer mismatch. Expected: '%s' Actual: '%s'",
 								entity.getEntityId(),
@@ -116,9 +116,9 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 					);
 			}
 			if (issuer.getFormat() != null && !issuer.getFormat().equals(ENTITY)) {
-				return new ValidationResult(entity)
+				return new Saml2ValidationResult(entity)
 					.addError(
-						new ValidationResult.ValidationError(
+						new Saml2ValidationResult.ValidationError(
 							format(
 								"Issuer name format mismatch. Expected: '%s' Actual: '%s'",
 								ENTITY,
@@ -131,8 +131,8 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 		return null;
 	}
 
-	boolean compareURIs(List<Endpoint> endpoints, String uri) {
-		for (Endpoint ep : endpoints) {
+	boolean compareURIs(List<Saml2Endpoint> endpoints, String uri) {
+		for (Saml2Endpoint ep : endpoints) {
 			if (compareURIs(ep.getLocation(), uri)) {
 				return true;
 			}
@@ -161,23 +161,23 @@ abstract class AbstractSamlValidator<ProviderType extends HostedProvider> {
 		return uri;
 	}
 
-	ValidationResult validate(LogoutRequest logoutRequest, ProviderType provider) {
-		ValidationResult result = new ValidationResult(logoutRequest);
+	Saml2ValidationResult validate(Saml2LogoutSaml2Request logoutRequest, ProviderType provider) {
+		Saml2ValidationResult result = new Saml2ValidationResult(logoutRequest);
 		checkValidSignature(logoutRequest, result);
 		return result;
 	}
 
-	ValidationResult validate(LogoutResponse logoutResponse, ProviderType provider) {
-		ValidationResult result = new ValidationResult(logoutResponse);
+	Saml2ValidationResult validate(Saml2LogoutResponseSaml2 logoutResponse, ProviderType provider) {
+		Saml2ValidationResult result = new Saml2ValidationResult(logoutResponse);
 		checkValidSignature(logoutResponse, result);
 		return result;
 	}
 
-	void checkValidSignature(SignableSaml2Object saml2Object, ValidationResult result) {
+	void checkValidSignature(Saml2SignableObject saml2Object, Saml2ValidationResult result) {
 		Signature signature = saml2Object.getSignature();
 		if (signature != null && !signature.isValidated()) {
 			result.addError(
-				new ValidationResult.ValidationError("Invalid signature on "+saml2Object.getClass().getSimpleName())
+				new Saml2ValidationResult.ValidationError("Invalid signature on "+saml2Object.getClass().getSimpleName())
 			);
 		}
 	}

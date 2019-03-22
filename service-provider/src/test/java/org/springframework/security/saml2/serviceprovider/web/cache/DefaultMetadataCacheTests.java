@@ -19,7 +19,7 @@ package org.springframework.security.saml2.serviceprovider.web.cache;
 
 import java.time.Clock;
 
-import org.springframework.security.saml2.SamlProviderNotFoundException;
+import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
@@ -43,7 +43,7 @@ class DefaultMetadataCacheTests {
 	private RestOperations validatingNetwork = mock(RestOperations.class);
 	private RestOperations nonValidatingNetwork = mock(RestOperations.class);
 
-	private DefaultMetadataCache cache;
+	private DefaultSaml2MetadataCache cache;
 
 	private String hitUrl = "hit.url.com";
 	private String missUrl = "miss.url.com";
@@ -54,7 +54,7 @@ class DefaultMetadataCacheTests {
 
 	@BeforeEach
 	void setUp() {
-		cache = new DefaultMetadataCache(clock, validatingNetwork, nonValidatingNetwork)
+		cache = new DefaultSaml2MetadataCache(clock, validatingNetwork, nonValidatingNetwork)
 			.setCacheHitDurationMillis(cacheTime)
 			.setCacheMissDurationMillis(missTime);
 
@@ -87,7 +87,7 @@ class DefaultMetadataCacheTests {
 	@Test
 	void correctExceptionWhenMiss() {
 		Assertions.assertThrows(
-			SamlProviderNotFoundException.class,
+			Saml2ProviderNotFoundException.class,
 			() -> cache.getMetadata(missUrl, true)
 		);
 	}
@@ -110,25 +110,25 @@ class DefaultMetadataCacheTests {
 
 	@Test
 	void cacheMissWorks() {
-		SamlProviderNotFoundException miss1 = doMiss();
-		SamlProviderNotFoundException miss2 = doMiss();
+		Saml2ProviderNotFoundException miss1 = doMiss();
+		Saml2ProviderNotFoundException miss2 = doMiss();
 		assertSame(miss1, miss2);
 	}
 
 
 	@Test
 	void cacheMissExpires() {
-		SamlProviderNotFoundException miss1 = doMiss();
+		Saml2ProviderNotFoundException miss1 = doMiss();
 		reset(clock);
 		when(clock.millis()).thenReturn(System.currentTimeMillis() + (2 * missTime));
-		SamlProviderNotFoundException miss2 = doMiss();
+		Saml2ProviderNotFoundException miss2 = doMiss();
 		assertNotSame(miss1, miss2);
 	}
 
-	private SamlProviderNotFoundException doMiss() {
+	private Saml2ProviderNotFoundException doMiss() {
 		try {
 			cache.getMetadata(missUrl, true);
-		} catch (SamlProviderNotFoundException e) {
+		} catch (Saml2ProviderNotFoundException e) {
 			return e;
 		}
 		throw new IllegalStateException();

@@ -27,39 +27,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.security.saml2.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.AudienceRestriction;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.AuthenticationStatement;
-import org.springframework.security.saml2.model.authentication.Conditions;
-import org.springframework.security.saml2.model.authentication.Issuer;
-import org.springframework.security.saml2.model.authentication.LogoutRequest;
-import org.springframework.security.saml2.model.authentication.LogoutResponse;
-import org.springframework.security.saml2.model.authentication.NameIdPolicy;
-import org.springframework.security.saml2.model.authentication.NameIdPrincipal;
-import org.springframework.security.saml2.model.authentication.Response;
-import org.springframework.security.saml2.model.authentication.Status;
-import org.springframework.security.saml2.model.authentication.StatusCode;
-import org.springframework.security.saml2.model.authentication.Subject;
-import org.springframework.security.saml2.model.authentication.SubjectConfirmation;
-import org.springframework.security.saml2.model.authentication.SubjectConfirmationData;
-import org.springframework.security.saml2.model.authentication.SubjectConfirmationMethod;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.BindingType;
-import org.springframework.security.saml2.model.metadata.Endpoint;
-import org.springframework.security.saml2.model.metadata.IdentityProvider;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.Metadata;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
+import org.springframework.security.saml2.model.authentication.Saml2Conditions;
+import org.springframework.security.saml2.model.authentication.Saml2Issuer;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Status;
+import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
+import org.springframework.security.saml2.model.authentication.Saml2Subject;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmation;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationData;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationMethod;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2BindingType;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProvider;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2Metadata;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.util.StringUtils;
+import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -67,7 +67,7 @@ import org.joda.time.DateTime;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static org.springframework.security.saml2.model.metadata.Binding.REDIRECT;
+import static org.springframework.security.saml2.model.metadata.Saml2Binding.REDIRECT;
 import static org.springframework.security.saml2.model.signature.AlgorithmMethod.RSA_SHA1;
 import static org.springframework.security.saml2.model.signature.DigestMethod.SHA1;
 import static org.springframework.util.StringUtils.hasText;
@@ -95,9 +95,9 @@ public class SamlTestObjectHelper {
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   HostedServiceProviderConfiguration configuration) {
-		List<KeyData> keys = configuration.getKeys();
-		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+														   HostedSaml2ServiceProviderConfiguration configuration) {
+		List<Saml2KeyData> keys = configuration.getKeys();
+		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String aliasPath = getAliasPath(configuration);
 		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/sp/";
@@ -120,16 +120,16 @@ public class SamlTestObjectHelper {
 		return metadata;
 	}
 
-	protected String getAliasPath(HostedProviderConfiguration configuration) {
+	protected String getAliasPath(HostedSaml2ProviderConfiguration configuration) {
 		return UriUtils.encode(
-			StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
+			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
 			"ISO-8859-1"
 		);
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   KeyData signingKey,
-														   List<KeyData> keys,
+														   Saml2KeyData signingKey,
+														   List<Saml2KeyData> keys,
 														   String pathPrefix,
 														   String aliasPath,
 														   AlgorithmMethod algorithmMethod,
@@ -151,11 +151,11 @@ public class SamlTestObjectHelper {
 						.setAuthnRequestsSigned(signingKey != null)
 						.setAssertionConsumerService(
 							asList(
-								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Saml2Binding.POST, 0, true),
 								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
-						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
+						.setNameIds(asList(Saml2NameId.PERSISTENT, Saml2NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
@@ -166,15 +166,15 @@ public class SamlTestObjectHelper {
 			);
 	}
 
-	public Endpoint getEndpoint(String baseUrl, String path, Binding binding, int index, boolean isDefault) {
+	public Saml2Endpoint getEndpoint(String baseUrl, String path, Saml2Binding binding, int index, boolean isDefault) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
 		builder.pathSegment(path);
 		return getEndpoint(builder.build().toUriString(), binding, index, isDefault);
 	}
 
-	public Endpoint getEndpoint(String url, Binding binding, int index, boolean isDefault) {
+	public Saml2Endpoint getEndpoint(String url, Saml2Binding binding, int index, boolean isDefault) {
 		return
-			new Endpoint()
+			new Saml2Endpoint()
 				.setIndex(index)
 				.setBinding(binding)
 				.setLocation(url)
@@ -182,14 +182,14 @@ public class SamlTestObjectHelper {
 				.setIndex(index);
 	}
 
-	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-															 HostedIdentityProviderConfiguration configuration) {
-		List<KeyData> keys = configuration.getKeys();
-		KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+	public Saml2IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+																  HostedSaml2IdentityProviderConfiguration configuration) {
+		List<Saml2KeyData> keys = configuration.getKeys();
+		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/idp/";
 		String aliasPath = getAliasPath(configuration);
-		IdentityProviderMetadata metadata = identityProviderMetadata(
+		Saml2IdentityProviderMetadata metadata = identityProviderMetadata(
 			baseUrl,
 			signingKey,
 			keys,
@@ -204,15 +204,15 @@ public class SamlTestObjectHelper {
 		return metadata;
 	}
 
-	public IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-															 KeyData signingKey,
-															 List<KeyData> keys,
-															 String pathPrefix,
-															 String aliasPath,
-															 AlgorithmMethod algorithmMethod,
-															 DigestMethod digestMethod) {
+	public Saml2IdentityProviderMetadata identityProviderMetadata(String baseUrl,
+																  Saml2KeyData signingKey,
+																  List<Saml2KeyData> keys,
+																  String pathPrefix,
+																  String aliasPath,
+																  AlgorithmMethod algorithmMethod,
+																  DigestMethod digestMethod) {
 
-		return new IdentityProviderMetadata()
+		return new Saml2IdentityProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId("IDPM"+UUID.randomUUID().toString())
 			.setSigningKey(
@@ -222,15 +222,15 @@ public class SamlTestObjectHelper {
 			)
 			.setProviders(
 				asList(
-					new IdentityProvider()
+					new Saml2IdentityProvider()
 						.setWantAuthnRequestsSigned(true)
 						.setSingleSignOnService(
 							asList(
-								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Binding.POST, 0, true),
+								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, Saml2Binding.POST, 0, true),
 								getEndpoint(baseUrl, pathPrefix + "SSO/alias/" + aliasPath, REDIRECT, 1, false)
 							)
 						)
-						.setNameIds(asList(NameId.PERSISTENT, NameId.EMAIL))
+						.setNameIds(asList(Saml2NameId.PERSISTENT, Saml2NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
 							asList(
@@ -242,30 +242,30 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public AuthenticationRequest authenticationRequest(ServiceProviderMetadata sp, IdentityProviderMetadata idp) {
+	public Saml2AuthenticationSaml2Request authenticationRequest(ServiceProviderMetadata sp, Saml2IdentityProviderMetadata idp) {
 
-		AuthenticationRequest request = new AuthenticationRequest()
+		Saml2AuthenticationSaml2Request request = new Saml2AuthenticationSaml2Request()
 			.setId("ARQ"+UUID.randomUUID().toString())
 			.setIssueInstant(new DateTime(time.millis()))
 			.setForceAuth(Boolean.FALSE)
 			.setPassive(Boolean.FALSE)
-			.setBinding(Binding.POST)
+			.setBinding(Saml2Binding.POST)
 			.setAssertionConsumerService(getACSFromSp(sp))
-			.setIssuer(new Issuer().setValue(sp.getEntityId()))
+			.setIssuer(new Saml2Issuer().setValue(sp.getEntityId()))
 			.setDestination(idp.getIdentityProvider().getSingleSignOnService().get(0));
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
-		NameIdPolicy policy;
+		Saml2NameIdPolicy policy;
 		if (idp.getDefaultNameId() != null) {
-			policy = new NameIdPolicy(
+			policy = new Saml2NameIdPolicy(
 				idp.getDefaultNameId(),
 				sp.getEntityAlias(),
 				true
 			);
 		}
 		else {
-			policy = new NameIdPolicy(
+			policy = new Saml2NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
 				sp.getEntityAlias(),
 				true
@@ -275,9 +275,9 @@ public class SamlTestObjectHelper {
 		return request;
 	}
 
-	private Endpoint getACSFromSp(ServiceProviderMetadata sp) {
-		Endpoint endpoint = sp.getServiceProvider().getAssertionConsumerService().get(0);
-		for (Endpoint e : sp.getServiceProvider().getAssertionConsumerService()) {
+	private Saml2Endpoint getACSFromSp(ServiceProviderMetadata sp) {
+		Saml2Endpoint endpoint = sp.getServiceProvider().getAssertionConsumerService().get(0);
+		for (Saml2Endpoint e : sp.getServiceProvider().getAssertionConsumerService()) {
 			if (e.isDefault()) {
 				endpoint = e;
 			}
@@ -285,33 +285,33 @@ public class SamlTestObjectHelper {
 		return endpoint;
 	}
 
-	public Assertion assertion(ServiceProviderMetadata sp,
-							   IdentityProviderMetadata idp,
-							   AuthenticationRequest request,
-							   String principal,
-							   NameId principalFormat) {
+	public Saml2Assertion assertion(ServiceProviderMetadata sp,
+									Saml2IdentityProviderMetadata idp,
+									Saml2AuthenticationSaml2Request request,
+									String principal,
+									Saml2NameId principalFormat) {
 
 		long now = time.millis();
-		return new Assertion()
+		return new Saml2Assertion()
 			.setSigningKey(idp.getSigningKey(), idp.getAlgorithm(), idp.getDigest())
 			.setVersion("2.0")
 			.setIssueInstant(new DateTime(now))
 			.setId("A"+UUID.randomUUID().toString())
 			.setIssuer(idp.getEntityId())
 			.setSubject(
-				new Subject()
+				new Saml2Subject()
 					.setPrincipal(
-						new NameIdPrincipal()
+						new Saml2NameIdPrincipalSaml2()
 							.setValue(principal)
 							.setFormat(principalFormat)
 							.setNameQualifier(sp.getEntityAlias())
 							.setSpNameQualifier(sp.getEntityId())
 					)
 					.addConfirmation(
-						new SubjectConfirmation()
-							.setMethod(SubjectConfirmationMethod.BEARER)
+						new Saml2SubjectConfirmation()
+							.setMethod(Saml2SubjectConfirmationMethod.BEARER)
 							.setConfirmationData(
-								new SubjectConfirmationData()
+								new Saml2SubjectConfirmationData()
 									.setInResponseTo(request != null ? request.getId() : null)
 									//we don't set NotBefore. Gets rejected.
 									//.setNotBefore(new DateTime(now - NOT_BEFORE))
@@ -327,17 +327,17 @@ public class SamlTestObjectHelper {
 
 			)
 			.setConditions(
-				new Conditions()
+				new Saml2Conditions()
 					.setNotBefore(new DateTime(now - NOT_BEFORE))
 					.setNotOnOrAfter(new DateTime(now + NOT_AFTER))
 					.addCriteria(
-						new AudienceRestriction()
+						new Saml2AudienceRestriction()
 							.addAudience(sp.getEntityId())
 
 					)
 			)
 			.addAuthenticationStatement(
-				new AuthenticationStatement()
+				new Saml2AuthenticationStatement()
 					.setAuthInstant(new DateTime(now))
 					.setSessionIndex("IDX"+UUID.randomUUID().toString())
 					.setSessionNotOnOrAfter(new DateTime(now + SESSION_NOT_AFTER))
@@ -346,23 +346,23 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public Response response(AuthenticationRequest authn,
-							 Assertion assertion,
-							 ServiceProviderMetadata recipient,
-							 IdentityProviderMetadata local) {
-		Response result = new Response()
+	public Saml2ResponseSaml2 response(Saml2AuthenticationSaml2Request authn,
+									   Saml2Assertion assertion,
+									   ServiceProviderMetadata recipient,
+									   Saml2IdentityProviderMetadata local) {
+		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
 			.setAssertions(asList(assertion))
 			.setId("RP"+UUID.randomUUID().toString())
 			.setInResponseTo(authn != null ? authn.getId() : null)
-			.setStatus(new Status().setCode(StatusCode.UNKNOWN_STATUS))
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setStatus(new Saml2Status().setCode(Saml2StatusCode.UNKNOWN_STATUS))
+			.setIssuer(new Saml2Issuer().setValue(local.getEntityId()))
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
 			.setIssueInstant(new DateTime())
-			.setStatus(new Status().setCode(StatusCode.SUCCESS))
+			.setStatus(new Saml2Status().setCode(Saml2StatusCode.SUCCESS))
 			.setVersion("2.0");
-		Endpoint acs = (authn != null ? authn.getAssertionConsumerService() : null);
+		Saml2Endpoint acs = (authn != null ? authn.getAssertionConsumerService() : null);
 		if (acs == null) {
-			acs = getPreferredACS(recipient.getServiceProvider().getAssertionConsumerService(), asList(BindingType.POST));
+			acs = getPreferredACS(recipient.getServiceProvider().getAssertionConsumerService(), asList(Saml2BindingType.POST));
 		}
 		if (acs != null) {
 			result.setDestination(acs.getLocation());
@@ -370,25 +370,25 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public Endpoint getPreferredACS(List<Endpoint> eps,
-									List<BindingType> preferred) {
+	public Saml2Endpoint getPreferredACS(List<Saml2Endpoint> eps,
+										 List<Saml2BindingType> preferred) {
 		if (eps == null || eps.isEmpty()) {
 			return null;
 		}
-		Endpoint result = null;
-		for (Endpoint e : eps) {
+		Saml2Endpoint result = null;
+		for (Saml2Endpoint e : eps) {
 			if (e.isDefault() && preferred.contains(e.getBinding().getType())) {
 				result = e;
 				break;
 			}
 		}
-		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
+		for (Saml2Endpoint e : (result == null ? eps : Collections.<Saml2Endpoint>emptyList())) {
 			if (e.isDefault()) {
 				result = e;
 				break;
 			}
 		}
-		for (Endpoint e : (result == null ? eps : Collections.<Endpoint>emptyList())) {
+		for (Saml2Endpoint e : (result == null ? eps : Collections.<Saml2Endpoint>emptyList())) {
 			if (preferred.contains(e.getBinding().getType())) {
 				result = e;
 				break;
@@ -400,15 +400,15 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public LogoutRequest logoutRequest(Metadata<? extends Metadata> recipient,
-									   Metadata<? extends Metadata> local,
-									   NameIdPrincipal principal) {
+	public Saml2LogoutSaml2Request logoutRequest(Saml2Metadata<? extends Saml2Metadata> recipient,
+												 Saml2Metadata<? extends Saml2Metadata> local,
+												 Saml2NameIdPrincipalSaml2 principal) {
 
 
-		LogoutRequest result = new LogoutRequest()
+		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId("LRQ"+UUID.randomUUID().toString())
 			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setIssuer(new Saml2Issuer().setValue(local.getEntityId()))
 			.setIssueInstant(DateTime.now())
 			.setNameId(principal)
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
@@ -416,18 +416,18 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public Endpoint getSingleLogout(List<Endpoint> logoutService) {
+	public Saml2Endpoint getSingleLogout(List<Saml2Endpoint> logoutService) {
 		if (logoutService == null || logoutService.isEmpty()) {
 			return null;
 		}
-		List<Endpoint> eps = logoutService;
-		Endpoint result = null;
-		for (Endpoint e : eps) {
+		List<Saml2Endpoint> eps = logoutService;
+		Saml2Endpoint result = null;
+		for (Saml2Endpoint e : eps) {
 			if (e.isDefault()) {
 				result = e;
 				break;
 			}
-			else if (BindingType.REDIRECT == e.getBinding().getType()) {
+			else if (Saml2BindingType.REDIRECT == e.getBinding().getType()) {
 				result = e;
 				break;
 			}
@@ -438,9 +438,9 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 IdentityProviderMetadata recipient,
-										 ServiceProviderMetadata local) {
+	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
+												   Saml2IdentityProviderMetadata recipient,
+												   ServiceProviderMetadata local) {
 		return logoutResponse(
 			request,
 			recipient,
@@ -449,25 +449,25 @@ public class SamlTestObjectHelper {
 		);
 	}
 
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 Metadata<? extends Metadata> recipient,
-										 Metadata<? extends Metadata> local,
-										 Endpoint destination) {
+	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
+												   Saml2Metadata<? extends Saml2Metadata> recipient,
+												   Saml2Metadata<? extends Saml2Metadata> local,
+												   Saml2Endpoint destination) {
 
-		return new LogoutResponse()
+		return new Saml2LogoutResponseSaml2()
 			.setId("LRP"+UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
 			.setDestination(destination != null ? destination.getLocation() : null)
-			.setStatus(new Status().setCode(StatusCode.SUCCESS))
-			.setIssuer(new Issuer().setValue(local.getEntityId()))
+			.setStatus(new Saml2Status().setCode(Saml2StatusCode.SUCCESS))
+			.setIssuer(new Saml2Issuer().setValue(local.getEntityId()))
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest())
 			.setIssueInstant(new DateTime())
 			.setVersion("2.0");
 	}
 
-	public LogoutResponse logoutResponse(LogoutRequest request,
-										 ServiceProviderMetadata recipient,
-										 IdentityProviderMetadata local) {
+	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
+												   ServiceProviderMetadata recipient,
+												   Saml2IdentityProviderMetadata local) {
 		return logoutResponse(
 			request,
 			recipient,

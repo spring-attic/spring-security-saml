@@ -17,15 +17,15 @@
 
 package org.springframework.security.saml2.boot.configuration;
 
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 
 public class SamlKey {
 	private String name;
 	private String privateKey;
 	private String certificate;
 	private String passphrase;
-	private KeyType type;
+	private Saml2KeyType type;
 
 	public SamlKey() {
 	}
@@ -34,7 +34,7 @@ public class SamlKey {
 				   String privateKey,
 				   String certificate,
 				   String passphrase,
-				   KeyType type) {
+				   Saml2KeyType type) {
 		this.name = name;
 		this.privateKey = privateKey;
 		this.certificate = certificate;
@@ -42,15 +42,15 @@ public class SamlKey {
 		this.type = type;
 	}
 
-	public KeyData toKeyData() {
+	public Saml2KeyData toKeyData() {
 		return toKeyData(
 			getName(),
 			getType()
 		);
 	}
 
-	public KeyData toKeyData(String name, KeyType type) {
-		return new KeyData(
+	public Saml2KeyData toKeyData(String name, Saml2KeyType type) {
+		return new Saml2KeyData(
 			name,
 			getPrivateKey(),
 			getCertificate(),
@@ -91,11 +91,11 @@ public class SamlKey {
 		this.passphrase = passphrase;
 	}
 
-	public KeyType getType() {
+	public Saml2KeyType getType() {
 		return type;
 	}
 
-	public void setType(KeyType type) {
+	public void setType(Saml2KeyType type) {
 		this.type = type;
 	}
 }

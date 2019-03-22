@@ -28,11 +28,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.provider.HostedServiceProvider;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
@@ -66,18 +66,18 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 	@Autowired(required = false)
 	ServiceProviderResolver spResolver;
-	private ExternalIdentityProviderConfiguration.Builder remoteTrustCheckMetadata =
-		ExternalIdentityProviderConfiguration.builder()
+	private ExternalSaml2IdentityProviderConfiguration.Builder remoteTrustCheckMetadata =
+		ExternalSaml2IdentityProviderConfiguration.builder()
 			.alias("metadata-trust-check")
 			.linktext("Remote Trust Check Metadata")
 			.metadataTrustCheck(true)
 			.verificationKeys(asList(
-				new KeyData(
+				new Saml2KeyData(
 					"trust",
 					null,
 					METADATA_TRUST_CHECK_KEY,
 					null,
-					KeyType.SIGNING
+					Saml2KeyType.SIGNING
 				)
 			))
 			.metadata(METADATA_TRUST_CHECK);
@@ -136,12 +136,12 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("remote party metadata contains both IDP and SP descriptors")
 	@Disabled("login page is now static - need to replace with unit test")
 	void parseDualRemoteMetadata() throws Exception {
-		final List<ExternalIdentityProviderConfiguration> providers =
+		final List<ExternalSaml2IdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()
 				.map(p -> p.toExternalIdentityProviderConfiguration())
 				.collect(Collectors.toList());
 		providers.add(
-			ExternalIdentityProviderConfiguration.builder()
+			ExternalSaml2IdentityProviderConfiguration.builder()
 				.alias("dual")
 				.linktext("Dual IDP/SP Metadata")
 				.metadata(IDP_DUAL_METADATA)
@@ -162,7 +162,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("signed remote metadata is verified through signature")
 	@Disabled("login page is now static - need to replace with unit test")
 	void remoteMetadataTrustCheck() throws Exception {
-		final List<ExternalIdentityProviderConfiguration> providers =
+		final List<ExternalSaml2IdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()
 				.map(p -> p.toExternalIdentityProviderConfiguration())
 				.collect(Collectors.toList());
@@ -182,7 +182,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("signed remote metadata fails signature verification")
 	@Disabled("login page is now static - need to replace with unit test")
 	void remoteMetadataTrustCheckFails() throws Exception {
-		final List<ExternalIdentityProviderConfiguration> providers =
+		final List<ExternalSaml2IdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()
 				.map(p -> p.toExternalIdentityProviderConfiguration())
 				.collect(Collectors.toList());
@@ -208,7 +208,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 		assertNotNull(metadataResolver);
 		assertNotNull(spResolver);
 
-		final List<ExternalIdentityProviderConfiguration> providers =
+		final List<ExternalSaml2IdentityProviderConfiguration> providers =
 			bootConfiguration.getServiceProvider().getProviders().stream()
 				.map(p -> p.toExternalIdentityProviderConfiguration())
 				.collect(Collectors.toList());
@@ -219,10 +219,10 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 		mockConfig(builder -> builder.providers(providers));
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		HostedServiceProvider provider = spResolver.getServiceProvider(request);
-		Map<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> idps =
+		HostedSaml2ServiceProvider provider = spResolver.getServiceProvider(request);
+		Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> idps =
 			metadataResolver.getIdentityProviders(provider.getConfiguration());
-		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entry = idps.entrySet()
+		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> entry = idps.entrySet()
 			.stream()
 			.filter(
 				e -> e.getValue().getEntityId().equals("login.run.pivotal.io")
@@ -230,9 +230,9 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 			.findFirst()
 			.orElse(null);
 		assertNotNull(entry);
-		IdentityProviderMetadata metadata = entry.getValue();
-		List<KeyData> keys = metadata.getIdentityProvider().getKeys();
-		KeyData staticKey = keys.stream()
+		Saml2IdentityProviderMetadata metadata = entry.getValue();
+		List<Saml2KeyData> keys = metadata.getIdentityProvider().getKeys();
+		Saml2KeyData staticKey = keys.stream()
 			.filter(
 				k -> SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData().getCertificate().equals(k.getCertificate())
 			)

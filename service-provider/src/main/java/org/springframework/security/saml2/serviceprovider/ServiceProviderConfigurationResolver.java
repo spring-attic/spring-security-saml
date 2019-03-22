@@ -17,10 +17,10 @@
 
 package org.springframework.security.saml2.serviceprovider;
 
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 
 public interface ServiceProviderConfigurationResolver<ResolvingEntity> {
-	HostedServiceProviderConfiguration getConfiguration(ResolvingEntity request);
+	HostedSaml2ServiceProviderConfiguration getConfiguration(ResolvingEntity request);
 
 	String getConfiguredPathPrefix();
 }

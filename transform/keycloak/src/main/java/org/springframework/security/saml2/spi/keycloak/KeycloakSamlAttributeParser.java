@@ -27,7 +27,7 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.springframework.security.saml2.SamlException;
+import org.springframework.security.saml2.Saml2Exception;
 
 import org.keycloak.saml.common.PicketLinkLogger;
 import org.keycloak.saml.common.PicketLinkLoggerFactory;
@@ -38,7 +38,7 @@ import org.keycloak.saml.processing.core.parsers.saml.assertion.SAMLAssertionQNa
 import org.keycloak.saml.processing.core.parsers.saml.assertion.SAMLAttributeValueParser;
 import org.keycloak.saml.processing.core.parsers.util.SAMLParserUtil;
 
-import static org.springframework.security.saml2.util.DateUtils.fromZuluTime;
+import static org.springframework.security.saml2.util.Saml2DateUtils.fromZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
 public class KeycloakSamlAttributeParser extends SAMLAttributeValueParser {
@@ -139,7 +139,7 @@ public class KeycloakSamlAttributeParser extends SAMLAttributeValueParser {
 				try {
 					return new URI(value);
 				} catch (URISyntaxException e) {
-					throw new SamlException(e);
+					throw new Saml2Exception(e);
 				}
 			}
 			else {

@@ -25,8 +25,8 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.SamlKeyStoreProvider;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.Saml2KeyStoreProvider;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -34,8 +34,8 @@ class KeyInfo {
 	private final KeyPair keyPair;
 	private X509Certificate certificate;
 
-	KeyInfo(SamlKeyStoreProvider provider, KeyData key) throws UnrecoverableKeyException, NoSuchAlgorithmException,
-															   KeyStoreException {
+	KeyInfo(Saml2KeyStoreProvider provider, Saml2KeyData key) throws UnrecoverableKeyException, NoSuchAlgorithmException,
+																	 KeyStoreException {
 		KeyStore keyStore = provider.getKeyStore(key, key.getId().toCharArray());
 		PrivateKey privateKey = hasText(key.getPrivateKey()) ?
 			(PrivateKey) keyStore.getKey(key.getId(), key.getPassphrase().toCharArray()) :

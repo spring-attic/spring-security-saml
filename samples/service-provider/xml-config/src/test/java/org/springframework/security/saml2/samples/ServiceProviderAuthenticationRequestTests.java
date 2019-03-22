@@ -25,8 +25,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.Disabled;
@@ -103,7 +103,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Disabled("login page is now static - need to replace with unit test")
 	void multipleIdpSelection() throws Exception {
 		List<RemoteIdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
-		List<ExternalIdentityProviderConfiguration> list = new LinkedList<>();
+		List<ExternalSaml2IdentityProviderConfiguration> list = new LinkedList<>();
 		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
 		providers.get(0).setAlias(providers.get(0).getAlias() + "-2");
 		providers.get(0).setLinktext("A Secondary SimpleSAML Provider");
@@ -126,7 +126,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
-		AuthenticationRequest authn = getAuthenticationRequest(
+		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -147,7 +147,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("authentication request is not signed")
 	void authNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
-		AuthenticationRequest authn = getAuthenticationRequest(
+		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),

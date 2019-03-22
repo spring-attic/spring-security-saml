@@ -19,9 +19,9 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml2.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.encrypt.DataEncryptionMethod;
-import org.springframework.security.saml2.model.encrypt.KeyEncryptionMethod;
+import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
+import org.springframework.security.saml2.model.encrypt.Saml2KeyEncryptionMethod;
 
 public class LocalIdentityProviderConfiguration extends
 	LocalProviderConfiguration<RemoteServiceProviderConfiguration> {
@@ -29,8 +29,8 @@ public class LocalIdentityProviderConfiguration extends
 	private boolean wantRequestsSigned = true;
 	private boolean signAssertions = true;
 	private boolean encryptAssertions = false;
-	private KeyEncryptionMethod keyEncryptionAlgorithm = KeyEncryptionMethod.RSA_1_5;
-	private DataEncryptionMethod dataEncryptionAlgorithm = DataEncryptionMethod.AES256_CBC;
+	private Saml2KeyEncryptionMethod keyEncryptionAlgorithm = Saml2KeyEncryptionMethod.RSA_1_5;
+	private Saml2DataEncryptionMethod dataEncryptionAlgorithm = Saml2DataEncryptionMethod.AES256_CBC;
 	private long notOnOrAfter = 120000;
 	private long notBefore = 60000;
 	private long sessionNotOnOrAfter = 30 * 60 * 1000;
@@ -63,8 +63,8 @@ public class LocalIdentityProviderConfiguration extends
 		this.encryptAssertions = encryptAssertions;
 	}
 
-	public HostedIdentityProviderConfiguration toHostedConfiguration() {
-		return new HostedIdentityProviderConfiguration(
+	public HostedSaml2IdentityProviderConfiguration toHostedConfiguration() {
+		return new HostedSaml2IdentityProviderConfiguration(
 			getPathPrefix(),
 			getBasePath(),
 			getAlias(),
@@ -88,19 +88,19 @@ public class LocalIdentityProviderConfiguration extends
 		);
 	}
 
-	public KeyEncryptionMethod getKeyEncryptionAlgorithm() {
+	public Saml2KeyEncryptionMethod getKeyEncryptionAlgorithm() {
 		return keyEncryptionAlgorithm;
 	}
 
-	public void setKeyEncryptionAlgorithm(KeyEncryptionMethod keyEncryptionAlgorithm) {
+	public void setKeyEncryptionAlgorithm(Saml2KeyEncryptionMethod keyEncryptionAlgorithm) {
 		this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
 	}
 
-	public DataEncryptionMethod getDataEncryptionAlgorithm() {
+	public Saml2DataEncryptionMethod getDataEncryptionAlgorithm() {
 		return dataEncryptionAlgorithm;
 	}
 
-	public void setDataEncryptionAlgorithm(DataEncryptionMethod dataEncryptionAlgorithm) {
+	public void setDataEncryptionAlgorithm(Saml2DataEncryptionMethod dataEncryptionAlgorithm) {
 		this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
 	}
 

@@ -23,26 +23,26 @@ package org.springframework.security.saml2.configuration;
  */
 public class HostedServerConfiguration {
 
-	private final HostedServiceProviderConfiguration serviceProvider;
-	private final HostedIdentityProviderConfiguration identityProvider;
+	private final HostedSaml2ServiceProviderConfiguration serviceProvider;
+	private final HostedSaml2IdentityProviderConfiguration identityProvider;
 
-	public HostedServerConfiguration(HostedServiceProviderConfiguration serviceProvider,
-									 HostedIdentityProviderConfiguration identityProvider) {
+	public HostedServerConfiguration(HostedSaml2ServiceProviderConfiguration serviceProvider,
+									 HostedSaml2IdentityProviderConfiguration identityProvider) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
 	}
 
-	public HostedServiceProviderConfiguration getServiceProvider() {
+	public HostedSaml2ServiceProviderConfiguration getServiceProvider() {
 		return serviceProvider;
 	}
 
-	public HostedIdentityProviderConfiguration getIdentityProvider() {
+	public HostedSaml2IdentityProviderConfiguration getIdentityProvider() {
 		return identityProvider;
 	}
 
 	public static final class Builder {
-		private HostedServiceProviderConfiguration serviceProvider;
-		private HostedIdentityProviderConfiguration identityProvider;
+		private HostedSaml2ServiceProviderConfiguration serviceProvider;
+		private HostedSaml2IdentityProviderConfiguration identityProvider;
 
 		private Builder() {
 		}
@@ -58,12 +58,12 @@ public class HostedServerConfiguration {
 				;
 		}
 
-		public Builder serviceProvider(HostedServiceProviderConfiguration serviceProvider) {
+		public Builder serviceProvider(HostedSaml2ServiceProviderConfiguration serviceProvider) {
 			this.serviceProvider = serviceProvider;
 			return this;
 		}
 
-		public Builder identityProvider(HostedIdentityProviderConfiguration identityProvider) {
+		public Builder identityProvider(HostedSaml2IdentityProviderConfiguration identityProvider) {
 			this.identityProvider = identityProvider;
 			return this;
 		}

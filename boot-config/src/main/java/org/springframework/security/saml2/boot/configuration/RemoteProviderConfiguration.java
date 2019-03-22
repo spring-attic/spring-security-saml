@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
 
 import static java.util.Optional.ofNullable;
 
@@ -84,16 +84,16 @@ public abstract class RemoteProviderConfiguration {
 		this.verificationKeys = verificationKeys;
 	}
 
-	protected List<KeyData> getVerificationKeyData() {
+	protected List<Saml2KeyData> getVerificationKeyData() {
 		return ofNullable(getVerificationKeys()).orElse(Collections.emptyList())
 			.stream()
 			.map(
-				s -> new KeyData(
+				s -> new Saml2KeyData(
 					"from-config-"+UUID.randomUUID().toString(),
 					null,
 					s,
 					null,
-					KeyType.SIGNING
+					Saml2KeyType.SIGNING
 				)
 			)
 			.collect(Collectors.toList());

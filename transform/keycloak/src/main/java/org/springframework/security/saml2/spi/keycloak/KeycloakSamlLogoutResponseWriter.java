@@ -21,7 +21,7 @@ import java.net.URI;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.springframework.security.saml2.util.DateUtils;
+import org.springframework.security.saml2.util.Saml2DateUtils;
 
 import org.keycloak.dom.saml.v2.assertion.NameIDType;
 import org.keycloak.dom.saml.v2.protocol.ExtensionsType;
@@ -47,7 +47,7 @@ import static org.keycloak.saml.common.constants.JBossSAMLConstants.STATUS_MESSA
 import static org.keycloak.saml.common.constants.JBossSAMLConstants.VALUE;
 import static org.keycloak.saml.common.constants.JBossSAMLURIConstants.ASSERTION_NSURI;
 import static org.keycloak.saml.common.constants.JBossSAMLURIConstants.PROTOCOL_NSURI;
-import static org.springframework.security.saml2.util.DateUtils.toZuluTime;
+import static org.springframework.security.saml2.util.Saml2DateUtils.toZuluTime;
 
 public class KeycloakSamlLogoutResponseWriter extends BaseWriter {
 
@@ -162,7 +162,7 @@ public class KeycloakSamlLogoutResponseWriter extends BaseWriter {
 		StaxUtil.writeAttribute(
 			writer,
 			JBossSAMLConstants.ISSUE_INSTANT.get(),
-			toZuluTime(DateUtils.toDateTime(statusResponse.getIssueInstant()))
+			toZuluTime(Saml2DateUtils.toDateTime(statusResponse.getIssueInstant()))
 		);
 
 		String destination = statusResponse.getDestination();

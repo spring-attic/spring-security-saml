@@ -22,9 +22,9 @@ import java.util.Arrays;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.model.key.KeyData;
-import org.springframework.security.saml2.model.key.KeyType;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
+import org.springframework.security.saml2.model.key.Saml2KeyType;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
@@ -44,14 +44,14 @@ public abstract class MetadataBase {
 
 	protected static Saml2Transformer config;
 	protected static Clock time;
-	protected KeyData spSigning;
-	protected KeyData idpSigning;
-	protected KeyData spVerifying;
-	protected KeyData idpVerifying;
+	protected Saml2KeyData spSigning;
+	protected Saml2KeyData idpSigning;
+	protected Saml2KeyData spVerifying;
+	protected Saml2KeyData idpVerifying;
 	protected String spBaseUrl;
 	protected String idpBaseUrl;
 	protected ServiceProviderMetadata serviceProviderMetadata;
-	protected IdentityProviderMetadata identityProviderMetadata;
+	protected Saml2IdentityProviderMetadata identityProviderMetadata;
 	protected SamlTestObjectHelper helper;
 
 	@BeforeAll
@@ -70,9 +70,9 @@ public abstract class MetadataBase {
 	@BeforeEach
 	public void setup() {
 		idpSigning = IDP_RSA_KEY.getSimpleKey("idp");
-		idpVerifying = new KeyData("idp-verify", null, SP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
+		idpVerifying = new Saml2KeyData("idp-verify", null, SP_RSA_KEY.getPublic(), null, Saml2KeyType.SIGNING);
 		spSigning = SP_RSA_KEY.getSimpleKey("sp");
-		spVerifying = new KeyData("sp-verify", null, IDP_RSA_KEY.getPublic(), null, KeyType.SIGNING);
+		spVerifying = new Saml2KeyData("sp-verify", null, IDP_RSA_KEY.getPublic(), null, Saml2KeyType.SIGNING);
 		spBaseUrl = "http://sp.localhost:8080/uaa";
 		idpBaseUrl = "http://idp.localhost:8080/uaa";
 		helper = new SamlTestObjectHelper(time);

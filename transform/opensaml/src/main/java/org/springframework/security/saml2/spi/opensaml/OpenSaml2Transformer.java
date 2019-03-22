@@ -20,15 +20,15 @@ package org.springframework.security.saml2.spi.opensaml;
 import java.time.Clock;
 
 import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
-import org.springframework.security.saml2.spi.SpringSecuritySaml;
+import org.springframework.security.saml2.spi.SpringSecuritySaml2;
 
 public class OpenSaml2Transformer extends DefaultSaml2Transformer {
 
 	public OpenSaml2Transformer() {
-		this(new OpenSamlImplementation(Clock.systemUTC()).init());
+		this(new OpenSaml2Implementation(Clock.systemUTC()).init());
 	}
 
-	public OpenSaml2Transformer(SpringSecuritySaml implementation) {
+	public OpenSaml2Transformer(SpringSecuritySaml2 implementation) {
 		super(implementation);
 	}
 }

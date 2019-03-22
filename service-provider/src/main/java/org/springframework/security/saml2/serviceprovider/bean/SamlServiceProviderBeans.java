@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
@@ -36,11 +36,11 @@ import org.springframework.util.Assert;
 public class SamlServiceProviderBeans {
 
 	private final Saml2Transformer transformer;
-	private final HostedServiceProviderConfiguration configuration;
+	private final HostedSaml2ServiceProviderConfiguration configuration;
 
 	public SamlServiceProviderBeans(
 		@Autowired Saml2Transformer transformer,
-		@Autowired(required = false) HostedServiceProviderConfiguration configuration) {
+		@Autowired(required = false) HostedSaml2ServiceProviderConfiguration configuration) {
 		this.transformer = transformer;
 		this.configuration = configuration;
 	}
@@ -69,7 +69,7 @@ public class SamlServiceProviderBeans {
 			configuration,
 			"Unable to configure a " + ServiceProviderConfigurationResolver.class.getName() +
 				" instance, without an actual configuration. " +
-				"Either expose a " + HostedServiceProviderConfiguration.class.getName() +
+				"Either expose a " + HostedSaml2ServiceProviderConfiguration.class.getName() +
 				"bean or override the " + ServiceProviderConfigurationResolver.class.getName() +
 				" bean."
 		);

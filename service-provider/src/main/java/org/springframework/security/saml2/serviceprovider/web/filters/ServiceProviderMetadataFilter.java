@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.provider.HostedServiceProvider;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -49,7 +49,7 @@ public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFi
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (getMatcher().matches(request)) {
-			HostedServiceProvider provider = getSpUtils().getProvider(request);
+			HostedSaml2ServiceProvider provider = getSpUtils().getProvider(request);
 			String xml = getTransformer().toXml(provider.getMetadata());
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");

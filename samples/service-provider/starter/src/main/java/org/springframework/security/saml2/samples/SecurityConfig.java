@@ -22,8 +22,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 
 import static org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer.saml2Login;
@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 					//need to retain the same key between restarts
 					//we can remove this once we have an IDP
 					//that can dynamically update keys (like Spring Security SAML)
-					KeyData.builder()
+					Saml2KeyData.builder()
 						.id("sp-signing-key")
 						.privateKey(privateKey)
 						.certificate(certificate)
@@ -65,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						.build()
 				)
 				.providers(
-					ExternalIdentityProviderConfiguration.builder()
+					ExternalSaml2IdentityProviderConfiguration.builder()
 						.alias("simplesamlphp")
 						.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
 						.build()

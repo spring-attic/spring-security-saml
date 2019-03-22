@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.xml.transform.stream.StreamSource;
 
-import org.springframework.security.saml2.model.Namespace;
+import org.springframework.security.saml2.model.Saml2Namespace;
 
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
@@ -39,12 +39,12 @@ public class XmlTestUtil {
 	static {
 		engine = new JAXPXPathEngine();
 		HashMap<String, String> nsContext = new HashMap<>();
-		nsContext.put("md", Namespace.NS_METADATA);
-		nsContext.put("ds", Namespace.NS_SIGNATURE);
-		nsContext.put("samlp", Namespace.NS_PROTOCOL);
-		nsContext.put("saml", Namespace.NS_ASSERTION);
-		nsContext.put("idpdisc", Namespace.NS_IDP_DISCOVERY);
-		nsContext.put("init", Namespace.NS_REQUEST_INIT);
+		nsContext.put("md", Saml2Namespace.NS_METADATA);
+		nsContext.put("ds", Saml2Namespace.NS_SIGNATURE);
+		nsContext.put("samlp", Saml2Namespace.NS_PROTOCOL);
+		nsContext.put("saml", Saml2Namespace.NS_ASSERTION);
+		nsContext.put("idpdisc", Saml2Namespace.NS_IDP_DISCOVERY);
+		nsContext.put("init", Saml2Namespace.NS_REQUEST_INIT);
 		engine.setNamespaceContext(nsContext);
 	}
 

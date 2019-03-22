@@ -24,10 +24,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.helper.SamlTestObjectHelper;
-import org.springframework.security.saml2.model.authentication.Assertion;
-import org.springframework.security.saml2.model.authentication.Response;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
@@ -63,26 +63,26 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	@DisplayName("response with signed assertion")
 	void authenticate() throws Exception {
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		Assertion a = helper.assertion(
+		Saml2Assertion a = helper.assertion(
 			sp,
 			idp,
 			null,
 			"user@test.org",
-			NameId.EMAIL
+			Saml2NameId.EMAIL
 		);
 		a.setSigningKey(
 			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
 			AlgorithmMethod.RSA_SHA256,
 			DigestMethod.SHA256
 		);
-		Response r = helper.response(null, a, sp, idp);
+		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);
 		String encoded = transformer.samlEncode(xml, false);
 
@@ -103,21 +103,21 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	void authenticateWithOnlyResponseSigned() throws Exception {
 		mockConfig(builder -> builder.wantAssertionsSigned(true));
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		Assertion a = helper.assertion(
+		Saml2Assertion a = helper.assertion(
 			sp,
 			idp,
 			null,
 			"user@test.org",
-			NameId.EMAIL
+			Saml2NameId.EMAIL
 		);
-		Response r = helper.response(null, a, sp, idp);
+		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
 		r.setSigningKey(
 			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
 			AlgorithmMethod.RSA_SHA256,
@@ -137,21 +137,21 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	void authenticateNoSignature() throws Exception {
 		mockConfig(builder -> builder.wantAssertionsSigned(false));
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		Assertion a = helper.assertion(
+		Saml2Assertion a = helper.assertion(
 			sp,
 			idp,
 			null,
 			"user@test.org",
-			NameId.EMAIL
+			Saml2NameId.EMAIL
 		);
-		Response r = helper.response(null, a, sp, idp);
+		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);
 		String encoded = transformer.samlEncode(xml, false);
 
@@ -166,14 +166,14 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	void invalidResponse() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
 		ServiceProviderMetadata sp = getServiceProviderMetadata();
-		IdentityProviderMetadata idp =
-			(IdentityProviderMetadata) transformer.fromXml(
+		Saml2IdentityProviderMetadata idp =
+			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
 				null,
 				null
 			);
-		Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", NameId.PERSISTENT);
-		Response response = helper.response(
+		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
+		Saml2ResponseSaml2 response = helper.response(
 			null,
 			assertion,
 			sp,

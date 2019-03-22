@@ -18,11 +18,11 @@ package saml.saml2.authentication;
 
 import java.util.Collections;
 
-import org.springframework.security.saml2.model.authentication.AuthenticationContextClassReference;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.RequestedAuthenticationContext;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
 
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.saml2.model.metadata.NameId.PERSISTENT;
+import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertTextNodeValue;
@@ -50,7 +50,8 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithDefaults() {
 
-		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		Saml2AuthenticationSaml2Request
+			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
 
 		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
@@ -77,7 +78,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
-		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
+		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(Saml2NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 0);
 
@@ -129,17 +130,18 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithDefaults() {
-		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		Saml2AuthenticationSaml2Request
+			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
-		AuthenticationRequest data =
-			(AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+		Saml2AuthenticationSaml2Request data =
+			(Saml2AuthenticationSaml2Request) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());
 		assertTrue(data.getSignature().isValidated());
 
 
-		assertSame(Binding.POST, data.getBinding());
+		assertSame(Saml2Binding.POST, data.getBinding());
 		assertEquals(
 			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
@@ -160,9 +162,10 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithAutContext() {
 
-		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		Saml2AuthenticationSaml2Request
+			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
+		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
 
 		String xml = config.toXml(request);
 
@@ -190,7 +193,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
 		nodes = getNodes(xml, "//samlp:NameIDPolicy");
-		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(NameId.PERSISTENT.toString()));
+		assertNodeAttribute(nodes.iterator().next(), "Format", equalTo(Saml2NameId.PERSISTENT.toString()));
 
 		assertNodeCount(xml, "//samlp:RequestedAuthnContext", 1);
 		nodes = getNodes(xml, "//samlp:RequestedAuthnContext");
@@ -208,28 +211,29 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithAutContext() {
-		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		Saml2AuthenticationSaml2Request
+			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
+		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
 
 		String xml = config.toXml(request);
-		AuthenticationRequest data =
-			(AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+		Saml2AuthenticationSaml2Request data =
+			(Saml2AuthenticationSaml2Request) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());
 		assertTrue(data.getSignature().isValidated());
 
 
-		assertSame(Binding.POST, data.getBinding());
+		assertSame(Saml2Binding.POST, data.getBinding());
 		assertEquals(
 			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
-		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
+		assertSame(Saml2RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
 		assertSame(
-			AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT,
+			Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT,
 			data.getAuthenticationContextClassReference()
 		);
 

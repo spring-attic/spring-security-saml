@@ -23,12 +23,12 @@ import org.springframework.security.saml2.boot.configuration.LocalServiceProvide
 import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml2.boot.configuration.RemoteProviderConfiguration;
 import org.springframework.security.saml2.boot.configuration.RemoteServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.ExternalSaml2ProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
+import org.springframework.security.saml2.configuration.ExternalSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +50,7 @@ public class ToHostedConfigurationTests {
 		assertLocalSp(sp);
 	}
 
-	private void assertLocalParent(LocalProviderConfiguration lc, HostedProviderConfiguration hc) {
+	private void assertLocalParent(LocalProviderConfiguration lc, HostedSaml2ProviderConfiguration hc) {
 		assertEquals(lc.getPathPrefix(), hc.getPathPrefix(), "pathPrefix");
 		assertEquals(lc.getBasePath(), hc.getBasePath(), "basePath");
 		assertEquals(lc.getAlias(), hc.getAlias(), "alias");
@@ -65,7 +65,7 @@ public class ToHostedConfigurationTests {
 	}
 
 	private void assertLocalSp(LocalServiceProviderConfiguration lc) {
-		HostedServiceProviderConfiguration hc = lc.toHostedConfiguration();
+		HostedSaml2ServiceProviderConfiguration hc = lc.toHostedConfiguration();
 		assertLocalParent(lc, hc);
 		for (int i=0; i<lc.getProviders().size(); i++) {
 			RemoteIdentityProviderConfiguration rc = lc.getProviders().get(i);
@@ -77,7 +77,7 @@ public class ToHostedConfigurationTests {
 	}
 
 	private void assertLocalIdp(LocalIdentityProviderConfiguration lc) {
-		HostedIdentityProviderConfiguration hc = lc.toHostedConfiguration();
+		HostedSaml2IdentityProviderConfiguration hc = lc.toHostedConfiguration();
 		assertLocalParent(lc, hc);
 		for (int i=0; i<lc.getProviders().size(); i++) {
 			RemoteServiceProviderConfiguration rc = lc.getProviders().get(i);
@@ -93,7 +93,7 @@ public class ToHostedConfigurationTests {
 		assertEquals(lc.getDataEncryptionAlgorithm(), hc.getDataEncryptionAlgorithm(), "sessionNotOnOrAfter");
 	}
 
-	private void assertRemoteParent(RemoteProviderConfiguration rc, ExternalProviderConfiguration ec) {
+	private void assertRemoteParent(RemoteProviderConfiguration rc, ExternalSaml2ProviderConfiguration ec) {
 		assertEquals(rc.isSkipSslValidation(), ec.isSkipSslValidation(), "skipSslValidation");
 		assertEquals(rc.isMetadataTrustCheck(), ec.isMetadataTrustCheck(), "metadataTrustCheck");
 		assertEquals(rc.getAlias(), ec.getAlias(), "alias");
@@ -102,14 +102,14 @@ public class ToHostedConfigurationTests {
 	}
 
 	private void assertRemoteIdentityProviderConfiguration(RemoteIdentityProviderConfiguration rc) {
-		ExternalIdentityProviderConfiguration ec = rc.toExternalIdentityProviderConfiguration();
+		ExternalSaml2IdentityProviderConfiguration ec = rc.toExternalIdentityProviderConfiguration();
 		assertRemoteParent(rc, ec);
 		assertEquals(rc.getNameId(), ec.getNameId(),"nameId");
 		assertEquals(rc.getAssertionConsumerServiceIndex(), ec.getAssertionConsumerServiceIndex(),"assertionConsumerServiceIndex");
 	}
 
 	private void assertRemoteServiceProviderConfiguration(RemoteServiceProviderConfiguration rc) {
-		ExternalServiceProviderConfiguration ec = rc.toExternalServiceProviderConfiguration();
+		ExternalSaml2ServiceProviderConfiguration ec = rc.toExternalServiceProviderConfiguration();
 		assertRemoteParent(rc, ec);
 	}
 

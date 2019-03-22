@@ -24,10 +24,10 @@ import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
 public class KeycloakSaml2Transformer extends DefaultSaml2Transformer {
 
 	public KeycloakSaml2Transformer() {
-		this(new KeycloakSamlImplementation(Clock.systemUTC()).init());
+		this(new KeycloakSaml2Implementation(Clock.systemUTC()).init());
 	}
 
-	public KeycloakSaml2Transformer(KeycloakSamlImplementation implementation) {
+	public KeycloakSaml2Transformer(KeycloakSaml2Implementation implementation) {
 		super(implementation);
 	}
 

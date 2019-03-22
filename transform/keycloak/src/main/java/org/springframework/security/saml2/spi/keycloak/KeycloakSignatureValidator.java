@@ -34,15 +34,15 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
-import org.springframework.security.saml2.SamlException;
-import org.springframework.security.saml2.model.SignableSaml2Object;
-import org.springframework.security.saml2.model.key.KeyData;
+import org.springframework.security.saml2.Saml2Exception;
+import org.springframework.security.saml2.model.Saml2SignableObject;
+import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.signature.AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.CanonicalizationMethod;
 import org.springframework.security.saml2.model.signature.DigestMethod;
 import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.security.saml2.model.signature.SignatureException;
-import org.springframework.security.saml2.util.X509Utils;
+import org.springframework.security.saml2.util.Saml2X509Utils;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -51,10 +51,10 @@ import org.w3c.dom.NodeList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
-import static org.springframework.security.saml2.model.Namespace.NS_SIGNATURE;
+import static org.springframework.security.saml2.model.Saml2Namespace.NS_SIGNATURE;
 
 class KeycloakSignatureValidator {
-	static Map<String, Signature> validateSignature(SamlObjectHolder parsed, List<KeyData> keys) {
+	static Map<String, Signature> validateSignature(SamlObjectHolder parsed, List<Saml2KeyData> keys) {
 		if (keys == null || keys.isEmpty()) {
 			return emptyMap();
 		}
@@ -83,9 +83,9 @@ class KeycloakSignatureValidator {
 		}
 	}
 
-	static Signature validateSignature(Node signatureNode, List<KeyData> keys) {
+	static Signature validateSignature(Node signatureNode, List<Saml2KeyData> keys) {
 		Exception last = null;
-		for (KeyData key : keys) {
+		for (Saml2KeyData key : keys) {
 			Key publicKey = getPublicKey(key.getCertificate());
 			KeySelector selector = KeySelector.singletonKeySelector(publicKey);
 			try {
@@ -123,7 +123,7 @@ class KeycloakSignatureValidator {
 			try {
 				return XMLSignatureFactory.getInstance("DOM");
 			} catch (Exception err) {
-				throw new SamlException(err);
+				throw new Saml2Exception(err);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ class KeycloakSignatureValidator {
 		return getSignatureHashKey(signature.getSignatureValue(), signature.getDigestValue());
 	}
 
-	static List<Key> getPublicKeys(List<KeyData> keys) {
+	static List<Key> getPublicKeys(List<Saml2KeyData> keys) {
 		return Collections.unmodifiableList(
 			ofNullable(keys).orElse(emptyList())
 				.stream()
@@ -188,19 +188,19 @@ class KeycloakSignatureValidator {
 
 	static PublicKey getPublicKey(String certPem) {
 		if (certPem == null) {
-			throw new SamlException("Public certificate is missing.");
+			throw new Saml2Exception("Public certificate is missing.");
 		}
 
 		try {
-			byte[] certbytes = X509Utils.getDER(certPem);
-			Certificate cert = X509Utils.getCertificate(certbytes);
+			byte[] certbytes = Saml2X509Utils.getDER(certPem);
+			Certificate cert = Saml2X509Utils.getCertificate(certbytes);
 			//TODO - should be based off of config
 			//((X509Certificate) cert).checkValidity();
 			return cert.getPublicKey();
 		} catch (CertificateException ex) {
-			throw new SamlException("Certificate is not valid.", ex);
+			throw new Saml2Exception("Certificate is not valid.", ex);
 		} catch (Exception e) {
-			throw new SamlException("Could not decode cert", e);
+			throw new Saml2Exception("Could not decode cert", e);
 		}
 	}
 
@@ -230,7 +230,7 @@ class KeycloakSignatureValidator {
 	}
 
 	static void assignSignatureToObject(Map<String, Signature> signatureMap,
-										SignableSaml2Object desc,
+										Saml2SignableObject desc,
 										Element descriptorSignature) {
 		if (descriptorSignature != null) {
 			Signature signature = KeycloakSignatureValidator.getSignature(descriptorSignature);

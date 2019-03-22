@@ -23,18 +23,18 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.SamlProviderNotFoundException;
-import org.springframework.security.saml2.configuration.ExternalIdentityProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.Issuer;
-import org.springframework.security.saml2.model.authentication.NameIdPolicy;
-import org.springframework.security.saml2.model.metadata.Binding;
-import org.springframework.security.saml2.model.metadata.BindingType;
-import org.springframework.security.saml2.model.metadata.Endpoint;
-import org.springframework.security.saml2.model.metadata.IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.NameId;
+import org.springframework.security.saml2.Saml2ProviderNotFoundException;
+import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2Issuer;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2BindingType;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.provider.HostedServiceProvider;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
@@ -59,17 +59,17 @@ public class Saml2WebAuthenticationRequestResolver
 	}
 
 	@Override
-	public AuthenticationRequest resolve(HttpServletRequest request) {
-		HostedServiceProvider provider = serviceProviderMethods.getProvider(request);
+	public Saml2AuthenticationSaml2Request resolve(HttpServletRequest request) {
+		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
-		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> entity =
+		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> entity =
 			getIdentityProvider(request, provider);
-		ExternalIdentityProviderConfiguration idpConfig = entity.getKey();
-		IdentityProviderMetadata idp = entity.getValue();
+		ExternalSaml2IdentityProviderConfiguration idpConfig = entity.getKey();
+		Saml2IdentityProviderMetadata idp = entity.getValue();
 		ServiceProviderMetadata localSp = provider.getMetadata();
-		final BindingType preferredSSOBinding =
+		final Saml2BindingType preferredSSOBinding =
 			ofNullable(idpConfig.getAuthenticationRequestBinding())
-				.orElse(Binding.REDIRECT)
+				.orElse(Saml2Binding.REDIRECT)
 				.getType();
 		return getAuthenticationRequest(
 			localSp,
@@ -81,7 +81,7 @@ public class Saml2WebAuthenticationRequestResolver
 	}
 
 	@Override
-	public String encode(AuthenticationRequest authn, boolean deflate) {
+	public String encode(Saml2AuthenticationSaml2Request authn, boolean deflate) {
 		String xml = serviceProviderMethods.getTransformer().toXml(authn);
 		return serviceProviderMethods.getTransformer().samlEncode(xml, deflate);
 	}
@@ -90,11 +90,11 @@ public class Saml2WebAuthenticationRequestResolver
 	 * UAA would want to override this as the entities are referred to by alias rather
 	 * than ID
 	 */
-	protected Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> getIdentityProvider(
+	protected Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProvider(
 		HttpServletRequest request,
-		HostedServiceProvider sp
+		HostedSaml2ServiceProvider sp
 	) {
-		Map.Entry<ExternalIdentityProviderConfiguration, IdentityProviderMetadata> result = null;
+		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> result = null;
 		String idpAlias = getIdpAlias(request);
 		if (hasText(idpAlias)) {
 			result = sp.getRemoteProviders().entrySet().stream()
@@ -110,7 +110,7 @@ public class Saml2WebAuthenticationRequestResolver
 				.orElse(null);
 		}
 		if (result == null) {
-			throw new SamlProviderNotFoundException("Unable to identify a configured identity provider.");
+			throw new Saml2ProviderNotFoundException("Unable to identify a configured identity provider.");
 		}
 		return result;
 	}
@@ -127,17 +127,17 @@ public class Saml2WebAuthenticationRequestResolver
 		return paths[2];
 	}
 
-	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderMetadata sp,
-															 IdentityProviderMetadata idp,
-															 NameId requestedNameId,
-															 int preferredACSEndpointIndex,
-															 BindingType preferredSSOBinding) {
-		Endpoint endpoint = serviceProviderMethods.getPreferredEndpoint(
+	protected Saml2AuthenticationSaml2Request getAuthenticationRequest(ServiceProviderMetadata sp,
+																	   Saml2IdentityProviderMetadata idp,
+																	   Saml2NameId requestedNameId,
+																	   int preferredACSEndpointIndex,
+																	   Saml2BindingType preferredSSOBinding) {
+		Saml2Endpoint endpoint = serviceProviderMethods.getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
 			preferredSSOBinding,
 			-1
 		);
-		AuthenticationRequest request = new AuthenticationRequest()
+		Saml2AuthenticationSaml2Request request = new Saml2AuthenticationSaml2Request()
 			// Some service providers will not accept first character if 0..9
 			// Azure AD IdP for example.
 			.setId("ARQ" + UUID.randomUUID().toString().substring(1))
@@ -152,27 +152,27 @@ public class Saml2WebAuthenticationRequestResolver
 					preferredACSEndpointIndex
 				)
 			)
-			.setIssuer(new Issuer().setValue(sp.getEntityId()))
+			.setIssuer(new Saml2Issuer().setValue(sp.getEntityId()))
 			.setDestination(endpoint);
 		if (sp.getServiceProvider().isAuthnRequestsSigned()) {
 			request.setSigningKey(sp.getSigningKey(), sp.getAlgorithm(), sp.getDigest());
 		}
 		if (requestedNameId != null) {
-			request.setNameIdPolicy(new NameIdPolicy(
+			request.setNameIdPolicy(new Saml2NameIdPolicy(
 				requestedNameId,
 				sp.getEntityId(),
 				true
 			));
 		}
 		else if (idp.getDefaultNameId() != null) {
-			request.setNameIdPolicy(new NameIdPolicy(
+			request.setNameIdPolicy(new Saml2NameIdPolicy(
 				idp.getDefaultNameId(),
 				sp.getEntityId(),
 				true
 			));
 		}
 		else if (idp.getIdentityProvider().getNameIds().size() > 0) {
-			request.setNameIdPolicy(new NameIdPolicy(
+			request.setNameIdPolicy(new Saml2NameIdPolicy(
 				idp.getIdentityProvider().getNameIds().get(0),
 				sp.getEntityId(),
 				true

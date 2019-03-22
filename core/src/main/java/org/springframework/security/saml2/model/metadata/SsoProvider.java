@@ -25,65 +25,65 @@ import java.util.List;
  *
  * @param <T> return class for builder pattern
  */
-public class SsoProvider<T extends SsoProvider<T>> extends Provider<T> {
+public class SsoProvider<T extends SsoProvider<T>> extends Saml2Provider<T> {
 
-	private List<Endpoint> artifactResolutionService = new LinkedList<>();
-	private List<Endpoint> singleLogoutService = new LinkedList<>();
-	private List<Endpoint> manageNameIDService = new LinkedList<>();
-	private List<NameId> nameIds = new LinkedList<>();
-	private Endpoint discovery;
-	private Endpoint requestInitiation;
+	private List<Saml2Endpoint> artifactResolutionService = new LinkedList<>();
+	private List<Saml2Endpoint> singleLogoutService = new LinkedList<>();
+	private List<Saml2Endpoint> manageNameIDService = new LinkedList<>();
+	private List<Saml2NameId> nameIds = new LinkedList<>();
+	private Saml2Endpoint discovery;
+	private Saml2Endpoint requestInitiation;
 
-	public List<Endpoint> getArtifactResolutionService() {
+	public List<Saml2Endpoint> getArtifactResolutionService() {
 		return artifactResolutionService;
 	}
 
-	public T setArtifactResolutionService(List<Endpoint> artifactResolutionService) {
+	public T setArtifactResolutionService(List<Saml2Endpoint> artifactResolutionService) {
 		this.artifactResolutionService = artifactResolutionService;
 		return _this();
 	}
 
-	public List<Endpoint> getSingleLogoutService() {
+	public List<Saml2Endpoint> getSingleLogoutService() {
 		return singleLogoutService;
 	}
 
-	public T setSingleLogoutService(List<Endpoint> singleLogoutService) {
+	public T setSingleLogoutService(List<Saml2Endpoint> singleLogoutService) {
 		this.singleLogoutService = singleLogoutService;
 		return _this();
 	}
 
-	public List<Endpoint> getManageNameIDService() {
+	public List<Saml2Endpoint> getManageNameIDService() {
 		return manageNameIDService;
 	}
 
-	public T setManageNameIDService(List<Endpoint> manageNameIDService) {
+	public T setManageNameIDService(List<Saml2Endpoint> manageNameIDService) {
 		this.manageNameIDService = manageNameIDService;
 		return _this();
 	}
 
-	public List<NameId> getNameIds() {
+	public List<Saml2NameId> getNameIds() {
 		return nameIds;
 	}
 
-	public T setNameIds(List<NameId> nameIds) {
+	public T setNameIds(List<Saml2NameId> nameIds) {
 		this.nameIds = nameIds;
 		return _this();
 	}
 
-	public Endpoint getDiscovery() {
+	public Saml2Endpoint getDiscovery() {
 		return discovery;
 	}
 
-	public T setDiscovery(Endpoint discovery) {
+	public T setDiscovery(Saml2Endpoint discovery) {
 		this.discovery = discovery;
 		return _this();
 	}
 
-	public Endpoint getRequestInitiation() {
+	public Saml2Endpoint getRequestInitiation() {
 		return requestInitiation;
 	}
 
-	public T setRequestInitiation(Endpoint requestInitiation) {
+	public T setRequestInitiation(Saml2Endpoint requestInitiation) {
 		this.requestInitiation = requestInitiation;
 		return _this();
 	}

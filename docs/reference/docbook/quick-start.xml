@@ -6,8 +6,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xlink="http://www.w3.org/1999/xlink" 
 	xsi:schemaLocation="
-		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+		http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 	<title>Quick start guide</title>
 	<para>
 		This chapter will guide you through steps required to easily integrate Spring Security SAML Extension with
@@ -36,10 +36,10 @@
 		<para>SAML Extension relies on XML processing capabilities of JAXP. Some older versions of JRE might require updating of the embedded
 		JAXP libraries. In case you encounter XML processing exceptions please create folder <emphasis>jdk/jre/lib/endorsed</emphasis> in your
 		JDK installation and include files in <emphasis>lib/endorsed</emphasis> from the latest OpenSAML archive available at
-		<ulink url="http://shibboleth.net/downloads/java-opensaml/">http://shibboleth.net/downloads/java-opensaml/</ulink>. The location of the
+		<ulink url="https://shibboleth.net/downloads/java-opensaml/">https://shibboleth.net/downloads/java-opensaml/</ulink>. The location of the
 		endorsed folder may differ based on your application server or container.</para>
 		<para>Due to US export limitations Java JDK comes with a limited set of cryptography capabilities. Usage of the SAML Extension might require 
-		installation of the <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Unlimited Strength Jurisdiction 
+		installation of the <ulink url="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Unlimited Strength Jurisdiction 
 		Policy Files</ulink> which removes these limitations.</para>
 	</section>
 
@@ -49,7 +49,7 @@
 	<section id="quick-start-download">
 		<title>Downloading sample application</title>
 		<para>Download the Spring SAML Extension either from <link xlink:href="https://github.com/SpringSource/spring-security-saml">sources</link> or
-		from one of the <link xlink:href="http://repo.spring.io/list/release/org/springframework/security/extensions/spring-security-saml/">releases</link>.</para>
+		from one of the <link xlink:href="https://repo.spring.io/list/release/org/springframework/security/extensions/spring-security-saml/">releases</link>.</para>
 		<para>The Spring SAML Sample application is included in <emphasis>sample</emphasis> directory. We will be customizing
 		content of the sample application in the following steps.</para>
 	</section> 
@@ -64,7 +64,7 @@
 		<list>
 			<bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
 				<constructor-arg>
-					<value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
+					<value type="java.lang.String">https://idp.ssocircle.com/idp-meta.xml</value>
 				</constructor-arg>
 				<constructor-arg>
 					<value type="int">5000</value>
@@ -175,7 +175,7 @@
 
 	<section id="quick-start-testing">
 		<title>Testing single sign-on and single logout</title>
-		<para>Open the front page of your SP application, select <emphasis>http://idp.ssocircle.com</emphasis> IDP and press login. The system
+		<para>Open the front page of your SP application, select <emphasis>https://idp.ssocircle.com</emphasis> IDP and press login. The system
 		will generate a new authentication request using SAML 2.0 protocol, digitally sign it and send it to the IDP. After authentication at IDP
 		with your account you will be redirected back to your application and automatically signed-in.</para>
 		<para>Pressing local logout will destroy local session and logout the user. While a session is still active at the IDP an attempt to reauthenticate

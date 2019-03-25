@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="http://localhost:8080/spring-security-saml2-sample/saml/SSO" ID="s267de9a60bedf783f408566c90464454c9e39f9a4" InResponseTo="a4abigj7cec5371i3051e9if9a5hbj5" IssueInstant="2014-08-01T19:26:36Z" Version="2.0">
-    <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://idp.ssocircle.com</saml:Issuer>
+    <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://idp.ssocircle.com</saml:Issuer>
     <samlp:Status xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
         </samlp:StatusCode>
     </samlp:Status>
     <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="s25394f2dd7685e7930ad16efe428339496a6be402" IssueInstant="2014-08-01T19:26:36Z" Version="2.0">
-        <saml:Issuer>http://idp.ssocircle.com</saml:Issuer>
-        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <saml:Issuer>https://idp.ssocircle.com</saml:Issuer>
+        <ds:Signature xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
             <ds:SignedInfo>
-                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-                <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+                <ds:CanonicalizationMethod Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <ds:SignatureMethod Algorithm="https://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
                 <ds:Reference URI="#s25394f2dd7685e7930ad16efe428339496a6be402">
                     <ds:Transforms>
-                        <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-                        <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                        <ds:Transform Algorithm="https://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                        <ds:Transform Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
                     </ds:Transforms>
-                    <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                    <ds:DigestMethod Algorithm="https://www.w3.org/2000/09/xmldsig#sha1"/>
                     <ds:DigestValue>kUdQnF6jG/N6rEX8uhSh0nDpGpg=</ds:DigestValue>
                 </ds:Reference>
             </ds:SignedInfo>
@@ -45,7 +45,7 @@
             </ds:KeyInfo>
         </ds:Signature>
         <saml:Subject>
-            <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" NameQualifier="http://idp.ssocircle.com">schafer@centrum.cz</saml:NameID>
+            <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" NameQualifier="https://idp.ssocircle.com">schafer@centrum.cz</saml:NameID>
             <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
                 <saml:SubjectConfirmationData InResponseTo="a4abigj7cec5371i3051e9if9a5hbj5" NotOnOrAfter="2014-08-01T19:36:36Z" Recipient="http://localhost:8080/spring-security-saml2-sample/saml/SSO"/>
             </saml:SubjectConfirmation>

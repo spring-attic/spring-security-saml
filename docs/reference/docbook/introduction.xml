@@ -6,8 +6,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
 	xsi:schemaLocation="
-		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+		http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 	<title>Introduction</title>
 
 	<section id="section-what-this-manual-covers">
@@ -101,39 +101,39 @@
 			<para>SAML 2.0 basic profiles
 			<itemizedlist spacing="compact">
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-profiles-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-profiles-2.0-os.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/v2.0/saml-conformance-2.0-os.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/v2.0/saml-conformance-2.0-os.pdf</para>
 				</listitem>
 			</itemizedlist></para>
 
 			<para>SAML 2.0 additional profiles
 			<itemizedlist spacing="compact">
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso.pdf
+					<para>https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso.pdf
 					</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml2-holder-of-key.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml2-holder-of-key.pdf</para>
 				</listitem>
 				<listitem>
-					<para>http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf</para>
+					<para>https://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf</para>
 				</listitem>
 			</itemizedlist></para>
 
@@ -141,7 +141,7 @@
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						http://kantarainitiative.org/confluence/download/attachments/42139782/kantara-egov-saml2-profile-2.0.pdf
+						https://kantarainitiative.org/confluence/download/attachments/42139782/kantara-egov-saml2-profile-2.0.pdf
 					</para>
 				</listitem>
 			</itemizedlist></para>
@@ -166,7 +166,7 @@
 		<title>Builds</title>
 
     <para>Snapshot builds of the project are available in the
-    <link xlink:href="http://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link>.
+    <link xlink:href="https://repo.springsource.org/libs-snapshot/org/springframework/security/extensions/spring-security-saml/">SpringSource repository</link>.
     We use <link xlink:href="https://build.springsource.org/browse/SES">Bamboo</link> for continuous integration.
     </para>
 	</section>
@@ -200,9 +200,9 @@
 	<section id="section-support">
 		<title>Community support</title>
 
-		<para>For community support please use <link xlink:href="http://stackoverflow.com/questions/tagged/spring-saml">Stack Overflow</link>.
+		<para>For community support please use <link xlink:href="https://stackoverflow.com/questions/tagged/spring-saml">Stack Overflow</link>.
 		The <link
-			xlink:href="http://forum.springsource.org/forumdisplay.php?86-SAML">Spring Security forums</link> contain some previously answered
+			xlink:href="https://forum.spring.io/forumdisplay.php?86-SAML">Spring Security forums</link> contain some previously answered
 		questions, but are now in read-only mode.</para>
 	</section>
 

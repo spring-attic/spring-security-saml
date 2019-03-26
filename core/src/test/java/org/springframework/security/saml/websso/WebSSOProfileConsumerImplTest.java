@@ -75,7 +75,7 @@ public class WebSSOProfileConsumerImplTest {
         SAMLTestHelper.setLocalContextParameters(request, "/", null);
 
         AssertionConsumerService assertionConsumerService = ((SAMLObjectBuilder<AssertionConsumerService>) builderFactory.getBuilder(AssertionConsumerService.DEFAULT_ELEMENT_NAME)).buildObject();
-        assertionConsumerService.setLocation("http://www.test.local/SSO");
+        assertionConsumerService.setLocation("https://www.test.local/SSO");
 
         replay(request);
         messageContext = contextProvider.getLocalEntity(request, null);
@@ -327,7 +327,7 @@ public class WebSSOProfileConsumerImplTest {
 
         SubjectConfirmationData subjectConfirmationData = ((SAMLObjectBuilder<SubjectConfirmationData>) builderFactory.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME)).buildObject();
         subjectConfirmationData.setNotOnOrAfter(new DateTime().minusSeconds(10));
-        subjectConfirmationData.setRecipient("http://www.test.local/SSO");
+        subjectConfirmationData.setRecipient("https://www.test.local/SSO");
 
         SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
         SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder.buildObject();
@@ -352,7 +352,7 @@ public class WebSSOProfileConsumerImplTest {
 
         SubjectConfirmationData subjectConfirmationData = ((SAMLObjectBuilder<SubjectConfirmationData>) builderFactory.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME)).buildObject();
         subjectConfirmationData.setNotOnOrAfter(new DateTime().minusSeconds(70));
-        subjectConfirmationData.setRecipient("http://www.test.local/SSO");
+        subjectConfirmationData.setRecipient("https://www.test.local/SSO");
 
         SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
         SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder.buildObject();
@@ -376,7 +376,7 @@ public class WebSSOProfileConsumerImplTest {
     public void verifySubjectMissingNotOnOrAfter() throws Exception {
 
         SubjectConfirmationData subjectConfirmationData = ((SAMLObjectBuilder<SubjectConfirmationData>) builderFactory.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME)).buildObject();
-        subjectConfirmationData.setRecipient("http://www.test.local/SSO");
+        subjectConfirmationData.setRecipient("https://www.test.local/SSO");
 
         SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
         SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder.buildObject();

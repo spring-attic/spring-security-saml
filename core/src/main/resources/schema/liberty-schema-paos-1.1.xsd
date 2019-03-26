@@ -18,8 +18,8 @@
         </xs:documentation>
     </xs:annotation>
 
-    <xs:import namespace="http://schemas.xmlsoap. org/soap/envelope/"
-               schemaLocation="http://schemas.xml soap.org/soap/envelope/"/>
+    <xs:import namespace="https://schemas.xmlsoap. org/soap/envelope/"
+               schemaLocation="https://schemas.xml soap.org/soap/envelope/"/>
     <xs:include schemaLocation="liberty-utility-v1.1.xsd"/>
     
     <xs:element name="Request" type="RequestType"/>

@@ -16,6 +16,11 @@
 
 package org.opensaml.liberty.binding.encoding;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+
 import org.opensaml.Configuration;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLObjectBuilder;
@@ -38,11 +43,6 @@ import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 
 public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
 
@@ -91,7 +91,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             HTTPTransportUtils.addNoCacheHeaders(outTransport);
             HTTPTransportUtils.setUTF8Encoding(outTransport);
             HTTPTransportUtils.setContentType(outTransport, "text/xml");
-            outTransport.setHeader("SOAPAction", "http://www.oasis-open.org/committees/security");
+            outTransport.setHeader("SOAPAction", "https://www.oasis-open.org/committees/security");
             Writer out = new OutputStreamWriter(outTransport.getOutgoingStream(), "UTF-8");
             XMLHelper.writeNode(envelopeElem, out);
             out.flush();

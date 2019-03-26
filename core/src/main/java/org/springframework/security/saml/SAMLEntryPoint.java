@@ -228,7 +228,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
     }
 
     /**
-     * Method initializes IDP Discovery Profile as defined in http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf
+     * Method initializes IDP Discovery Profile as defined in https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf
      * It is presumed that metadata of the local Service Provider contains discovery return address.
      *
      * @param context saml context also containing request and response objects

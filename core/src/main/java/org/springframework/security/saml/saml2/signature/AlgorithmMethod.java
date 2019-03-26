@@ -17,10 +17,10 @@
 package org.springframework.security.saml.saml2.signature;
 
 public enum AlgorithmMethod {
-	RSA_SHA1("http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
-	RSA_SHA256("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"),
-	RSA_SHA512("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"),
-	RSA_RIPEMD160("http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160");
+	RSA_SHA1("https://www.w3.org/2000/09/xmldsig#rsa-sha1"),
+	RSA_SHA256("https://www.w3.org/2001/04/xmldsig-more#rsa-sha256"),
+	RSA_SHA512("https://www.w3.org/2001/04/xmldsig-more#rsa-sha512"),
+	RSA_RIPEMD160("https://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160");
 
 	private final String urn;
 

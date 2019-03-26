@@ -24,10 +24,10 @@ import org.springframework.security.saml.SamlException;
 
 public enum DataEncryptionMethod {
 
-	TRIPLEDES_CBS("http://www.w3.org/2001/04/xmlenc#tripledes-cbc"),
-	AES128_CBC("http://www.w3.org/2001/04/xmlenc#aes128-cbc"),
-	AES256_CBC("http://www.w3.org/2001/04/xmlenc#aes256-cbc"),
-	AES192_CBC("http://www.w3.org/2001/04/xmlenc#aes192-cbc");
+	TRIPLEDES_CBS("https://www.w3.org/2001/04/xmlenc#tripledes-cbc"),
+	AES128_CBC("https://www.w3.org/2001/04/xmlenc#aes128-cbc"),
+	AES256_CBC("https://www.w3.org/2001/04/xmlenc#aes256-cbc"),
+	AES192_CBC("https://www.w3.org/2001/04/xmlenc#aes192-cbc");
 
 	private final String urn;
 

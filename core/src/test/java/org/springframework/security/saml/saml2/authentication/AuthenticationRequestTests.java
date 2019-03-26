@@ -62,12 +62,12 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"AssertionConsumerServiceURL",
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"Destination",
-			equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
+			equalTo("https://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
 		);
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
@@ -91,7 +91,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Binding.POST, data.getBinding());
 		assertEquals(
-			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
+			"https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
@@ -103,7 +103,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
 		assertThat(
 			data.getAssertionConsumerService().getLocation(),
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 	}
 
@@ -130,12 +130,12 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"AssertionConsumerServiceURL",
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"Destination",
-			equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
+			equalTo("https://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
 		);
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
@@ -173,7 +173,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Binding.POST, data.getBinding());
 		assertEquals(
-			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
+			"https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
@@ -190,7 +190,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
 		assertThat(
 			data.getAssertionConsumerService().getLocation(),
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 	}
 

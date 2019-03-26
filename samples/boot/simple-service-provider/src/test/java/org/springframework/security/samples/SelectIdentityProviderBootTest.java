@@ -77,7 +77,7 @@ public class SelectIdentityProviderBootTest {
 
 	@BeforeEach
 	void setUp() {
-		idpEntityId = "http://dual.sp-idp.com/saml/idp/metadata";
+		idpEntityId = "https://dual.sp-idp.com/saml/idp/metadata";
 		providers = config.getServiceProvider().getProviders();
 		List<ExternalIdentityProviderConfiguration> newConfig = new ArrayList<>(providers);
 		newConfig.add(
@@ -111,8 +111,8 @@ public class SelectIdentityProviderBootTest {
 			.andReturn();
 	}
 
-	private static final String IDP_DUAL_METADATA = "<ns3:EntityDescriptor xmlns:ns3=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns=\"http://www.w3.org/2000/09/xmldsig#\"\n" +
-		"                      xmlns:ns2=\"http://www.w3.org/2001/04/xmlenc#\" xmlns:ns4=\"urn:oasis:names:tc:SAML:2.0:assertion\"\n" +
+	private static final String IDP_DUAL_METADATA = "<ns3:EntityDescriptor xmlns:ns3=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns=\"https://www.w3.org/2000/09/xmldsig#\"\n" +
+		"                      xmlns:ns2=\"https://www.w3.org/2001/04/xmlenc#\" xmlns:ns4=\"urn:oasis:names:tc:SAML:2.0:assertion\"\n" +
 		"                      ID=\"S9a4982e5-0588-4a51-8ea9-c7bb5a62dc14\" entityID=\"Zalar_73_Test\">\n" +
 		"    <ns3:IDPSSODescriptor WantAuthnRequestsSigned=\"true\"\n" +
 		"                          protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n" +

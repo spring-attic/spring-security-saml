@@ -29,10 +29,10 @@ public class Namespace {
 	public static final String NS_METADATA = "urn:oasis:names:tc:SAML:2.0:metadata";
 
 	public static final String NS_SIGNATURE_PREFIX = "ds:";
-	public static final String NS_SIGNATURE = "http://www.w3.org/2000/09/xmldsig#";
+	public static final String NS_SIGNATURE = "https://www.w3.org/2000/09/xmldsig#";
 
 	public static final String NS_ENCRYPTION_PREFIX = "xenc:";
-	public static final String NS_ENCRYPTION = "http://www.w3.org/2001/04/xmlenc#";
+	public static final String NS_ENCRYPTION = "https://www.w3.org/2001/04/xmlenc#";
 
 	public static final String NS_SCHEMA_PREFIX = "xs:";
 	public static final String NS_SCHEMA = "http://www.w3.org/2001/XMLSchema";

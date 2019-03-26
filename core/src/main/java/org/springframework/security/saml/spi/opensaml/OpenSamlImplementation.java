@@ -308,7 +308,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		Map<String, Boolean> parserBuilderFeatures = new HashMap<>();
 		parserBuilderFeatures.put("http://apache.org/xml/features/disallow-doctype-decl", TRUE);
-		parserBuilderFeatures.put("http://javax.xml.XMLConstants/feature/secure-processing", TRUE);
+		parserBuilderFeatures.put("https://javax.xml.XMLConstants/feature/secure-processing", TRUE);
 		parserBuilderFeatures.put("http://xml.org/sax/features/external-general-entities", FALSE);
 		parserBuilderFeatures.put(
 			"http://apache.org/xml/features/validation/schema/normalized-value",

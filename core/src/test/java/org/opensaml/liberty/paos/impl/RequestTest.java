@@ -42,7 +42,7 @@ public class RequestTest extends BaseSAMLObjectProviderTestCase {
         
         expectedResponseConsumerURL = "https://identity-service/SAML2/ECP";
         expectedService = "urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp";
-        expectedSOAP11Actor = "http://schemas.xmlsoap.org/soap/actor/next";
+        expectedSOAP11Actor = "http://schemas.xmlsoap.org/soap/actor/next/";
         expectedSOAP11MustUnderstand = true;
         expectedMessageID = "6c3a4f8b9c2d";
     }

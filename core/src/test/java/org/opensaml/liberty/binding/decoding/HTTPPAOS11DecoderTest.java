@@ -67,7 +67,7 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
             "<soap11:Header> " +
                 "<ecp:RelayState " +
                     "xmlns:ecp=\"urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp\" " +
-                    "soap11:actor=\"http://schemas.xmlsoap.org/soap/actor/next\" " +
+                    "soap11:actor=\"http://schemas.xmlsoap.org/soap/actor/next/\" " +
                     "soap11:mustUnderstand=\"1\">" + expectedRelayState +
                 "</ecp:RelayState></soap11:Header>" +
             "<soap11:Body> " +

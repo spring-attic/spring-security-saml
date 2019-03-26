@@ -494,9 +494,9 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * At the moment the value is only used for signatures on metadata.
      *
      * Typical values are:
-     * http://www.w3.org/2000/09/xmldsig#rsa-sha1
-     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
-     * http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
+     * https://www.w3.org/2000/09/xmldsig#rsa-sha1
+     * https://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+     * https://www.w3.org/2001/04/xmldsig-more#rsa-sha512
      *
      * @param signingAlgorithm The new signing algorithm to use
      * @see org.opensaml.xml.signature.SignatureConstants
@@ -598,11 +598,11 @@ public class ExtendedMetadata implements Serializable, Cloneable {
      * At the moment the value is only used for signatures on metadata.
      *
      * Typical values are:
-     * http://www.w3.org/2001/04/xmlenc#sha1
-     * http://www.w3.org/2001/04/xmlenc#sha256
-     * http://www.w3.org/2001/04/xmlenc#sha384
-     * http://www.w3.org/2001/04/xmlenc#sha512
-     * http://www.w3.org/2001/04/xmlenc#ripemd160
+     * https://www.w3.org/2001/04/xmlenc#sha1
+     * https://www.w3.org/2001/04/xmlenc#sha256
+     * https://www.w3.org/2001/04/xmlenc#sha384
+     * https://www.w3.org/2001/04/xmlenc#sha512
+     * https://www.w3.org/2001/04/xmlenc#ripemd160
      *
      * @param digestMethodAlgorithm The new digest method algorithm to use
      * @see org.opensaml.xml.signature.SignatureConstants

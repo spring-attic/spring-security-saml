@@ -45,7 +45,7 @@ import java.util.List;
 
 /**
  * Filter implements Identity Provider Discovery Service and Profile as defined in
- * http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf.
+ * https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf.
  *
  * @author Vladimir Schaefer
  */

@@ -6,8 +6,8 @@
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
-		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+		http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 	<title>Integrating Identity Providers</title>
 	<para>Section provides additional information regarding integration of Spring SAML with popular Identity Providers.</para>
 
@@ -18,7 +18,7 @@
 			Before starting with the configuration make sure that the following pre-requisites are satisfied:</para>
 			<para><itemizedlist spacing="compact">
 					<listitem>
-						<para>Install AD FS 2.0 (http://www.microsoft.com/en-us/download/details.aspx?id=10909)</para>
+						<para>Install AD FS 2.0 (https://www.microsoft.com/en-us/download/details.aspx?id=10909)</para>
 					</listitem>
 					<listitem>
 						<para>Run AD FS 2.0 Federation Server Configuration Wizard in the AD FS 2.0 Management Console</para>
@@ -30,7 +30,7 @@
 						<para>Install a Java container (e.g. Tomcat) for deployment of the SAML 2 Extension</para>
 					</listitem>
 					<listitem>
-						<para>Configure your container to use HTTPS, this is required by AD FS (<ulink url="http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</ulink>)</para>
+						<para>Configure your container to use HTTPS, this is required by AD FS (<ulink url="https://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">https://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</ulink>)</para>
 					</listitem>
 				</itemizedlist></para>
 

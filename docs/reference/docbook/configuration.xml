@@ -6,8 +6,8 @@
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
-		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">	
+		http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">	
   
 		<title>Configuring SAML Extension</title>
 		<partintro>
@@ -157,7 +157,7 @@
         </section>
         <section id="logging">
             <title>Logging</title>
-            <para>SAML Extension uses <ulink url="http://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlying OpenSAML
+            <para>SAML Extension uses <ulink url="https://www.slf4j.org/">SLF4J framework</ulink> for logging. The same applies to the underlying OpenSAML
                 library. The sample application by default uses log4j version 1.2 binding for SLF4J, configured with the following dependency:<programlisting><![CDATA[<dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-log4j12</artifactId>
@@ -175,7 +175,7 @@
                 <programlisting>log4j.logger.org.springframework.security.saml=DEBUG
 log4j.logger.org.opensaml=DEBUG
 log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
-            <para>For details about using other logging frameworks please consult the <ulink url="http://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
+            <para>For details about using other logging frameworks please consult the <ulink url="https://www.slf4j.org/manual.html">SLF4J manual</ulink>.</para>
         </section>
 	</chapter>
 
@@ -409,7 +409,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	<constructor-arg>
 		<bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
 			<constructor-arg>
-				<value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
+				<value type="java.lang.String">https://idp.ssocircle.com/idp-meta.xml</value>
 			</constructor-arg>
 			<constructor-arg>
 				<!-- Timeout for metadata loading in ms -->
@@ -463,7 +463,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
 	<constructor-arg>
 		<!-- Extended metadata for specific IDPs -->
 		<map>
-			<entry key="http://idp.ssocircle.com">
+			<entry key="https://idp.ssocircle.com">
 				<bean class="org.springframework.security.saml.metadata.ExtendedMetadata"/>
 			</entry>
 		</map>
@@ -566,15 +566,15 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                                     <emphasis>strict</emphasis> and <emphasis>allowAll</emphasis>. Value <emphasis>allowAll</emphasis>
                                     effectively disables hostname verification. All values are case-insensitive. For
                                     more details on the supported hostname verifications see
-                                    <link linkend="http://juliusdavies.ca/commons-ssl/javadocs/org/apache/commons/ssl/HostnameVerifier.html">Commons-SSL JavaDoc</link>.
+                                    <link linkend="http://www.juliusdavies.ca/commons-ssl/javadocs/org/apache/commons/ssl/HostnameVerifier.html">Commons-SSL JavaDoc</link>.
                                 </entry>
                             </row>
                             <row>
                                 <entry>signingAlgorithm</entry>
                                 <entry>-</entry>
                                 <entry>local only</entry>
-                                <entry>Algorithm used to create digital signature on the metadata object. Typical values are <emphasis>http://www.w3.org/2000/09/xmldsig#rsa-sha1</emphasis>,
-                                  <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</emphasis> and <emphasis>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</emphasis>.</entry>
+                                <entry>Algorithm used to create digital signature on the metadata object. Typical values are <emphasis>https://www.w3.org/2000/09/xmldsig#rsa-sha1</emphasis>,
+                                  <emphasis>https://www.w3.org/2001/04/xmldsig-more#rsa-sha256</emphasis> and <emphasis>https://www.w3.org/2001/04/xmldsig-more#rsa-sha512</emphasis>.</entry>
                             </row>
                             <row>
                                 <entry>signingKey</entry>
@@ -785,7 +785,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  </para>
                  <para>
                      MetaIOP is the default profile for verification of XML signatures. For details about this profile
-                     see <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf">the specification</ulink>.
+                     see <ulink url="https://docs.oasis-open.org/security/saml/Post2.0/sstc-metadata-iop.pdf">the specification</ulink>.
                  </para>
              </section>
              <section id="configuration-security-profiles-pkix">
@@ -852,7 +852,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                  (by setting system property <emphasis>com.sun.security.enableCRLDP</emphasis> to true), CRL point defined using certificate's Authority
                  Information Access (AIA) Extension (by setting system property <emphasis>com.sun.security.enableAIAcaIssuers</emphasis> to true)
                  and OCSP (by setting system property <emphasis>ocsp.enable</emphasis> to true).
-                 For details see the <ulink url="http://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">Java PKI Programmer's Guide</ulink>.
+                 For details see the <ulink url="https://docs.oracle.com/javase/7/docs/technotes/guides/security/certpath/CertPathProgGuide.html#AppB">Java PKI Programmer's Guide</ulink>.
                  In case you are using another security provider, please consult its manual for functionality related to <emphasis>CertPathBuilder</emphasis> and <emphasis>CertPathValidator</emphasis>
                  with the <emphasis>PKIX</emphasis> algorithm.
              </para>
@@ -894,7 +894,7 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
             <title>IDP selection and discovery</title>
             <para>Discovery helps your Service Provider determine which Identity Provider should be used for authentication of the current user. It is automatically initialized during calls to 
             single sign-on endpoint at <emphasis>scheme://server:port/contextPath/saml/login</emphasis>. SAML Extension supports multiple modes of discovery including 
-            the <ulink url="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service Protocol and Profile</ulink>.</para>
+            the <ulink url="https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf">Identity Provider Discovery Service Protocol and Profile</ulink>.</para>
             <para>
               IDP discovery modes can always be skipped during SSO initialization by specifying HTTP request parameter <emphasis>idp</emphasis> with the
               entityId of the required IDP, e.g. <emphasis>scheme://server:port/contextPath/saml/login?idp=mySelectedIDP</emphasis>.
@@ -1025,11 +1025,11 @@ log4j.logger.PROTOCOL_MESSAGE=DEBUG</programlisting></para>
                             </row>
                             <row>
                                 <entry>authnContexts</entry>
-                                <entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                                <entry>Default: empty. Authentication contexts IDP is allowed to use when authenticating user. See <ulink url="https://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
                             </row>
                             <row>
                                 <entry>authnContextComparison</entry>
-                                <entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
+                                <entry>Default: AuthnContextComparisonTypeEnumeration.EXACT. Mechanism used by IDP to determine authentication method to use. See <ulink url="https://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf">the specification</ulink> for details.</entry>
                             </row>
                             <row>
                                 <entry>relayState</entry>

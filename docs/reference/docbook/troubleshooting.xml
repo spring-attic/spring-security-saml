@@ -6,8 +6,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
 	xsi:schemaLocation="
-		http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-		http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+		http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+		http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 	<info>
 		<title>Troubleshooting common problems</title>
 	</info>
@@ -15,7 +15,7 @@
       <title>Time synchronization</title>
       <para>Processing of SAML messages and assertions is often limited to a specific time window which e.g. prevents possibilities of replay attacks.
       Validation of messages can fail when internal clocks of the IDP and SP machines are not synchronized. Make sure to use a       
-      <ulink url="http://www.freebsd.org/doc/handbook/network-ntp.html">time synchronization service</ulink> on all systems in the federation.</para>
+      <ulink url="https://www.freebsd.org/doc/handbook/network-ntp.html">time synchronization service</ulink> on all systems in the federation.</para>
     </simplesect>
     
     <simplesect>

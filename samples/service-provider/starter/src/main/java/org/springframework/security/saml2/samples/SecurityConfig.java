@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.providers(
 					ExternalSaml2IdentityProviderConfiguration.builder()
 						.alias("simplesamlphp")
-						.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
+						.metadata("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
 						.build()
 				)
 		);

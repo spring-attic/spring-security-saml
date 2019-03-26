@@ -127,10 +127,10 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
 		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
-			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+			equalTo("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
 		);
 		assertThat(
 			authn.getOriginEntityId(),
@@ -148,10 +148,10 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	void authNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
 		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
-			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+			equalTo("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
 		);
 		assertThat(
 			authn.getOriginEntityId(),

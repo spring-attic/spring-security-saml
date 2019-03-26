@@ -119,7 +119,7 @@ public class SimpleIdentityProviderBootTests {
 
 		given(
 			cache.getMetadata(
-				eq("http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp"),
+				eq("https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp"),
 				anyBoolean()
 			)
 		).willReturn(CACHED_SIMPLESAML_META_DATA.getBytes());
@@ -252,7 +252,7 @@ public class SimpleIdentityProviderBootTests {
 
 		IdentityProviderMetadata idpm = getIdentityProviderMetadata();
 		String spm1EntityId = "spring.security.saml.xml.sp.id";
-		String spm2EntityId = "http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp";
+		String spm2EntityId = "https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp";
 		IdentityProviderService provider = provisioning.getHostedProvider();
 		ServiceProviderMetadata spm1 = provider.getRemoteProvider(spm1EntityId);
 		ServiceProviderMetadata spm2 = provider.getRemoteProvider(spm2EntityId);
@@ -335,7 +335,7 @@ public class SimpleIdentityProviderBootTests {
 		assertNotNull(logoutRequest);
 		assertThat(
 			logoutRequest.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-logout.php/default-sp")
+			equalTo("https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-logout.php/default-sp")
 		);
 
 		//SP2 responds to the LogoutRequest
@@ -506,17 +506,17 @@ public class SimpleIdentityProviderBootTests {
 	}
 
 	public static final String CACHED_SIMPLESAML_META_DATA = "<?xml version=\"1.0\"?>\n" +
-		"<md:EntityDescriptor ID=\"pfx5adc5a2c-6518-b025-b3f1-90cbaa59075f\" entityID=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\">\n" +
-		"\t<ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"<md:EntityDescriptor ID=\"pfx5adc5a2c-6518-b025-b3f1-90cbaa59075f\" entityID=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\">\n" +
+		"\t<ds:Signature xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\">\n" +
 		"\t\t<ds:SignedInfo>\n" +
-		"\t\t\t<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"\t\t\t<ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+		"\t\t\t<ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"\t\t\t<ds:SignatureMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
 		"\t\t\t<ds:Reference URI=\"#pfx5adc5a2c-6518-b025-b3f1-90cbaa59075f\">\n" +
 		"\t\t\t\t<ds:Transforms>\n" +
-		"\t\t\t\t\t<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"\t\t\t\t\t<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"\t\t\t\t\t<ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"\t\t\t\t\t<ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 		"\t\t\t\t</ds:Transforms>\n" +
-		"\t\t\t\t<ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
+		"\t\t\t\t<ds:DigestMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
 		"\t\t\t\t<ds:DigestValue>FhDHN8ZwPqVrOhRwNtdGh6mDt2o=</ds:DigestValue>\n" +
 		"\t\t\t</ds:Reference>\n" +
 		"\t\t</ds:SignedInfo>\n" +
@@ -528,11 +528,11 @@ public class SimpleIdentityProviderBootTests {
 		"\t\t</ds:KeyInfo>\n" +
 		"\t</ds:Signature>\n" +
 		"\t<md:SPSSODescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol\">\n" +
-		"\t\t<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-logout.php/default-sp\"/>\n" +
-		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-acs.php/default-sp\" index=\"0\"/>\n" +
-		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:1.0:profiles:browser-post\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml1-acs.php/default-sp\" index=\"1\"/>\n" +
-		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-acs.php/default-sp\" index=\"2\"/>\n" +
-		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:1.0:profiles:artifact-01\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml1-acs.php/default-sp/artifact\" index=\"3\"/>\n" +
+		"\t\t<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-logout.php/default-sp\"/>\n" +
+		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-acs.php/default-sp\" index=\"0\"/>\n" +
+		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:1.0:profiles:browser-post\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml1-acs.php/default-sp\" index=\"1\"/>\n" +
+		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml2-acs.php/default-sp\" index=\"2\"/>\n" +
+		"\t\t<md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:1.0:profiles:artifact-01\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/saml1-acs.php/default-sp/artifact\" index=\"3\"/>\n" +
 		"\t</md:SPSSODescriptor>\n" +
 		"\t<md:ContactPerson contactType=\"technical\">\n" +
 		"\t\t<md:GivenName>Filip</md:GivenName>\n" +
@@ -542,16 +542,16 @@ public class SimpleIdentityProviderBootTests {
 		"</md:EntityDescriptor>";
 
 	public static final String CACHED_SSS_META_DATA = "\n" +
-		"<md:EntityDescriptor ID=\"dfc08e8f-ab6e-4682-aa34-6e7fcd812892\" entityID=\"spring.security.saml.sp.id\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\"><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"<md:EntityDescriptor ID=\"dfc08e8f-ab6e-4682-aa34-6e7fcd812892\" entityID=\"spring.security.saml.sp.id\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\"><ds:Signature xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\">\n" +
 		"<ds:SignedInfo>\n" +
-		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
 		"<ds:Reference URI=\"#dfc08e8f-ab6e-4682-aa34-6e7fcd812892\">\n" +
 		"<ds:Transforms>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 		"</ds:Transforms>\n" +
-		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
+		"<ds:DigestMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
 		"<ds:DigestValue>SMvLzAh6oFKgdeC0bfQrzM6fZbk=</ds:DigestValue>\n" +
 		"</ds:Reference>\n" +
 		"</ds:SignedInfo>\n" +
@@ -571,7 +571,7 @@ public class SimpleIdentityProviderBootTests {
 		"ztmWqRbe5OuEmpewH7cx+kNgcVjdctOGy3Q6x+I4qakY/9qhBQIDAQABMA0GCSqGSIb3DQEBCwUA\n" +
 		"A4GBAAeViTvHOyQopWEiXOfI2Z9eukwrSknDwq/zscR0YxwwqDBMt/QdAODfSwAfnciiYLkmEjlo\n" +
 		"zWRtOeN+qK7UFgP1bRl5qksrYX5S0z2iGJh0GvonLUt3e20Ssfl5tTEDDnAEUMLfBkyaxEHDRZ/n\n" +
-		"bTJ7VTeZOSyRoVn5XHhpuJ0B</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:SPSSODescriptor AuthnRequestsSigned=\"true\" ID=\"cabd4887-532f-4259-822f-960c55de6249\" WantAssertionsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><md:Extensions/><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQCuVzyqFgMSyDANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
+		"bTJ7VTeZOSyRoVn5XHhpuJ0B</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:SPSSODescriptor AuthnRequestsSigned=\"true\" ID=\"cabd4887-532f-4259-822f-960c55de6249\" WantAssertionsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><md:Extensions/><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQCuVzyqFgMSyDANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
 		"BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy\n" +
 		"aXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQDDBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAe\n" +
 		"Fw0xODA1MTQxNDMwNDRaFw0yODA1MTExNDMwNDRaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwK\n" +
@@ -582,7 +582,7 @@ public class SimpleIdentityProviderBootTests {
 		"ztmWqRbe5OuEmpewH7cx+kNgcVjdctOGy3Q6x+I4qakY/9qhBQIDAQABMA0GCSqGSIb3DQEBCwUA\n" +
 		"A4GBAAeViTvHOyQopWEiXOfI2Z9eukwrSknDwq/zscR0YxwwqDBMt/QdAODfSwAfnciiYLkmEjlo\n" +
 		"zWRtOeN+qK7UFgP1bRl5qksrYX5S0z2iGJh0GvonLUt3e20Ssfl5tTEDDnAEUMLfBkyaxEHDRZ/n\n" +
-		"bTJ7VTeZOSyRoVn5XHhpuJ0B</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQCQqf5mvKPOpzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
+		"bTJ7VTeZOSyRoVn5XHhpuJ0B</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQCQqf5mvKPOpzANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
 		"BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy\n" +
 		"aXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQDDBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAe\n" +
 		"Fw0xODA1MTQxNDQ0NDZaFw0yODA1MTExNDQ0NDZaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwK\n" +
@@ -593,7 +593,7 @@ public class SimpleIdentityProviderBootTests {
 		"HULtvhMvLKf7UPRwX4jzxLanc6R4IcULJZ/dg9gBT5KDlm164wIDAQABMA0GCSqGSIb3DQEBCwUA\n" +
 		"A4GBAHDyh2B4AZ1C9LSigis+sAiVJIzODsnKg8pIWGI7bcFUK+i/Vj7qlx09ZD/GbrQts87Yp4aq\n" +
 		"+5OqVqb5n6bS8DWB8jHCoHC5HACSBb3J7x/mC0PBsKXA9A8NSFzScErvfD/ACjWg3DJEghxnlqAV\n" +
-		"Tm/DQX/t8kNTdrLdlzsYTuE0</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQC3dvhia5XvzjANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
+		"Tm/DQX/t8kNTdrLdlzsYTuE0</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIICgTCCAeoCCQC3dvhia5XvzjANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMCVVMxEzARBgNV\n" +
 		"BAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsGA1UECgwUU3ByaW5nIFNlY3Vy\n" +
 		"aXR5IFNBTUwxCzAJBgNVBAsMAnNwMSAwHgYDVQQDDBdzcC5zcHJpbmcuc2VjdXJpdHkuc2FtbDAe\n" +
 		"Fw0xODA1MTQxNDQ1MzBaFw0yODA1MTExNDQ1MzBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECAwK\n" +

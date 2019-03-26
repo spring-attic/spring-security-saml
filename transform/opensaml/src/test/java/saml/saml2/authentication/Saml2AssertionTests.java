@@ -490,14 +490,14 @@ public class Saml2AssertionTests extends MetadataBase {
 		assertThat(assertion.getVersion(), equalTo("2.0"));
 
 		assertNotNull(assertion.getIssuer());
-		assertThat(assertion.getIssuer().getValue(), equalTo("http://idp.localhost:8080/uaa"));
+		assertThat(assertion.getIssuer().getValue(), equalTo("https://idp.localhost:8080/uaa"));
 
 		assertNotNull(assertion.getSubject());
 		assertNotNull(assertion.getSubject().getPrincipal());
 		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(Saml2NameIdPrincipalSaml2.class));
 		Saml2NameIdPrincipalSaml2 principal = (Saml2NameIdPrincipalSaml2) assertion.getSubject().getPrincipal();
 		assertThat(principal.getFormat(), equalTo(EMAIL));
-		assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
+		assertThat(principal.getSpNameQualifier(), equalTo("https://sp.localhost:8080/uaa"));
 		assertThat(principal.getValue(), equalTo("test@test.com"));
 
 		assertNotNull(assertion.getSubject().getConfirmations());
@@ -517,7 +517,7 @@ public class Saml2AssertionTests extends MetadataBase {
 		assertThat(assertion.getConditions().getCriteria().size(), equalTo(2));
 		assertThat(assertion.getConditions().getCriteria().get(0).getClass(), equalTo(Saml2AudienceRestriction.class));
 		Saml2AudienceRestriction aud = (Saml2AudienceRestriction) assertion.getConditions().getCriteria().get(0);
-		assertThat(aud.getAudiences(), containsInAnyOrder("http://sp.localhost:8080/uaa"));
+		assertThat(aud.getAudiences(), containsInAnyOrder("https://sp.localhost:8080/uaa"));
 		assertThat(assertion.getConditions().getCriteria().get(1).getClass(), equalTo(Saml2OneTimeUse.class));
 
 		assertNotNull(assertion.getAuthenticationStatements());

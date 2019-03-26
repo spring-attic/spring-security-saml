@@ -68,12 +68,12 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"AssertionConsumerServiceURL",
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"Destination",
-			equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
+			equalTo("https://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
 		);
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
@@ -94,16 +94,16 @@ class AuthenticationRequestTests extends MetadataBase {
 	public void parseOpenSamlGenerated() {
 
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-			"<saml2p:AuthnRequest AssertionConsumerServiceURL=\"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias\" Destination=\"http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias\" ForceAuthn=\"false\" ID=\"7f24b8b7-2729-4395-8d6d-15d589b1d212\" IsPassive=\"false\" IssueInstant=\"2018-11-08T17:42:21.195Z\" ProtocolBinding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Version=\"2.0\" xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.localhost:8080/uaa</saml2:Issuer><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+			"<saml2p:AuthnRequest AssertionConsumerServiceURL=\"https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias\" Destination=\"https://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias\" ForceAuthn=\"false\" ID=\"7f24b8b7-2729-4395-8d6d-15d589b1d212\" IsPassive=\"false\" IssueInstant=\"2018-11-08T17:42:21.195Z\" ProtocolBinding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Version=\"2.0\" xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">https://sp.localhost:8080/uaa</saml2:Issuer><ds:Signature xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\">\n" +
 			"<ds:SignedInfo>\n" +
-			"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-			"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+			"<ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+			"<ds:SignatureMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
 			"<ds:Reference URI=\"#7f24b8b7-2729-4395-8d6d-15d589b1d212\">\n" +
 			"<ds:Transforms>\n" +
-			"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-			"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+			"<ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+			"<ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 			"</ds:Transforms>\n" +
-			"<ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
+			"<ds:DigestMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
 			"<ds:DigestValue>arEsOu92QLpsjSVkO1OE7bqfhfM=</ds:DigestValue>\n" +
 			"</ds:Reference>\n" +
 			"</ds:SignedInfo>\n" +
@@ -143,7 +143,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Saml2Binding.POST, data.getBinding());
 		assertEquals(
-			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
+			"https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
@@ -155,7 +155,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
 		assertThat(
 			data.getAssertionConsumerService().getLocation(),
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 	}
 
@@ -183,12 +183,12 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"AssertionConsumerServiceURL",
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 		assertNodeAttribute(
 			nodes.iterator().next(),
 			"Destination",
-			equalTo("http://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
+			equalTo("https://idp.localhost:8080/uaa/saml/idp/SSO/alias/idp-alias")
 		);
 
 		assertNodeCount(xml, "//samlp:NameIDPolicy", 1);
@@ -227,7 +227,7 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertSame(Saml2Binding.POST, data.getBinding());
 		assertEquals(
-			"http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
+			"https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias",
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
@@ -244,7 +244,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertThat(data.getBinding().toString(), equalTo("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"));
 		assertThat(
 			data.getAssertionConsumerService().getLocation(),
-			equalTo("http://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
+			equalTo("https://sp.localhost:8080/uaa/saml/sp/SSO/alias/sp-alias")
 		);
 	}
 

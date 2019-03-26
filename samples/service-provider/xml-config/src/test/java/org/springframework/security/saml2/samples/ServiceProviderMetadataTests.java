@@ -125,10 +125,10 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@Test
 	@DisplayName("service provider entity-id is based on configured base path")
 	void generateSpEntityIdFromBasePath() throws Exception {
-		mockConfig(builder -> builder.entityId(null).basePath("http://some.other.host:8080/sample-sp"));
+		mockConfig(builder -> builder.entityId(null).basePath("https://some.other.host:8080/sample-sp"));
 		ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
-		assertThat(metadata.getEntityId(), equalTo("http://some.other.host:8080/sample-sp"));
+		assertThat(metadata.getEntityId(), equalTo("https://some.other.host:8080/sample-sp"));
 		assertThat(metadata.getEntityAlias(), equalTo("some.other.host"));
 	}
 
@@ -243,8 +243,8 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 
 	private final String IDP_DUAL_METADATA =
-		"<ns3:EntityDescriptor xmlns:ns3=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns=\"http://www.w3.org/2000/09/xmldsig#\"\n" +
-			"                      xmlns:ns2=\"http://www.w3.org/2001/04/xmlenc#\" xmlns:ns4=\"urn:oasis:names:tc:SAML:2.0:assertion\"\n" +
+		"<ns3:EntityDescriptor xmlns:ns3=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns=\"https://www.w3.org/2000/09/xmldsig#\"\n" +
+			"                      xmlns:ns2=\"https://www.w3.org/2001/04/xmlenc#\" xmlns:ns4=\"urn:oasis:names:tc:SAML:2.0:assertion\"\n" +
 			"                      ID=\"S9a4982e5-0588-4a51-8ea9-c7bb5a62dc14\" entityID=\"Zalar_73_Test\">\n" +
 			"    <ns3:IDPSSODescriptor WantAuthnRequestsSigned=\"true\"\n" +
 			"                          protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n" +
@@ -378,7 +378,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 			"</ns3:EntityDescriptor>";
 
 	private static String METADATA_TRUST_CHECK =
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"login.run.pivotal.io\" entityID=\"login.run.pivotal.io\"><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/><ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><ds:Reference URI=\"#login.run.pivotal.io\"><ds:Transforms><ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/></ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><ds:DigestValue>cayGaIpGtYkEXMr0g+scVayzxMI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EPu6XnPsdMNNY4fuQczAdGB8029i/t+7tZ2w6xaX1WzutRji76PL2e6zfiZvcBGRrcPYmqVJZC6BorBcvMCIVxE+MxKWp4JE9qsQUMoXGpovbBmiKzMfqaO+lcusCmX6CRyqni6P75L1Sff2j31Sp/QxgXkA3ZHvrcaNynMCWdYaqFUuk/L44CI3FllceGlmWDNEM7gPIEYAlQ6A0ct7y5+Dj+aZxDofS8bTCR3dgf4fw6+gu2Cxf+zbSflQ2kT4jTW0GBsOJ6NBZZCP5f7+WCTWD4YFGSbCk/KisM/FS7i7seedoTJplYLyn+2YYUO1xKnFF8wNL5Uqi92lC1hgGw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"login.run.pivotal.io\" entityID=\"login.run.pivotal.io\"><ds:Signature xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/><ds:SignatureMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><ds:Reference URI=\"#login.run.pivotal.io\"><ds:Transforms><ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/></ds:Transforms><ds:DigestMethod Algorithm=\"https://www.w3.org/2000/09/xmldsig#sha1\"/><ds:DigestValue>cayGaIpGtYkEXMr0g+scVayzxMI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EPu6XnPsdMNNY4fuQczAdGB8029i/t+7tZ2w6xaX1WzutRji76PL2e6zfiZvcBGRrcPYmqVJZC6BorBcvMCIVxE+MxKWp4JE9qsQUMoXGpovbBmiKzMfqaO+lcusCmX6CRyqni6P75L1Sff2j31Sp/QxgXkA3ZHvrcaNynMCWdYaqFUuk/L44CI3FllceGlmWDNEM7gPIEYAlQ6A0ct7y5+Dj+aZxDofS8bTCR3dgf4fw6+gu2Cxf+zbSflQ2kT4jTW0GBsOJ6NBZZCP5f7+WCTWD4YFGSbCk/KisM/FS7i7seedoTJplYLyn+2YYUO1xKnFF8wNL5Uqi92lC1hgGw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
 			"CAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEfMB0GA1UECgwWUGl2b3RhbCBT\n" +
 			"b2Z0d2FyZSwgSW5jLjEZMBcGA1UEAwwQKi5ydW4ucGl2b3RhbC5pbzAeFw0xNTA5MDIyMzIwMDla\n" +
 			"Fw0xODA5MDEyMzIwMDlaMHYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYD\n" +
@@ -393,7 +393,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 			"0xLTss8yBDHcZkgwvDrH8aTwUtq8gO67wY3JuWBxjTsnoAPbH8zInkHeolCUSobPxAx9XHqbAxfu\n" +
 			"a8HJjDihi+cJYEb5lPSpvY5ytcPG9JAXAHQ6aalpJjkyB+eaGRYi8s5Ejr3luI3nzJEzfUj5y0fc\n" +
 			"FTv9CtDt9VfblSuHdRw4uFwat5e1Fb7LtEjATi4cKaG1+zZ80QyuChfC08for83TeQgjq7TA10FA\n" +
-			"kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:IDPSSODescriptor WantAuthnRequestsSigned=\"false\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
+			"kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:IDPSSODescriptor WantAuthnRequestsSigned=\"false\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
 			"CAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEfMB0GA1UECgwWUGl2b3RhbCBT\n" +
 			"b2Z0d2FyZSwgSW5jLjEZMBcGA1UEAwwQKi5ydW4ucGl2b3RhbC5pbzAeFw0xNTA5MDIyMzIwMDla\n" +
 			"Fw0xODA5MDEyMzIwMDlaMHYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYD\n" +
@@ -408,7 +408,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 			"0xLTss8yBDHcZkgwvDrH8aTwUtq8gO67wY3JuWBxjTsnoAPbH8zInkHeolCUSobPxAx9XHqbAxfu\n" +
 			"a8HJjDihi+cJYEb5lPSpvY5ytcPG9JAXAHQ6aalpJjkyB+eaGRYi8s5Ejr3luI3nzJEzfUj5y0fc\n" +
 			"FTv9CtDt9VfblSuHdRw4uFwat5e1Fb7LtEjATi4cKaG1+zZ80QyuChfC08for83TeQgjq7TA10FA\n" +
-			"kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"encryption\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
+			"kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"encryption\"><ds:KeyInfo xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE\n" +
 			"CAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEfMB0GA1UECgwWUGl2b3RhbCBT\n" +
 			"b2Z0d2FyZSwgSW5jLjEZMBcGA1UEAwwQKi5ydW4ucGl2b3RhbC5pbzAeFw0xNTA5MDIyMzIwMDla\n" +
 			"Fw0xODA5MDEyMzIwMDlaMHYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYD\n" +

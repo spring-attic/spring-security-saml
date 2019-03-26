@@ -68,16 +68,16 @@ class LogoutObjectTests {
 		"IssueInstant=\"2018-06-04T14:53:16.712Z\" NotOnOrAfter=\"2018-06-04T15:53:16.712Z\" Version=\"2.0\" " +
 		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer " +
 		"xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test.org</saml2:Issuer><ds:Signature " +
-		"xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\">\n" +
 		"<ds:SignedInfo>\n" +
-		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"https://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/>\n" +
 		"<ds:Reference URI=\"#request-id\">\n" +
 		"<ds:Transforms>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 		"</ds:Transforms>\n" +
-		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"/>\n" +
+		"<ds:DigestMethod Algorithm=\"https://www.w3.org/2001/04/xmlenc#sha512\"/>\n" +
 		"<ds:DigestValue>zEvGcnSA/2RwlBDayoKKmLIt/QfpBZc/76ticiNNvP2ldbnXZ9ibNcyoWbeioBhh9L4eMxWCjJFC\n" +
 		"BrVXibxQTg==</ds:DigestValue>\n" +
 		"</ds:Reference>\n" +
@@ -110,17 +110,17 @@ class LogoutObjectTests {
 		"<saml2p:LogoutResponse Destination=\"http://idp.test.org\" ID=\"response-id\" InResponseTo=\"in-response-to\"" +
 		" IssueInstant=\"2018-06-04T19:24:09.572Z\" Version=\"2.0\" " +
 		"xmlns:saml2p=\"urn:oasis:names:tc:SAML:2.0:protocol\"><saml2:Issuer NameQualifier=\"name qualifier\" " +
-		"SPNameQualifier=\"sp name qualifier\" xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">http://sp.test" +
-		".org</saml2:Issuer><ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+		"SPNameQualifier=\"sp name qualifier\" xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">https://sp.test" +
+		".org</saml2:Issuer><ds:Signature xmlns:ds=\"https://www.w3.org/2000/09/xmldsig#\">\n" +
 		"<ds:SignedInfo>\n" +
-		"<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
-		"<ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha512\"/>\n" +
+		"<ds:CanonicalizationMethod Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:SignatureMethod Algorithm=\"https://www.w3.org/2001/04/xmldsig-more#rsa-sha512\"/>\n" +
 		"<ds:Reference URI=\"#response-id\">\n" +
 		"<ds:Transforms>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-		"<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+		"<ds:Transform Algorithm=\"https://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 		"</ds:Transforms>\n" +
-		"<ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
+		"<ds:DigestMethod Algorithm=\"https://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
 		"<ds:DigestValue>qemZnU8Q1s8jNPhYl37mO8FToJnpU/k7V4BwnryApVA=</ds:DigestValue>\n" +
 		"</ds:Reference>\n" +
 		"</ds:SignedInfo>\n" +

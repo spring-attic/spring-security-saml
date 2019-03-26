@@ -127,10 +127,10 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
 		Saml2AuthenticationSaml2Request authn = getAuthenticationRequestRedirect(
-			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+			equalTo("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
 		);
 		assertThat(
 			authn.getOriginEntityId(),
@@ -185,7 +185,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 				p.setAuthenticationRequestBinding(Saml2Binding.POST.getValue());
 				p.setMetadata(p.getMetadata().replace(
 					"  </md:IDPSSODescriptor>\n",
-					"    <md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php\"/>\n" +
+					"    <md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php\"/>\n" +
 						"  </md:IDPSSODescriptor>\n"
 				));
 			}
@@ -196,13 +196,13 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 
 
 	private Saml2AuthenticationSaml2Request validateAuthenticationRequest(Saml2Binding binding) throws Exception {
-		final String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
+		final String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		Saml2AuthenticationSaml2Request authn = binding == Saml2Binding.REDIRECT ?
 			getAuthenticationRequestRedirect(idpEntityId) :
 			getAuthenticationRequestPost(idpEntityId);
 		assertThat(
 			authn.getDestination().getLocation(),
-			equalTo("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
+			equalTo("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/SSOService.php")
 		);
 		assertThat(
 			authn.getDestination().getBinding(),

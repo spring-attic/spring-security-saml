@@ -73,8 +73,8 @@ public abstract class MetadataBase {
 		idpVerifying = new Saml2KeyData("idp-verify", null, SP_RSA_KEY.getPublic(), null, Saml2KeyType.SIGNING);
 		spSigning = SP_RSA_KEY.getSimpleKey("sp");
 		spVerifying = new Saml2KeyData("sp-verify", null, IDP_RSA_KEY.getPublic(), null, Saml2KeyType.SIGNING);
-		spBaseUrl = "http://sp.localhost:8080/uaa";
-		idpBaseUrl = "http://idp.localhost:8080/uaa";
+		spBaseUrl = "https://sp.localhost:8080/uaa";
+		idpBaseUrl = "https://idp.localhost:8080/uaa";
 		helper = new SamlTestObjectHelper(time);
 
 		serviceProviderMetadata = helper.serviceProviderMetadata(

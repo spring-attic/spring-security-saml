@@ -31,7 +31,7 @@ We have provided [samples](samples) to get started with.
 These samples are meant to be very [simple](samples).
 
 ## Links 
-Web: http://projects.spring.io/spring-security-saml/
+Web: https://projects.spring.io/spring-security-saml/
 
 Sources: https://github.com/spring-projects/spring-security-saml
 
@@ -40,10 +40,10 @@ Documentation: See [samples](samples)
 CI: https://build.spring.io/browse/SES
 
 Releases:
-- Final: http://repo.spring.io/list/release/org/springframework/security/extensions/
-- Milestone: http://repo.spring.io/list/milestone/org/springframework/security/extensions/spring-security-saml2/
-- Snapshot: http://repo.spring.io/list/snapshot/org/springframework/security/extensions/spring-security-saml2/
+- Final: https://repo.spring.io/list/release/org/springframework/security/extensions/
+- Milestone: https://repo.spring.io/list/milestone/org/springframework/security/extensions/spring-security-saml2/
+- Snapshot: https://repo.spring.io/list/snapshot/org/springframework/security/extensions/spring-security-saml2/
 
 Support:
-- Stackoverflow: http://stackoverflow.com/questions/tagged/spring-saml
+- Stackoverflow: https://stackoverflow.com/questions/tagged/spring-saml
 - Gitter: https://gitter.im/spring-projects/spring-security

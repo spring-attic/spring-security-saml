@@ -26,8 +26,8 @@ spring:
         digest-method: SHA256
         single-logout-enabled: true
         encrypt-assertions: true
-        key-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#rsa-1_5
-        data-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#aes256-cbc
+        key-encryption-algorithm: https://www.w3.org/2001/04/xmlenc#rsa-1_5
+        data-encryption-algorithm: https://www.w3.org/2001/04/xmlenc#aes256-cbc
         name-ids:
           - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
           - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
@@ -154,7 +154,7 @@ spring:
           metadata: http://localhost:8080/sample-sp/saml/sp/metadata
           linktext: Spring Security SAML SP
         - alias: simplesamlphp
-          metadata: http://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
+          metadata: https://simplesaml-for-spring-saml.cfapps.io/module.php/saml/sp/metadata.php/default-sp
           link-text: Simple SAML PHP SP
         - alias: xml-example
           link-text: Example SP Config Using XML
@@ -164,7 +164,7 @@ spring:
               <md:SPSSODescriptor AuthnRequestsSigned="false" ID="6af07992-f76b-478d-804a-bfcb0e0c0c97" WantAssertionsSigned="true"
                                   protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
                 <md:KeyDescriptor use="signing">
-                            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                            <ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
                                 <ds:X509Data>
                                     <ds:X509Certificate>MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEO
             MAwGA1UECBMFYXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEO
@@ -188,7 +188,7 @@ spring:
                             </ds:KeyInfo>
                         </md:KeyDescriptor>
                         <md:KeyDescriptor use="encryption">
-                            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                            <ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
                                 <ds:X509Data>
                                     <ds:X509Certificate>MIIDSTCCArKgAwIBAgIBADANBgkqhkiG9w0BAQQFADB8MQswCQYDVQQGEwJhdzEO
             MAwGA1UECBMFYXJ1YmExDjAMBgNVBAoTBWFydWJhMQ4wDAYDVQQHEwVhcnViYTEO

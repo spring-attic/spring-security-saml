@@ -73,7 +73,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 									asList(
 										new ExternalSaml2IdentityProviderConfiguration(
 											"simplesamlphp",
-											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
+											"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
 											"Simple SAML PHP IDP (Java Config)",
 											true,
 											false,

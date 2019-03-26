@@ -28,12 +28,12 @@
     <samlp:StatusDetail><detail>Authentication of spring@idp.saml.spring.io was successful</detail></samlp:StatusDetail>
   </samlp:Status>
   <saml:Assertion
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xs="https://www.w3.org/2001/XMLSchema"
     ID="0d295a03-2f6f-4c6f-8ca2-6b456219ccd0"
     Version="2.0"
     IssueInstant="2018-05-07T22:14:19.785Z">
-    <saml:Issuer>http://idp.example.com/metadata.php</saml:Issuer>
+    <saml:Issuer>https://idp.example.com/metadata.php</saml:Issuer>
     <saml:Subject>
       <saml:NameID
         SPNameQualifier="https://sp.saml.spring.io/"

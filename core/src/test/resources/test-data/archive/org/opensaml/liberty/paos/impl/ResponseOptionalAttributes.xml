@@ -3,4 +3,4 @@
                xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/"
     refToMessageID="6c3a4f8b9c2d"
     soap11:mustUnderstand="1"
-    soap11:actor= "http://schemas.xmlsoap.org/soap/actor/next" />
+    soap11:actor= "http://schemas.xmlsoap.org/soap/actor/next/" />

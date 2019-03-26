@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="testSP2">
    <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
       <md:KeyDescriptor use="signing">
-         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+         <ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
             <ds:X509Data>
                <ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
 LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
@@ -19,7 +19,7 @@ STdzW1akQ9dX2Et/8TiJe6SHuQ==</ds:X509Certificate>
          </ds:KeyInfo>
       </md:KeyDescriptor>
       <md:KeyDescriptor use="encryption">
-         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+         <ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
             <ds:X509Data>
                <ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
 LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx

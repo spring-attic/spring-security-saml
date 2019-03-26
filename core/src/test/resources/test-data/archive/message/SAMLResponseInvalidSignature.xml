@@ -2,16 +2,16 @@
                 Destination="http://localhost:8081/spring-security-saml2-webapp/saml/SSO"
                 ID="s21e557b7c90f913964d93057a7f1616178dc4f066" IssueInstant="2009-04-19T15:43:02Z" Version="2.0">
     <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://localhost:8080/opensso</saml:Issuer>
-    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <Signature xmlns="https://www.w3.org/2000/09/xmldsig#">
         <SignedInfo>
-            <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+            <CanonicalizationMethod Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <SignatureMethod Algorithm="https://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
             <Reference URI="#s21e557b7c90f913964d93057a7f1616178dc4f066">
                 <Transforms>
-                    <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-                    <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                    <Transform Algorithm="https://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <Transform Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
                 </Transforms>
-                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                <DigestMethod Algorithm="https://www.w3.org/2000/09/xmldsig#sha1"/>
                 <DigestValue>EfFGCG5w0BuF1Lq8+B/E7TR51AQ=</DigestValue>
             </Reference>
         </SignedInfo>

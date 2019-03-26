@@ -14,7 +14,7 @@
   -->
 
 <md:EntityDescriptor entityID="https://sp.saml.spring.io/sp"
-                     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:ds="https://www.w3.org/2000/09/xmldsig#"
                      xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
 
   <md:SPSSODescriptor

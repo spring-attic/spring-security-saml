@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <md:EntityDescriptor ID="login.run.pivotal.io" entityID="login.run.pivotal.io" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
-	<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+	<ds:Signature xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
 		<ds:SignedInfo>
-			<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-			<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+			<ds:CanonicalizationMethod Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
+			<ds:SignatureMethod Algorithm="https://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
 			<ds:Reference URI="#login.run.pivotal.io">
 				<ds:Transforms>
-					<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-					<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+					<ds:Transform Algorithm="https://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+					<ds:Transform Algorithm="https://www.w3.org/2001/10/xml-exc-c14n#"/>
 				</ds:Transforms>
-				<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+				<ds:DigestMethod Algorithm="https://www.w3.org/2000/09/xmldsig#sha1"/>
 				<ds:DigestValue>cayGaIpGtYkEXMr0g+scVayzxMI=</ds:DigestValue>
 			</ds:Reference>
 		</ds:SignedInfo>
@@ -37,7 +37,7 @@ kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate>
 	</ds:Signature>
 	<md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
 		<md:KeyDescriptor use="signing">
-			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+			<ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
 				<ds:X509Data>
 					<ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE
 CAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEfMB0GA1UECgwWUGl2b3RhbCBT
@@ -59,7 +59,7 @@ kKe5nrXyHOORz+ttXkYkp5uEBhpZ</ds:X509Certificate>
 			</ds:KeyInfo>
 		</md:KeyDescriptor>
 		<md:KeyDescriptor use="encryption">
-			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+			<ds:KeyInfo xmlns:ds="https://www.w3.org/2000/09/xmldsig#">
 				<ds:X509Data>
 					<ds:X509Certificate>MIIDaDCCAlACCQDFsMECzdtetjANBgkqhkiG9w0BAQUFADB2MQswCQYDVQQGEwJVUzETMBEGA1UE
 CAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEfMB0GA1UECgwWUGl2b3RhbCBT

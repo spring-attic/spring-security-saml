@@ -1,9 +1,9 @@
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-              http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
-              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+<beans xmlns="https://www.springframework.org/schema/beans"
+       xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xmlns:util="https://www.springframework.org/schema/util"
+       xmlns:context="https://www.springframework.org/schema/context"
+       xsi:schemaLocation="https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+              https://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd
+              https://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Enable autowiring -->
     <context:component-scan base-package="org.springframework.security.saml2"/>
@@ -79,9 +79,9 @@
                 </bean>
             </list>
         </constructor-arg>
-        <property name="hostedSPName" value="http://localhost:8081/spring-security-saml2-webapp"/>
+        <property name="hostedSPName" value="https://localhost:8081/spring-security-saml2-webapp"/>
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
-        <property name="defaultIDP" value="http://localhost:8080/opensso"/>
+        <property name="defaultIDP" value="https://localhost:8080/opensso"/>
     </bean>
 
     <!-- XML parser pool needed for OpenSAML parsing -->

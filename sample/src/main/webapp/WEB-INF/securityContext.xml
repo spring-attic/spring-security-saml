@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+<beans xmlns="https://www.springframework.org/schema/beans"
+       xmlns:security="https://www.springframework.org/schema/security"
+       xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="https://www.springframework.org/schema/context"
+       xsi:schemaLocation="https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+              https://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd https://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
     <!-- Enable auto-wiring -->
     <context:annotation-config/>
@@ -167,7 +167,7 @@
                 <bean class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
                     <!-- URL containing the metadata -->
                     <constructor-arg>
-                        <value type="java.lang.String">http://idp.ssocircle.com/idp-meta.xml</value>
+                        <value type="java.lang.String">https://idp.ssocircle.com/idp-meta.xml</value>
                     </constructor-arg>
                     <!-- Timeout for metadata loading in ms -->
                     <constructor-arg>
@@ -189,7 +189,7 @@
         <!-- OPTIONAL used when one of the metadata files contains information about this service provider -->
         <!-- <property name="hostedSPName" value=""/> -->
         <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
-        <!-- <property name="defaultIDP" value="http://localhost:8080/opensso"/> -->
+        <!-- <property name="defaultIDP" value="https://localhost:8080/opensso"/> -->
     </bean>
 
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
@@ -321,7 +321,7 @@
                  
                  1) set pool property 'expandEntityReferences' to 'false'
                  2) set feature 'javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING' to true
-                 3) set feature 'http://apache.org/xml/features/disallow-doctype-decl' to true. This is a Xerces-specific feature,
+                 3) set feature 'https://apache.org/xml/features/disallow-doctype-decl' to true. This is a Xerces-specific feature,
                     including derivatives such as the internal JAXP implementations supplied with the Oracle and OpenJDK JREs. For
                     other JAXP implementations, consult the documentation for the implementation for guidance on how to achieve a
                     similar configuration.

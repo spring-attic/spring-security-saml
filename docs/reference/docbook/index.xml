@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<book version="5.0" xml:id="spring-security-reference-guide" xmlns="http://docbook.org/ns/docbook"
-	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+<book version="5.0" xml:id="spring-security-reference-guide" xmlns="https://docbook.org/ns/docbook"
+	xmlns:xlink="https://www.w3.org/1999/xlink" xmlns:xi="https://www.w3.org/2001/XInclude">
 
 	<info>
 		<title>Spring Security SAML Extension</title>
@@ -28,16 +28,16 @@
 			enabled by this component.</para>
 		</partintro>
 
-		<xi:include href="introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		<xi:include href="introduction.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
     
-    <xi:include href="whats-new.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="whats-new.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-		<xi:include href="glossary.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		<xi:include href="glossary.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-		<xi:include href="quick-start.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		<xi:include href="quick-start.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 	</part>
 
-	<xi:include href="configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+	<xi:include href="configuration.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 		  
 	<part xml:id="sample-app">
 		<title>Sample application</title>
@@ -45,7 +45,7 @@
 			<para>Chapter provides reference for the sample application and its administration user interface.</para>
 		</partintro>
 
-		<xi:include href="administration-ui.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		<xi:include href="administration-ui.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 		
 	</part>  		
   
@@ -56,9 +56,9 @@
       enabling single sign-on with common identity providers.</para>
 		</partintro>
 
-		<xi:include href="idp-guide.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+		<xi:include href="idp-guide.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
     
-    <xi:include href="troubleshooting.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="troubleshooting.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
 	</part>
 

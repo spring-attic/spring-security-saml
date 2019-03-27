@@ -4,7 +4,7 @@ apply plugin: 'idea'
 //apply plugin: 'io.spring.dependency-management'
 
 dependencies {
-	compile project(':spring-security-saml2-service-provider')
+	compile project(':spring-security-saml2-service-provider-web')
 	compile (group: "org.springframework.boot", name: "spring-boot", version: "${springBootVersion}") {
 		exclude group: "org.springframework.security", module: "spring-security-core"
 		exclude group: "org.springframework.security", module: "spring-security-config"

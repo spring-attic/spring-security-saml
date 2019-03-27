@@ -21,13 +21,13 @@ package org.springframework.security.saml2.configuration;
  * Represents a configuration for a host or domain.
  * A hosted domain can have one local service provider, or one local identity provider, or both.
  */
-public class HostedServerConfiguration {
+public class HostedSaml2ServerConfiguration {
 
 	private final HostedSaml2ServiceProviderConfiguration serviceProvider;
 	private final HostedSaml2IdentityProviderConfiguration identityProvider;
 
-	public HostedServerConfiguration(HostedSaml2ServiceProviderConfiguration serviceProvider,
-									 HostedSaml2IdentityProviderConfiguration identityProvider) {
+	public HostedSaml2ServerConfiguration(HostedSaml2ServiceProviderConfiguration serviceProvider,
+										  HostedSaml2IdentityProviderConfiguration identityProvider) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
 	}
@@ -51,7 +51,7 @@ public class HostedServerConfiguration {
 			return new Builder();
 		}
 
-		public static Builder builder(HostedServerConfiguration configuration) {
+		public static Builder builder(HostedSaml2ServerConfiguration configuration) {
 			return new Builder()
 				.identityProvider(configuration.getIdentityProvider())
 				.serviceProvider(configuration.getServiceProvider())
@@ -68,8 +68,8 @@ public class HostedServerConfiguration {
 			return this;
 		}
 
-		public HostedServerConfiguration build() {
-			return new HostedServerConfiguration(serviceProvider, identityProvider);
+		public HostedSaml2ServerConfiguration build() {
+			return new HostedSaml2ServerConfiguration(serviceProvider, identityProvider);
 		}
 	}
 }

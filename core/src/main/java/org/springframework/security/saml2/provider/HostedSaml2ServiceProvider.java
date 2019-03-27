@@ -22,16 +22,16 @@ import java.util.Map;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
 public class HostedSaml2ServiceProvider extends HostedSaml2Provider<
 	HostedSaml2ServiceProviderConfiguration,
-	ServiceProviderMetadata,
+	Saml2ServiceProviderMetadata,
 	ExternalSaml2IdentityProviderConfiguration,
 	Saml2IdentityProviderMetadata> {
 
 	public HostedSaml2ServiceProvider(HostedSaml2ServiceProviderConfiguration configuration,
-									  ServiceProviderMetadata metadata,
+									  Saml2ServiceProviderMetadata metadata,
 									  Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> providers) {
 		super(configuration, metadata, providers);
 	}

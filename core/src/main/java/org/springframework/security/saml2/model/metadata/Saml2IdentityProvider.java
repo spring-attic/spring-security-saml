@@ -25,7 +25,7 @@ import org.springframework.security.saml2.model.attribute.Saml2Attribute;
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  * Page 19, Line 792
  */
-public class Saml2IdentityProvider extends SsoProvider<Saml2IdentityProvider> {
+public class Saml2IdentityProvider extends Saml2SsoProvider<Saml2IdentityProvider> {
 
 	private boolean wantAuthnRequestsSigned = true;
 	private List<Saml2Endpoint> singleSignOnService;

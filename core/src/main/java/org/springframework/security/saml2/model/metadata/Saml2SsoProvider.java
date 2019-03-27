@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @param <T> return class for builder pattern
  */
-public class SsoProvider<T extends SsoProvider<T>> extends Saml2Provider<T> {
+public class Saml2SsoProvider<T extends Saml2SsoProvider<T>> extends Saml2Provider<T> {
 
 	private List<Saml2Endpoint> artifactResolutionService = new LinkedList<>();
 	private List<Saml2Endpoint> singleLogoutService = new LinkedList<>();

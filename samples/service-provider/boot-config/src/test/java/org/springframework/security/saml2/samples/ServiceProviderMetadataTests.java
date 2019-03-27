@@ -33,7 +33,7 @@ import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -92,7 +92,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("SSO logout endpoints are present in metadata")
 	void singleLogoutMetadata() throws Exception {
 		mockConfig(builder -> builder.singleLogoutEnabled(true));
-		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService(), not(empty()));
 	}
 
@@ -100,7 +100,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("SSO logout endpoints are disabled")
 	void singleLogoutDisabledMetadata() throws Exception {
 		mockConfig(builder -> builder.singleLogoutEnabled(false));
-		ServiceProviderMetadata spm = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata spm = getServiceProviderMetadata();
 		assertThat(spm.getServiceProvider().getSingleLogoutService(), containsInAnyOrder());
 	}
 
@@ -108,7 +108,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@Test
 	@DisplayName("fetch service provider metadata")
 	void testGetMetadata() throws Exception {
-		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("spring.security.saml.sp.id"));
 	}
@@ -117,7 +117,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("service Provider entity-id is generated")
 	void generateSpEntityId() throws Exception {
 		mockConfig(builder -> builder.entityId(null));
-		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://localhost"));
 	}
@@ -126,7 +126,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("service provider entity-id is based on configured base path")
 	void generateSpEntityIdFromBasePath() throws Exception {
 		mockConfig(builder -> builder.entityId(null).basePath("http://some.other.host:8080/sample-sp"));
-		ServiceProviderMetadata metadata = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata metadata = getServiceProviderMetadata();
 		assertNotNull(metadata);
 		assertThat(metadata.getEntityId(), equalTo("http://some.other.host:8080/sample-sp"));
 		assertThat(metadata.getEntityAlias(), equalTo("some.other.host"));

@@ -43,8 +43,8 @@ import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.metadata.SsoProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.serviceprovider.authentication.SamlAuthentication;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -158,7 +158,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 			SamlAuthentication sa = (SamlAuthentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
 			HostedSaml2ServiceProvider provider = getSpUtils().getProvider(request);
-			ServiceProviderMetadata sp = provider.getMetadata();
+			Saml2ServiceProviderMetadata sp = provider.getMetadata();
 			Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			Saml2LogoutSaml2Request lr = logoutRequest(provider.getMetadata(), idp, (Saml2NameIdPrincipalSaml2) sa.getSamlPrincipal());
 			if (lr.getDestination() != null) {
@@ -184,7 +184,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		HostedSaml2ServiceProvider local,
 		Saml2LogoutSaml2Request request,
 		Saml2IdentityProviderMetadata recipient) {
-		List<SsoProvider> ssoProviders = recipient.getSsoProviders();
+		List<Saml2SsoProvider> ssoProviders = recipient.getSsoProviders();
 		Saml2Endpoint destination = getSpUtils().getPreferredEndpoint(
 			ssoProviders.get(0).getSingleLogoutService(),
 			null,
@@ -228,10 +228,10 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 	}
 
 	protected Saml2LogoutSaml2Request logoutRequest(
-		ServiceProviderMetadata local,
+		Saml2ServiceProviderMetadata local,
 		Saml2IdentityProviderMetadata idp,
 		Saml2NameIdPrincipalSaml2 principal) {
-		List<SsoProvider> ssoProviders = idp.getSsoProviders();
+		List<Saml2SsoProvider> ssoProviders = idp.getSsoProviders();
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId("LRQ" + UUID.randomUUID().toString())
 			.setDestination(

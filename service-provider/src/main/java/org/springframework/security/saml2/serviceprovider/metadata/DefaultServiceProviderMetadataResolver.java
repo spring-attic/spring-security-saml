@@ -40,8 +40,9 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProvider;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.metadata.SsoProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.serviceprovider.web.cache.DefaultSaml2MetadataCache;
@@ -85,7 +86,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 	}
 
 	@Override
-	public ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
+	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
 		return generateMetadata(configuration);
 	}
 
@@ -165,7 +166,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			return (Saml2IdentityProviderMetadata) metadata;
 		}
 		else {
-			List<SsoProvider> providers = metadata.getSsoProviders();
+			List<Saml2SsoProvider> providers = metadata.getSsoProviders();
 			providers = providers.stream().filter(p -> p instanceof Saml2IdentityProvider).collect(toList());
 			Saml2IdentityProviderMetadata result = new Saml2IdentityProviderMetadata(metadata);
 			result.setProviders(providers);
@@ -175,7 +176,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 		}
 	}
 
-	private ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
+	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
 
 		String pathPrefix = configuration.getPathPrefix();
 		List<Saml2KeyData> keys = configuration.getKeys();
@@ -184,14 +185,14 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 		String entityId =
 			hasText(configuration.getEntityId()) ? configuration.getEntityId() : baseUrl;
 
-		return new ServiceProviderMetadata()
+		return new Saml2ServiceProviderMetadata()
 			.setEntityId(entityId)
 			.setEntityAlias(getEntityAlias(configuration, entityId))
 			.setId("M" + UUID.randomUUID().toString())
 			.setSigningKey(keys.get(0), RSA_SHA256, SHA256)
 			.setProviders(
 				asList(
-					new org.springframework.security.saml2.model.metadata.ServiceProvider()
+					new Saml2ServiceProvider()
 						.setKeys(keys)
 						.setWantAssertionsSigned(configuration.isWantAssertionsSigned())
 						.setAuthnRequestsSigned(keys.size() > 0 && configuration.isSignRequests())

@@ -82,9 +82,9 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2Provider;
-import org.springframework.security.saml2.model.metadata.ServiceProvider;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.metadata.SsoProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.Saml2KeyStoreProvider;
@@ -173,11 +173,11 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private Saml2Metadata determineMetadataType(List<? extends Saml2Provider> ssoProviders) {
 		Saml2Metadata result = new Saml2Metadata();
-		long sps = ssoProviders.stream().filter(p -> p instanceof ServiceProvider).count();
+		long sps = ssoProviders.stream().filter(p -> p instanceof Saml2ServiceProvider).count();
 		long idps = ssoProviders.stream().filter(p -> p instanceof Saml2IdentityProvider).count();
 
 		if (ssoProviders.size() == sps) {
-			result = new ServiceProviderMetadata();
+			result = new Saml2ServiceProviderMetadata();
 		}
 		else if (ssoProviders.size() == idps) {
 			result = new Saml2IdentityProviderMetadata();
@@ -497,10 +497,10 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private List<RoleDescriptorType> getRoleDescriptors(Saml2Metadata<? extends Saml2Metadata> metadata) {
 		List<RoleDescriptorType> result = new LinkedList<>();
-		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
+		for (Saml2SsoProvider<? extends Saml2SsoProvider> p : metadata.getSsoProviders()) {
 			RoleDescriptorType roleDescriptor = null;
-			if (p instanceof ServiceProvider) {
-				ServiceProvider sp = (ServiceProvider) p;
+			if (p instanceof Saml2ServiceProvider) {
+				Saml2ServiceProvider sp = (Saml2ServiceProvider) p;
 				SPSSODescriptorType descriptor = new SPSSODescriptorType(sp.getProtocolSupportEnumeration());
 				roleDescriptor = descriptor;
 				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
@@ -800,7 +800,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private List<? extends Saml2Provider> getSsoProviders(EntityDescriptorType descriptor) {
-		final List<SsoProvider> providers = new LinkedList<>();
+		final List<Saml2SsoProvider> providers = new LinkedList<>();
 		List<SSODescriptorType> roles = new LinkedList<>();
 		descriptor.getChoiceType().stream()
 			.forEach(ct -> ct.getDescriptors().stream().forEach(
@@ -820,10 +820,10 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return providers;
 	}
 
-	private SsoProvider getSsoProvider(SSODescriptorType descriptor) {
+	private Saml2SsoProvider getSsoProvider(SSODescriptorType descriptor) {
 		if (descriptor instanceof SPSSODescriptorType) {
 			SPSSODescriptorType desc = (SPSSODescriptorType) descriptor;
-			ServiceProvider provider = new ServiceProvider();
+			Saml2ServiceProvider provider = new Saml2ServiceProvider();
 			provider.setId(desc.getID());
 			provider.setValidUntil(toDateTime(desc.getValidUntil()));
 			if (desc.getCacheDuration() != null) {

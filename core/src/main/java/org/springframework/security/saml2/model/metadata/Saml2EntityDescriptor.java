@@ -124,13 +124,13 @@ implements Saml2SignableObject<T> {
 		return _this();
 	}
 
-	public List<SsoProvider> getSsoProviders() {
-		List<SsoProvider> result = new LinkedList<>();
+	public List<Saml2SsoProvider> getSsoProviders() {
+		List<Saml2SsoProvider> result = new LinkedList<>();
 		if (getProviders() != null) {
 			getProviders()
 				.stream()
-				.filter(p -> p instanceof SsoProvider)
-				.forEach(p -> result.add((SsoProvider) p));
+				.filter(p -> p instanceof Saml2SsoProvider)
+				.forEach(p -> result.add((Saml2SsoProvider) p));
 		}
 		return result;
 	}

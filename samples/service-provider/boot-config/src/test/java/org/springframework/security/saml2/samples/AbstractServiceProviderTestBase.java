@@ -36,7 +36,7 @@ import org.springframework.security.saml2.configuration.HostedSaml2ServiceProvid
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -135,7 +135,7 @@ abstract class AbstractServiceProviderTestBase {
 			.when(configuration).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
 	}
 
-	ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
+	Saml2ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
 		String xml = mockMvc.perform(get("/saml/sp/metadata"))
 			.andExpect(status().isOk())
 			.andReturn()
@@ -144,8 +144,8 @@ abstract class AbstractServiceProviderTestBase {
 		assertNotNull(xml);
 		Saml2Metadata m = (Saml2Metadata) transformer.fromXml(xml, null, null);
 		assertNotNull(m);
-		assertThat(m.getClass(), equalTo(ServiceProviderMetadata.class));
-		return (ServiceProviderMetadata) m;
+		assertThat(m.getClass(), equalTo(Saml2ServiceProviderMetadata.class));
+		return (Saml2ServiceProviderMetadata) m;
 	}
 
 	String extractResponse(String html, String name) {

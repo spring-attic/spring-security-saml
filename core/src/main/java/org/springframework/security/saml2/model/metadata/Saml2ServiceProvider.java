@@ -26,7 +26,7 @@ import org.springframework.security.saml2.model.attribute.Saml2Attribute;
  * https://www.oasis-open.org/committees/download.php/35391/sstc-saml-metadata-errata-2.0-wd-04-diff.pdf
  * Page 20, Line 846
  */
-public class ServiceProvider extends SsoProvider<ServiceProvider> {
+public class Saml2ServiceProvider extends Saml2SsoProvider<Saml2ServiceProvider> {
 
 	private boolean authnRequestsSigned;
 	private boolean wantAssertionsSigned;
@@ -52,7 +52,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 //        return attributeConsumingService;
 //    }
 
-	public ServiceProvider setAssertionConsumerService(List<Saml2Endpoint> assertionConsumerService) {
+	public Saml2ServiceProvider setAssertionConsumerService(List<Saml2Endpoint> assertionConsumerService) {
 		this.assertionConsumerService = assertionConsumerService;
 		return _this();
 	}
@@ -61,7 +61,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return authnRequestsSigned;
 	}
 
-	public ServiceProvider setAuthnRequestsSigned(boolean authnRequestsSigned) {
+	public Saml2ServiceProvider setAuthnRequestsSigned(boolean authnRequestsSigned) {
 		this.authnRequestsSigned = authnRequestsSigned;
 		return _this();
 	}
@@ -70,7 +70,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return wantAssertionsSigned;
 	}
 
-	public ServiceProvider setWantAssertionsSigned(boolean wantAssertionsSigned) {
+	public Saml2ServiceProvider setWantAssertionsSigned(boolean wantAssertionsSigned) {
 		this.wantAssertionsSigned = wantAssertionsSigned;
 		return _this();
 	}
@@ -79,7 +79,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return configuredAssertionConsumerService;
 	}
 
-	public ServiceProvider setConfiguredAssertionConsumerService(
+	public Saml2ServiceProvider setConfiguredAssertionConsumerService(
 		Saml2Endpoint
 			configuredAssertionConsumerService
 	) {
@@ -91,7 +91,7 @@ public class ServiceProvider extends SsoProvider<ServiceProvider> {
 		return requestedAttributes;
 	}
 
-	public ServiceProvider setRequestedAttributes(List<Saml2Attribute> requestedAttributes) {
+	public Saml2ServiceProvider setRequestedAttributes(List<Saml2Attribute> requestedAttributes) {
 		this.requestedAttributes = requestedAttributes;
 		return this;
 	}

@@ -33,8 +33,8 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProvider;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProvider;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
@@ -107,7 +107,7 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void sp_to_xml() throws Exception {
-		ServiceProviderMetadata spm = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+		Saml2ServiceProviderMetadata spm = (Saml2ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 
 		Saml2KeyData key = new Saml2KeyData(
@@ -332,7 +332,7 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_sp_external() throws IOException {
-		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+		Saml2ServiceProviderMetadata sp = (Saml2ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"), asList(keyLoginRunPivotalIo), null);
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
@@ -341,7 +341,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(sp.getProviders());
 		assertThat(sp.getProviders().size(), equalTo(1));
 
-		ServiceProvider provider = sp.getServiceProvider();
+		Saml2ServiceProvider provider = sp.getServiceProvider();
 		assertNotNull(provider);
 		assertTrue(provider.isWantAssertionsSigned());
 		assertTrue(provider.isAuthnRequestsSigned());
@@ -401,7 +401,7 @@ public class MetadataTests extends MetadataBase {
 
 	@Test
 	public void xml_to_sp_complete() throws IOException {
-		ServiceProviderMetadata sp = (ServiceProviderMetadata) config.fromXml(getFileBytes(
+		Saml2ServiceProviderMetadata sp = (Saml2ServiceProviderMetadata) config.fromXml(getFileBytes(
 			"/test-data/metadata/sp-metadata-with-extras-20180504.xml"), null, null);
 		assertNotNull(sp);
 		assertNotNull(sp.getImplementation());
@@ -410,7 +410,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(sp.getProviders());
 		assertThat(sp.getProviders().size(), equalTo(1));
 
-		ServiceProvider provider = sp.getServiceProvider();
+		Saml2ServiceProvider provider = sp.getServiceProvider();
 		assertNotNull(provider);
 		assertTrue(provider.isWantAssertionsSigned());
 		assertTrue(provider.isAuthnRequestsSigned());
@@ -698,7 +698,7 @@ public class MetadataTests extends MetadataBase {
 		assertNotNull(entities);
 		assertThat(entities.getClass(), equalTo(Saml2IdentityProviderMetadata.class));
 		assertTrue(entities.hasNext());
-		assertThat(entities.getNext().getClass(), equalTo(ServiceProviderMetadata.class));
+		assertThat(entities.getNext().getClass(), equalTo(Saml2ServiceProviderMetadata.class));
 	}
 
 	@Test

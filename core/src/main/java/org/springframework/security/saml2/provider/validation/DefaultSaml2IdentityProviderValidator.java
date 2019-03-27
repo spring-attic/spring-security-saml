@@ -29,7 +29,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.util.Assert;
 
@@ -70,8 +70,8 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 	public Saml2ValidationResult validate(Saml2Object saml2Object, HostedSaml2IdentityProvider provider) {
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
 		Saml2ValidationResult result;
-		if (saml2Object instanceof ServiceProviderMetadata) {
-			result = validate((ServiceProviderMetadata)saml2Object, provider);
+		if (saml2Object instanceof Saml2ServiceProviderMetadata) {
+			result = validate((Saml2ServiceProviderMetadata)saml2Object, provider);
 		}
 		else if (saml2Object instanceof Saml2AuthenticationSaml2Request) {
 			result = validate((Saml2AuthenticationSaml2Request)saml2Object, provider);
@@ -89,7 +89,7 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 
 	}
 
-	private Saml2ValidationResult validate(ServiceProviderMetadata metadata, HostedSaml2IdentityProvider provider) {
+	private Saml2ValidationResult validate(Saml2ServiceProviderMetadata metadata, HostedSaml2IdentityProvider provider) {
 		return new Saml2ValidationResult(metadata);
 	}
 

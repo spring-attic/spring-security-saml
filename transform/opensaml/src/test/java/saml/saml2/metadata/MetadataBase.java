@@ -25,7 +25,7 @@ import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
@@ -50,7 +50,7 @@ public abstract class MetadataBase {
 	protected Saml2KeyData idpVerifying;
 	protected String spBaseUrl;
 	protected String idpBaseUrl;
-	protected ServiceProviderMetadata serviceProviderMetadata;
+	protected Saml2ServiceProviderMetadata serviceProviderMetadata;
 	protected Saml2IdentityProviderMetadata identityProviderMetadata;
 	protected SamlTestObjectHelper helper;
 

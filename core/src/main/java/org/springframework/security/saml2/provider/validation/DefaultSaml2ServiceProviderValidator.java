@@ -41,7 +41,7 @@ import org.springframework.security.saml2.model.authentication.Saml2SubjectConfi
 import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationData;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.util.Assert;
@@ -103,13 +103,13 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 		}
 		else if (saml2Object instanceof Saml2ResponseSaml2) {
 			Saml2ResponseSaml2 r = (Saml2ResponseSaml2) saml2Object;
-			ServiceProviderMetadata requester = provider.getMetadata();
+			Saml2ServiceProviderMetadata requester = provider.getMetadata();
 			Saml2IdentityProviderMetadata responder = provider.getRemoteProvider(r.getOriginEntityId());
 			result = validate(r, null, requester, responder);
 		}
 		else if (saml2Object instanceof Saml2Assertion) {
 			Saml2Assertion a = (Saml2Assertion) saml2Object;
-			ServiceProviderMetadata requester = provider.getMetadata();
+			Saml2ServiceProviderMetadata requester = provider.getMetadata();
 			Saml2IdentityProviderMetadata responder = provider.getRemoteProvider(a.getOriginEntityId());
 			result = validate(a, null, requester, responder, requester.getServiceProvider().isWantAssertionsSigned());
 		}
@@ -125,7 +125,7 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 
 	private Saml2ValidationResult validate(Saml2Assertion assertion,
 										   List<String> mustMatchInResponseTo,
-										   ServiceProviderMetadata requester,
+										   Saml2ServiceProviderMetadata requester,
 										   Saml2IdentityProviderMetadata responder,
 										   boolean requireAssertionsSigned) {
 		//verify assertion
@@ -241,7 +241,7 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 
 	private Saml2ValidationResult validate(Saml2ResponseSaml2 response,
 										   List<String> mustMatchInResponseTo,
-										   ServiceProviderMetadata requester,
+										   Saml2ServiceProviderMetadata requester,
 										   Saml2IdentityProviderMetadata responder) {
 		String entityId = requester.getEntityId();
 

@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.authentication.Saml2LogoutRespon
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -68,7 +68,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	@DisplayName("SP initiated logout")
 	void initiateLogout() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
@@ -111,7 +111,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	@DisplayName("SP receives logout request")
 	void receiveLogoutRequest() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
@@ -166,7 +166,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 	@DisplayName("SP receives logout response")
 	void receiveLogoutResponse() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),

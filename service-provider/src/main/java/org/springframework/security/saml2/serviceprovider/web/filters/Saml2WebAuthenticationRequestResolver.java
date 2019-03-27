@@ -33,7 +33,7 @@ import org.springframework.security.saml2.model.metadata.Saml2BindingType;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
@@ -66,7 +66,7 @@ public class Saml2WebAuthenticationRequestResolver
 			getIdentityProvider(request, provider);
 		ExternalSaml2IdentityProviderConfiguration idpConfig = entity.getKey();
 		Saml2IdentityProviderMetadata idp = entity.getValue();
-		ServiceProviderMetadata localSp = provider.getMetadata();
+		Saml2ServiceProviderMetadata localSp = provider.getMetadata();
 		final Saml2BindingType preferredSSOBinding =
 			ofNullable(idpConfig.getAuthenticationRequestBinding())
 				.orElse(Saml2Binding.REDIRECT)
@@ -127,7 +127,7 @@ public class Saml2WebAuthenticationRequestResolver
 		return paths[2];
 	}
 
-	protected Saml2AuthenticationSaml2Request getAuthenticationRequest(ServiceProviderMetadata sp,
+	protected Saml2AuthenticationSaml2Request getAuthenticationRequest(Saml2ServiceProviderMetadata sp,
 																	   Saml2IdentityProviderMetadata idp,
 																	   Saml2NameId requestedNameId,
 																	   int preferredACSEndpointIndex,

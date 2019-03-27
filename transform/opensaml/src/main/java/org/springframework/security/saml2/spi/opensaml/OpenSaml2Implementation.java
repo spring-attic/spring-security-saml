@@ -79,9 +79,9 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2Provider;
-import org.springframework.security.saml2.model.metadata.ServiceProvider;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.metadata.SsoProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
@@ -619,7 +619,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 	}
 
 	private List<? extends Saml2Provider> getSsoProviders(EntityDescriptor descriptor) {
-		final List<SsoProvider> providers = new LinkedList<>();
+		final List<Saml2SsoProvider> providers = new LinkedList<>();
 		for (RoleDescriptor roleDescriptor : descriptor.getRoleDescriptors()) {
 			if (roleDescriptor instanceof IDPSSODescriptor || roleDescriptor instanceof SPSSODescriptor) {
 				providers.add(getSsoProvider(roleDescriptor));
@@ -631,10 +631,10 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return providers;
 	}
 
-	private SsoProvider getSsoProvider(RoleDescriptor descriptor) {
+	private Saml2SsoProvider getSsoProvider(RoleDescriptor descriptor) {
 		if (descriptor instanceof SPSSODescriptor) {
 			SPSSODescriptor desc = (SPSSODescriptor) descriptor;
-			ServiceProvider provider = new ServiceProvider();
+			Saml2ServiceProvider provider = new Saml2ServiceProvider();
 			provider.setId(desc.getID());
 			provider.setValidUntil(desc.getValidUntil());
 			if (desc.getCacheDuration() != null) {
@@ -865,10 +865,10 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 
 	private List<RoleDescriptor> getRoleDescriptors(Saml2Metadata<? extends Saml2Metadata> metadata) {
 		List<RoleDescriptor> result = new LinkedList<>();
-		for (SsoProvider<? extends SsoProvider> p : metadata.getSsoProviders()) {
+		for (Saml2SsoProvider<? extends Saml2SsoProvider> p : metadata.getSsoProviders()) {
 			RoleDescriptor roleDescriptor = null;
-			if (p instanceof ServiceProvider) {
-				ServiceProvider sp = (ServiceProvider) p;
+			if (p instanceof Saml2ServiceProvider) {
+				Saml2ServiceProvider sp = (Saml2ServiceProvider) p;
 				SPSSODescriptor descriptor = getSPSSODescriptor();
 				roleDescriptor = descriptor;
 				descriptor.setAuthnRequestsSigned(sp.isAuthnRequestsSigned());
@@ -1682,11 +1682,11 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 
 	private Saml2Metadata determineMetadataType(List<? extends Saml2Provider> ssoProviders) {
 		Saml2Metadata result = new Saml2Metadata();
-		long sps = ssoProviders.stream().filter(p -> p instanceof ServiceProvider).count();
+		long sps = ssoProviders.stream().filter(p -> p instanceof Saml2ServiceProvider).count();
 		long idps = ssoProviders.stream().filter(p -> p instanceof Saml2IdentityProvider).count();
 
 		if (ssoProviders.size() == sps) {
-			result = new ServiceProviderMetadata();
+			result = new Saml2ServiceProviderMetadata();
 		} else if (ssoProviders.size() == idps) {
 			result = new Saml2IdentityProviderMetadata();
 		}

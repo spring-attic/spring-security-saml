@@ -55,8 +55,8 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProvider;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProvider;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProvider;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.util.Saml2StringUtils;
@@ -93,15 +93,15 @@ public class SamlTestObjectHelper {
 		return this;
 	}
 
-	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   HostedSaml2ServiceProviderConfiguration configuration) {
+	public Saml2ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
+																HostedSaml2ServiceProviderConfiguration configuration) {
 		List<Saml2KeyData> keys = configuration.getKeys();
 		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
 		String aliasPath = getAliasPath(configuration);
 		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/sp/";
 
-		ServiceProviderMetadata metadata =
+		Saml2ServiceProviderMetadata metadata =
 			serviceProviderMetadata(
 				baseUrl,
 				signingKey,
@@ -126,15 +126,15 @@ public class SamlTestObjectHelper {
 		);
 	}
 
-	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-														   Saml2KeyData signingKey,
-														   List<Saml2KeyData> keys,
-														   String pathPrefix,
-														   String aliasPath,
-														   Saml2AlgorithmMethod algorithmMethod,
-														   Saml2DigestMethod digestMethod) {
+	public Saml2ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
+																Saml2KeyData signingKey,
+																List<Saml2KeyData> keys,
+																String pathPrefix,
+																String aliasPath,
+																Saml2AlgorithmMethod algorithmMethod,
+																Saml2DigestMethod digestMethod) {
 
-		return new ServiceProviderMetadata()
+		return new Saml2ServiceProviderMetadata()
 			.setEntityId(baseUrl)
 			.setId("SPM"+UUID.randomUUID().toString())
 			.setSigningKey(
@@ -144,7 +144,7 @@ public class SamlTestObjectHelper {
 			)
 			.setProviders(
 				asList(
-					new ServiceProvider()
+					new Saml2ServiceProvider()
 						.setKeys(keys)
 						.setWantAssertionsSigned(true)
 						.setAuthnRequestsSigned(signingKey != null)
@@ -241,7 +241,7 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public Saml2AuthenticationSaml2Request authenticationRequest(ServiceProviderMetadata sp, Saml2IdentityProviderMetadata idp) {
+	public Saml2AuthenticationSaml2Request authenticationRequest(Saml2ServiceProviderMetadata sp, Saml2IdentityProviderMetadata idp) {
 
 		Saml2AuthenticationSaml2Request request = new Saml2AuthenticationSaml2Request()
 			.setId("ARQ"+UUID.randomUUID().toString())
@@ -274,7 +274,7 @@ public class SamlTestObjectHelper {
 		return request;
 	}
 
-	private Saml2Endpoint getACSFromSp(ServiceProviderMetadata sp) {
+	private Saml2Endpoint getACSFromSp(Saml2ServiceProviderMetadata sp) {
 		Saml2Endpoint endpoint = sp.getServiceProvider().getAssertionConsumerService().get(0);
 		for (Saml2Endpoint e : sp.getServiceProvider().getAssertionConsumerService()) {
 			if (e.isDefault()) {
@@ -284,7 +284,7 @@ public class SamlTestObjectHelper {
 		return endpoint;
 	}
 
-	public Saml2Assertion assertion(ServiceProviderMetadata sp,
+	public Saml2Assertion assertion(Saml2ServiceProviderMetadata sp,
 									Saml2IdentityProviderMetadata idp,
 									Saml2AuthenticationSaml2Request request,
 									String principal,
@@ -347,7 +347,7 @@ public class SamlTestObjectHelper {
 
 	public Saml2ResponseSaml2 response(Saml2AuthenticationSaml2Request authn,
 									   Saml2Assertion assertion,
-									   ServiceProviderMetadata recipient,
+									   Saml2ServiceProviderMetadata recipient,
 									   Saml2IdentityProviderMetadata local) {
 		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
 			.setAssertions(asList(assertion))
@@ -439,7 +439,7 @@ public class SamlTestObjectHelper {
 
 	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
 												   Saml2IdentityProviderMetadata recipient,
-												   ServiceProviderMetadata local) {
+												   Saml2ServiceProviderMetadata local) {
 		return logoutResponse(
 			request,
 			recipient,
@@ -465,7 +465,7 @@ public class SamlTestObjectHelper {
 	}
 
 	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
-												   ServiceProviderMetadata recipient,
+												   Saml2ServiceProviderMetadata recipient,
 												   Saml2IdentityProviderMetadata local) {
 		return logoutResponse(
 			request,

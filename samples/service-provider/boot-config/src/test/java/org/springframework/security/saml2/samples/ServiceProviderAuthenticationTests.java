@@ -28,7 +28,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
+import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
@@ -62,7 +62,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	@Test
 	@DisplayName("response with signed assertion")
 	void authenticate() throws Exception {
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
@@ -102,7 +102,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	@DisplayName("signed response")
 	void authenticateWithOnlyResponseSigned() throws Exception {
 		mockConfig(builder -> builder.wantAssertionsSigned(true));
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
@@ -136,7 +136,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	@DisplayName("signature not required")
 	void authenticateNoSignature() throws Exception {
 		mockConfig(builder -> builder.wantAssertionsSigned(false));
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),
@@ -165,7 +165,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 	@DisplayName("response with invalid destination")
 	void invalidResponse() throws Exception {
 		SamlTestObjectHelper helper = new SamlTestObjectHelper(Clock.systemUTC());
-		ServiceProviderMetadata sp = getServiceProviderMetadata();
+		Saml2ServiceProviderMetadata sp = getServiceProviderMetadata();
 		Saml2IdentityProviderMetadata idp =
 			(Saml2IdentityProviderMetadata) transformer.fromXml(
 				bootConfiguration.getServiceProvider().getProviders().get(0).getMetadata(),

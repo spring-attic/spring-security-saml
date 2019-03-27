@@ -23,8 +23,8 @@ import java.util.List;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 
 public interface Saml2Transformer {
 
@@ -46,7 +46,7 @@ public interface Saml2Transformer {
 	 *                         The implementation will attempt each key until one succeeds
 	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml2.model.signature.SignatureException if signature validation
+	 * @throws Saml2SignatureException if signature validation
 	 *                                                                              fails
 	 * @throws IllegalArgumentException                                             if the XML object
 	 *                                                                              structure
@@ -65,7 +65,7 @@ public interface Saml2Transformer {
 	 *                         The implementation will attempt each key until one succeeds
 	 * @param localKeys        the configured local private keys. Used for decryption when needed.
 	 * @return the Java object that was
-	 * @throws org.springframework.security.saml2.model.signature.SignatureException if signature validation
+	 * @throws Saml2SignatureException if signature validation
 	 *                                                                              fails
 	 * @throws IllegalArgumentException                                             if the XML object
 	 *                                                                              structure
@@ -109,7 +109,7 @@ public interface Saml2Transformer {
 	 */
 	String samlDecode(String s, boolean inflate);
 
-	Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
-		throws SignatureException;
+	Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
+		throws Saml2SignatureException;
 
 }

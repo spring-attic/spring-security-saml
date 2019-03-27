@@ -35,9 +35,9 @@ import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 
 import org.junit.jupiter.api.Test;
@@ -119,7 +119,7 @@ public class MetadataTests extends MetadataBase {
 		);
 
 		spm.getServiceProvider().setKeys(Arrays.asList(key));
-		spm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);
+		spm.setSigningKey(key, Saml2AlgorithmMethod.RSA_SHA512, Saml2DigestMethod.SHA512);
 
 		String xml = config.toXml(spm);
 		Iterable<Node> nodes = assertNodeCount(xml, "//md:EntityDescriptor", 1);
@@ -221,10 +221,10 @@ public class MetadataTests extends MetadataBase {
 
 		assertNodeCount(xml, "//ds:Signature", 1);
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2AlgorithmMethod.RSA_SHA512.toString());
 
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2DigestMethod.SHA512.toString());
 	}
 
 	@Test
@@ -241,7 +241,7 @@ public class MetadataTests extends MetadataBase {
 		);
 
 		ipm.getIdentityProvider().setKeys(Arrays.asList(key));
-		ipm.setSigningKey(key, AlgorithmMethod.RSA_SHA512, DigestMethod.SHA512);
+		ipm.setSigningKey(key, Saml2AlgorithmMethod.RSA_SHA512, Saml2DigestMethod.SHA512);
 
 		String xml = config.toXml(ipm);
 		Iterable<Node> nodes = assertNodeCount(xml, "//md:EntityDescriptor", 1);
@@ -313,10 +313,10 @@ public class MetadataTests extends MetadataBase {
 
 		assertNodeCount(xml, "//ds:Signature", 1);
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA512.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2AlgorithmMethod.RSA_SHA512.toString());
 
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA512.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2DigestMethod.SHA512.toString());
 
 	}
 
@@ -534,7 +534,7 @@ public class MetadataTests extends MetadataBase {
 	@Test
 	public void sp_invalid_verification_key() {
 		assertThrows(
-			SignatureException.class,
+			Saml2SignatureException.class,
 			() -> config.fromXml(
 				getFileBytes("/test-data/metadata/sp-metadata-login.run.pivotal.io-20180504.xml"),
 				asList(RSA_TEST_KEY.getSimpleKey("alias")),
@@ -668,7 +668,7 @@ public class MetadataTests extends MetadataBase {
 	@Test
 	public void idp_invalid_verification_key() {
 		assertThrows(
-			SignatureException.class,
+			Saml2SignatureException.class,
 			() -> config.fromXml(
 				getFileBytes("/test-data/metadata/idp-metadata-login.run.pivotal.io-20180504.xml"),
 				asList(RSA_TEST_KEY.getSimpleKey("alias")),

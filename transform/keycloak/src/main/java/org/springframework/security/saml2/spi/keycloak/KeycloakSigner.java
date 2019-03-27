@@ -66,7 +66,7 @@ import static org.keycloak.saml.common.util.DocumentUtil.getDocumentAsString;
 import static org.keycloak.saml.processing.api.saml.v2.sig.SAML2Signature.configureIdAttribute;
 import static org.keycloak.saml.processing.core.util.XMLEncryptionUtil.DS_KEY_INFO;
 import static org.keycloak.saml.processing.core.util.XMLEncryptionUtil.encryptKey;
-import static org.springframework.security.saml2.model.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
+import static org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
 import static org.springframework.util.StringUtils.hasText;
 
 class KeycloakSigner {

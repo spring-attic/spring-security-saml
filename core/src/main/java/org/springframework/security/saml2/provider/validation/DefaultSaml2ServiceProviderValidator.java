@@ -42,8 +42,8 @@ import org.springframework.security.saml2.model.authentication.Saml2SubjectConfi
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.util.Assert;
 
 import org.joda.time.DateTime;
@@ -83,8 +83,8 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 	}
 
 	@Override
-	public Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys)
-		throws SignatureException {
+	public Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys)
+		throws Saml2SignatureException {
 		return super.validateSignature(saml2Object, verificationKeys);
 	}
 

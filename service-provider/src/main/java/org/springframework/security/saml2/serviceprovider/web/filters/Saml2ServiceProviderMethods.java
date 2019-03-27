@@ -30,8 +30,8 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.metadata.Saml2BindingType;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -141,10 +141,10 @@ class Saml2ServiceProviderMethods {
 					throw new Saml2ProviderNotFoundException(result.getOriginEntityId());
 				}
 				try {
-					Signature signature =
+					Saml2Signature signature =
 						getValidator().validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
 					signableSaml2Object.setSignature(signature);
-				} catch (SignatureException e) {
+				} catch (Saml2SignatureException e) {
 				}
 			}
 		}

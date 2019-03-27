@@ -18,23 +18,23 @@
 package org.springframework.security.saml2.model;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 public interface Saml2SignableObject<T extends Saml2Object> extends Saml2Object {
 
-	T setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest);
+	T setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest);
 
 	Saml2KeyData getSigningKey();
 
-	AlgorithmMethod getAlgorithm();
+	Saml2AlgorithmMethod getAlgorithm();
 
-	DigestMethod getDigest();
+	Saml2DigestMethod getDigest();
 
 	String getId();
 
-	T setSignature(Signature signature);
+	T setSignature(Saml2Signature signature);
 
-	Signature getSignature();
+	Saml2Signature getSignature();
 }

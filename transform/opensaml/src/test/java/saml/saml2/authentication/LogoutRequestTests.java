@@ -28,11 +28,11 @@ import org.springframework.security.saml2.model.authentication.Saml2NameIdPrinci
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.CanonicalizationMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 
 import org.joda.time.DateTime;
@@ -44,11 +44,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.EMAIL;
-import static org.springframework.security.saml2.model.signature.AlgorithmMethod.RSA_SHA256;
-import static org.springframework.security.saml2.model.signature.AlgorithmMethod.RSA_SHA512;
-import static org.springframework.security.saml2.model.signature.CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
-import static org.springframework.security.saml2.model.signature.DigestMethod.SHA256;
-import static org.springframework.security.saml2.model.signature.DigestMethod.SHA512;
+import static org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod.RSA_SHA256;
+import static org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod.RSA_SHA512;
+import static org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
+import static org.springframework.security.saml2.model.signature.Saml2DigestMethod.SHA256;
+import static org.springframework.security.saml2.model.signature.Saml2DigestMethod.SHA512;
 import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
 import static org.springframework.security.saml2.util.Saml2DateUtils.fromZuluTime;
@@ -246,7 +246,7 @@ class LogoutObjectTests {
 
 		Exception expected =
 			assertThrows(
-				SignatureException.class,
+				Saml2SignatureException.class,
 				//using the wrong key
 				() -> saml.validateSignature(
 					saml.fromXml(
@@ -282,14 +282,14 @@ class LogoutObjectTests {
 		assertThat(response.getStatus().getCode(), equalTo(Saml2StatusCode.SUCCESS));
 		assertThat(response.getStatus().getMessage(), equalTo("User logged out!"));
 
-		Signature signature = saml.validateSignature(response, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
+		Saml2Signature signature = saml.validateSignature(response, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")));
 		assertNotNull(signature);
 		assertThat(signature.isValidated(), equalTo(true));
-		assertThat(signature.getSignatureAlgorithm(), equalTo(AlgorithmMethod.RSA_SHA512));
-		assertThat(signature.getDigestAlgorithm(), equalTo(DigestMethod.SHA256));
+		assertThat(signature.getSignatureAlgorithm(), equalTo(Saml2AlgorithmMethod.RSA_SHA512));
+		assertThat(signature.getDigestAlgorithm(), equalTo(Saml2DigestMethod.SHA256));
 		assertThat(
 			signature.getCanonicalizationAlgorithm(),
-			equalTo(CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS)
+			equalTo(Saml2CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS)
 		);
 	}
 
@@ -315,7 +315,7 @@ class LogoutObjectTests {
 			.setSigningKey(
 				RSA_TEST_KEY.getSimpleKey("test"),
 				RSA_SHA512,
-				DigestMethod.SHA256
+				Saml2DigestMethod.SHA256
 			)
 			.setConsent("consent");
 
@@ -384,7 +384,7 @@ class LogoutObjectTests {
 
 		Exception expected =
 			assertThrows(
-				SignatureException.class,
+				Saml2SignatureException.class,
 				//using the wrong key
 				() -> saml.validateSignature(
 					saml.fromXml(xml, null, null, Saml2SignableObject.class),

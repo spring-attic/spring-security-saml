@@ -34,8 +34,8 @@ import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -45,7 +45,7 @@ import static org.springframework.security.saml2.model.metadata.Saml2NameId.ENTI
 
 abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> {
 
-	final Signature INVALID_SIGNATURE = new Signature() {
+	final Saml2Signature INVALID_SIGNATURE = new Saml2Signature() {
 		@Override
 		public boolean isValidated() {
 			return false;
@@ -61,18 +61,18 @@ abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> 
 	 * @param saml2Object      - a signed object to validate
 	 * @param verificationKeys a list of keys to use for validation
 	 * @return the key that successfully validated the signature
-	 * @throws SignatureException if object failed signature validation
+	 * @throws Saml2SignatureException if object failed signature validation
 	 */
-	protected Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys)
-		throws SignatureException {
+	protected Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys)
+		throws Saml2SignatureException {
 		try {
-			Signature main = getSamlTransformer().validateSignature(saml2Object, verificationKeys);
+			Saml2Signature main = getSamlTransformer().validateSignature(saml2Object, verificationKeys);
 			if (saml2Object instanceof Saml2ResponseSaml2 && main == null) {
 				for (Saml2Assertion a : ((Saml2ResponseSaml2)saml2Object).getAssertions()) {
 					try {
-						Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
+						Saml2Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
 						a.setSignature(sig);
-					} catch (SignatureException e){
+					} catch (Saml2SignatureException e){
 						a.setSignature(INVALID_SIGNATURE);
 					}
 				}
@@ -80,11 +80,11 @@ abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> 
 			saml2Object.setSignature(main);
 			return main;
 		} catch (Exception x) {
-			if (x instanceof SignatureException) {
+			if (x instanceof Saml2SignatureException) {
 				throw x;
 			}
 			else {
-				throw new SignatureException(x.getMessage(), x);
+				throw new Saml2SignatureException(x.getMessage(), x);
 			}
 		}
 	}
@@ -174,7 +174,7 @@ abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> 
 	}
 
 	void checkValidSignature(Saml2SignableObject saml2Object, Saml2ValidationResult result) {
-		Signature signature = saml2Object.getSignature();
+		Saml2Signature signature = saml2Object.getSignature();
 		if (signature != null && !signature.isValidated()) {
 			result.addError(
 				new Saml2ValidationResult.ValidationError("Invalid signature on "+saml2Object.getClass().getSimpleName())

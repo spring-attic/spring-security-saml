@@ -30,7 +30,7 @@ import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2R
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module
@@ -62,7 +62,7 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 	}
 
 	@Override
-	public Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys) {
+	public Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys) {
 		return super.validateSignature(saml2Object, verificationKeys);
 	}
 

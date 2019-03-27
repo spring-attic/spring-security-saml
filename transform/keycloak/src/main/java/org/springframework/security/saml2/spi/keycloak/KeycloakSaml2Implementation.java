@@ -85,8 +85,8 @@ import org.springframework.security.saml2.model.metadata.Saml2Provider;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.SsoProvider;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.Saml2KeyStoreProvider;
 import org.springframework.security.saml2.spi.SpringSecuritySaml2;
 import org.springframework.security.saml2.util.Saml2DateUtils;
@@ -263,7 +263,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	@Override
 	protected Saml2Object resolve(byte[] xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys) {
 		SamlObjectHolder parsed = parse(xml);
-		Map<String, Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
+		Map<String, Saml2Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
 		Saml2Object result = null;
 		if (parsed.getSamlObject() instanceof EntityDescriptorType) {
 			result = resolveMetadata(
@@ -325,9 +325,9 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	@Override
-	protected Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys) {
+	protected Saml2Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys) {
 		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
-			Map<String, Signature> signatureMap =
+			Map<String, Saml2Signature> signatureMap =
 				KeycloakSignatureValidator.validateSignature(
 					(SamlObjectHolder) saml2Object.getImplementation(),
 					trustedKeys
@@ -365,7 +365,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			}
 		}
 		else {
-			throw new SignatureException(
+			throw new Saml2SignatureException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}
@@ -1184,7 +1184,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private Saml2ResponseSaml2 resolveResponse(
 		ResponseType parsed,
-		Map<String, Signature> signatureMap,
+		Map<String, Saml2Signature> signatureMap,
 		List<Saml2KeyData> localKeys
 	) {
 		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
@@ -1268,7 +1268,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private Saml2Assertion resolveAssertion(
 		AssertionType parsed,
-		Map<String, Signature> signatureMap,
+		Map<String, Saml2Signature> signatureMap,
 		List<Saml2KeyData> localKeys,
 		boolean encrypted
 	) {
@@ -1525,7 +1525,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private Saml2LogoutResponseSaml2 resolveLogoutResponse(StatusResponseType response,
-														   Map<String, Signature> signatureMap,
+														   Map<String, Saml2Signature> signatureMap,
 														   List<Saml2KeyData> localKeys) {
 		Saml2LogoutResponseSaml2 result = new Saml2LogoutResponseSaml2()
 			.setId(response.getID())
@@ -1542,7 +1542,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private Saml2LogoutSaml2Request resolveLogoutRequest(LogoutRequestType request,
-														 Map<String, Signature> signatureMap,
+														 Map<String, Saml2Signature> signatureMap,
 														 List<Saml2KeyData> localKeys) {
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId(request.getID())
@@ -1584,7 +1584,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private Saml2AuthenticationSaml2Request resolveAuthenticationRequest(AuthnRequestType parsed,
-																		 Map<String, Signature> signatureMap) {
+																		 Map<String, Saml2Signature> signatureMap) {
 		AuthnRequestType request = parsed;
 		Saml2AuthenticationSaml2Request result = new Saml2AuthenticationSaml2Request()
 			.setBinding(Saml2Binding.fromUrn(request.getProtocolBinding().toString()))
@@ -1640,7 +1640,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private Saml2Metadata resolveMetadata(EntitiesDescriptorType parsed,
-										  Map<String, Signature> signatureMap) {
+										  Map<String, Saml2Signature> signatureMap) {
 		Saml2Metadata result = null, current = null;
 		for (Object object : parsed.getEntityDescriptor()) {
 			EntityDescriptorType desc = (EntityDescriptorType) object;
@@ -1658,7 +1658,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 	}
 
 	private Saml2Metadata resolveMetadata(EntityDescriptorType parsed,
-										  Map<String, Signature> signatureMap) {
+										  Map<String, Saml2Signature> signatureMap) {
 		EntityDescriptorType descriptor = parsed;
 		List<? extends Saml2Provider> ssoProviders = getSsoProviders(descriptor);
 		Saml2Metadata desc = getMetadata(ssoProviders);

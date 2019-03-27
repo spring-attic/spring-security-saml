@@ -21,8 +21,8 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 /**
  * Implementation samlp:AuthnRequestType as defined by
@@ -40,8 +40,8 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 	private Saml2RequestedAuthenticationContext requestedAuthenticationContext;
 	private Saml2AuthenticationContextClassReference authenticationContextClassReference;
 	private Saml2KeyData signingKey;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 
 	private Saml2NameIdPolicy nameIdPolicy;
 
@@ -100,12 +100,12 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 	}
 
 	@Override
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
 	@Override
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
@@ -137,7 +137,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 	}
 
 	@Override
-	public Saml2AuthenticationSaml2Request setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public Saml2AuthenticationSaml2Request setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

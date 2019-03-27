@@ -37,11 +37,11 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.CanonicalizationMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.util.Saml2X509Utils;
 
 import org.w3c.dom.Element;
@@ -54,7 +54,7 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml2.model.Saml2Namespace.NS_SIGNATURE;
 
 class KeycloakSignatureValidator {
-	static Map<String, Signature> validateSignature(SamlObjectHolder parsed, List<Saml2KeyData> keys) {
+	static Map<String, Saml2Signature> validateSignature(SamlObjectHolder parsed, List<Saml2KeyData> keys) {
 		if (keys == null || keys.isEmpty()) {
 			return emptyMap();
 		}
@@ -63,34 +63,34 @@ class KeycloakSignatureValidator {
 			if (nl == null || nl.getLength() == 0) {
 				return emptyMap();
 			}
-			Map<String, Signature> valid = new LinkedHashMap<>();
+			Map<String, Saml2Signature> valid = new LinkedHashMap<>();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node signatureNode = nl.item(i);
-				Signature validSignature = validateSignature(signatureNode, keys);
+				Saml2Signature validSignature = validateSignature(signatureNode, keys);
 				valid.put(getSignatureHashKey(validSignature), validSignature);
 			}
 			return valid;
-		} catch (SignatureException e) {
-			throw new SignatureException(
+		} catch (Saml2SignatureException e) {
+			throw new Saml2SignatureException(
 				"Signature validation against a " + parsed.getSamlObject().getClass().getName() +
 				" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
 				e);
 		} catch (Exception e) {
-			throw new SignatureException(
+			throw new Saml2SignatureException(
 				"Unable to get signature for class:" + parsed.getSamlObject().getClass().getName(),
 				e
 			);
 		}
 	}
 
-	static Signature validateSignature(Node signatureNode, List<Saml2KeyData> keys) {
+	static Saml2Signature validateSignature(Node signatureNode, List<Saml2KeyData> keys) {
 		Exception last = null;
 		for (Saml2KeyData key : keys) {
 			Key publicKey = getPublicKey(key.getCertificate());
 			KeySelector selector = KeySelector.singletonKeySelector(publicKey);
 			try {
 				if (validateUsingKeySelector(signatureNode, selector)) {
-					Signature sig = getSignature((Element) signatureNode)
+					Saml2Signature sig = getSignature((Element) signatureNode)
 						.setValidated(true)
 						.setValidatingKey(key);
 					return sig;
@@ -100,15 +100,15 @@ class KeycloakSignatureValidator {
 			}
 		}
 		if (last != null) {
-			if (last instanceof SignatureException) {
-				throw (SignatureException)last;
+			if (last instanceof Saml2SignatureException) {
+				throw (Saml2SignatureException)last;
 			}
 			else {
-				throw new SignatureException(last);
+				throw new Saml2SignatureException(last);
 			}
 		}
 		else {
-			throw new SignatureException(
+			throw new Saml2SignatureException(
 				"Signature validation failed using " +
 				keys.size() +
 				(keys.size() == 1 ? " key." : " keys.")
@@ -136,7 +136,7 @@ class KeycloakSignatureValidator {
 		return signature.validate(valContext);
 	}
 
-	static String getSignatureHashKey(Signature signature) {
+	static String getSignatureHashKey(Saml2Signature signature) {
 		return getSignatureHashKey(signature.getSignatureValue(), signature.getDigestValue());
 	}
 
@@ -149,10 +149,10 @@ class KeycloakSignatureValidator {
 		);
 	}
 
-	static Signature getSignature(Element n) {
-		Signature result = new Signature()
+	static Saml2Signature getSignature(Element n) {
+		Saml2Signature result = new Saml2Signature()
 			.setCanonicalizationAlgorithm(
-				CanonicalizationMethod.fromUrn(
+				Saml2CanonicalizationMethod.fromUrn(
 					getAttributeFromChildNode(n, NS_SIGNATURE, "CanonicalizationMethod", "Algorithm")
 				)
 			)
@@ -160,7 +160,7 @@ class KeycloakSignatureValidator {
 				getTextFromChildNode(n, NS_SIGNATURE, "DigestValue")
 			)
 			.setDigestAlgorithm(
-				DigestMethod.fromUrn(
+				Saml2DigestMethod.fromUrn(
 					getAttributeFromChildNode(n, NS_SIGNATURE, "DigestMethod", "Algorithm")
 				)
 			)
@@ -168,7 +168,7 @@ class KeycloakSignatureValidator {
 				getTextFromChildNode(n, NS_SIGNATURE, "SignatureValue")
 			)
 			.setSignatureAlgorithm(
-				AlgorithmMethod.fromUrn(
+				Saml2AlgorithmMethod.fromUrn(
 					getAttributeFromChildNode(n, NS_SIGNATURE, "SignatureMethod", "Algorithm")
 				)
 			);
@@ -229,11 +229,11 @@ class KeycloakSignatureValidator {
 		return list.item(0).getTextContent();
 	}
 
-	static void assignSignatureToObject(Map<String, Signature> signatureMap,
+	static void assignSignatureToObject(Map<String, Saml2Signature> signatureMap,
 										Saml2SignableObject desc,
 										Element descriptorSignature) {
 		if (descriptorSignature != null) {
-			Signature signature = KeycloakSignatureValidator.getSignature(descriptorSignature);
+			Saml2Signature signature = KeycloakSignatureValidator.getSignature(descriptorSignature);
 			String hashKey = KeycloakSignatureValidator.getSignatureHashKey(signature);
 			desc.setSignature(signatureMap.get(hashKey));
 		}

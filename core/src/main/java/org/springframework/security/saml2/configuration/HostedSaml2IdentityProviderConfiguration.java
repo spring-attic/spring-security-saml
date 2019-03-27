@@ -23,8 +23,8 @@ import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMetho
 import org.springframework.security.saml2.model.encrypt.Saml2KeyEncryptionMethod;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 import static java.util.Arrays.asList;
 
@@ -52,8 +52,8 @@ public class HostedSaml2IdentityProviderConfiguration extends
 													boolean wantRequestsSigned,
 													String metadata,
 													List<Saml2KeyData> keys,
-													AlgorithmMethod defaultSigningAlgorithm,
-													DigestMethod defaultDigest,
+													Saml2AlgorithmMethod defaultSigningAlgorithm,
+													Saml2DigestMethod defaultDigest,
 													List<Saml2NameId> nameIds,
 													boolean singleLogoutEnabled,
 													List<ExternalSaml2ServiceProviderConfiguration> providers,
@@ -159,9 +159,9 @@ public class HostedSaml2IdentityProviderConfiguration extends
 		private String metadata;
 		private Saml2KeyEncryptionMethod keyEncryptionAlgorithm;
 		private List<Saml2KeyData> keys;
-		private AlgorithmMethod defaultSigningAlgorithm;
+		private Saml2AlgorithmMethod defaultSigningAlgorithm;
 		private Saml2DataEncryptionMethod dataEncryptionAlgorithm;
-		private DigestMethod defaultDigest;
+		private Saml2DigestMethod defaultDigest;
 		private long notOnOrAfter;
 		private long notBefore;
 		private List<Saml2NameId> nameIds;
@@ -227,7 +227,7 @@ public class HostedSaml2IdentityProviderConfiguration extends
 			return this;
 		}
 
-		public Builder defaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+		public Builder defaultSigningAlgorithm(Saml2AlgorithmMethod defaultSigningAlgorithm) {
 			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 			return this;
 		}
@@ -237,7 +237,7 @@ public class HostedSaml2IdentityProviderConfiguration extends
 			return this;
 		}
 
-		public Builder defaultDigest(DigestMethod defaultDigest) {
+		public Builder defaultDigest(Saml2DigestMethod defaultDigest) {
 			this.defaultDigest = defaultDigest;
 			return this;
 		}

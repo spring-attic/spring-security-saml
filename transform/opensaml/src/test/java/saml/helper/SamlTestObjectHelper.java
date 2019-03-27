@@ -57,8 +57,8 @@ import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -68,13 +68,13 @@ import org.joda.time.DateTime;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml2.model.metadata.Saml2Binding.REDIRECT;
-import static org.springframework.security.saml2.model.signature.AlgorithmMethod.RSA_SHA1;
-import static org.springframework.security.saml2.model.signature.DigestMethod.SHA1;
+import static org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod.RSA_SHA1;
+import static org.springframework.security.saml2.model.signature.Saml2DigestMethod.SHA1;
 import static org.springframework.util.StringUtils.hasText;
 
 public class SamlTestObjectHelper {
-	public AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
-	public DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
+	public Saml2AlgorithmMethod DEFAULT_SIGN_ALGORITHM = RSA_SHA1;
+	public Saml2DigestMethod DEFAULT_SIGN_DIGEST = SHA1;
 	public long NOT_BEFORE = 60000;
 	public long NOT_AFTER = 120000;
 	public long SESSION_NOT_AFTER = 30 * 60 * 1000;
@@ -132,8 +132,8 @@ public class SamlTestObjectHelper {
 														   List<Saml2KeyData> keys,
 														   String pathPrefix,
 														   String aliasPath,
-														   AlgorithmMethod algorithmMethod,
-														   DigestMethod digestMethod) {
+														   Saml2AlgorithmMethod algorithmMethod,
+														   Saml2DigestMethod digestMethod) {
 
 		return new ServiceProviderMetadata()
 			.setEntityId(baseUrl)
@@ -209,8 +209,8 @@ public class SamlTestObjectHelper {
 																  List<Saml2KeyData> keys,
 																  String pathPrefix,
 																  String aliasPath,
-																  AlgorithmMethod algorithmMethod,
-																  DigestMethod digestMethod) {
+																  Saml2AlgorithmMethod algorithmMethod,
+																  Saml2DigestMethod digestMethod) {
 
 		return new Saml2IdentityProviderMetadata()
 			.setEntityId(baseUrl)

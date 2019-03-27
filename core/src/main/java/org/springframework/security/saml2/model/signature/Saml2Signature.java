@@ -18,39 +18,39 @@ package org.springframework.security.saml2.model.signature;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 
-public class Signature {
+public class Saml2Signature {
 
-	private CanonicalizationMethod canonicalizationAlgorithm;
-	private AlgorithmMethod signatureAlgorithm;
-	private DigestMethod digestAlgorithm;
+	private Saml2CanonicalizationMethod canonicalizationAlgorithm;
+	private Saml2AlgorithmMethod signatureAlgorithm;
+	private Saml2DigestMethod digestAlgorithm;
 	private String digestValue;
 	private String signatureValue;
 	private boolean validated = false;
 	private Saml2KeyData validatingKey;
 
-	public CanonicalizationMethod getCanonicalizationAlgorithm() {
+	public Saml2CanonicalizationMethod getCanonicalizationAlgorithm() {
 		return canonicalizationAlgorithm;
 	}
 
-	public Signature setCanonicalizationAlgorithm(CanonicalizationMethod canonicalizationAlgorithm) {
+	public Saml2Signature setCanonicalizationAlgorithm(Saml2CanonicalizationMethod canonicalizationAlgorithm) {
 		this.canonicalizationAlgorithm = canonicalizationAlgorithm;
 		return this;
 	}
 
-	public AlgorithmMethod getSignatureAlgorithm() {
+	public Saml2AlgorithmMethod getSignatureAlgorithm() {
 		return signatureAlgorithm;
 	}
 
-	public Signature setSignatureAlgorithm(AlgorithmMethod signatureAlgorithm) {
+	public Saml2Signature setSignatureAlgorithm(Saml2AlgorithmMethod signatureAlgorithm) {
 		this.signatureAlgorithm = signatureAlgorithm;
 		return this;
 	}
 
-	public DigestMethod getDigestAlgorithm() {
+	public Saml2DigestMethod getDigestAlgorithm() {
 		return digestAlgorithm;
 	}
 
-	public Signature setDigestAlgorithm(DigestMethod digestAlgorithm) {
+	public Saml2Signature setDigestAlgorithm(Saml2DigestMethod digestAlgorithm) {
 		this.digestAlgorithm = digestAlgorithm;
 		return this;
 	}
@@ -59,7 +59,7 @@ public class Signature {
 		return digestValue;
 	}
 
-	public Signature setDigestValue(String digestValue) {
+	public Saml2Signature setDigestValue(String digestValue) {
 		this.digestValue = digestValue;
 		return this;
 	}
@@ -68,7 +68,7 @@ public class Signature {
 		return signatureValue;
 	}
 
-	public Signature setSignatureValue(String signatureValue) {
+	public Saml2Signature setSignatureValue(String signatureValue) {
 		this.signatureValue = signatureValue;
 		return this;
 	}
@@ -77,7 +77,7 @@ public class Signature {
 		return validated;
 	}
 
-	public Signature setValidated(boolean b) {
+	public Saml2Signature setValidated(boolean b) {
 		this.validated = b;
 		return this;
 	}
@@ -86,7 +86,7 @@ public class Signature {
 		return validatingKey;
 	}
 
-	public Signature setValidatingKey(Saml2KeyData validatingKey) {
+	public Saml2Signature setValidatingKey(Saml2KeyData validatingKey) {
 		this.validatingKey = validatingKey;
 		return this;
 	}

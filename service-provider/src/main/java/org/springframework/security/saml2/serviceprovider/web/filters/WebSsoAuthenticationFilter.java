@@ -32,8 +32,8 @@ import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -97,7 +97,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 			throw new ProviderNotFoundException(r.getIssuer().getValue());
 		}
 		try {
-			Signature signature = validator.validateSignature(r, idp.getIdentityProvider().getKeys());
+			Saml2Signature signature = validator.validateSignature(r, idp.getIdentityProvider().getKeys());
 			r.setSignature(signature);
 			for (Saml2Assertion assertion : r.getAssertions()) {
 				if (assertion.getSignature() == null) {
@@ -105,7 +105,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 					assertion.setSignature(signature);
 				}
 			}
-		} catch (SignatureException e) {
+		} catch (Saml2SignatureException e) {
 			logger.debug("Unable to validate signature for SAML response.");
 			throw new AuthenticationServiceException("Failed to validate SAML authentication signature.");
 		}

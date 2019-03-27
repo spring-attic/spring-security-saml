@@ -31,9 +31,9 @@ import org.springframework.security.saml2.model.attribute.Saml2Attribute;
 import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
 import org.springframework.security.saml2.model.encrypt.Saml2KeyEncryptionMethod;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 import org.joda.time.DateTime;
 
@@ -51,15 +51,15 @@ public class Saml2Assertion extends Saml2ImplementationHolder<Saml2Assertion>
 	private String id;
 	private DateTime issueInstant;
 	private Saml2Issuer issuer;
-	private Signature signature;
+	private Saml2Signature signature;
 	private Saml2Subject subject;
 	private Saml2Conditions conditions;
 	private Saml2Advice advice;
 	private List<Saml2AuthenticationStatement> authenticationStatements = new LinkedList<>();
 	private List<Saml2Attribute> attributes = new LinkedList<>();
 	private Saml2KeyData signingKey;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 	private Saml2KeyData encryptionKey;
 	private Saml2KeyEncryptionMethod keyAlgorithm;
 	private Saml2DataEncryptionMethod dataAlgorithm;
@@ -109,11 +109,11 @@ public class Saml2Assertion extends Saml2ImplementationHolder<Saml2Assertion>
 		return this;
 	}
 
-	public Signature getSignature() {
+	public Saml2Signature getSignature() {
 		return signature;
 	}
 
-	public Saml2Assertion setSignature(Signature signature) {
+	public Saml2Assertion setSignature(Saml2Signature signature) {
 		this.signature = signature;
 		return this;
 	}
@@ -171,12 +171,12 @@ public class Saml2Assertion extends Saml2ImplementationHolder<Saml2Assertion>
 	}
 
 	@Override
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
 	@Override
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
@@ -211,7 +211,7 @@ public class Saml2Assertion extends Saml2ImplementationHolder<Saml2Assertion>
 	}
 
 	@Override
-	public Saml2Assertion setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public Saml2Assertion setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

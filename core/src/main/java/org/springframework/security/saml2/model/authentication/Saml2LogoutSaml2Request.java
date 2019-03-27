@@ -19,8 +19,8 @@ package org.springframework.security.saml2.model.authentication;
 
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 import org.joda.time.DateTime;
 
@@ -33,26 +33,26 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 	implements Saml2SignableObject<Saml2LogoutSaml2Request> {
 
 	private Saml2KeyData signingKey;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 	private Saml2NameIdPrincipalSaml2 nameId;
 	private Saml2LogoutReason reason;
 	private DateTime notOnOrAfter;
 
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
-	public Saml2LogoutSaml2Request setAlgorithm(AlgorithmMethod algorithm) {
+	public Saml2LogoutSaml2Request setAlgorithm(Saml2AlgorithmMethod algorithm) {
 		this.algorithm = algorithm;
 		return this;
 	}
 
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
-	public Saml2LogoutSaml2Request setDigest(DigestMethod digest) {
+	public Saml2LogoutSaml2Request setDigest(Saml2DigestMethod digest) {
 		this.digest = digest;
 		return this;
 	}
@@ -88,7 +88,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return signingKey;
 	}
 
-	public Saml2LogoutSaml2Request setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public Saml2LogoutSaml2Request setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

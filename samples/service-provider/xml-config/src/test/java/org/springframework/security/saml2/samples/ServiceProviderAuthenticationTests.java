@@ -29,8 +29,8 @@ import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -79,8 +79,8 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 		);
 		a.setSigningKey(
 			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
-			AlgorithmMethod.RSA_SHA256,
-			DigestMethod.SHA256
+			Saml2AlgorithmMethod.RSA_SHA256,
+			Saml2DigestMethod.SHA256
 		);
 		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);
@@ -120,8 +120,8 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
 		r.setSigningKey(
 			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
-			AlgorithmMethod.RSA_SHA256,
-			DigestMethod.SHA256
+			Saml2AlgorithmMethod.RSA_SHA256,
+			Saml2DigestMethod.SHA256
 		);
 		String xml = transformer.toXml(r);
 		String encoded = transformer.samlEncode(xml, false);

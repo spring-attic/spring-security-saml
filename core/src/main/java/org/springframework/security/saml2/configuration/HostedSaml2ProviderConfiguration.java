@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 public abstract class HostedSaml2ProviderConfiguration
 	<ExternalConfiguration extends ExternalSaml2ProviderConfiguration<ExternalConfiguration>> {
@@ -35,8 +35,8 @@ public abstract class HostedSaml2ProviderConfiguration
 	private final boolean signMetadata;
 	private final String metadata;
 	private final List<Saml2KeyData> keys;
-	private final AlgorithmMethod defaultSigningAlgorithm;
-	private final DigestMethod defaultDigest;
+	private final Saml2AlgorithmMethod defaultSigningAlgorithm;
+	private final Saml2DigestMethod defaultDigest;
 	private final List<Saml2NameId> nameIds;
 	private final boolean singleLogoutEnabled;
 	private final List<ExternalConfiguration> providers;
@@ -48,8 +48,8 @@ public abstract class HostedSaml2ProviderConfiguration
 									 boolean signMetadata,
 									 String metadata,
 									 List<Saml2KeyData> keys,
-									 AlgorithmMethod defaultSigningAlgorithm,
-									 DigestMethod defaultDigest,
+									 Saml2AlgorithmMethod defaultSigningAlgorithm,
+									 Saml2DigestMethod defaultDigest,
 									 List<Saml2NameId> nameIds,
 									 boolean singleLogoutEnabled,
 									 List<ExternalConfiguration> providers) {
@@ -99,11 +99,11 @@ public abstract class HostedSaml2ProviderConfiguration
 		return nameIds;
 	}
 
-	public AlgorithmMethod getDefaultSigningAlgorithm() {
+	public Saml2AlgorithmMethod getDefaultSigningAlgorithm() {
 		return defaultSigningAlgorithm;
 	}
 
-	public DigestMethod getDefaultDigest() {
+	public Saml2DigestMethod getDefaultDigest() {
 		return defaultDigest;
 	}
 

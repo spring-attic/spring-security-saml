@@ -23,9 +23,9 @@ import javax.xml.datatype.Duration;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.Saml2ImplementationHolder;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 import org.joda.time.DateTime;
 
@@ -43,10 +43,10 @@ implements Saml2SignableObject<T> {
 	private DateTime validUntil;
 	private Duration cacheDuration;
 	private List<? extends Saml2Provider> providers;
-	private Signature signature;
+	private Saml2Signature signature;
 	private Saml2KeyData signingKey;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 
 	Saml2EntityDescriptor() {
 	}
@@ -144,11 +144,11 @@ implements Saml2SignableObject<T> {
 		return _this();
 	}
 
-	public Signature getSignature() {
+	public Saml2Signature getSignature() {
 		return signature;
 	}
 
-	public T setSignature(Signature signature) {
+	public T setSignature(Saml2Signature signature) {
 		this.signature = signature;
 		return _this();
 	}
@@ -157,11 +157,11 @@ implements Saml2SignableObject<T> {
 		return signingKey;
 	}
 
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
@@ -175,7 +175,7 @@ implements Saml2SignableObject<T> {
 	}
 
 	@Override
-	public T setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public T setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

@@ -25,8 +25,8 @@ import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -97,10 +97,10 @@ public abstract class DefaultSaml2Transformer implements Saml2Transformer, Initi
 	}
 
 	@Override
-	public Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
-		throws SignatureException {
+	public Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
+		throws Saml2SignatureException {
 		if (saml2Object == null || saml2Object.getImplementation() == null) {
-			throw new SignatureException("No object to validate signature against.");
+			throw new Saml2SignatureException("No object to validate signature against.");
 		}
 
 		if (saml2Object instanceof Saml2Assertion && ((Saml2Assertion) saml2Object).isEncrypted()) {
@@ -108,14 +108,14 @@ public abstract class DefaultSaml2Transformer implements Saml2Transformer, Initi
 			//of an assertion that was successfully decrypted
 			try {
 				return implementation.getValidSignature(saml2Object, trustedKeys);
-			} catch (SignatureException x) {
+			} catch (Saml2SignatureException x) {
 				//ignore. if we decrypted the object, we don't need this
 				return null;
 			}
 		}
 
 		if (trustedKeys == null || trustedKeys.isEmpty()) {
-			throw new SignatureException("At least one verification key has to be provided");
+			throw new Saml2SignatureException("At least one verification key has to be provided");
 		}
 
 		return implementation.getValidSignature(saml2Object, trustedKeys);

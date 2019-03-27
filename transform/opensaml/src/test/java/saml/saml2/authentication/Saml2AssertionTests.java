@@ -46,9 +46,9 @@ import org.springframework.security.saml2.model.encrypt.Saml2KeyEncryptionMethod
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 
 import org.hamcrest.core.IsEqual;
 import org.joda.time.DateTime;
@@ -139,8 +139,8 @@ public class Saml2AssertionTests extends MetadataBase {
 	public void create_saml_response() throws Exception {
 		Saml2ResponseSaml2 response =
 			(Saml2ResponseSaml2) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
-		response.setSigningKey(idpSigning, AlgorithmMethod.RSA_RIPEMD160, DigestMethod.SHA512);
-		response.getAssertions().get(0).setSigningKey(spSigning, AlgorithmMethod.RSA_SHA256, DigestMethod.SHA256);
+		response.setSigningKey(idpSigning, Saml2AlgorithmMethod.RSA_RIPEMD160, Saml2DigestMethod.SHA512);
+		response.getAssertions().get(0).setSigningKey(spSigning, Saml2AlgorithmMethod.RSA_SHA256, Saml2DigestMethod.SHA256);
 		String xml = config.toXml(response);
 		assertNotNull(xml);
 		Iterable<Node> nodes = assertNodeCount(xml, "//samlp:Response", 1);
@@ -164,8 +164,8 @@ public class Saml2AssertionTests extends MetadataBase {
 		assertNodeCount(xml, "//samlp:Response/saml:Assertion/ds:Signature", 1);
 
 		//fail to validate if only one key is passed in
-		assertThrows(SignatureException.class, () -> config.fromXml(xml, asList(idpSigning), null));
-		assertThrows(SignatureException.class, () -> config.fromXml(xml, asList(spSigning), null));
+		assertThrows(Saml2SignatureException.class, () -> config.fromXml(xml, asList(idpSigning), null));
+		assertThrows(Saml2SignatureException.class, () -> config.fromXml(xml, asList(spSigning), null));
 
 		config.fromXml(xml, asList(spSigning, idpSigning), null);
 	}
@@ -564,7 +564,7 @@ public class Saml2AssertionTests extends MetadataBase {
 		byte[] data = getAssertionBytes();
 		Exception expected =
 			assertThrows(
-				SignatureException.class,
+				Saml2SignatureException.class,
 				//using the wrong key
 				() -> config.fromXml(data, asList(ExamplePemKey.SP_RSA_KEY.getPublicKey("verify")), null)
 			);

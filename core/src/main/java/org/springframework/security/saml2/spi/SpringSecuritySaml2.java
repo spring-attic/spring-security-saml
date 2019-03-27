@@ -25,8 +25,8 @@ import javax.xml.datatype.Duration;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -76,8 +76,8 @@ public abstract class SpringSecuritySaml2<T extends SpringSecuritySaml2> {
 
 	protected abstract Saml2Object resolve(byte[] xml, List<Saml2KeyData> trustedKeys, List<Saml2KeyData> localKeys);
 
-	protected abstract Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
-		throws SignatureException;
+	protected abstract Saml2Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys)
+		throws Saml2SignatureException;
 
 	protected String encode(byte[] b) {
 		return Saml2EncodingUtils.encode(b);

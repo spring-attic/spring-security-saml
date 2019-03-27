@@ -23,8 +23,8 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -84,10 +84,10 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//ds:Signature", 1);
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:SignatureMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", AlgorithmMethod.RSA_SHA1.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2AlgorithmMethod.RSA_SHA1.toString());
 
 		nodes = assertNodeCount(xml, "//ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestMethod", 1);
-		assertNodeAttribute(nodes.iterator().next(), "Algorithm", DigestMethod.SHA1.toString());
+		assertNodeAttribute(nodes.iterator().next(), "Algorithm", Saml2DigestMethod.SHA1.toString());
 	}
 
 	@Test

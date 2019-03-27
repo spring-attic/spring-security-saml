@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.security.saml2.model.Saml2ImplementationHolder;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 import org.joda.time.DateTime;
 
@@ -33,7 +33,7 @@ import org.joda.time.DateTime;
 public class Saml2Request<T extends Saml2Request<T>> extends Saml2ImplementationHolder {
 
 	private Saml2Issuer issuer;
-	private Signature signature;
+	private Saml2Signature signature;
 	private List<Object> extensions;
 	private String id;
 	private DateTime issueInstant;
@@ -55,11 +55,11 @@ public class Saml2Request<T extends Saml2Request<T>> extends Saml2Implementation
 		return (T) this;
 	}
 
-	public Signature getSignature() {
+	public Saml2Signature getSignature() {
 		return signature;
 	}
 
-	public T setSignature(Signature signature) {
+	public T setSignature(Saml2Signature signature) {
 		this.signature = signature;
 		return _this();
 	}

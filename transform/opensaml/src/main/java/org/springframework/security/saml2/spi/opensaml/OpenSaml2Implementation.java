@@ -82,11 +82,12 @@ import org.springframework.security.saml2.model.metadata.Saml2Provider;
 import org.springframework.security.saml2.model.metadata.ServiceProvider;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.SsoProvider;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.CanonicalizationMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.Saml2KeyStoreProvider;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.spi.SpringSecuritySaml2;
 import org.springframework.util.CollectionUtils;
 
@@ -392,7 +393,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 	@Override
 	protected Saml2Object resolve(byte[] xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys) {
 		XMLObject parsed = parse(xml);
-		Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
+		Saml2Signature signature = validateSignature((SignableSAMLObject) parsed, verificationKeys);
 		Saml2Object result = null;
 		if (parsed instanceof EntityDescriptor) {
 			result = resolveMetadata((EntityDescriptor) parsed)
@@ -444,19 +445,19 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 	}
 
 	@Override
-	protected Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys) {
+	protected Saml2Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys) {
 		if (saml2Object.getImplementation() instanceof SignableSAMLObject) {
 			return validateSignature((SignableSAMLObject) saml2Object.getImplementation(), trustedKeys);
 		}
 		else {
-			throw new org.springframework.security.saml2.model.signature.SignatureException(
+			throw new Saml2SignatureException(
 				"Unrecognized object type:" + saml2Object.getImplementation().getClass().getName()
 			);
 		}
 	}
 
-	private Signature validateSignature(SignableSAMLObject object, List<Saml2KeyData> keys) {
-		Signature result = null;
+	private Saml2Signature validateSignature(SignableSAMLObject object, List<Saml2KeyData> keys) {
+		Saml2Signature result = null;
 		if (object.isSigned() && keys != null && !keys.isEmpty()) {
 			SignatureException last = null;
 			for (Saml2KeyData key : keys) {
@@ -473,7 +474,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				}
 			}
 			if (last != null) {
-				throw new org.springframework.security.saml2.model.signature.SignatureException(
+				throw new Saml2SignatureException(
 					"Signature validation against a " + object.getClass().getName() +
 						" object failed using " + keys.size() + (keys.size() == 1 ? " key." : " keys."),
 					last
@@ -506,15 +507,15 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return resolver;
 	}
 
-	private Signature getSignature(SignableSAMLObject target) {
+	private Saml2Signature getSignature(SignableSAMLObject target) {
 		org.opensaml.xmlsec.signature.Signature signature = target.getSignature();
-		Signature result = null;
+		Saml2Signature result = null;
 		if (signature != null && signature instanceof SignatureImpl) {
 			SignatureImpl impl = (SignatureImpl) signature;
 			try {
-				result = new Signature()
-					.setSignatureAlgorithm(AlgorithmMethod.fromUrn(impl.getSignatureAlgorithm()))
-					.setCanonicalizationAlgorithm(CanonicalizationMethod.fromUrn(impl
+				result = new Saml2Signature()
+					.setSignatureAlgorithm(Saml2AlgorithmMethod.fromUrn(impl.getSignatureAlgorithm()))
+					.setCanonicalizationAlgorithm(Saml2CanonicalizationMethod.fromUrn(impl
 						.getCanonicalizationAlgorithm()))
 					.setSignatureValue(org.apache.xml.security.utils.Base64.encode(impl.getXMLSignature()
 						.getSignatureValue()))
@@ -524,7 +525,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 					ofNullable(signature.getContentReferences()).orElse(emptyList())) {
 					if (ref instanceof SAMLObjectContentReference) {
 						SAMLObjectContentReference sref = (SAMLObjectContentReference) ref;
-						result.setDigestAlgorithm(DigestMethod.fromUrn(sref.getDigestAlgorithm()));
+						result.setDigestAlgorithm(Saml2DigestMethod.fromUrn(sref.getDigestAlgorithm()));
 					}
 				}
 
@@ -1330,7 +1331,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		List<Saml2KeyData> localKeys,
 		boolean encrypted
 	) {
-		Signature signature = null;
+		Saml2Signature signature = null;
 		if (!encrypted) {
 			signature = validateSignature(parsed, verificationKeys);
 		}
@@ -1648,7 +1649,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				current.setNext(m);
 				current = m;
 			}
-			Signature signature = validateSignature(desc, verificationKeys);
+			Saml2Signature signature = validateSignature(desc, verificationKeys);
 			current.setSignature(signature);
 		}
 		return result;
@@ -1852,8 +1853,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 
 	private void signObject(SignableSAMLObject signable,
 							Saml2KeyData key,
-							AlgorithmMethod algorithm,
-							DigestMethod digest) {
+							Saml2AlgorithmMethod algorithm,
+							Saml2DigestMethod digest) {
 
 		KeyStoreCredentialResolver resolver = getCredentialsResolver(key);
 		Credential credential = getCredential(key, resolver);
@@ -1872,7 +1873,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		parameters.setSignatureAlgorithm(algorithm.toString());
 		parameters.setSignatureReferenceDigestMethod(digest.toString());
 		parameters.setSignatureCanonicalizationAlgorithm(
-			CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString()
+			Saml2CanonicalizationMethod.ALGO_ID_C14N_EXCL_OMIT_COMMENTS.toString()
 		);
 
 		try {

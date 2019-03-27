@@ -42,8 +42,8 @@ import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.SsoProvider;
-import org.springframework.security.saml2.model.signature.Signature;
-import org.springframework.security.saml2.model.signature.SignatureException;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
+import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.serviceprovider.web.cache.DefaultSaml2MetadataCache;
 import org.springframework.security.saml2.serviceprovider.web.cache.RestOperationsUtils;
 import org.springframework.security.saml2.util.Saml2StringUtils;
@@ -57,8 +57,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.security.saml2.model.metadata.Saml2Binding.REDIRECT;
-import static org.springframework.security.saml2.model.signature.AlgorithmMethod.RSA_SHA256;
-import static org.springframework.security.saml2.model.signature.DigestMethod.SHA256;
+import static org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod.RSA_SHA256;
+import static org.springframework.security.saml2.model.signature.Saml2DigestMethod.SHA256;
 import static org.springframework.security.saml2.util.Saml2StringUtils.isUrl;
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripStartingSlashes;
@@ -120,7 +120,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			return null;
 		}
 		try {
-			Signature signature = saml2Transformer.validateSignature(idp, idpConfig.getVerificationKeys());
+			Saml2Signature signature = saml2Transformer.validateSignature(idp, idpConfig.getVerificationKeys());
 			if (signature != null &&
 				signature.isValidated() &&
 				signature.getValidatingKey() != null) {
@@ -129,7 +129,7 @@ public class DefaultServiceProviderMetadataResolver implements ServiceProviderMe
 			else {
 				logger.warn("Missing signature for " + idpConfig.getMetadata() + ". Unable to trust.");
 			}
-		} catch (SignatureException e) {
+		} catch (Saml2SignatureException e) {
 			logger.warn("Invalid signature for IDP metadata " + idpConfig.getMetadata() + ". Unable to trust.", e);
 		}
 		return null;

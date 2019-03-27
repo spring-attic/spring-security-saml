@@ -24,10 +24,10 @@ import org.springframework.security.saml2.provider.HostedSaml2IdentityProvider;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 public interface Saml2IdentityProviderValidator {
-	Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys);
+	Saml2Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys);
 
 	/**
 	 * Performs an object validation on behalf of a service or identity provider on the respective object

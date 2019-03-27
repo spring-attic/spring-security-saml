@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 /**
  * Implementation samlp:ResponseType as defined by
@@ -36,8 +36,8 @@ public class Saml2ResponseSaml2 extends Saml2StatusResponse<Saml2ResponseSaml2>
 	private List<Saml2Assertion> assertions = new LinkedList<>();
 
 	private Saml2KeyData signingKey = null;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 
 	public List<Saml2Assertion> getAssertions() {
 		return Collections.unmodifiableList(assertions);
@@ -53,18 +53,18 @@ public class Saml2ResponseSaml2 extends Saml2StatusResponse<Saml2ResponseSaml2>
 		return signingKey;
 	}
 
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
 	@Override
 	public Saml2ResponseSaml2 setSigningKey(Saml2KeyData signingKey,
-											AlgorithmMethod algorithm,
-											DigestMethod digest) {
+											Saml2AlgorithmMethod algorithm,
+											Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

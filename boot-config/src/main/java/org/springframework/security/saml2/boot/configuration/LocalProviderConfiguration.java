@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
 
@@ -41,8 +41,8 @@ public abstract class LocalProviderConfiguration
 	private boolean singleLogoutEnabled = true;
 	@NestedConfigurationProperty
 	private List<Saml2NameId> nameIds = new LinkedList<>();
-	private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
-	private DigestMethod defaultDigest = DigestMethod.SHA256;
+	private Saml2AlgorithmMethod defaultSigningAlgorithm = Saml2AlgorithmMethod.RSA_SHA256;
+	private Saml2DigestMethod defaultDigest = Saml2DigestMethod.SHA256;
 	@NestedConfigurationProperty
 	private List<ExternalConfiguration> providers = new LinkedList<>();
 	private String basePath;
@@ -119,19 +119,19 @@ public abstract class LocalProviderConfiguration
 			.collect(Collectors.toList());
 	}
 
-	public AlgorithmMethod getDefaultSigningAlgorithm() {
+	public Saml2AlgorithmMethod getDefaultSigningAlgorithm() {
 		return defaultSigningAlgorithm;
 	}
 
-	public void setDefaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+	public void setDefaultSigningAlgorithm(Saml2AlgorithmMethod defaultSigningAlgorithm) {
 		this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 	}
 
-	public DigestMethod getDefaultDigest() {
+	public Saml2DigestMethod getDefaultDigest() {
 		return defaultDigest;
 	}
 
-	public void setDefaultDigest(DigestMethod defaultDigest) {
+	public void setDefaultDigest(Saml2DigestMethod defaultDigest) {
 		this.defaultDigest = defaultDigest;
 	}
 

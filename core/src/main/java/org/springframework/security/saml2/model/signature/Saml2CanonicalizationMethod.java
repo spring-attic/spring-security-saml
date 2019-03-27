@@ -16,20 +16,23 @@
  */
 package org.springframework.security.saml2.model.signature;
 
-public enum AlgorithmMethod {
-	RSA_SHA1("http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
-	RSA_SHA256("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"),
-	RSA_SHA512("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"),
-	RSA_RIPEMD160("http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160");
+public enum Saml2CanonicalizationMethod {
+
+	ALGO_ID_C14N_OMIT_COMMENTS("http://www.w3.org/TR/2001/REC-xml-c14n-20010315"),
+	ALGO_ID_C14N_WITH_COMMENTS(ALGO_ID_C14N_OMIT_COMMENTS.toString() + "#WithComments"),
+	ALGO_ID_C14N11_OMIT_COMMENTS("http://www.w3.org/2006/12/xml-c14n11"),
+	ALGO_ID_C14N11_WITH_COMMENTS(ALGO_ID_C14N11_OMIT_COMMENTS.toString() + "#WithComments"),
+	ALGO_ID_C14N_EXCL_OMIT_COMMENTS("http://www.w3.org/2001/10/xml-exc-c14n#"),
+	ALGO_ID_C14N_EXCL_WITH_COMMENTS(ALGO_ID_C14N_EXCL_OMIT_COMMENTS + "WithComments");
 
 	private final String urn;
 
-	AlgorithmMethod(String urn) {
+	Saml2CanonicalizationMethod(String urn) {
 		this.urn = urn;
 	}
 
-	public static AlgorithmMethod fromUrn(String urn) {
-		for (AlgorithmMethod m : values()) {
+	public static Saml2CanonicalizationMethod fromUrn(String urn) {
+		for (Saml2CanonicalizationMethod m : values()) {
 			if (m.urn.equalsIgnoreCase(urn)) {
 				return m;
 			}

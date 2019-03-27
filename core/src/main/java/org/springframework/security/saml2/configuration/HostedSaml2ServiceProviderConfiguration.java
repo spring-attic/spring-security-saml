@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
 import static java.util.Arrays.asList;
 
@@ -42,8 +42,8 @@ public class HostedSaml2ServiceProviderConfiguration extends
 												   boolean signMetadata,
 												   String metadata,
 												   List<Saml2KeyData> keys,
-												   AlgorithmMethod defaultSigningAlgorithm,
-												   DigestMethod defaultDigest,
+												   Saml2AlgorithmMethod defaultSigningAlgorithm,
+												   Saml2DigestMethod defaultDigest,
 												   List<Saml2NameId> nameIds,
 												   boolean singleLogoutEnabled,
 												   List<ExternalSaml2IdentityProviderConfiguration> providers,
@@ -107,8 +107,8 @@ public class HostedSaml2ServiceProviderConfiguration extends
 		private boolean signMetadata = true;
 		private String metadata;
 		private List<Saml2KeyData> keys;
-		private AlgorithmMethod defaultSigningAlgorithm = AlgorithmMethod.RSA_SHA256;
-		private DigestMethod defaultDigest = DigestMethod.SHA256;
+		private Saml2AlgorithmMethod defaultSigningAlgorithm = Saml2AlgorithmMethod.RSA_SHA256;
+		private Saml2DigestMethod defaultDigest = Saml2DigestMethod.SHA256;
 		private List<Saml2NameId> nameIds = asList(Saml2NameId.PERSISTENT, Saml2NameId.EMAIL);
 		private boolean singleLogoutEnabled = true;
 		private List<ExternalSaml2IdentityProviderConfiguration> providers;
@@ -166,12 +166,12 @@ public class HostedSaml2ServiceProviderConfiguration extends
 			return this;
 		}
 
-		public Builder defaultSigningAlgorithm(AlgorithmMethod defaultSigningAlgorithm) {
+		public Builder defaultSigningAlgorithm(Saml2AlgorithmMethod defaultSigningAlgorithm) {
 			this.defaultSigningAlgorithm = defaultSigningAlgorithm;
 			return this;
 		}
 
-		public Builder defaultDigest(DigestMethod defaultDigest) {
+		public Builder defaultDigest(Saml2DigestMethod defaultDigest) {
 			this.defaultDigest = defaultDigest;
 			return this;
 		}

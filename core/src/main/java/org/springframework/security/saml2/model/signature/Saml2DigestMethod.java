@@ -16,7 +16,7 @@
  */
 package org.springframework.security.saml2.model.signature;
 
-public enum DigestMethod {
+public enum Saml2DigestMethod {
 
 
 	/**
@@ -45,12 +45,12 @@ public enum DigestMethod {
 
 	private final String urn;
 
-	DigestMethod(String urn) {
+	Saml2DigestMethod(String urn) {
 		this.urn = urn;
 	}
 
-	public static DigestMethod fromUrn(String digestAlgorithm) {
-		for (DigestMethod m : values()) {
+	public static Saml2DigestMethod fromUrn(String digestAlgorithm) {
+		for (Saml2DigestMethod m : values()) {
 			if (m.urn.equalsIgnoreCase(digestAlgorithm)) {
 				return m;
 			}

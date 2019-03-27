@@ -18,9 +18,9 @@ package org.springframework.security.saml2.model.authentication;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.Saml2ImplementationHolder;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 import org.joda.time.DateTime;
 
@@ -36,11 +36,11 @@ public class Saml2StatusResponse<T extends Saml2StatusResponse> extends Saml2Imp
 	private String destination;
 	private String consent;
 	private Saml2Issuer issuer;
-	private Signature signature;
+	private Saml2Signature signature;
 	private Saml2Status status;
 	private Saml2KeyData signingKey;
-	private AlgorithmMethod algorithm;
-	private DigestMethod digest;
+	private Saml2AlgorithmMethod algorithm;
+	private Saml2DigestMethod digest;
 
 	public String getId() {
 		return id;
@@ -110,11 +110,11 @@ public class Saml2StatusResponse<T extends Saml2StatusResponse> extends Saml2Imp
 		return _this();
 	}
 
-	public Signature getSignature() {
+	public Saml2Signature getSignature() {
 		return signature;
 	}
 
-	public T setSignature(Signature signature) {
+	public T setSignature(Saml2Signature signature) {
 		this.signature = signature;
 		return _this();
 	}
@@ -132,15 +132,15 @@ public class Saml2StatusResponse<T extends Saml2StatusResponse> extends Saml2Imp
 		return signingKey;
 	}
 
-	public AlgorithmMethod getAlgorithm() {
+	public Saml2AlgorithmMethod getAlgorithm() {
 		return algorithm;
 	}
 
-	public DigestMethod getDigest() {
+	public Saml2DigestMethod getDigest() {
 		return digest;
 	}
 
-	public T setSigningKey(Saml2KeyData signingKey, AlgorithmMethod algorithm, DigestMethod digest) {
+	public T setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

@@ -26,8 +26,8 @@ import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
-import org.springframework.security.saml2.model.signature.AlgorithmMethod;
-import org.springframework.security.saml2.model.signature.DigestMethod;
+import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
+import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.spi.DefaultSaml2Transformer;
 import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Implementation;
 import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer;
@@ -84,8 +84,8 @@ public abstract class MetadataBase {
 			Arrays.asList(spSigning),
 			"saml/sp/",
 			"sp-alias",
-			AlgorithmMethod.RSA_SHA1,
-			DigestMethod.SHA1
+			Saml2AlgorithmMethod.RSA_SHA1,
+			Saml2DigestMethod.SHA1
 		);
 		identityProviderMetadata = helper.identityProviderMetadata(
 			idpBaseUrl,
@@ -93,8 +93,8 @@ public abstract class MetadataBase {
 			Arrays.asList(idpSigning),
 			"saml/idp/",
 			"idp-alias",
-			AlgorithmMethod.RSA_SHA1,
-			DigestMethod.SHA1
+			Saml2AlgorithmMethod.RSA_SHA1,
+			Saml2DigestMethod.SHA1
 		);
 	}
 

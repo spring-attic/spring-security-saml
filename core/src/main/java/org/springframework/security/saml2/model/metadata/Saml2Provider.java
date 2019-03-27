@@ -23,7 +23,7 @@ import javax.xml.datatype.Duration;
 
 import org.springframework.security.saml2.model.Saml2Namespace;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.model.signature.Signature;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 
 import org.joda.time.DateTime;
 
@@ -36,18 +36,18 @@ import static java.util.Arrays.asList;
  */
 public class Saml2Provider<T extends Saml2Provider<T>> {
 
-	private Signature signature;
+	private Saml2Signature signature;
 	private List<Saml2KeyData> keys = new LinkedList<>();
 	private String id;
 	private DateTime validUntil;
 	private Duration cacheDuration;
 	private List<String> protocolSupportEnumeration = asList(Saml2Namespace.NS_PROTOCOL);
 
-	public Signature getSignature() {
+	public Saml2Signature getSignature() {
 		return signature;
 	}
 
-	public T setSignature(Signature signature) {
+	public T setSignature(Saml2Signature signature) {
 		this.signature = signature;
 		return (T) this;
 	}

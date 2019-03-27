@@ -16,19 +16,29 @@
  */
 package org.springframework.security.saml2.model.signature;
 
-import org.springframework.security.saml2.Saml2Exception;
+public enum Saml2AlgorithmMethod {
+	RSA_SHA1("http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
+	RSA_SHA256("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"),
+	RSA_SHA512("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"),
+	RSA_RIPEMD160("http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160");
 
-public class SignatureException extends Saml2Exception {
+	private final String urn;
 
-	public SignatureException(String message) {
-		super(message);
+	Saml2AlgorithmMethod(String urn) {
+		this.urn = urn;
 	}
 
-	public SignatureException(String message, Throwable cause) {
-		super(message, cause);
+	public static Saml2AlgorithmMethod fromUrn(String urn) {
+		for (Saml2AlgorithmMethod m : values()) {
+			if (m.urn.equalsIgnoreCase(urn)) {
+				return m;
+			}
+		}
+		return null;
 	}
 
-	public SignatureException(Throwable cause) {
-		super(cause);
+	@Override
+	public String toString() {
+		return urn;
 	}
 }

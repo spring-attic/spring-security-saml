@@ -36,7 +36,7 @@
           class="org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer"/>
 
     <bean id="samlServiceProviderValidator"
-          class="org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator">
+          class="org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator">
         <constructor-arg ref="samlTransformer"/>
     </bean>
 

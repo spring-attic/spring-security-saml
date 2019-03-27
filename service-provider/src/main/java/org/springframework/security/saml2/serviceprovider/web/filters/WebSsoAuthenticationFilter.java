@@ -27,7 +27,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
@@ -48,12 +48,12 @@ import static org.springframework.util.Assert.notNull;
 public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
-	private final ServiceProviderValidator validator;
+	private final Saml2ServiceProviderValidator validator;
 	private final Saml2ServiceProviderMethods spUtils;
 
 	public WebSsoAuthenticationFilter(Saml2Transformer transformer,
 									  ServiceProviderResolver resolver,
-									  ServiceProviderValidator validator,
+									  Saml2ServiceProviderValidator validator,
 									  RequestMatcher matcher
 	) {
 		super(matcher);

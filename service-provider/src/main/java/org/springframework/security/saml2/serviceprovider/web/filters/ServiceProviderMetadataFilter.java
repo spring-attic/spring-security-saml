@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -39,7 +39,7 @@ public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFi
 
 	public ServiceProviderMetadataFilter(Saml2Transformer transformer,
 										 ServiceProviderResolver resolver,
-										 ServiceProviderValidator validator,
+										 Saml2ServiceProviderValidator validator,
 										 RequestMatcher matcher) {
 		super(transformer, resolver, validator, matcher);
 	}

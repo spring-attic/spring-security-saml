@@ -24,7 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.metadata.Saml2BindingType;
@@ -41,11 +41,11 @@ class Saml2ServiceProviderMethods {
 
 	private final Saml2Transformer transformer;
 	private final ServiceProviderResolver resolver;
-	private final ServiceProviderValidator validator;
+	private final Saml2ServiceProviderValidator validator;
 
 	Saml2ServiceProviderMethods(Saml2Transformer transformer,
 								ServiceProviderResolver resolver,
-								ServiceProviderValidator validator) {
+								Saml2ServiceProviderValidator validator) {
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.validator = validator;
@@ -60,7 +60,7 @@ class Saml2ServiceProviderMethods {
 		return resolver;
 	}
 
-	public ServiceProviderValidator getValidator() {
+	public Saml2ServiceProviderValidator getValidator() {
 		return validator;
 	}
 

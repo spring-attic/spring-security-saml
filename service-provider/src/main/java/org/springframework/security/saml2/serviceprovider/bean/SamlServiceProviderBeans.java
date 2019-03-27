@@ -28,8 +28,8 @@ import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigu
 import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.util.Assert;
 
 @Configuration
@@ -46,8 +46,8 @@ public class SamlServiceProviderBeans {
 	}
 
 	@Bean(name = "samlServiceProviderValidator")
-	public ServiceProviderValidator samlValidator() {
-		return new DefaultServiceProviderValidator(transformer);
+	public Saml2ServiceProviderValidator samlValidator() {
+		return new DefaultSaml2ServiceProviderValidator(transformer);
 	}
 
 	@Bean(name = "samlServiceProviderMetadataResolver")

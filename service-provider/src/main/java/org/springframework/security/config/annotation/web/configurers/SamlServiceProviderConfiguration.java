@@ -28,8 +28,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.provider.validation.DefaultServiceProviderValidator;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
@@ -64,7 +64,7 @@ class SamlServiceProviderConfiguration {
 
 	private HttpSecurity http;
 	private Saml2Transformer transformer;
-	private ServiceProviderValidator validator;
+	private Saml2ServiceProviderValidator validator;
 	private ServiceProviderMetadataResolver metadataResolver;
 	private ServiceProviderResolver providerResolver;
 	private ServiceProviderConfigurationResolver configurationResolver;
@@ -237,12 +237,12 @@ class SamlServiceProviderConfiguration {
 		return metadataResolver;
 	}
 
-	ServiceProviderValidator getSamlValidator() {
+	Saml2ServiceProviderValidator getSamlValidator() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		validator = getSharedObject(
 			http,
-			ServiceProviderValidator.class,
-			() -> new DefaultServiceProviderValidator(transformer),
+			Saml2ServiceProviderValidator.class,
+			() -> new DefaultSaml2ServiceProviderValidator(transformer),
 			validator
 		);
 		return validator;

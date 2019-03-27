@@ -34,8 +34,8 @@ import org.springframework.security.saml2.model.signature.Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module
-public class DefaultIdentityProviderValidator extends AbstractSamlValidator<HostedSaml2IdentityProvider>
-	implements IdentityProviderValidator {
+public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validator<HostedSaml2IdentityProvider>
+	implements Saml2IdentityProviderValidator {
 
 	private Saml2Transformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -43,7 +43,7 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultIdentityProviderValidator(Saml2Transformer implementation) {
+	public DefaultSaml2IdentityProviderValidator(Saml2Transformer implementation) {
 		setSamlTransformer(implementation);
 	}
 
@@ -56,7 +56,7 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 		return implementation;
 	}
 
-	public DefaultIdentityProviderValidator setTime(Clock time) {
+	public DefaultSaml2IdentityProviderValidator setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -103,7 +103,7 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 		return responseSkewTimeMillis;
 	}
 
-	public DefaultIdentityProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public DefaultSaml2IdentityProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -112,7 +112,7 @@ public class DefaultIdentityProviderValidator extends AbstractSamlValidator<Host
 		return allowUnsolicitedResponses;
 	}
 
-	public DefaultIdentityProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public DefaultSaml2IdentityProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}

@@ -26,7 +26,7 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.signature.Signature;
 
-public interface ServiceProviderValidator {
+public interface Saml2ServiceProviderValidator {
 	Signature validateSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> verificationKeys);
 
 	/**

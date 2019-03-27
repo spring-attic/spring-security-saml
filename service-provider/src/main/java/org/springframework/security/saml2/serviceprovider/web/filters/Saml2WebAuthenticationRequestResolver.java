@@ -35,7 +35,7 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.ServiceProviderValidator;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.util.Assert;
@@ -54,7 +54,7 @@ public class Saml2WebAuthenticationRequestResolver
 
 	public Saml2WebAuthenticationRequestResolver(Saml2Transformer transformer,
 												 ServiceProviderResolver resolver,
-												 ServiceProviderValidator validator) {
+												 Saml2ServiceProviderValidator validator) {
 		serviceProviderMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
 	}
 

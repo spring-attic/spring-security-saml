@@ -55,8 +55,8 @@ import static org.springframework.security.saml2.model.authentication.Saml2Subje
 import static org.springframework.security.saml2.util.Saml2DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultServiceProviderValidator extends AbstractSamlValidator<HostedSaml2ServiceProvider>
-	implements ServiceProviderValidator {
+public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator<HostedSaml2ServiceProvider>
+	implements Saml2ServiceProviderValidator {
 
 	private Saml2Transformer implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
@@ -64,7 +64,7 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
-	public DefaultServiceProviderValidator(Saml2Transformer implementation) {
+	public DefaultSaml2ServiceProviderValidator(Saml2Transformer implementation) {
 		setTransformer(implementation);
 	}
 
@@ -77,7 +77,7 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 		return implementation;
 	}
 
-	public DefaultServiceProviderValidator setTime(Clock time) {
+	public DefaultSaml2ServiceProviderValidator setTime(Clock time) {
 		this.time = time;
 		return this;
 	}
@@ -413,7 +413,7 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 		return responseSkewTimeMillis;
 	}
 
-	public DefaultServiceProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
+	public DefaultSaml2ServiceProviderValidator setResponseSkewTimeMillis(int responseSkewTimeMillis) {
 		this.responseSkewTimeMillis = responseSkewTimeMillis;
 		return this;
 	}
@@ -422,7 +422,7 @@ public class DefaultServiceProviderValidator extends AbstractSamlValidator<Hoste
 		return allowUnsolicitedResponses;
 	}
 
-	public DefaultServiceProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+	public DefaultSaml2ServiceProviderValidator setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
 		this.allowUnsolicitedResponses = allowUnsolicitedResponses;
 		return this;
 	}

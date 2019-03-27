@@ -92,9 +92,10 @@
     </bean>
 
     <bean id="samlSpMetadataFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderMetadataFilter">
-        <constructor-arg ref="metadataMatcher"/>
+          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderMetadataFilter">
+        <constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="metadataMatcher"/>
     </bean>
 
     <bean id="logoutMatcher"

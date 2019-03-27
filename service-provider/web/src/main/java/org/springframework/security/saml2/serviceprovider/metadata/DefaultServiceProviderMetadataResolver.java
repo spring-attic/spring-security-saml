@@ -65,7 +65,7 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultServiceProviderMetadataResolver implements ServiceProviderMetadataResolver {
+public class DefaultServiceProviderMetadataResolver implements Saml2ServiceProviderMetadataResolver {
 	private static Log logger = LogFactory.getLog(DefaultServiceProviderMetadataResolver.class);
 
 	private final Saml2Transformer saml2Transformer;

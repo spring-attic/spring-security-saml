@@ -27,7 +27,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlServiceProviderConfigurer, HttpSecurity> {
+public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2ServiceProviderConfigurer, HttpSecurity> {
 
 	/*
 	 * =========== Builders ============
@@ -38,8 +38,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * in the filter chain this configurer is applied to
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login() {
-		return new SamlServiceProviderConfigurer();
+	public static Saml2ServiceProviderConfigurer saml2Login() {
+		return new Saml2ServiceProviderConfigurer();
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login(Saml2ServiceProviderResolver resolver) {
+	public static Saml2ServiceProviderConfigurer saml2Login(Saml2ServiceProviderResolver resolver) {
 		return saml2Login().providerResolver(resolver);
 	}
 
@@ -62,7 +62,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login(Saml2ServiceProviderConfigurationResolver resolver) {
+	public static Saml2ServiceProviderConfigurer saml2Login(Saml2ServiceProviderConfigurationResolver resolver) {
 		return saml2Login().configurationResolver(resolver);
 	}
 
@@ -74,8 +74,8 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * @return configuration spec for a SAML service provider {@link AuthenticationEntryPoint}
 	 *         to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2AuthenticationEntryPoint() {
-		final SamlServiceProviderConfigurer configurer = saml2Login();
+	public static Saml2ServiceProviderConfigurer saml2AuthenticationEntryPoint() {
+		final Saml2ServiceProviderConfigurer configurer = saml2Login();
 		configurer.installEndpoints = false;
 		return configurer;
 	}
@@ -83,7 +83,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/*
 	 * =========== Builder configuration ============
 	 */
-	private SamlServiceProviderConfiguration configuration = new SamlServiceProviderConfiguration();
+	private Saml2ServiceProviderConfiguration configuration = new Saml2ServiceProviderConfiguration();
 	private boolean installEndpoints = true;
 
 	/*
@@ -99,7 +99,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * @return this object to be used in a builder pattern
 	 * @throws IllegalStateException if {@link #providerResolver(Saml2ServiceProviderResolver)} has been previously invoked
 	 */
-	public SamlServiceProviderConfigurer configurationResolver(
+	public Saml2ServiceProviderConfigurer configurationResolver(
 		Saml2ServiceProviderConfigurationResolver resolver
 	) {
 		configuration.setConfigurationResolver(resolver);
@@ -116,7 +116,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 * @throws IllegalStateException if {@link #configurationResolver(Saml2ServiceProviderConfigurationResolver)}
 	 *                               has been previously invoked
 	 */
-	public SamlServiceProviderConfigurer providerResolver(Saml2ServiceProviderResolver resolver) {
+	public Saml2ServiceProviderConfigurer providerResolver(Saml2ServiceProviderResolver resolver) {
 		configuration.setProviderResolver(resolver);
 		return this;
 	}
@@ -126,7 +126,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *
 	 * @param manager the manager that will be invoked after an assertion has been successfully parsed
 	 */
-	public SamlServiceProviderConfigurer authenticationManager(AuthenticationManager manager) {
+	public Saml2ServiceProviderConfigurer authenticationManager(AuthenticationManager manager) {
 		configuration.setAuthenticationManager(manager);
 		return this;
 	}
@@ -137,7 +137,7 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *
 	 * @param handler the manager that will be invoked after an assertion has been successfully parsed
 	 */
-	public SamlServiceProviderConfigurer authenticationFailureHandler(AuthenticationFailureHandler handler) {
+	public Saml2ServiceProviderConfigurer authenticationFailureHandler(AuthenticationFailureHandler handler) {
 		configuration.authenticationFailureHandler(handler);
 		return this;
 	}

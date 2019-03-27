@@ -33,14 +33,14 @@ import org.springframework.security.saml2.provider.validation.Saml2ServiceProvid
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
-import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderMetadataFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderMetadataFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -58,14 +58,14 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
-class SamlServiceProviderConfiguration {
+class Saml2ServiceProviderConfiguration {
 
-	private static Log logger = LogFactory.getLog(SamlServiceProviderConfiguration.class);
+	private static Log logger = LogFactory.getLog(Saml2ServiceProviderConfiguration.class);
 
 	private HttpSecurity http;
 	private Saml2Transformer transformer;
 	private Saml2ServiceProviderValidator validator;
-	private ServiceProviderMetadataResolver metadataResolver;
+	private Saml2ServiceProviderMetadataResolver metadataResolver;
 	private Saml2ServiceProviderResolver providerResolver;
 	private Saml2ServiceProviderConfigurationResolver configurationResolver;
 	private AuthenticationFailureHandler failureHandler;
@@ -73,36 +73,36 @@ class SamlServiceProviderConfiguration {
 	private AuthenticationEntryPoint authenticationEntryPoint;
 	private String pathPrefix;
 
-	SamlServiceProviderConfiguration() {
+	Saml2ServiceProviderConfiguration() {
 	}
 
-	SamlServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
+	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
 		notNull(resolver, "providerResolver must not be null");
 		isNull(configurationResolver, "configurationResolver", "providerResolver");
 		this.providerResolver = resolver;
 		return this;
 	}
 
-	SamlServiceProviderConfiguration setAuthenticationManager(AuthenticationManager manager) {
+	Saml2ServiceProviderConfiguration setAuthenticationManager(AuthenticationManager manager) {
 		notNull(manager, "authenticationManager must not be null");
 		this.authenticationManager = manager;
 		return this;
 	}
 
-	SamlServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderConfigurationResolver resolver) {
+	Saml2ServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderConfigurationResolver resolver) {
 		notNull(resolver, "configurationResolver must not be null");
 		isNull(providerResolver, "providerResolver", "configurationResolver");
 		this.configurationResolver = resolver;
 		return this;
 	}
 
-	SamlServiceProviderConfiguration authenticationFailureHandler(AuthenticationFailureHandler handler) {
+	Saml2ServiceProviderConfiguration authenticationFailureHandler(AuthenticationFailureHandler handler) {
 		notNull(handler, "authenticationFailureHandler must not be null");
 		this.failureHandler = handler;
 		return this;
 	}
 
-	SamlServiceProviderConfiguration validate(HttpSecurity http) {
+	Saml2ServiceProviderConfiguration validate(HttpSecurity http) {
 		this.http = http;
 		getSamlTransformer();
 		getSamlValidator();
@@ -193,15 +193,14 @@ class SamlServiceProviderConfiguration {
 		);
 	}
 
-	ServiceProviderMetadataFilter getMetadataFilter() {
+	Saml2ServiceProviderMetadataFilter getMetadataFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			ServiceProviderMetadataFilter.class,
-			() -> new ServiceProviderMetadataFilter(
-				transformer,
+			Saml2ServiceProviderMetadataFilter.class,
+			() -> new Saml2ServiceProviderMetadataFilter(
 				providerResolver,
-				validator,
+				transformer,
 				new AntPathRequestMatcher(pathPrefix + "/metadata/**")
 			),
 			null
@@ -226,11 +225,11 @@ class SamlServiceProviderConfiguration {
 		return providerResolver;
 	}
 
-	ServiceProviderMetadataResolver getSamlMetadataResolver() {
+	Saml2ServiceProviderMetadataResolver getSamlMetadataResolver() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		metadataResolver = getSharedObject(
 			http,
-			ServiceProviderMetadataResolver.class,
+			Saml2ServiceProviderMetadataResolver.class,
 			() -> new DefaultServiceProviderMetadataResolver(transformer),
 			metadataResolver
 		);

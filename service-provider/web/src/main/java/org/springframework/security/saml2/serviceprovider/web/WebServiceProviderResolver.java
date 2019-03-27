@@ -23,14 +23,14 @@ import org.springframework.security.saml2.configuration.HostedSaml2ServiceProvid
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 
 public class WebServiceProviderResolver implements Saml2ServiceProviderResolver<HttpServletRequest> {
 
-	private final ServiceProviderMetadataResolver metadataResolver;
+	private final Saml2ServiceProviderMetadataResolver metadataResolver;
 	private final Saml2ServiceProviderConfigurationResolver configResolver;
 
-	public WebServiceProviderResolver(ServiceProviderMetadataResolver metadataResolver,
+	public WebServiceProviderResolver(Saml2ServiceProviderMetadataResolver metadataResolver,
 									  Saml2ServiceProviderConfigurationResolver configResolver) {
 		this.configResolver = configResolver;
 		this.metadataResolver = metadataResolver;

@@ -24,7 +24,7 @@ import org.springframework.security.saml2.configuration.HostedSaml2ServiceProvid
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
-public interface ServiceProviderMetadataResolver {
+public interface Saml2ServiceProviderMetadataResolver {
 	Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProviders(
 		HostedSaml2ServiceProviderConfiguration configuration
 	);

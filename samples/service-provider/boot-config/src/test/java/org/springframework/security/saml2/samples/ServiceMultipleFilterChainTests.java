@@ -28,7 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
+import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +65,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.saml2AuthenticationEntryPoint()
+							Saml2ServiceProviderConfigurer.saml2AuthenticationEntryPoint()
 						)
 				;
 				// @formatter:on
@@ -84,7 +84,7 @@ public class ServiceMultipleFilterChainTests extends AbstractServiceProviderTest
 						.anyRequest().authenticated()
 					.and()
 						.apply(
-							SamlServiceProviderConfigurer.saml2AuthenticationEntryPoint()
+							Saml2ServiceProviderConfigurer.saml2AuthenticationEntryPoint()
 						)
 				;
 				// @formatter:on

@@ -35,7 +35,7 @@ import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.Disabled;
@@ -62,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBase {
 
 	@Autowired(required = false)
-	ServiceProviderMetadataResolver metadataResolver;
+	Saml2ServiceProviderMetadataResolver metadataResolver;
 
 	@Autowired(required = false)
 	Saml2ServiceProviderResolver spResolver;

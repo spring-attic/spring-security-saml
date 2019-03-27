@@ -45,8 +45,8 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
-import org.springframework.security.saml2.serviceprovider.authentication.SamlAuthentication;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -69,7 +69,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 
 	public ServiceProviderLogoutFilter(Saml2Transformer transformer,
-									   ServiceProviderResolver resolver,
+									   Saml2ServiceProviderResolver resolver,
 									   Saml2ServiceProviderValidator validator,
 									   RequestMatcher matcher) {
 		super(transformer, resolver, validator, matcher);
@@ -101,7 +101,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 				else if (ofNullable(logoutResponse).isPresent()) {
 					receivedLogoutResponse(request, response, authentication, logoutResponse);
 				}
-				else if (authentication instanceof SamlAuthentication) {
+				else if (authentication instanceof Saml2Authentication) {
 					spInitiatedLogout(request, response, authentication);
 				}
 				else { //just perform a simple logout
@@ -154,8 +154,8 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 	protected void spInitiatedLogout(HttpServletRequest request,
 									 HttpServletResponse response,
 									 Authentication authentication) throws IOException {
-		if (authentication instanceof SamlAuthentication) {
-			SamlAuthentication sa = (SamlAuthentication) authentication;
+		if (authentication instanceof Saml2Authentication) {
+			Saml2Authentication sa = (Saml2Authentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
 			HostedSaml2ServiceProvider provider = getSpUtils().getProvider(request);
 			Saml2ServiceProviderMetadata sp = provider.getMetadata();

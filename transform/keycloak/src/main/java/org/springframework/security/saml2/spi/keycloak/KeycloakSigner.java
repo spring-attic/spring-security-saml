@@ -37,7 +37,7 @@ import javax.xml.namespace.QName;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
@@ -130,7 +130,7 @@ class KeycloakSigner {
 			if (signable instanceof Saml2Metadata) {
 				return sign((Saml2Metadata) signable, document);
 			}
-			else if (signable instanceof Saml2AuthenticationSaml2Request) {
+			else if (signable instanceof Saml2AuthenticationRequest) {
 				return sign(signable, document);
 			}
 			else if (signable instanceof Saml2Assertion) {

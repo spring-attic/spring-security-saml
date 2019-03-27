@@ -35,7 +35,7 @@ import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
+import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +76,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 				null
 			);
 		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
-		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+		DefaultSaml2Authentication authentication = new DefaultSaml2Authentication(
 			true,
 			assertion,
 			idp.getEntityId(),
@@ -119,7 +119,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 				null
 			);
 		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
-		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+		DefaultSaml2Authentication authentication = new DefaultSaml2Authentication(
 			true,
 			assertion,
 			idp.getEntityId(),
@@ -174,7 +174,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 				null
 			);
 		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
-		DefaultSamlAuthentication authentication = new DefaultSamlAuthentication(
+		DefaultSaml2Authentication authentication = new DefaultSaml2Authentication(
 			true,
 			assertion,
 			idp.getEntityId(),

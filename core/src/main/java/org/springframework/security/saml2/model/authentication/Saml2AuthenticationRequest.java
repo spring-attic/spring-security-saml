@@ -29,8 +29,8 @@ import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 50, Line 2147
  */
-public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2AuthenticationSaml2Request>
-	implements Saml2SignableObject<Saml2AuthenticationSaml2Request> {
+public class Saml2AuthenticationRequest extends Saml2Request<Saml2AuthenticationRequest>
+	implements Saml2SignableObject<Saml2AuthenticationRequest> {
 
 	private String providerName;
 	private Saml2Binding binding;
@@ -49,7 +49,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return providerName;
 	}
 
-	public Saml2AuthenticationSaml2Request setProviderName(String providerName) {
+	public Saml2AuthenticationRequest setProviderName(String providerName) {
 		this.providerName = providerName;
 		return _this();
 	}
@@ -58,7 +58,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return binding;
 	}
 
-	public Saml2AuthenticationSaml2Request setBinding(Saml2Binding binding) {
+	public Saml2AuthenticationRequest setBinding(Saml2Binding binding) {
 		this.binding = binding;
 		return _this();
 	}
@@ -67,7 +67,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return assertionConsumerService;
 	}
 
-	public Saml2AuthenticationSaml2Request setAssertionConsumerService(Saml2Endpoint assertionConsumerService) {
+	public Saml2AuthenticationRequest setAssertionConsumerService(Saml2Endpoint assertionConsumerService) {
 		this.assertionConsumerService = assertionConsumerService;
 		return _this();
 	}
@@ -76,7 +76,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return requestedAuthenticationContext;
 	}
 
-	public Saml2AuthenticationSaml2Request setRequestedAuthenticationContext(
+	public Saml2AuthenticationRequest setRequestedAuthenticationContext(
 		Saml2RequestedAuthenticationContext requestedAuthenticationContext
 	) {
 		this.requestedAuthenticationContext = requestedAuthenticationContext;
@@ -87,7 +87,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return authenticationContextClassReference;
 	}
 
-	public Saml2AuthenticationSaml2Request setAuthenticationContextClassReference(
+	public Saml2AuthenticationRequest setAuthenticationContextClassReference(
 		Saml2AuthenticationContextClassReference authenticationContextClassReference
 	) {
 		this.authenticationContextClassReference = authenticationContextClassReference;
@@ -113,17 +113,17 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 		return nameIdPolicy;
 	}
 
-	public Saml2AuthenticationSaml2Request setNameIdPolicy(Saml2NameIdPolicy nameIdPolicy) {
+	public Saml2AuthenticationRequest setNameIdPolicy(Saml2NameIdPolicy nameIdPolicy) {
 		this.nameIdPolicy = nameIdPolicy;
 		return _this();
 	}
 
-	public Saml2AuthenticationSaml2Request setForceAuth(Boolean forceAuth) {
+	public Saml2AuthenticationRequest setForceAuth(Boolean forceAuth) {
 		this.forceAuth = forceAuth;
 		return _this();
 	}
 
-	public Saml2AuthenticationSaml2Request setPassive(Boolean passive) {
+	public Saml2AuthenticationRequest setPassive(Boolean passive) {
 		isPassive = passive;
 		return _this();
 	}
@@ -137,7 +137,7 @@ public class Saml2AuthenticationSaml2Request extends Saml2Request<Saml2Authentic
 	}
 
 	@Override
-	public Saml2AuthenticationSaml2Request setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
+	public Saml2AuthenticationRequest setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

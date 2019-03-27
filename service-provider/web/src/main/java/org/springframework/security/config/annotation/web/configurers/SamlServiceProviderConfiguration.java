@@ -30,14 +30,14 @@ import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebAuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
-import org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderMetadataFilter;
@@ -66,8 +66,8 @@ class SamlServiceProviderConfiguration {
 	private Saml2Transformer transformer;
 	private Saml2ServiceProviderValidator validator;
 	private ServiceProviderMetadataResolver metadataResolver;
-	private ServiceProviderResolver providerResolver;
-	private ServiceProviderConfigurationResolver configurationResolver;
+	private Saml2ServiceProviderResolver providerResolver;
+	private Saml2ServiceProviderConfigurationResolver configurationResolver;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
@@ -76,7 +76,7 @@ class SamlServiceProviderConfiguration {
 	SamlServiceProviderConfiguration() {
 	}
 
-	SamlServiceProviderConfiguration setProviderResolver(ServiceProviderResolver resolver) {
+	SamlServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
 		notNull(resolver, "providerResolver must not be null");
 		isNull(configurationResolver, "configurationResolver", "providerResolver");
 		this.providerResolver = resolver;
@@ -89,7 +89,7 @@ class SamlServiceProviderConfiguration {
 		return this;
 	}
 
-	SamlServiceProviderConfiguration setConfigurationResolver(ServiceProviderConfigurationResolver resolver) {
+	SamlServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderConfigurationResolver resolver) {
 		notNull(resolver, "configurationResolver must not be null");
 		isNull(providerResolver, "providerResolver", "configurationResolver");
 		this.configurationResolver = resolver;
@@ -168,7 +168,7 @@ class SamlServiceProviderConfiguration {
 			http,
 			Saml2AuthenticationRequestFilter.class,
 			() -> new Saml2AuthenticationRequestFilter(
-				new Saml2WebAuthenticationRequestResolver(
+				new DefaultSaml2AuthenticationRequestResolver(
 					transformer,
 					providerResolver,
 					validator
@@ -211,15 +211,15 @@ class SamlServiceProviderConfiguration {
 	AuthenticationFailureHandler getAuthenticationFailureHandler() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		failureHandler = ofNullable(failureHandler)
-			.orElseGet(() -> new SamlAuthenticationFailureHandler());
+			.orElseGet(() -> new Saml2AuthenticationFailureHandler());
 		return failureHandler;
 	}
 
-	ServiceProviderResolver getServiceProviderResolver() {
+	Saml2ServiceProviderResolver getServiceProviderResolver() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		providerResolver = getSharedObject(
 			http,
-			ServiceProviderResolver.class,
+			Saml2ServiceProviderResolver.class,
 			() -> null,
 			providerResolver
 		);
@@ -272,9 +272,9 @@ class SamlServiceProviderConfiguration {
 	}
 
 	private Map<String, String> getStaticLoginUrls() {
-		final ServiceProviderConfigurationResolver configResolver = getSharedObject(
+		final Saml2ServiceProviderConfigurationResolver configResolver = getSharedObject(
 			http,
-			ServiceProviderConfigurationResolver.class,
+			Saml2ServiceProviderConfigurationResolver.class,
 			() -> null,
 			configurationResolver
 		);
@@ -302,31 +302,31 @@ class SamlServiceProviderConfiguration {
 		if (ofNullable(providerResolver).isPresent()) {
 			notNull(
 				providerResolver.getConfiguredPathPrefix(),
-				ServiceProviderResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
+				Saml2ServiceProviderResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
 			);
 		}
 		else {
 			//do we have a configurationResolver?
 			configurationResolver = getSharedObject(
 				http,
-				ServiceProviderConfigurationResolver.class,
+				Saml2ServiceProviderConfigurationResolver.class,
 				null,
 				configurationResolver
 			);
 
 			notNull(
 				configurationResolver,
-				ServiceProviderConfigurationResolver.class.getName() + " must not be null"
+				Saml2ServiceProviderConfigurationResolver.class.getName() + " must not be null"
 			);
 
 			notNull(
 				configurationResolver.getConfiguredPathPrefix(),
-				ServiceProviderConfigurationResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
+				Saml2ServiceProviderConfigurationResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
 			);
 
 			metadataResolver = getSamlMetadataResolver();
 			providerResolver = new WebServiceProviderResolver(metadataResolver, configurationResolver);
-			setSharedObject(http, ServiceProviderResolver.class, providerResolver);
+			setSharedObject(http, Saml2ServiceProviderResolver.class, providerResolver);
 		}
 	}
 

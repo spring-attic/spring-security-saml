@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
@@ -56,7 +56,7 @@ public class SamlServiceProviderBeans {
 	}
 
 	@Bean(name = "samlServiceProviderResolver")
-	public ServiceProviderResolver serviceProviderResolver() {
+	public Saml2ServiceProviderResolver serviceProviderResolver() {
 		return new WebServiceProviderResolver(
 			serviceProviderMetadataResolver(),
 			serviceProviderConfigurationResolver()
@@ -64,13 +64,13 @@ public class SamlServiceProviderBeans {
 	}
 
 	@Bean(name = "samlServiceProviderConfigurationResolver")
-	public ServiceProviderConfigurationResolver serviceProviderConfigurationResolver() {
+	public Saml2ServiceProviderConfigurationResolver serviceProviderConfigurationResolver() {
 		Assert.notNull(
 			configuration,
-			"Unable to configure a " + ServiceProviderConfigurationResolver.class.getName() +
+			"Unable to configure a " + Saml2ServiceProviderConfigurationResolver.class.getName() +
 				" instance, without an actual configuration. " +
 				"Either expose a " + HostedSaml2ServiceProviderConfiguration.class.getName() +
-				"bean or override the " + ServiceProviderConfigurationResolver.class.getName() +
+				"bean or override the " + Saml2ServiceProviderConfigurationResolver.class.getName() +
 				" bean."
 		);
 		return SingletonServiceProviderConfigurationResolver.fromConfiguration(configuration);

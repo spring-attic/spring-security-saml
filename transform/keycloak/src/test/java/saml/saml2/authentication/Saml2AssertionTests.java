@@ -31,7 +31,7 @@ import org.springframework.security.saml2.model.authentication.Saml2AssertionCon
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
@@ -266,7 +266,7 @@ public class Saml2AssertionTests extends MetadataBase {
 	@Test
 	public void create_with_request() {
 
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		Saml2Assertion assertion = helper.assertion(
 			serviceProviderMetadata,
@@ -335,7 +335,7 @@ public class Saml2AssertionTests extends MetadataBase {
 
 	@Test
 	public void check_xml() throws URISyntaxException, IOException {
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 
 		Saml2Assertion assertion = helper.assertion(

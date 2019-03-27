@@ -34,10 +34,10 @@ import org.springframework.security.saml2.boot.configuration.SamlBootConfigurati
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -64,7 +64,7 @@ abstract class AbstractServiceProviderTestBase {
 	SamlBootConfiguration bootConfiguration;
 
 	@SpyBean
-	ServiceProviderConfigurationResolver configuration;
+	Saml2ServiceProviderConfigurationResolver configuration;
 
 	@BeforeEach
 	void setUp() {
@@ -74,7 +74,7 @@ abstract class AbstractServiceProviderTestBase {
 	void reset() {
 	}
 
-	Saml2AuthenticationSaml2Request getAuthenticationRequestRedirect(String idpEntityId) throws Exception {
+	Saml2AuthenticationRequest getAuthenticationRequestRedirect(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
@@ -93,11 +93,11 @@ abstract class AbstractServiceProviderTestBase {
 			bootConfiguration.getServiceProvider().getKeys().toList()
 		);
 		assertNotNull(saml2Object);
-		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationSaml2Request.class));
-		return (Saml2AuthenticationSaml2Request) saml2Object;
+		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationRequest.class));
+		return (Saml2AuthenticationRequest) saml2Object;
 	}
 
-	Saml2AuthenticationSaml2Request getAuthenticationRequestPost(String idpEntityId) throws Exception {
+	Saml2AuthenticationRequest getAuthenticationRequestPost(String idpEntityId) throws Exception {
 		MvcResult result = mockMvc.perform(
 			get("/saml/sp/authenticate")
 				.param("idp", idpEntityId)
@@ -117,8 +117,8 @@ abstract class AbstractServiceProviderTestBase {
 			bootConfiguration.getServiceProvider().getKeys().toList()
 		);
 		assertNotNull(saml2Object);
-		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationSaml2Request.class));
-		return (Saml2AuthenticationSaml2Request) saml2Object;
+		assertThat(saml2Object.getClass(), equalTo(Saml2AuthenticationRequest.class));
+		return (Saml2AuthenticationRequest) saml2Object;
 	}
 
 	void mockConfig(Consumer<HostedSaml2ServiceProviderConfiguration.Builder> modifier) {

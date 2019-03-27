@@ -32,7 +32,7 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -40,11 +40,11 @@ import static org.springframework.util.StringUtils.hasText;
 class Saml2ServiceProviderMethods {
 
 	private final Saml2Transformer transformer;
-	private final ServiceProviderResolver resolver;
+	private final Saml2ServiceProviderResolver resolver;
 	private final Saml2ServiceProviderValidator validator;
 
 	Saml2ServiceProviderMethods(Saml2Transformer transformer,
-								ServiceProviderResolver resolver,
+								Saml2ServiceProviderResolver resolver,
 								Saml2ServiceProviderValidator validator) {
 		this.transformer = transformer;
 		this.resolver = resolver;
@@ -56,7 +56,7 @@ class Saml2ServiceProviderMethods {
 		return transformer;
 	}
 
-	public ServiceProviderResolver getResolver() {
+	public Saml2ServiceProviderResolver getResolver() {
 		return resolver;
 	}
 

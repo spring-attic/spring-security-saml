@@ -119,7 +119,7 @@
 	<!--</bean>-->
 
 	<bean id="saml2AuthenticationRequestResolver"
-		  class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebAuthenticationRequestResolver">
+		  class="org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver">
 		<constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
 		<constructor-arg ref="samlServiceProviderValidator"/>
@@ -144,7 +144,7 @@
         <constructor-arg ref="samlServiceProviderValidator"/>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml2.serviceprovider.web.filters.SamlAuthenticationFailureHandler"/>
+            <bean class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler"/>
         </property>
     </bean>
 

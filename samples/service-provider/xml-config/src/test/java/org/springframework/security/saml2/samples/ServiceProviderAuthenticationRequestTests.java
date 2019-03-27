@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.Disabled;
@@ -126,7 +126,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
-		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
+		Saml2AuthenticationRequest authn = getAuthenticationRequest(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -147,7 +147,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("authentication request is not signed")
 	void authNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
-		Saml2AuthenticationSaml2Request authn = getAuthenticationRequest(
+		Saml2AuthenticationRequest authn = getAuthenticationRequest(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),

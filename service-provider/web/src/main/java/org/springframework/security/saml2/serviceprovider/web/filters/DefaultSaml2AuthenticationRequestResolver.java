@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
@@ -36,7 +36,7 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -46,20 +46,20 @@ import org.joda.time.DateTime;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
-public class Saml2WebAuthenticationRequestResolver
-	implements Saml2AuthenticationRequestResolver<HttpServletRequest> {
+public class DefaultSaml2AuthenticationRequestResolver
+	implements Saml2AuthenticationRequestResolver {
 
 	private Clock clock = Clock.systemUTC();
 	private Saml2ServiceProviderMethods serviceProviderMethods;
 
-	public Saml2WebAuthenticationRequestResolver(Saml2Transformer transformer,
-												 ServiceProviderResolver resolver,
-												 Saml2ServiceProviderValidator validator) {
+	public DefaultSaml2AuthenticationRequestResolver(Saml2Transformer transformer,
+													 Saml2ServiceProviderResolver resolver,
+													 Saml2ServiceProviderValidator validator) {
 		serviceProviderMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
 	}
 
 	@Override
-	public Saml2AuthenticationSaml2Request resolve(HttpServletRequest request) {
+	public Saml2AuthenticationRequest resolve(HttpServletRequest request) {
 		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> entity =
@@ -81,7 +81,7 @@ public class Saml2WebAuthenticationRequestResolver
 	}
 
 	@Override
-	public String encode(Saml2AuthenticationSaml2Request authn, boolean deflate) {
+	public String encode(Saml2AuthenticationRequest authn, boolean deflate) {
 		String xml = serviceProviderMethods.getTransformer().toXml(authn);
 		return serviceProviderMethods.getTransformer().samlEncode(xml, deflate);
 	}
@@ -127,17 +127,17 @@ public class Saml2WebAuthenticationRequestResolver
 		return paths[2];
 	}
 
-	protected Saml2AuthenticationSaml2Request getAuthenticationRequest(Saml2ServiceProviderMetadata sp,
-																	   Saml2IdentityProviderMetadata idp,
-																	   Saml2NameId requestedNameId,
-																	   int preferredACSEndpointIndex,
-																	   Saml2BindingType preferredSSOBinding) {
+	protected Saml2AuthenticationRequest getAuthenticationRequest(Saml2ServiceProviderMetadata sp,
+																  Saml2IdentityProviderMetadata idp,
+																  Saml2NameId requestedNameId,
+																  int preferredACSEndpointIndex,
+																  Saml2BindingType preferredSSOBinding) {
 		Saml2Endpoint endpoint = serviceProviderMethods.getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
 			preferredSSOBinding,
 			-1
 		);
-		Saml2AuthenticationSaml2Request request = new Saml2AuthenticationSaml2Request()
+		Saml2AuthenticationRequest request = new Saml2AuthenticationRequest()
 			// Some service providers will not accept first character if 0..9
 			// Azure AD IdP for example.
 			.setId("ARQ" + UUID.randomUUID().toString().substring(1))

@@ -24,7 +24,7 @@ import org.springframework.security.saml2.model.authentication.Saml2SubjectPrinc
 /**
  * An authentication containing SAML information
  */
-public interface SamlAuthentication extends Authentication {
+public interface Saml2Authentication extends Authentication {
 
 	/**
 	 * Returns the entity id of the identity provider that issued the assertion

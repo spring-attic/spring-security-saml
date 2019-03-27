@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.SamlServiceProviderConfigurer;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 
 import static org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
 
@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	protected ServiceProviderConfigurationResolver configurationResolver() {
+	protected Saml2ServiceProviderConfigurationResolver configurationResolver() {
 		return fromConfiguration(
 			config -> config
 				.keys(

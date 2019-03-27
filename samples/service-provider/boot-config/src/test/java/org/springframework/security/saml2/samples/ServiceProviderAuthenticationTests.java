@@ -31,7 +31,7 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
-import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
+import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.DisplayName;
@@ -92,8 +92,8 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 		).andExpect(
 			authenticated()
 				.withAuthentication(authentication -> {
-					assertTrue(authentication instanceof DefaultSamlAuthentication);
-					assertNotNull(((DefaultSamlAuthentication) authentication).getResponseXml());
+					assertTrue(authentication instanceof DefaultSaml2Authentication);
+					assertNotNull(((DefaultSaml2Authentication) authentication).getResponseXml());
 				})
 		);
 	}

@@ -21,8 +21,8 @@ import javax.servlet.Filter;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -45,24 +45,24 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	/**
 	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
 	 * in the filter chain this configurer is applied to
-	 * This is a mutually exclusive option to {@link #saml2Login(ServiceProviderConfigurationResolver)}
-	 * @param resolver pre configures the {@link ServiceProviderResolver}. This is the minimum the
+	 * This is a mutually exclusive option to {@link #saml2Login(Saml2ServiceProviderConfigurationResolver)}
+	 * @param resolver pre configures the {@link Saml2ServiceProviderResolver}. This is the minimum the
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderResolver resolver) {
+	public static SamlServiceProviderConfigurer saml2Login(Saml2ServiceProviderResolver resolver) {
 		return saml2Login().providerResolver(resolver);
 	}
 
 	/**
 	 * Creates a SAML service provider using minimum required configuration and installs all the service endpoints
 	 * in the filter chain this configurer is applied to
-	 * This is a mutually exclusive option to {@link #saml2Login(ServiceProviderResolver)}
-	 * @param resolver pre configures the {@link ServiceProviderConfigurationResolver}. This is the minimum the
+	 * This is a mutually exclusive option to {@link #saml2Login(Saml2ServiceProviderResolver)}
+	 * @param resolver pre configures the {@link Saml2ServiceProviderConfigurationResolver}. This is the minimum the
 	 *                 configuration needed for a service provider to run in a servlet container
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
-	public static SamlServiceProviderConfigurer saml2Login(ServiceProviderConfigurationResolver resolver) {
+	public static SamlServiceProviderConfigurer saml2Login(Saml2ServiceProviderConfigurationResolver resolver) {
 		return saml2Login().configurationResolver(resolver);
 	}
 
@@ -97,10 +97,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *
 	 * @param resolver - the configuration resolver to use
 	 * @return this object to be used in a builder pattern
-	 * @throws IllegalStateException if {@link #providerResolver(ServiceProviderResolver)} has been previously invoked
+	 * @throws IllegalStateException if {@link #providerResolver(Saml2ServiceProviderResolver)} has been previously invoked
 	 */
 	public SamlServiceProviderConfigurer configurationResolver(
-		ServiceProviderConfigurationResolver resolver
+		Saml2ServiceProviderConfigurationResolver resolver
 	) {
 		configuration.setConfigurationResolver(resolver);
 		return this;
@@ -113,10 +113,10 @@ public class SamlServiceProviderConfigurer extends AbstractHttpConfigurer<SamlSe
 	 *
 	 * @param resolver - the SAML service provider resolver to use
 	 * @return this object to be used in a builder pattern
-	 * @throws IllegalStateException if {@link #configurationResolver(ServiceProviderConfigurationResolver)}
+	 * @throws IllegalStateException if {@link #configurationResolver(Saml2ServiceProviderConfigurationResolver)}
 	 *                               has been previously invoked
 	 */
-	public SamlServiceProviderConfigurer providerResolver(ServiceProviderResolver resolver) {
+	public SamlServiceProviderConfigurer providerResolver(Saml2ServiceProviderResolver resolver) {
 		configuration.setProviderResolver(resolver);
 		return this;
 	}

@@ -26,11 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
-public class SamlAuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class Saml2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
 	private StandaloneHtmlWriter processor = new StandaloneHtmlWriter();
 
-	public SamlAuthenticationFailureHandler() {
+	public Saml2AuthenticationFailureHandler() {
 	}
 
 	@Override

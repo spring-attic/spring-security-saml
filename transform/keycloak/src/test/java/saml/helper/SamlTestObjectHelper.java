@@ -32,7 +32,7 @@ import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfi
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -242,9 +242,9 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public Saml2AuthenticationSaml2Request authenticationRequest(Saml2ServiceProviderMetadata sp, Saml2IdentityProviderMetadata idp) {
+	public Saml2AuthenticationRequest authenticationRequest(Saml2ServiceProviderMetadata sp, Saml2IdentityProviderMetadata idp) {
 
-		Saml2AuthenticationSaml2Request request = new Saml2AuthenticationSaml2Request()
+		Saml2AuthenticationRequest request = new Saml2AuthenticationRequest()
 			.setId("ARQ"+UUID.randomUUID().toString())
 			.setIssueInstant(new DateTime(time.millis()))
 			.setForceAuth(Boolean.FALSE)
@@ -287,7 +287,7 @@ public class SamlTestObjectHelper {
 
 	public Saml2Assertion assertion(Saml2ServiceProviderMetadata sp,
 									Saml2IdentityProviderMetadata idp,
-									Saml2AuthenticationSaml2Request request,
+									Saml2AuthenticationRequest request,
 									String principal,
 									Saml2NameId principalFormat) {
 
@@ -346,7 +346,7 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public Saml2ResponseSaml2 response(Saml2AuthenticationSaml2Request authn,
+	public Saml2ResponseSaml2 response(Saml2AuthenticationRequest authn,
 									   Saml2Assertion assertion,
 									   Saml2ServiceProviderMetadata recipient,
 									   Saml2IdentityProviderMetadata local) {

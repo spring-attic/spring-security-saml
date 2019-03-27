@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -38,7 +38,7 @@ public class ServiceProviderMetadataFilter extends AbstractSamlServiceProviderFi
 	private String filename = "saml-service-provider-metadata.xml";
 
 	public ServiceProviderMetadataFilter(Saml2Transformer transformer,
-										 ServiceProviderResolver resolver,
+										 Saml2ServiceProviderResolver resolver,
 										 Saml2ServiceProviderValidator validator,
 										 RequestMatcher matcher) {
 		super(transformer, resolver, validator, matcher);

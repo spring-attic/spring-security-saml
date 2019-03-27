@@ -19,7 +19,7 @@ package saml.saml2.authentication;
 import java.util.Collections;
 
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
@@ -50,7 +50,7 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithDefaults() {
 
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
 
@@ -130,11 +130,11 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithDefaults() {
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
-		Saml2AuthenticationSaml2Request data =
-			(Saml2AuthenticationSaml2Request) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+		Saml2AuthenticationRequest data =
+			(Saml2AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());
@@ -162,7 +162,7 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void createWithAutContext() {
 
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
@@ -211,14 +211,14 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void parseWithAutContext() {
-		Saml2AuthenticationSaml2Request
+		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
 
 		String xml = config.toXml(request);
-		Saml2AuthenticationSaml2Request data =
-			(Saml2AuthenticationSaml2Request) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+		Saml2AuthenticationRequest data =
+			(Saml2AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());

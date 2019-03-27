@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -65,7 +65,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	ServiceProviderMetadataResolver metadataResolver;
 
 	@Autowired(required = false)
-	ServiceProviderResolver spResolver;
+	Saml2ServiceProviderResolver spResolver;
 	private ExternalSaml2IdentityProviderConfiguration.Builder remoteTrustCheckMetadata =
 		ExternalSaml2IdentityProviderConfiguration.builder()
 			.alias("metadata-trust-check")

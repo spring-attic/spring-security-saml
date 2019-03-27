@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -126,7 +126,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("initiate login by SP")
 	void spInitiated() throws Exception {
-		Saml2AuthenticationSaml2Request authn = getAuthenticationRequestRedirect(
+		Saml2AuthenticationRequest authn = getAuthenticationRequestRedirect(
 			"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(
 			authn.getDestination().getLocation(),
@@ -147,7 +147,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("authentication request is not signed")
 	void authNRequestNotSigned() throws Exception {
 		mockConfig(builder -> builder.signRequests(false));
-		Saml2AuthenticationSaml2Request authn = validateAuthenticationRequest(Saml2Binding.REDIRECT);
+		Saml2AuthenticationRequest authn = validateAuthenticationRequest(Saml2Binding.REDIRECT);
 		assertThat(
 			authn.getSignature(),
 			nullValue()
@@ -195,9 +195,9 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	}
 
 
-	private Saml2AuthenticationSaml2Request validateAuthenticationRequest(Saml2Binding binding) throws Exception {
+	private Saml2AuthenticationRequest validateAuthenticationRequest(Saml2Binding binding) throws Exception {
 		final String idpEntityId = "http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
-		Saml2AuthenticationSaml2Request authn = binding == Saml2Binding.REDIRECT ?
+		Saml2AuthenticationRequest authn = binding == Saml2Binding.REDIRECT ?
 			getAuthenticationRequestRedirect(idpEntityId) :
 			getAuthenticationRequestPost(idpEntityId);
 		assertThat(

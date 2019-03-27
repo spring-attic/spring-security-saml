@@ -34,8 +34,8 @@ import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.serviceprovider.authentication.DefaultSamlAuthentication;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -52,7 +52,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 	private final Saml2ServiceProviderMethods spUtils;
 
 	public WebSsoAuthenticationFilter(Saml2Transformer transformer,
-									  ServiceProviderResolver resolver,
+									  Saml2ServiceProviderResolver resolver,
 									  Saml2ServiceProviderValidator validator,
 									  RequestMatcher matcher
 	) {
@@ -116,7 +116,7 @@ public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessing
 		}
 
 		Saml2Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);
-		DefaultSamlAuthentication auth = new DefaultSamlAuthentication(
+		DefaultSaml2Authentication auth = new DefaultSaml2Authentication(
 			true,
 			assertion,
 			r.getOriginEntityId(),

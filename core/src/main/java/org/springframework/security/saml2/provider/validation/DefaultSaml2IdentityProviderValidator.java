@@ -22,10 +22,10 @@ import java.util.List;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.provider.HostedSaml2IdentityProvider;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
@@ -73,8 +73,8 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 		if (saml2Object instanceof Saml2ServiceProviderMetadata) {
 			result = validate((Saml2ServiceProviderMetadata)saml2Object, provider);
 		}
-		else if (saml2Object instanceof Saml2AuthenticationSaml2Request) {
-			result = validate((Saml2AuthenticationSaml2Request)saml2Object, provider);
+		else if (saml2Object instanceof Saml2AuthenticationRequest) {
+			result = validate((Saml2AuthenticationRequest)saml2Object, provider);
 		}
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = validate((Saml2LogoutSaml2Request)saml2Object, provider);
@@ -93,7 +93,7 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 		return new Saml2ValidationResult(metadata);
 	}
 
-	private Saml2ValidationResult validate(Saml2AuthenticationSaml2Request authnRequest, HostedSaml2IdentityProvider provider) {
+	private Saml2ValidationResult validate(Saml2AuthenticationRequest authnRequest, HostedSaml2IdentityProvider provider) {
 		Saml2ValidationResult result = new Saml2ValidationResult(authnRequest);
 		checkValidSignature(authnRequest, result);
 		return result;

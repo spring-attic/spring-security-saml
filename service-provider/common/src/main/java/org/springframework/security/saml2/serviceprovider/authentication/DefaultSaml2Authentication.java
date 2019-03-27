@@ -24,7 +24,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2SubjectPrincipal;
 
-public class DefaultSamlAuthentication implements SamlAuthentication {
+public class DefaultSaml2Authentication implements Saml2Authentication {
 	private boolean authenticated;
 	private Saml2Assertion assertion;
 	private String assertingEntityId;
@@ -32,12 +32,12 @@ public class DefaultSamlAuthentication implements SamlAuthentication {
 	private String relayState;
 	private String responseXml;
 
-	public DefaultSamlAuthentication(boolean authenticated,
-									 Saml2Assertion assertion,
-									 String assertingEntityId,
-									 String holdingEntityId,
-									 String relayState,
-									 String responseXml) {
+	public DefaultSaml2Authentication(boolean authenticated,
+									  Saml2Assertion assertion,
+									  String assertingEntityId,
+									  String holdingEntityId,
+									  String relayState,
+									  String responseXml) {
 		this.authenticated = authenticated;
 		this.assertion = assertion;
 		this.assertingEntityId = assertingEntityId;

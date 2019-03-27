@@ -55,7 +55,7 @@ import org.springframework.security.saml2.model.authentication.Saml2AssertionCon
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -230,8 +230,8 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		if (saml2Object instanceof Saml2Metadata) {
 			result = internalToXml((Saml2Metadata) saml2Object);
 		}
-		else if (saml2Object instanceof Saml2AuthenticationSaml2Request) {
-			result = internalToXml((Saml2AuthenticationSaml2Request) saml2Object);
+		else if (saml2Object instanceof Saml2AuthenticationRequest) {
+			result = internalToXml((Saml2AuthenticationRequest) saml2Object);
 		}
 		else if (saml2Object instanceof Saml2Assertion) {
 			result = internalToXml((Saml2Assertion) saml2Object);
@@ -392,7 +392,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return desc;
 	}
 
-	private AuthnRequestType internalToXml(Saml2AuthenticationSaml2Request request) {
+	private AuthnRequestType internalToXml(Saml2AuthenticationRequest request) {
 		XMLGregorianCalendar instant =
 			getXmlGregorianCalendar(ofNullable(request.getIssueInstant()).orElse(DateTime.now()));
 		if (!hasText(request.getId())) {
@@ -622,7 +622,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private RequestedAuthnContextType getRequestedAuthenticationContext(Saml2AuthenticationSaml2Request request) {
+	private RequestedAuthnContextType getRequestedAuthenticationContext(Saml2AuthenticationRequest request) {
 		RequestedAuthnContextType result = null;
 		if (request.getRequestedAuthenticationContext() != null) {
 			result = new RequestedAuthnContextType();
@@ -1583,10 +1583,10 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private Saml2AuthenticationSaml2Request resolveAuthenticationRequest(AuthnRequestType parsed,
-																		 Map<String, Saml2Signature> signatureMap) {
+	private Saml2AuthenticationRequest resolveAuthenticationRequest(AuthnRequestType parsed,
+																	Map<String, Saml2Signature> signatureMap) {
 		AuthnRequestType request = parsed;
-		Saml2AuthenticationSaml2Request result = new Saml2AuthenticationSaml2Request()
+		Saml2AuthenticationRequest result = new Saml2AuthenticationRequest()
 			.setBinding(Saml2Binding.fromUrn(request.getProtocolBinding().toString()))
 			.setAssertionConsumerService(
 				getEndpoint(

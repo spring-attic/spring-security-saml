@@ -19,9 +19,9 @@ package org.springframework.security.saml2.serviceprovider;
 
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 
-public interface ServiceProviderResolver<ResolvingEntity> {
+public interface Saml2ServiceProviderResolver<HttpRequest> {
 
-	HostedSaml2ServiceProvider getServiceProvider(ResolvingEntity request);
+	HostedSaml2ServiceProvider getServiceProvider(HttpRequest request);
 
 	String getConfiguredPathPrefix();
 

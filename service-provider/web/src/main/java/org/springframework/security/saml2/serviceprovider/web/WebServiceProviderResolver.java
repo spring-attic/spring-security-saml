@@ -21,17 +21,17 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.ServiceProviderMetadataResolver;
 
-public class WebServiceProviderResolver implements ServiceProviderResolver<HttpServletRequest> {
+public class WebServiceProviderResolver implements Saml2ServiceProviderResolver<HttpServletRequest> {
 
 	private final ServiceProviderMetadataResolver metadataResolver;
-	private final ServiceProviderConfigurationResolver configResolver;
+	private final Saml2ServiceProviderConfigurationResolver configResolver;
 
 	public WebServiceProviderResolver(ServiceProviderMetadataResolver metadataResolver,
-									  ServiceProviderConfigurationResolver configResolver) {
+									  Saml2ServiceProviderConfigurationResolver configResolver) {
 		this.configResolver = configResolver;
 		this.metadataResolver = metadataResolver;
 	}

@@ -17,12 +17,14 @@
 
 package org.springframework.security.saml2.serviceprovider.authentication;
 
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import javax.servlet.http.HttpServletRequest;
 
-public interface Saml2AuthenticationRequestResolver<HttpRequest> {
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 
-	String encode(Saml2AuthenticationSaml2Request authn, boolean deflate);
+public interface Saml2AuthenticationRequestResolver {
 
-	Saml2AuthenticationSaml2Request resolve(HttpRequest source);
+	String encode(Saml2AuthenticationRequest authn, boolean deflate);
+
+	Saml2AuthenticationRequest resolve(HttpServletRequest request);
 
 }

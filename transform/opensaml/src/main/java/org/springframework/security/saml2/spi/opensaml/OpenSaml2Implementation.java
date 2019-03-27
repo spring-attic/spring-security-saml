@@ -50,7 +50,7 @@ import org.springframework.security.saml2.model.authentication.Saml2AssertionCon
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -362,8 +362,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 	@Override
 	protected String toXml(Saml2Object saml2Object) {
 		XMLObject result = null;
-		if (saml2Object instanceof Saml2AuthenticationSaml2Request) {
-			result = internalToXml((Saml2AuthenticationSaml2Request) saml2Object);
+		if (saml2Object instanceof Saml2AuthenticationRequest) {
+			result = internalToXml((Saml2AuthenticationRequest) saml2Object);
 		}
 		else if (saml2Object instanceof Saml2Assertion) {
 			result = internalToXml((Saml2Assertion) saml2Object);
@@ -1158,7 +1158,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		}
 	}
 
-	private AuthnRequest internalToXml(Saml2AuthenticationSaml2Request request) {
+	private AuthnRequest internalToXml(Saml2AuthenticationRequest request) {
 		AuthnRequest auth = buildSAMLObject(AuthnRequest.class);
 		auth.setID(request.getId());
 		auth.setVersion(SAMLVersion.VERSION_20);
@@ -1191,7 +1191,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		}
 	}
 
-	private RequestedAuthnContext getRequestedAuthenticationContext(Saml2AuthenticationSaml2Request request) {
+	private RequestedAuthnContext getRequestedAuthenticationContext(Saml2AuthenticationRequest request) {
 		RequestedAuthnContext result = null;
 		if (request.getRequestedAuthenticationContext() != null) {
 			result = buildSAMLObject(RequestedAuthnContext.class);
@@ -1580,9 +1580,9 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				.setNameQualifier(issuer.getNameQualifier());
 	}
 
-	private Saml2AuthenticationSaml2Request resolveAuthenticationRequest(AuthnRequest parsed) {
+	private Saml2AuthenticationRequest resolveAuthenticationRequest(AuthnRequest parsed) {
 		AuthnRequest request = parsed;
-		Saml2AuthenticationSaml2Request result = new Saml2AuthenticationSaml2Request()
+		Saml2AuthenticationRequest result = new Saml2AuthenticationRequest()
 			.setBinding(Saml2Binding.fromUrn(request.getProtocolBinding()))
 			.setAssertionConsumerService(
 				getEndpoint(

@@ -136,7 +136,7 @@
           class="org.springframework.security.saml2.samples.NoOpAuthenticationManager"/>
 
     <bean id="samlWebSsoAuthenticationFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebSsoAuthenticationFilter">
         <constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlServiceProviderValidator"/>

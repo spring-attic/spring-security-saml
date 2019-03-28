@@ -45,16 +45,16 @@ import org.apache.commons.logging.LogFactory;
 
 import static org.springframework.util.Assert.notNull;
 
-public class WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-	private static Log logger = LogFactory.getLog(WebSsoAuthenticationFilter.class);
+	private static Log logger = LogFactory.getLog(Saml2WebSsoAuthenticationFilter.class);
 	private final Saml2ServiceProviderValidator validator;
 	private final Saml2ServiceProviderMethods spUtils;
 
-	public WebSsoAuthenticationFilter(Saml2Transformer transformer,
-									  Saml2ServiceProviderResolver resolver,
-									  Saml2ServiceProviderValidator validator,
-									  RequestMatcher matcher
+	public Saml2WebSsoAuthenticationFilter(Saml2Transformer transformer,
+										   Saml2ServiceProviderResolver resolver,
+										   Saml2ServiceProviderValidator validator,
+										   RequestMatcher matcher
 	) {
 		super(matcher);
 		this.validator = validator;

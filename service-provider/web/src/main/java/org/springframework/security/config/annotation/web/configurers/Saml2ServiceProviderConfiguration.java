@@ -41,7 +41,7 @@ import org.springframework.security.saml2.serviceprovider.web.filters.Saml2Authe
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderMetadataFilter;
-import org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -144,12 +144,12 @@ class Saml2ServiceProviderConfiguration {
 		);
 	}
 
-	WebSsoAuthenticationFilter getWebSsoAuthenticationFilter() {
+	Saml2WebSsoAuthenticationFilter getWebSsoAuthenticationFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
-		WebSsoAuthenticationFilter filter = getSharedObject(
+		Saml2WebSsoAuthenticationFilter filter = getSharedObject(
 			http,
-			WebSsoAuthenticationFilter.class,
-			() -> new WebSsoAuthenticationFilter(
+			Saml2WebSsoAuthenticationFilter.class,
+			() -> new Saml2WebSsoAuthenticationFilter(
 				transformer,
 				providerResolver,
 				validator,

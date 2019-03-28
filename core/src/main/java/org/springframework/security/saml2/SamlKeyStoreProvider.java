@@ -50,7 +50,16 @@ public interface SamlKeyStoreProvider {
 
 			if (hasText(key.getPrivateKey())) {
 				PrivateKey pkey = X509Utils.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
-				ks.setKeyEntry(key.getId(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
+				
+				char[] passphrase;
+				if(key.getPassphrase() != null) {
+				    passphrase = key.getPassphrase().toCharArray();
+				}
+				else {
+				    passphrase = new char[0];
+				}
+				
+				ks.setKeyEntry(key.getId(), pkey, passphrase, new Certificate[]{certificate});
 			}
 
 			return ks;

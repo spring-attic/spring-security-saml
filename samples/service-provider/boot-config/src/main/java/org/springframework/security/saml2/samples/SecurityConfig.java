@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
 import org.springframework.security.saml2.boot.configuration.SamlBootConfiguration;
 import org.springframework.security.saml2.serviceprovider.bean.OpenSaml2TransformerBeans;
-import org.springframework.security.saml2.serviceprovider.bean.SamlServiceProviderBeans;
+import org.springframework.security.saml2.serviceprovider.bean.Saml2ServiceProviderBeans;
 
 import static org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer.saml2Login;
 
@@ -32,7 +32,7 @@ import static org.springframework.security.config.annotation.web.configurers.Sam
 	({
 		 SamlBootConfiguration.class,    //properties from application.yml
 		 OpenSaml2TransformerBeans.class, //OpenSAML as the underlying parsing library
-		 SamlServiceProviderBeans.class  //Service Provider beans used by saml2login()
+		 Saml2ServiceProviderBeans.class  //Service Provider beans used by saml2login()
 	 })
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {

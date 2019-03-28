@@ -26,19 +26,19 @@ import org.springframework.security.saml2.serviceprovider.web.WebServiceProvider
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.util.Assert;
 
 @Configuration
-public class SamlServiceProviderBeans {
+public class Saml2ServiceProviderBeans {
 
 	private final Saml2Transformer transformer;
 	private final HostedSaml2ServiceProviderConfiguration configuration;
 
-	public SamlServiceProviderBeans(
+	public Saml2ServiceProviderBeans(
 		@Autowired Saml2Transformer transformer,
 		@Autowired(required = false) HostedSaml2ServiceProviderConfiguration configuration) {
 		this.transformer = transformer;
@@ -52,7 +52,7 @@ public class SamlServiceProviderBeans {
 
 	@Bean(name = "samlServiceProviderMetadataResolver")
 	public Saml2ServiceProviderMetadataResolver serviceProviderMetadataResolver() {
-		return new DefaultServiceProviderMetadataResolver(transformer);
+		return new DefaultSaml2ServiceProviderMetadataResolver(transformer);
 	}
 
 	@Bean(name = "samlServiceProviderResolver")

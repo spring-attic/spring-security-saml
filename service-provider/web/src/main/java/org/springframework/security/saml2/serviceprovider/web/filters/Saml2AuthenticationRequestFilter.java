@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;

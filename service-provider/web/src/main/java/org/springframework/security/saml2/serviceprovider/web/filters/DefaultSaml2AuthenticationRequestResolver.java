@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -37,7 +37,7 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.authentication.Saml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

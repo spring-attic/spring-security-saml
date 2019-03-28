@@ -65,8 +65,8 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultServiceProviderMetadataResolver implements Saml2ServiceProviderMetadataResolver {
-	private static Log logger = LogFactory.getLog(DefaultServiceProviderMetadataResolver.class);
+public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2ServiceProviderMetadataResolver {
+	private static Log logger = LogFactory.getLog(DefaultSaml2ServiceProviderMetadataResolver.class);
 
 	private final Saml2Transformer saml2Transformer;
 
@@ -76,11 +76,11 @@ public class DefaultServiceProviderMetadataResolver implements Saml2ServiceProvi
 		new RestOperationsUtils(4000, 4000).get(true)
 	);
 
-	public DefaultServiceProviderMetadataResolver(Saml2Transformer saml2Transformer) {
+	public DefaultSaml2ServiceProviderMetadataResolver(Saml2Transformer saml2Transformer) {
 		this.saml2Transformer = saml2Transformer;
 	}
 
-	public DefaultServiceProviderMetadataResolver setCache(Saml2MetadataCache cache) {
+	public DefaultSaml2ServiceProviderMetadataResolver setCache(Saml2MetadataCache cache) {
 		this.cache = cache;
 		return this;
 	}

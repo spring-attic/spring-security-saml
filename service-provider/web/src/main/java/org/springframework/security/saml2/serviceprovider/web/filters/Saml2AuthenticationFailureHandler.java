@@ -19,16 +19,19 @@ package org.springframework.security.saml2.serviceprovider.web.filters;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.web.util.HtmlUtils;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 public class Saml2AuthenticationFailureHandler implements AuthenticationFailureHandler {
-
-	private StandaloneHtmlWriter processor = new StandaloneHtmlWriter();
 
 	public Saml2AuthenticationFailureHandler() {
 	}
@@ -37,11 +40,32 @@ public class Saml2AuthenticationFailureHandler implements AuthenticationFailureH
 	public void onAuthenticationFailure(HttpServletRequest request,
 										HttpServletResponse response,
 										AuthenticationException exception) throws IOException, ServletException {
-		ErrorHtml html = new ErrorHtml(Collections.singletonList(exception.getMessage()));
+		sendHtmlBody(response, errorHtml(Collections.singletonList(exception.getMessage())));
+	}
+
+	private void sendHtmlBody(HttpServletResponse response, String content) throws IOException {
 		response.setStatus(400);
-		processor.processHtmlBody(
-			response,
-			html
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		response.getWriter().write(content);
+	}
+
+	private String errorHtml(List<String> messages) {
+		return (
+			"<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"<head>\n" +
+				"    <meta charset=\"utf-8\" />\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"    <p>\n" +
+				"        <strong>Error:</strong> A SAML error occurred<br/><br/>\n" +
+				messages.stream().reduce((s1, s2) -> HtmlUtils.htmlEscape(s1) + "<br/>" + HtmlUtils.htmlEscape(s2)) +
+				"    </p>\n" +
+				"    #parse ( \"/templates/add-html-body-content.vm\" )\n" +
+				"</body>\n" +
+				"</html>"
+
 		);
 	}
 }

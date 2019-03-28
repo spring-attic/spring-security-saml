@@ -32,14 +32,14 @@ import org.springframework.security.saml2.provider.validation.DefaultSaml2Servic
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter;
-import org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter;
+import org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderMetadataFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.util.Saml2StringUtils;
@@ -124,15 +124,15 @@ class Saml2ServiceProviderConfiguration {
 		return authenticationManager;
 	}
 
-	ServiceProviderLogoutFilter getLogoutFilter() {
+	Saml2ServiceProviderLogoutFilter getLogoutFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			ServiceProviderLogoutFilter.class,
+			Saml2ServiceProviderLogoutFilter.class,
 			() -> {
 				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
-				return new ServiceProviderLogoutFilter(
+				return new Saml2ServiceProviderLogoutFilter(
 					transformer,
 					providerResolver,
 					validator,
@@ -230,7 +230,7 @@ class Saml2ServiceProviderConfiguration {
 		metadataResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderMetadataResolver.class,
-			() -> new DefaultServiceProviderMetadataResolver(transformer),
+			() -> new DefaultSaml2ServiceProviderMetadataResolver(transformer),
 			metadataResolver
 		);
 		return metadataResolver;

@@ -47,10 +47,14 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -59,20 +63,43 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.util.StringUtils.hasText;
 
-public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilter {
+public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 
-	private static Log logger = LogFactory.getLog(ServiceProviderLogoutFilter.class);
+	private static Log logger = LogFactory.getLog(Saml2ServiceProviderLogoutFilter.class);
 
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+	private final RequestMatcher matcher;
+	private final Saml2ServiceProviderMethods saml2SpMethods;
+	private final RedirectStrategy redirectStrategy;
 
-	public ServiceProviderLogoutFilter(Saml2Transformer transformer,
-									   Saml2ServiceProviderResolver resolver,
-									   Saml2ServiceProviderValidator validator,
-									   RequestMatcher matcher) {
-		super(transformer, resolver, validator, matcher);
+	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
+											Saml2ServiceProviderResolver resolver,
+											Saml2ServiceProviderValidator validator,
+											RequestMatcher matcher) {
+
+		this(
+			transformer,
+			resolver,
+			validator,
+			matcher,
+			new DefaultRedirectStrategy()
+		);
+	}
+
+	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
+											Saml2ServiceProviderResolver resolver,
+											Saml2ServiceProviderValidator validator,
+											RequestMatcher matcher,
+											RedirectStrategy redirectStrategy) {
+
+		this.matcher = matcher;
+		this.saml2SpMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
+		this.redirectStrategy = redirectStrategy;
 	}
 
 
@@ -80,7 +107,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		return logoutSuccessHandler;
 	}
 
-	public ServiceProviderLogoutFilter setLogoutSuccessHandler(LogoutSuccessHandler logoutSuccessHandler) {
+	public Saml2ServiceProviderLogoutFilter setLogoutSuccessHandler(LogoutSuccessHandler logoutSuccessHandler) {
 		this.logoutSuccessHandler = logoutSuccessHandler;
 		return this;
 	}
@@ -88,11 +115,10 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-		if (getMatcher().matches(request)) {
-
+		if (matcher.matches(request)) {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			Saml2Object logoutRequest = getSpUtils().getSamlRequest(request);
-			Saml2Object logoutResponse = getSpUtils().getSamlResponse(request);
+			Saml2Object logoutRequest = saml2SpMethods.getSamlRequest(request);
+			Saml2Object logoutResponse = saml2SpMethods.getSamlResponse(request);
 			try {
 
 				if (ofNullable(logoutRequest).isPresent()) {
@@ -125,8 +151,8 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
 		}
 		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) logoutRequest;
-		HostedSaml2ServiceProvider provider = getSpUtils().getProvider(request);
-		Saml2ValidationResult validate = getValidator().validate(lr, provider);
+		HostedSaml2ServiceProvider provider = saml2SpMethods.getProvider(request);
+		Saml2ValidationResult validate = saml2SpMethods.getValidator().validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new Saml2Exception(validate.toString());
 		}
@@ -140,7 +166,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 			request.getParameter("RelayState")
 		);
 		doLogout(request, response, authentication);
-		response.sendRedirect(url);
+		redirectStrategy.sendRedirect(request, response, url);
 	}
 
 	protected void receivedLogoutResponse(HttpServletRequest request,
@@ -157,7 +183,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		if (authentication instanceof Saml2Authentication) {
 			Saml2Authentication sa = (Saml2Authentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
-			HostedSaml2ServiceProvider provider = getSpUtils().getProvider(request);
+			HostedSaml2ServiceProvider provider = saml2SpMethods.getProvider(request);
 			Saml2ServiceProviderMetadata sp = provider.getMetadata();
 			Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(sa.getAssertingEntityId());
 			Saml2LogoutSaml2Request lr = logoutRequest(provider.getMetadata(), idp, (Saml2NameIdPrincipalSaml2) sa.getSamlPrincipal());
@@ -172,7 +198,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 						idp
 					)
 				);
-				response.sendRedirect(redirect);
+				redirectStrategy.sendRedirect(request, response, redirect);
 			}
 			else {
 				logger.debug("Unable to send logout request. No destination set.");
@@ -185,7 +211,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		Saml2LogoutSaml2Request request,
 		Saml2IdentityProviderMetadata recipient) {
 		List<Saml2SsoProvider> ssoProviders = recipient.getSsoProviders();
-		Saml2Endpoint destination = getSpUtils().getPreferredEndpoint(
+		Saml2Endpoint destination = saml2SpMethods.getPreferredEndpoint(
 			ssoProviders.get(0).getSingleLogoutService(),
 			null,
 			-1
@@ -210,8 +236,8 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 									String paramName,
 									String relayState)
 		throws UnsupportedEncodingException {
-		String xml = getTransformer().toXml(lr);
-		String value = getTransformer().samlEncode(xml, true);
+		String xml = saml2SpMethods.getTransformer().toXml(lr);
+		String value = saml2SpMethods.getTransformer().samlEncode(xml, true);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 		if (hasText(relayState)) {
 			builder.queryParam("RelayState", UriUtils.encode(relayState, StandardCharsets.UTF_8.name()));
@@ -235,7 +261,7 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId("LRQ" + UUID.randomUUID().toString())
 			.setDestination(
-				getSpUtils().getPreferredEndpoint(
+				saml2SpMethods.getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),
 					null,
 					-1
@@ -251,5 +277,79 @@ public class ServiceProviderLogoutFilter extends AbstractSamlServiceProviderFilt
 
 	protected String getLogoutRelayState(HttpServletRequest request, Saml2IdentityProviderMetadata idp) {
 		return request.getParameter("RelayState");
+	}
+
+	private String postBindingHtml(String postUrl,
+					String request,
+					String response,
+					String relayState) {
+
+		return ("<!DOCTYPE html>\n" +
+			"<html>\n" +
+			"    <head>\n" +
+			"        <meta charset=\"utf-8\" />\n" +
+			"    </head>\n" +
+			"    <body onload=\"document.forms[0].submit()\">\n" +
+			"        <noscript>\n" +
+			"            <p>\n" +
+			"                <strong>Note:</strong> Since your browser does not support JavaScript,\n" +
+			"                you must press the Continue button once to proceed.\n" +
+			"            </p>\n" +
+			"        </noscript>\n" +
+			"        \n" +
+			"        <form action=\""+ postUrl +"\" method=\"post\">\n" +
+			"            <div>\n" +
+			(hasText(relayState) ?
+				("                <input type=\"hidden\" name=\"RelayState\" value=\"" +
+					HtmlUtils.htmlEscape(relayState) +
+					"\"/>\n"
+				) : ""
+			) +
+			(hasText(request) ?
+				("                <input type=\"hidden\" name=\"SAMLRequest\" value=\"" +
+					HtmlUtils.htmlEscape(request) +
+					"\"/>\n"
+				) : ""
+			) +
+			(hasText(response) ?
+				("                <input type=\"hidden\" name=\"SAMLResponse\" value=\"" +
+					HtmlUtils.htmlEscape(response) +
+					"\"/>\n"
+				) : ""
+			) +
+			"            </div>\n" +
+			"            <noscript>\n" +
+			"                <div>\n" +
+			"                    <input type=\"submit\" value=\"Continue\"/>\n" +
+			"                </div>\n" +
+			"            </noscript>\n" +
+			"        </form>\n" +
+			"    </body>\n" +
+			"</html>");
+	}
+
+	private void sendHtmlBody(HttpServletResponse response, String content) throws IOException {
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		response.getWriter().write(content);
+	}
+
+	private String errorHtml(List<String> messages) {
+		return (
+			"<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"<head>\n" +
+				"    <meta charset=\"utf-8\" />\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"    <p>\n" +
+				"        <strong>Error:</strong> A SAML error occurred<br/><br/>\n" +
+				messages.stream().reduce((s1, s2) -> HtmlUtils.htmlEscape(s1) + "<br/>" + HtmlUtils.htmlEscape(s2)) +
+				"    </p>\n" +
+				"    #parse ( \"/templates/add-html-body-content.vm\" )\n" +
+				"</body>\n" +
+				"</html>"
+
+		);
 	}
 }

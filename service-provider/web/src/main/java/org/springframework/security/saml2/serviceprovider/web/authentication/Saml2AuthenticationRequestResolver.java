@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.authentication;
+package org.springframework.security.saml2.serviceprovider.web.authentication;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -41,7 +41,7 @@
     </bean>
 
     <bean id="samlServiceProviderMetadataResolver"
-          class="org.springframework.security.saml2.serviceprovider.metadata.DefaultServiceProviderMetadataResolver">
+          class="org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver">
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
@@ -137,12 +137,14 @@
 
     <bean id="samlWebSsoAuthenticationFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filters.WebSsoAuthenticationFilter">
-        <constructor-arg>
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                <constructor-arg value="#{'/' + pathPrefix + '/SSO/**'}"/>
-            </bean>
-        </constructor-arg>
+        <constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlServiceProviderValidator"/>
+		<constructor-arg>
+			<bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+				<constructor-arg value="#{'/' + pathPrefix + '/SSO/**'}"/>
+			</bean>
+		</constructor-arg>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
             <bean class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler"/>
@@ -150,10 +152,12 @@
     </bean>
 
     <bean id="serviceProviderLogoutFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.ServiceProviderLogoutFilter">
-        <constructor-arg ref="logoutMatcher"/>
-        <constructor-arg ref="samlTransformer"/>
-        <constructor-arg ref="samlServiceProviderValidator"/>
+          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderLogoutFilter">
+
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
+		<constructor-arg ref="logoutMatcher"/>
         <property name="logoutSuccessHandler">
             <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
                 <property name="defaultTargetUrl" value="#{'/' + pathPrefix + '/select'}"/>

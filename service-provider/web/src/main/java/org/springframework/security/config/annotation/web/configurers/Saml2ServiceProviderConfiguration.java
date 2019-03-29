@@ -332,10 +332,10 @@ class Saml2ServiceProviderConfiguration {
 
 	private Saml2Transformer createDefaultSamlTransformer() {
 		try {
-			return getClassInstance("org.springframework.security.saml2.spi.opensaml.OpenSamlTransformer");
+			return getClassInstance("org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer");
 		} catch (Saml2Exception e) {
 			try {
-				return getClassInstance("org.springframework.security.saml2.spi.keycloak.KeycloakSamlTransformer");
+				return getClassInstance("org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer");
 			} catch (Saml2Exception e2) {
 				throw e;
 			}

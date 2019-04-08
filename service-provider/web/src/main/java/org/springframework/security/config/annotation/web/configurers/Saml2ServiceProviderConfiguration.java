@@ -60,6 +60,11 @@ import static org.springframework.util.Assert.notNull;
 
 class Saml2ServiceProviderConfiguration {
 
+	public static final String SAML2_TRANSFORMER_OPEN_SAML =
+		"org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer";
+	public static final String SAML2_TRANSFORMER_KEYCLOAK =
+		"org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer";
+
 	private static Log logger = LogFactory.getLog(Saml2ServiceProviderConfiguration.class);
 
 	private HttpSecurity http;
@@ -332,18 +337,19 @@ class Saml2ServiceProviderConfiguration {
 
 	private Saml2Transformer createDefaultSamlTransformer() {
 		try {
-			return getClassInstance("org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer");
+			return getClassInstance(SAML2_TRANSFORMER_OPEN_SAML);
 		} catch (Saml2Exception e) {
 			try {
-				return getClassInstance("org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer");
+				return getClassInstance(SAML2_TRANSFORMER_KEYCLOAK);
 			} catch (Saml2Exception e2) {
 				throw e;
 			}
 		}
 	}
 
-	private Saml2Transformer getClassInstance(String className) {
+	Saml2Transformer getClassInstance(String className) {
 		try {
+			logger.info("Loading SAML2 implementation:"+className);
 			Class<?> clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
 			return (Saml2Transformer) clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

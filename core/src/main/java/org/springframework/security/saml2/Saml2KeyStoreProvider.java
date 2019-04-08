@@ -29,11 +29,12 @@ import java.util.UUID;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.util.Saml2X509Utils;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasText;
 
 public interface Saml2KeyStoreProvider {
 
-	char[] DEFAULT_KS_PASSWD = ("ks"+UUID.randomUUID().toString()).toCharArray();
+	char[] DEFAULT_KS_PASSWD = ("ks" + UUID.randomUUID().toString()).toCharArray();
 
 	default KeyStore getKeyStore(Saml2KeyData key) {
 		return getKeyStore(key, DEFAULT_KS_PASSWD);
@@ -51,15 +52,7 @@ public interface Saml2KeyStoreProvider {
 			if (hasText(key.getPrivateKey())) {
 				PrivateKey pkey = Saml2X509Utils.readPrivateKey(key.getPrivateKey(), key.getPassphrase());
 				ks.setKeyEntry(key.getId(), pkey, key.getPassphrase().toCharArray(), new Certificate[]{certificate});
-
-				char[] passphrase;
-				if(key.getPassphrase() != null) {
-				    passphrase = key.getPassphrase().toCharArray();
-				}
-				else {
-				    passphrase = new char[0];
-				}
-
+				char[] passphrase = (ofNullable(key.getPassphrase()).orElse("")).toCharArray();
 				ks.setKeyEntry(key.getId(), pkey, passphrase, new Certificate[]{certificate});
 			}
 

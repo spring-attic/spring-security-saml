@@ -40,6 +40,8 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 
+import static java.util.Optional.ofNullable;
+
 public class X509Utilities {
 
 	public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
@@ -99,8 +101,8 @@ public class X509Utilities {
 			else if (obj instanceof PEMEncryptedKeyPair) {
 				// Encrypted key - we will use provided password
 				PEMEncryptedKeyPair ckp = (PEMEncryptedKeyPair) obj;
-				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passphrase
-					.toCharArray());
+				char[] passarray = (ofNullable(passphrase).orElse("")).toCharArray();
+				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(passarray);
 				kp = converter.getKeyPair(ckp.decryptKeyPair(decProv));
 			}
 			else {

@@ -93,45 +93,6 @@ configure(subprojects) { subproject ->
 }
 
 configure(coreProjects) { p ->
-	apply plugin: 'spring-io'
-
-	ext.springIoVersion = project.hasProperty('platformVersion') ? platformVersion : 'Brussels-SR6'
-
-	configurations {
-		springIoTestRuntime {
-			resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-				if (details.requested.name == 'servlet-api') {
-					details.useTarget 'javax.servlet:javax.servlet-api:3.1.0'
-				}
-			}
-		}
-		// springIo knows all transitive dependencies for Spring Security 4
-		springSecurity4TestRuntime.extendsFrom springIoTestRuntime
-
-		// springIo does not yet use Spring Security 4, so force it to be Spring Security 4
-		springSecurity4TestRuntime.incoming.beforeResolve { resolvable ->
-			springSecurity4TestRuntime.resolutionStrategy.eachDependency { details ->
-				if (details.requested.group == 'org.springframework.security') {
-					details.useVersion '4.0.0.RELEASE'
-				}
-			}
-		}
-	}
-
-	task springSecurity4Test(type: Test) {
-		jvmArgs = ['-ea', '-Xmx500m', '-XX:MaxPermSize=128M']
-		classpath = sourceSets.test.output + sourceSets.main.output + configurations.springSecurity4TestRuntime
-		reports {
-			html.destination = project.file("$project.buildDir/reports/spring-io-springsecurity4-tests/")
-			junitXml.destination = project.file("$project.buildDir/spring-io-springsecurity4-test-results/")
-		}
-	}
-
-	check.dependsOn springSecurity4Test
-
-	dependencies {
-		springIoVersions "io.spring.platform:platform-versions:${springIoVersion}@properties"
-	}
 
 	jar {
 		manifest.attributes["Created-By"] =

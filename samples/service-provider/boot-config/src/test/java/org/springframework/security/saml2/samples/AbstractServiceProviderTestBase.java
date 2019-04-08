@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.SamlBootConfiguration;
+import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.Saml2Object;
@@ -61,7 +61,7 @@ abstract class AbstractServiceProviderTestBase {
 	Saml2Transformer transformer;
 
 	@Autowired
-	SamlBootConfiguration bootConfiguration;
+	Saml2BootConfiguration bootConfiguration;
 
 	@SpyBean
 	Saml2ServiceProviderConfigurationResolver configuration;
@@ -161,7 +161,7 @@ abstract class AbstractServiceProviderTestBase {
 		return null;
 	}
 
-	List<ExternalSaml2IdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteIdentityProviderConfiguration> c) {
+	List<ExternalSaml2IdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteSaml2IdentityProviderConfiguration> c) {
 		return bootConfiguration.getServiceProvider().getProviders().stream()
 			.map(p -> {
 				c.accept(p);

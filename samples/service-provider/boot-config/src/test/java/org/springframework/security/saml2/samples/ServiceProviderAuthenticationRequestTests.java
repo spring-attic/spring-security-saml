@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
@@ -103,7 +103,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@DisplayName("multiple IDPs are always displayed")
 	@Disabled("login page is now static")
 	void multipleIdpSelection() throws Exception {
-		List<RemoteIdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
+		List<RemoteSaml2IdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
 		List<ExternalSaml2IdentityProviderConfiguration> list = new LinkedList<>();
 		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
 		providers.get(0).setAlias(providers.get(0).getAlias() + "-2");

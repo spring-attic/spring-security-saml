@@ -34,7 +34,7 @@ import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderCo
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler;
@@ -324,7 +324,7 @@ class Saml2ServiceProviderConfiguration {
 			);
 
 			metadataResolver = getSamlMetadataResolver();
-			providerResolver = new WebServiceProviderResolver(metadataResolver, configurationResolver);
+			providerResolver = new Saml2WebServiceProviderResolver(metadataResolver, configurationResolver);
 			setSharedObject(http, Saml2ServiceProviderResolver.class, providerResolver);
 		}
 	}

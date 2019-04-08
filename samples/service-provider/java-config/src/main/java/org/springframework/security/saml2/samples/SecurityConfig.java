@@ -32,7 +32,7 @@ import static java.util.Collections.emptyList;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.EMAIL;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.UNSPECIFIED;
-import static org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver.fromConfiguration;
+import static org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
 @Configuration

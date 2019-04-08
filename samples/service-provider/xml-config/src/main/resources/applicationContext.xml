@@ -25,7 +25,7 @@
         https://www.springframework.org/schema/security/spring-security.xsd">
 
     <bean id="samlConfiguration"
-          class="org.springframework.security.saml2.boot.configuration.SamlBootConfiguration"/>
+          class="org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration"/>
 
     <bean id="samlServiceProviderConfiguration"
           factory-bean="samlConfiguration"
@@ -46,12 +46,12 @@
     </bean>
 
     <bean id="samlServiceProviderConfigurationResolver"
-          class="org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver">
+          class="org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver">
         <constructor-arg ref="samlServiceProviderConfiguration"/>
     </bean>
 
     <bean id="samlServiceProviderResolver"
-          class="org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver">
+          class="org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver">
         <constructor-arg ref="samlServiceProviderMetadataResolver"/>
         <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
     </bean>

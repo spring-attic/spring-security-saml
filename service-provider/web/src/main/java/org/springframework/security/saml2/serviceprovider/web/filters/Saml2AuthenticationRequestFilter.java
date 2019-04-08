@@ -162,7 +162,6 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 				"        <strong>Error:</strong> A SAML error occurred<br/><br/>\n" +
 				messages.stream().reduce((s1, s2) -> HtmlUtils.htmlEscape(s1) + "<br/>" + HtmlUtils.htmlEscape(s2)) +
 				"    </p>\n" +
-				"    #parse ( \"/templates/add-html-body-content.vm\" )\n" +
 				"</body>\n" +
 				"</html>"
 

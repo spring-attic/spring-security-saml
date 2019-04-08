@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.boot.configuration.SamlBootConfiguration;
+import org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
@@ -55,7 +55,7 @@ abstract class AbstractServiceProviderTestBase {
 	Saml2Transformer transformer;
 
 	@Autowired
-	SamlBootConfiguration bootConfiguration;
+	Saml2BootConfiguration bootConfiguration;
 
 	@SpyBean
 	Saml2ServiceProviderConfigurationResolver configuration;

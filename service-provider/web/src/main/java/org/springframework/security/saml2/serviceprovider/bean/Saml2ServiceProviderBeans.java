@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.serviceprovider.web.WebServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
@@ -57,7 +57,7 @@ public class Saml2ServiceProviderBeans {
 
 	@Bean(name = "samlServiceProviderResolver")
 	public Saml2ServiceProviderResolver serviceProviderResolver() {
-		return new WebServiceProviderResolver(
+		return new Saml2WebServiceProviderResolver(
 			serviceProviderMetadataResolver(),
 			serviceProviderConfigurationResolver()
 		);
@@ -73,7 +73,7 @@ public class Saml2ServiceProviderBeans {
 				"bean or override the " + Saml2ServiceProviderConfigurationResolver.class.getName() +
 				" bean."
 		);
-		return SingletonServiceProviderConfigurationResolver.fromConfiguration(configuration);
+		return SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration(configuration);
 	}
 
 }

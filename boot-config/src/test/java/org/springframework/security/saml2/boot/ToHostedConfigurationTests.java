@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml2.boot;
 
-import org.springframework.security.saml2.boot.configuration.LocalIdentityProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.LocalProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.LocalServiceProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.RemoteIdentityProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.RemoteProviderConfiguration;
-import org.springframework.security.saml2.boot.configuration.RemoteServiceProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.LocalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.LocalSaml2ProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.LocalSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.RemoteSaml2ProviderConfiguration;
+import org.springframework.security.saml2.boot.configuration.RemoteSaml2ServiceProviderConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2ProviderConfiguration;
 import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
 import org.springframework.security.saml2.configuration.ExternalSaml2ServiceProviderConfiguration;
@@ -40,17 +40,17 @@ public class ToHostedConfigurationTests {
 
 	@Test
 	public void testHostedIdpDefaults() {
-		LocalIdentityProviderConfiguration idp = new LocalIdentityProviderConfiguration();
+		LocalSaml2IdentityProviderConfiguration idp = new LocalSaml2IdentityProviderConfiguration();
 		assertLocalIdp(idp);
 	}
 
 	@Test
 	public void testHostedSpDefaults() {
-		LocalServiceProviderConfiguration sp = new LocalServiceProviderConfiguration();
+		LocalSaml2ServiceProviderConfiguration sp = new LocalSaml2ServiceProviderConfiguration();
 		assertLocalSp(sp);
 	}
 
-	private void assertLocalParent(LocalProviderConfiguration lc, HostedSaml2ProviderConfiguration hc) {
+	private void assertLocalParent(LocalSaml2ProviderConfiguration lc, HostedSaml2ProviderConfiguration hc) {
 		assertEquals(lc.getPathPrefix(), hc.getPathPrefix(), "pathPrefix");
 		assertEquals(lc.getBasePath(), hc.getBasePath(), "basePath");
 		assertEquals(lc.getAlias(), hc.getAlias(), "alias");
@@ -64,11 +64,11 @@ public class ToHostedConfigurationTests {
 		assertEquals(lc.isSingleLogoutEnabled(), hc.isSingleLogoutEnabled(), "singleLogoutEnabled");
 	}
 
-	private void assertLocalSp(LocalServiceProviderConfiguration lc) {
+	private void assertLocalSp(LocalSaml2ServiceProviderConfiguration lc) {
 		HostedSaml2ServiceProviderConfiguration hc = lc.toHostedConfiguration();
 		assertLocalParent(lc, hc);
 		for (int i=0; i<lc.getProviders().size(); i++) {
-			RemoteIdentityProviderConfiguration rc = lc.getProviders().get(i);
+			RemoteSaml2IdentityProviderConfiguration rc = lc.getProviders().get(i);
 			assertRemoteIdentityProviderConfiguration(rc);
 		}
 
@@ -76,11 +76,11 @@ public class ToHostedConfigurationTests {
 		assertEquals(lc.isWantAssertionsSigned(), hc.isWantAssertionsSigned(), "wantAssertionsSigned");
 	}
 
-	private void assertLocalIdp(LocalIdentityProviderConfiguration lc) {
+	private void assertLocalIdp(LocalSaml2IdentityProviderConfiguration lc) {
 		HostedSaml2IdentityProviderConfiguration hc = lc.toHostedConfiguration();
 		assertLocalParent(lc, hc);
 		for (int i=0; i<lc.getProviders().size(); i++) {
-			RemoteServiceProviderConfiguration rc = lc.getProviders().get(i);
+			RemoteSaml2ServiceProviderConfiguration rc = lc.getProviders().get(i);
 			assertRemoteServiceProviderConfiguration(rc);
 		}
 		assertEquals(lc.isWantRequestsSigned(), hc.isWantRequestsSigned(), "wantRequestsSigned");
@@ -93,7 +93,7 @@ public class ToHostedConfigurationTests {
 		assertEquals(lc.getDataEncryptionAlgorithm(), hc.getDataEncryptionAlgorithm(), "sessionNotOnOrAfter");
 	}
 
-	private void assertRemoteParent(RemoteProviderConfiguration rc, ExternalSaml2ProviderConfiguration ec) {
+	private void assertRemoteParent(RemoteSaml2ProviderConfiguration rc, ExternalSaml2ProviderConfiguration ec) {
 		assertEquals(rc.isSkipSslValidation(), ec.isSkipSslValidation(), "skipSslValidation");
 		assertEquals(rc.isMetadataTrustCheck(), ec.isMetadataTrustCheck(), "metadataTrustCheck");
 		assertEquals(rc.getAlias(), ec.getAlias(), "alias");
@@ -101,14 +101,14 @@ public class ToHostedConfigurationTests {
 		assertEquals(rc.getLinktext(), ec.getLinktext(), "linkText");
 	}
 
-	private void assertRemoteIdentityProviderConfiguration(RemoteIdentityProviderConfiguration rc) {
+	private void assertRemoteIdentityProviderConfiguration(RemoteSaml2IdentityProviderConfiguration rc) {
 		ExternalSaml2IdentityProviderConfiguration ec = rc.toExternalIdentityProviderConfiguration();
 		assertRemoteParent(rc, ec);
 		assertEquals(rc.getNameId(), ec.getNameId(),"nameId");
 		assertEquals(rc.getAssertionConsumerServiceIndex(), ec.getAssertionConsumerServiceIndex(),"assertionConsumerServiceIndex");
 	}
 
-	private void assertRemoteServiceProviderConfiguration(RemoteServiceProviderConfiguration rc) {
+	private void assertRemoteServiceProviderConfiguration(RemoteSaml2ServiceProviderConfiguration rc) {
 		ExternalSaml2ServiceProviderConfiguration ec = rc.toExternalServiceProviderConfiguration();
 		assertRemoteParent(rc, ec);
 	}

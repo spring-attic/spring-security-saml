@@ -165,7 +165,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private static final Log logger = LogFactory.getLog(KeycloakSaml2Implementation.class);
 	private Saml2KeyStoreProvider samlKeyStoreProvider = new Saml2KeyStoreProvider() {};
-	private KeycloakSamlParser samlParser = new KeycloakSamlParser();
+	private KeycloakSaml2Parser samlParser = new KeycloakSaml2Parser();
 
 	public KeycloakSaml2Implementation(Clock time) {
 		super(time);
@@ -198,14 +198,14 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	protected void bootstrap() {
 		try {
-			overrideSingletonField(SAMLAttributeValueParser.class, "INSTANCE", new KeycloakSamlAttributeParser());
+			overrideSingletonField(SAMLAttributeValueParser.class, "INSTANCE", new KeycloakSaml2AttributeParser());
 		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw new Saml2Exception("Unable to initialize attribute parser to support xsd:DateTime formats", e);
 		}
 		org.apache.xml.security.Init.init();
 	}
 
-	private void overrideSingletonField(Class<?> clazz, String name, KeycloakSamlAttributeParser value)
+	private void overrideSingletonField(Class<?> clazz, String name, KeycloakSaml2AttributeParser value)
 		throws NoSuchFieldException, IllegalAccessException {
 		Field instance = ReflectionUtils.findField(clazz, name);
 		instance.setAccessible(true);
@@ -262,38 +262,38 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	@Override
 	protected Saml2Object resolve(byte[] xml, List<Saml2KeyData> verificationKeys, List<Saml2KeyData> localKeys) {
-		SamlObjectHolder parsed = parse(xml);
-		Map<String, Saml2Signature> signatureMap = KeycloakSignatureValidator.validateSignature(parsed, verificationKeys);
+		Saml2ObjectHolder parsed = parse(xml);
+		Map<String, Saml2Signature> signatureMap = KeycloakSaml2SignatureValidator.validateSignature(parsed, verificationKeys);
 		Saml2Object result = null;
-		if (parsed.getSamlObject() instanceof EntityDescriptorType) {
+		if (parsed.getSaml2Object() instanceof EntityDescriptorType) {
 			result = resolveMetadata(
-				(EntityDescriptorType) parsed.getSamlObject(),
+				(EntityDescriptorType) parsed.getSaml2Object(),
 				signatureMap
 			);
 		}
-		else if (parsed.getSamlObject() instanceof EntitiesDescriptorType) {
+		else if (parsed.getSaml2Object() instanceof EntitiesDescriptorType) {
 			result =
 				resolveMetadata(
-					(EntitiesDescriptorType) parsed.getSamlObject(),
+					(EntitiesDescriptorType) parsed.getSaml2Object(),
 					signatureMap
 				);
 			;
 		}
-		else if (parsed.getSamlObject() instanceof AuthnRequestType) {
+		else if (parsed.getSaml2Object() instanceof AuthnRequestType) {
 			result = resolveAuthenticationRequest(
-				(AuthnRequestType) parsed.getSamlObject(),
+				(AuthnRequestType) parsed.getSaml2Object(),
 				signatureMap
 			);
 		}
-		else if (parsed.getSamlObject() instanceof ResponseType) {
+		else if (parsed.getSaml2Object() instanceof ResponseType) {
 			result = resolveResponse(
-				(ResponseType) parsed.getSamlObject(),
+				(ResponseType) parsed.getSaml2Object(),
 				signatureMap,
 				localKeys
 			);
 		}
-		else if (parsed.getSamlObject() instanceof AssertionType) {
-			AssertionType at = (AssertionType) parsed.getSamlObject();
+		else if (parsed.getSaml2Object() instanceof AssertionType) {
+			AssertionType at = (AssertionType) parsed.getSaml2Object();
 			result = resolveAssertion(
 				at,
 				signatureMap,
@@ -301,15 +301,15 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 				false
 			);
 		}
-		else if (parsed.getSamlObject() instanceof LogoutRequestType) {
+		else if (parsed.getSaml2Object() instanceof LogoutRequestType) {
 			result = resolveLogoutRequest(
-				(LogoutRequestType) parsed.getSamlObject(),
+				(LogoutRequestType) parsed.getSaml2Object(),
 				signatureMap,
 				localKeys);
 		}
-		else if (parsed.getSamlObject() instanceof StatusResponseType) {
+		else if (parsed.getSaml2Object() instanceof StatusResponseType) {
 			result = resolveLogoutResponse(
-				(StatusResponseType) parsed.getSamlObject(),
+				(StatusResponseType) parsed.getSaml2Object(),
 				signatureMap,
 				localKeys
 			);
@@ -321,15 +321,15 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			}
 			return result;
 		}
-		throw new Saml2Exception("Deserialization not yet supported for class: " + parsed.getSamlObject().getClass());
+		throw new Saml2Exception("Deserialization not yet supported for class: " + parsed.getSaml2Object().getClass());
 	}
 
 	@Override
 	protected Saml2Signature getValidSignature(Saml2SignableObject saml2Object, List<Saml2KeyData> trustedKeys) {
-		if (saml2Object.getImplementation() instanceof SamlObjectHolder) {
+		if (saml2Object.getImplementation() instanceof Saml2ObjectHolder) {
 			Map<String, Saml2Signature> signatureMap =
-				KeycloakSignatureValidator.validateSignature(
-					(SamlObjectHolder) saml2Object.getImplementation(),
+				KeycloakSaml2SignatureValidator.validateSignature(
+					(Saml2ObjectHolder) saml2Object.getImplementation(),
 					trustedKeys
 				);
 
@@ -339,16 +339,16 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 					if (assertion.getImplementation() != null &&
 						assertion.getSignature() == null) {
 						AssertionType t = (AssertionType) assertion.getImplementation();
-						KeycloakSignatureValidator.assignSignatureToObject(
+						KeycloakSaml2SignatureValidator.assignSignatureToObject(
 							signatureMap,
 							assertion,
 							t.getSignature()
 						);
 					}
 				}
-				ResponseType rt = (ResponseType) ((SamlObjectHolder) saml2Object.getImplementation()).getSamlObject();
+				ResponseType rt = (ResponseType) ((Saml2ObjectHolder) saml2Object.getImplementation()).getSaml2Object();
 				if (rt.getSignature() != null) {
-					KeycloakSignatureValidator.assignSignatureToObject(
+					KeycloakSaml2SignatureValidator.assignSignatureToObject(
 						signatureMap,
 						saml2Object,
 						rt.getSignature()
@@ -421,7 +421,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		if (object instanceof EntityDescriptorType) {
 			try {
 				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
-				SAMLMetadataWriter metadataWriter = new KeycloakSamlMetadataWriter(streamWriter);
+				SAMLMetadataWriter metadataWriter = new KeycloakSaml2MetadataWriter(streamWriter);
 				metadataWriter.writeEntityDescriptor((EntityDescriptorType) object);
 				streamWriter.flush();
 				return writer.getBuffer().toString();
@@ -443,7 +443,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		else if (object instanceof AssertionType) {
 			try {
 				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
-				SAMLAssertionWriter assertionWriter = new KeycloakSamlAssertionWriter(streamWriter);
+				SAMLAssertionWriter assertionWriter = new KeycloakSaml2AssertionWriter(streamWriter);
 				assertionWriter.write((AssertionType) object);
 				streamWriter.flush();
 				return writer.getBuffer().toString();
@@ -462,11 +462,11 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 				throw new Saml2Exception(e);
 			}
 		}
-		else if (object instanceof LogoutResponseType) {
+		else if (object instanceof Saml2LogoutResponseType) {
 			try {
 				XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(writer);
-				KeycloakSamlLogoutResponseWriter responseWriter = new KeycloakSamlLogoutResponseWriter(streamWriter);
-				responseWriter.writeLogoutResponse((LogoutResponseType) object);
+				KeycloakSaml2LogoutResponseWriter responseWriter = new KeycloakSaml2LogoutResponseWriter(streamWriter);
+				responseWriter.writeLogoutResponse((Saml2LogoutResponseType) object);
 				streamWriter.flush();
 				return writer.getBuffer().toString();
 			} catch (ProcessingException | XMLStreamException e) {
@@ -491,7 +491,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	private String signObject(String xml,
 							  Saml2SignableObject signable) {
-		KeycloakSigner signer = new KeycloakSigner(samlKeyStoreProvider);
+		KeycloakSaml2Signer signer = new KeycloakSaml2Signer(samlKeyStoreProvider);
 		return signer.signOrEncrypt(signable, xml);
 	}
 
@@ -764,7 +764,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		Exception last = null;
 		for (Saml2KeyData k : keys) {
 			try {
-				KeyInfo info = new KeyInfo(getSamlKeyStoreProvider(), k);
+				KeycloakSaml2KeyInfo info = new KeycloakSaml2KeyInfo(getSamlKeyStoreProvider(), k);
 				Element result =
 					XMLEncryptionUtil.decryptElementInDocument(
 						encryptedAssertionDocument,
@@ -782,7 +782,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return null;
 	}
 
-	private SamlObjectHolder parse(byte[] xml) {
+	private Saml2ObjectHolder parse(byte[] xml) {
 		try {
 			InputStream reader = new ByteArrayInputStream(xml);
 			Document samlDocument = DocumentUtil.getDocument(reader);
@@ -793,7 +793,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 				configureIdAttribute(samlDocument);
 			}
 			Object object = samlParser.parse(samlDocument);
-			return new SamlObjectHolder(samlDocument, object);
+			return new Saml2ObjectHolder(samlDocument, object);
 		} catch (Exception e) {
 			throw new Saml2Exception(e);
 		}
@@ -1045,14 +1045,14 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	}
 
-	private LogoutResponseType internalToXml(Saml2LogoutResponseSaml2 response) {
+	private Saml2LogoutResponseType internalToXml(Saml2LogoutResponseSaml2 response) {
 		if (!hasText(response.getId())) {
 			response.setId("L" + UUID.randomUUID().toString());
 		}
 		if (response.getIssueInstant() == null) {
 			response.setIssueInstant(DateTime.now());
 		}
-		LogoutResponseType result = new LogoutResponseType(
+		Saml2LogoutResponseType result = new Saml2LogoutResponseType(
 			response.getId(),
 			getXmlGregorianCalendar(response.getIssueInstant())
 		);
@@ -1221,7 +1221,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 					)
 				);
 		}
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, parsed.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, result, parsed.getSignature());
 		return result;
 
 	}
@@ -1282,7 +1282,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			.setAuthenticationStatements(getAuthenticationStatements(parsed.getStatements()))
 			.setAttributes(getAttributes(parsed.getAttributeStatements(), localKeys))
 			.setImplementation(parsed);
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, assertion, parsed.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, assertion, parsed.getSignature());
 		return assertion;
 	}
 
@@ -1537,7 +1537,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			.setDestination(response.getDestination())
 			.setStatus(getStatus(response.getStatus()));
 
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, response.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, result, response.getSignature());
 		return result;
 	}
 
@@ -1555,7 +1555,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			.setDestination(new Saml2Endpoint().setLocation(request.getDestination().toString()));
 		NameIDType nameID = getNameID(request.getNameID(), request.getEncryptedID(), localKeys);
 		result.setNameId(getNameIdPrincipal(nameID));
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, request.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, result, request.getSignature());
 		return result;
 	}
 
@@ -1613,7 +1613,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
 			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
 			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, result, request.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, result, request.getSignature());
 		return result;
 	}
 
@@ -1677,7 +1677,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		desc.setId(descriptor.getID());
 		desc.setValidUntil(toDateTime(descriptor.getValidUntil()));
 
-		KeycloakSignatureValidator.assignSignatureToObject(signatureMap, desc, descriptor.getSignature());
+		KeycloakSaml2SignatureValidator.assignSignatureToObject(signatureMap, desc, descriptor.getSignature());
 		return desc;
 	}
 

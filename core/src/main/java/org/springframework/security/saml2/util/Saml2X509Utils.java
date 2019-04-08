@@ -29,7 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 import org.springframework.security.saml2.Saml2KeyException;
 
@@ -59,8 +59,7 @@ public class Saml2X509Utils {
 
 	public static byte[] getDER(String pem) {
 		String data = keyCleanup(pem);
-
-		return DatatypeConverter.parseBase64Binary(data);
+		return Base64.getDecoder().decode(data);
 	}
 
 	public static String keyCleanup(String pem) {

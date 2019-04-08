@@ -28,5 +28,5 @@ dependencies {
 	}
 	testCompile group: 'org.xmlunit', name: 'xmlunit-core', version: '2.5.1'
 	testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
-	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.18.3'
+	testCompile group: 'org.mockito', name: 'mockito-core', version: "${mockitoVersion}"
 }

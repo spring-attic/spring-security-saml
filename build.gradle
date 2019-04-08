@@ -43,12 +43,13 @@ configure(allprojects) { project ->
 	ext.bcprovVersion = "1.60"
 	ext.openSamlVersion = "3.3.0"
 	ext.commonsLoggingVersion = "1.2"
-	ext.springBootVersion = "2.0.7.RELEASE"
+	ext.springBootVersion = "2.1.4.RELEASE"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 	ext.junitVersion = "5.3.2"
 	ext.jodaTimeVersion = "2.10.1"
 	ext.httpClientVersion = "4.5.6"
 	ext.thymeleafExtrasSpringSecurityVersion = "3.0.4.RELEASE"
+	ext.mockitoVersion = '2.26.0'
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
@@ -282,20 +283,5 @@ configure(rootProject) {
 		archives distZip
 	}
 
-	task wrapper(type: Wrapper) {
-		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "2.3"
-
-		doLast() {
-			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
-			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-			File wrapperFile = file("gradlew")
-			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-				"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-			File wrapperBatFile = file("gradlew.bat")
-			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-		}
-	}
 
 }

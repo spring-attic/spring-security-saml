@@ -12,5 +12,7 @@ logging:
     sample: DEBUG
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   thymeleaf:
     cache: false

@@ -13,6 +13,8 @@ logging:
     org.springframework.security.saml: DEBUG
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   thymeleaf:
     cache: false
   security:

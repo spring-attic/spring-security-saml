@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,7 +59,7 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
 import static org.springframework.util.Assert.notNull;
 
-class Saml2ServiceProviderConfiguration {
+class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 
 	public static final String SAML2_TRANSFORMER_OPEN_SAML =
 		"org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer";
@@ -77,6 +78,7 @@ class Saml2ServiceProviderConfiguration {
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
 	private String pathPrefix;
+	private ClassLoader classLoader = Saml2ServiceProviderConfiguration.class.getClassLoader();
 
 	Saml2ServiceProviderConfiguration() {
 	}
@@ -350,7 +352,7 @@ class Saml2ServiceProviderConfiguration {
 	Saml2Transformer getClassInstance(String className) {
 		try {
 			logger.info("Loading SAML2 implementation:"+className);
-			Class<?> clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+			Class<?> clazz = Class.forName(className, true, classLoader);
 			return (Saml2Transformer) clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			throw new Saml2Exception(
@@ -397,5 +399,10 @@ class Saml2ServiceProviderConfiguration {
 		if (ofNullable(configuredObject).isPresent()) {
 			throw new IllegalStateException(identifier + " should be null if you wish to configure a " + alternate);
 		}
+	}
+
+	@Override
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 }

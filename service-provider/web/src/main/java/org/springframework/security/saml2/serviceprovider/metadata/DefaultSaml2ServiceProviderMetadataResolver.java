@@ -170,7 +170,7 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 			Saml2IdentityProviderMetadata result = new Saml2IdentityProviderMetadata(metadata);
 			result.setProviders(providers);
 			result.setImplementation(metadata.getImplementation());
-			result.setOriginalXML(metadata.getOriginalXML());
+			result.setOriginalDataRepresentation(metadata.getOriginalDataRepresentation());
 			return result;
 		}
 	}

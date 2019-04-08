@@ -640,8 +640,8 @@ public class Saml2AssertionTests extends MetadataBase {
 		Saml2Object resolve = config.fromXml(assertion, verification, local);
 		assertNotNull(resolve);
 		assertThat(resolve.getClass(), equalTo(Saml2ResponseSaml2.class));
-		assertNotNull(resolve.getOriginalXML());
-		assertThat(resolve.getOriginalXML(), equalTo(new String(assertion, StandardCharsets.UTF_8)));
+		assertNotNull(resolve.getOriginalDataRepresentation());
+		assertThat(resolve.getOriginalDataRepresentation(), equalTo(new String(assertion, StandardCharsets.UTF_8)));
 	}
 
 }

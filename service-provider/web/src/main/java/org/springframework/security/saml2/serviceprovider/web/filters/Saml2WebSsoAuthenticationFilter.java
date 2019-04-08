@@ -122,7 +122,7 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 			r.getOriginEntityId(),
 			provider.getMetadata().getEntityId(),
 			request.getParameter("RelayState"),
-			r.getOriginalXML()
+			r.getOriginalDataRepresentation()
 		);
 		return getAuthenticationManager().authenticate(auth);
 	}

@@ -317,7 +317,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		if (result != null) {
 			if (result instanceof Saml2ImplementationHolder) {
 				((Saml2ImplementationHolder) result).setImplementation(parsed);
-				((Saml2ImplementationHolder) result).setOriginalXML(new String(xml, StandardCharsets.UTF_8));
+				((Saml2ImplementationHolder) result).setOriginalDataRepresentation(new String(xml, StandardCharsets.UTF_8));
 			}
 			return result;
 		}

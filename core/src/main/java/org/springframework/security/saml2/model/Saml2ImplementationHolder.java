@@ -20,7 +20,7 @@ package org.springframework.security.saml2.model;
 public abstract class Saml2ImplementationHolder<T extends Saml2ImplementationHolder> implements Saml2Object {
 
 	private Object implementation;
-	private String originalXML;
+	private String originalData;
 
 	public Object getImplementation() {
 		return implementation;
@@ -32,12 +32,12 @@ public abstract class Saml2ImplementationHolder<T extends Saml2ImplementationHol
 	}
 
 	@Override
-	public String getOriginalXML() {
-		return originalXML;
+	public String getOriginalDataRepresentation() {
+		return originalData;
 	}
 
-	public T setOriginalXML(String originalXML) {
-		this.originalXML = originalXML;
+	public T setOriginalDataRepresentation(String originalData) {
+		this.originalData = originalData;
 		return _this();
 	}
 

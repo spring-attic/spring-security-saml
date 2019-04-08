@@ -66,7 +66,7 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			Saml2AuthenticationRequest authn = resolver.resolve(request);
-			sendAuthenticationRequest(authn, authn.getDestination(), request, response);
+			sendAuthenticationRequest(authn, request, response);
 		}
 		else {
 			filterChain.doFilter(request, response);
@@ -74,10 +74,10 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 	}
 
 	protected void sendAuthenticationRequest(Saml2AuthenticationRequest authn,
-											 Saml2Endpoint destination,
 											 HttpServletRequest request,
 											 HttpServletResponse response) throws IOException {
 		String relayState = request.getParameter("RelayState");
+		Saml2Endpoint destination = authn.getDestination();
 		if (destination.getBinding().equals(Saml2Binding.REDIRECT)) {
 			String encoded = resolver.encode(authn, true);
 			UriComponentsBuilder url = UriComponentsBuilder.fromUriString(destination.getLocation());

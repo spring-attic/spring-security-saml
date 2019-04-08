@@ -34,9 +34,24 @@ public interface Saml2Object {
 	 */
 	Object getImplementation();
 
-	String getOriginalXML();
+	/**
+	 * If this object was decoded from an XML stream,
+	 * this method returns the data in it's original XML format.
+	 * @return XML data if the object was decoded from XML, null otherwise
+	 */
+	String getOriginalDataRepresentation();
 
+	/**
+	 * returns the entity-id of the service/identity provider that this object originated from.
+	 * can be null.
+	 * @return the origin entity-id or null
+	 */
 	String getOriginEntityId();
 
+	/**
+	 * returns the entity-id of the service/identity provider that this object destined for.
+	 * can be null.
+	 * @return the destination entity-id or null
+	 */
 	String getDestinationEntityId();
 }

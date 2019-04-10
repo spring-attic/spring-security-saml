@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.serviceprovider.model.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -35,19 +33,11 @@ public class Saml2AuthenticationRequestResolvingFilter extends OncePerRequestFil
 
 	private final Saml2AuthenticationRequestResolver resolver;
 	private final RequestMatcher matcher;
-	private final RedirectStrategy redirectStrategy;
 
 	public Saml2AuthenticationRequestResolvingFilter(Saml2AuthenticationRequestResolver resolver,
 													 RequestMatcher matcher) {
-		this(resolver, matcher, new DefaultRedirectStrategy());
-	}
-
-	public Saml2AuthenticationRequestResolvingFilter(Saml2AuthenticationRequestResolver resolver,
-													 RequestMatcher matcher,
-													 RedirectStrategy redirectStrategy) {
 		this.resolver = resolver;
 		this.matcher = matcher;
-		this.redirectStrategy = redirectStrategy;
 	}
 
 	@Override

@@ -41,7 +41,7 @@
     </bean>
 
     <bean id="samlServiceProviderMetadataResolver"
-          class="org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver">
+          class="org.springframework.security.saml2.serviceprovider.web.metadata.DefaultSaml2ServiceProviderMetadataResolver">
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
@@ -92,7 +92,7 @@
     </bean>
 
     <bean id="samlSpMetadataFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderMetadataFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderMetadataFilter">
         <constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="metadataMatcher"/>
@@ -108,10 +108,24 @@
 	</bean>
 
     <bean id="samlLoginPageGeneratingFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2LoginPageGeneratingFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2LoginPageGeneratingFilter">
         <constructor-arg ref="staticIdpLoginMatcher"/>
 		<constructor-arg value="#{@staticLoginPageUrls.getStaticLoginUrls()}"/>
     </bean>
+
+	<bean id="samlHttpMessageRenderingViewFilter"
+		  class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageRenderingViewFilter">
+		<constructor-arg>
+			<bean class="org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods">
+				<constructor-arg ref="samlTransformer"/>
+				<constructor-arg ref="samlServiceProviderResolver"/>
+				<constructor-arg ref="samlServiceProviderValidator"/>
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="org.springframework.security.web.DefaultRedirectStrategy"/>
+		</constructor-arg>
+	</bean>
 
 	<!--<bean id="selectIdentityProviderUIFilter"-->
 		  <!--class="org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter">-->
@@ -120,14 +134,14 @@
 	<!--</bean>-->
 
 	<bean id="saml2AuthenticationRequestResolver"
-		  class="org.springframework.security.saml2.serviceprovider.web.filters.DefaultSaml2AuthenticationRequestResolver">
+		  class="org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver">
 		<constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
 		<constructor-arg ref="samlServiceProviderValidator"/>
 	</bean>
 
 	<bean id="saml2AuthenticationRequestFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationRequestFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter">
         <constructor-arg ref="idpDiscoveryMatcher"/>
         <constructor-arg ref="saml2AuthenticationRequestResolver"/>
     </bean>
@@ -136,7 +150,7 @@
           class="org.springframework.security.saml2.samples.NoOpAuthenticationManager"/>
 
     <bean id="samlWebSsoAuthenticationFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2WebSsoAuthenticationFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2WebSsoAuthenticationFilter">
         <constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
         <constructor-arg ref="samlServiceProviderValidator"/>
@@ -147,12 +161,12 @@
 		</constructor-arg>
         <property name="authenticationManager" ref="samlAuthenticationManager"/>
         <property name="authenticationFailureHandler">
-            <bean class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2AuthenticationFailureHandler"/>
+            <bean class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler"/>
         </property>
     </bean>
 
     <bean id="serviceProviderLogoutFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filters.Saml2ServiceProviderLogoutFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderLogoutFilter">
 
 		<constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
@@ -192,10 +206,10 @@
         <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
         <security:custom-filter ref="samlSpMetadataFilter" before="DIGEST_AUTH_FILTER"/>
         <security:custom-filter ref="samlLoginPageGeneratingFilter" position="DIGEST_AUTH_FILTER"/>
-        <!--<security:custom-filter ref="selectIdentityProviderUIFilter" after="DIGEST_AUTH_FILTER"/>-->
         <security:custom-filter ref="saml2AuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>
+        <security:custom-filter ref="samlHttpMessageRenderingViewFilter" before="LAST"/>
         <security:csrf request-matcher-ref="samlMatcher" disabled="true"/>
     </security:http>
 

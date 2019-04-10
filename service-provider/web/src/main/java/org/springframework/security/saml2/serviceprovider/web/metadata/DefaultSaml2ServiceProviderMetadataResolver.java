@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.metadata;
+package org.springframework.security.saml2.serviceprovider.web.metadata;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,6 +45,7 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
+import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.cache.DefaultSaml2MetadataCache;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.web.filters;
+package org.springframework.security.saml2.serviceprovider.web.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -47,6 +47,7 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;

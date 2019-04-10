@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.web.filters;
+package org.springframework.security.saml2.serviceprovider.web.filter;
 
 import java.io.IOException;
 import java.util.Map;

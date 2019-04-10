@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.web.filters;
+package org.springframework.security.saml2.serviceprovider.web.authentication;
 
 import java.time.Clock;
 import java.util.Map;
@@ -37,7 +37,7 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -78,12 +78,6 @@ public class DefaultSaml2AuthenticationRequestResolver
 			idpConfig.getAssertionConsumerServiceIndex(),
 			preferredSSOBinding
 		);
-	}
-
-	@Override
-	public String encode(Saml2AuthenticationRequest authn, boolean deflate) {
-		String xml = serviceProviderMethods.getTransformer().toXml(authn);
-		return serviceProviderMethods.getTransformer().samlEncode(xml, deflate);
 	}
 
 	/*

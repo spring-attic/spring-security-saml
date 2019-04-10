@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.bean;
+package org.springframework.security.saml2.serviceprovider.web.bean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,7 @@ import org.springframework.security.saml2.serviceprovider.web.Saml2WebServicePro
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.DefaultSaml2ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.web.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;

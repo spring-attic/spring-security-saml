@@ -23,8 +23,6 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 
 public interface Saml2AuthenticationRequestResolver {
 
-	String encode(Saml2AuthenticationRequest authn, boolean deflate);
-
 	Saml2AuthenticationRequest resolve(HttpServletRequest request);
 
 }

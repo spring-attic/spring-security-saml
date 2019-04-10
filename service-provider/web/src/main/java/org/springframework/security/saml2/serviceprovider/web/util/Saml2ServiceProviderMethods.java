@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.web.filters;
+package org.springframework.security.saml2.serviceprovider.web.util;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -37,13 +37,13 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.springframework.util.StringUtils.hasText;
 
-class Saml2ServiceProviderMethods {
+public class Saml2ServiceProviderMethods {
 
 	private final Saml2Transformer transformer;
 	private final Saml2ServiceProviderResolver resolver;
 	private final Saml2ServiceProviderValidator validator;
 
-	Saml2ServiceProviderMethods(Saml2Transformer transformer,
+	public Saml2ServiceProviderMethods(Saml2Transformer transformer,
 								Saml2ServiceProviderResolver resolver,
 								Saml2ServiceProviderValidator validator) {
 		this.transformer = transformer;
@@ -64,11 +64,11 @@ class Saml2ServiceProviderMethods {
 		return validator;
 	}
 
-	String getEndpointPath(HttpServletRequest request) {
+	public String getEndpointPath(HttpServletRequest request) {
 		return new UrlPathHelper().getPathWithinApplication(request);
 	}
 
-	HostedSaml2ServiceProvider getProvider(HttpServletRequest request) {
+	public HostedSaml2ServiceProvider getProvider(HttpServletRequest request) {
 		HostedSaml2ServiceProvider serviceProvider = getResolver().getServiceProvider(request);
 		if (serviceProvider == null) {
 			throw new Saml2ProviderNotFoundException("hosted");
@@ -76,15 +76,15 @@ class Saml2ServiceProviderMethods {
 		return serviceProvider;
 	}
 
-	Saml2Object getSamlRequest(HttpServletRequest request) {
+	public Saml2Object getSamlRequest(HttpServletRequest request) {
 		return parseSamlObject(request, getProvider(request), "SAMLRequest");
 	}
 
-	Saml2Object getSamlResponse(HttpServletRequest request) {
+	public Saml2Object getSamlResponse(HttpServletRequest request) {
 		return parseSamlObject(request, getProvider(request), "SAMLResponse");
 	}
 
-	Saml2Endpoint getPreferredEndpoint(List<Saml2Endpoint> endpoints,
+	public Saml2Endpoint getPreferredEndpoint(List<Saml2Endpoint> endpoints,
 									   Saml2BindingType preferredBinding,
 									   int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
@@ -126,7 +126,7 @@ class Saml2ServiceProviderMethods {
 		return result;
 	}
 
-	Saml2Object parseSamlObject(HttpServletRequest request,
+	public Saml2Object parseSamlObject(HttpServletRequest request,
 								HostedSaml2ServiceProvider provider,
 								String parameterName) {
 		Saml2Object result = null;

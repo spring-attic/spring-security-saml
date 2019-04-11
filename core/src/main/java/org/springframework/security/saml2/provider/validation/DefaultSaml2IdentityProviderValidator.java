@@ -27,7 +27,7 @@ import org.springframework.security.saml2.provider.HostedSaml2IdentityProvider;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
@@ -79,8 +79,8 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = validate((Saml2LogoutSaml2Request)saml2Object, provider);
 		}
-		else if (saml2Object instanceof Saml2LogoutResponseSaml2) {
-			result = validate((Saml2LogoutResponseSaml2)saml2Object, provider);
+		else if (saml2Object instanceof Saml2LogoutResponse) {
+			result = validate((Saml2LogoutResponse)saml2Object, provider);
 		}
 		else {
 			throw new Saml2Exception("No validation implemented for class:" + saml2Object.getClass().getName());

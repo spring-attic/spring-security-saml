@@ -37,7 +37,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
@@ -438,9 +438,9 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
-												   Saml2IdentityProviderMetadata recipient,
-												   Saml2ServiceProviderMetadata local) {
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+											  Saml2IdentityProviderMetadata recipient,
+											  Saml2ServiceProviderMetadata local) {
 		return logoutResponse(
 			request,
 			recipient,
@@ -449,12 +449,12 @@ public class SamlTestObjectHelper {
 		);
 	}
 
-	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
-												   Saml2Metadata<? extends Saml2Metadata> recipient,
-												   Saml2Metadata<? extends Saml2Metadata> local,
-												   Saml2Endpoint destination) {
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+											  Saml2Metadata<? extends Saml2Metadata> recipient,
+											  Saml2Metadata<? extends Saml2Metadata> local,
+											  Saml2Endpoint destination) {
 
-		return new Saml2LogoutResponseSaml2()
+		return new Saml2LogoutResponse()
 			.setId("LRP"+UUID.randomUUID().toString())
 			.setInResponseTo(request != null ? request.getId() : null)
 			.setDestination(destination != null ? destination.getLocation() : null)
@@ -465,9 +465,9 @@ public class SamlTestObjectHelper {
 			.setVersion("2.0");
 	}
 
-	public Saml2LogoutResponseSaml2 logoutResponse(Saml2LogoutSaml2Request request,
-												   Saml2ServiceProviderMetadata recipient,
-												   Saml2IdentityProviderMetadata local) {
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+											  Saml2ServiceProviderMetadata recipient,
+											  Saml2IdentityProviderMetadata local) {
 		return logoutResponse(
 			request,
 			recipient,

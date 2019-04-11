@@ -56,7 +56,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
@@ -377,8 +377,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = internalToXml((Saml2LogoutSaml2Request) saml2Object);
 		}
-		else if (saml2Object instanceof Saml2LogoutResponseSaml2) {
-			result = internalToXml((Saml2LogoutResponseSaml2) saml2Object);
+		else if (saml2Object instanceof Saml2LogoutResponse) {
+			result = internalToXml((Saml2LogoutResponse) saml2Object);
 		}
 		if (result != null) {
 			return marshallToXml(result);
@@ -992,7 +992,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return service;
 	}
 
-	private org.opensaml.saml.saml2.core.LogoutResponse internalToXml(Saml2LogoutResponseSaml2 response) {
+	private org.opensaml.saml.saml2.core.LogoutResponse internalToXml(Saml2LogoutResponse response) {
 		org.opensaml.saml.saml2.core.LogoutResponse result =
 			buildSAMLObject(org.opensaml.saml.saml2.core.LogoutResponse.class);
 		result.setInResponseTo(response.getInResponseTo());
@@ -1286,10 +1286,10 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 
 	}
 
-	private Saml2LogoutResponseSaml2 resolveLogoutResponse(org.opensaml.saml.saml2.core.LogoutResponse response,
-														   List<Saml2KeyData> verificationKeys,
-														   List<Saml2KeyData> localKeys) {
-		Saml2LogoutResponseSaml2 result = new Saml2LogoutResponseSaml2()
+	private Saml2LogoutResponse resolveLogoutResponse(org.opensaml.saml.saml2.core.LogoutResponse response,
+													  List<Saml2KeyData> verificationKeys,
+													  List<Saml2KeyData> localKeys) {
+		Saml2LogoutResponse result = new Saml2LogoutResponse()
 			.setId(response.getID())
 			.setInResponseTo(response.getInResponseTo())
 			.setConsent(response.getConsent())

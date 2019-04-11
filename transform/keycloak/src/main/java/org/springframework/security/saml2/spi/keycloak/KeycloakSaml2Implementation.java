@@ -61,7 +61,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
@@ -242,8 +242,8 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = internalToXml((Saml2LogoutSaml2Request) saml2Object);
 		}
-		else if (saml2Object instanceof Saml2LogoutResponseSaml2) {
-			result = internalToXml((Saml2LogoutResponseSaml2) saml2Object);
+		else if (saml2Object instanceof Saml2LogoutResponse) {
+			result = internalToXml((Saml2LogoutResponse) saml2Object);
 		}
 		if (result == null) {
 			throw new Saml2Exception("To xml transformation not supported for: " +
@@ -1045,7 +1045,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 
 	}
 
-	private Saml2LogoutResponseType internalToXml(Saml2LogoutResponseSaml2 response) {
+	private Saml2LogoutResponseType internalToXml(Saml2LogoutResponse response) {
 		if (!hasText(response.getId())) {
 			response.setId("L" + UUID.randomUUID().toString());
 		}
@@ -1524,10 +1524,10 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private Saml2LogoutResponseSaml2 resolveLogoutResponse(StatusResponseType response,
-														   Map<String, Saml2Signature> signatureMap,
-														   List<Saml2KeyData> localKeys) {
-		Saml2LogoutResponseSaml2 result = new Saml2LogoutResponseSaml2()
+	private Saml2LogoutResponse resolveLogoutResponse(StatusResponseType response,
+													  Map<String, Saml2Signature> signatureMap,
+													  List<Saml2KeyData> localKeys) {
+		Saml2LogoutResponse result = new Saml2LogoutResponse()
 			.setId(response.getID())
 			.setInResponseTo(response.getInResponseTo())
 			.setConsent(response.getConsent())

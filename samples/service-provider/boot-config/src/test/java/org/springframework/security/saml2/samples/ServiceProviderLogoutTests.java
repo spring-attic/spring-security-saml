@@ -30,7 +30,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.saml2.helper.SamlTestObjectHelper;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
@@ -152,7 +152,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 		Map<String, String> params = queryParams(new URI(redirect));
 		String response = params.get("SAMLResponse");
 		assertNotNull(response);
-		Saml2LogoutResponseSaml2 lr = (Saml2LogoutResponseSaml2) transformer.fromXml(
+		Saml2LogoutResponse lr = (Saml2LogoutResponse) transformer.fromXml(
 			transformer.samlDecode(response, true),
 			null,
 			null
@@ -188,7 +188,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			assertion.getSubject().getPrincipal()
 		);
 
-		Saml2LogoutResponseSaml2 response = helper.logoutResponse(request, sp, idp);
+		Saml2LogoutResponse response = helper.logoutResponse(request, sp, idp);
 
 		String xml = transformer.toXml(response);
 		String param = transformer.samlEncode(xml, true);

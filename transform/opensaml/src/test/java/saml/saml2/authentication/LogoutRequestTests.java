@@ -23,7 +23,7 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
@@ -267,11 +267,11 @@ class LogoutObjectTests {
 
 	@Test
 	public void responseFromXml() throws Exception {
-		Saml2LogoutResponseSaml2 response = saml.fromXml(
+		Saml2LogoutResponse response = saml.fromXml(
 			EXAMPLE_RESPONSE,
 			Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")),
 			null,
-			Saml2LogoutResponseSaml2.class
+			Saml2LogoutResponse.class
 		);
 		assertThat(response.getId(), equalTo("response-id"));
 		assertNotNull(response.getDestination());
@@ -295,7 +295,7 @@ class LogoutObjectTests {
 
 	@Test
 	public void responseToXml() throws Exception {
-		Saml2LogoutResponseSaml2 response = new Saml2LogoutResponseSaml2()
+		Saml2LogoutResponse response = new Saml2LogoutResponse()
 			.setInResponseTo("in-response-to")
 			.setDestination(destination)
 			.setId("response-id")

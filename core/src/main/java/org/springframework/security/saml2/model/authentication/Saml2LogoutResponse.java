@@ -24,6 +24,6 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 62, Line 2708
  */
-public class Saml2LogoutResponseSaml2
-	extends Saml2StatusResponse<Saml2LogoutResponseSaml2> implements Saml2SignableObject<Saml2LogoutResponseSaml2> {
+public class Saml2LogoutResponse
+	extends Saml2StatusResponse<Saml2LogoutResponse> implements Saml2SignableObject<Saml2LogoutResponse> {
 }

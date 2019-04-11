@@ -48,6 +48,8 @@ import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderRe
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.model.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -68,13 +70,29 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 	private final RequestMatcher matcher;
 	private final Saml2ServiceProviderMethods saml2SpMethods;
+	private final Saml2HttpMessageResponder saml2MessageResponder;
 
 	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
 											Saml2ServiceProviderResolver resolver,
 											Saml2ServiceProviderValidator validator,
 											RequestMatcher matcher) {
+		this(
+			transformer,
+			resolver,
+			validator,
+			matcher,
+			new DefaultRedirectStrategy()
+		);
+	}
+
+	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
+											Saml2ServiceProviderResolver resolver,
+											Saml2ServiceProviderValidator validator,
+											RequestMatcher matcher,
+											RedirectStrategy redirectStrategy) {
 		this.matcher = matcher;
 		this.saml2SpMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
+		this.saml2MessageResponder = new Saml2HttpMessageResponder(saml2SpMethods, redirectStrategy);
 	}
 
 	public LogoutSuccessHandler getLogoutSuccessHandler() {
@@ -90,32 +108,37 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			Saml2Object logoutRequest = saml2SpMethods.getSamlRequest(request);
-			Saml2Object logoutResponse = saml2SpMethods.getSamlResponse(request);
-			if (ofNullable(logoutRequest).isPresent()) {
-				receivedLogoutRequest(request, response, authentication, logoutRequest);
-			}
-			else if (ofNullable(logoutResponse).isPresent()) {
-				finishLogout(request, response, authentication, logoutResponse);
-				return;
-			}
-			else if (authentication instanceof Saml2Authentication) {
-				spInitiatedLogout(request, response, authentication);
-			}
-			else {
-				//just perform a simple logout
-				finishLogout(request, response, authentication, null);
-				return;
-			}
+			doSaml2LogoutAction(request, response);
 		}
-		filterChain.doFilter(request, response);
+		else {
+			filterChain.doFilter(request, response);
+		}
 	}
 
-	protected void receivedLogoutRequest(HttpServletRequest request,
-										 HttpServletResponse response,
-										 Authentication authentication,
-										 Saml2Object logoutRequest) throws IOException {
+	private void doSaml2LogoutAction(HttpServletRequest request, HttpServletResponse response)
+		throws IOException, ServletException {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Saml2Object logoutRequest = saml2SpMethods.getSamlRequest(request);
+		Saml2Object logoutResponse = saml2SpMethods.getSamlResponse(request);
+		if (ofNullable(logoutRequest).isPresent()) {
+			receivedLogoutRequest(request, response, authentication, logoutRequest);
+		}
+		else if (ofNullable(logoutResponse).isPresent()) {
+			finishLogout(request, response, authentication, logoutResponse);
+		}
+		else if (authentication instanceof Saml2Authentication) {
+			spInitiatedLogout(request, response, authentication);
+		}
+		else {
+			//just perform a simple logout
+			finishLogout(request, response, authentication, null);
+		}
+	}
+
+	private void receivedLogoutRequest(HttpServletRequest request,
+									   HttpServletResponse response,
+									   Authentication authentication,
+									   Saml2Object logoutRequest) throws IOException {
 
 		if (!(logoutRequest instanceof Saml2LogoutSaml2Request)) {
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
@@ -137,21 +160,25 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 				.setBinding(Saml2Binding.REDIRECT),
 			getLogoutRelayState(request, idp)
 		);
-		request.setAttribute(Saml2HttpMessageData.getModelAttributeName(), mvcData);
+		saml2MessageResponder.processResponse(
+			mvcData,
+			request,
+			response
+		);
 		doLogout(request, response, authentication);
 	}
 
-	protected void finishLogout(HttpServletRequest request,
-								HttpServletResponse response,
-								Authentication authentication,
-								Saml2Object logoutResponse) throws IOException, ServletException {
+	private void finishLogout(HttpServletRequest request,
+							  HttpServletResponse response,
+							  Authentication authentication,
+							  Saml2Object logoutResponse) throws IOException, ServletException {
 		doLogout(request, response, authentication);
 		logoutSuccessHandler.onLogoutSuccess(request, response, authentication);
 	}
 
-	protected void spInitiatedLogout(HttpServletRequest request,
-									 HttpServletResponse response,
-									 Authentication authentication) throws IOException {
+	private void spInitiatedLogout(HttpServletRequest request,
+								   HttpServletResponse response,
+								   Authentication authentication) throws IOException {
 		if (authentication instanceof Saml2Authentication) {
 			Saml2Authentication sa = (Saml2Authentication) authentication;
 			logger.debug(format("Initiating SP logout for SP:%s", sa.getHoldingEntityId()));
@@ -170,7 +197,11 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 						idp
 					)
 				);
-				request.setAttribute(Saml2HttpMessageData.getModelAttributeName(), mvcData);
+				saml2MessageResponder.processResponse(
+					mvcData,
+					request,
+					response
+				);
 			}
 			else {
 				throw new Saml2Exception("Unable to send logout request. No destination set.");
@@ -178,7 +209,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		}
 	}
 
-	protected Saml2LogoutResponse logoutResponse(
+	private Saml2LogoutResponse logoutResponse(
 		HostedSaml2ServiceProvider local,
 		Saml2LogoutSaml2Request request,
 		Saml2IdentityProviderMetadata recipient) {
@@ -203,13 +234,13 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 			.setVersion("2.0");
 	}
 
-	protected void doLogout(HttpServletRequest request,
-							HttpServletResponse response, Authentication authentication) {
+	private void doLogout(HttpServletRequest request,
+						  HttpServletResponse response, Authentication authentication) {
 		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 		logoutHandler.logout(request, response, authentication);
 	}
 
-	protected Saml2LogoutSaml2Request logoutRequest(
+	private Saml2LogoutSaml2Request logoutRequest(
 		Saml2ServiceProviderMetadata local,
 		Saml2IdentityProviderMetadata idp,
 		Saml2NameIdPrincipalSaml2 principal) {
@@ -231,7 +262,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		return result;
 	}
 
-	protected String getLogoutRelayState(HttpServletRequest request, Saml2IdentityProviderMetadata idp) {
+	private String getLogoutRelayState(HttpServletRequest request, Saml2IdentityProviderMetadata idp) {
 		return request.getParameter("RelayState");
 	}
 

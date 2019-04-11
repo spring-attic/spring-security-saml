@@ -22,10 +22,6 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 
 public class Saml2HttpMessageData {
 
-	public static String getModelAttributeName() {
-		return Saml2HttpMessageData.class.getName();
-	}
-
 	private final Saml2Object samlRequest;
 	private final Saml2Object samlResponse;
 	private final Saml2Endpoint endpoint;

@@ -113,8 +113,15 @@
 		<constructor-arg value="#{@staticLoginPageUrls.getStaticLoginUrls()}"/>
     </bean>
 
-	<bean id="samlHttpMessageRenderingViewFilter"
-		  class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageRenderingViewFilter">
+	<bean id="saml2AuthenticationRequestResolver"
+		  class="org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver">
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
+	</bean>
+
+	<bean id="saml2MessageResponder"
+		  class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder">
 		<constructor-arg>
 			<bean class="org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods">
 				<constructor-arg ref="samlTransformer"/>
@@ -127,22 +134,10 @@
 		</constructor-arg>
 	</bean>
 
-	<!--<bean id="selectIdentityProviderUIFilter"-->
-		  <!--class="org.springframework.security.saml2.serviceprovider.web.filters.DynamicSelectIdentityProviderFilter">-->
-		<!--<constructor-arg ref="pathPrefix"/>-->
-		<!--<constructor-arg ref="selectIdpMatcher"/>-->
-	<!--</bean>-->
-
-	<bean id="saml2AuthenticationRequestResolver"
-		  class="org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver">
-		<constructor-arg ref="samlTransformer"/>
-		<constructor-arg ref="samlServiceProviderResolver"/>
-		<constructor-arg ref="samlServiceProviderValidator"/>
-	</bean>
-
 	<bean id="saml2AuthenticationRequestFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter">
         <constructor-arg ref="idpDiscoveryMatcher"/>
+		<constructor-arg ref="saml2MessageResponder"/>
         <constructor-arg ref="saml2AuthenticationRequestResolver"/>
     </bean>
 
@@ -209,7 +204,6 @@
         <security:custom-filter ref="saml2AuthenticationRequestFilter" before="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="samlWebSsoAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
         <security:custom-filter ref="serviceProviderLogoutFilter" after="BASIC_AUTH_FILTER"/>
-        <security:custom-filter ref="samlHttpMessageRenderingViewFilter" before="LAST"/>
         <security:csrf request-matcher-ref="samlMatcher" disabled="true"/>
     </security:http>
 

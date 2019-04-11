@@ -32,12 +32,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class Saml2AuthenticationRequestResolvingFilter extends OncePerRequestFilter {
 
 	private final Saml2AuthenticationRequestResolver resolver;
+	private final Saml2HttpMessageResponder responder;
 	private final RequestMatcher matcher;
 
 	public Saml2AuthenticationRequestResolvingFilter(Saml2AuthenticationRequestResolver resolver,
+													 Saml2HttpMessageResponder responder,
 													 RequestMatcher matcher) {
 		this.resolver = resolver;
 		this.matcher = matcher;
+		this.responder = responder;
 	}
 
 	@Override
@@ -45,9 +48,11 @@ public class Saml2AuthenticationRequestResolvingFilter extends OncePerRequestFil
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			Saml2HttpMessageData mvcModel = resolveAuthenticationRequest(request);
-			request.setAttribute(Saml2HttpMessageData.getModelAttributeName(), mvcModel);
+			responder.processResponse(mvcModel, request, response);
 		}
-		filterChain.doFilter(request, response);
+		else {
+			filterChain.doFilter(request, response);
+		}
 	}
 
 	private Saml2HttpMessageData resolveAuthenticationRequest(HttpServletRequest request) {

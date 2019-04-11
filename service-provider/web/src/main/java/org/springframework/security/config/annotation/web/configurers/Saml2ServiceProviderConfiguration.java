@@ -20,7 +20,6 @@ package org.springframework.security.config.annotation.web.configurers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
 import javax.servlet.Filter;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -35,17 +34,17 @@ import org.springframework.security.saml2.provider.validation.DefaultSaml2Servic
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageRenderingViewFilter;
-import org.springframework.security.saml2.serviceprovider.web.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver;
-import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler;
+import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter;
+import org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderMetadataFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2WebSsoAuthenticationFilter;
+import org.springframework.security.saml2.serviceprovider.web.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -136,26 +135,6 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return authenticationManager;
 	}
 
-	Filter getHttpMessageRenderingViewFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2HttpMessageRenderingViewFilter.class,
-			() -> {
-				Saml2ServiceProviderMethods methods = new Saml2ServiceProviderMethods(
-					getSamlTransformer(),
-					getServiceProviderResolver(),
-					getSamlValidator()
-				);
-				return new Saml2HttpMessageRenderingViewFilter(
-					methods,
-					new DefaultRedirectStrategy()
-				);
-			},
-			null
-		);
-	}
-
 	Filter getLogoutFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
@@ -204,6 +183,14 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 					transformer,
 					providerResolver,
 					validator
+				),
+				new Saml2HttpMessageResponder(
+					new Saml2ServiceProviderMethods(
+						transformer,
+						providerResolver,
+						validator
+					),
+					new DefaultRedirectStrategy()
 				),
 				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 			),

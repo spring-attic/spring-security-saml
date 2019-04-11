@@ -176,8 +176,7 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 				configuration.getStaticLoginPageFilter(),
 				configuration.getAuthenticationRequestFilter(),
 				configuration.getWebSsoAuthenticationFilter(),
-				configuration.getLogoutFilter(),
-				configuration.getHttpMessageRenderingViewFilter()
+				configuration.getLogoutFilter()
 			);
 		}
 	}

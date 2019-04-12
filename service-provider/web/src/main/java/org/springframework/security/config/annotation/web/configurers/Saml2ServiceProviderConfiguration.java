@@ -35,10 +35,10 @@ import org.springframework.security.saml2.provider.validation.Saml2ServiceProvid
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler;
-import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter;
+import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderLogoutFilter;
@@ -206,8 +206,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			Saml2AuthenticationRequestResolvingFilter.class,
-			() -> new Saml2AuthenticationRequestResolvingFilter(
+			Saml2AuthenticationRequestFilter.class,
+			() -> new Saml2AuthenticationRequestFilter(
 				new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
 				getSamlHttpMessageResponder(),
 				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
@@ -362,7 +362,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			);
 
 			metadataResolver = getSamlMetadataResolver();
-			providerResolver = new Saml2WebServiceProviderResolver(metadataResolver, configurationResolver);
+			providerResolver = new DefaultSaml2ServiceProviderResolver(metadataResolver, configurationResolver);
 			setSharedObject(http, Saml2ServiceProviderResolver.class, providerResolver);
 		}
 	}

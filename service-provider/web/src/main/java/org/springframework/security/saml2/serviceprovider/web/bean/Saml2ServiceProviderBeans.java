@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 import org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver;
@@ -57,7 +57,7 @@ public class Saml2ServiceProviderBeans {
 
 	@Bean(name = "samlServiceProviderResolver")
 	public Saml2ServiceProviderResolver serviceProviderResolver() {
-		return new Saml2WebServiceProviderResolver(
+		return new DefaultSaml2ServiceProviderResolver(
 			serviceProviderMetadataResolver(),
 			serviceProviderConfigurationResolver()
 		);

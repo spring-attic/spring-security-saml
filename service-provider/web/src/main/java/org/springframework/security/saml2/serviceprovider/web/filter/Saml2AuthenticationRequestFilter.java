@@ -29,15 +29,15 @@ import org.springframework.security.saml2.serviceprovider.web.authentication.Sam
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class Saml2AuthenticationRequestResolvingFilter extends OncePerRequestFilter {
+public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 
 	private final Saml2AuthenticationRequestResolver resolver;
 	private final Saml2HttpMessageResponder responder;
 	private final RequestMatcher matcher;
 
-	public Saml2AuthenticationRequestResolvingFilter(Saml2AuthenticationRequestResolver resolver,
-													 Saml2HttpMessageResponder responder,
-													 RequestMatcher matcher) {
+	public Saml2AuthenticationRequestFilter(Saml2AuthenticationRequestResolver resolver,
+											Saml2HttpMessageResponder responder,
+											RequestMatcher matcher) {
 		this.resolver = resolver;
 		this.matcher = matcher;
 		this.responder = responder;

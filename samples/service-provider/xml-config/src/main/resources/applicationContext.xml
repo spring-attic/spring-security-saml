@@ -51,7 +51,7 @@
     </bean>
 
     <bean id="samlServiceProviderResolver"
-          class="org.springframework.security.saml2.serviceprovider.web.Saml2WebServiceProviderResolver">
+          class="org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver">
         <constructor-arg ref="samlServiceProviderMetadataResolver"/>
         <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
     </bean>
@@ -134,7 +134,7 @@
 	</bean>
 
 	<bean id="saml2AuthenticationRequestFilter"
-          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter">
+          class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestFilter">
         <constructor-arg ref="saml2AuthenticationRequestResolver"/>
 		<constructor-arg ref="samlServiceProviderResponder"/>
 		<constructor-arg ref="idpDiscoveryMatcher"/>

@@ -49,8 +49,8 @@ public class Saml2HttpMessageResponder {
 	}
 
 	void processResponse(Saml2HttpMessageData model,
-								 HttpServletRequest request,
-								 HttpServletResponse response) throws IOException {
+						 HttpServletRequest request,
+						 HttpServletResponse response) throws IOException {
 		String relayState = model.getRelayState();
 		if (!hasText(relayState)) {
 			relayState = request.getParameter("RelayState");
@@ -123,7 +123,7 @@ public class Saml2HttpMessageResponder {
 			"            </p>\n" +
 			"        </noscript>\n" +
 			"        \n" +
-			"        <form action=\""+ postUrl +"\" method=\"post\">\n" +
+			"        <form action=\"" + postUrl + "\" method=\"post\">\n" +
 			"            <div>\n" +
 			(hasText(relayState) ?
 				("                <input type=\"hidden\" name=\"RelayState\" value=\"" +

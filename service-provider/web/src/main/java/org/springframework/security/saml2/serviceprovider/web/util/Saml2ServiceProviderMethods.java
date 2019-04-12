@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.metadata.Saml2BindingType;
@@ -32,6 +30,8 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
+import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -44,8 +44,8 @@ public class Saml2ServiceProviderMethods {
 	private final Saml2ServiceProviderValidator validator;
 
 	public Saml2ServiceProviderMethods(Saml2Transformer transformer,
-								Saml2ServiceProviderResolver resolver,
-								Saml2ServiceProviderValidator validator) {
+									   Saml2ServiceProviderResolver resolver,
+									   Saml2ServiceProviderValidator validator) {
 		this.transformer = transformer;
 		this.resolver = resolver;
 		this.validator = validator;
@@ -85,8 +85,8 @@ public class Saml2ServiceProviderMethods {
 	}
 
 	public Saml2Endpoint getPreferredEndpoint(List<Saml2Endpoint> endpoints,
-									   Saml2BindingType preferredBinding,
-									   int preferredIndex) {
+											  Saml2BindingType preferredBinding,
+											  int preferredIndex) {
 		if (endpoints == null || endpoints.isEmpty()) {
 			return null;
 		}
@@ -127,8 +127,8 @@ public class Saml2ServiceProviderMethods {
 	}
 
 	public Saml2Object parseSamlObject(HttpServletRequest request,
-								HostedSaml2ServiceProvider provider,
-								String parameterName) {
+									   HostedSaml2ServiceProvider provider,
+									   String parameterName) {
 		Saml2Object result = null;
 		String rs = request.getParameter(parameterName);
 		if (hasText(rs)) {

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
-import org.springframework.security.saml2.serviceprovider.model.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.message.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;

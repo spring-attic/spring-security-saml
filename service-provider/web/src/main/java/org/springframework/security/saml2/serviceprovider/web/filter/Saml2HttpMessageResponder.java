@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
-import org.springframework.security.saml2.serviceprovider.model.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.message.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.web.util.HtmlUtils;

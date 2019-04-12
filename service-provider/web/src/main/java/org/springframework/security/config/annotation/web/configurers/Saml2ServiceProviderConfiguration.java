@@ -135,6 +135,38 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return authenticationManager;
 	}
 
+	Saml2ServiceProviderMethods getServiceProviderMethods() {
+		notNull(this.http, "Call validate(HttpSecurity) first.");
+		return getSharedObject(
+			http,
+			Saml2ServiceProviderMethods.class,
+			() -> new Saml2ServiceProviderMethods(
+				transformer,
+				providerResolver,
+				validator
+			),
+			null
+		);
+	}
+
+	Saml2HttpMessageResponder getSamlHttpMessageResponder() {
+		notNull(this.http, "Call validate(HttpSecurity) first.");
+		return getSharedObject(
+			http,
+			Saml2HttpMessageResponder.class,
+			() ->
+				new Saml2HttpMessageResponder(
+					new Saml2ServiceProviderMethods(
+						transformer,
+						providerResolver,
+						validator
+					),
+					new DefaultRedirectStrategy()
+				),
+			null
+		);
+	}
+
 	Filter getLogoutFilter() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
@@ -144,9 +176,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
 				return new Saml2ServiceProviderLogoutFilter(
-					transformer,
-					providerResolver,
-					validator,
+					getServiceProviderMethods(),
+					getSamlHttpMessageResponder(),
 					new AntPathRequestMatcher(pathPrefix + "/logout/**")
 				)
 					.setLogoutSuccessHandler(logoutSuccessHandler);
@@ -161,9 +192,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			http,
 			Saml2WebSsoAuthenticationFilter.class,
 			() -> new Saml2WebSsoAuthenticationFilter(
-				transformer,
-				providerResolver,
-				validator,
+				getServiceProviderMethods(),
 				new AntPathRequestMatcher(pathPrefix + "/SSO/**")
 			),
 			null
@@ -179,19 +208,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			http,
 			Saml2AuthenticationRequestResolvingFilter.class,
 			() -> new Saml2AuthenticationRequestResolvingFilter(
-				new DefaultSaml2AuthenticationRequestResolver(
-					transformer,
-					providerResolver,
-					validator
-				),
-				new Saml2HttpMessageResponder(
-					new Saml2ServiceProviderMethods(
-						transformer,
-						providerResolver,
-						validator
-					),
-					new DefaultRedirectStrategy()
-				),
+				new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
+				getSamlHttpMessageResponder(),
 				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 			),
 			null
@@ -339,7 +357,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 
 			notNull(
 				configurationResolver.getConfiguredPathPrefix(),
-				Saml2ServiceProviderConfigurationResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
+				Saml2ServiceProviderConfigurationResolver.class.getName() +
+					".getConfiguredPathPrefix() must not return null"
 			);
 
 			metadataResolver = getSamlMetadataResolver();
@@ -363,7 +382,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 
 	Saml2Transformer getClassInstance(String className) {
 		try {
-			logger.info("Loading SAML2 implementation:"+className);
+			logger.info("Loading SAML2 implementation:" + className);
 			Class<?> clazz = Class.forName(className, true, classLoader);
 			return (Saml2Transformer) clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

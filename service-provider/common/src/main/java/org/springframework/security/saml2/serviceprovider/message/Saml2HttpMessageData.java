@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.model;
+package org.springframework.security.saml2.serviceprovider.message;
 
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;

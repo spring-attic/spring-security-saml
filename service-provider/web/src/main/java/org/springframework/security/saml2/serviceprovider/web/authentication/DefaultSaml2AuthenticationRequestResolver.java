@@ -23,7 +23,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
-import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -35,8 +34,6 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -50,12 +47,10 @@ public class DefaultSaml2AuthenticationRequestResolver
 	implements Saml2AuthenticationRequestResolver {
 
 	private Clock clock = Clock.systemUTC();
-	private Saml2ServiceProviderMethods serviceProviderMethods;
+	private final Saml2ServiceProviderMethods serviceProviderMethods;
 
-	public DefaultSaml2AuthenticationRequestResolver(Saml2Transformer transformer,
-													 Saml2ServiceProviderResolver resolver,
-													 Saml2ServiceProviderValidator validator) {
-		serviceProviderMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
+	public DefaultSaml2AuthenticationRequestResolver(Saml2ServiceProviderMethods serviceProviderMethods) {
+		this.serviceProviderMethods = serviceProviderMethods;
 	}
 
 	@Override

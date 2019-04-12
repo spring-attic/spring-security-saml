@@ -56,6 +56,21 @@
         <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
     </bean>
 
+	<bean id="samlServiceProviderMethods"
+		  class="org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods">
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
+	</bean>
+
+	<bean id="samlServiceProviderResponder"
+		  class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder">
+		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg>
+			<bean class="org.springframework.security.web.DefaultRedirectStrategy"/>
+		</constructor-arg>
+	</bean>
+
     <bean id="pathPrefix"
           factory-bean="samlServiceProviderConfiguration"
           factory-method="getPathPrefix"
@@ -115,30 +130,14 @@
 
 	<bean id="saml2AuthenticationRequestResolver"
 		  class="org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver">
-		<constructor-arg ref="samlTransformer"/>
-		<constructor-arg ref="samlServiceProviderResolver"/>
-		<constructor-arg ref="samlServiceProviderValidator"/>
-	</bean>
-
-	<bean id="saml2MessageResponder"
-		  class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder">
-		<constructor-arg>
-			<bean class="org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods">
-				<constructor-arg ref="samlTransformer"/>
-				<constructor-arg ref="samlServiceProviderResolver"/>
-				<constructor-arg ref="samlServiceProviderValidator"/>
-			</bean>
-		</constructor-arg>
-		<constructor-arg>
-			<bean class="org.springframework.security.web.DefaultRedirectStrategy"/>
-		</constructor-arg>
+		<constructor-arg ref="samlServiceProviderMethods"/>
 	</bean>
 
 	<bean id="saml2AuthenticationRequestFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestResolvingFilter">
-        <constructor-arg ref="idpDiscoveryMatcher"/>
-		<constructor-arg ref="saml2MessageResponder"/>
         <constructor-arg ref="saml2AuthenticationRequestResolver"/>
+		<constructor-arg ref="samlServiceProviderResponder"/>
+		<constructor-arg ref="idpDiscoveryMatcher"/>
     </bean>
 
     <bean id="samlAuthenticationManager"
@@ -146,9 +145,7 @@
 
     <bean id="samlWebSsoAuthenticationFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2WebSsoAuthenticationFilter">
-        <constructor-arg ref="samlTransformer"/>
-		<constructor-arg ref="samlServiceProviderResolver"/>
-        <constructor-arg ref="samlServiceProviderValidator"/>
+        <constructor-arg ref="samlServiceProviderMethods"/>
 		<constructor-arg>
 			<bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
 				<constructor-arg value="#{'/' + pathPrefix + '/SSO/**'}"/>
@@ -163,9 +160,8 @@
     <bean id="serviceProviderLogoutFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderLogoutFilter">
 
-		<constructor-arg ref="samlTransformer"/>
-		<constructor-arg ref="samlServiceProviderResolver"/>
-		<constructor-arg ref="samlServiceProviderValidator"/>
+		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlServiceProviderResponder"/>
 		<constructor-arg ref="logoutMatcher"/>
         <property name="logoutSuccessHandler">
             <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">

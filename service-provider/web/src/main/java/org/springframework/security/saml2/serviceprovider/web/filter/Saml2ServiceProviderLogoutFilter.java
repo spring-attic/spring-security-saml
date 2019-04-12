@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.Saml2Exception;
-import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -43,13 +42,9 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.model.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.message.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -72,27 +67,12 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private final Saml2ServiceProviderMethods saml2SpMethods;
 	private final Saml2HttpMessageResponder saml2MessageResponder;
 
-	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
-											Saml2ServiceProviderResolver resolver,
-											Saml2ServiceProviderValidator validator,
+	public Saml2ServiceProviderLogoutFilter(Saml2ServiceProviderMethods saml2SpMethods,
+											Saml2HttpMessageResponder saml2MessageResponder,
 											RequestMatcher matcher) {
-		this(
-			transformer,
-			resolver,
-			validator,
-			matcher,
-			new DefaultRedirectStrategy()
-		);
-	}
-
-	public Saml2ServiceProviderLogoutFilter(Saml2Transformer transformer,
-											Saml2ServiceProviderResolver resolver,
-											Saml2ServiceProviderValidator validator,
-											RequestMatcher matcher,
-											RedirectStrategy redirectStrategy) {
 		this.matcher = matcher;
-		this.saml2SpMethods = new Saml2ServiceProviderMethods(transformer, resolver, validator);
-		this.saml2MessageResponder = new Saml2HttpMessageResponder(saml2SpMethods, redirectStrategy);
+		this.saml2SpMethods = saml2SpMethods;
+		this.saml2MessageResponder = saml2MessageResponder;
 	}
 
 	public LogoutSuccessHandler getLogoutSuccessHandler() {

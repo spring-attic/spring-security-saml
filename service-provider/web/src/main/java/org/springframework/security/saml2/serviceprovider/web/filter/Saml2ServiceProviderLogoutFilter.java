@@ -43,7 +43,8 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.message.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.web.binding.Saml2WebHttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -65,10 +66,10 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 	private LogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 	private final RequestMatcher matcher;
 	private final Saml2ServiceProviderMethods saml2SpMethods;
-	private final Saml2HttpMessageResponder saml2MessageResponder;
+	private final Saml2WebHttpMessageResponder saml2MessageResponder;
 
 	public Saml2ServiceProviderLogoutFilter(Saml2ServiceProviderMethods saml2SpMethods,
-											Saml2HttpMessageResponder saml2MessageResponder,
+											Saml2WebHttpMessageResponder saml2MessageResponder,
 											RequestMatcher matcher) {
 		this.matcher = matcher;
 		this.saml2SpMethods = saml2SpMethods;
@@ -140,7 +141,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 				.setBinding(Saml2Binding.REDIRECT),
 			getLogoutRelayState(request, idp)
 		);
-		saml2MessageResponder.processResponse(
+		saml2MessageResponder.sendSaml2Message(
 			mvcData,
 			request,
 			response
@@ -177,7 +178,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 						idp
 					)
 				);
-				saml2MessageResponder.processResponse(
+				saml2MessageResponder.sendSaml2Message(
 					mvcData,
 					request,
 					response

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.web.filter;
+package org.springframework.security.saml2.serviceprovider.web.binding;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
-import org.springframework.security.saml2.serviceprovider.message.Saml2HttpMessageData;
+import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.web.util.HtmlUtils;
@@ -37,20 +37,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.util.StringUtils.hasText;
 
-public class Saml2HttpMessageResponder {
+public class DefaultSaml2HttpMessageResponder implements Saml2WebHttpMessageResponder {
 
 	private final Saml2ServiceProviderMethods methods;
 	private final RedirectStrategy redirectStrategy;
 
-	public Saml2HttpMessageResponder(Saml2ServiceProviderMethods methods,
-									 RedirectStrategy redirectStrategy) {
+	public DefaultSaml2HttpMessageResponder(Saml2ServiceProviderMethods methods,
+											RedirectStrategy redirectStrategy) {
 		this.methods = methods;
 		this.redirectStrategy = redirectStrategy;
 	}
 
-	void processResponse(Saml2HttpMessageData model,
-						 HttpServletRequest request,
-						 HttpServletResponse response) throws IOException {
+	@Override
+	public void sendSaml2Message(Saml2HttpMessageData model,
+								 HttpServletRequest request,
+								 HttpServletResponse response) throws IOException {
 		String relayState = model.getRelayState();
 		if (!hasText(relayState)) {
 			relayState = request.getParameter("RelayState");

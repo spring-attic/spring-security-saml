@@ -37,9 +37,10 @@ import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderRe
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.binding.DefaultSaml2HttpMessageResponder;
+import org.springframework.security.saml2.serviceprovider.web.binding.Saml2WebHttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestFilter;
-import org.springframework.security.saml2.serviceprovider.web.filter.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2LoginPageGeneratingFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2ServiceProviderMetadataFilter;
@@ -149,13 +150,13 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		);
 	}
 
-	Saml2HttpMessageResponder getSamlHttpMessageResponder() {
+	Saml2WebHttpMessageResponder getSamlHttpMessageResponder() {
 		notNull(this.http, "Call validate(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			Saml2HttpMessageResponder.class,
+			DefaultSaml2HttpMessageResponder.class,
 			() ->
-				new Saml2HttpMessageResponder(
+				new DefaultSaml2HttpMessageResponder(
 					new Saml2ServiceProviderMethods(
 						transformer,
 						providerResolver,

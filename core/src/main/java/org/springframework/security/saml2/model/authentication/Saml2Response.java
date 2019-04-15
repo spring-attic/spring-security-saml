@@ -31,8 +31,8 @@ import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 47, Line 1995
  */
-public class Saml2ResponseSaml2 extends Saml2StatusResponse<Saml2ResponseSaml2>
-	implements Saml2SignableObject<Saml2ResponseSaml2> {
+public class Saml2Response extends Saml2StatusResponse<Saml2Response>
+	implements Saml2SignableObject<Saml2Response> {
 	private List<Saml2Assertion> assertions = new LinkedList<>();
 
 	private Saml2KeyData signingKey = null;
@@ -43,7 +43,7 @@ public class Saml2ResponseSaml2 extends Saml2StatusResponse<Saml2ResponseSaml2>
 		return Collections.unmodifiableList(assertions);
 	}
 
-	public Saml2ResponseSaml2 setAssertions(List<Saml2Assertion> assertions) {
+	public Saml2Response setAssertions(List<Saml2Assertion> assertions) {
 		this.assertions.clear();
 		this.assertions.addAll(assertions);
 		return this;
@@ -62,16 +62,16 @@ public class Saml2ResponseSaml2 extends Saml2StatusResponse<Saml2ResponseSaml2>
 	}
 
 	@Override
-	public Saml2ResponseSaml2 setSigningKey(Saml2KeyData signingKey,
-											Saml2AlgorithmMethod algorithm,
-											Saml2DigestMethod digest) {
+	public Saml2Response setSigningKey(Saml2KeyData signingKey,
+									   Saml2AlgorithmMethod algorithm,
+									   Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;
 		return this;
 	}
 
-	public Saml2ResponseSaml2 addAssertion(Saml2Assertion assertion) {
+	public Saml2Response addAssertion(Saml2Assertion assertion) {
 		this.assertions.add(assertion);
 		return this;
 	}

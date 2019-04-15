@@ -40,7 +40,7 @@ import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2R
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.authentication.Saml2Subject;
@@ -345,11 +345,11 @@ public class SamlTestObjectHelper {
 
 	}
 
-	public Saml2ResponseSaml2 response(Saml2AuthenticationRequest authn,
-									   Saml2Assertion assertion,
-									   Saml2ServiceProviderMetadata recipient,
-									   Saml2IdentityProviderMetadata local) {
-		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
+	public Saml2Response response(Saml2AuthenticationRequest authn,
+								  Saml2Assertion assertion,
+								  Saml2ServiceProviderMetadata recipient,
+								  Saml2IdentityProviderMetadata local) {
+		Saml2Response result = new Saml2Response()
 			.setAssertions(asList(assertion))
 			.setId("RP"+UUID.randomUUID().toString())
 			.setInResponseTo(authn != null ? authn.getId() : null)

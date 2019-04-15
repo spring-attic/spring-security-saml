@@ -61,7 +61,7 @@ import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.authentication.Saml2Subject;
@@ -371,8 +371,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		else if (saml2Object instanceof Saml2Metadata) {
 			result = internalToXml((Saml2Metadata) saml2Object);
 		}
-		else if (saml2Object instanceof Saml2ResponseSaml2) {
-			result = internalToXml((Saml2ResponseSaml2) saml2Object);
+		else if (saml2Object instanceof Saml2Response) {
+			result = internalToXml((Saml2Response) saml2Object);
 		}
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = internalToXml((Saml2LogoutSaml2Request) saml2Object);
@@ -803,7 +803,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return result;
 	}
 
-	private org.opensaml.saml.saml2.core.Response internalToXml(Saml2ResponseSaml2 response) {
+	private org.opensaml.saml.saml2.core.Response internalToXml(Saml2Response response) {
 		org.opensaml.saml.saml2.core.Response result = buildSAMLObject(org.opensaml.saml.saml2.core.Response.class);
 		result.setConsent(response.getConsent());
 		result.setID(ofNullable(response.getId()).orElse("A" + UUID.randomUUID().toString()));
@@ -1246,12 +1246,12 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return result;
 	}
 
-	private Saml2ResponseSaml2 resolveResponse(
+	private Saml2Response resolveResponse(
 		org.opensaml.saml.saml2.core.Response parsed,
 		List<Saml2KeyData> verificationKeys,
 		List<Saml2KeyData> localKeys
 	) {
-		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
+		Saml2Response result = new Saml2Response()
 			.setConsent(parsed.getConsent())
 			.setDestination(parsed.getDestination())
 			.setId(parsed.getID())

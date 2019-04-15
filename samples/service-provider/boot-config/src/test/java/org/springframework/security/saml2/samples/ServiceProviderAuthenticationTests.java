@@ -25,7 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.helper.SamlTestObjectHelper;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
@@ -82,7 +82,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 			Saml2AlgorithmMethod.RSA_SHA256,
 			Saml2DigestMethod.SHA256
 		);
-		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
+		Saml2Response r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);
 		String encoded = transformer.samlEncode(xml, false);
 
@@ -117,7 +117,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 			"user@test.org",
 			Saml2NameId.EMAIL
 		);
-		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
+		Saml2Response r = helper.response(null, a, sp, idp);
 		r.setSigningKey(
 			SimpleSamlPhpTestKeys.getSimpleSamlPhpKeyData(),
 			Saml2AlgorithmMethod.RSA_SHA256,
@@ -151,7 +151,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 			"user@test.org",
 			Saml2NameId.EMAIL
 		);
-		Saml2ResponseSaml2 r = helper.response(null, a, sp, idp);
+		Saml2Response r = helper.response(null, a, sp, idp);
 		String xml = transformer.toXml(r);
 		String encoded = transformer.samlEncode(xml, false);
 
@@ -173,7 +173,7 @@ public class ServiceProviderAuthenticationTests extends AbstractServiceProviderT
 				null
 			);
 		Saml2Assertion assertion = helper.assertion(sp, idp, null, "test-user@test.com", Saml2NameId.PERSISTENT);
-		Saml2ResponseSaml2 response = helper.response(
+		Saml2Response response = helper.response(
 			null,
 			assertion,
 			sp,

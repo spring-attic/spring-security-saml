@@ -30,7 +30,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
@@ -67,8 +67,8 @@ abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> 
 		throws Saml2SignatureException {
 		try {
 			Saml2Signature main = getSamlTransformer().validateSignature(saml2Object, verificationKeys);
-			if (saml2Object instanceof Saml2ResponseSaml2 && main == null) {
-				for (Saml2Assertion a : ((Saml2ResponseSaml2)saml2Object).getAssertions()) {
+			if (saml2Object instanceof Saml2Response && main == null) {
+				for (Saml2Assertion a : ((Saml2Response)saml2Object).getAssertions()) {
 					try {
 						Saml2Signature sig = getSamlTransformer().validateSignature(a, verificationKeys);
 						a.setSignature(sig);

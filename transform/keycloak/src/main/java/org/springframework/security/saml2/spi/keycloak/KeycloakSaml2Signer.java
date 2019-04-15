@@ -40,7 +40,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.Saml2KeyStoreProvider;
@@ -77,7 +77,7 @@ class KeycloakSaml2Signer {
 		this.provider = provider;
 	}
 
-	private String signOrEncrypt(Saml2ResponseSaml2 response, Document document) {
+	private String signOrEncrypt(Saml2Response response, Document document) {
 		try {
 			Map<String, Element> assertions = getAssertions(document);
 
@@ -120,8 +120,8 @@ class KeycloakSaml2Signer {
 			configureIdAttribute(document);
 
 			//response may have nested objects to be signed
-			if (signable instanceof Saml2ResponseSaml2) {
-				return signOrEncrypt((Saml2ResponseSaml2) signable, document);
+			if (signable instanceof Saml2Response) {
+				return signOrEncrypt((Saml2Response) signable, document);
 			}
 
 			if (signable.getSigningKey() == null) {

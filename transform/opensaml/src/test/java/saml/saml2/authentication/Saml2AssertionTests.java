@@ -36,7 +36,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2Subject;
 import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmation;
@@ -137,8 +137,8 @@ public class Saml2AssertionTests extends MetadataBase {
 
 	@Test
 	public void create_saml_response() throws Exception {
-		Saml2ResponseSaml2 response =
-			(Saml2ResponseSaml2) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		Saml2Response response =
+			(Saml2Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
 		response.setSigningKey(idpSigning, Saml2AlgorithmMethod.RSA_RIPEMD160, Saml2DigestMethod.SHA512);
 		response.getAssertions().get(0).setSigningKey(spSigning, Saml2AlgorithmMethod.RSA_SHA256, Saml2DigestMethod.SHA256);
 		String xml = config.toXml(response);
@@ -172,8 +172,8 @@ public class Saml2AssertionTests extends MetadataBase {
 
 	@Test
 	public void read_saml_response() throws Exception {
-		Saml2ResponseSaml2 response =
-			(Saml2ResponseSaml2) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		Saml2Response response =
+			(Saml2Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
 		assertNotNull(response);
 		assertNotNull(response.getImplementation());
 		assertThat(response.getId(), equalTo("a09e79055-6968-46fa-8b6d-55a883580db7"));
@@ -584,8 +584,8 @@ public class Saml2AssertionTests extends MetadataBase {
 	}
 
 	public void encryptAssertion(Saml2KeyEncryptionMethod keyAlgorithm, Saml2DataEncryptionMethod dataAlgorithm) throws Exception {
-		Saml2ResponseSaml2 response =
-			(Saml2ResponseSaml2) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
+		Saml2Response response =
+			(Saml2Response) config.fromXml(getFileBytes("/test-data/assertion/assertion-external-20180507.xml"), null, null);
 		Saml2KeyData encryptionKey =
 			new Saml2KeyData(
 				"encryption-key",
@@ -607,8 +607,8 @@ public class Saml2AssertionTests extends MetadataBase {
 		List<Saml2KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(encryptedXml, verification, local);
 		assertNotNull(resolve);
-		assertThat(resolve.getClass(), equalTo(Saml2ResponseSaml2.class));
-		Saml2ResponseSaml2 r = (Saml2ResponseSaml2) resolve;
+		assertThat(resolve.getClass(), equalTo(Saml2Response.class));
+		Saml2Response r = (Saml2Response) resolve;
 		assertNotNull(r.getImplementation());
 		assertNotNull(r.getAssertions());
 		assertThat(r.getAssertions().size(), equalTo(1));
@@ -626,8 +626,8 @@ public class Saml2AssertionTests extends MetadataBase {
 		List<Saml2KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(assertion, verification, local);
 		assertNotNull(resolve);
-		assertThat(resolve.getClass(), equalTo(Saml2ResponseSaml2.class));
-		Saml2ResponseSaml2 r = (Saml2ResponseSaml2) resolve;
+		assertThat(resolve.getClass(), equalTo(Saml2Response.class));
+		Saml2Response r = (Saml2Response) resolve;
 		assertNotNull(r.getImplementation());
 		assertNotNull(r.getAssertions());
 		assertThat(r.getAssertions().size(), equalTo(1));
@@ -640,7 +640,7 @@ public class Saml2AssertionTests extends MetadataBase {
 		List<Saml2KeyData> local = asList(decryptionKey);
 		Saml2Object resolve = config.fromXml(assertion, verification, local);
 		assertNotNull(resolve);
-		assertThat(resolve.getClass(), equalTo(Saml2ResponseSaml2.class));
+		assertThat(resolve.getClass(), equalTo(Saml2Response.class));
 		assertNotNull(resolve.getOriginalDataRepresentation());
 		assertThat(resolve.getOriginalDataRepresentation(), equalTo(new String(assertion, StandardCharsets.UTF_8)));
 	}

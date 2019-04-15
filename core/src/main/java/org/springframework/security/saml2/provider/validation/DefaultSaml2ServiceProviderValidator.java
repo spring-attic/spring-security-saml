@@ -35,7 +35,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmation;
 import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationData;
@@ -101,8 +101,8 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 		else if (saml2Object instanceof Saml2LogoutResponse) {
 			result = validate((Saml2LogoutResponse) saml2Object, provider);
 		}
-		else if (saml2Object instanceof Saml2ResponseSaml2) {
-			Saml2ResponseSaml2 r = (Saml2ResponseSaml2) saml2Object;
+		else if (saml2Object instanceof Saml2Response) {
+			Saml2Response r = (Saml2Response) saml2Object;
 			Saml2ServiceProviderMetadata requester = provider.getMetadata();
 			Saml2IdentityProviderMetadata responder = provider.getRemoteProvider(r.getOriginEntityId());
 			result = validate(r, null, requester, responder);
@@ -239,7 +239,7 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 		return new Saml2ValidationResult(assertion);
 	}
 
-	private Saml2ValidationResult validate(Saml2ResponseSaml2 response,
+	private Saml2ValidationResult validate(Saml2Response response,
 										   List<String> mustMatchInResponseTo,
 										   Saml2ServiceProviderMetadata requester,
 										   Saml2IdentityProviderMetadata responder) {

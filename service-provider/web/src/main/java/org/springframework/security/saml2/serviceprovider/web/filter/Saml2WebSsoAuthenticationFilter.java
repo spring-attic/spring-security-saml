@@ -27,7 +27,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
@@ -60,19 +60,18 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		Saml2ResponseSaml2 samlResponse = super.requiresAuthentication(request, response) ?
-			getSamlWebResponse(request) :
-			null;
+		Saml2Response samlResponse =
+			super.requiresAuthentication(request, response) ? getSamlWebResponse(request) : null;
 		return samlResponse != null;
 	}
 
-	private Saml2ResponseSaml2 getSamlWebResponse(HttpServletRequest request) {
+	private Saml2Response getSamlWebResponse(HttpServletRequest request) {
 		Saml2Object object = serviceProviderMethods.getSamlResponse(request);
 		if (object == null) {
 			return null;
 		}
-		if (object instanceof Saml2ResponseSaml2) {
-			return (Saml2ResponseSaml2) object;
+		if (object instanceof Saml2Response) {
+			return (Saml2Response) object;
 		}
 		else {
 			return null;
@@ -83,7 +82,7 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 		throws AuthenticationException {
 		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
-		Saml2ResponseSaml2 r = getSamlWebResponse(request);
+		Saml2Response r = getSamlWebResponse(request);
 		notNull(r, "The response should never be null");
 		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		if (idp == null) {
@@ -127,7 +126,7 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 		return getAuthenticationManager().authenticate(auth);
 	}
 
-	private Saml2IdentityProviderMetadata getIdentityProvider(Saml2ResponseSaml2 r, HostedSaml2ServiceProvider sp) {
+	private Saml2IdentityProviderMetadata getIdentityProvider(Saml2Response r, HostedSaml2ServiceProvider sp) {
 		if (r.getAssertions().isEmpty()) {
 			return null;
 		}

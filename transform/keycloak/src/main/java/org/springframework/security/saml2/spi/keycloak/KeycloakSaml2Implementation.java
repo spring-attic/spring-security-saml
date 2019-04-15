@@ -66,7 +66,7 @@ import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
-import org.springframework.security.saml2.model.authentication.Saml2ResponseSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.authentication.Saml2Subject;
@@ -236,8 +236,8 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		else if (saml2Object instanceof Saml2Assertion) {
 			result = internalToXml((Saml2Assertion) saml2Object);
 		}
-		else if (saml2Object instanceof Saml2ResponseSaml2) {
-			result = internalToXml((Saml2ResponseSaml2) saml2Object);
+		else if (saml2Object instanceof Saml2Response) {
+			result = internalToXml((Saml2Response) saml2Object);
 		}
 		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
 			result = internalToXml((Saml2LogoutSaml2Request) saml2Object);
@@ -333,8 +333,8 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 					trustedKeys
 				);
 
-			if (saml2Object instanceof Saml2ResponseSaml2) {
-				Saml2ResponseSaml2 r = (Saml2ResponseSaml2)saml2Object;
+			if (saml2Object instanceof Saml2Response) {
+				Saml2Response r = (Saml2Response)saml2Object;
 				for (Saml2Assertion assertion : r.getAssertions()) {
 					if (assertion.getImplementation() != null &&
 						assertion.getSignature() == null) {
@@ -1008,7 +1008,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private ResponseType internalToXml(Saml2ResponseSaml2 response) {
+	private ResponseType internalToXml(Saml2Response response) {
 		if (!hasText(response.getId())) {
 			response.setId("R" + UUID.randomUUID().toString());
 		}
@@ -1182,12 +1182,12 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private Saml2ResponseSaml2 resolveResponse(
+	private Saml2Response resolveResponse(
 		ResponseType parsed,
 		Map<String, Saml2Signature> signatureMap,
 		List<Saml2KeyData> localKeys
 	) {
-		Saml2ResponseSaml2 result = new Saml2ResponseSaml2()
+		Saml2Response result = new Saml2Response()
 			.setConsent(parsed.getConsent())
 			.setDestination(parsed.getDestination())
 			.setId(parsed.getID())

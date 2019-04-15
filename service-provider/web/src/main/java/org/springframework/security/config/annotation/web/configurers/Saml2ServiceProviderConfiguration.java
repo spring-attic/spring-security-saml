@@ -38,7 +38,7 @@ import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceP
 import org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.web.binding.DefaultSaml2HttpMessageResponder;
-import org.springframework.security.saml2.serviceprovider.web.binding.Saml2WebHttpMessageResponder;
+import org.springframework.security.saml2.serviceprovider.web.binding.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationRequestFilter;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2LoginPageGeneratingFilter;
@@ -114,7 +114,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return this;
 	}
 
-	Saml2ServiceProviderConfiguration validate(HttpSecurity http) {
+	Saml2ServiceProviderConfiguration initialize(HttpSecurity http) {
 		this.http = http;
 		getSamlTransformer();
 		getSamlValidator();
@@ -137,7 +137,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderMethods getServiceProviderMethods() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2ServiceProviderMethods.class,
@@ -150,8 +150,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		);
 	}
 
-	Saml2WebHttpMessageResponder getSamlHttpMessageResponder() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+	Saml2HttpMessageResponder getSamlHttpMessageResponder() {
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			DefaultSaml2HttpMessageResponder.class,
@@ -169,7 +169,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Filter getLogoutFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2ServiceProviderLogoutFilter.class,
@@ -188,7 +188,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Filter getWebSsoAuthenticationFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		Saml2WebSsoAuthenticationFilter filter = getSharedObject(
 			http,
 			Saml2WebSsoAuthenticationFilter.class,
@@ -204,7 +204,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Filter getAuthenticationRequestFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2AuthenticationRequestFilter.class,
@@ -218,7 +218,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Filter getStaticLoginPageFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2LoginPageGeneratingFilter.class,
@@ -232,7 +232,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Filter getMetadataFilter() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2ServiceProviderMetadataFilter.class,
@@ -246,14 +246,14 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	AuthenticationFailureHandler getAuthenticationFailureHandler() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		failureHandler = ofNullable(failureHandler)
 			.orElseGet(() -> new Saml2AuthenticationFailureHandler());
 		return failureHandler;
 	}
 
 	Saml2ServiceProviderResolver getServiceProviderResolver() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		providerResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderResolver.class,
@@ -264,7 +264,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderMetadataResolver getSamlMetadataResolver() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		metadataResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderMetadataResolver.class,
@@ -275,7 +275,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderValidator getSamlValidator() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		validator = getSharedObject(
 			http,
 			Saml2ServiceProviderValidator.class,
@@ -286,7 +286,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2Transformer getSamlTransformer() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		transformer = getSharedObject(
 			http,
 			Saml2Transformer.class,
@@ -297,7 +297,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	AuthenticationEntryPoint getAuthenticationEntryPoint() {
-		notNull(this.http, "Call validate(HttpSecurity) first.");
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		authenticationEntryPoint = getSharedObject(
 			http,
 			AuthenticationEntryPoint.class,

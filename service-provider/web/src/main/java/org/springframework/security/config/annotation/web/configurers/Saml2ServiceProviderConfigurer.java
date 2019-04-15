@@ -147,7 +147,7 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 	 */
 	@Override
 	public void init(HttpSecurity http) throws Exception {
-		configuration.validate(http);
+		configuration.initialize(http);
 		registerDefaultAuthenticationEntryPoint(http, configuration.getAuthenticationEntryPoint());
 
 		if (installEndpoints) {

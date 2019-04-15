@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultSaml2HttpMessageResponder implements Saml2WebHttpMessageResponder {
+public class DefaultSaml2HttpMessageResponder implements Saml2HttpMessageResponder {
 
 	private final Saml2ServiceProviderMethods methods;
 	private final RedirectStrategy redirectStrategy;

@@ -17,11 +17,17 @@
 
 package org.springframework.security.saml2.serviceprovider.web.binding;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageResponder;
+import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
 
-public interface Saml2WebHttpMessageResponder
-	extends Saml2HttpMessageResponder<HttpServletRequest, HttpServletResponse> {
+public interface Saml2HttpMessageResponder {
+
+	void sendSaml2Message(Saml2HttpMessageData model,
+						  HttpServletRequest request,
+						  HttpServletResponse response) throws IOException;
+
 }

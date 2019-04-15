@@ -26,18 +26,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationRequestResolver;
-import org.springframework.security.saml2.serviceprovider.web.binding.Saml2WebHttpMessageResponder;
+import org.springframework.security.saml2.serviceprovider.web.binding.Saml2HttpMessageResponder;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 
 	private final Saml2AuthenticationRequestResolver resolver;
-	private final Saml2WebHttpMessageResponder responder;
+	private final Saml2HttpMessageResponder responder;
 	private final RequestMatcher matcher;
 
 	public Saml2AuthenticationRequestFilter(Saml2AuthenticationRequestResolver resolver,
-											Saml2WebHttpMessageResponder responder,
+											Saml2HttpMessageResponder responder,
 											RequestMatcher matcher) {
 		this.resolver = resolver;
 		this.matcher = matcher;

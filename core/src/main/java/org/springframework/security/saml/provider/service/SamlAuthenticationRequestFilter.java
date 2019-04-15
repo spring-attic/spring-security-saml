@@ -37,6 +37,7 @@ import org.springframework.security.saml.saml2.metadata.IdentityProviderMetadata
 import org.springframework.security.web.header.HeaderWriter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -125,7 +126,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 			model.put("action", location.getLocation());
 			model.put("SAMLRequest", encoded);
 			if (hasText(relayState)) {
-				model.put("RelayState", relayState);
+				model.put("RelayState", HtmlUtils.htmlEscape(relayState));
 			}
 			processHtml(
 				request,

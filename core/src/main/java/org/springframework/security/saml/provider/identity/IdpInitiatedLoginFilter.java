@@ -40,6 +40,7 @@ import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -119,7 +120,7 @@ public class IdpInitiatedLoginFilter extends SamlFilter<IdentityProviderService>
 				model.put("action", acsUrl.getLocation());
 				model.put("SAMLResponse", encoded);
 				if (hasText(relayState)) {
-					model.put("RelayState", relayState);
+					model.put("RelayState", HtmlUtils.htmlEscape(relayState));
 				}
 				processHtml(request, response, getPostBindingTemplate(), model);
 			}

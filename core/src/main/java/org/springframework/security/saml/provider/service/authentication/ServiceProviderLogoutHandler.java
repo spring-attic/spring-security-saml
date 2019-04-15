@@ -144,7 +144,7 @@ public class ServiceProviderLogoutHandler implements LogoutHandler {
 	}
 
 	protected String getLogoutRelayState(HttpServletRequest request, IdentityProviderMetadata idp) {
-		return null;
+		return request.getParameter("RelayState");
 	}
 
 	private String getRedirectUrl(ServiceProviderService provider,

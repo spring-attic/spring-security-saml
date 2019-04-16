@@ -57,7 +57,7 @@
     </bean>
 
 	<bean id="samlServiceProviderMethods"
-		  class="org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods">
+		  class="org.springframework.security.saml2.serviceprovider.servlet.util.DefaultSaml2ServiceProviderMethods">
 		<constructor-arg ref="samlTransformer"/>
 		<constructor-arg ref="samlServiceProviderResolver"/>
 		<constructor-arg ref="samlServiceProviderValidator"/>

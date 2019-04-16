@@ -50,6 +50,7 @@ import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2We
 import org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.util.DefaultSaml2ServiceProviderMethods;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -145,7 +146,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return getSharedObject(
 			http,
 			Saml2ServiceProviderMethods.class,
-			() -> new Saml2ServiceProviderMethods(
+			() -> new DefaultSaml2ServiceProviderMethods(
 				transformer,
 				providerResolver,
 				validator

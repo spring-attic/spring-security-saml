@@ -56,7 +56,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.UriUtils;
 
@@ -66,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlashes;
+import static org.springframework.util.Assert.isTrue;
 import static org.springframework.util.Assert.notNull;
 
 class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
@@ -141,7 +141,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderMethods getServiceProviderMethods() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2ServiceProviderMethods.class,
@@ -155,7 +155,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2HttpMessageResponder getSamlHttpMessageResponder() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2HttpMessageResponder.class,
@@ -169,7 +169,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2AuthenticationTokenResolver getSaml2AuthenticationTokenResolver() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2AuthenticationTokenResolver.class,
@@ -182,7 +182,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2LogoutHttpMessageResolver getSaml2LogoutHttpMessageResolver() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
 			Saml2LogoutHttpMessageResolver.class,
@@ -194,90 +194,15 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		);
 	}
 
-	Filter getLogoutFilter() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2ServiceProviderLogoutFilter.class,
-			() -> {
-				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
-				return new Saml2ServiceProviderLogoutFilter(
-					getSaml2LogoutHttpMessageResolver(),
-					getSamlHttpMessageResponder(),
-					new AntPathRequestMatcher(pathPrefix + "/logout/**")
-				);
-			},
-			null
-		);
-	}
-
-	Filter getWebSsoAuthenticationFilter() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
-		Saml2WebSsoAuthenticationFilter filter = getSharedObject(
-			http,
-			Saml2WebSsoAuthenticationFilter.class,
-			() -> new Saml2WebSsoAuthenticationFilter(
-				getSaml2AuthenticationTokenResolver(),
-				new AntPathRequestMatcher(pathPrefix + "/SSO/**")
-			),
-			null
-		);
-		filter.setAuthenticationManager(getAuthenticationManager());
-		filter.setAuthenticationFailureHandler(getAuthenticationFailureHandler());
-		return filter;
-	}
-
-	Filter getAuthenticationRequestFilter() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2AuthenticationRequestFilter.class,
-			() -> new Saml2AuthenticationRequestFilter(
-				new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
-				getSamlHttpMessageResponder(),
-				new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
-			),
-			null
-		);
-	}
-
-	Filter getStaticLoginPageFilter() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2LoginPageGeneratingFilter.class,
-			() ->
-				new Saml2LoginPageGeneratingFilter(
-					new AntPathRequestMatcher(pathPrefix + "/login/**"),
-					getStaticLoginUrls()
-				),
-			null
-		);
-	}
-
-	Filter getMetadataFilter() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2ServiceProviderMetadataFilter.class,
-			() -> new Saml2ServiceProviderMetadataFilter(
-				getServiceProviderMethods(),
-				new AntPathRequestMatcher(pathPrefix + "/metadata/**")
-			),
-			null
-		);
-	}
-
 	AuthenticationFailureHandler getAuthenticationFailureHandler() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		failureHandler = ofNullable(failureHandler)
 			.orElseGet(() -> new Saml2AuthenticationFailureHandler());
 		return failureHandler;
 	}
 
 	Saml2ServiceProviderResolver getServiceProviderResolver() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		providerResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderResolver.class,
@@ -288,7 +213,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderMetadataResolver getSamlMetadataResolver() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		metadataResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderMetadataResolver.class,
@@ -299,7 +224,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2ServiceProviderValidator getSamlValidator() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		validator = getSharedObject(
 			http,
 			Saml2ServiceProviderValidator.class,
@@ -310,7 +235,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	Saml2Transformer getSamlTransformer() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		transformer = getSharedObject(
 			http,
 			Saml2Transformer.class,
@@ -321,7 +246,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	AuthenticationEntryPoint getAuthenticationEntryPoint() {
-		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		authenticationEntryPoint = getSharedObject(
 			http,
 			AuthenticationEntryPoint.class,
@@ -330,6 +255,51 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		);
 
 		return authenticationEntryPoint;
+	}
+
+	Filter getLogoutFilter() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		return new Saml2ServiceProviderLogoutFilter(
+			getSaml2LogoutHttpMessageResolver(),
+			getSamlHttpMessageResponder(),
+			new AntPathRequestMatcher(pathPrefix + "/logout/**")
+		);
+	}
+
+	Filter getWebSsoAuthenticationFilter() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		Saml2WebSsoAuthenticationFilter filter = new Saml2WebSsoAuthenticationFilter(
+			getSaml2AuthenticationTokenResolver(),
+			new AntPathRequestMatcher(pathPrefix + "/SSO/**")
+		);
+		filter.setAuthenticationManager(getAuthenticationManager());
+		filter.setAuthenticationFailureHandler(getAuthenticationFailureHandler());
+		return filter;
+	}
+
+	Filter getAuthenticationRequestFilter() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		return new Saml2AuthenticationRequestFilter(
+			new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
+			getSamlHttpMessageResponder(),
+			new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
+		);
+	}
+
+	Filter getStaticLoginPageFilter() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		return new Saml2LoginPageGeneratingFilter(
+			new AntPathRequestMatcher(pathPrefix + "/login/**"),
+			getStaticLoginUrls()
+		);
+	}
+
+	Filter getMetadataFilter() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		return new Saml2ServiceProviderMetadataFilter(
+			getServiceProviderMethods(),
+			new AntPathRequestMatcher(pathPrefix + "/metadata/**")
+		);
 	}
 
 	private Map<String, String> getStaticLoginUrls() {
@@ -355,7 +325,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return providerUrls;
 	}
 
-	private boolean hasHttp() {
+	private boolean isInitialized() {
 		return http != null;
 	}
 

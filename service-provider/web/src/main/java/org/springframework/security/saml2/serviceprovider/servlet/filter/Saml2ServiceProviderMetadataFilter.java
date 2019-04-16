@@ -24,9 +24,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -36,15 +35,12 @@ import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 
 	private String filename = "saml2-service-provider-metadata.xml";
-	private final Saml2Transformer transformer;
-	private final Saml2ServiceProviderResolver resolver;
+	private final Saml2ServiceProviderMethods serviceProviderMethods;
 	private final RequestMatcher matcher;
 
-	public Saml2ServiceProviderMetadataFilter(Saml2ServiceProviderResolver resolver,
-											  Saml2Transformer transformer,
+	public Saml2ServiceProviderMetadataFilter(Saml2ServiceProviderMethods serviceProviderMethods,
 											  RequestMatcher matcher) {
-		this.transformer = transformer;
-		this.resolver = resolver;
+		this.serviceProviderMethods = serviceProviderMethods;
 		this.matcher = matcher;
 	}
 
@@ -53,8 +49,8 @@ public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedSaml2ServiceProvider provider = resolver.getServiceProvider(request);
-			String xml = transformer.toXml(provider.getMetadata());
+			HostedSaml2ServiceProvider provider = serviceProviderMethods.getResolver().getServiceProvider(request);
+			String xml = serviceProviderMethods.getTransformer().toXml(provider.getMetadata());
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");
 			response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"" + ";");

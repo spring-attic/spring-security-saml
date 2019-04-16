@@ -47,6 +47,8 @@ import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2Lo
 import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2ServiceProviderLogoutFilter;
 import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2ServiceProviderMetadataFilter;
 import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2WebSsoAuthenticationFilter;
+import org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.saml2.util.Saml2StringUtils;
@@ -156,7 +158,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			DefaultSaml2HttpMessageResponder.class,
+			Saml2HttpMessageResponder.class,
 			() ->
 				new DefaultSaml2HttpMessageResponder(
 					getServiceProviderMethods(),
@@ -170,9 +172,22 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		notNull(this.http, "Call initialize(HttpSecurity) first.");
 		return getSharedObject(
 			http,
-			DefaultSaml2AuthenticationTokenResolver.class,
+			Saml2AuthenticationTokenResolver.class,
 			() ->
 				new DefaultSaml2AuthenticationTokenResolver(
+					getServiceProviderMethods()
+				),
+			null
+		);
+	}
+
+	Saml2LogoutHttpMessageResolver getSaml2LogoutHttpMessageResolver() {
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		return getSharedObject(
+			http,
+			Saml2LogoutHttpMessageResolver.class,
+			() ->
+				new DefaultSaml2LogoutHttpMessageResolver(
 					getServiceProviderMethods()
 				),
 			null
@@ -188,11 +203,10 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 				SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
 				logoutSuccessHandler.setDefaultTargetUrl(pathPrefix + "/select");
 				return new Saml2ServiceProviderLogoutFilter(
-					getServiceProviderMethods(),
+					getSaml2LogoutHttpMessageResolver(),
 					getSamlHttpMessageResponder(),
 					new AntPathRequestMatcher(pathPrefix + "/logout/**")
-				)
-					.setLogoutSuccessHandler(logoutSuccessHandler);
+				);
 			},
 			null
 		);
@@ -248,8 +262,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			http,
 			Saml2ServiceProviderMetadataFilter.class,
 			() -> new Saml2ServiceProviderMetadataFilter(
-				providerResolver,
-				transformer,
+				getServiceProviderMethods(),
 				new AntPathRequestMatcher(pathPrefix + "/metadata/**")
 			),
 			null

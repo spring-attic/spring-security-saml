@@ -113,8 +113,7 @@
 
     <bean id="samlSpMetadataFilter"
           class="org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2ServiceProviderMetadataFilter">
-        <constructor-arg ref="samlServiceProviderResolver"/>
-        <constructor-arg ref="samlTransformer"/>
+        <constructor-arg ref="samlServiceProviderMethods"/>
 		<constructor-arg ref="metadataMatcher"/>
     </bean>
 
@@ -162,17 +161,16 @@
         </property>
     </bean>
 
+	<bean id="samlLogoutMessageResolver"
+		  class="org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver">
+		<constructor-arg ref="samlServiceProviderMethods"/>
+	</bean>
+
     <bean id="serviceProviderLogoutFilter"
           class="org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2ServiceProviderLogoutFilter">
-
-		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlLogoutMessageResolver"/>
 		<constructor-arg ref="samlServiceProviderResponder"/>
 		<constructor-arg ref="logoutMatcher"/>
-        <property name="logoutSuccessHandler">
-            <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
-                <property name="defaultTargetUrl" value="#{'/' + pathPrefix + '/select'}"/>
-            </bean>
-        </property>
     </bean>
 
     <!-- BEGIN - the following two chains are used by integration tests -->

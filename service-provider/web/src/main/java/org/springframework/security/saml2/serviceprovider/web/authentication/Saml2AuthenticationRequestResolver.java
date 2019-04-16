@@ -18,11 +18,12 @@
 package org.springframework.security.saml2.serviceprovider.web.authentication;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 
 public interface Saml2AuthenticationRequestResolver {
 
-	Saml2AuthenticationRequest resolve(HttpServletRequest request);
+	Saml2AuthenticationRequest resolve(HttpServletRequest request, HttpServletResponse response);
 
 }

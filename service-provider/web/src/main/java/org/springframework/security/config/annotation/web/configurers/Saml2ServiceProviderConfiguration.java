@@ -37,6 +37,8 @@ import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderRe
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.web.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationTokenResolver;
+import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationTokenResolver;
 import org.springframework.security.saml2.serviceprovider.web.binding.DefaultSaml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.binding.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.web.filter.Saml2AuthenticationFailureHandler;
@@ -157,12 +159,21 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			DefaultSaml2HttpMessageResponder.class,
 			() ->
 				new DefaultSaml2HttpMessageResponder(
-					new Saml2ServiceProviderMethods(
-						transformer,
-						providerResolver,
-						validator
-					),
+					getServiceProviderMethods(),
 					new DefaultRedirectStrategy()
+				),
+			null
+		);
+	}
+
+	Saml2AuthenticationTokenResolver getSaml2AuthenticationTokenResolver() {
+		notNull(this.http, "Call initialize(HttpSecurity) first.");
+		return getSharedObject(
+			http,
+			DefaultSaml2AuthenticationTokenResolver.class,
+			() ->
+				new DefaultSaml2AuthenticationTokenResolver(
+					getServiceProviderMethods()
 				),
 			null
 		);
@@ -193,7 +204,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			http,
 			Saml2WebSsoAuthenticationFilter.class,
 			() -> new Saml2WebSsoAuthenticationFilter(
-				getServiceProviderMethods(),
+				getSaml2AuthenticationTokenResolver(),
 				new AntPathRequestMatcher(pathPrefix + "/SSO/**")
 			),
 			null

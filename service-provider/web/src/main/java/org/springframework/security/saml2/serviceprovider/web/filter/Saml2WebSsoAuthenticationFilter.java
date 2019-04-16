@@ -20,20 +20,9 @@ package org.springframework.security.saml2.serviceprovider.web.filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml2.Saml2ValidationResult;
-import org.springframework.security.saml2.model.Saml2Object;
-import org.springframework.security.saml2.model.authentication.Saml2Assertion;
-import org.springframework.security.saml2.model.authentication.Saml2Response;
-import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
-import org.springframework.security.saml2.model.signature.Saml2Signature;
-import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
-import org.springframework.security.saml2.serviceprovider.web.util.Saml2ServiceProviderMethods;
+import org.springframework.security.saml2.serviceprovider.web.authentication.Saml2AuthenticationTokenResolver;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -41,18 +30,18 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import static org.springframework.util.Assert.notNull;
-
 public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	private static Log logger = LogFactory.getLog(Saml2WebSsoAuthenticationFilter.class);
-	private final Saml2ServiceProviderMethods serviceProviderMethods;
+	private final Saml2AuthenticationTokenResolver authenticationTokenResolver;
+	private final RequestMatcher matcher;
 
-	public Saml2WebSsoAuthenticationFilter(Saml2ServiceProviderMethods serviceProviderMethods,
+	public Saml2WebSsoAuthenticationFilter(Saml2AuthenticationTokenResolver authenticationTokenResolver,
 										   RequestMatcher matcher
 	) {
 		super(matcher);
-		this.serviceProviderMethods = serviceProviderMethods;
+		this.matcher = matcher;
+		this.authenticationTokenResolver = authenticationTokenResolver;
 		setAllowSessionCreation(true);
 		setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		setAuthenticationManager(authentication -> authentication);
@@ -60,77 +49,19 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		Saml2Response samlResponse =
-			super.requiresAuthentication(request, response) ? getSamlWebResponse(request) : null;
-		return samlResponse != null;
+		return (
+			matcher.matches(request) && request.getParameter("SAMLResponse")!=null
+			);
 	}
 
-	private Saml2Response getSamlWebResponse(HttpServletRequest request) {
-		Saml2Object object = serviceProviderMethods.getSamlResponse(request);
-		if (object == null) {
-			return null;
-		}
-		if (object instanceof Saml2Response) {
-			return (Saml2Response) object;
-		}
-		else {
-			return null;
-		}
-	}
+
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 		throws AuthenticationException {
-		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
-		Saml2Response r = getSamlWebResponse(request);
-		notNull(r, "The response should never be null");
-		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
-		if (idp == null) {
-			logger.debug("Unable to find configured provider for SAML response.");
-			throw new ProviderNotFoundException(r.getIssuer().getValue());
-		}
-		try {
-			Saml2Signature signature = serviceProviderMethods
-				.getValidator()
-				.validateSignature(r, idp.getIdentityProvider().getKeys());
-			r.setSignature(signature);
-			for (Saml2Assertion assertion : r.getAssertions()) {
-				if (assertion.getSignature() == null) {
-					signature = serviceProviderMethods
-						.getValidator()
-						.validateSignature(assertion, idp.getIdentityProvider().getKeys());
-					assertion.setSignature(signature);
-				}
-			}
-		} catch (Saml2SignatureException e) {
-			logger.debug("Unable to validate signature for SAML response.");
-			throw new AuthenticationServiceException("Failed to validate SAML authentication signature.");
-		}
-
-		Saml2ValidationResult validationResult = serviceProviderMethods
-			.getValidator()
-			.validate(r, provider);
-		if (!validationResult.isSuccess()) {
-			throw new AuthenticationServiceException(validationResult.toString());
-		}
-
-		Saml2Assertion assertion = r.getAssertions().stream().findFirst().orElse(null);
-		DefaultSaml2Authentication auth = new DefaultSaml2Authentication(
-			true,
-			assertion,
-			r.getOriginEntityId(),
-			provider.getMetadata().getEntityId(),
-			request.getParameter("RelayState"),
-			r.getOriginalDataRepresentation()
-		);
+		logger.debug("Attempting to resolve SAML2 WebSSO SAMLResponse");
+		Authentication auth = authenticationTokenResolver.resolveSaml2Authentication(request, response);
 		return getAuthenticationManager().authenticate(auth);
-	}
-
-	private Saml2IdentityProviderMetadata getIdentityProvider(Saml2Response r, HostedSaml2ServiceProvider sp) {
-		if (r.getAssertions().isEmpty()) {
-			return null;
-		}
-		return sp.getRemoteProvider(r.getAssertions().get(0).getOriginEntityId());
 	}
 
 }

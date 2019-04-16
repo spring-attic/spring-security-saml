@@ -71,6 +71,11 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="samlAuthenticationTokenResolver"
+		  class="org.springframework.security.saml2.serviceprovider.web.authentication.DefaultSaml2AuthenticationTokenResolver">
+		<constructor-arg ref="samlServiceProviderMethods"/>
+	</bean>
+
     <bean id="pathPrefix"
           factory-bean="samlServiceProviderConfiguration"
           factory-method="getPathPrefix"
@@ -145,7 +150,7 @@
 
     <bean id="samlWebSsoAuthenticationFilter"
           class="org.springframework.security.saml2.serviceprovider.web.filter.Saml2WebSsoAuthenticationFilter">
-        <constructor-arg ref="samlServiceProviderMethods"/>
+        <constructor-arg ref="samlAuthenticationTokenResolver"/>
 		<constructor-arg>
 			<bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
 				<constructor-arg value="#{'/' + pathPrefix + '/SSO/**'}"/>

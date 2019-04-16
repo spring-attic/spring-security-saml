@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
@@ -54,7 +55,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 	}
 
 	@Override
-	public Saml2AuthenticationRequest resolve(HttpServletRequest request) {
+	public Saml2AuthenticationRequest resolve(HttpServletRequest request, HttpServletResponse response) {
 		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> entity =

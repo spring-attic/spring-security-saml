@@ -48,7 +48,7 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			Saml2HttpMessageData mvcModel = resolveAuthenticationRequest(request);
+			Saml2HttpMessageData mvcModel = resolveAuthenticationRequest(request, response);
 			responder.sendSaml2Message(mvcModel, request, response);
 		}
 		else {
@@ -56,8 +56,9 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private Saml2HttpMessageData resolveAuthenticationRequest(HttpServletRequest request) {
-		Saml2AuthenticationRequest authn = resolver.resolve(request);
+	private Saml2HttpMessageData resolveAuthenticationRequest(HttpServletRequest request,
+															  HttpServletResponse response) {
+		Saml2AuthenticationRequest authn = resolver.resolve(request, response);
 		return new Saml2HttpMessageData(
 			authn,
 			null,

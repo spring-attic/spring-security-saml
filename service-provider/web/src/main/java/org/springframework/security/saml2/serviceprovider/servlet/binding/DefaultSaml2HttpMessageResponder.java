@@ -95,17 +95,6 @@ public class DefaultSaml2HttpMessageResponder implements Saml2HttpMessageRespond
 		return methods.getTransformer().samlEncode(xml, deflate);
 	}
 
-
-	private void sendHtmlBody(HttpServletResponse response, String content) throws IOException {
-		response.setContentType(TEXT_HTML_VALUE);
-		response.setCharacterEncoding(UTF_8.name());
-		response.getWriter().write(content);
-	}
-
-	private void displayError(HttpServletResponse response, String message) throws IOException {
-		sendHtmlBody(response, errorHtml(Collections.singletonList(message)));
-	}
-
 	private String postBindingHtml(String postUrl,
 								   String request,
 								   String response,
@@ -153,6 +142,16 @@ public class DefaultSaml2HttpMessageResponder implements Saml2HttpMessageRespond
 			"        </form>\n" +
 			"    </body>\n" +
 			"</html>");
+	}
+
+	private void sendHtmlBody(HttpServletResponse response, String content) throws IOException {
+		response.setContentType(TEXT_HTML_VALUE);
+		response.setCharacterEncoding(UTF_8.name());
+		response.getWriter().write(content);
+	}
+
+	private void displayError(HttpServletResponse response, String message) throws IOException {
+		sendHtmlBody(response, errorHtml(Collections.singletonList(message)));
 	}
 
 	private String errorHtml(List<String> messages) {

@@ -51,21 +51,37 @@ public class Saml2ServiceProviderMethods {
 		this.validator = validator;
 	}
 
-
-	public Saml2Transformer getTransformer() {
-		return transformer;
-	}
-
-	public Saml2ServiceProviderResolver getResolver() {
-		return resolver;
-	}
-
-	public Saml2ServiceProviderValidator getValidator() {
-		return validator;
-	}
-
 	public String getEndpointPath(HttpServletRequest request) {
 		return new UrlPathHelper().getPathWithinApplication(request);
+	}
+
+	public Saml2Object getSamlRequest(HttpServletRequest request) {
+		return parseSamlObject(request, getProvider(request), "SAMLRequest");
+	}
+
+	public Saml2Object parseSamlObject(HttpServletRequest request,
+									   HostedSaml2ServiceProvider provider,
+									   String parameterName) {
+		Saml2Object result = null;
+		String rs = request.getParameter(parameterName);
+		if (hasText(rs)) {
+			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
+			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
+			if (result instanceof Saml2SignableObject) {
+				Saml2SignableObject signableSaml2Object = (Saml2SignableObject) result;
+				Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
+				if (idp == null) {
+					throw new Saml2ProviderNotFoundException(result.getOriginEntityId());
+				}
+				try {
+					Saml2Signature signature =
+						getValidator().validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
+					signableSaml2Object.setSignature(signature);
+				} catch (Saml2SignatureException e) {
+				}
+			}
+		}
+		return result;
 	}
 
 	public HostedSaml2ServiceProvider getProvider(HttpServletRequest request) {
@@ -76,8 +92,16 @@ public class Saml2ServiceProviderMethods {
 		return serviceProvider;
 	}
 
-	public Saml2Object getSamlRequest(HttpServletRequest request) {
-		return parseSamlObject(request, getProvider(request), "SAMLRequest");
+	public Saml2Transformer getTransformer() {
+		return transformer;
+	}
+
+	public Saml2ServiceProviderValidator getValidator() {
+		return validator;
+	}
+
+	public Saml2ServiceProviderResolver getResolver() {
+		return resolver;
 	}
 
 	public Saml2Object getSamlResponse(HttpServletRequest request) {
@@ -122,31 +146,6 @@ public class Saml2ServiceProviderMethods {
 		//fallback to the very first available endpoint
 		if (result == null) {
 			result = eps.get(0);
-		}
-		return result;
-	}
-
-	public Saml2Object parseSamlObject(HttpServletRequest request,
-									   HostedSaml2ServiceProvider provider,
-									   String parameterName) {
-		Saml2Object result = null;
-		String rs = request.getParameter(parameterName);
-		if (hasText(rs)) {
-			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
-			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
-			if (result instanceof Saml2SignableObject) {
-				Saml2SignableObject signableSaml2Object = (Saml2SignableObject) result;
-				Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());
-				if (idp == null) {
-					throw new Saml2ProviderNotFoundException(result.getOriginEntityId());
-				}
-				try {
-					Saml2Signature signature =
-						getValidator().validateSignature(signableSaml2Object, idp.getIdentityProvider().getKeys());
-					signableSaml2Object.setSignature(signature);
-				} catch (Saml2SignatureException e) {
-				}
-			}
 		}
 		return result;
 	}

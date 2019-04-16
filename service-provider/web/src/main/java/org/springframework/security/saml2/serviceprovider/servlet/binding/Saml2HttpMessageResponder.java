@@ -18,7 +18,6 @@
 package org.springframework.security.saml2.serviceprovider.servlet.binding;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

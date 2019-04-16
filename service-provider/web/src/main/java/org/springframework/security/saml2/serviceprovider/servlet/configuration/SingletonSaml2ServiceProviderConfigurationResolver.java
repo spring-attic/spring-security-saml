@@ -30,6 +30,14 @@ import static org.springframework.util.StringUtils.hasText;
 public class SingletonSaml2ServiceProviderConfigurationResolver
 	implements Saml2ServiceProviderConfigurationResolver<HttpServletRequest> {
 
+	private final HostedSaml2ServiceProviderConfiguration configuration;
+
+	public SingletonSaml2ServiceProviderConfigurationResolver(HostedSaml2ServiceProviderConfiguration configuration) {
+		this.configuration = configuration;
+		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
+		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
+	}
+
 	public static SingletonSaml2ServiceProviderConfigurationResolver fromConfiguration(Consumer<Builder> config) {
 		Builder builder = HostedSaml2ServiceProviderConfiguration.builder();
 		config.accept(builder);
@@ -39,19 +47,6 @@ public class SingletonSaml2ServiceProviderConfigurationResolver
 	public static SingletonSaml2ServiceProviderConfigurationResolver fromConfiguration(
 		HostedSaml2ServiceProviderConfiguration c) {
 		return new SingletonSaml2ServiceProviderConfigurationResolver(c);
-	}
-
-	private final HostedSaml2ServiceProviderConfiguration configuration;
-
-	public SingletonSaml2ServiceProviderConfigurationResolver(HostedSaml2ServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
-		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
-		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
-	}
-
-	@Override
-	public String getConfiguredPathPrefix() {
-		return configuration.getPathPrefix();
 	}
 
 	@Override
@@ -71,6 +66,11 @@ public class SingletonSaml2ServiceProviderConfigurationResolver
 			}
 		}
 		return builder.build();
+	}
+
+	@Override
+	public String getConfiguredPathPrefix() {
+		return configuration.getPathPrefix();
 	}
 
 	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {

@@ -86,94 +86,15 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 	}
 
 	@Override
-	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
-		return generateMetadata(configuration);
-	}
-
-	@Override
 	public Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProviders(
 		HostedSaml2ServiceProviderConfiguration configuration
 	) {
 		return getProviders(configuration);
 	}
 
-	private Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getProviders(
-		HostedSaml2ServiceProviderConfiguration configuration) {
-		Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> result = new HashMap<>();
-		List<ExternalSaml2IdentityProviderConfiguration> providers = configuration.getProviders();
-		for (ExternalSaml2IdentityProviderConfiguration idpConfig : providers) {
-			Saml2IdentityProviderMetadata idp = getIdentityProviderMetadata(idpConfig);
-			idp = metadataTrustCheck(idpConfig, idp);
-			if (idp != null) {
-				result.put(idpConfig, idp);
-			}
-		}
-		return result;
-	}
-
-	private Saml2IdentityProviderMetadata metadataTrustCheck(ExternalSaml2IdentityProviderConfiguration idpConfig,
-															 Saml2IdentityProviderMetadata idp) {
-		if (!idpConfig.isMetadataTrustCheck()) {
-			return idp;
-		}
-		if (idpConfig.getVerificationKeys().isEmpty()) {
-			logger.warn("No keys to verify metadata for " + idpConfig.getMetadata() + " with. Unable to trust.");
-			return null;
-		}
-		try {
-			Saml2Signature signature = saml2Transformer.validateSignature(idp, idpConfig.getVerificationKeys());
-			if (signature != null &&
-				signature.isValidated() &&
-				signature.getValidatingKey() != null) {
-				return idp;
-			}
-			else {
-				logger.warn("Missing signature for " + idpConfig.getMetadata() + ". Unable to trust.");
-			}
-		} catch (Saml2SignatureException e) {
-			logger.warn("Invalid signature for IDP metadata " + idpConfig.getMetadata() + ". Unable to trust.", e);
-		}
-		return null;
-	}
-
-	private Saml2IdentityProviderMetadata getIdentityProviderMetadata(ExternalSaml2IdentityProviderConfiguration idp) {
-		Saml2IdentityProviderMetadata result = null;
-		try {
-			byte[] data = idp.getMetadata().getBytes(StandardCharsets.UTF_8);
-			if (isUri(idp.getMetadata())) {
-				data = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
-			}
-			Saml2Metadata metadata = (Saml2Metadata) saml2Transformer.fromXml(data, null, null);
-			metadata.setEntityAlias(idp.getAlias());
-			result = transform(metadata);
-			addStaticKeys(idp, result);
-		} catch (Saml2ProviderNotFoundException e) {
-			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
-		}
-		return result;
-	}
-
-	private void addStaticKeys(ExternalSaml2IdentityProviderConfiguration idp, Saml2IdentityProviderMetadata metadata) {
-		if (!idp.getVerificationKeys().isEmpty() && metadata != null) {
-			List<Saml2KeyData> keys = new LinkedList(metadata.getIdentityProvider().getKeys());
-			keys.addAll(idp.getVerificationKeys());
-			metadata.getIdentityProvider().setKeys(keys);
-		}
-	}
-
-	private Saml2IdentityProviderMetadata transform(Saml2Metadata metadata) {
-		if (metadata instanceof Saml2IdentityProviderMetadata) {
-			return (Saml2IdentityProviderMetadata) metadata;
-		}
-		else {
-			List<Saml2SsoProvider> providers = metadata.getSsoProviders();
-			providers = providers.stream().filter(p -> p instanceof Saml2IdentityProvider).collect(toList());
-			Saml2IdentityProviderMetadata result = new Saml2IdentityProviderMetadata(metadata);
-			result.setProviders(providers);
-			result.setImplementation(metadata.getImplementation());
-			result.setOriginalDataRepresentation(metadata.getOriginalDataRepresentation());
-			return result;
-		}
+	@Override
+	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
+		return generateMetadata(configuration);
 	}
 
 	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
@@ -234,6 +155,13 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 			);
 	}
 
+	private String getAliasPath(HostedSaml2ProviderConfiguration configuration) {
+		return UriUtils.encode(
+			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
+			StandardCharsets.ISO_8859_1.name()
+		);
+	}
+
 	private String getEntityAlias(HostedSaml2ServiceProviderConfiguration configuration, String entityId) {
 		return hasText(configuration.getAlias()) ? configuration.getAlias() :
 			isUrl(entityId) ? Saml2StringUtils.getHostFromUrl(entityId) : entityId;
@@ -255,11 +183,60 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 				.setIndex(index);
 	}
 
-	private String getAliasPath(HostedSaml2ProviderConfiguration configuration) {
-		return UriUtils.encode(
-			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
-			StandardCharsets.ISO_8859_1.name()
-		);
+	private Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getProviders(
+		HostedSaml2ServiceProviderConfiguration configuration) {
+		Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> result = new HashMap<>();
+		List<ExternalSaml2IdentityProviderConfiguration> providers = configuration.getProviders();
+		for (ExternalSaml2IdentityProviderConfiguration idpConfig : providers) {
+			Saml2IdentityProviderMetadata idp = getIdentityProviderMetadata(idpConfig);
+			idp = metadataTrustCheck(idpConfig, idp);
+			if (idp != null) {
+				result.put(idpConfig, idp);
+			}
+		}
+		return result;
+	}
+
+	private Saml2IdentityProviderMetadata getIdentityProviderMetadata(ExternalSaml2IdentityProviderConfiguration idp) {
+		Saml2IdentityProviderMetadata result = null;
+		try {
+			byte[] data = idp.getMetadata().getBytes(StandardCharsets.UTF_8);
+			if (isUri(idp.getMetadata())) {
+				data = cache.getMetadata(idp.getMetadata(), idp.isSkipSslValidation());
+			}
+			Saml2Metadata metadata = (Saml2Metadata) saml2Transformer.fromXml(data, null, null);
+			metadata.setEntityAlias(idp.getAlias());
+			result = transform(metadata);
+			addStaticKeys(idp, result);
+		} catch (Saml2ProviderNotFoundException e) {
+			logger.debug("Unable to resolve remote metadata:" + e.getMessage());
+		}
+		return result;
+	}
+
+	private Saml2IdentityProviderMetadata metadataTrustCheck(ExternalSaml2IdentityProviderConfiguration idpConfig,
+															 Saml2IdentityProviderMetadata idp) {
+		if (!idpConfig.isMetadataTrustCheck()) {
+			return idp;
+		}
+		if (idpConfig.getVerificationKeys().isEmpty()) {
+			logger.warn("No keys to verify metadata for " + idpConfig.getMetadata() + " with. Unable to trust.");
+			return null;
+		}
+		try {
+			Saml2Signature signature = saml2Transformer.validateSignature(idp, idpConfig.getVerificationKeys());
+			if (signature != null &&
+				signature.isValidated() &&
+				signature.getValidatingKey() != null) {
+				return idp;
+			}
+			else {
+				logger.warn("Missing signature for " + idpConfig.getMetadata() + ". Unable to trust.");
+			}
+		} catch (Saml2SignatureException e) {
+			logger.warn("Invalid signature for IDP metadata " + idpConfig.getMetadata() + ". Unable to trust.", e);
+		}
+		return null;
 	}
 
 	private boolean isUri(String uri) {
@@ -270,6 +247,29 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 		} catch (URISyntaxException e) {
 		}
 		return isUri;
+	}
+
+	private Saml2IdentityProviderMetadata transform(Saml2Metadata metadata) {
+		if (metadata instanceof Saml2IdentityProviderMetadata) {
+			return (Saml2IdentityProviderMetadata) metadata;
+		}
+		else {
+			List<Saml2SsoProvider> providers = metadata.getSsoProviders();
+			providers = providers.stream().filter(p -> p instanceof Saml2IdentityProvider).collect(toList());
+			Saml2IdentityProviderMetadata result = new Saml2IdentityProviderMetadata(metadata);
+			result.setProviders(providers);
+			result.setImplementation(metadata.getImplementation());
+			result.setOriginalDataRepresentation(metadata.getOriginalDataRepresentation());
+			return result;
+		}
+	}
+
+	private void addStaticKeys(ExternalSaml2IdentityProviderConfiguration idp, Saml2IdentityProviderMetadata metadata) {
+		if (!idp.getVerificationKeys().isEmpty() && metadata != null) {
+			List<Saml2KeyData> keys = new LinkedList(metadata.getIdentityProvider().getKeys());
+			keys.addAll(idp.getVerificationKeys());
+			metadata.getIdentityProvider().setKeys(keys);
+		}
 	}
 
 }

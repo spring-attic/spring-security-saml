@@ -34,9 +34,9 @@ import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
 public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 
-	private String filename = "saml2-service-provider-metadata.xml";
 	private final Saml2ServiceProviderMethods serviceProviderMethods;
 	private final RequestMatcher matcher;
+	private String filename = "saml2-service-provider-metadata.xml";
 
 	public Saml2ServiceProviderMetadataFilter(Saml2ServiceProviderMethods serviceProviderMethods,
 											  RequestMatcher matcher) {

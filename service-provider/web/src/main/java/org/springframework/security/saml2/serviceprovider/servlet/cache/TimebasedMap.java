@@ -41,33 +41,6 @@ class TimebasedMap<K, V> implements Map<K, V> {
 		this.time = time;
 	}
 
-	public Clock getTime() {
-		return time;
-	}
-
-	public TimebasedMap<K, V> setTime(Clock time) {
-		this.time = time;
-		return this;
-	}
-
-	public long getExpirationTimeMills() {
-		return expirationTimeMills;
-	}
-
-	public TimebasedMap<K, V> setExpirationTimeMills(long expirationTimeMills) {
-		this.expirationTimeMills = expirationTimeMills;
-		return this;
-	}
-
-	public long getFrequencyIntervalMills() {
-		return frequencyIntervalMills;
-	}
-
-	public TimebasedMap<K, V> setFrequencyIntervalMills(long frequencyIntervalMills) {
-		this.frequencyIntervalMills = frequencyIntervalMills;
-		return this;
-	}
-
 	private V access(MapEntry<V> value) {
 		V result = null;
 		if (value != null) {
@@ -105,6 +78,74 @@ class TimebasedMap<K, V> implements Map<K, V> {
 				.forEach(
 					key -> remove(key)
 				);
+		}
+	}
+
+	public Clock getTime() {
+		return time;
+	}
+
+	public TimebasedMap<K, V> setTime(Clock time) {
+		this.time = time;
+		return this;
+	}
+
+	public long getExpirationTimeMills() {
+		return expirationTimeMills;
+	}
+
+	public TimebasedMap<K, V> setExpirationTimeMills(long expirationTimeMills) {
+		this.expirationTimeMills = expirationTimeMills;
+		return this;
+	}
+
+	public long getFrequencyIntervalMills() {
+		return frequencyIntervalMills;
+	}
+
+	public TimebasedMap<K, V> setFrequencyIntervalMills(long frequencyIntervalMills) {
+		this.frequencyIntervalMills = frequencyIntervalMills;
+		return this;
+	}
+
+	class MapEntry<V> {
+
+		private V value;
+		private long creationTime;
+		private long lastAccessTime;
+
+		MapEntry(V value) {
+			long now = getTime().millis();
+			setValue(value);
+			setCreationTime(now);
+			setLastAccessTime(now);
+		}
+
+		public V getValue() {
+			return value;
+		}
+
+		public MapEntry<V> setValue(V value) {
+			this.value = value;
+			return this;
+		}
+
+		public long getCreationTime() {
+			return creationTime;
+		}
+
+		MapEntry<V> setCreationTime(long creationTime) {
+			this.creationTime = creationTime;
+			return this;
+		}
+
+		long getLastAccessTime() {
+			return lastAccessTime;
+		}
+
+		MapEntry<V> setLastAccessTime(long lastAccessTime) {
+			this.lastAccessTime = lastAccessTime;
+			return this;
 		}
 	}
 
@@ -216,46 +257,5 @@ class TimebasedMap<K, V> implements Map<K, V> {
 					e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().getValue())
 				)
 				.collect(Collectors.toSet());
-	}
-
-	class MapEntry<V> {
-
-		private V value;
-		private long creationTime;
-		private long lastAccessTime;
-
-		MapEntry(V value) {
-			long now = getTime().millis();
-			setValue(value);
-			setCreationTime(now);
-			setLastAccessTime(now);
-		}
-
-		public V getValue() {
-			return value;
-		}
-
-		public MapEntry<V> setValue(V value) {
-			this.value = value;
-			return this;
-		}
-
-		public long getCreationTime() {
-			return creationTime;
-		}
-
-		MapEntry<V> setCreationTime(long creationTime) {
-			this.creationTime = creationTime;
-			return this;
-		}
-
-		long getLastAccessTime() {
-			return lastAccessTime;
-		}
-
-		MapEntry<V> setLastAccessTime(long lastAccessTime) {
-			this.lastAccessTime = lastAccessTime;
-			return this;
-		}
 	}
 }

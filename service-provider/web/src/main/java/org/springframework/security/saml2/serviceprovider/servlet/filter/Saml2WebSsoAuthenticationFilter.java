@@ -49,11 +49,8 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-		return (
-			matcher.matches(request) && request.getParameter("SAMLResponse")!=null
-			);
+		return (matcher.matches(request) && request.getParameter("SAMLResponse") != null);
 	}
-
 
 
 	@Override

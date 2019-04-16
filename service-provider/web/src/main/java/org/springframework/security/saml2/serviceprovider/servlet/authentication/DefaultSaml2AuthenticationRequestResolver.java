@@ -47,8 +47,8 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultSaml2AuthenticationRequestResolver
 	implements Saml2AuthenticationRequestResolver {
 
-	private Clock clock = Clock.systemUTC();
 	private final Saml2ServiceProviderMethods serviceProviderMethods;
+	private Clock clock = Clock.systemUTC();
 
 	public DefaultSaml2AuthenticationRequestResolver(Saml2ServiceProviderMethods serviceProviderMethods) {
 		this.serviceProviderMethods = serviceProviderMethods;
@@ -105,18 +105,6 @@ public class DefaultSaml2AuthenticationRequestResolver
 		return result;
 	}
 
-	private String getIdpAlias(HttpServletRequest request) {
-		String path = request.getRequestURI().substring(request.getContextPath().length());
-		if (!hasText(path)) {
-			return null;
-		}
-		String[] paths = StringUtils.split(path, "/");
-		if (paths.length < 3) {
-			return null;
-		}
-		return paths[2];
-	}
-
 	protected Saml2AuthenticationRequest getAuthenticationRequest(Saml2ServiceProviderMetadata sp,
 																  Saml2IdentityProviderMetadata idp,
 																  Saml2NameId requestedNameId,
@@ -171,6 +159,17 @@ public class DefaultSaml2AuthenticationRequestResolver
 		return request;
 	}
 
+	private String getIdpAlias(HttpServletRequest request) {
+		String path = request.getRequestURI().substring(request.getContextPath().length());
+		if (!hasText(path)) {
+			return null;
+		}
+		String[] paths = StringUtils.split(path, "/");
+		if (paths.length < 3) {
+			return null;
+		}
+		return paths[2];
+	}
 
 
 }

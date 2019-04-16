@@ -57,7 +57,7 @@ public class DefaultSaml2MetadataCache implements Saml2MetadataCache {
 
 	public DefaultSaml2MetadataCache setCacheHitDurationMillis(long cacheHitDurationMillis) {
 		cache.setExpirationTimeMills(cacheHitDurationMillis);
-		cache.setFrequencyIntervalMills(Math.round((double)cacheHitDurationMillis / 2.0d));
+		cache.setFrequencyIntervalMills(Math.round((double) cacheHitDurationMillis / 2.0d));
 		return this;
 	}
 
@@ -67,7 +67,7 @@ public class DefaultSaml2MetadataCache implements Saml2MetadataCache {
 
 	public DefaultSaml2MetadataCache setCacheMissDurationMillis(long cacheMissDurationMillis) {
 		misses.setExpirationTimeMills(cacheMissDurationMillis);
-		misses.setFrequencyIntervalMills(Math.round((double)cacheMissDurationMillis / 2.0d));
+		misses.setFrequencyIntervalMills(Math.round((double) cacheMissDurationMillis / 2.0d));
 		return this;
 	}
 

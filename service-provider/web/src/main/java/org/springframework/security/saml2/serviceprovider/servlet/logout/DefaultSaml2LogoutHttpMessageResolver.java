@@ -158,6 +158,10 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 			.setVersion("2.0");
 	}
 
+	private String getLogoutRelayState(HttpServletRequest request, Saml2IdentityProviderMetadata idp) {
+		return request.getParameter("RelayState");
+	}
+
 	private Saml2LogoutSaml2Request logoutRequest(
 		Saml2ServiceProviderMetadata local,
 		Saml2IdentityProviderMetadata idp,
@@ -178,9 +182,5 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 			.setSigningKey(local.getSigningKey(), local.getAlgorithm(), local.getDigest());
 
 		return result;
-	}
-
-	private String getLogoutRelayState(HttpServletRequest request, Saml2IdentityProviderMetadata idp) {
-		return request.getParameter("RelayState");
 	}
 }

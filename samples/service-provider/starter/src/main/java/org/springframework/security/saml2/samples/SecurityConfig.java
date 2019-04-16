@@ -26,7 +26,7 @@ import org.springframework.security.saml2.configuration.ExternalSaml2IdentityPro
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
 
-import static org.springframework.security.saml2.serviceprovider.web.configuration.SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration;
+import static org.springframework.security.saml2.serviceprovider.servlet.configuration.SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {

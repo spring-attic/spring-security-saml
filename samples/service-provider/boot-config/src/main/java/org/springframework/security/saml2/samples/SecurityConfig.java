@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
 import org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration;
 import org.springframework.security.saml2.serviceprovider.bean.OpenSaml2TransformerBeans;
-import org.springframework.security.saml2.serviceprovider.web.bean.Saml2ServiceProviderBeans;
+import org.springframework.security.saml2.serviceprovider.servlet.bean.Saml2ServiceProviderBeans;
 
 import static org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer.saml2Login;
 

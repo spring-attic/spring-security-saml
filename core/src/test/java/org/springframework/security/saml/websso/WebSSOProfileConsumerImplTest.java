@@ -28,6 +28,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLStatusException;
 import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -137,6 +138,18 @@ public class WebSSOProfileConsumerImplTest {
         SAMLCredential samlCredential = profile.processAuthenticationResponse(messageContext);
         assertTrue(samlCredential.getAttributes().size() == 2);
     }
+
+	/**
+	 * Verifies that valid SAML response with an unsuccessful status code is correctly handled.
+	 *
+	 * @throws Exception error
+	 */
+	@Test(expected = SAMLStatusException.class)
+	public void testUnsuccessfulStatusResponse() throws Exception {
+		Response noPassiveStatusResponse = helper.getNoPassiveStatusResponse();
+		messageContext.setInboundSAMLMessage(noPassiveStatusResponse);
+		profile.processAuthenticationResponse(messageContext);
+	}
 
     /**
      * Verifies that processing of Response without authnStatement will fail.

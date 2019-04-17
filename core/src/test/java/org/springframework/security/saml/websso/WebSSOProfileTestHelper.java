@@ -44,6 +44,23 @@ public class WebSSOProfileTestHelper {
         return response;
     }
 
+	public Response getNoPassiveStatusResponse() {
+		SAMLObjectBuilder<Response> builder = (SAMLObjectBuilder<Response>) builderFactory.getBuilder(Response.DEFAULT_ELEMENT_NAME);
+		Response response = builder.buildObject();
+
+		StatusCode subStatusCode = ((SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME)).buildObject();
+		subStatusCode.setValue(StatusCode.NO_PASSIVE_URI);
+		StatusCode statusCode = ((SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME)).buildObject();
+		statusCode.setValue(StatusCode.RESPONDER_URI);
+		statusCode.setStatusCode(subStatusCode);
+		Status status = ((SAMLObjectBuilder<Status>) builderFactory.getBuilder(Status.DEFAULT_ELEMENT_NAME)).buildObject();
+		status.setStatusCode(statusCode);
+		response.setStatus(status);
+		response.setIssueInstant(new DateTime());
+
+		return response;
+	}
+
     public SubjectConfirmation getBearerConfirmation() {
 
         SAMLObjectBuilder<SubjectConfirmation> confirmationBuilder = (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);

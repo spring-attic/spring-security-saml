@@ -29,6 +29,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLStatusException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
@@ -103,14 +104,19 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         Response response = (Response) message;
 
         // Verify status
-        String statusCode = response.getStatus().getStatusCode().getValue();
-        if (!StatusCode.SUCCESS_URI.equals(statusCode)) {
+		StatusCode statusCode = response.getStatus().getStatusCode();
+        if (!StatusCode.SUCCESS_URI.equals(statusCode.getValue())) {
             StatusMessage statusMessage = response.getStatus().getStatusMessage();
             String statusMessageText = null;
             if (statusMessage != null) {
                 statusMessageText = statusMessage.getMessage();
             }
-            throw new SAMLException("Response has invalid status code " + statusCode + ", status message is " + statusMessageText);
+            // The final status code will be the most internal one
+            String finalStatusCode = statusCode.getValue();
+            if (statusCode.getStatusCode() != null){
+            	finalStatusCode = statusCode.getStatusCode().getValue();
+			}
+            throw new SAMLStatusException(finalStatusCode, "Response has invalid status code " + finalStatusCode + ", status message is " + statusMessageText);
         }
 
         // Verify signature of the response if present, unless already verified in binding

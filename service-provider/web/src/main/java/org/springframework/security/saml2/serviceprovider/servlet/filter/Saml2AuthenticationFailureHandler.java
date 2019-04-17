@@ -28,10 +28,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.web.util.HtmlUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 public class Saml2AuthenticationFailureHandler implements AuthenticationFailureHandler {
+
+	private static Log logger = LogFactory.getLog(Saml2AuthenticationFailureHandler.class);
 
 	public Saml2AuthenticationFailureHandler() {
 	}
@@ -40,6 +45,7 @@ public class Saml2AuthenticationFailureHandler implements AuthenticationFailureH
 	public void onAuthenticationFailure(HttpServletRequest request,
 										HttpServletResponse response,
 										AuthenticationException exception) throws IOException, ServletException {
+		logger.debug("Processing SAML2 Authentication Exception", exception);
 		sendHtmlBody(response, errorHtml(Collections.singletonList(exception.getMessage())));
 	}
 

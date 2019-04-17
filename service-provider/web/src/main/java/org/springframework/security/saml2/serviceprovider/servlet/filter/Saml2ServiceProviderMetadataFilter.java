@@ -50,6 +50,7 @@ public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
 			HostedSaml2ServiceProvider provider = serviceProviderMethods.getResolver().getServiceProvider(request);
+			logger.debug("Downloading SAML2 SP Metadata for:"+provider.getMetadata().getEntityId());
 			String xml = serviceProviderMethods.getTransformer().toXml(provider.getMetadata());
 			response.setContentType(TEXT_XML_VALUE);
 			String safeFilename = URLEncoder.encode(filename, "ISO-8859-1");

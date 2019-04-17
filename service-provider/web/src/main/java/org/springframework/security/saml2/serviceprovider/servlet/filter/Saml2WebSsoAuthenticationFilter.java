@@ -58,6 +58,9 @@ public class Saml2WebSsoAuthenticationFilter extends AbstractAuthenticationProce
 		throws AuthenticationException {
 		logger.debug("Attempting to resolve SAML2 WebSSO SAMLResponse");
 		Authentication auth = authenticationTokenResolver.resolveSaml2Authentication(request, response);
+		if (auth != null) {
+			logger.debug("SAML2 Authentication with:" + auth.getName() + " authenticated: " + auth.isAuthenticated() );
+		}
 		return getAuthenticationManager().authenticate(auth);
 	}
 

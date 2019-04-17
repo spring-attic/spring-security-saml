@@ -48,8 +48,10 @@ public class Saml2AuthenticationRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
+			logger.debug("Creating SAML2 SP Authentication Request.");
 			Saml2HttpMessageData mvcModel = resolveAuthenticationRequest(request, response);
 			responder.sendSaml2Message(mvcModel, request, response);
+			logger.debug("SAML2 SP Authentication Request Sent to Browser");
 		}
 		else {
 			filterChain.doFilter(request, response);

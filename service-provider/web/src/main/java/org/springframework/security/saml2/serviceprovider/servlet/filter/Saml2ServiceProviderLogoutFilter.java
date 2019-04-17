@@ -61,6 +61,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (matcher.matches(request)) {
+			logger.debug("Processing SAML2 SP Logout.");
 			if (authentication instanceof Saml2Authentication) {
 				Saml2HttpMessageData data = logoutResolver.resolveLogoutHttpMessage(
 					(Saml2Authentication) authentication,
@@ -68,18 +69,24 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 					response
 				);
 				if (data == null) {
+					logger.debug("No SAML2 Logout message needed. Performing regular logout.");
 					doLogout(request, response, authentication, true);
 				}
 				else {
 					//send either a LogoutRequest or a LogoutResponse to the IDP
 					if (data.getSamlResponse() != null) {
+						logger.debug("Sending SAML2 Logout Response. Performing local logout.");
 						//clear the session locally
 						doLogout(request, response, authentication, false);
+					}
+					else if (data.getSamlRequest() != null) {
+						logger.debug("Sending SAML2 SP Logout Request.");
 					}
 					saml2MessageResponder.sendSaml2Message(data, request, response);
 				}
 			}
 			else {
+				logger.debug("SAML2 Logout Authentication missing. Performing regular logout.");
 				doLogout(request, response, authentication, true);
 			}
 		}
@@ -100,6 +107,7 @@ public class Saml2ServiceProviderLogoutFilter extends OncePerRequestFilter {
 		}
 		if (redirect) {
 			//TODO - redirect to general app logout URL? /logout
+			logger.debug("SAML2 SP Logout - redirecting to:" + defaultLogoutSuccessUrl);
 			redirectStrategy.sendRedirect(request, response, defaultLogoutSuccessUrl);
 		}
 	}

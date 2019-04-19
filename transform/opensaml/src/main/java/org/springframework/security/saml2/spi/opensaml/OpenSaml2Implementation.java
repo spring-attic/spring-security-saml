@@ -62,6 +62,7 @@ import org.springframework.security.saml2.model.authentication.Saml2NameIdPrinci
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
+import org.springframework.security.saml2.model.authentication.Saml2Scoping;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.authentication.Saml2Subject;
@@ -153,9 +154,13 @@ import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.EncryptedAttribute;
 import org.opensaml.saml.saml2.core.EncryptedElementType;
 import org.opensaml.saml.saml2.core.EncryptedID;
+import org.opensaml.saml.saml2.core.IDPEntry;
+import org.opensaml.saml.saml2.core.IDPList;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.core.RequesterID;
+import org.opensaml.saml.saml2.core.Scoping;
 import org.opensaml.saml.saml2.core.StatusMessage;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
@@ -1176,7 +1181,32 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		if (request.getSigningKey() != null) {
 			this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
 		}
-
+		Saml2Scoping saml2Scoping = request.getScoping();
+		if (saml2Scoping != null) {
+			Scoping scoping = buildSAMLObject(Scoping.class);
+			List<String> idpListValues = saml2Scoping.getIdpList();
+			if (!CollectionUtils.isEmpty(idpListValues)) {
+				IDPList idpList = buildSAMLObject(IDPList.class);
+				List<IDPEntry> idpEntries = idpListValues.stream().map(idpId -> {
+					IDPEntry idpEntry = buildSAMLObject(IDPEntry.class);
+					idpEntry.setProviderID(idpId);
+					return idpEntry;
+				}).collect(Collectors.toList());
+				idpList.getIDPEntrys().addAll(idpEntries);
+				scoping.setIDPList(idpList);
+			}
+			scoping.setProxyCount(saml2Scoping.getProxyCount());
+			List<String> requesterIDs = saml2Scoping.getRequesterIds();
+			if (!CollectionUtils.isEmpty(requesterIDs)) {
+				List<RequesterID> requesterIDList = requesterIDs.stream().map(id -> {
+					RequesterID requesterID = buildSAMLObject(RequesterID.class);
+					requesterID.setRequesterID(id);
+					return requesterID;
+				}).collect(Collectors.toList());
+				scoping.getRequesterIDs().addAll(requesterIDList);
+			}
+			auth.setScoping(scoping);
+		}
 		return auth;
 	}
 
@@ -1242,6 +1272,21 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				.setAllowCreate(nameIDPolicy.getAllowCreate())
 				.setFormat(Saml2NameId.fromUrn(nameIDPolicy.getFormat()))
 				.setSpNameQualifier(nameIDPolicy.getSPNameQualifier());
+		}
+		return result;
+	}
+
+	private Saml2Scoping fromScoping(Scoping scoping) {
+		Saml2Scoping result = null;
+		if (scoping != null) {
+			IDPList idpList = scoping.getIDPList();
+			List<RequesterID> requesterIDs = scoping.getRequesterIDs();
+			result = new Saml2Scoping(
+				idpList != null ? idpList.getIDPEntrys().stream().map(idpEntry -> idpEntry.getProviderID())
+					.collect(Collectors.toList()) : Collections.emptyList(),
+				requesterIDs != null ? requesterIDs.stream().map(requesterID -> requesterID.getRequesterID())
+					.collect(Collectors.toList()) : Collections.emptyList(),
+				scoping.getProxyCount());
 		}
 		return result;
 	}
@@ -1608,7 +1653,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 			.setVersion(request.getVersion().toString())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
 			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
-			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
+			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()))
+			.setScoping(fromScoping(request.getScoping()));
 
 		return result;
 	}

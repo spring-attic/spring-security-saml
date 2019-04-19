@@ -44,6 +44,7 @@ public class Saml2AuthenticationRequest extends Saml2Request<Saml2Authentication
 	private Saml2DigestMethod digest;
 
 	private Saml2NameIdPolicy nameIdPolicy;
+	private Saml2Scoping scoping;
 
 	public String getProviderName() {
 		return providerName;
@@ -134,6 +135,15 @@ public class Saml2AuthenticationRequest extends Saml2Request<Saml2Authentication
 
 	public Boolean isPassive() {
 		return isPassive;
+	}
+
+	public Saml2Scoping getScoping() {
+		return scoping;
+	}
+
+	public Saml2AuthenticationRequest setScoping(Saml2Scoping scoping) {
+		this.scoping = scoping;
+		return _this();
 	}
 
 	@Override

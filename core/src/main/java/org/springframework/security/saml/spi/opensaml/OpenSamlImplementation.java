@@ -63,6 +63,7 @@ import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
 import org.springframework.security.saml.saml2.authentication.OneTimeUse;
 import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml.saml2.authentication.Response;
+import org.springframework.security.saml.saml2.authentication.Scoping;
 import org.springframework.security.saml.saml2.authentication.Status;
 import org.springframework.security.saml.saml2.authentication.StatusCode;
 import org.springframework.security.saml.saml2.authentication.Subject;
@@ -151,9 +152,12 @@ import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.EncryptedAttribute;
 import org.opensaml.saml.saml2.core.EncryptedElementType;
 import org.opensaml.saml.saml2.core.EncryptedID;
+import org.opensaml.saml.saml2.core.IDPEntry;
+import org.opensaml.saml.saml2.core.IDPList;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.core.RequesterID;
 import org.opensaml.saml.saml2.core.StatusMessage;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
@@ -1196,7 +1200,7 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		if (request.getSigningKey() != null) {
 			this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
 		}
-
+		auth.setScoping(getScoping(request.getScoping()));
 		return auth;
 	}
 
@@ -1262,6 +1266,50 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				.setAllowCreate(nameIDPolicy.getAllowCreate())
 				.setFormat(NameId.fromUrn(nameIDPolicy.getFormat()))
 				.setSpNameQualifier(nameIDPolicy.getSPNameQualifier());
+		}
+		return result;
+	}
+
+	protected org.opensaml.saml.saml2.core.Scoping getScoping(Scoping saml2Scoping) {
+		org.opensaml.saml.saml2.core.Scoping scoping = null;
+		if (saml2Scoping != null) {
+			scoping = buildSAMLObject(org.opensaml.saml.saml2.core.Scoping.class);
+			List<String> idpListValues = saml2Scoping.getIdpList();
+			if (!CollectionUtils.isEmpty(idpListValues)) {
+				IDPList idpList = buildSAMLObject(IDPList.class);
+				List<IDPEntry> idpEntries = idpListValues.stream().map(idpId -> {
+					IDPEntry idpEntry = buildSAMLObject(IDPEntry.class);
+					idpEntry.setProviderID(idpId);
+					return idpEntry;
+				}).collect(Collectors.toList());
+				idpList.getIDPEntrys().addAll(idpEntries);
+				scoping.setIDPList(idpList);
+			}
+			scoping.setProxyCount(saml2Scoping.getProxyCount());
+			List<String> requesterIDs = saml2Scoping.getRequesterIds();
+			if (!CollectionUtils.isEmpty(requesterIDs)) {
+				List<RequesterID> requesterIDList = requesterIDs.stream().map(id -> {
+					RequesterID requesterID = buildSAMLObject(RequesterID.class);
+					requesterID.setRequesterID(id);
+					return requesterID;
+				}).collect(Collectors.toList());
+				scoping.getRequesterIDs().addAll(requesterIDList);
+			}
+		}
+		return scoping;
+	}
+
+	protected Scoping fromScoping(org.opensaml.saml.saml2.core.Scoping scoping) {
+		Scoping result = null;
+		if (scoping != null) {
+			IDPList idpList = scoping.getIDPList();
+			List<RequesterID> requesterIDs = scoping.getRequesterIDs();
+			result = new Scoping(
+				idpList != null ? idpList.getIDPEntrys().stream().map(idpEntry -> idpEntry.getProviderID())
+					.collect(Collectors.toList()) : Collections.emptyList(),
+				requesterIDs != null ? requesterIDs.stream().map(requesterID -> requesterID.getRequesterID())
+					.collect(Collectors.toList()) : Collections.emptyList(),
+				scoping.getProxyCount());
 		}
 		return result;
 	}
@@ -1620,8 +1668,8 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setVersion(request.getVersion().toString())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
 			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
-			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()));
-
+			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()))
+			.setScoping(fromScoping(request.getScoping()));
 		return result;
 	}
 

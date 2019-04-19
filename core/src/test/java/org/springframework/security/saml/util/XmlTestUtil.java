@@ -44,6 +44,7 @@ public class XmlTestUtil {
 		nsContext.put("samlp", Namespace.NS_PROTOCOL);
 		nsContext.put("saml2p", Namespace.NS_PROTOCOL);
 		nsContext.put("saml", Namespace.NS_ASSERTION);
+		nsContext.put("saml2", Namespace.NS_ASSERTION);
 		nsContext.put("idpdisc", Namespace.NS_IDP_DISCOVERY);
 		nsContext.put("init", Namespace.NS_REQUEST_INIT);
 		engine.setNamespaceContext(nsContext);

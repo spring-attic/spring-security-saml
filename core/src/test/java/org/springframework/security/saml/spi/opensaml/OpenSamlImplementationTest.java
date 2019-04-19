@@ -1,17 +1,18 @@
 package org.springframework.security.saml.spi.opensaml;
 
 import org.junit.jupiter.api.Test;
+import org.opensaml.saml.saml2.core.NameID;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
-import org.springframework.security.saml.saml2.authentication.Issuer;
-import org.springframework.security.saml.saml2.authentication.Scoping;
+import org.springframework.security.saml.saml2.authentication.*;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
+import org.springframework.security.saml.saml2.metadata.NameId;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,12 +99,52 @@ class OpenSamlImplementationTest {
 		assertNull(scoping);
 	}
 
+	@Test
+	public void assertionWithAuthenticatingAuthoritiesToXml() {
+		String authenticatingAuthority = "http://authenticating_authority";
+		Assertion assertion = new Assertion()
+			.setIssuer(new Issuer())
+			.setSubject(new Subject()
+				.setPrincipal(new NameIdPrincipal().setValue("admin").setFormat(NameId.UNSPECIFIED))
+				.setConfirmations(Arrays.asList(
+					new SubjectConfirmation()
+						.setMethod(SubjectConfirmationMethod.BEARER)
+						.setConfirmationData(new SubjectConfirmationData().setInResponseTo("inResponseTo")))))
+			.setAuthenticationStatements(Arrays.asList(
+				new AuthenticationStatement()
+					.setAuthenticationContext(new AuthenticationContext()
+						.setAuthenticatingAuthorities(Arrays.asList(authenticatingAuthority)))))
+			.setConditions(new Conditions());
+
+		String xml = subject.toXml(assertion);
+
+		Iterable<Node> nodes = getNodes(xml, "//saml2:AuthenticatingAuthority");
+		String textContent = nodes.iterator().next().getTextContent();
+		assertEquals(authenticatingAuthority, textContent);
+	}
+
+	@Test
+	public void resolveAssertionWithAuthenticatinAuthorities() throws IOException {
+		AuthenticationContext authenticationContext =
+			parseAuthenticationContext("assertion_with_authenticating_authority.xml");
+		assertEquals(2, authenticationContext.getAuthenticatingAuthorities().size());
+		assertEquals("http://authenticating_authority", authenticationContext.getAuthenticatingAuthorities().get(0));
+	}
+
 	private Scoping parseScoping(String fileName) throws IOException {
 		byte[] xml = StreamUtils.copyToByteArray(
 			new ClassPathResource(String.format("authn_requests/%s", fileName)).getInputStream());
 		return ((AuthenticationRequest)
 			subject.resolve(xml, Collections.emptyList(), Collections.emptyList())).getScoping();
+	}
 
+	private AuthenticationContext parseAuthenticationContext(String fileName) throws IOException {
+		byte[] xml = StreamUtils.copyToByteArray(
+			new ClassPathResource(String.format("assertions/%s", fileName)).getInputStream());
+		return ((Assertion)
+			subject.resolve(xml, Collections.emptyList(), Collections.emptyList()))
+			.getAuthenticationStatements().get(0)
+			.getAuthenticationContext();
 	}
 
 	private Endpoint endpoint(String location) {

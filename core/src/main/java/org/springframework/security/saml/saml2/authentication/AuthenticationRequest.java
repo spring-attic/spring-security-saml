@@ -42,6 +42,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 	private DigestMethod digest;
 
 	private NameIdPolicy nameIdPolicy;
+	private Scoping scoping;
 
 	public String getProviderName() {
 		return providerName;
@@ -129,6 +130,15 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 
 	public Boolean isPassive() {
 		return isPassive;
+	}
+
+	public Scoping getScoping() {
+		return scoping;
+	}
+
+	public AuthenticationRequest setScoping(Scoping scoping) {
+		this.scoping = scoping;
+		return _this();
 	}
 
 	public AuthenticationRequest setSigningKey(SimpleKey signingKey, AlgorithmMethod algorithm, DigestMethod digest) {

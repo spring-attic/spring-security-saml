@@ -81,7 +81,8 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		if (getRequestMatcher().matches(request) && hasText(idpIdentifier)) {
 			ServiceProviderService provider = provisioning.getHostedProvider();
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
-			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
+			AuthenticationRequest authenticationRequest =
+				enhanceAuthenticationRequest(provider.authenticationRequest(idp), request);
 			sendAuthenticationRequest(
 				provider,
 				request,
@@ -95,7 +96,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		}
 	}
 
-	private RequestMatcher getRequestMatcher() {
+	protected RequestMatcher getRequestMatcher() {
 		return requestMatcher;
 	}
 
@@ -143,6 +144,11 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 				Collections.singletonMap("message", "Unsupported binding:" + location.getBinding().toString())
 			);
 		}
+	}
+
+	protected AuthenticationRequest enhanceAuthenticationRequest(AuthenticationRequest authenticationRequest,
+																 HttpServletRequest request) {
+		return authenticationRequest;
 	}
 
 	protected String getRelayState(ServiceProviderService provider, HttpServletRequest request) {

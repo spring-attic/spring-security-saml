@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
@@ -199,8 +199,8 @@ public class Saml2AssertionTests extends MetadataBase {
 		Saml2Subject subject = assertion.getSubject();
 		assertNotNull(subject);
 		assertNotNull(subject.getPrincipal());
-		assertThat(subject.getPrincipal().getClass(), equalTo(Saml2NameIdPrincipalSaml2.class));
-		Saml2NameIdPrincipalSaml2 principal = (Saml2NameIdPrincipalSaml2) subject.getPrincipal();
+		assertThat(subject.getPrincipal().getClass(), equalTo(Saml2NameIdPrincipal.class));
+		Saml2NameIdPrincipal principal = (Saml2NameIdPrincipal) subject.getPrincipal();
 		assertThat(principal.getValue(), equalTo("spring@idp.saml.spring.io"));
 		assertThat(principal.getFormat(), equalTo(EMAIL));
 
@@ -287,11 +287,11 @@ public class Saml2AssertionTests extends MetadataBase {
 
 		assertNotNull(assertion.getSubject());
 		assertNotNull(assertion.getSubject().getPrincipal());
-		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(Saml2NameIdPrincipalSaml2.class));
+		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(Saml2NameIdPrincipal.class));
 		assertThat(assertion.getSubject().getPrincipal().getValue(), equalTo("test-principal"));
-		assertThat(((Saml2NameIdPrincipalSaml2) assertion.getSubject().getPrincipal()).getFormat(), equalTo(Saml2NameId.PERSISTENT));
+		assertThat(((Saml2NameIdPrincipal) assertion.getSubject().getPrincipal()).getFormat(), equalTo(Saml2NameId.PERSISTENT));
 		assertThat(
-			((Saml2NameIdPrincipalSaml2) assertion.getSubject().getPrincipal()).getSpNameQualifier(),
+			((Saml2NameIdPrincipal) assertion.getSubject().getPrincipal()).getSpNameQualifier(),
 			equalTo(serviceProviderMetadata.getEntityId())
 		);
 		assertNotNull(assertion.getSubject().getConfirmations());
@@ -348,7 +348,7 @@ public class Saml2AssertionTests extends MetadataBase {
 
 		String username = "test@test.com";
 
-		Saml2NameIdPrincipalSaml2 principal = assertion.getSubject().getPrincipal();
+		Saml2NameIdPrincipal principal = assertion.getSubject().getPrincipal();
 		principal.setFormat(EMAIL);
 		principal.setValue(username);
 
@@ -494,8 +494,8 @@ public class Saml2AssertionTests extends MetadataBase {
 
 		assertNotNull(assertion.getSubject());
 		assertNotNull(assertion.getSubject().getPrincipal());
-		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(Saml2NameIdPrincipalSaml2.class));
-		Saml2NameIdPrincipalSaml2 principal = (Saml2NameIdPrincipalSaml2) assertion.getSubject().getPrincipal();
+		assertThat(assertion.getSubject().getPrincipal().getClass(), equalTo(Saml2NameIdPrincipal.class));
+		Saml2NameIdPrincipal principal = (Saml2NameIdPrincipal) assertion.getSubject().getPrincipal();
 		assertThat(principal.getFormat(), equalTo(EMAIL));
 		assertThat(principal.getSpNameQualifier(), equalTo("http://sp.localhost:8080/uaa"));
 		assertThat(principal.getValue(), equalTo("test@test.com"));

@@ -39,7 +39,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
@@ -300,7 +300,7 @@ public class SamlTestObjectHelper {
 			.setSubject(
 				new Saml2Subject()
 					.setPrincipal(
-						new Saml2NameIdPrincipalSaml2()
+						new Saml2NameIdPrincipal()
 							.setValue(principal)
 							.setFormat(principalFormat)
 							.setNameQualifier(sp.getEntityAlias())
@@ -401,7 +401,7 @@ public class SamlTestObjectHelper {
 
 	public Saml2LogoutSaml2Request logoutRequest(Saml2Metadata<? extends Saml2Metadata> recipient,
 												 Saml2Metadata<? extends Saml2Metadata> local,
-												 Saml2NameIdPrincipalSaml2 principal) {
+												 Saml2NameIdPrincipal principal) {
 
 
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()

@@ -43,6 +43,7 @@ public class XmlTestUtil {
 		nsContext.put("ds", Saml2Namespace.NS_SIGNATURE);
 		nsContext.put("samlp", Saml2Namespace.NS_PROTOCOL);
 		nsContext.put("saml2p", Saml2Namespace.NS_PROTOCOL);
+		nsContext.put("saml2", Saml2Namespace.NS_ASSERTION);
 		nsContext.put("saml", Saml2Namespace.NS_ASSERTION);
 		nsContext.put("idpdisc", Saml2Namespace.NS_IDP_DISCOVERY);
 		nsContext.put("init", Saml2Namespace.NS_REQUEST_INIT);

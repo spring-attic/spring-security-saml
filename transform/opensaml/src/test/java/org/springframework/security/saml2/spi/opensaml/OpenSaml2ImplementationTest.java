@@ -19,18 +19,28 @@ package org.springframework.security.saml2.spi.opensaml;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.saml2.model.attribute.Saml2Attribute;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
+import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2Scoping;
+import org.springframework.security.saml2.model.authentication.Saml2Subject;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmation;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationData;
+import org.springframework.security.saml2.model.authentication.Saml2SubjectConfirmationMethod;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.util.StreamUtils;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -135,6 +145,48 @@ class OpenSaml2ImplementationTest {
 		String value = (String) values.get(0);
 		assertEquals("urn:collab:person:example.com:admin", value);
 	}
+
+	@Test
+	public void assertionWithAuthenticatingAuthoritiesToXml() {
+		String authenticatingAuthority = "http://authenticating_authority";
+		Saml2Assertion assertion = new Saml2Assertion()
+			.setIssuer(new Saml2Issuer())
+			.setSubject(new Saml2Subject()
+				.setPrincipal(new Saml2NameIdPrincipal().setValue("admin").setFormat(Saml2NameId.UNSPECIFIED))
+				.setConfirmations(Arrays.asList(
+					new Saml2SubjectConfirmation()
+						.setMethod(Saml2SubjectConfirmationMethod.BEARER)
+						.setConfirmationData(new Saml2SubjectConfirmationData().setInResponseTo("inResponseTo")))))
+			.setAuthenticationStatements(Arrays.asList(
+				new Saml2AuthenticationStatement()
+					.setAuthenticationContext(new Saml2AuthenticationContext()
+						.setAuthenticatingAuthorities(Arrays.asList(authenticatingAuthority)))))
+			.setConditions(new Saml2Conditions());
+
+		String xml = subject.toXml(assertion);
+
+		Iterable<Node> nodes = getNodes(xml, "//saml2:AuthenticatingAuthority");
+		String textContent = nodes.iterator().next().getTextContent();
+		assertEquals(authenticatingAuthority, textContent);
+	}
+
+	@Test
+	public void resolveAssertionWithAuthenticatinAuthorities() throws IOException {
+		Saml2AuthenticationContext authenticationContext =
+			parseAuthenticationContext("assertion_with_authenticating_authority.xml");
+		assertEquals(2, authenticationContext.getAuthenticatingAuthorities().size());
+		assertEquals("http://authenticating_authority", authenticationContext.getAuthenticatingAuthorities().get(0));
+	}
+
+	private Saml2AuthenticationContext parseAuthenticationContext(String fileName) throws IOException {
+		byte[] xml = StreamUtils.copyToByteArray(
+			new ClassPathResource(String.format("assertions/%s", fileName)).getInputStream());
+		return ((Saml2Assertion)
+			subject.resolve(xml, Collections.emptyList(), Collections.emptyList()))
+			.getAuthenticationStatements().get(0)
+			.getAuthenticationContext();
+	}
+
 
 	private Saml2Scoping parseSaml2Scoping(String fileName) throws IOException {
 		byte[] xml = StreamUtils.copyToByteArray(

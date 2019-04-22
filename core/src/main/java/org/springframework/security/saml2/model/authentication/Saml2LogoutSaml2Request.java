@@ -35,7 +35,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 	private Saml2KeyData signingKey;
 	private Saml2AlgorithmMethod algorithm;
 	private Saml2DigestMethod digest;
-	private Saml2NameIdPrincipalSaml2 nameId;
+	private Saml2NameIdPrincipal nameId;
 	private Saml2LogoutReason reason;
 	private DateTime notOnOrAfter;
 
@@ -57,11 +57,11 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return this;
 	}
 
-	public Saml2NameIdPrincipalSaml2 getNameId() {
+	public Saml2NameIdPrincipal getNameId() {
 		return nameId;
 	}
 
-	public Saml2LogoutSaml2Request setNameId(Saml2NameIdPrincipalSaml2 nameId) {
+	public Saml2LogoutSaml2Request setNameId(Saml2NameIdPrincipal nameId) {
 		this.nameId = nameId;
 		return this;
 	}

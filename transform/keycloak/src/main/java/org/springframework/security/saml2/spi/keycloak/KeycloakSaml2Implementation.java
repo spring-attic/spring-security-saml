@@ -63,7 +63,7 @@ import org.springframework.security.saml2.model.authentication.Saml2LogoutReason
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
@@ -1422,7 +1422,7 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private Saml2NameIdPrincipalSaml2 getPrincipal(SubjectType subject, List<Saml2KeyData> localKeys) {
+	private Saml2NameIdPrincipal getPrincipal(SubjectType subject, List<Saml2KeyData> localKeys) {
 		NameIDType p = getNameID(
 			(NameIDType) subject.getSubType().getBaseID(),
 			subject.getSubType().getEncryptedID(),
@@ -1559,8 +1559,8 @@ public class KeycloakSaml2Implementation extends SpringSecuritySaml2<KeycloakSam
 		return result;
 	}
 
-	private Saml2NameIdPrincipalSaml2 getNameIdPrincipal(NameIDType p) {
-		return new Saml2NameIdPrincipalSaml2()
+	private Saml2NameIdPrincipal getNameIdPrincipal(NameIDType p) {
+		return new Saml2NameIdPrincipal()
 			.setSpNameQualifier(p.getSPNameQualifier())
 			.setNameQualifier(p.getNameQualifier())
 			.setFormat(Saml2NameId.fromUrn(p.getFormat().toString()))

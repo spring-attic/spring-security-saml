@@ -24,7 +24,7 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 18, Line 707
  */
-public class Saml2NameIdPrincipalSaml2 extends Saml2SubjectPrincipal<Saml2NameIdPrincipalSaml2> {
+public class Saml2NameIdPrincipal extends Saml2SubjectPrincipal<Saml2NameIdPrincipal> {
 	private String nameQualifier;
 	private String spNameQualifier;
 	private Saml2NameId format;
@@ -35,7 +35,7 @@ public class Saml2NameIdPrincipalSaml2 extends Saml2SubjectPrincipal<Saml2NameId
 		return nameQualifier;
 	}
 
-	public Saml2NameIdPrincipalSaml2 setNameQualifier(String nameQualifier) {
+	public Saml2NameIdPrincipal setNameQualifier(String nameQualifier) {
 		this.nameQualifier = nameQualifier;
 		return _this();
 	}
@@ -44,7 +44,7 @@ public class Saml2NameIdPrincipalSaml2 extends Saml2SubjectPrincipal<Saml2NameId
 		return spNameQualifier;
 	}
 
-	public Saml2NameIdPrincipalSaml2 setSpNameQualifier(String spNameQualifier) {
+	public Saml2NameIdPrincipal setSpNameQualifier(String spNameQualifier) {
 		this.spNameQualifier = spNameQualifier;
 		return _this();
 	}
@@ -53,7 +53,7 @@ public class Saml2NameIdPrincipalSaml2 extends Saml2SubjectPrincipal<Saml2NameId
 		return format;
 	}
 
-	public Saml2NameIdPrincipalSaml2 setFormat(Saml2NameId format) {
+	public Saml2NameIdPrincipal setFormat(Saml2NameId format) {
 		this.format = format;
 		return _this();
 	}
@@ -62,7 +62,7 @@ public class Saml2NameIdPrincipalSaml2 extends Saml2SubjectPrincipal<Saml2NameId
 		return spProvidedId;
 	}
 
-	public Saml2NameIdPrincipalSaml2 setSpProvidedId(String spProvidedId) {
+	public Saml2NameIdPrincipal setSpProvidedId(String spProvidedId) {
 		this.spProvidedId = spProvidedId;
 		return _this();
 	}

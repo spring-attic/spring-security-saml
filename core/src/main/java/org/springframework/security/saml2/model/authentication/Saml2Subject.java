@@ -31,14 +31,14 @@ public class Saml2Subject {
 	/**
 	 * BaseID, NameID or EncryptedID
 	 */
-	private Saml2NameIdPrincipalSaml2 principal;
+	private Saml2NameIdPrincipal principal;
 	private List<Saml2SubjectConfirmation> confirmations = new LinkedList<>();
 
-	public Saml2NameIdPrincipalSaml2 getPrincipal() {
+	public Saml2NameIdPrincipal getPrincipal() {
 		return principal;
 	}
 
-	public Saml2Subject setPrincipal(Saml2NameIdPrincipalSaml2 principal) {
+	public Saml2Subject setPrincipal(Saml2NameIdPrincipal principal) {
 		this.principal = principal;
 		return this;
 	}

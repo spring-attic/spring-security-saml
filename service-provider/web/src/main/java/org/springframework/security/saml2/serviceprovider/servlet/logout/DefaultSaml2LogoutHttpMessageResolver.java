@@ -28,7 +28,7 @@ import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
@@ -114,7 +114,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		Saml2ServiceProviderMetadata sp = provider.getMetadata();
 		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(authentication.getAssertingEntityId());
 		Saml2LogoutSaml2Request lr =
-			logoutRequest(provider.getMetadata(), idp, (Saml2NameIdPrincipalSaml2) authentication.getSamlPrincipal());
+			logoutRequest(provider.getMetadata(), idp, (Saml2NameIdPrincipal) authentication.getSamlPrincipal());
 		if (lr.getDestination() != null) {
 			logger.debug("Sending logout request through redirect.");
 			Saml2HttpMessageData mvcData = new Saml2HttpMessageData(
@@ -165,7 +165,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 	private Saml2LogoutSaml2Request logoutRequest(
 		Saml2ServiceProviderMetadata local,
 		Saml2IdentityProviderMetadata idp,
-		Saml2NameIdPrincipalSaml2 principal) {
+		Saml2NameIdPrincipal principal) {
 		List<Saml2SsoProvider> ssoProviders = idp.getSsoProviders();
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId("LRQ" + UUID.randomUUID().toString())

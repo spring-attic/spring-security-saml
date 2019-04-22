@@ -24,7 +24,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
@@ -170,7 +170,7 @@ class LogoutObjectTests {
 		assertThat(request.getSignature().getCanonicalizationAlgorithm(), equalTo(ALGO_ID_C14N_EXCL_OMIT_COMMENTS));
 		assertThat(request.getSignature().getSignatureAlgorithm(), equalTo(RSA_SHA256));
 
-		Saml2NameIdPrincipalSaml2 nameId = request.getNameId();
+		Saml2NameIdPrincipal nameId = request.getNameId();
 		assertNotNull(nameId);
 		assertThat(nameId.getFormat(), equalTo(EMAIL));
 		assertThat(nameId.getNameQualifier(), equalTo("http://sp.test.org"));
@@ -185,7 +185,7 @@ class LogoutObjectTests {
 			.setId("request-id")
 			.setDestination(new Saml2Endpoint().setLocation(destination))
 			.setSigningKey(RSA_TEST_KEY.getSimpleKey("test"), RSA_SHA256, SHA512)
-			.setNameId(new Saml2NameIdPrincipalSaml2()
+			.setNameId(new Saml2NameIdPrincipal()
 				.setNameQualifier(issuer)
 				.setSpNameQualifier(issuer)
 				.setFormat(EMAIL)

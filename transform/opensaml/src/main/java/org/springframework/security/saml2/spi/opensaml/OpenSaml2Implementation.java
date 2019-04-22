@@ -59,7 +59,7 @@ import org.springframework.security.saml2.model.authentication.Saml2LogoutReason
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
-import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
+import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
 import org.springframework.security.saml2.model.authentication.Saml2RequestedAuthenticationContext;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
@@ -145,6 +145,7 @@ import org.opensaml.saml.ext.saml2mdreqinit.impl.RequestInitiatorBuilder;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AuthenticatingAuthority;
 import org.opensaml.saml.saml2.core.AuthnContext;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
@@ -231,7 +232,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 	private static final Log logger = LogFactory.getLog(OpenSaml2Implementation.class);
 	private BasicParserPool parserPool;
 	private ChainingEncryptedKeyResolver encryptedKeyResolver;
-	private Saml2KeyStoreProvider samlKeyStoreProvider = new Saml2KeyStoreProvider() {};
+	private Saml2KeyStoreProvider samlKeyStoreProvider = new Saml2KeyStoreProvider() {
+	};
 
 	public OpenSaml2Implementation(Clock time) {
 		super(time);
@@ -444,7 +446,10 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		if (result != null) {
 			if (result instanceof Saml2ImplementationHolder) {
 				((Saml2ImplementationHolder) result).setImplementation(parsed);
-				((Saml2ImplementationHolder) result).setOriginalDataRepresentation(new String(xml, StandardCharsets.UTF_8));
+				((Saml2ImplementationHolder) result).setOriginalDataRepresentation(new String(
+					xml,
+					StandardCharsets.UTF_8
+				));
 			}
 			return result;
 		}
@@ -632,7 +637,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				providers.add(getSsoProvider(roleDescriptor));
 			}
 			else {
-				logger.debug("Ignoring unknown metadata descriptor:"+roleDescriptor.getClass().getName());
+				logger.debug("Ignoring unknown metadata descriptor:" + roleDescriptor.getClass().getName());
 			}
 		}
 		return providers;
@@ -762,7 +767,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		if (desc.getKeyInfo() == null) {
 			return null;
 		}
-		Saml2KeyType type = desc.getUse() != null ? Saml2KeyType.valueOf(desc.getUse().name()) : Saml2KeyType.UNSPECIFIED;
+		Saml2KeyType type =
+			desc.getUse() != null ? Saml2KeyType.valueOf(desc.getUse().name()) : Saml2KeyType.UNSPECIFIED;
 		int index = 0;
 		for (X509Data x509 : ofNullable(desc.getKeyInfo().getX509Datas()).orElse(emptyList())) {
 			for (X509Certificate cert : ofNullable(x509.getX509Certificates()).orElse(emptyList())) {
@@ -860,7 +866,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 			desc.setID(metadata.getId());
 		}
 		else {
-			desc.setID("M"+UUID.randomUUID().toString());
+			desc.setID("M" + UUID.randomUUID().toString());
 		}
 		List<RoleDescriptor> descriptors = getRoleDescriptors(metadata);
 		desc.getRoleDescriptors().addAll(descriptors);
@@ -931,7 +937,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 			}
 			roleDescriptor.setValidUntil(p.getValidUntil());
 			roleDescriptor.addSupportedProtocol(NS_PROTOCOL);
-			roleDescriptor.setID(ofNullable(p.getId()).orElse("RD"+UUID.randomUUID().toString()));
+			roleDescriptor.setID(ofNullable(p.getId()).orElse("RD" + UUID.randomUUID().toString()));
 
 			for (Saml2KeyData key : p.getKeys()) {
 				roleDescriptor.getKeyDescriptors().add(getKeyDescriptor(key));
@@ -1067,7 +1073,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		issuer.setValue(request.getIssuer().getValue());
 		a.setIssuer(issuer);
 
-		Saml2NameIdPrincipalSaml2 principal = (Saml2NameIdPrincipalSaml2) request.getSubject().getPrincipal();
+		Saml2NameIdPrincipal principal = (Saml2NameIdPrincipal) request.getSubject().getPrincipal();
 
 		NameID nid = buildSAMLObject(NameID.class);
 		nid.setValue(request.getSubject().getPrincipal().getValue());
@@ -1116,7 +1122,20 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContext.class);
 			org.opensaml.saml.saml2.core.AuthnContextClassRef aref =
 				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContextClassRef.class);
-			aref.setAuthnContextClassRef(stmt.getAuthenticationContext().getClassReference().toString());
+			Saml2AuthenticationContext authenticationContext = stmt.getAuthenticationContext();
+			aref.setAuthnContextClassRef(authenticationContext.getClassReference().toString());
+			if (!CollectionUtils.isEmpty(authenticationContext.getAuthenticatingAuthorities())) {
+				actx.getAuthenticatingAuthorities()
+					.addAll(authenticationContext.getAuthenticatingAuthorities()
+						.stream()
+						.map(uri -> {
+							AuthenticatingAuthority authenticatingAuthority =
+								buildSAMLObject(AuthenticatingAuthority.class);
+							authenticatingAuthority.setURI(uri);
+							return authenticatingAuthority;
+						})
+						.collect(Collectors.toList()));
+			}
 			actx.setAuthnContextClassRef(aref);
 			authnStatement.setAuthnContext(actx);
 			a.getAuthnStatements().add(authnStatement);
@@ -1288,7 +1307,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 					.collect(Collectors.toList()) : Collections.emptyList(),
 				requesterIDs != null ? requesterIDs.stream().map(requesterID -> requesterID.getRequesterID())
 					.collect(Collectors.toList()) : Collections.emptyList(),
-				scoping.getProxyCount());
+				scoping.getProxyCount()
+			);
 		}
 		return result;
 	}
@@ -1472,9 +1492,10 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				if (StringUtils.isEmpty(textContent) && !CollectionUtils.isEmpty(xsAny.getUnknownXMLObjects())) {
 					XMLObject xmlObject = xsAny.getUnknownXMLObjects().get(0);
 					if (xmlObject instanceof NameIDType) {
-						result.add(((NameIDType)xmlObject).getValue());
+						result.add(((NameIDType) xmlObject).getValue());
 					}
-				} else {
+				}
+				else {
 					result.add(textContent);
 				}
 			}
@@ -1500,6 +1521,11 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 			if (authnContextClassRef.getAuthnContextClassRef() != null) {
 				ref = authnContextClassRef.getAuthnContextClassRef();
 			}
+			List<AuthenticatingAuthority> authenticatingAuthorities = authnContext.getAuthenticatingAuthorities();
+			List<String> authenticatingAuthoritiesUrns = authenticatingAuthorities != null ?
+				authenticatingAuthorities
+					.stream()
+					.map(authority -> authority.getURI()).collect(Collectors.toList()) : null;
 
 			result.add(
 				new Saml2AuthenticationStatement()
@@ -1510,6 +1536,7 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 						authnContext != null ?
 							new Saml2AuthenticationContext()
 								.setClassReference(Saml2AuthenticationContextClassReference.fromUrn(ref))
+								.setAuthenticatingAuthorities(authenticatingAuthoritiesUrns)
 							: null
 					)
 			);
@@ -1591,7 +1618,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		return result;
 	}
 
-	private Saml2NameIdPrincipalSaml2 getPrincipal(org.opensaml.saml.saml2.core.Subject subject, List<Saml2KeyData> localKeys) {
+	private Saml2NameIdPrincipal getPrincipal(org.opensaml.saml.saml2.core.Subject subject,
+											  List<Saml2KeyData> localKeys) {
 		NameID p =
 			getNameID(
 				subject.getNameID(),
@@ -1606,8 +1634,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 		}
 	}
 
-	private Saml2NameIdPrincipalSaml2 getNameIdPrincipal(NameID p) {
-		return new Saml2NameIdPrincipalSaml2()
+	private Saml2NameIdPrincipal getNameIdPrincipal(NameID p) {
+		return new Saml2NameIdPrincipal()
 			.setSpNameQualifier(p.getSPNameQualifier())
 			.setNameQualifier(p.getNameQualifier())
 			.setFormat(Saml2NameId.fromUrn(p.getFormat()))
@@ -1744,7 +1772,8 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 
 		if (ssoProviders.size() == sps) {
 			result = new Saml2ServiceProviderMetadata();
-		} else if (ssoProviders.size() == idps) {
+		}
+		else if (ssoProviders.size() == idps) {
 			result = new Saml2IdentityProviderMetadata();
 		}
 		result.setProviders(ssoProviders);

@@ -17,12 +17,15 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import java.util.List;
+
 import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
 
 public class AuthenticationContext {
 
 	private AuthenticationContextClassReference classReference = UNSPECIFIED;
 
+	private List<String> authenticatingAuthorities;
 
 	public AuthenticationContextClassReference getClassReference() {
 		return classReference;
@@ -30,6 +33,15 @@ public class AuthenticationContext {
 
 	public AuthenticationContext setClassReference(AuthenticationContextClassReference classReference) {
 		this.classReference = classReference;
+		return this;
+	}
+
+	public List<String> getAuthenticatingAuthorities() {
+		return authenticatingAuthorities;
+	}
+
+	public AuthenticationContext setAuthenticatingAuthorities(List<String> authenticatingAuthorities) {
+		this.authenticatingAuthorities = authenticatingAuthorities;
 		return this;
 	}
 }

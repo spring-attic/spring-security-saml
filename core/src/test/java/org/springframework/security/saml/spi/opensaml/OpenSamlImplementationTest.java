@@ -2,8 +2,11 @@ package org.springframework.security.saml.spi.opensaml;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.Issuer;
+import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Scoping;
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.Endpoint;
@@ -96,6 +99,21 @@ class OpenSamlImplementationTest {
 			parseScoping("authn_request_with_no_scoping.xml");
 
 		assertNull(scoping);
+	}
+
+	@Test
+	public void resolveAuthnResponseWithComplexAttributeValue() throws IOException {
+		byte[] xml = StreamUtils.copyToByteArray(
+			new ClassPathResource("authn_response/authn_response_with_xml_element_attribute_value.xml").getInputStream());
+		Response response = (Response) subject.resolve(xml, Collections.emptyList(), Collections.emptyList());
+		Assertion assertion = response.getAssertions().get(0);
+		Attribute attribute = assertion.getFirstAttribute("urn:mace:dir:attribute-def:eduPersonTargetedID");
+
+		List<Object> values = attribute.getValues();
+		assertEquals(1, values.size());
+
+		String value = (String) values.get(0);
+		assertEquals("urn:collab:person:example.com:admin", value);
 	}
 
 	private Scoping parseScoping(String fileName) throws IOException {

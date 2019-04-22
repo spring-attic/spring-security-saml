@@ -156,6 +156,7 @@ import org.opensaml.saml.saml2.core.IDPEntry;
 import org.opensaml.saml.saml2.core.IDPList;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
+import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.RequesterID;
 import org.opensaml.saml.saml2.core.StatusMessage;
@@ -205,6 +206,7 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.Signer;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -1480,7 +1482,16 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				result.add(((XSInteger) o).getValue());
 			}
 			else if (o instanceof XSAny) {
-				result.add(((XSAny) o).getTextContent());
+				XSAny xsAny = (XSAny) o;
+				String textContent = xsAny.getTextContent();
+				if (StringUtils.isEmpty(textContent) && !CollectionUtils.isEmpty(xsAny.getUnknownXMLObjects())) {
+					XMLObject xmlObject = xsAny.getUnknownXMLObjects().get(0);
+					if (xmlObject instanceof NameIDType) {
+						result.add(((NameIDType)xmlObject).getValue());
+					}
+				} else {
+					result.add(textContent);
+				}
 			}
 			else {
 				//we don't know the type.

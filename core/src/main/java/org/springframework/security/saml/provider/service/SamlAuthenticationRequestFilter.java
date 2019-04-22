@@ -64,11 +64,6 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		this.requestMatcher = requestMatcher;
 	}
 
-	private String getAuthnRequestXml(ServiceProviderService provider, AuthenticationRequest authenticationRequest) {
-		String xml = provider.toXml(authenticationRequest);
-		return xml;
-	}
-
 	public SamlAuthenticationRequestFilter setCacheHeaderWriter(HeaderWriter cacheHeaderWriter) {
 		this.cacheHeaderWriter = cacheHeaderWriter;
 		return this;
@@ -81,7 +76,7 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		if (getRequestMatcher().matches(request) && hasText(idpIdentifier)) {
 			ServiceProviderService provider = provisioning.getHostedProvider();
 			IdentityProviderMetadata idp = getIdentityProvider(provider, idpIdentifier);
-			AuthenticationRequest authenticationRequest = provider.authenticationRequest(idp);
+			AuthenticationRequest authenticationRequest = getAuthenticationRequest(provider, idp, request);
 			sendAuthenticationRequest(
 				provider,
 				request,
@@ -95,7 +90,13 @@ public class SamlAuthenticationRequestFilter extends SamlFilter<ServiceProviderS
 		}
 	}
 
-	private RequestMatcher getRequestMatcher() {
+	protected AuthenticationRequest getAuthenticationRequest(ServiceProviderService provider,
+															 IdentityProviderMetadata idp,
+															 HttpServletRequest request) {
+		return provider.authenticationRequest(idp);
+	}
+
+	protected RequestMatcher getRequestMatcher() {
 		return requestMatcher;
 	}
 

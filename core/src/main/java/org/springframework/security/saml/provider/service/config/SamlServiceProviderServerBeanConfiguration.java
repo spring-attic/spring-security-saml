@@ -25,6 +25,7 @@ import org.springframework.security.saml.provider.SamlServerConfiguration;
 import org.springframework.security.saml.provider.config.AbstractSamlServerBeanConfiguration;
 import org.springframework.security.saml.provider.provisioning.HostBasedSamlServiceProviderProvisioning;
 import org.springframework.security.saml.provider.provisioning.SamlProviderProvisioning;
+import org.springframework.security.saml.provider.service.AuthenticationRequestEnhancer;
 import org.springframework.security.saml.provider.service.SamlAuthenticationRequestFilter;
 import org.springframework.security.saml.provider.service.SelectIdentityProviderFilter;
 import org.springframework.security.saml.provider.service.ServiceProviderMetadataFilter;
@@ -51,7 +52,8 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 			samlConfigurationRepository(),
 			samlTransformer(),
 			samlValidator(),
-			samlMetadataCache()
+			samlMetadataCache(),
+			authenticationRequestEnhancer()
 		);
 	}
 
@@ -84,4 +86,9 @@ public abstract class SamlServiceProviderServerBeanConfiguration
 	@Override
 	@Bean(name = "spSamlServerConfiguration")
 	protected abstract SamlServerConfiguration getDefaultHostSamlServerConfiguration();
+
+	@Bean
+	public AuthenticationRequestEnhancer authenticationRequestEnhancer() {
+		return (authnRequest) -> authnRequest;
+	}
 }

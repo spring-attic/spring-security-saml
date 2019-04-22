@@ -48,18 +48,24 @@ import org.springframework.security.saml.saml2.metadata.SsoProvider;
 
 import org.joda.time.DateTime;
 
+import static java.util.Optional.ofNullable;
+
 public class HostedServiceProviderService extends AbstractHostedProviderService<
 	LocalServiceProviderConfiguration,
 	ServiceProviderMetadata,
 	IdentityProviderMetadata> implements ServiceProviderService {
 
+	private AuthenticationRequestEnhancer authnRequestEnhancer;
 
 	public HostedServiceProviderService(LocalServiceProviderConfiguration configuration,
 										ServiceProviderMetadata metadata,
 										SamlTransformer transformer,
 										SamlValidator validator,
-										SamlMetadataCache cache) {
+										SamlMetadataCache cache,
+										AuthenticationRequestEnhancer authnRequestEnhancer) {
 		super(configuration, metadata, transformer, validator, cache);
+		this.authnRequestEnhancer = ofNullable(authnRequestEnhancer)
+			.orElseGet(() -> authenticationRequest -> authenticationRequest);
 	}
 
 	@Override
@@ -172,7 +178,7 @@ public class HostedServiceProviderService extends AbstractHostedProviderService<
 				true
 			));
 		}
-		return request;
+		return authnRequestEnhancer.enhance(request);
 	}
 
 	private ExternalIdentityProviderConfiguration getIdentityProviderConfigurationForMetadata(

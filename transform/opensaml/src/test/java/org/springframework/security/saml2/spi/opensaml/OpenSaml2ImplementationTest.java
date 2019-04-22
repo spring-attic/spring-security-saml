@@ -17,20 +17,25 @@
 
 package org.springframework.security.saml2.spi.opensaml;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.Saml2Issuer;
-import org.springframework.security.saml2.model.authentication.Saml2Scoping;
-import org.springframework.security.saml2.model.metadata.Saml2Binding;
-import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.util.StreamUtils;
-import org.w3c.dom.Node;
-
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.saml2.model.attribute.Saml2Attribute;
+import org.springframework.security.saml2.model.authentication.Saml2Assertion;
+import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
+import org.springframework.security.saml2.model.authentication.Saml2Issuer;
+import org.springframework.security.saml2.model.authentication.Saml2Response;
+import org.springframework.security.saml2.model.authentication.Saml2Scoping;
+import org.springframework.security.saml2.model.metadata.Saml2Binding;
+import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
+import org.springframework.util.StreamUtils;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Node;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,12 +46,13 @@ class OpenSaml2ImplementationTest {
 
 	private OpenSaml2Implementation subject = new OpenSaml2Implementation(Clock.systemDefaultZone());
 
-	{
+	@BeforeEach
+	public void setup() {
 		subject.bootstrap();
 	}
 
 	@Test
-	public void authenticationRequestWithScopingToXml() {
+	void authenticationRequestWithScopingToXml() {
 		Saml2AuthenticationRequest authenticationRequest = new Saml2AuthenticationRequest();
 		String requesterId = "http://requesterId";
 		String idpId = "http://idp";
@@ -78,7 +84,7 @@ class OpenSaml2ImplementationTest {
 	}
 
 	@Test
-	public void resolveAuthnRequestWithScoping() throws IOException {
+	void resolveAuthnRequestWithScoping() throws IOException {
 		Saml2Scoping scoping =
 			parseSaml2Scoping("authn_request_with_scoping.xml");
 
@@ -94,7 +100,7 @@ class OpenSaml2ImplementationTest {
 	}
 
 	@Test
-	public void resolveAuthnRequestWithEmptyScoping() throws IOException {
+	void resolveAuthnRequestWithEmptyScoping() throws IOException {
 		Saml2Scoping scoping =
 			parseSaml2Scoping("authn_request_with_empty_scoping.xml");
 
@@ -108,11 +114,26 @@ class OpenSaml2ImplementationTest {
 	}
 
 	@Test
-	public void resolveAuthnRequestWithNoScoping() throws IOException {
+	void resolveAuthnRequestWithNoScoping() throws IOException {
 		Saml2Scoping scoping =
 			parseSaml2Scoping("authn_request_with_no_scoping.xml");
 
 		assertNull(scoping);
+	}
+
+	@Test
+	void resolveAuthnResponseWithComplexAttributeValue() throws IOException {
+		byte[] xml = StreamUtils.copyToByteArray(
+			new ClassPathResource("authn_response/authn_response_with_xml_element_attribute_value.xml").getInputStream());
+		Saml2Response response = (Saml2Response) subject.resolve(xml, Collections.emptyList(), Collections.emptyList());
+		Saml2Assertion assertion = response.getAssertions().get(0);
+		Saml2Attribute attribute = assertion.getFirstAttribute("urn:mace:dir:attribute-def:eduPersonTargetedID");
+
+		List<Object> values = attribute.getValues();
+		assertEquals(1, values.size());
+
+		String value = (String) values.get(0);
+		assertEquals("urn:collab:person:example.com:admin", value);
 	}
 
 	private Saml2Scoping parseSaml2Scoping(String fileName) throws IOException {

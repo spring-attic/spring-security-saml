@@ -40,6 +40,7 @@ import javax.xml.namespace.QName;
 
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2KeyException;
+import org.springframework.security.saml2.Saml2KeyStoreProvider;
 import org.springframework.security.saml2.model.Saml2ImplementationHolder;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
@@ -55,8 +56,8 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipalSaml2;
 import org.springframework.security.saml2.model.authentication.Saml2OneTimeUse;
@@ -87,10 +88,10 @@ import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2CanonicalizationMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
-import org.springframework.security.saml2.Saml2KeyStoreProvider;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.spi.SpringSecuritySaml2;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -158,6 +159,7 @@ import org.opensaml.saml.saml2.core.IDPEntry;
 import org.opensaml.saml.saml2.core.IDPList;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
+import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.RequesterID;
 import org.opensaml.saml.saml2.core.Scoping;
@@ -1465,7 +1467,16 @@ public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implem
 				result.add(((XSInteger) o).getValue());
 			}
 			else if (o instanceof XSAny) {
-				result.add(((XSAny) o).getTextContent());
+				XSAny xsAny = (XSAny) o;
+				String textContent = xsAny.getTextContent();
+				if (StringUtils.isEmpty(textContent) && !CollectionUtils.isEmpty(xsAny.getUnknownXMLObjects())) {
+					XMLObject xmlObject = xsAny.getUnknownXMLObjects().get(0);
+					if (xmlObject instanceof NameIDType) {
+						result.add(((NameIDType)xmlObject).getValue());
+					}
+				} else {
+					result.add(textContent);
+				}
 			}
 			else {
 				//we don't know the type.

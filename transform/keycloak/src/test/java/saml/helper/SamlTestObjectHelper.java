@@ -95,12 +95,12 @@ public class SamlTestObjectHelper {
 	}
 
 	public Saml2ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-																HostedSaml2ServiceProviderRegistration configuration) {
-		List<Saml2KeyData> keys = configuration.getKeys();
-		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+																HostedSaml2ServiceProviderRegistration registration) {
+		List<Saml2KeyData> keys = registration.getKeys();
+		Saml2KeyData signingKey = registration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
-		String aliasPath = getAliasPath(configuration);
-		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/sp/";
+		String aliasPath = getAliasPath(registration);
+		String pathPrefix = hasText(registration.getPathPrefix()) ? registration.getPathPrefix() : "saml/sp/";
 
 		Saml2ServiceProviderMetadata metadata =
 			serviceProviderMetadata(
@@ -109,20 +109,20 @@ public class SamlTestObjectHelper {
 				keys,
 				pathPrefix,
 				aliasPath,
-				configuration.getDefaultSigningAlgorithm(),
-				configuration.getDefaultDigest()
+				registration.getDefaultSigningAlgorithm(),
+				registration.getDefaultDigest()
 			);
 
-		if (!configuration.getNameIds().isEmpty()) {
-			metadata.getServiceProvider().setNameIds(configuration.getNameIds());
+		if (!registration.getNameIds().isEmpty()) {
+			metadata.getServiceProvider().setNameIds(registration.getNameIds());
 		}
 
 		return metadata;
 	}
 
-	protected String getAliasPath(HostedSaml2ProviderRegistration configuration) {
+	protected String getAliasPath(HostedSaml2ProviderRegistration registration) {
 		return UriUtils.encode(
-			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
+			Saml2StringUtils.getAliasPath(registration.getAlias(), registration.getEntityId()),
 			"ISO-8859-1"
 		);
 	}
@@ -183,23 +183,23 @@ public class SamlTestObjectHelper {
 	}
 
 	public Saml2IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-																  HostedSaml2IdentityProviderRegistration configuration) {
-		List<Saml2KeyData> keys = configuration.getKeys();
-		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
+																  HostedSaml2IdentityProviderRegistration registration) {
+		List<Saml2KeyData> keys = registration.getKeys();
+		Saml2KeyData signingKey = registration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
-		String pathPrefix = hasText(configuration.getPathPrefix()) ? configuration.getPathPrefix() : "saml/idp/";
-		String aliasPath = getAliasPath(configuration);
+		String pathPrefix = hasText(registration.getPathPrefix()) ? registration.getPathPrefix() : "saml/idp/";
+		String aliasPath = getAliasPath(registration);
 		Saml2IdentityProviderMetadata metadata = identityProviderMetadata(
 			baseUrl,
 			signingKey,
 			keys,
 			pathPrefix,
 			aliasPath,
-			configuration.getDefaultSigningAlgorithm(),
-			configuration.getDefaultDigest()
+			registration.getDefaultSigningAlgorithm(),
+			registration.getDefaultDigest()
 		);
-		if (!configuration.getNameIds().isEmpty()) {
-			metadata.getIdentityProvider().setNameIds(configuration.getNameIds());
+		if (!registration.getNameIds().isEmpty()) {
+			metadata.getIdentityProvider().setNameIds(registration.getNameIds());
 		}
 		return metadata;
 	}

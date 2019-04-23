@@ -2,4 +2,4 @@
 
 Sample platform to test out different concepts 
 for how to implement a SAML Service Provider (SP)
-using Java configuration
+using Java registration

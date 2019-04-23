@@ -36,13 +36,13 @@ import org.springframework.util.Assert;
 public class Saml2ServiceProviderBeans {
 
 	private final Saml2Transformer transformer;
-	private final HostedSaml2ServiceProviderRegistration configuration;
+	private final HostedSaml2ServiceProviderRegistration registration;
 
 	public Saml2ServiceProviderBeans(
 		@Autowired Saml2Transformer transformer,
-		@Autowired(required = false) HostedSaml2ServiceProviderRegistration configuration) {
+		@Autowired(required = false) HostedSaml2ServiceProviderRegistration registration) {
 		this.transformer = transformer;
-		this.configuration = configuration;
+		this.registration = registration;
 	}
 
 	@Bean(name = "samlServiceProviderValidator")
@@ -66,14 +66,14 @@ public class Saml2ServiceProviderBeans {
 	@Bean(name = "samlServiceProviderRegistrationResolver")
 	public Saml2ServiceProviderRegistrationResolver serviceProviderRegistrationResolver() {
 		Assert.notNull(
-			configuration,
+			registration,
 			"Unable to configure a " + Saml2ServiceProviderRegistrationResolver.class.getName() +
-				" instance, without an actual configuration. " +
+				" instance, without an actual registration. " +
 				"Either expose a " + HostedSaml2ServiceProviderRegistration.class.getName() +
 				"bean or override the " + Saml2ServiceProviderRegistrationResolver.class.getName() +
 				" bean."
 		);
-		return SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration(configuration);
+		return SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration(registration);
 	}
 
 }

@@ -116,7 +116,7 @@ Search the codebase to find related unit tests and add additional `@Test` method
 2. New test methods should not start with test. This is an old JUnit3 convention and is not necessary since the method is annotated with @Test.
 
 # Update spring-security-x.y.rnc for schema changes
-Update the [RELAX NG](https://relaxng.org/) schema `spring-security-x.y.rnc` instead of `spring-security-x.y.xsd` if you contribute changes to supported XML configuration. The XML schema file can be generated the following Gradle task:
+Update the [RELAX NG](https://relaxng.org/) schema `spring-security-x.y.rnc` instead of `spring-security-x.y.xsd` if you contribute changes to supported XML registration. The XML schema file can be generated the following Gradle task:
 
 <pre>
 ./gradlew spring-security-config:rncToXsd

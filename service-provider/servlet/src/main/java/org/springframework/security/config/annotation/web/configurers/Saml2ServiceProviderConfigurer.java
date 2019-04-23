@@ -65,7 +65,7 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 	 * @return configuration spec for a SAML service provider to be applied to a filter chain
 	 */
 	public static Saml2ServiceProviderConfigurer saml2Login(Saml2ServiceProviderRegistrationResolver resolver) {
-		return saml2Login().configurationResolver(resolver);
+		return saml2Login().registrationResolver(resolver);
 	}
 
 	/**
@@ -93,18 +93,18 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 	 */
 
 	/**
-	 * Sets the configuration resolver for the SAML filter chain.
+	 * Sets the registration resolver for the SAML filter chain.
 	 * This provides SAML Service Provider configuration based on an HTTP request
 	 * and allows for tenant hosting based on {@link javax.servlet.http.HttpServletRequest}
 	 *
-	 * @param resolver - the configuration resolver to use
+	 * @param resolver - the registration resolver to use
 	 * @return this object to be used in a builder pattern
 	 * @throws IllegalStateException if {@link #providerResolver(Saml2ServiceProviderResolver)} has been previously invoked
 	 */
-	public Saml2ServiceProviderConfigurer configurationResolver(
+	public Saml2ServiceProviderConfigurer registrationResolver(
 		Saml2ServiceProviderRegistrationResolver resolver
 	) {
-		configuration.setConfigurationResolver(resolver);
+		configuration.setRegistrationResolver(resolver);
 		return this;
 	}
 
@@ -115,7 +115,7 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 	 *
 	 * @param resolver - the SAML service provider resolver to use
 	 * @return this object to be used in a builder pattern
-	 * @throws IllegalStateException if {@link #configurationResolver(Saml2ServiceProviderRegistrationResolver)}
+	 * @throws IllegalStateException if {@link #registrationResolver(Saml2ServiceProviderRegistrationResolver)}
 	 *                               has been previously invoked
 	 */
 	public Saml2ServiceProviderConfigurer providerResolver(Saml2ServiceProviderResolver resolver) {

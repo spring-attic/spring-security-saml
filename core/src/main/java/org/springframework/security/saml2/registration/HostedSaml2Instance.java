@@ -51,10 +51,10 @@ public class HostedSaml2Instance {
 			return new Builder();
 		}
 
-		public static Builder builder(HostedSaml2Instance configuration) {
+		public static Builder builder(HostedSaml2Instance instance) {
 			return new Builder()
-				.identityProvider(configuration.getIdentityProvider())
-				.serviceProvider(configuration.getServiceProvider())
+				.identityProvider(instance.getIdentityProvider())
+				.serviceProvider(instance.getServiceProvider())
 				;
 		}
 

@@ -87,36 +87,36 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 
 	@Override
 	public Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProviders(
-		HostedSaml2ServiceProviderRegistration configuration
+		HostedSaml2ServiceProviderRegistration registration
 	) {
-		return getProviders(configuration);
+		return getProviders(registration);
 	}
 
 	@Override
-	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderRegistration configuration) {
-		return generateMetadata(configuration);
+	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderRegistration registration) {
+		return generateMetadata(registration);
 	}
 
-	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderRegistration configuration) {
+	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderRegistration registration) {
 
-		String pathPrefix = configuration.getPathPrefix();
-		List<Saml2KeyData> keys = configuration.getKeys();
-		String aliasPath = getAliasPath(configuration);
-		String baseUrl = configuration.getBasePath();
+		String pathPrefix = registration.getPathPrefix();
+		List<Saml2KeyData> keys = registration.getKeys();
+		String aliasPath = getAliasPath(registration);
+		String baseUrl = registration.getBasePath();
 		String entityId =
-			hasText(configuration.getEntityId()) ? configuration.getEntityId() : baseUrl;
+			hasText(registration.getEntityId()) ? registration.getEntityId() : baseUrl;
 
 		return new Saml2ServiceProviderMetadata()
 			.setEntityId(entityId)
-			.setEntityAlias(getEntityAlias(configuration, entityId))
+			.setEntityAlias(getEntityAlias(registration, entityId))
 			.setId("M" + UUID.randomUUID().toString())
 			.setSigningKey(keys.get(0), RSA_SHA256, SHA256)
 			.setProviders(
 				asList(
 					new Saml2ServiceProvider()
 						.setKeys(keys)
-						.setWantAssertionsSigned(configuration.isWantAssertionsSigned())
-						.setAuthnRequestsSigned(keys.size() > 0 && configuration.isSignRequests())
+						.setWantAssertionsSigned(registration.isWantAssertionsSigned())
+						.setAuthnRequestsSigned(keys.size() > 0 && registration.isSignRequests())
 						.setAssertionConsumerService(
 							asList(
 								getEndpoint(
@@ -138,7 +138,7 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 						.setNameIds(asList(Saml2NameId.PERSISTENT, Saml2NameId.EMAIL))
 						.setKeys(keys)
 						.setSingleLogoutService(
-							configuration.isSingleLogoutEnabled() ?
+							registration.isSingleLogoutEnabled() ?
 								asList(
 									getEndpoint(
 										baseUrl,
@@ -155,15 +155,15 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 			);
 	}
 
-	private String getAliasPath(HostedSaml2ProviderRegistration configuration) {
+	private String getAliasPath(HostedSaml2ProviderRegistration registration) {
 		return UriUtils.encode(
-			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
+			Saml2StringUtils.getAliasPath(registration.getAlias(), registration.getEntityId()),
 			StandardCharsets.ISO_8859_1.name()
 		);
 	}
 
-	private String getEntityAlias(HostedSaml2ServiceProviderRegistration configuration, String entityId) {
-		return hasText(configuration.getAlias()) ? configuration.getAlias() :
+	private String getEntityAlias(HostedSaml2ServiceProviderRegistration registration, String entityId) {
+		return hasText(registration.getAlias()) ? registration.getAlias() :
 			isUrl(entityId) ? Saml2StringUtils.getHostFromUrl(entityId) : entityId;
 	}
 
@@ -184,9 +184,9 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 	}
 
 	private Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getProviders(
-		HostedSaml2ServiceProviderRegistration configuration) {
+		HostedSaml2ServiceProviderRegistration registration) {
 		Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> result = new HashMap<>();
-		List<ExternalSaml2IdentityProviderRegistration> providers = configuration.getProviders();
+		List<ExternalSaml2IdentityProviderRegistration> providers = registration.getProviders();
 		for (ExternalSaml2IdentityProviderRegistration idpConfig : providers) {
 			Saml2IdentityProviderMetadata idp = getIdentityProviderMetadata(idpConfig);
 			idp = metadataTrustCheck(idpConfig, idp);

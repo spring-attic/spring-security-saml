@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	protected Saml2ServiceProviderRegistrationResolver configurationResolver() {
+	protected Saml2ServiceProviderRegistrationResolver registrationResolver() {
 		return fromConfiguration(
 			config -> config
 				.keys(

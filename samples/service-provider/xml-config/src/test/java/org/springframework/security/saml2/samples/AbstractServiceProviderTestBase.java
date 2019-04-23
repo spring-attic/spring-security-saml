@@ -58,7 +58,7 @@ abstract class AbstractServiceProviderTestBase {
 	Saml2BootConfiguration bootConfiguration;
 
 	@SpyBean
-	Saml2ServiceProviderRegistrationResolver configuration;
+	Saml2ServiceProviderRegistrationResolver registrationResolver;
 
 	@BeforeEach
 	void setUp() {
@@ -102,7 +102,7 @@ abstract class AbstractServiceProviderTestBase {
 				return builder.build();
 			}
 		)
-			.when(configuration).getServiceProviderRegistration(ArgumentMatchers.any(HttpServletRequest.class));
+			.when(registrationResolver).getServiceProviderRegistration(ArgumentMatchers.any(HttpServletRequest.class));
 	}
 
 	Saml2ServiceProviderMetadata getServiceProviderMetadata() throws Exception {

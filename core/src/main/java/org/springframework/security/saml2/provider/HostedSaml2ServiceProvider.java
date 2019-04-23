@@ -30,9 +30,9 @@ public class HostedSaml2ServiceProvider extends HostedSaml2Provider<
 	ExternalSaml2IdentityProviderRegistration,
 	Saml2IdentityProviderMetadata> {
 
-	public HostedSaml2ServiceProvider(HostedSaml2ServiceProviderRegistration configuration,
+	public HostedSaml2ServiceProvider(HostedSaml2ServiceProviderRegistration registration,
 									  Saml2ServiceProviderMetadata metadata,
 									  Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> providers) {
-		super(configuration, metadata, providers);
+		super(registration, metadata, providers);
 	}
 }

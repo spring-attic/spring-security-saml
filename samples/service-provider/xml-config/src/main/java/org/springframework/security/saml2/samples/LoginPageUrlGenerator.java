@@ -28,19 +28,19 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 
 public class LoginPageUrlGenerator {
 
-	private final HostedSaml2ServiceProviderRegistration configuration;
+	private final HostedSaml2ServiceProviderRegistration registration;
 
-	public LoginPageUrlGenerator(HostedSaml2ServiceProviderRegistration configuration) {
-		this.configuration = configuration;
+	public LoginPageUrlGenerator(HostedSaml2ServiceProviderRegistration registration) {
+		this.registration = registration;
 	}
 
 	public Map<String, String> getStaticLoginUrls() {
 		Map<String, String> providerUrls = new HashMap<>();
-		configuration.getProviders().stream().forEach(
+		registration.getProviders().stream().forEach(
 			p -> {
 				String linkText = p.getLinktext();
 				String url = "/" +
-					stripSlashes(configuration.getPathPrefix()) +
+					stripSlashes(registration.getPathPrefix()) +
 					"/authenticate/" +
 					UriUtils.encode(p.getAlias(), UTF_8.toString());
 				providerUrls.put(linkText, url);

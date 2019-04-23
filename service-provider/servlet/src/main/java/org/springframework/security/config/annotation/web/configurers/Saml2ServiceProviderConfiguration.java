@@ -84,7 +84,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private Saml2ServiceProviderValidator validator;
 	private Saml2ServiceProviderMetadataResolver metadataResolver;
 	private Saml2ServiceProviderResolver providerResolver;
-	private Saml2ServiceProviderRegistrationResolver configurationResolver;
+	private Saml2ServiceProviderRegistrationResolver registrationResolver;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
@@ -100,7 +100,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 
 	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
 		notNull(resolver, "providerResolver must not be null");
-		isNull(configurationResolver, "configurationResolver", "providerResolver");
+		isNull(registrationResolver, "registrationResolver", "providerResolver");
 		this.providerResolver = resolver;
 		return this;
 	}
@@ -111,10 +111,10 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return this;
 	}
 
-	Saml2ServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderRegistrationResolver resolver) {
-		notNull(resolver, "configurationResolver must not be null");
-		isNull(providerResolver, "providerResolver", "configurationResolver");
-		this.configurationResolver = resolver;
+	Saml2ServiceProviderConfiguration setRegistrationResolver(Saml2ServiceProviderRegistrationResolver resolver) {
+		notNull(resolver, "registrationResolver must not be null");
+		isNull(providerResolver, "providerResolver", "registrationResolver");
+		this.registrationResolver = resolver;
 		return this;
 	}
 
@@ -343,15 +343,15 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	private Map<String, String> getStaticLoginUrls() {
-		final Saml2ServiceProviderRegistrationResolver configResolver = getSharedObject(
+		final Saml2ServiceProviderRegistrationResolver spRegistrationResolver = getSharedObject(
 			http,
 			Saml2ServiceProviderRegistrationResolver.class,
 			() -> null,
-			configurationResolver
+			registrationResolver
 		);
-		HostedSaml2ServiceProviderRegistration configuration = configResolver.getServiceProviderRegistration(null);
+		HostedSaml2ServiceProviderRegistration registration = spRegistrationResolver.getServiceProviderRegistration(null);
 		Map<String, String> providerUrls = new HashMap<>();
-		configuration.getProviders().stream().forEach(
+		registration.getProviders().stream().forEach(
 			p -> {
 				String linkText = p.getLinktext();
 				String url = "/" +
@@ -377,27 +377,27 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			);
 		}
 		else {
-			//do we have a configurationResolver?
-			configurationResolver = getSharedObject(
+			//do we have a registrationResolver?
+			registrationResolver = getSharedObject(
 				http,
 				Saml2ServiceProviderRegistrationResolver.class,
 				null,
-				configurationResolver
+				registrationResolver
 			);
 
 			notNull(
-				configurationResolver,
+				registrationResolver,
 				Saml2ServiceProviderRegistrationResolver.class.getName() + " must not be null"
 			);
 
 			notNull(
-				configurationResolver.getHttpPathPrefix(),
+				registrationResolver.getHttpPathPrefix(),
 				Saml2ServiceProviderRegistrationResolver.class.getName() +
 					".getHttpPathPrefix() must not return null"
 			);
 
 			metadataResolver = getSamlMetadataResolver();
-			providerResolver = new DefaultSaml2ServiceProviderResolver(metadataResolver, configurationResolver);
+			providerResolver = new DefaultSaml2ServiceProviderResolver(metadataResolver, registrationResolver);
 			setSharedObject(http, Saml2ServiceProviderResolver.class, providerResolver);
 		}
 	}

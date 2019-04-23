@@ -17,7 +17,7 @@ TLDR; Here is why*
 ** Multi tenancy support for both IDP and SP
 ** Key rotation
 * Integration with Spring Security
-* Built in configuration DSL
+* Built in registration DSL
 * Uncomplicated RSA key handling, no more keystores
 * Intuitive usage requiring less documentation
 * Reducing the foot print of the library

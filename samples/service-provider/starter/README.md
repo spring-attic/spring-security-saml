@@ -15,7 +15,7 @@ based on a few attributes such as
 * Assertion Consumer Endpoints (ACS) - HTTP endpoints that accept SAML messages 
 containing assertions (authentications)
 
-This sample generates metadata based on this configuration combined with context data
+This sample generates metadata based on this registration combined with context data
 from the HTTP request. The entity ID and ACS endpoints are dynamically generated 
 based on the incoming HTTP Host header and the application context path
 
@@ -28,7 +28,7 @@ the user in the local application based on mutual trust with the identity provid
 
 ### Test Support
 
-SAML, which requires, mutual configuration between an identity provider, IDP, and a 
+SAML, which requires, mutual registration between an identity provider, IDP, and a 
 service provider, SP, is often difficult to test. Some applications rely on 
 integration tests using external SAML providers making the test dependent on external factors to succeed.
 

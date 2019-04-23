@@ -30,10 +30,10 @@ import static org.springframework.util.StringUtils.hasText;
 public class SingletonSaml2ServiceProviderRegistrationResolver
 	implements Saml2ServiceProviderRegistrationResolver<HttpServletRequest> {
 
-	private final HostedSaml2ServiceProviderRegistration configuration;
+	private final HostedSaml2ServiceProviderRegistration registration;
 
 	public SingletonSaml2ServiceProviderRegistrationResolver(HostedSaml2ServiceProviderRegistration registration) {
-		this.configuration = registration;
+		this.registration = registration;
 		notNull(registration, "HostedServiceProviderRegistration must not be null");
 		notNull(registration.getPathPrefix(), "HostedServiceProviderRegistration.pathPrefix must not be null");
 	}
@@ -52,16 +52,16 @@ public class SingletonSaml2ServiceProviderRegistrationResolver
 	@Override
 	public HostedSaml2ServiceProviderRegistration getServiceProviderRegistration(HttpServletRequest request) {
 		Builder builder =
-			HostedSaml2ServiceProviderRegistration.builder(configuration);
+			HostedSaml2ServiceProviderRegistration.builder(registration);
 		if (request != null) {
 			String basePath = getBasePath(request, false);
-			if (!hasText(configuration.getEntityId())) {
+			if (!hasText(registration.getEntityId())) {
 				builder.entityId(basePath);
 			}
-			if (!hasText(configuration.getAlias())) {
+			if (!hasText(registration.getAlias())) {
 				builder.alias(request.getServerName());
 			}
-			if (!hasText(configuration.getBasePath())) {
+			if (!hasText(registration.getBasePath())) {
 				builder.basePath(basePath);
 			}
 		}
@@ -70,7 +70,7 @@ public class SingletonSaml2ServiceProviderRegistrationResolver
 
 	@Override
 	public String getHttpPathPrefix() {
-		return configuration.getPathPrefix();
+		return registration.getPathPrefix();
 	}
 
 	private String getBasePath(HttpServletRequest request, boolean includeStandardPorts) {

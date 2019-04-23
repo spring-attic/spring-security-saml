@@ -79,22 +79,22 @@ public class HostedSaml2ServiceProviderRegistration extends
 		return new Builder();
 	}
 
-	public static Builder builder(HostedSaml2ServiceProviderRegistration configuration) {
+	public static Builder builder(HostedSaml2ServiceProviderRegistration registration) {
 		return builder()
-			.signRequests(configuration.isSignRequests())
-			.wantAssertionsSigned(configuration.isWantAssertionsSigned())
-			.pathPrefix(configuration.getPathPrefix())
-			.basePath(configuration.getBasePath())
-			.alias(configuration.getAlias())
-			.entityId(configuration.getEntityId())
-			.signMetadata(configuration.isSignMetadata())
-			.metadata(configuration.getMetadata())
-			.keys(configuration.getKeys())
-			.defaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
-			.defaultDigest(configuration.getDefaultDigest())
-			.nameIds(configuration.getNameIds())
-			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
-			.providers(configuration.getProviders());
+			.signRequests(registration.isSignRequests())
+			.wantAssertionsSigned(registration.isWantAssertionsSigned())
+			.pathPrefix(registration.getPathPrefix())
+			.basePath(registration.getBasePath())
+			.alias(registration.getAlias())
+			.entityId(registration.getEntityId())
+			.signMetadata(registration.isSignMetadata())
+			.metadata(registration.getMetadata())
+			.keys(registration.getKeys())
+			.defaultSigningAlgorithm(registration.getDefaultSigningAlgorithm())
+			.defaultDigest(registration.getDefaultDigest())
+			.nameIds(registration.getNameIds())
+			.singleLogoutEnabled(registration.isSingleLogoutEnabled())
+			.providers(registration.getProviders());
 	}
 
 	public static final class Builder {

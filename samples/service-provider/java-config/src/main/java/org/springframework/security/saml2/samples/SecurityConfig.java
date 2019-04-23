@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.apply(
 				Saml2ServiceProviderConfigurer.saml2Login()
-					.configurationResolver(
+					.registrationResolver(
 						fromConfiguration(
 							config -> config
 								.pathPrefix(pathPrefix)

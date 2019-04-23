@@ -123,28 +123,28 @@ public class HostedSaml2IdentityProviderRegistration extends
 		return new Builder();
 	}
 
-	public static Builder builder(HostedSaml2IdentityProviderRegistration configuration) {
+	public static Builder builder(HostedSaml2IdentityProviderRegistration registration) {
 		return builder()
-			.wantRequestsSigned(configuration.isWantRequestsSigned())
-			.signAssertions(configuration.isSignAssertions())
-			.encryptAssertions(configuration.isEncryptAssertions())
-			.keyEncryptionAlgorithm(configuration.getKeyEncryptionAlgorithm())
-			.dataEncryptionAlgorithm(configuration.getDataEncryptionAlgorithm())
-			.notOnOrAfter(configuration.getNotOnOrAfter())
-			.notBefore(configuration.getNotBefore())
-			.sessionNotOnOrAfter(configuration.getSessionNotOnOrAfter())
-			.pathPrefix(configuration.getPathPrefix())
-			.basePath(configuration.getBasePath())
-			.alias(configuration.getAlias())
-			.entityId(configuration.getEntityId())
-			.signMetadata(configuration.isSignMetadata())
-			.metadata(configuration.getMetadata())
-			.keys(configuration.getKeys())
-			.defaultSigningAlgorithm(configuration.getDefaultSigningAlgorithm())
-			.defaultDigest(configuration.getDefaultDigest())
-			.nameIds(configuration.getNameIds())
-			.singleLogoutEnabled(configuration.isSingleLogoutEnabled())
-			.providers(configuration.getProviders());
+			.wantRequestsSigned(registration.isWantRequestsSigned())
+			.signAssertions(registration.isSignAssertions())
+			.encryptAssertions(registration.isEncryptAssertions())
+			.keyEncryptionAlgorithm(registration.getKeyEncryptionAlgorithm())
+			.dataEncryptionAlgorithm(registration.getDataEncryptionAlgorithm())
+			.notOnOrAfter(registration.getNotOnOrAfter())
+			.notBefore(registration.getNotBefore())
+			.sessionNotOnOrAfter(registration.getSessionNotOnOrAfter())
+			.pathPrefix(registration.getPathPrefix())
+			.basePath(registration.getBasePath())
+			.alias(registration.getAlias())
+			.entityId(registration.getEntityId())
+			.signMetadata(registration.isSignMetadata())
+			.metadata(registration.getMetadata())
+			.keys(registration.getKeys())
+			.defaultSigningAlgorithm(registration.getDefaultSigningAlgorithm())
+			.defaultDigest(registration.getDefaultDigest())
+			.nameIds(registration.getNameIds())
+			.singleLogoutEnabled(registration.isSingleLogoutEnabled())
+			.providers(registration.getProviders());
 	}
 
 	public static final class Builder {

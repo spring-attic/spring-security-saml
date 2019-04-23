@@ -35,7 +35,7 @@ Please use
 
 The [Spring Boot Starter sample](service-provider/starter) showcases the use of 
 a Spring Boot application with the use of a minimal 
-[default configuration](service-provider/starter/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java)
+[default registration](service-provider/starter/src/main/java/org/springframework/security/saml2/samples/SecurityConfig.java)
 to configure the SAML Service Provider. 
 
 Service Provider runs on `http://localhost:8080/sample-sp`
@@ -85,7 +85,7 @@ Service Provider runs on `http://localhost:8080/sample-sp`
 
 The [Spring XML sample](service-provider/xml-config) showcases the use of 
 a Spring Boot application where all the beans are configured via
-[an XML configuration file]((service-provider/xml-config/src/main/resources/applicationContext.xml))
+[an XML registration file]((service-provider/xml-config/src/main/resources/applicationContext.xml))
 to configure the SAML Service Provider
 
 Service Provider runs on `http://localhost:8080/sample-sp`

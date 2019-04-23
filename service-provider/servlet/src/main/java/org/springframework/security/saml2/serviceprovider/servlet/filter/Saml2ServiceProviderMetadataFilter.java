@@ -24,7 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -49,7 +49,7 @@ public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			HostedSaml2ServiceProvider provider = serviceProviderMethods.getResolver().getServiceProvider(request);
+			Saml2ServiceProviderInstance provider = serviceProviderMethods.getResolver().getServiceProvider(request);
 			logger.debug("Downloading SAML2 SP Metadata for:"+provider.getMetadata().getEntityId());
 			String xml = serviceProviderMethods.getTransformer().toXml(provider.getMetadata());
 			response.setContentType(TEXT_XML_VALUE);

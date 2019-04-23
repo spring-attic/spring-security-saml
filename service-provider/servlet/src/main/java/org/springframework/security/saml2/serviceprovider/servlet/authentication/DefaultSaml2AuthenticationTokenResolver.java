@@ -29,7 +29,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
@@ -49,7 +49,7 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 	@Override
 	public Saml2Authentication resolveSaml2Authentication(HttpServletRequest request,
 														  HttpServletResponse response) {
-		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
 		Saml2Response r = getSamlWebResponse(request);
 		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		try {
@@ -102,7 +102,7 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 		}
 	}
 
-	private Saml2IdentityProviderMetadata getIdentityProvider(Saml2Response r, HostedSaml2ServiceProvider sp) {
+	private Saml2IdentityProviderMetadata getIdentityProvider(Saml2Response r, Saml2ServiceProviderInstance sp) {
 		if (r.getAssertions().isEmpty()) {
 			return null;
 		}

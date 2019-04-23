@@ -24,15 +24,18 @@ import org.springframework.security.saml2.registration.HostedSaml2ServiceProvide
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
-public class HostedSaml2ServiceProvider extends HostedSaml2Provider<
+/**
+ * {@inheritDoc}
+ */
+public class Saml2ServiceProviderInstance extends AbstractSaml2ProviderInstance<
 	HostedSaml2ServiceProviderRegistration,
 	Saml2ServiceProviderMetadata,
 	ExternalSaml2IdentityProviderRegistration,
 	Saml2IdentityProviderMetadata> {
 
-	public HostedSaml2ServiceProvider(HostedSaml2ServiceProviderRegistration registration,
-									  Saml2ServiceProviderMetadata metadata,
-									  Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> providers) {
+	public Saml2ServiceProviderInstance(HostedSaml2ServiceProviderRegistration registration,
+										Saml2ServiceProviderMetadata metadata,
+										Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> providers) {
 		super(registration, metadata, providers);
 	}
 }

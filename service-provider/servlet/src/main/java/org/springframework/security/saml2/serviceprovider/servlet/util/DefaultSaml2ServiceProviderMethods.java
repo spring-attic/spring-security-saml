@@ -30,7 +30,7 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 
@@ -57,7 +57,7 @@ public class DefaultSaml2ServiceProviderMethods implements Saml2ServiceProviderM
 
 	@Override
 	public Saml2Object parseSamlObject(HttpServletRequest request,
-									   HostedSaml2ServiceProvider provider,
+									   Saml2ServiceProviderInstance provider,
 									   String parameterName) {
 		Saml2Object result = null;
 		String rs = request.getParameter(parameterName);
@@ -82,8 +82,8 @@ public class DefaultSaml2ServiceProviderMethods implements Saml2ServiceProviderM
 	}
 
 	@Override
-	public HostedSaml2ServiceProvider getProvider(HttpServletRequest request) {
-		HostedSaml2ServiceProvider serviceProvider = getResolver().getServiceProvider(request);
+	public Saml2ServiceProviderInstance getProvider(HttpServletRequest request) {
+		Saml2ServiceProviderInstance serviceProvider = getResolver().getServiceProvider(request);
 		if (serviceProvider == null) {
 			throw new Saml2ProviderNotFoundException("hosted");
 		}

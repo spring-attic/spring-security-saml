@@ -24,7 +24,7 @@ import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2BindingType;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 
@@ -33,10 +33,10 @@ public interface Saml2ServiceProviderMethods {
 	Saml2Object getSamlRequest(HttpServletRequest request);
 
 	Saml2Object parseSamlObject(HttpServletRequest request,
-								HostedSaml2ServiceProvider provider,
+								Saml2ServiceProviderInstance provider,
 								String parameterName);
 
-	HostedSaml2ServiceProvider getProvider(HttpServletRequest request);
+	Saml2ServiceProviderInstance getProvider(HttpServletRequest request);
 
 	Saml2Transformer getTransformer();
 

@@ -25,7 +25,7 @@ import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.Saml2ValidationResult.ValidationError;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
@@ -55,7 +55,7 @@ import static org.springframework.security.saml2.model.authentication.Saml2Subje
 import static org.springframework.security.saml2.util.Saml2DateUtils.toZuluTime;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator<HostedSaml2ServiceProvider>
+public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator<Saml2ServiceProviderInstance>
 	implements Saml2ServiceProviderValidator {
 
 	private Saml2Transformer implementation;
@@ -89,7 +89,7 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 	}
 
 	@Override
-	public Saml2ValidationResult validate(Saml2Object saml2Object, HostedSaml2ServiceProvider provider) {
+	public Saml2ValidationResult validate(Saml2Object saml2Object, Saml2ServiceProviderInstance provider) {
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
 		Saml2ValidationResult result;
 		if (saml2Object instanceof Saml2IdentityProviderMetadata) {
@@ -119,7 +119,7 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 		return result;
 	}
 
-	private Saml2ValidationResult validate(Saml2IdentityProviderMetadata metadata, HostedSaml2ServiceProvider provider) {
+	private Saml2ValidationResult validate(Saml2IdentityProviderMetadata metadata, Saml2ServiceProviderInstance provider) {
 		return new Saml2ValidationResult(metadata);
 	}
 

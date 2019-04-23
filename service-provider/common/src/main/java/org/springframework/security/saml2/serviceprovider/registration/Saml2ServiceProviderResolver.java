@@ -17,11 +17,11 @@
 
 package org.springframework.security.saml2.serviceprovider.registration;
 
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 
 public interface Saml2ServiceProviderResolver<HttpRequest> {
 
-	HostedSaml2ServiceProvider getServiceProvider(HttpRequest request);
+	Saml2ServiceProviderInstance getServiceProvider(HttpRequest request);
 
 	String getHttpPathPrefix();
 

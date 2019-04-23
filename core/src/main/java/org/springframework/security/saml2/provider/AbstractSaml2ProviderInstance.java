@@ -24,19 +24,28 @@ import org.springframework.security.saml2.registration.HostedSaml2ProviderRegist
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.util.Assert;
 
-public abstract class HostedSaml2Provider<
+/**
+ * Represents a hosted provider, either Service Provider or Identity Provider
+ * @param <Registration>       - the local configuration type for this provider
+ * @param <LocalMetadata>      - the generated metadata for this provider
+ * @param <RemoteRegistration> - the configuration type of a remote paired provider
+ * @param <RemoteMetadata>     - the metadata of the remote provider
+ */
+abstract class AbstractSaml2ProviderInstance<
 	Registration extends HostedSaml2ProviderRegistration,
 	LocalMetadata extends Saml2Metadata,
 	RemoteRegistration extends ExternalSaml2ProviderRegistration,
-	RemoteMetadata extends Saml2Metadata> {
+	RemoteMetadata extends Saml2Metadata>
+
+	implements Saml2ProviderInstance<Registration,LocalMetadata,RemoteRegistration,RemoteMetadata> {
 
 	private final Registration registration;
 	private final LocalMetadata metadata;
 	private final Map<RemoteRegistration, RemoteMetadata> providers;
 
-	protected HostedSaml2Provider(Registration registration,
-								  LocalMetadata metadata,
-								  Map<RemoteRegistration, RemoteMetadata> providers) {
+	protected AbstractSaml2ProviderInstance(Registration registration,
+											LocalMetadata metadata,
+											Map<RemoteRegistration, RemoteMetadata> providers) {
 		this.registration = registration;
 		this.metadata = metadata;
 		this.providers = providers;

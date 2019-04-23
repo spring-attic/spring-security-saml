@@ -20,7 +20,7 @@ package org.springframework.security.saml2.provider.validation;
 import java.util.List;
 
 import org.springframework.security.saml2.Saml2ValidationResult;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
@@ -35,5 +35,5 @@ public interface Saml2ServiceProviderValidator {
 	 * @param saml2Object the object to be validated according to SAML specification rules
 	 * @param provider    the object used to resolve metadata
 	 */
-	Saml2ValidationResult validate(Saml2Object saml2Object, HostedSaml2ServiceProvider provider);
+	Saml2ValidationResult validate(Saml2Object saml2Object, Saml2ServiceProviderInstance provider);
 }

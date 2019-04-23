@@ -36,7 +36,7 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
@@ -87,7 +87,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
 		}
 		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) logoutRequest;
-		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
 		Saml2ValidationResult validate = serviceProviderMethods.getValidator().validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new Saml2Exception(validate.toString());
@@ -110,7 +110,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 												   HttpServletResponse response,
 												   Saml2Authentication authentication) {
 		logger.debug(format("Initiating SP logout for SP:%s", authentication.getHoldingEntityId()));
-		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
 		Saml2ServiceProviderMetadata sp = provider.getMetadata();
 		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(authentication.getAssertingEntityId());
 		Saml2LogoutSaml2Request lr =
@@ -134,7 +134,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 	}
 
 	private Saml2LogoutResponse logoutResponse(
-		HostedSaml2ServiceProvider local,
+		Saml2ServiceProviderInstance local,
 		Saml2LogoutSaml2Request request,
 		Saml2IdentityProviderMetadata recipient) {
 		List<Saml2SsoProvider> ssoProviders = recipient.getSsoProviders();

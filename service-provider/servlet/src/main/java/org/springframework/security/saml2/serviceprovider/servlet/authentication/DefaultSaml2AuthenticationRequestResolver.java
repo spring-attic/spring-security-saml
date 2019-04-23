@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -56,7 +56,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 
 	@Override
 	public Saml2AuthenticationRequest resolve(HttpServletRequest request, HttpServletResponse response) {
-		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> entity =
 			getIdentityProvider(request, provider);
@@ -82,7 +82,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 	 */
 	protected Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProvider(
 		HttpServletRequest request,
-		HostedSaml2ServiceProvider sp
+		Saml2ServiceProviderInstance sp
 	) {
 		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> result = null;
 		String idpAlias = getIdpAlias(request);

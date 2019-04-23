@@ -29,7 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
@@ -220,7 +220,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 		mockConfig(builder -> builder.providers(providers));
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		HostedSaml2ServiceProvider provider = spResolver.getServiceProvider(request);
+		Saml2ServiceProviderInstance provider = spResolver.getServiceProvider(request);
 		Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> idps =
 			metadataResolver.getIdentityProviders(provider.getRegistration());
 		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> entry = idps.entrySet()

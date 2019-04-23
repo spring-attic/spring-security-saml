@@ -25,15 +25,19 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
 //TODO Move to Identity Provider module
-public class HostedSaml2IdentityProvider extends HostedSaml2Provider<
+
+/**
+ * {@inheritDoc}
+ */
+public class Saml2IdentityProviderInstance extends AbstractSaml2ProviderInstance<
 	HostedSaml2IdentityProviderRegistration,
 	Saml2IdentityProviderMetadata,
 	ExternalSaml2ServiceProviderRegistration,
 	Saml2ServiceProviderMetadata> {
 
-	public HostedSaml2IdentityProvider(HostedSaml2IdentityProviderRegistration registration,
-									   Saml2IdentityProviderMetadata metadata,
-									   Map<ExternalSaml2ServiceProviderRegistration, Saml2ServiceProviderMetadata> providers) {
+	public Saml2IdentityProviderInstance(HostedSaml2IdentityProviderRegistration registration,
+										 Saml2IdentityProviderMetadata metadata,
+										 Map<ExternalSaml2ServiceProviderRegistration, Saml2ServiceProviderMetadata> providers) {
 		super(registration, metadata, providers);
 	}
 }

@@ -23,19 +23,19 @@ import java.util.List;
 
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
-import org.springframework.security.saml2.provider.HostedSaml2Provider;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
+import org.springframework.security.saml2.provider.Saml2ProviderInstance;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -43,7 +43,7 @@ import org.joda.time.Interval;
 import static java.lang.String.format;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.ENTITY;
 
-abstract class AbstractSaml2Validator<ProviderType extends HostedSaml2Provider> {
+abstract class AbstractSaml2Validator<ProviderType extends Saml2ProviderInstance> {
 
 	final Saml2Signature INVALID_SIGNATURE = new Saml2Signature() {
 		@Override

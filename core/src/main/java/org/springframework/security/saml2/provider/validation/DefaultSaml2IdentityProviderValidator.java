@@ -23,7 +23,7 @@ import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
-import org.springframework.security.saml2.provider.HostedSaml2IdentityProvider;
+import org.springframework.security.saml2.provider.Saml2IdentityProviderInstance;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.util.Assert;
 
 //TODO Move to Identity Provider module
-public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validator<HostedSaml2IdentityProvider>
+public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validator<Saml2IdentityProviderInstance>
 	implements Saml2IdentityProviderValidator {
 
 	private Saml2Transformer implementation;
@@ -67,7 +67,7 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 	}
 
 	@Override
-	public Saml2ValidationResult validate(Saml2Object saml2Object, HostedSaml2IdentityProvider provider) {
+	public Saml2ValidationResult validate(Saml2Object saml2Object, Saml2IdentityProviderInstance provider) {
 		Assert.notNull(saml2Object, "Object to be validated cannot be null");
 		Saml2ValidationResult result;
 		if (saml2Object instanceof Saml2ServiceProviderMetadata) {
@@ -89,11 +89,11 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 
 	}
 
-	private Saml2ValidationResult validate(Saml2ServiceProviderMetadata metadata, HostedSaml2IdentityProvider provider) {
+	private Saml2ValidationResult validate(Saml2ServiceProviderMetadata metadata, Saml2IdentityProviderInstance provider) {
 		return new Saml2ValidationResult(metadata);
 	}
 
-	private Saml2ValidationResult validate(Saml2AuthenticationRequest authnRequest, HostedSaml2IdentityProvider provider) {
+	private Saml2ValidationResult validate(Saml2AuthenticationRequest authnRequest, Saml2IdentityProviderInstance provider) {
 		Saml2ValidationResult result = new Saml2ValidationResult(authnRequest);
 		checkValidSignature(authnRequest, result);
 		return result;

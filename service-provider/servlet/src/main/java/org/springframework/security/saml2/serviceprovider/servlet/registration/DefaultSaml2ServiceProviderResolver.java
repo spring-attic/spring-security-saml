@@ -20,7 +20,7 @@ package org.springframework.security.saml2.serviceprovider.servlet.registration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
-import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
@@ -37,9 +37,9 @@ public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProvider
 	}
 
 	@Override
-	public HostedSaml2ServiceProvider getServiceProvider(HttpServletRequest request) {
+	public Saml2ServiceProviderInstance getServiceProvider(HttpServletRequest request) {
 		HostedSaml2ServiceProviderRegistration config = configResolver.getServiceProviderRegistration(request);
-		return new HostedSaml2ServiceProvider(
+		return new Saml2ServiceProviderInstance(
 			config,
 			metadataResolver.getMetadata(config),
 			metadataResolver.getIdentityProviders(config)

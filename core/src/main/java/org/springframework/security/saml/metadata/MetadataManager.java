@@ -730,7 +730,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     private void addDescriptor(List<String> result, EntityDescriptor descriptor) throws MetadataProviderException {
 
         String entityID = descriptor.getEntityID();
-        log.debug("Found metadata EntityDescriptor with ID", entityID);
+        log.debug("Found metadata EntityDescriptor with ID {}", entityID);
         result.add(entityID);
 
     }

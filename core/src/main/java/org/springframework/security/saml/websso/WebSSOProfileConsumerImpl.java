@@ -14,32 +14,59 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.joda.time.DateTime;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.validation.ValidationException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import javax.xml.namespace.QName;
+
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.SAMLStatusException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.util.Assert;
 
-import javax.xml.namespace.QName;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import org.joda.time.DateTime;
+import org.opensaml.common.SAMLException;
+import org.opensaml.common.SAMLObject;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.AuthnContext;
+import org.opensaml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.opensaml.saml2.core.AuthnContextDeclRef;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.Condition;
+import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.EncryptedAssertion;
+import org.opensaml.saml2.core.EncryptedAttribute;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.OneTimeUse;
+import org.opensaml.saml2.core.ProxyRestriction;
+import org.opensaml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.StatusMessage;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.encryption.DecryptionException;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.validation.ValidationException;
 
 import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
@@ -103,14 +130,23 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         Response response = (Response) message;
 
         // Verify status
-        String statusCode = response.getStatus().getStatusCode().getValue();
-        if (!StatusCode.SUCCESS_URI.equals(statusCode)) {
+		StatusCode statusCode = response.getStatus().getStatusCode();
+		if (!StatusCode.SUCCESS_URI.equals(statusCode.getValue())) {
             StatusMessage statusMessage = response.getStatus().getStatusMessage();
             String statusMessageText = null;
             if (statusMessage != null) {
                 statusMessageText = statusMessage.getMessage();
             }
-            throw new SAMLException("Response has invalid status code " + statusCode + ", status message is " + statusMessageText);
+			// The final status code will be the most internal one
+			String finalStatusCode = statusCode.getValue();
+			while (statusCode.getStatusCode() != null){
+				finalStatusCode = statusCode.getStatusCode().getValue();
+				statusCode = statusCode.getStatusCode();
+			}
+			throw new SAMLStatusException(
+				finalStatusCode,
+				"Response has invalid status code " + finalStatusCode + ", status message is " + statusMessageText
+			);
         }
 
         // Verify signature of the response if present, unless already verified in binding
@@ -658,3 +694,4 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     }
 
 }
+

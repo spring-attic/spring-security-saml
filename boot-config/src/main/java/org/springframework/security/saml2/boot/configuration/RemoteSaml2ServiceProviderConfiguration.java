@@ -17,12 +17,12 @@
 
 package org.springframework.security.saml2.boot.configuration;
 
-import org.springframework.security.saml2.configuration.ExternalSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2ServiceProviderRegistration;
 
 public class RemoteSaml2ServiceProviderConfiguration extends RemoteSaml2ProviderConfiguration {
 
-	public ExternalSaml2ServiceProviderConfiguration toExternalServiceProviderConfiguration() {
-		return new ExternalSaml2ServiceProviderConfiguration(
+	public ExternalSaml2ServiceProviderRegistration toExternalServiceProviderRegistration() {
+		return new ExternalSaml2ServiceProviderRegistration(
 			getAlias(),
 			getMetadata(),
 			getLinktext(),

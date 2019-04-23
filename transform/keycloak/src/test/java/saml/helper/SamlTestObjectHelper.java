@@ -27,9 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
@@ -95,7 +95,7 @@ public class SamlTestObjectHelper {
 	}
 
 	public Saml2ServiceProviderMetadata serviceProviderMetadata(String baseUrl,
-																HostedSaml2ServiceProviderConfiguration configuration) {
+																HostedSaml2ServiceProviderRegistration configuration) {
 		List<Saml2KeyData> keys = configuration.getKeys();
 		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 
@@ -120,7 +120,7 @@ public class SamlTestObjectHelper {
 		return metadata;
 	}
 
-	protected String getAliasPath(HostedSaml2ProviderConfiguration configuration) {
+	protected String getAliasPath(HostedSaml2ProviderRegistration configuration) {
 		return UriUtils.encode(
 			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
 			"ISO-8859-1"
@@ -183,7 +183,7 @@ public class SamlTestObjectHelper {
 	}
 
 	public Saml2IdentityProviderMetadata identityProviderMetadata(String baseUrl,
-																  HostedSaml2IdentityProviderConfiguration configuration) {
+																  HostedSaml2IdentityProviderRegistration configuration) {
 		List<Saml2KeyData> keys = configuration.getKeys();
 		Saml2KeyData signingKey = configuration.isSignMetadata() && keys.size()>0 ? keys.get(0) : null;
 

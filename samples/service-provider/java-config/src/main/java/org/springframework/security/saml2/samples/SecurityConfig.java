@@ -22,7 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
@@ -32,7 +32,7 @@ import static java.util.Collections.emptyList;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.EMAIL;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.UNSPECIFIED;
-import static org.springframework.security.saml2.serviceprovider.servlet.configuration.SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration;
+import static org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration;
 
 @EnableWebSecurity
 @Configuration
@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 								)
 								.providers(
 									asList(
-										new ExternalSaml2IdentityProviderConfiguration(
+										new ExternalSaml2IdentityProviderRegistration(
 											"simplesamlphp",
 											"http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php",
 											"Simple SAML PHP IDP (Java Config)",

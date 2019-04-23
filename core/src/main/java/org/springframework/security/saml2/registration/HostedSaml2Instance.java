@@ -15,34 +15,34 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 /**
  * Represents a configuration for a host or domain.
  * A hosted domain can have one local service provider, or one local identity provider, or both.
  */
-public class HostedSaml2ServerConfiguration {
+public class HostedSaml2Instance {
 
-	private final HostedSaml2ServiceProviderConfiguration serviceProvider;
-	private final HostedSaml2IdentityProviderConfiguration identityProvider;
+	private final HostedSaml2ServiceProviderRegistration serviceProvider;
+	private final HostedSaml2IdentityProviderRegistration identityProvider;
 
-	public HostedSaml2ServerConfiguration(HostedSaml2ServiceProviderConfiguration serviceProvider,
-										  HostedSaml2IdentityProviderConfiguration identityProvider) {
+	public HostedSaml2Instance(HostedSaml2ServiceProviderRegistration serviceProvider,
+							   HostedSaml2IdentityProviderRegistration identityProvider) {
 		this.serviceProvider = serviceProvider;
 		this.identityProvider = identityProvider;
 	}
 
-	public HostedSaml2ServiceProviderConfiguration getServiceProvider() {
+	public HostedSaml2ServiceProviderRegistration getServiceProvider() {
 		return serviceProvider;
 	}
 
-	public HostedSaml2IdentityProviderConfiguration getIdentityProvider() {
+	public HostedSaml2IdentityProviderRegistration getIdentityProvider() {
 		return identityProvider;
 	}
 
 	public static final class Builder {
-		private HostedSaml2ServiceProviderConfiguration serviceProvider;
-		private HostedSaml2IdentityProviderConfiguration identityProvider;
+		private HostedSaml2ServiceProviderRegistration serviceProvider;
+		private HostedSaml2IdentityProviderRegistration identityProvider;
 
 		private Builder() {
 		}
@@ -51,25 +51,25 @@ public class HostedSaml2ServerConfiguration {
 			return new Builder();
 		}
 
-		public static Builder builder(HostedSaml2ServerConfiguration configuration) {
+		public static Builder builder(HostedSaml2Instance configuration) {
 			return new Builder()
 				.identityProvider(configuration.getIdentityProvider())
 				.serviceProvider(configuration.getServiceProvider())
 				;
 		}
 
-		public Builder serviceProvider(HostedSaml2ServiceProviderConfiguration serviceProvider) {
+		public Builder serviceProvider(HostedSaml2ServiceProviderRegistration serviceProvider) {
 			this.serviceProvider = serviceProvider;
 			return this;
 		}
 
-		public Builder identityProvider(HostedSaml2IdentityProviderConfiguration identityProvider) {
+		public Builder identityProvider(HostedSaml2IdentityProviderRegistration identityProvider) {
 			this.identityProvider = identityProvider;
 			return this;
 		}
 
-		public HostedSaml2ServerConfiguration build() {
-			return new HostedSaml2ServerConfiguration(serviceProvider, identityProvider);
+		public HostedSaml2Instance build() {
+			return new HostedSaml2Instance(serviceProvider, identityProvider);
 		}
 	}
 }

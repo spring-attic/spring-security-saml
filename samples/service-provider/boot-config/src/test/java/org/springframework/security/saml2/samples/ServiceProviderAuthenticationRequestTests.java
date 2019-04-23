@@ -25,7 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -104,11 +104,11 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Disabled("login page is now static")
 	void multipleIdpSelection() throws Exception {
 		List<RemoteSaml2IdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
-		List<ExternalSaml2IdentityProviderConfiguration> list = new LinkedList<>();
-		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		List<ExternalSaml2IdentityProviderRegistration> list = new LinkedList<>();
+		list.add(providers.get(0).toExternalIdentityProviderRegistration());
 		providers.get(0).setAlias(providers.get(0).getAlias() + "-2");
 		providers.get(0).setLinktext("A Secondary SimpleSAML Provider");
-		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		list.add(providers.get(0).toExternalIdentityProviderRegistration());
 		mockConfig(
 			builder ->
 				builder.providers(list)
@@ -157,7 +157,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("authentication request uses only available endpoint [HTTP REDIRECT]")
 	void authNRequestWithRedirectOnly() throws Exception {
-		final List<ExternalSaml2IdentityProviderConfiguration> providers = modifyIdpProviders(
+		final List<ExternalSaml2IdentityProviderRegistration> providers = modifyIdpProviders(
 			p -> p.setAuthenticationRequestBinding(Saml2Binding.POST.getValue())
 		);
 		mockConfig(builder -> builder.providers(providers));
@@ -167,7 +167,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("authentication request uses only available endpoint [HTTP POST]")
 	void authNRequestWithPostOnly() throws Exception {
-		final List<ExternalSaml2IdentityProviderConfiguration> providers = modifyIdpProviders(
+		final List<ExternalSaml2IdentityProviderRegistration> providers = modifyIdpProviders(
 			p -> p.setMetadata(p.getMetadata().replace(
 				"md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\"",
 				"md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\""
@@ -180,7 +180,7 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Test
 	@DisplayName("authentication request uses preferred available endpoint [HTTP POST]")
 	void authNRequestWithPostPreferred() throws Exception {
-		final List<ExternalSaml2IdentityProviderConfiguration> providers = modifyIdpProviders(
+		final List<ExternalSaml2IdentityProviderRegistration> providers = modifyIdpProviders(
 			p -> {
 				p.setAuthenticationRequestBinding(Saml2Binding.POST.getValue());
 				p.setMetadata(p.getMetadata().replace(

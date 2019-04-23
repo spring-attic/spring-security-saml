@@ -19,39 +19,39 @@ package org.springframework.security.saml2.provider;
 
 import java.util.Map;
 
-import org.springframework.security.saml2.configuration.ExternalSaml2ProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2ProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.util.Assert;
 
 public abstract class HostedSaml2Provider<
-	Configuration extends HostedSaml2ProviderConfiguration,
+	Registration extends HostedSaml2ProviderRegistration,
 	LocalMetadata extends Saml2Metadata,
-	RemoteConfiguration extends ExternalSaml2ProviderConfiguration,
+	RemoteRegistration extends ExternalSaml2ProviderRegistration,
 	RemoteMetadata extends Saml2Metadata> {
 
-	private final Configuration configuration;
+	private final Registration registration;
 	private final LocalMetadata metadata;
-	private final Map<RemoteConfiguration, RemoteMetadata> providers;
+	private final Map<RemoteRegistration, RemoteMetadata> providers;
 
-	protected HostedSaml2Provider(Configuration configuration,
+	protected HostedSaml2Provider(Registration registration,
 								  LocalMetadata metadata,
-								  Map<RemoteConfiguration, RemoteMetadata> providers) {
-		this.configuration = configuration;
+								  Map<RemoteRegistration, RemoteMetadata> providers) {
+		this.registration = registration;
 		this.metadata = metadata;
 		this.providers = providers;
 	}
 
 
-	public Configuration getConfiguration() {
-		return configuration;
+	public Registration getRegistration() {
+		return registration;
 	}
 
 	public LocalMetadata getMetadata() {
 		return metadata;
 	}
 
-	public Map<RemoteConfiguration,RemoteMetadata> getRemoteProviders() {
+	public Map<RemoteRegistration,RemoteMetadata> getRemoteProviders() {
 		return providers;
 	}
 

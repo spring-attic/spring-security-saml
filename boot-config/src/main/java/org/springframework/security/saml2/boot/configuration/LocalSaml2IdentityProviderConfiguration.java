@@ -19,7 +19,7 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
 import org.springframework.security.saml2.model.encrypt.Saml2KeyEncryptionMethod;
 
@@ -63,8 +63,8 @@ public class LocalSaml2IdentityProviderConfiguration extends
 		this.encryptAssertions = encryptAssertions;
 	}
 
-	public HostedSaml2IdentityProviderConfiguration toHostedConfiguration() {
-		return new HostedSaml2IdentityProviderConfiguration(
+	public HostedSaml2IdentityProviderRegistration toHostedIdentityProviderRegistration() {
+		return new HostedSaml2IdentityProviderRegistration(
 			getPathPrefix(),
 			getBasePath(),
 			getAlias(),
@@ -78,7 +78,7 @@ public class LocalSaml2IdentityProviderConfiguration extends
 			getDefaultDigest(),
 			getNameIds(),
 			isSingleLogoutEnabled(),
-			getProviders().stream().map(p -> p.toExternalServiceProviderConfiguration()).collect(Collectors.toList()),
+			getProviders().stream().map(p -> p.toExternalServiceProviderRegistration()).collect(Collectors.toList()),
 			isEncryptAssertions(),
 			getKeyEncryptionAlgorithm(),
 			getDataEncryptionAlgorithm(),

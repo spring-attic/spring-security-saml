@@ -30,9 +30,9 @@ import java.util.UUID;
 import org.springframework.security.saml2.Saml2MetadataCache;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
@@ -86,18 +86,18 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 	}
 
 	@Override
-	public Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProviders(
-		HostedSaml2ServiceProviderConfiguration configuration
+	public Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProviders(
+		HostedSaml2ServiceProviderRegistration configuration
 	) {
 		return getProviders(configuration);
 	}
 
 	@Override
-	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
+	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderRegistration configuration) {
 		return generateMetadata(configuration);
 	}
 
-	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderConfiguration configuration) {
+	private Saml2ServiceProviderMetadata generateMetadata(HostedSaml2ServiceProviderRegistration configuration) {
 
 		String pathPrefix = configuration.getPathPrefix();
 		List<Saml2KeyData> keys = configuration.getKeys();
@@ -155,14 +155,14 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 			);
 	}
 
-	private String getAliasPath(HostedSaml2ProviderConfiguration configuration) {
+	private String getAliasPath(HostedSaml2ProviderRegistration configuration) {
 		return UriUtils.encode(
 			Saml2StringUtils.getAliasPath(configuration.getAlias(), configuration.getEntityId()),
 			StandardCharsets.ISO_8859_1.name()
 		);
 	}
 
-	private String getEntityAlias(HostedSaml2ServiceProviderConfiguration configuration, String entityId) {
+	private String getEntityAlias(HostedSaml2ServiceProviderRegistration configuration, String entityId) {
 		return hasText(configuration.getAlias()) ? configuration.getAlias() :
 			isUrl(entityId) ? Saml2StringUtils.getHostFromUrl(entityId) : entityId;
 	}
@@ -183,11 +183,11 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 				.setIndex(index);
 	}
 
-	private Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getProviders(
-		HostedSaml2ServiceProviderConfiguration configuration) {
-		Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> result = new HashMap<>();
-		List<ExternalSaml2IdentityProviderConfiguration> providers = configuration.getProviders();
-		for (ExternalSaml2IdentityProviderConfiguration idpConfig : providers) {
+	private Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getProviders(
+		HostedSaml2ServiceProviderRegistration configuration) {
+		Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> result = new HashMap<>();
+		List<ExternalSaml2IdentityProviderRegistration> providers = configuration.getProviders();
+		for (ExternalSaml2IdentityProviderRegistration idpConfig : providers) {
 			Saml2IdentityProviderMetadata idp = getIdentityProviderMetadata(idpConfig);
 			idp = metadataTrustCheck(idpConfig, idp);
 			if (idp != null) {
@@ -197,7 +197,7 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 		return result;
 	}
 
-	private Saml2IdentityProviderMetadata getIdentityProviderMetadata(ExternalSaml2IdentityProviderConfiguration idp) {
+	private Saml2IdentityProviderMetadata getIdentityProviderMetadata(ExternalSaml2IdentityProviderRegistration idp) {
 		Saml2IdentityProviderMetadata result = null;
 		try {
 			byte[] data = idp.getMetadata().getBytes(StandardCharsets.UTF_8);
@@ -214,7 +214,7 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 		return result;
 	}
 
-	private Saml2IdentityProviderMetadata metadataTrustCheck(ExternalSaml2IdentityProviderConfiguration idpConfig,
+	private Saml2IdentityProviderMetadata metadataTrustCheck(ExternalSaml2IdentityProviderRegistration idpConfig,
 															 Saml2IdentityProviderMetadata idp) {
 		if (!idpConfig.isMetadataTrustCheck()) {
 			return idp;
@@ -264,7 +264,7 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 		}
 	}
 
-	private void addStaticKeys(ExternalSaml2IdentityProviderConfiguration idp, Saml2IdentityProviderMetadata metadata) {
+	private void addStaticKeys(ExternalSaml2IdentityProviderRegistration idp, Saml2IdentityProviderMetadata metadata) {
 		if (!idp.getVerificationKeys().isEmpty() && metadata != null) {
 			List<Saml2KeyData> keys = new LinkedList(metadata.getIdentityProvider().getKeys());
 			keys.addAll(idp.getVerificationKeys());

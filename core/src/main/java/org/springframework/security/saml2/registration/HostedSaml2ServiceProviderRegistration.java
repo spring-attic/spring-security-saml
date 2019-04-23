@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.List;
 
@@ -29,26 +29,26 @@ import static java.util.Arrays.asList;
 /**
  * Immutable configuration object that represents a local service provider (SP) service.
  */
-public class HostedSaml2ServiceProviderConfiguration extends
-	HostedSaml2ProviderConfiguration<ExternalSaml2IdentityProviderConfiguration> {
+public class HostedSaml2ServiceProviderRegistration extends
+	HostedSaml2ProviderRegistration<ExternalSaml2IdentityProviderRegistration> {
 
 	private final boolean signRequests;
 	private final boolean wantAssertionsSigned;
 
-	public HostedSaml2ServiceProviderConfiguration(String pathPrefix,
-												   String basePath,
-												   String alias,
-												   String entityId,
-												   boolean signMetadata,
-												   String metadata,
-												   List<Saml2KeyData> keys,
-												   Saml2AlgorithmMethod defaultSigningAlgorithm,
-												   Saml2DigestMethod defaultDigest,
-												   List<Saml2NameId> nameIds,
-												   boolean singleLogoutEnabled,
-												   List<ExternalSaml2IdentityProviderConfiguration> providers,
-												   boolean signRequests,
-												   boolean wantAssertionsSigned) {
+	public HostedSaml2ServiceProviderRegistration(String pathPrefix,
+												  String basePath,
+												  String alias,
+												  String entityId,
+												  boolean signMetadata,
+												  String metadata,
+												  List<Saml2KeyData> keys,
+												  Saml2AlgorithmMethod defaultSigningAlgorithm,
+												  Saml2DigestMethod defaultDigest,
+												  List<Saml2NameId> nameIds,
+												  boolean singleLogoutEnabled,
+												  List<ExternalSaml2IdentityProviderRegistration> providers,
+												  boolean signRequests,
+												  boolean wantAssertionsSigned) {
 		super(
 			pathPrefix,
 			basePath,
@@ -79,7 +79,7 @@ public class HostedSaml2ServiceProviderConfiguration extends
 		return new Builder();
 	}
 
-	public static Builder builder(HostedSaml2ServiceProviderConfiguration configuration) {
+	public static Builder builder(HostedSaml2ServiceProviderRegistration configuration) {
 		return builder()
 			.signRequests(configuration.isSignRequests())
 			.wantAssertionsSigned(configuration.isWantAssertionsSigned())
@@ -111,7 +111,7 @@ public class HostedSaml2ServiceProviderConfiguration extends
 		private Saml2DigestMethod defaultDigest = Saml2DigestMethod.SHA256;
 		private List<Saml2NameId> nameIds = asList(Saml2NameId.PERSISTENT, Saml2NameId.EMAIL);
 		private boolean singleLogoutEnabled = true;
-		private List<ExternalSaml2IdentityProviderConfiguration> providers;
+		private List<ExternalSaml2IdentityProviderRegistration> providers;
 
 		private Builder() {
 		}
@@ -186,19 +186,19 @@ public class HostedSaml2ServiceProviderConfiguration extends
 			return this;
 		}
 
-		public Builder providers(List<ExternalSaml2IdentityProviderConfiguration> providers) {
+		public Builder providers(List<ExternalSaml2IdentityProviderRegistration> providers) {
 			this.providers = providers;
 			return this;
 		}
 
-		public Builder providers(ExternalSaml2IdentityProviderConfiguration... providers) {
+		public Builder providers(ExternalSaml2IdentityProviderRegistration... providers) {
 			this.providers = asList(providers);
 			return this;
 		}
 
-		public HostedSaml2ServiceProviderConfiguration build() {
-			HostedSaml2ServiceProviderConfiguration hostedServiceProviderConfiguration =
-				new HostedSaml2ServiceProviderConfiguration(
+		public HostedSaml2ServiceProviderRegistration build() {
+			HostedSaml2ServiceProviderRegistration hostedServiceProviderRegistration =
+				new HostedSaml2ServiceProviderRegistration(
 					pathPrefix,
 					basePath,
 					alias,
@@ -213,7 +213,7 @@ public class HostedSaml2ServiceProviderConfiguration extends
 					providers,
 					signRequests,
 					wantAssertionsSigned);
-			return hostedServiceProviderConfiguration;
+			return hostedServiceProviderRegistration;
 		}
 	}
 }

@@ -20,9 +20,9 @@ package org.springframework.security.saml2.boot.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServerConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2Instance;
 
 @ConfigurationProperties(prefix = "spring.security.saml2")
 public class Saml2BootConfiguration {
@@ -49,20 +49,20 @@ public class Saml2BootConfiguration {
 		this.identityProvider = identityProvider;
 	}
 
-	public HostedSaml2ServerConfiguration toSamlServerConfiguration() {
-		return new HostedSaml2ServerConfiguration(
-			serviceProvider == null ? null : serviceProvider.toHostedConfiguration(),
-			identityProvider == null ? null : identityProvider.toHostedConfiguration()
+	public HostedSaml2Instance toSamlServerConfiguration() {
+		return new HostedSaml2Instance(
+			serviceProvider == null ? null : serviceProvider.toHostedServiceProviderRegistration(),
+			identityProvider == null ? null : identityProvider.toHostedIdentityProviderRegistration()
 		);
 	}
 
 	@Bean
-	public HostedSaml2ServiceProviderConfiguration samlServiceProviderConfiguration() {
+	public HostedSaml2ServiceProviderRegistration samlServiceProviderRegistration() {
 		return toSamlServerConfiguration().getServiceProvider();
 	}
 
 	@Bean
-	public HostedSaml2IdentityProviderConfiguration samlIdentityProviderConfiguration() {
+	public HostedSaml2IdentityProviderRegistration samlIdentityProviderRegistration() {
 		return toSamlServerConfiguration().getIdentityProvider();
 	}
 }

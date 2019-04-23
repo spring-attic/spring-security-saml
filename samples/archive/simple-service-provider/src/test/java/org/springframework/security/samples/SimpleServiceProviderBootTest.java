@@ -38,7 +38,7 @@ import org.springframework.security.saml2.model.key.KeyType;
 import org.springframework.security.saml2.model.key.SimpleKey;
 import org.springframework.security.saml2.provider.provisioning.SamlProviderProvisioning;
 import org.springframework.security.saml2.provider.service.ServiceProviderService;
-import org.springframework.security.saml2.configuration.HostedServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedServiceProviderConfiguration;
 import org.springframework.security.saml2.model.authentication.Assertion;
 import org.springframework.security.saml2.model.authentication.AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.LogoutRequest;

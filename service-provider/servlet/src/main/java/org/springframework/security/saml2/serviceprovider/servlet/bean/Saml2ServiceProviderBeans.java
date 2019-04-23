@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.DefaultSaml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.configuration.SingletonSaml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.util.Assert;
 
@@ -36,11 +36,11 @@ import org.springframework.util.Assert;
 public class Saml2ServiceProviderBeans {
 
 	private final Saml2Transformer transformer;
-	private final HostedSaml2ServiceProviderConfiguration configuration;
+	private final HostedSaml2ServiceProviderRegistration configuration;
 
 	public Saml2ServiceProviderBeans(
 		@Autowired Saml2Transformer transformer,
-		@Autowired(required = false) HostedSaml2ServiceProviderConfiguration configuration) {
+		@Autowired(required = false) HostedSaml2ServiceProviderRegistration configuration) {
 		this.transformer = transformer;
 		this.configuration = configuration;
 	}
@@ -54,7 +54,7 @@ public class Saml2ServiceProviderBeans {
 	public Saml2ServiceProviderResolver serviceProviderResolver() {
 		return new DefaultSaml2ServiceProviderResolver(
 			serviceProviderMetadataResolver(),
-			serviceProviderConfigurationResolver()
+			serviceProviderRegistrationResolver()
 		);
 	}
 
@@ -63,17 +63,17 @@ public class Saml2ServiceProviderBeans {
 		return new DefaultSaml2ServiceProviderMetadataResolver(transformer);
 	}
 
-	@Bean(name = "samlServiceProviderConfigurationResolver")
-	public Saml2ServiceProviderConfigurationResolver serviceProviderConfigurationResolver() {
+	@Bean(name = "samlServiceProviderRegistrationResolver")
+	public Saml2ServiceProviderRegistrationResolver serviceProviderRegistrationResolver() {
 		Assert.notNull(
 			configuration,
-			"Unable to configure a " + Saml2ServiceProviderConfigurationResolver.class.getName() +
+			"Unable to configure a " + Saml2ServiceProviderRegistrationResolver.class.getName() +
 				" instance, without an actual configuration. " +
-				"Either expose a " + HostedSaml2ServiceProviderConfiguration.class.getName() +
-				"bean or override the " + Saml2ServiceProviderConfigurationResolver.class.getName() +
+				"Either expose a " + HostedSaml2ServiceProviderRegistration.class.getName() +
+				"bean or override the " + Saml2ServiceProviderRegistrationResolver.class.getName() +
 				" bean."
 		);
-		return SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration(configuration);
+		return SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration(configuration);
 	}
 
 }

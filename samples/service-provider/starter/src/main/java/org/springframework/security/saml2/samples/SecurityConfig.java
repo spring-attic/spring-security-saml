@@ -22,11 +22,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
 
-import static org.springframework.security.saml2.serviceprovider.servlet.configuration.SingletonSaml2ServiceProviderConfigurationResolver.fromConfiguration;
+import static org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	protected Saml2ServiceProviderConfigurationResolver configurationResolver() {
+	protected Saml2ServiceProviderRegistrationResolver configurationResolver() {
 		return fromConfiguration(
 			config -> config
 				.keys(
@@ -64,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						.build()
 				)
 				.providers(
-					ExternalSaml2IdentityProviderConfiguration.builder()
+					ExternalSaml2IdentityProviderRegistration.builder()
 						.alias("simplesamlphp")
 						.metadata("http://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
 						.build()

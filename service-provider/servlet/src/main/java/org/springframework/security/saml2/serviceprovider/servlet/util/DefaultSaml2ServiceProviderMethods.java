@@ -32,7 +32,7 @@ import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -63,7 +63,7 @@ public class DefaultSaml2ServiceProviderMethods implements Saml2ServiceProviderM
 		String rs = request.getParameter(parameterName);
 		if (hasText(rs)) {
 			String xml = getTransformer().samlDecode(rs, HttpMethod.GET.matches(request.getMethod()));
-			result = getTransformer().fromXml(xml, null, provider.getConfiguration().getKeys());
+			result = getTransformer().fromXml(xml, null, provider.getRegistration().getKeys());
 			if (result instanceof Saml2SignableObject) {
 				Saml2SignableObject signableSaml2Object = (Saml2SignableObject) result;
 				Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(signableSaml2Object.getOriginEntityId());

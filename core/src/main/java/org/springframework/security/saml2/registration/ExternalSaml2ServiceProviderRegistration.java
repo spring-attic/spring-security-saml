@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,8 +28,8 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * Immutable configuration object that represents an external service provider
  */
-public class ExternalSaml2ServiceProviderConfiguration extends
-	ExternalSaml2ProviderConfiguration<ExternalSaml2ServiceProviderConfiguration> {
+public class ExternalSaml2ServiceProviderRegistration extends
+	ExternalSaml2ProviderRegistration<ExternalSaml2ServiceProviderRegistration> {
 
 	/**
 	 * Creates a configuration representation of an external service provider
@@ -42,20 +42,20 @@ public class ExternalSaml2ServiceProviderConfiguration extends
 	 * @param metadataTrustCheck - set to true if you wish to validate metadata signature against known keys
 	 * @param verificationKeys   - list of certificates, required if metadataTrustCheck is set to true
 	 */
-	public ExternalSaml2ServiceProviderConfiguration(String alias,
-													 String metadata,
-													 String linktext,
-													 boolean skipSslValidation,
-													 boolean metadataTrustCheck,
-													 List<Saml2KeyData> verificationKeys) {
+	public ExternalSaml2ServiceProviderRegistration(String alias,
+													String metadata,
+													String linktext,
+													boolean skipSslValidation,
+													boolean metadataTrustCheck,
+													List<Saml2KeyData> verificationKeys) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck, verificationKeys);
 	}
 
-	public static ExternalSaml2ServiceProviderConfiguration.Builder builder() {
-		return new ExternalSaml2ServiceProviderConfiguration.Builder();
+	public static ExternalSaml2ServiceProviderRegistration.Builder builder() {
+		return new ExternalSaml2ServiceProviderRegistration.Builder();
 	}
 
-	public static ExternalSaml2ServiceProviderConfiguration.Builder builder(ExternalSaml2ServiceProviderConfiguration idp) {
+	public static ExternalSaml2ServiceProviderRegistration.Builder builder(ExternalSaml2ServiceProviderRegistration idp) {
 		return builder()
 			.alias(idp.getAlias())
 			.metadata(idp.getMetadata())
@@ -78,45 +78,45 @@ public class ExternalSaml2ServiceProviderConfiguration extends
 		private Builder() {
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder alias(String alias) {
+		public ExternalSaml2ServiceProviderRegistration.Builder alias(String alias) {
 			this.alias = alias;
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder metadata(String metadata) {
+		public ExternalSaml2ServiceProviderRegistration.Builder metadata(String metadata) {
 			this.metadata = metadata;
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder linktext(String linktext) {
+		public ExternalSaml2ServiceProviderRegistration.Builder linktext(String linktext) {
 			this.linktext = linktext;
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder skipSslValidation(boolean skipSslValidation) {
+		public ExternalSaml2ServiceProviderRegistration.Builder skipSslValidation(boolean skipSslValidation) {
 			this.skipSslValidation = skipSslValidation;
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder metadataTrustCheck(boolean metadataTrustCheck) {
+		public ExternalSaml2ServiceProviderRegistration.Builder metadataTrustCheck(boolean metadataTrustCheck) {
 			this.metadataTrustCheck = metadataTrustCheck;
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder verificationKeys(List<Saml2KeyData> verificationKeys) {
+		public ExternalSaml2ServiceProviderRegistration.Builder verificationKeys(List<Saml2KeyData> verificationKeys) {
 			this.verificationKeys = new LinkedList<>(verificationKeys);
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration.Builder addVerificationKey(Saml2KeyData verificationKey) {
+		public ExternalSaml2ServiceProviderRegistration.Builder addVerificationKey(Saml2KeyData verificationKey) {
 			this.verificationKeys.add(verificationKey);
 			return this;
 		}
 
-		public ExternalSaml2ServiceProviderConfiguration build() {
+		public ExternalSaml2ServiceProviderRegistration build() {
 			Assert.notNull(alias, "Alias is required");
 			Assert.notNull(metadata, "Metadata is required");
-			return new ExternalSaml2ServiceProviderConfiguration(
+			return new ExternalSaml2ServiceProviderRegistration(
 				alias,
 				metadata,
 				hasText(linktext) ? linktext : alias,

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
@@ -58,9 +58,9 @@ public class DefaultSaml2AuthenticationRequestResolver
 	public Saml2AuthenticationRequest resolve(HttpServletRequest request, HttpServletResponse response) {
 		HostedSaml2ServiceProvider provider = serviceProviderMethods.getProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
-		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> entity =
+		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> entity =
 			getIdentityProvider(request, provider);
-		ExternalSaml2IdentityProviderConfiguration idpConfig = entity.getKey();
+		ExternalSaml2IdentityProviderRegistration idpConfig = entity.getKey();
 		Saml2IdentityProviderMetadata idp = entity.getValue();
 		Saml2ServiceProviderMetadata localSp = provider.getMetadata();
 		final Saml2BindingType preferredSSOBinding =
@@ -80,11 +80,11 @@ public class DefaultSaml2AuthenticationRequestResolver
 	 * UAA would want to override this as the entities are referred to by alias rather
 	 * than ID
 	 */
-	protected Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProvider(
+	protected Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProvider(
 		HttpServletRequest request,
 		HostedSaml2ServiceProvider sp
 	) {
-		Map.Entry<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> result = null;
+		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> result = null;
 		String idpAlias = getIdpAlias(request);
 		if (hasText(idpAlias)) {
 			result = sp.getRemoteProviders().entrySet().stream()

@@ -29,13 +29,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.DefaultSaml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationTokenResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
@@ -84,7 +84,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private Saml2ServiceProviderValidator validator;
 	private Saml2ServiceProviderMetadataResolver metadataResolver;
 	private Saml2ServiceProviderResolver providerResolver;
-	private Saml2ServiceProviderConfigurationResolver configurationResolver;
+	private Saml2ServiceProviderRegistrationResolver configurationResolver;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
@@ -111,7 +111,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return this;
 	}
 
-	Saml2ServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderConfigurationResolver resolver) {
+	Saml2ServiceProviderConfiguration setConfigurationResolver(Saml2ServiceProviderRegistrationResolver resolver) {
 		notNull(resolver, "configurationResolver must not be null");
 		isNull(providerResolver, "providerResolver", "configurationResolver");
 		this.configurationResolver = resolver;
@@ -157,7 +157,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		getAuthenticationFailureHandler();
 		getAuthenticationManager();
 		validateSamlConfiguration(http);
-		this.pathPrefix = "/" + Saml2StringUtils.stripSlashes(getServiceProviderResolver().getConfiguredPathPrefix());
+		this.pathPrefix = "/" + Saml2StringUtils.stripSlashes(getServiceProviderResolver().getHttpPathPrefix());
 		return this;
 	}
 
@@ -343,13 +343,13 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	}
 
 	private Map<String, String> getStaticLoginUrls() {
-		final Saml2ServiceProviderConfigurationResolver configResolver = getSharedObject(
+		final Saml2ServiceProviderRegistrationResolver configResolver = getSharedObject(
 			http,
-			Saml2ServiceProviderConfigurationResolver.class,
+			Saml2ServiceProviderRegistrationResolver.class,
 			() -> null,
 			configurationResolver
 		);
-		HostedSaml2ServiceProviderConfiguration configuration = configResolver.getConfiguration(null);
+		HostedSaml2ServiceProviderRegistration configuration = configResolver.getServiceProviderRegistration(null);
 		Map<String, String> providerUrls = new HashMap<>();
 		configuration.getProviders().stream().forEach(
 			p -> {
@@ -372,28 +372,28 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private void validateSamlConfiguration(HttpSecurity http) {
 		if (ofNullable(providerResolver).isPresent()) {
 			notNull(
-				providerResolver.getConfiguredPathPrefix(),
-				Saml2ServiceProviderResolver.class.getName() + ".getConfiguredPathPrefix() must not return null"
+				providerResolver.getHttpPathPrefix(),
+				Saml2ServiceProviderResolver.class.getName() + ".getHttpPathPrefix() must not return null"
 			);
 		}
 		else {
 			//do we have a configurationResolver?
 			configurationResolver = getSharedObject(
 				http,
-				Saml2ServiceProviderConfigurationResolver.class,
+				Saml2ServiceProviderRegistrationResolver.class,
 				null,
 				configurationResolver
 			);
 
 			notNull(
 				configurationResolver,
-				Saml2ServiceProviderConfigurationResolver.class.getName() + " must not be null"
+				Saml2ServiceProviderRegistrationResolver.class.getName() + " must not be null"
 			);
 
 			notNull(
-				configurationResolver.getConfiguredPathPrefix(),
-				Saml2ServiceProviderConfigurationResolver.class.getName() +
-					".getConfiguredPathPrefix() must not return null"
+				configurationResolver.getHttpPathPrefix(),
+				Saml2ServiceProviderRegistrationResolver.class.getName() +
+					".getHttpPathPrefix() must not return null"
 			);
 
 			metadataResolver = getSamlMetadataResolver();

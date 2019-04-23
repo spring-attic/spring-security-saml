@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.List;
 
@@ -31,8 +31,8 @@ import static java.util.Arrays.asList;
 /**
  * Immutable configuration object that represents a local identity provider (IDP) service.
  */
-public class HostedSaml2IdentityProviderConfiguration extends
-	HostedSaml2ProviderConfiguration<ExternalSaml2ServiceProviderConfiguration> {
+public class HostedSaml2IdentityProviderRegistration extends
+	HostedSaml2ProviderRegistration<ExternalSaml2ServiceProviderRegistration> {
 
 	private final boolean wantRequestsSigned;
 	private final boolean signAssertions;
@@ -43,26 +43,26 @@ public class HostedSaml2IdentityProviderConfiguration extends
 	private final long notBefore;
 	private final long sessionNotOnOrAfter;
 
-	public HostedSaml2IdentityProviderConfiguration(String pathPrefix,
-													String basePath,
-													String alias,
-													String entityId,
-													boolean signMetadata,
-													boolean signAssertions,
-													boolean wantRequestsSigned,
-													String metadata,
-													List<Saml2KeyData> keys,
-													Saml2AlgorithmMethod defaultSigningAlgorithm,
-													Saml2DigestMethod defaultDigest,
-													List<Saml2NameId> nameIds,
-													boolean singleLogoutEnabled,
-													List<ExternalSaml2ServiceProviderConfiguration> providers,
-													boolean encryptAssertions,
-													Saml2KeyEncryptionMethod keyEncryptionAlgorithm,
-													Saml2DataEncryptionMethod dataEncryptionAlgorithm,
-													long notOnOrAfter,
-													long notBefore,
-													long sessionNotOnOrAfter) {
+	public HostedSaml2IdentityProviderRegistration(String pathPrefix,
+												   String basePath,
+												   String alias,
+												   String entityId,
+												   boolean signMetadata,
+												   boolean signAssertions,
+												   boolean wantRequestsSigned,
+												   String metadata,
+												   List<Saml2KeyData> keys,
+												   Saml2AlgorithmMethod defaultSigningAlgorithm,
+												   Saml2DigestMethod defaultDigest,
+												   List<Saml2NameId> nameIds,
+												   boolean singleLogoutEnabled,
+												   List<ExternalSaml2ServiceProviderRegistration> providers,
+												   boolean encryptAssertions,
+												   Saml2KeyEncryptionMethod keyEncryptionAlgorithm,
+												   Saml2DataEncryptionMethod dataEncryptionAlgorithm,
+												   long notOnOrAfter,
+												   long notBefore,
+												   long sessionNotOnOrAfter) {
 		super(
 			pathPrefix,
 			basePath,
@@ -123,7 +123,7 @@ public class HostedSaml2IdentityProviderConfiguration extends
 		return new Builder();
 	}
 
-	public static Builder builder(HostedSaml2IdentityProviderConfiguration configuration) {
+	public static Builder builder(HostedSaml2IdentityProviderRegistration configuration) {
 		return builder()
 			.wantRequestsSigned(configuration.isWantRequestsSigned())
 			.signAssertions(configuration.isSignAssertions())
@@ -167,7 +167,7 @@ public class HostedSaml2IdentityProviderConfiguration extends
 		private List<Saml2NameId> nameIds;
 		private long sessionNotOnOrAfter;
 		private boolean singleLogoutEnabled;
-		private List<ExternalSaml2ServiceProviderConfiguration> providers;
+		private List<ExternalSaml2ServiceProviderRegistration> providers;
 
 		private Builder() {
 		}
@@ -272,19 +272,19 @@ public class HostedSaml2IdentityProviderConfiguration extends
 			return this;
 		}
 
-		public Builder providers(List<ExternalSaml2ServiceProviderConfiguration> providers) {
+		public Builder providers(List<ExternalSaml2ServiceProviderRegistration> providers) {
 			this.providers = providers;
 			return this;
 		}
 
-		public Builder providers(ExternalSaml2ServiceProviderConfiguration... providers) {
+		public Builder providers(ExternalSaml2ServiceProviderRegistration... providers) {
 			this.providers = asList(providers);
 			return this;
 		}
 
-		public HostedSaml2IdentityProviderConfiguration build() {
-			HostedSaml2IdentityProviderConfiguration hostedIdentityProviderConfiguration =
-				new HostedSaml2IdentityProviderConfiguration(
+		public HostedSaml2IdentityProviderRegistration build() {
+			HostedSaml2IdentityProviderRegistration hostedIdentityProviderRegistration =
+				new HostedSaml2IdentityProviderRegistration(
 					pathPrefix,
 					basePath,
 					alias,
@@ -306,7 +306,7 @@ public class HostedSaml2IdentityProviderConfiguration extends
 					notBefore,
 					sessionNotOnOrAfter
 				);
-			return hostedIdentityProviderConfiguration;
+			return hostedIdentityProviderRegistration;
 		}
 	}
 }

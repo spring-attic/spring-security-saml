@@ -26,7 +26,7 @@ import org.springframework.security.saml2.model.metadata.Saml2BindingType;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 
 public interface Saml2ServiceProviderMethods {
 

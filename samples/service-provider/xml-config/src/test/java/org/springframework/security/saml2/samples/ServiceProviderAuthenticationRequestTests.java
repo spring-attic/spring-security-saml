@@ -25,7 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -103,11 +103,11 @@ public class ServiceProviderAuthenticationRequestTests extends AbstractServicePr
 	@Disabled("login page is now static - need to replace with unit test")
 	void multipleIdpSelection() throws Exception {
 		List<RemoteSaml2IdentityProviderConfiguration> providers = bootConfiguration.getServiceProvider().getProviders();
-		List<ExternalSaml2IdentityProviderConfiguration> list = new LinkedList<>();
-		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		List<ExternalSaml2IdentityProviderRegistration> list = new LinkedList<>();
+		list.add(providers.get(0).toExternalIdentityProviderRegistration());
 		providers.get(0).setAlias(providers.get(0).getAlias() + "-2");
 		providers.get(0).setLinktext("A Secondary SimpleSAML Provider");
-		list.add(providers.get(0).toExternalIdentityProviderConfiguration());
+		list.add(providers.get(0).toExternalIdentityProviderRegistration());
 		mockConfig(
 			builder ->
 				builder.providers(list)

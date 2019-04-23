@@ -30,7 +30,7 @@ import org.springframework.security.saml2.SamlMetadataCache;
 import org.springframework.security.saml2.SamlTransformer;
 import org.springframework.security.saml2.SamlValidator;
 import org.springframework.security.saml2.provider.config.SamlConfigurationRepository;
-import org.springframework.security.saml2.configuration.SamlServerConfiguration;
+import org.springframework.security.saml2.registration.SamlServerConfiguration;
 import org.springframework.security.saml2.provider.identity.config.SamlIdentityProviderServerBeanConfiguration;
 import org.springframework.security.saml2.model.authentication.Assertion;
 

@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,8 +25,8 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
-public abstract class HostedSaml2ProviderConfiguration
-	<ExternalConfiguration extends ExternalSaml2ProviderConfiguration<ExternalConfiguration>> {
+public abstract class HostedSaml2ProviderRegistration
+	<ExternalRegistration extends ExternalSaml2ProviderRegistration<ExternalRegistration>> {
 
 	private final String pathPrefix;
 	private final String basePath;
@@ -39,20 +39,20 @@ public abstract class HostedSaml2ProviderConfiguration
 	private final Saml2DigestMethod defaultDigest;
 	private final List<Saml2NameId> nameIds;
 	private final boolean singleLogoutEnabled;
-	private final List<ExternalConfiguration> providers;
+	private final List<ExternalRegistration> providers;
 
-	HostedSaml2ProviderConfiguration(String pathPrefix,
-									 String basePath,
-									 String alias,
-									 String entityId,
-									 boolean signMetadata,
-									 String metadata,
-									 List<Saml2KeyData> keys,
-									 Saml2AlgorithmMethod defaultSigningAlgorithm,
-									 Saml2DigestMethod defaultDigest,
-									 List<Saml2NameId> nameIds,
-									 boolean singleLogoutEnabled,
-									 List<ExternalConfiguration> providers) {
+	HostedSaml2ProviderRegistration(String pathPrefix,
+									String basePath,
+									String alias,
+									String entityId,
+									boolean signMetadata,
+									String metadata,
+									List<Saml2KeyData> keys,
+									Saml2AlgorithmMethod defaultSigningAlgorithm,
+									Saml2DigestMethod defaultDigest,
+									List<Saml2NameId> nameIds,
+									boolean singleLogoutEnabled,
+									List<ExternalRegistration> providers) {
 		this.pathPrefix = pathPrefix;
 		this.basePath = basePath;
 		this.alias = alias;
@@ -111,7 +111,7 @@ public abstract class HostedSaml2ProviderConfiguration
 		return basePath;
 	}
 
-	public List<ExternalConfiguration> getProviders() {
+	public List<ExternalRegistration> getProviders() {
 		return providers;
 	}
 

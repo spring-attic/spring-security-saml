@@ -15,44 +15,44 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.servlet.configuration;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import java.util.function.Consumer;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration.Builder;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration.Builder;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
 
-public class SingletonSaml2ServiceProviderConfigurationResolver
-	implements Saml2ServiceProviderConfigurationResolver<HttpServletRequest> {
+public class SingletonSaml2ServiceProviderRegistrationResolver
+	implements Saml2ServiceProviderRegistrationResolver<HttpServletRequest> {
 
-	private final HostedSaml2ServiceProviderConfiguration configuration;
+	private final HostedSaml2ServiceProviderRegistration configuration;
 
-	public SingletonSaml2ServiceProviderConfigurationResolver(HostedSaml2ServiceProviderConfiguration configuration) {
-		this.configuration = configuration;
-		notNull(configuration, "HostedServiceProviderConfiguration must not be null");
-		notNull(configuration.getPathPrefix(), "HostedServiceProviderConfiguration.pathPrefix must not be null");
+	public SingletonSaml2ServiceProviderRegistrationResolver(HostedSaml2ServiceProviderRegistration registration) {
+		this.configuration = registration;
+		notNull(registration, "HostedServiceProviderRegistration must not be null");
+		notNull(registration.getPathPrefix(), "HostedServiceProviderRegistration.pathPrefix must not be null");
 	}
 
-	public static SingletonSaml2ServiceProviderConfigurationResolver fromConfiguration(Consumer<Builder> config) {
-		Builder builder = HostedSaml2ServiceProviderConfiguration.builder();
+	public static SingletonSaml2ServiceProviderRegistrationResolver fromConfiguration(Consumer<Builder> config) {
+		Builder builder = HostedSaml2ServiceProviderRegistration.builder();
 		config.accept(builder);
 		return fromConfiguration(builder.build());
 	}
 
-	public static SingletonSaml2ServiceProviderConfigurationResolver fromConfiguration(
-		HostedSaml2ServiceProviderConfiguration c) {
-		return new SingletonSaml2ServiceProviderConfigurationResolver(c);
+	public static SingletonSaml2ServiceProviderRegistrationResolver fromConfiguration(
+		HostedSaml2ServiceProviderRegistration c) {
+		return new SingletonSaml2ServiceProviderRegistrationResolver(c);
 	}
 
 	@Override
-	public HostedSaml2ServiceProviderConfiguration getConfiguration(HttpServletRequest request) {
+	public HostedSaml2ServiceProviderRegistration getServiceProviderRegistration(HttpServletRequest request) {
 		Builder builder =
-			HostedSaml2ServiceProviderConfiguration.builder(configuration);
+			HostedSaml2ServiceProviderRegistration.builder(configuration);
 		if (request != null) {
 			String basePath = getBasePath(request, false);
 			if (!hasText(configuration.getEntityId())) {
@@ -69,7 +69,7 @@ public class SingletonSaml2ServiceProviderConfigurationResolver
 	}
 
 	@Override
-	public String getConfiguredPathPrefix() {
+	public String getHttpPathPrefix() {
 		return configuration.getPathPrefix();
 	}
 

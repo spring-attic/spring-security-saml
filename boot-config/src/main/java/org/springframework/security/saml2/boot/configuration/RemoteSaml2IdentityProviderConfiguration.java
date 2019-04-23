@@ -19,7 +19,7 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.net.URI;
 
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 
@@ -57,8 +57,8 @@ public class RemoteSaml2IdentityProviderConfiguration extends RemoteSaml2Provide
 		this.authenticationRequestBinding = authenticationRequestBinding;
 	}
 
-	public ExternalSaml2IdentityProviderConfiguration toExternalIdentityProviderConfiguration() {
-		return new ExternalSaml2IdentityProviderConfiguration(
+	public ExternalSaml2IdentityProviderRegistration toExternalIdentityProviderRegistration() {
+		return new ExternalSaml2IdentityProviderRegistration(
 			getAlias(),
 			getMetadata(),
 			getLinktext(),

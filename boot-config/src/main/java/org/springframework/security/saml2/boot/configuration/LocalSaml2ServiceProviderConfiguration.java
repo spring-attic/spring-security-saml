@@ -19,7 +19,7 @@ package org.springframework.security.saml2.boot.configuration;
 
 import java.util.stream.Collectors;
 
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 
 public class LocalSaml2ServiceProviderConfiguration extends
 	LocalSaml2ProviderConfiguration<RemoteSaml2IdentityProviderConfiguration> {
@@ -31,8 +31,8 @@ public class LocalSaml2ServiceProviderConfiguration extends
 		super("saml/sp");
 	}
 
-	public HostedSaml2ServiceProviderConfiguration toHostedConfiguration() {
-		return new HostedSaml2ServiceProviderConfiguration(
+	public HostedSaml2ServiceProviderRegistration toHostedServiceProviderRegistration() {
+		return new HostedSaml2ServiceProviderRegistration(
 			getPathPrefix(),
 			getBasePath(),
 			getAlias(),
@@ -44,7 +44,7 @@ public class LocalSaml2ServiceProviderConfiguration extends
 			getDefaultDigest(),
 			getNameIds(),
 			isSingleLogoutEnabled(),
-			getProviders().stream().map(p -> p.toExternalIdentityProviderConfiguration()).collect(Collectors.toList()),
+			getProviders().stream().map(p -> p.toExternalIdentityProviderRegistration()).collect(Collectors.toList()),
 			isSignRequests(),
 			isWantAssertionsSigned()
 		);

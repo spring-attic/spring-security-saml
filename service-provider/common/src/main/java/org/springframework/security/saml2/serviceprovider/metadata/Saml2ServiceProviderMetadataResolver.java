@@ -19,15 +19,15 @@ package org.springframework.security.saml2.serviceprovider.metadata;
 
 import java.util.Map;
 
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
 public interface Saml2ServiceProviderMetadataResolver {
-	Map<ExternalSaml2IdentityProviderConfiguration, Saml2IdentityProviderMetadata> getIdentityProviders(
-		HostedSaml2ServiceProviderConfiguration configuration
+	Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProviders(
+		HostedSaml2ServiceProviderRegistration configuration
 	);
 
-	Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderConfiguration configuration);
+	Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderRegistration configuration);
 }

@@ -5,40 +5,40 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.servlet;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.HostedSaml2ServiceProvider;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 
 public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProviderResolver<HttpServletRequest> {
 
 	private final Saml2ServiceProviderMetadataResolver metadataResolver;
-	private final Saml2ServiceProviderConfigurationResolver configResolver;
+	private final Saml2ServiceProviderRegistrationResolver configResolver;
 
 	public DefaultSaml2ServiceProviderResolver(Saml2ServiceProviderMetadataResolver metadataResolver,
-											   Saml2ServiceProviderConfigurationResolver configResolver) {
+											   Saml2ServiceProviderRegistrationResolver configResolver) {
 		this.configResolver = configResolver;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public HostedSaml2ServiceProvider getServiceProvider(HttpServletRequest request) {
-		HostedSaml2ServiceProviderConfiguration config = configResolver.getConfiguration(request);
+		HostedSaml2ServiceProviderRegistration config = configResolver.getServiceProviderRegistration(request);
 		return new HostedSaml2ServiceProvider(
 			config,
 			metadataResolver.getMetadata(config),
@@ -47,7 +47,7 @@ public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProvider
 	}
 
 	@Override
-	public String getConfiguredPathPrefix() {
-		return configResolver.getConfiguredPathPrefix();
+	public String getHttpPathPrefix() {
+		return configResolver.getHttpPathPrefix();
 	}
 }

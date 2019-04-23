@@ -24,12 +24,12 @@
         http://www.springframework.org/schema/security
         https://www.springframework.org/schema/security/spring-security.xsd">
 
-    <bean id="samlConfiguration"
+    <bean id="samlBootConfiguration"
           class="org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration"/>
 
-    <bean id="samlServiceProviderConfiguration"
-          factory-bean="samlConfiguration"
-          factory-method="samlServiceProviderConfiguration">
+    <bean id="samlServiceProviderRegistration"
+          factory-bean="samlBootConfiguration"
+          factory-method="samlServiceProviderRegistration">
     </bean>
 
     <bean id="samlTransformer"
@@ -45,15 +45,15 @@
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
-    <bean id="samlServiceProviderConfigurationResolver"
-          class="org.springframework.security.saml2.serviceprovider.servlet.configuration.SingletonSaml2ServiceProviderConfigurationResolver">
-        <constructor-arg ref="samlServiceProviderConfiguration"/>
+    <bean id="samlServiceProviderRegistrationResolver"
+          class="org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver">
+        <constructor-arg ref="samlServiceProviderRegistration"/>
     </bean>
 
     <bean id="samlServiceProviderResolver"
-          class="org.springframework.security.saml2.serviceprovider.servlet.DefaultSaml2ServiceProviderResolver">
+          class="org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver">
         <constructor-arg ref="samlServiceProviderMetadataResolver"/>
-        <constructor-arg ref="samlServiceProviderConfigurationResolver"/>
+        <constructor-arg ref="samlServiceProviderRegistrationResolver"/>
     </bean>
 
 	<bean id="samlServiceProviderMethods"
@@ -77,7 +77,7 @@
 	</bean>
 
     <bean id="pathPrefix"
-          factory-bean="samlServiceProviderConfiguration"
+          factory-bean="samlServiceProviderRegistration"
           factory-method="getPathPrefix"
           class="java.lang.String"
     />
@@ -123,7 +123,7 @@
     </bean>
 
 	<bean id="staticLoginPageUrls" class="org.springframework.security.saml2.samples.LoginPageUrlGenerator">
-		<constructor-arg ref="samlServiceProviderConfiguration"/>
+		<constructor-arg ref="samlServiceProviderRegistration"/>
 	</bean>
 
     <bean id="samlLoginPageGeneratingFilter"

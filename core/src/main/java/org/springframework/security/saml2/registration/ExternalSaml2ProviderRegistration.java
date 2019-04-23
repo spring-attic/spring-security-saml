@@ -15,13 +15,13 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.List;
 
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 
-public abstract class ExternalSaml2ProviderConfiguration<T extends ExternalSaml2ProviderConfiguration> {
+public abstract class ExternalSaml2ProviderRegistration<T extends ExternalSaml2ProviderRegistration> {
 	private final String alias;
 	private final String metadata;
 	private final String linktext;
@@ -29,12 +29,12 @@ public abstract class ExternalSaml2ProviderConfiguration<T extends ExternalSaml2
 	private final boolean metadataTrustCheck;
 	private final List<Saml2KeyData> verificationKeys;
 
-	ExternalSaml2ProviderConfiguration(String alias,
-									   String metadata,
-									   String linktext,
-									   boolean skipSslValidation,
-									   boolean metadataTrustCheck,
-									   List<Saml2KeyData> verificationKeys) {
+	ExternalSaml2ProviderRegistration(String alias,
+									  String metadata,
+									  String linktext,
+									  boolean skipSslValidation,
+									  boolean metadataTrustCheck,
+									  List<Saml2KeyData> verificationKeys) {
 		this.alias = alias;
 		this.metadata = metadata;
 		this.linktext = linktext;

@@ -20,7 +20,7 @@ package org.springframework.security.saml2.samples;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.web.util.UriUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -28,9 +28,9 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 
 public class LoginPageUrlGenerator {
 
-	private final HostedSaml2ServiceProviderConfiguration configuration;
+	private final HostedSaml2ServiceProviderRegistration configuration;
 
-	public LoginPageUrlGenerator(HostedSaml2ServiceProviderConfiguration configuration) {
+	public LoginPageUrlGenerator(HostedSaml2ServiceProviderRegistration configuration) {
 		this.configuration = configuration;
 	}
 

@@ -31,13 +31,13 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.boot.configuration.RemoteSaml2IdentityProviderConfiguration;
 import org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration;
-import org.springframework.security.saml2.configuration.ExternalSaml2IdentityProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2ServiceProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -64,7 +64,7 @@ abstract class AbstractServiceProviderTestBase {
 	Saml2BootConfiguration bootConfiguration;
 
 	@SpyBean
-	Saml2ServiceProviderConfigurationResolver configuration;
+	Saml2ServiceProviderRegistrationResolver configuration;
 
 	@BeforeEach
 	void setUp() {
@@ -121,18 +121,18 @@ abstract class AbstractServiceProviderTestBase {
 		return (Saml2AuthenticationRequest) saml2Object;
 	}
 
-	void mockConfig(Consumer<HostedSaml2ServiceProviderConfiguration.Builder> modifier) {
+	void mockConfig(Consumer<HostedSaml2ServiceProviderRegistration.Builder> modifier) {
 		Mockito.doAnswer(
 			invocation -> {
-				HostedSaml2ServiceProviderConfiguration config =
-					(HostedSaml2ServiceProviderConfiguration) invocation.callRealMethod();
-				HostedSaml2ServiceProviderConfiguration.Builder builder =
-					HostedSaml2ServiceProviderConfiguration.builder(config);
+				HostedSaml2ServiceProviderRegistration config =
+					(HostedSaml2ServiceProviderRegistration) invocation.callRealMethod();
+				HostedSaml2ServiceProviderRegistration.Builder builder =
+					HostedSaml2ServiceProviderRegistration.builder(config);
 				modifier.accept(builder);
 				return builder.build();
 			}
 		)
-			.when(configuration).getConfiguration(ArgumentMatchers.any(HttpServletRequest.class));
+			.when(configuration).getServiceProviderRegistration(ArgumentMatchers.any(HttpServletRequest.class));
 	}
 
 	Saml2ServiceProviderMetadata getServiceProviderMetadata() throws Exception {
@@ -161,11 +161,11 @@ abstract class AbstractServiceProviderTestBase {
 		return null;
 	}
 
-	List<ExternalSaml2IdentityProviderConfiguration> modifyIdpProviders(Consumer<RemoteSaml2IdentityProviderConfiguration> c) {
+	List<ExternalSaml2IdentityProviderRegistration> modifyIdpProviders(Consumer<RemoteSaml2IdentityProviderConfiguration> c) {
 		return bootConfiguration.getServiceProvider().getProviders().stream()
 			.map(p -> {
 				c.accept(p);
-				return p.toExternalIdentityProviderConfiguration();
+				return p.toExternalIdentityProviderRegistration();
 			})
 			.collect(Collectors.toList());
 	}

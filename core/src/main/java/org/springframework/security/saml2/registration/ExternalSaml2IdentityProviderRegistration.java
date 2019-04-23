@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.configuration;
+package org.springframework.security.saml2.registration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,8 +30,8 @@ import static org.springframework.util.StringUtils.hasText;
 /**
  * Immutable configuration object that represents an external identity provider
  */
-public class ExternalSaml2IdentityProviderConfiguration extends
-	ExternalSaml2ProviderConfiguration<ExternalSaml2IdentityProviderConfiguration> {
+public class ExternalSaml2IdentityProviderRegistration extends
+	ExternalSaml2ProviderRegistration<ExternalSaml2IdentityProviderRegistration> {
 
 	private final Saml2NameId nameId;
 	private final int assertionConsumerServiceIndex;
@@ -50,15 +50,15 @@ public class ExternalSaml2IdentityProviderConfiguration extends
 	 *                           authentication request
 	 * @param verificationKeys   - list of certificates, required if metadataTrustCheck is set to true
 	 */
-	public ExternalSaml2IdentityProviderConfiguration(String alias,
-													  String metadata,
-													  String linktext,
-													  boolean skipSslValidation,
-													  boolean metadataTrustCheck,
-													  Saml2NameId nameId,
-													  int assertionConsumerServiceIndex,
-													  List<Saml2KeyData> verificationKeys,
-													  Saml2Binding authenticationRequestBinding) {
+	public ExternalSaml2IdentityProviderRegistration(String alias,
+													 String metadata,
+													 String linktext,
+													 boolean skipSslValidation,
+													 boolean metadataTrustCheck,
+													 Saml2NameId nameId,
+													 int assertionConsumerServiceIndex,
+													 List<Saml2KeyData> verificationKeys,
+													 Saml2Binding authenticationRequestBinding) {
 		super(alias, metadata, linktext, skipSslValidation, metadataTrustCheck, verificationKeys);
 		this.nameId = nameId;
 		this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
@@ -81,7 +81,7 @@ public class ExternalSaml2IdentityProviderConfiguration extends
 		return new Builder();
 	}
 
-	public static Builder builder(ExternalSaml2IdentityProviderConfiguration idp) {
+	public static Builder builder(ExternalSaml2IdentityProviderRegistration idp) {
 		return builder()
 			.alias(idp.getAlias())
 			.metadata(idp.getMetadata())
@@ -159,10 +159,10 @@ public class ExternalSaml2IdentityProviderConfiguration extends
 			return this;
 		}
 
-		public ExternalSaml2IdentityProviderConfiguration build() {
+		public ExternalSaml2IdentityProviderRegistration build() {
 			Assert.notNull(alias, "Alias is required");
 			Assert.notNull(metadata, "Metadata is required");
-			return new ExternalSaml2IdentityProviderConfiguration(
+			return new ExternalSaml2IdentityProviderRegistration(
 				alias,
 				metadata,
 				hasText(linktext) ? linktext : alias,

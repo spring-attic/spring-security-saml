@@ -19,21 +19,21 @@ package org.springframework.security.saml2.provider;
 
 import java.util.Map;
 
-import org.springframework.security.saml2.configuration.ExternalSaml2ServiceProviderConfiguration;
-import org.springframework.security.saml2.configuration.HostedSaml2IdentityProviderConfiguration;
+import org.springframework.security.saml2.registration.ExternalSaml2ServiceProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 
 //TODO Move to Identity Provider module
 public class HostedSaml2IdentityProvider extends HostedSaml2Provider<
-	HostedSaml2IdentityProviderConfiguration,
+	HostedSaml2IdentityProviderRegistration,
 	Saml2IdentityProviderMetadata,
-	ExternalSaml2ServiceProviderConfiguration,
+	ExternalSaml2ServiceProviderRegistration,
 	Saml2ServiceProviderMetadata> {
 
-	public HostedSaml2IdentityProvider(HostedSaml2IdentityProviderConfiguration configuration,
+	public HostedSaml2IdentityProvider(HostedSaml2IdentityProviderRegistration configuration,
 									   Saml2IdentityProviderMetadata metadata,
-									   Map<ExternalSaml2ServiceProviderConfiguration, Saml2ServiceProviderMetadata> providers) {
+									   Map<ExternalSaml2ServiceProviderRegistration, Saml2ServiceProviderMetadata> providers) {
 		super(configuration, metadata, providers);
 	}
 }

@@ -21,8 +21,10 @@ import javax.servlet.Filter;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderConfigurationResolver;
+import org.springframework.security.saml2.serviceprovider.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -138,7 +140,17 @@ public class Saml2ServiceProviderConfigurer extends AbstractHttpConfigurer<Saml2
 	 * @param handler the manager that will be invoked after an assertion has been successfully parsed
 	 */
 	public Saml2ServiceProviderConfigurer authenticationFailureHandler(AuthenticationFailureHandler handler) {
-		configuration.authenticationFailureHandler(handler);
+		configuration.setAuthenticationFailureHandler(handler);
+		return this;
+	}
+
+	public Saml2ServiceProviderConfigurer authenticationRequestResolver(Saml2AuthenticationRequestResolver resolver) {
+		configuration.setAuthenticationRequestResolver(resolver);
+		return this;
+	}
+
+	public Saml2ServiceProviderConfigurer authenticationTokenResolver(Saml2AuthenticationTokenResolver resolver) {
+		configuration.setAuthenticationTokenResolver(resolver);
 		return this;
 	}
 

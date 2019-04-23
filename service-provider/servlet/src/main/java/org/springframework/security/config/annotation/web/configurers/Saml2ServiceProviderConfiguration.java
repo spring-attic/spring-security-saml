@@ -38,6 +38,7 @@ import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceP
 import org.springframework.security.saml2.serviceprovider.servlet.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationTokenResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationTokenResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.binding.DefaultSaml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.servlet.binding.Saml2HttpMessageResponder;
@@ -87,6 +88,10 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
 	private AuthenticationEntryPoint authenticationEntryPoint;
+	private Saml2HttpMessageResponder httpMessageResponder;
+	private Saml2AuthenticationTokenResolver authenticationTokenResolver;
+	private Saml2LogoutHttpMessageResolver logoutHttpMessageResolver;
+	private Saml2AuthenticationRequestResolver authenticationRequestResolver;
 	private String pathPrefix;
 	private ClassLoader classLoader = Saml2ServiceProviderConfiguration.class.getClassLoader();
 
@@ -113,9 +118,33 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return this;
 	}
 
-	Saml2ServiceProviderConfiguration authenticationFailureHandler(AuthenticationFailureHandler handler) {
+	Saml2ServiceProviderConfiguration setAuthenticationFailureHandler(AuthenticationFailureHandler handler) {
 		notNull(handler, "authenticationFailureHandler must not be null");
 		this.failureHandler = handler;
+		return this;
+	}
+
+	Saml2ServiceProviderConfiguration setHttpMessageResponder(Saml2HttpMessageResponder httpMessageResponder) {
+		notNull(httpMessageResponder, "httpMessageResponder must not be null");
+		this.httpMessageResponder = httpMessageResponder;
+		return this;
+	}
+
+	Saml2ServiceProviderConfiguration setAuthenticationTokenResolver(Saml2AuthenticationTokenResolver authenticationTokenResolver) {
+		notNull(httpMessageResponder, "authenticationTokenResolver must not be null");
+		this.authenticationTokenResolver = authenticationTokenResolver;
+		return this;
+	}
+
+	Saml2ServiceProviderConfiguration setLogoutHttpMessageResolver(Saml2LogoutHttpMessageResolver logoutHttpMessageResolver) {
+		notNull(logoutHttpMessageResolver, "logoutHttpMessageResolver must not be null");
+		this.logoutHttpMessageResolver = logoutHttpMessageResolver;
+		return this;
+	}
+
+	Saml2ServiceProviderConfiguration setAuthenticationRequestResolver(Saml2AuthenticationRequestResolver authenticationRequestResolver) {
+		notNull(authenticationRequestResolver, "authenticationRequestResolver must not be null");
+		this.authenticationRequestResolver = authenticationRequestResolver;
 		return this;
 	}
 
@@ -165,7 +194,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 					getServiceProviderMethods(),
 					new DefaultRedirectStrategy()
 				),
-			null
+			httpMessageResponder
 		);
 	}
 
@@ -178,7 +207,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 				new DefaultSaml2AuthenticationTokenResolver(
 					getServiceProviderMethods()
 				),
-			null
+			authenticationTokenResolver
 		);
 	}
 
@@ -191,7 +220,17 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 				new DefaultSaml2LogoutHttpMessageResolver(
 					getServiceProviderMethods()
 				),
-			null
+			logoutHttpMessageResolver
+		);
+	}
+
+	Saml2AuthenticationRequestResolver getAuthenticationRequestResolver() {
+		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
+		return getSharedObject(
+			http,
+			Saml2AuthenticationRequestResolver.class,
+			() -> new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
+			authenticationRequestResolver
 		);
 	}
 
@@ -281,7 +320,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	Filter getAuthenticationRequestFilter() {
 		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return new Saml2AuthenticationRequestFilter(
-			new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
+			getAuthenticationRequestResolver(),
 			getSamlHttpMessageResponder(),
 			new AntPathRequestMatcher(pathPrefix + "/authenticate/**")
 		);

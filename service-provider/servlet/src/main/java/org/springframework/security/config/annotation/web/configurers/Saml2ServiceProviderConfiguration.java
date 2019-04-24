@@ -52,8 +52,6 @@ import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2We
 import org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.util.DefaultSaml2ServiceProviderMethods;
-import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -169,20 +167,6 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	AuthenticationManager getAuthenticationManager() {
 		authenticationManager = ofNullable(authenticationManager).orElseGet(() -> a -> a);
 		return authenticationManager;
-	}
-
-	Saml2ServiceProviderMethods getServiceProviderMethods() {
-		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
-		return getSharedObject(
-			http,
-			Saml2ServiceProviderMethods.class,
-			() -> new DefaultSaml2ServiceProviderMethods(
-				transformer,
-				providerResolver,
-				validator
-			),
-			null
-		);
 	}
 
 	Saml2HttpMessageResponder getSamlHttpMessageResponder() {

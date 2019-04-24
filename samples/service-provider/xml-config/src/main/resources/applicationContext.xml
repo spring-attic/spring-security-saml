@@ -56,13 +56,6 @@
         <constructor-arg ref="samlServiceProviderRegistrationResolver"/>
     </bean>
 
-	<bean id="samlServiceProviderMethods"
-		  class="org.springframework.security.saml2.serviceprovider.servlet.util.DefaultSaml2ServiceProviderMethods">
-		<constructor-arg ref="samlTransformer"/>
-		<constructor-arg ref="samlServiceProviderResolver"/>
-		<constructor-arg ref="samlServiceProviderValidator"/>
-	</bean>
-
 	<bean id="samlServiceProviderResponder"
 		  class="org.springframework.security.saml2.serviceprovider.servlet.binding.DefaultSaml2HttpMessageResponder">
 		<constructor-arg ref="samlTransformer"/>

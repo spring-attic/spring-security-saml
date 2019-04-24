@@ -134,7 +134,7 @@
 
 	<bean id="saml2AuthenticationRequestResolver"
 		  class="org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationRequestResolver">
-		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
 	</bean>
 
 	<bean id="saml2AuthenticationRequestFilter"

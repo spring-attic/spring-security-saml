@@ -87,7 +87,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
 		}
 		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) logoutRequest;
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
 		Saml2ValidationResult validate = serviceProviderMethods.getValidator().validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new Saml2Exception(validate.toString());
@@ -110,7 +110,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 												   HttpServletResponse response,
 												   Saml2Authentication authentication) {
 		logger.debug(format("Initiating SP logout for SP:%s", authentication.getHoldingEntityId()));
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
 		Saml2ServiceProviderMetadata sp = provider.getMetadata();
 		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(authentication.getAssertingEntityId());
 		Saml2LogoutSaml2Request lr =

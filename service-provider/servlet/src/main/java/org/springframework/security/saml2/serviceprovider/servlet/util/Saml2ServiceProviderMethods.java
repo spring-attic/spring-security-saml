@@ -32,19 +32,15 @@ public interface Saml2ServiceProviderMethods {
 
 	Saml2Object getSamlRequest(HttpServletRequest request);
 
-	Saml2Object parseSamlObject(HttpServletRequest request,
-								Saml2ServiceProviderInstance provider,
-								String parameterName);
+	Saml2Object getSamlResponse(HttpServletRequest request);
 
-	Saml2ServiceProviderInstance getProvider(HttpServletRequest request);
+	Saml2ServiceProviderInstance getServiceProvider(HttpServletRequest request);
 
 	Saml2Transformer getTransformer();
 
 	Saml2ServiceProviderValidator getValidator();
 
 	Saml2ServiceProviderResolver getResolver();
-
-	Saml2Object getSamlResponse(HttpServletRequest request);
 
 	Saml2Endpoint getPreferredEndpoint(List<Saml2Endpoint> endpoints,
 									   Saml2BindingType preferredBinding,

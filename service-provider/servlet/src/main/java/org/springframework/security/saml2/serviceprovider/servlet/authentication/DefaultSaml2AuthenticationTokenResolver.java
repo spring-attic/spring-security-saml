@@ -49,7 +49,7 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 	@Override
 	public Saml2Authentication resolveSaml2Authentication(HttpServletRequest request,
 														  HttpServletResponse response) {
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
 		Saml2Response r = getSamlWebResponse(request);
 		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		try {

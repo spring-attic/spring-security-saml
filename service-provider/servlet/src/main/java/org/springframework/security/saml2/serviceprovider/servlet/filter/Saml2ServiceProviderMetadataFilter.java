@@ -49,7 +49,7 @@ public class Saml2ServiceProviderMetadataFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 		if (matcher.matches(request)) {
-			Saml2ServiceProviderInstance provider = serviceProviderMethods.getResolver().getServiceProvider(request);
+			Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
 			logger.debug("Downloading SAML2 SP Metadata for:"+provider.getMetadata().getEntityId());
 			String xml = serviceProviderMethods.getTransformer().toXml(provider.getMetadata());
 			response.setContentType(TEXT_XML_VALUE);

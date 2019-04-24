@@ -229,7 +229,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return getSharedObject(
 			http,
 			Saml2AuthenticationRequestResolver.class,
-			() -> new DefaultSaml2AuthenticationRequestResolver(getServiceProviderMethods()),
+			() -> new DefaultSaml2AuthenticationRequestResolver(getServiceProviderResolver()),
 			authenticationRequestResolver
 		);
 	}

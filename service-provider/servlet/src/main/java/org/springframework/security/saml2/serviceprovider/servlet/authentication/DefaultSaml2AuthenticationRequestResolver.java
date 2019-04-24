@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
-import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
@@ -35,7 +34,9 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
-import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -47,16 +48,17 @@ import static org.springframework.util.StringUtils.hasText;
 public class DefaultSaml2AuthenticationRequestResolver
 	implements Saml2AuthenticationRequestResolver {
 
-	private final Saml2ServiceProviderMethods serviceProviderMethods;
+	private final Saml2ServiceProviderResolver resolver;
+
 	private Clock clock = Clock.systemUTC();
 
-	public DefaultSaml2AuthenticationRequestResolver(Saml2ServiceProviderMethods serviceProviderMethods) {
-		this.serviceProviderMethods = serviceProviderMethods;
+	public DefaultSaml2AuthenticationRequestResolver(Saml2ServiceProviderResolver resolver) {
+		this.resolver = resolver;
 	}
 
 	@Override
 	public Saml2AuthenticationRequest resolve(HttpServletRequest request, HttpServletResponse response) {
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getProvider(request);
+		Saml2ServiceProviderInstance provider = resolver.getServiceProvider(request);
 		Assert.notNull(provider, "Each request must resolve into a hosted SAML provider");
 		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> entity =
 			getIdentityProvider(request, provider);
@@ -110,7 +112,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 																  Saml2NameId requestedNameId,
 																  int preferredACSEndpointIndex,
 																  Saml2BindingType preferredSSOBinding) {
-		Saml2Endpoint endpoint = serviceProviderMethods.getPreferredEndpoint(
+		Saml2Endpoint endpoint = Saml2ServiceProviderUtils.getPreferredEndpoint(
 			idp.getIdentityProvider().getSingleSignOnService(),
 			preferredSSOBinding,
 			-1
@@ -124,7 +126,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 			.setPassive(Boolean.FALSE)
 			.setBinding(endpoint.getBinding())
 			.setAssertionConsumerService(
-				serviceProviderMethods.getPreferredEndpoint(
+				Saml2ServiceProviderUtils.getPreferredEndpoint(
 					sp.getServiceProvider().getAssertionConsumerService(),
 					null,
 					preferredACSEndpointIndex
@@ -159,7 +161,7 @@ public class DefaultSaml2AuthenticationRequestResolver
 		return request;
 	}
 
-	private String getIdpAlias(HttpServletRequest request) {
+	protected String getIdpAlias(HttpServletRequest request) {
 		String path = request.getRequestURI().substring(request.getContextPath().length());
 		if (!hasText(path)) {
 			return null;

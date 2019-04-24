@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -83,7 +84,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private Saml2Transformer transformer;
 	private Saml2ServiceProviderValidator validator;
 	private Saml2ServiceProviderMetadataResolver metadataResolver;
-	private Saml2ServiceProviderResolver providerResolver;
+	private Saml2ServiceProviderResolver<HttpServletRequest> providerResolver;
 	private Saml2ServiceProviderRegistrationResolver registrationResolver;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
@@ -98,7 +99,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	Saml2ServiceProviderConfiguration() {
 	}
 
-	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
+	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver<HttpServletRequest> resolver) {
 		notNull(resolver, "providerResolver must not be null");
 		isNull(registrationResolver, "registrationResolver", "providerResolver");
 		this.providerResolver = resolver;
@@ -220,7 +221,9 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			Saml2LogoutHttpMessageResolver.class,
 			() ->
 				new DefaultSaml2LogoutHttpMessageResolver(
-					getServiceProviderMethods()
+					getServiceProviderResolver(),
+					getSamlValidator(),
+					getSamlTransformer()
 				),
 			logoutHttpMessageResolver
 		);
@@ -243,7 +246,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return failureHandler;
 	}
 
-	Saml2ServiceProviderResolver getServiceProviderResolver() {
+	Saml2ServiceProviderResolver<HttpServletRequest> getServiceProviderResolver() {
 		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		providerResolver = getSharedObject(
 			http,

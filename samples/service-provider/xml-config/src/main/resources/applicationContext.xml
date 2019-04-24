@@ -166,7 +166,9 @@
 
 	<bean id="samlLogoutMessageResolver"
 		  class="org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver">
-		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
 	</bean>
 
     <bean id="serviceProviderLogoutFilter"

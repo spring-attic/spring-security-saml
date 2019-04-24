@@ -22,7 +22,9 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.Saml2Exception;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
@@ -37,9 +39,11 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
-import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,26 +55,36 @@ import static java.util.Optional.ofNullable;
 public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMessageResolver {
 
 	private static Log logger = LogFactory.getLog(DefaultSaml2LogoutHttpMessageResolver.class);
-	private final Saml2ServiceProviderMethods serviceProviderMethods;
+	private final Saml2ServiceProviderResolver<HttpServletRequest> spResolver;
+	private final Saml2ServiceProviderValidator spValidator;
+	private final Saml2Transformer spTransformer;
 
-	public DefaultSaml2LogoutHttpMessageResolver(Saml2ServiceProviderMethods serviceProviderMethods) {
-		this.serviceProviderMethods = serviceProviderMethods;
+	public DefaultSaml2LogoutHttpMessageResolver(
+		Saml2ServiceProviderResolver<HttpServletRequest> spResolver,
+		Saml2ServiceProviderValidator spValidator,
+		Saml2Transformer spTransformer
+	) {
+		this.spResolver = spResolver;
+		this.spValidator = spValidator;
+		this.spTransformer = spTransformer;
 	}
 
 	@Override
 	public Saml2HttpMessageData resolveLogoutHttpMessage(Saml2Authentication authentication,
 														 HttpServletRequest request,
 														 HttpServletResponse response) {
-		Saml2Object logoutRequest = serviceProviderMethods.getSamlRequest(request);
-		Saml2Object logoutResponse = serviceProviderMethods.getSamlResponse(request);
+		Saml2ServiceProviderInstance provider = spResolver.getServiceProvider(request);
+
+		Saml2Object logoutRequest = getSamlRequest(request, provider);
+		Saml2Object logoutResponse = getSamlResponse(request, provider);
 		if (ofNullable(logoutRequest).isPresent()) {
-			return receivedLogoutRequest(request, response, authentication, logoutRequest);
+			return receivedLogoutRequest(request, response, authentication, logoutRequest, provider);
 		}
 		else if (ofNullable(logoutResponse).isPresent()) {
 			return null;
 		}
 		else if (authentication != null) {
-			return spInitiatedLogout(request, response, authentication);
+			return spInitiatedLogout(request, response, authentication, provider);
 		}
 		else {
 			//just perform a simple logout
@@ -78,17 +92,39 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		}
 	}
 
+	private Saml2Object getSamlResponse(HttpServletRequest request,
+										Saml2ServiceProviderInstance provider) {
+		return Saml2ServiceProviderUtils.parseSaml2Object(
+			request.getParameter("SAMLResponse"),
+			HttpMethod.GET.matches(request.getMethod()),
+			provider,
+			spTransformer,
+			spValidator
+		);
+	}
+
+	private Saml2Object getSamlRequest(HttpServletRequest request,
+									   Saml2ServiceProviderInstance provider) {
+		return Saml2ServiceProviderUtils.parseSaml2Object(
+			request.getParameter("SAMLRequest"),
+			HttpMethod.GET.matches(request.getMethod()),
+			provider,
+			spTransformer,
+			spValidator
+		);
+	}
+
 	private Saml2HttpMessageData receivedLogoutRequest(HttpServletRequest request,
 													   HttpServletResponse response,
 													   Saml2Authentication authentication,
-													   Saml2Object logoutRequest) {
+													   Saml2Object logoutRequest,
+													   Saml2ServiceProviderInstance provider) {
 
 		if (!(logoutRequest instanceof Saml2LogoutSaml2Request)) {
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
 		}
 		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) logoutRequest;
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
-		Saml2ValidationResult validate = serviceProviderMethods.getValidator().validate(lr, provider);
+		Saml2ValidationResult validate = spValidator.validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new Saml2Exception(validate.toString());
 		}
@@ -108,9 +144,9 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 
 	private Saml2HttpMessageData spInitiatedLogout(HttpServletRequest request,
 												   HttpServletResponse response,
-												   Saml2Authentication authentication) {
+												   Saml2Authentication authentication,
+												   Saml2ServiceProviderInstance provider) {
 		logger.debug(format("Initiating SP logout for SP:%s", authentication.getHoldingEntityId()));
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
 		Saml2ServiceProviderMetadata sp = provider.getMetadata();
 		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(authentication.getAssertingEntityId());
 		Saml2LogoutSaml2Request lr =
@@ -138,7 +174,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		Saml2LogoutSaml2Request request,
 		Saml2IdentityProviderMetadata recipient) {
 		List<Saml2SsoProvider> ssoProviders = recipient.getSsoProviders();
-		Saml2Endpoint destination = serviceProviderMethods.getPreferredEndpoint(
+		Saml2Endpoint destination = Saml2ServiceProviderUtils.getPreferredEndpoint(
 			ssoProviders.get(0).getSingleLogoutService(),
 			null,
 			-1
@@ -170,7 +206,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
 			.setId("LRQ" + UUID.randomUUID().toString())
 			.setDestination(
-				serviceProviderMethods.getPreferredEndpoint(
+				Saml2ServiceProviderUtils.getPreferredEndpoint(
 					ssoProviders.get(0).getSingleLogoutService(),
 					null,
 					-1

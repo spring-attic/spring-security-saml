@@ -24,10 +24,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
-import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,12 +39,12 @@ import static org.springframework.util.StringUtils.hasText;
 
 public class DefaultSaml2HttpMessageResponder implements Saml2HttpMessageResponder {
 
-	private final Saml2ServiceProviderMethods methods;
+	private final Saml2Transformer transformer;
 	private final RedirectStrategy redirectStrategy;
 
-	public DefaultSaml2HttpMessageResponder(Saml2ServiceProviderMethods methods,
+	public DefaultSaml2HttpMessageResponder(Saml2Transformer transformer,
 											RedirectStrategy redirectStrategy) {
-		this.methods = methods;
+		this.transformer = transformer;
 		this.redirectStrategy = redirectStrategy;
 	}
 
@@ -91,8 +91,8 @@ public class DefaultSaml2HttpMessageResponder implements Saml2HttpMessageRespond
 		if (saml2Object == null) {
 			return null;
 		}
-		String xml = methods.getTransformer().toXml(saml2Object);
-		return methods.getTransformer().samlEncode(xml, deflate);
+		String xml = transformer.toXml(saml2Object);
+		return transformer.samlEncode(xml, deflate);
 	}
 
 	private String postBindingHtml(String postUrl,

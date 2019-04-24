@@ -65,7 +65,7 @@
 
 	<bean id="samlServiceProviderResponder"
 		  class="org.springframework.security.saml2.serviceprovider.servlet.binding.DefaultSaml2HttpMessageResponder">
-		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlTransformer"/>
 		<constructor-arg>
 			<bean class="org.springframework.security.web.DefaultRedirectStrategy"/>
 		</constructor-arg>

@@ -191,7 +191,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			Saml2HttpMessageResponder.class,
 			() ->
 				new DefaultSaml2HttpMessageResponder(
-					getServiceProviderMethods(),
+					getSamlTransformer(),
 					new DefaultRedirectStrategy()
 				),
 			httpMessageResponder

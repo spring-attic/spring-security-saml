@@ -205,7 +205,9 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			Saml2AuthenticationTokenResolver.class,
 			() ->
 				new DefaultSaml2AuthenticationTokenResolver(
-					getServiceProviderMethods()
+					getServiceProviderResolver(),
+					getSamlValidator(),
+					getSamlTransformer()
 				),
 			authenticationTokenResolver
 		);

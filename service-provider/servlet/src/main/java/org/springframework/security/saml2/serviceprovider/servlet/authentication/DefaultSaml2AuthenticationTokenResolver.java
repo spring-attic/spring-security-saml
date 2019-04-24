@@ -20,8 +20,10 @@ package org.springframework.security.saml2.serviceprovider.servlet.authenticatio
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
@@ -30,9 +32,11 @@ import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMe
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
+import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.authentication.DefaultSaml2Authentication;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderMethods;
+import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,28 +44,32 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultSaml2AuthenticationTokenResolver implements Saml2AuthenticationTokenResolver {
 
 	private static Log logger = LogFactory.getLog(DefaultSaml2AuthenticationTokenResolver.class);
-	private final Saml2ServiceProviderMethods serviceProviderMethods;
+	private final Saml2ServiceProviderResolver spResolver;
+	private final Saml2ServiceProviderValidator spValidator;
+	private final Saml2Transformer spTransformer;
 
-	public DefaultSaml2AuthenticationTokenResolver(Saml2ServiceProviderMethods serviceProviderMethods) {
-		this.serviceProviderMethods = serviceProviderMethods;
+	public DefaultSaml2AuthenticationTokenResolver(
+		Saml2ServiceProviderResolver spResolver,
+		Saml2ServiceProviderValidator spValidator,
+		Saml2Transformer spTransformer
+	) {
+		this.spResolver = spResolver;
+		this.spValidator = spValidator;
+		this.spTransformer = spTransformer;
 	}
 
 	@Override
 	public Saml2Authentication resolveSaml2Authentication(HttpServletRequest request,
 														  HttpServletResponse response) {
-		Saml2ServiceProviderInstance provider = serviceProviderMethods.getServiceProvider(request);
-		Saml2Response r = getSamlWebResponse(request);
+		Saml2ServiceProviderInstance provider = spResolver.getServiceProvider(request);
+		Saml2Response r = getSamlWebResponse(request, provider);
 		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		try {
-			Saml2Signature signature = serviceProviderMethods
-				.getValidator()
-				.validateSignature(r, idp.getIdentityProvider().getKeys());
+			Saml2Signature signature = spValidator.validateSignature(r, idp.getIdentityProvider().getKeys());
 			r.setSignature(signature);
 			for (Saml2Assertion assertion : r.getAssertions()) {
 				if (assertion.getSignature() == null) {
-					signature = serviceProviderMethods
-						.getValidator()
-						.validateSignature(assertion, idp.getIdentityProvider().getKeys());
+					signature = spValidator.validateSignature(assertion, idp.getIdentityProvider().getKeys());
 					assertion.setSignature(signature);
 				}
 			}
@@ -70,9 +78,7 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 			throw new AuthenticationServiceException("Failed to validate SAML authentication signature.");
 		}
 
-		Saml2ValidationResult validationResult = serviceProviderMethods
-			.getValidator()
-			.validate(r, provider);
+		Saml2ValidationResult validationResult = spValidator.validate(r, provider);
 		if (!validationResult.isSuccess()) {
 			throw new AuthenticationServiceException(validationResult.toString());
 		}
@@ -89,8 +95,16 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 		);
 	}
 
-	private Saml2Response getSamlWebResponse(HttpServletRequest request) {
-		Saml2Object object = serviceProviderMethods.getSamlResponse(request);
+	private Saml2Response getSamlWebResponse(HttpServletRequest request,
+											 Saml2ServiceProviderInstance provider) {
+		String saml2Response = request.getParameter("SAMLResponse");
+		Saml2Object object = Saml2ServiceProviderUtils.parseSaml2Object(
+			saml2Response,
+			request.getMethod().equalsIgnoreCase(HttpMethod.GET.name()),
+			provider,
+			spTransformer,
+			null
+		);
 		if (object == null) {
 			return null;
 		}

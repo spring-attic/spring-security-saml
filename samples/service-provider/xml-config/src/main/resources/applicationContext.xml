@@ -73,7 +73,9 @@
 
 	<bean id="samlAuthenticationTokenResolver"
 		  class="org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationTokenResolver">
-		<constructor-arg ref="samlServiceProviderMethods"/>
+		<constructor-arg ref="samlTransformer"/>
+		<constructor-arg ref="samlServiceProviderResolver"/>
+		<constructor-arg ref="samlServiceProviderValidator"/>
 	</bean>
 
     <bean id="pathPrefix"

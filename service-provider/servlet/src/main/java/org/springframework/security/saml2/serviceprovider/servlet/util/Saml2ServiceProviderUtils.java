@@ -78,12 +78,12 @@ public final class Saml2ServiceProviderUtils {
 	}
 
 	/**
-	 *
+	 * Decodes and constructs a Saml2Object from an encoded string.
 	 * @param encodedSamlObject - SAML 2 Object in encoded format
 	 * @param inflate - set to true if the encoding has been deflated
 	 * @param provider - the server provider this object is intended for. provider keys are used in case object is encrypted
 	 * @param transformer - the transformer to transform the object from string to {@link Saml2Object}
-	 * @param validator - if not null, signature and object will be validated. may be null.
+	 * @param validator - if not null, signature and object validation will be attempted. may be null.
 	 * @return the decoded, and possibly validated, SAML2 object
 	 * @throws {@link Saml2ProviderNotFoundException} if the origin of the message is not found in the service provider instance
 	 * @throws {@link org.springframework.security.saml2.model.signature.Saml2SignatureException} if signature validation fails

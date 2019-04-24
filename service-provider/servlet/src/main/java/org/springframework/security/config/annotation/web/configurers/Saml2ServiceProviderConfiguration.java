@@ -339,7 +339,8 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	Filter getMetadataFilter() {
 		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		return new Saml2ServiceProviderMetadataFilter(
-			getServiceProviderMethods(),
+			getServiceProviderResolver(),
+			getSamlTransformer(),
 			new AntPathRequestMatcher(pathPrefix + "/metadata/**")
 		);
 	}

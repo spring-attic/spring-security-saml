@@ -29,8 +29,10 @@ import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import static java.util.Arrays.asList;
 
 /**
- * Immutable configuration object that represents a local identity provider (IDP) service.
+ * Immutable configuration object that represents a local(hosted under a tenant) identity provider (IDP) service.
+ * Thread safe.
  */
+
 public class HostedSaml2IdentityProviderRegistration extends
 	HostedSaml2ProviderRegistration<ExternalSaml2ServiceProviderRegistration> {
 

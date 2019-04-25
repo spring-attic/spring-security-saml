@@ -15,19 +15,8 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.bean;
+/**
+ * SAML 2 Utilities
+ */
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
-
-@Configuration
-public class OpenSaml2TransformerBeans {
-
-	@Bean(name = "openSamlTransformer")
-	public Saml2Transformer samlTransformer() {
-		return new OpenSaml2Transformer();
-	}
-
-}
+package org.springframework.security.saml2.util;

@@ -23,15 +23,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer;
 import org.springframework.security.saml2.boot.configuration.Saml2BootConfiguration;
-import org.springframework.security.saml2.serviceprovider.bean.OpenSaml2TransformerBeans;
 import org.springframework.security.saml2.serviceprovider.servlet.bean.Saml2ServiceProviderBeans;
-
-import static org.springframework.security.config.annotation.web.configurers.Saml2ServiceProviderConfigurer.saml2Login;
 
 @Import
 	({
 		 Saml2BootConfiguration.class,    //properties from application.yml
-		 OpenSaml2TransformerBeans.class, //OpenSAML as the underlying parsing library
 		 Saml2ServiceProviderBeans.class  //Service Provider beans used by saml2login()
 	 })
 @EnableWebSecurity

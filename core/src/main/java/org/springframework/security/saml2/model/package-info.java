@@ -16,7 +16,7 @@
  */
 
 /**
- * Contains all the Java objects representing all the data in the SAML 2 specifications
- * that are used in the Spring Security SAML framework.
+ * Contains all the Java objects, POJOs, representing all the data in the SAML 2 specifications
+ * that are used in the Spring Security SAML2 framework for web single signon and single logout.
  */
 package org.springframework.security.saml2.model;

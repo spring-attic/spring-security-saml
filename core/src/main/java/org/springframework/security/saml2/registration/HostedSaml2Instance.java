@@ -18,8 +18,8 @@
 package org.springframework.security.saml2.registration;
 
 /**
- * Represents a configuration for a host or domain.
- * A hosted domain can have one local service provider, or one local identity provider, or both.
+ * Represents a configuration for a host or tenant.
+ * A hosted tenant can have one local service provider, or one local identity provider, or both.
  */
 public class HostedSaml2Instance {
 

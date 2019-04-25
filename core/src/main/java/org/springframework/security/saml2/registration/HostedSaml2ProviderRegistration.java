@@ -25,6 +25,13 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.signature.Saml2AlgorithmMethod;
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 
+/**
+ * Base class for a SAML2 local provider. A local provider can be paired up with one or more
+ * external SAML2 providers
+ *
+ * @param <ExternalRegistration> either a {@link ExternalSaml2IdentityProviderRegistration} or
+ *                               {@link ExternalSaml2ServiceProviderRegistration}
+ */
 public abstract class HostedSaml2ProviderRegistration
 	<ExternalRegistration extends ExternalSaml2ProviderRegistration<ExternalRegistration>> {
 

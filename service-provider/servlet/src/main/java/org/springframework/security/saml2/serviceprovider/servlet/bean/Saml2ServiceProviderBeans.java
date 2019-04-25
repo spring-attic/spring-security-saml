@@ -28,31 +28,29 @@ import org.springframework.security.saml2.serviceprovider.servlet.registration.D
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 import org.springframework.util.Assert;
 
 @Configuration
 public class Saml2ServiceProviderBeans {
 
-	private final Saml2Transformer transformer;
 	private final HostedSaml2ServiceProviderRegistration registration;
 
 	public Saml2ServiceProviderBeans(
-		@Autowired Saml2Transformer transformer,
 		@Autowired(required = false) HostedSaml2ServiceProviderRegistration registration) {
-		this.transformer = transformer;
 		this.registration = registration;
 	}
 
 	@Bean(name = "samlServiceProviderValidator")
 	public Saml2ServiceProviderValidator samlValidator() {
-		return new DefaultSaml2ServiceProviderValidator(transformer);
+		return new DefaultSaml2ServiceProviderValidator(samlTransformer());
 	}
 
 	@Bean(name = "samlServiceProviderResolver")
 	public Saml2ServiceProviderResolver serviceProviderResolver() {
 		return new DefaultSaml2ServiceProviderResolver(
 			serviceProviderRegistrationResolver(),
-			transformer
+			samlTransformer()
 		);
 	}
 
@@ -67,6 +65,11 @@ public class Saml2ServiceProviderBeans {
 				" bean."
 		);
 		return SingletonSaml2ServiceProviderRegistrationResolver.fromConfiguration(registration);
+	}
+
+	@Bean(name = "openSamlTransformer")
+	public Saml2Transformer samlTransformer() {
+		return new OpenSaml2Transformer();
 	}
 
 }

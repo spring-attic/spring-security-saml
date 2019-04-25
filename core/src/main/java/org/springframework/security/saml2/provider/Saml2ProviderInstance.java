@@ -36,8 +36,6 @@ public interface Saml2ProviderInstance<
 	RemoteRegistration extends ExternalSaml2ProviderRegistration,
 	RemoteMetadata extends Saml2Metadata> {
 
-
-
 	Registration getRegistration();
 
 	LocalMetadata getMetadata();

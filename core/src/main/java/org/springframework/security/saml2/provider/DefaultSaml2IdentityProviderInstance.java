@@ -33,7 +33,7 @@ public class DefaultSaml2IdentityProviderInstance extends AbstractSaml2ProviderI
 	HostedSaml2IdentityProviderRegistration,
 	Saml2IdentityProviderMetadata,
 	ExternalSaml2ServiceProviderRegistration,
-	Saml2ServiceProviderMetadata> {
+	Saml2ServiceProviderMetadata> implements Saml2IdentityProviderInstance {
 
 	public DefaultSaml2IdentityProviderInstance(HostedSaml2IdentityProviderRegistration registration,
 										 Saml2IdentityProviderMetadata metadata,

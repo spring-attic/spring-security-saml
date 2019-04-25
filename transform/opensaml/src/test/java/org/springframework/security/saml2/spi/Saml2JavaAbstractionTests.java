@@ -34,16 +34,16 @@ package org.springframework.security.saml2.spi;
 import java.time.Clock;
 import java.util.UUID;
 
-import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Implementation;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Implementation;
 
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class SpringSecuritySaml2Tests {
+public class Saml2JavaAbstractionTests {
 
-	private SpringSecuritySaml2 instance = new KeycloakSaml2Implementation(Clock.systemUTC());
+	private Saml2JavaAbstraction instance = new OpenSaml2Implementation(Clock.systemUTC());
 
 	@Test
 	public void init_works() {
@@ -58,7 +58,7 @@ public class SpringSecuritySaml2Tests {
 
 	@Test
 	public void deflate_inflate() {
-		SpringSecuritySaml2 saml = instance.init();
+		Saml2JavaAbstraction saml = instance.init();
 		String s = "deflate_inflate_test_"+UUID.randomUUID().toString();
 		String deflated = saml.encode(saml.deflate(s));
 		String inflated = saml.inflate(saml.decode(deflated));

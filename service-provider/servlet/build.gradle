@@ -16,9 +16,7 @@
  */
 
 dependencies {
-	compile project(':spring-security-saml2-core')
-	provided project(':spring-security-saml2-transform-keycloak')
-	provided project(':spring-security-saml2-transform-opensaml')
+	compile project(':spring-security-saml2-transform-opensaml')
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 	compile group: "org.springframework", name: "spring-web", version: "$springVersion"

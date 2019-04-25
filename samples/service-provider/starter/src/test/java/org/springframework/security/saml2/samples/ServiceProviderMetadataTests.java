@@ -27,8 +27,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.model.metadata.Saml2Metadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Implementation;
-import org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer;
 import org.springframework.security.saml2.spi.opensaml.OpenSaml2Implementation;
 import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -64,15 +62,6 @@ public class ServiceProviderMetadataTests  {
 	void fetchMetadataOpenSaml() throws Exception {
 		Saml2ServiceProviderMetadata spm = getServiceProviderMetadata(new OpenSaml2Transformer(
 			new OpenSaml2Implementation(Clock.systemUTC()).init()
-		));
-		assertNotNull(spm);
-	}
-
-	@Test
-	@DisplayName("fetch of SP metadata - decode using Keycloak")
-	void fetchMetadataKeycloak() throws Exception {
-		Saml2ServiceProviderMetadata spm = getServiceProviderMetadata(new KeycloakSaml2Transformer(
-			new KeycloakSaml2Implementation(Clock.systemUTC()).init()
 		));
 		assertNotNull(spm);
 	}

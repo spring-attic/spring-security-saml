@@ -89,7 +89,7 @@ import org.springframework.security.saml2.model.signature.Saml2CanonicalizationM
 import org.springframework.security.saml2.model.signature.Saml2DigestMethod;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.spi.SpringSecuritySaml2;
+import org.springframework.security.saml2.spi.Saml2JavaAbstraction;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -227,7 +227,7 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.getHostFr
 import static org.springframework.security.saml2.util.Saml2StringUtils.isUrl;
 import static org.springframework.util.StringUtils.hasText;
 
-public class OpenSaml2Implementation extends SpringSecuritySaml2<OpenSaml2Implementation> {
+public class OpenSaml2Implementation extends Saml2JavaAbstraction<OpenSaml2Implementation> {
 
 	private static final Log logger = LogFactory.getLog(OpenSaml2Implementation.class);
 	private BasicParserPool parserPool;

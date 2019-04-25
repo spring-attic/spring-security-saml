@@ -17,7 +17,6 @@
 
 include "core"
 include "transform/opensaml"
-include "transform/keycloak"
 include "service-provider/servlet"
 include "boot-config"
 include "samples/service-provider/boot-config"

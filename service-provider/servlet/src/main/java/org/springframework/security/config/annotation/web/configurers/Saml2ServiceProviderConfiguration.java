@@ -17,17 +17,16 @@
 
 package org.springframework.security.config.annotation.web.configurers;
 
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
 
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
@@ -51,6 +50,8 @@ import org.springframework.security.saml2.serviceprovider.servlet.metadata.Defau
 import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Implementation;
+import org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -68,12 +69,7 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 import static org.springframework.util.Assert.isTrue;
 import static org.springframework.util.Assert.notNull;
 
-class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
-
-	public static final String SAML2_TRANSFORMER_OPEN_SAML =
-		"org.springframework.security.saml2.spi.opensaml.OpenSaml2Transformer";
-	public static final String SAML2_TRANSFORMER_KEYCLOAK =
-		"org.springframework.security.saml2.spi.keycloak.KeycloakSaml2Transformer";
+class Saml2ServiceProviderConfiguration {
 
 	private static Log logger = LogFactory.getLog(Saml2ServiceProviderConfiguration.class);
 
@@ -91,7 +87,6 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private Saml2LogoutHttpMessageResolver logoutHttpMessageResolver;
 	private Saml2AuthenticationRequestResolver authenticationRequestResolver;
 	private String pathPrefix;
-	private ClassLoader classLoader = Saml2ServiceProviderConfiguration.class.getClassLoader();
 
 	Saml2ServiceProviderConfiguration() {
 	}
@@ -393,29 +388,9 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 
 
 	private Saml2Transformer createDefaultSamlTransformer() {
-		try {
-			return getClassInstance(SAML2_TRANSFORMER_OPEN_SAML);
-		} catch (Saml2Exception e) {
-			try {
-				return getClassInstance(SAML2_TRANSFORMER_KEYCLOAK);
-			} catch (Saml2Exception e2) {
-				throw e;
-			}
-		}
-	}
-
-	Saml2Transformer getClassInstance(String className) {
-		try {
-			logger.info("Loading SAML2 implementation:" + className);
-			Class<?> clazz = Class.forName(className, true, classLoader);
-			return (Saml2Transformer) clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			throw new Saml2Exception(
-				"Unable to instantiate the default SAML transformer. " +
-					"Have you included the transform-opensaml or transform-keycloak dependency in your project?",
-				e
-			);
-		}
+		final OpenSaml2Implementation implementation = new OpenSaml2Implementation(Clock.systemUTC());
+		implementation.init();
+		return new OpenSaml2Transformer(implementation);
 	}
 
 	private <C> C getSharedObject(HttpSecurity http, Class<C> clazz) {
@@ -455,11 +430,5 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 			throw new IllegalStateException(identifier + " should be null if you wish to configure a " + alternate);
 		}
 	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
-
 
 }

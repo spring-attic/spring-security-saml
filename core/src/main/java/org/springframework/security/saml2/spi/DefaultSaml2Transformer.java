@@ -32,13 +32,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class DefaultSaml2Transformer implements Saml2Transformer, InitializingBean {
 
-	private SpringSecuritySaml2 implementation;
+	private Saml2JavaAbstraction implementation;
 
-	public DefaultSaml2Transformer(SpringSecuritySaml2 implementation) {
+	public DefaultSaml2Transformer(Saml2JavaAbstraction implementation) {
 		setImplementation(implementation);
 	}
 
-	public Saml2Transformer setImplementation(SpringSecuritySaml2 implementation) {
+	public Saml2Transformer setImplementation(Saml2JavaAbstraction implementation) {
 		this.implementation = implementation;
 		return this;
 	}

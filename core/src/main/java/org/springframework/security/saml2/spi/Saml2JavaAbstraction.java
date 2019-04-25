@@ -35,12 +35,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @param <T> generic type for subclass in order to have a working builder pattern for subclasses
  */
-public abstract class SpringSecuritySaml2<T extends SpringSecuritySaml2> {
+public abstract class Saml2JavaAbstraction<T extends Saml2JavaAbstraction> {
 
 	private final AtomicBoolean hasInitCompleted = new AtomicBoolean(false);
 	private Clock time;
 
-	public SpringSecuritySaml2(Clock time) {
+	public Saml2JavaAbstraction(Clock time) {
 		this.time = time;
 	}
 

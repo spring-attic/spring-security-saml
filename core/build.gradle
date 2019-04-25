@@ -29,8 +29,6 @@ dependencies {
 	compile group: 'commons-logging', name: 'commons-logging', version: "$commonsLoggingVersion"
 	compile group: 'org.apache.velocity', name: 'velocity', version: '1.7'
 
-	provided "javax.servlet:javax.servlet-api:3.1.0"
-
 	testCompile "org.slf4j:slf4j-log4j12:$slf4jVersion"
 	testCompile "commons-logging:commons-logging:1.2"
 

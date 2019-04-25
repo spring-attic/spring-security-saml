@@ -34,7 +34,7 @@ import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 

@@ -45,7 +45,7 @@ import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
 import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 
 import org.apache.commons.logging.Log;
@@ -58,12 +58,12 @@ import static java.util.Optional.ofNullable;
 public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMessageResolver {
 
 	private static Log logger = LogFactory.getLog(DefaultSaml2LogoutHttpMessageResolver.class);
-	private final Saml2ServiceProviderResolver<HttpServletRequest> spResolver;
+	private final Saml2ServiceProviderResolver spResolver;
 	private final Saml2ServiceProviderValidator spValidator;
 	private final Saml2Transformer spTransformer;
 
 	public DefaultSaml2LogoutHttpMessageResolver(
-		Saml2ServiceProviderResolver<HttpServletRequest> spResolver,
+		Saml2ServiceProviderResolver spResolver,
 		Saml2ServiceProviderValidator spValidator,
 		Saml2Transformer spTransformer
 	) {

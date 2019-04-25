@@ -15,12 +15,16 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.registration;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
-import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
+import javax.servlet.http.HttpServletRequest;
 
-public interface Saml2ServiceProviderRegistrationResolver<HttpRequest> {
-	HostedSaml2ServiceProviderRegistration getServiceProviderRegistration(HttpRequest request);
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
+
+public interface Saml2ServiceProviderResolver {
+
+	Saml2ServiceProviderInstance getServiceProvider(HttpServletRequest request);
 
 	String getHttpPathPrefix();
+
 }

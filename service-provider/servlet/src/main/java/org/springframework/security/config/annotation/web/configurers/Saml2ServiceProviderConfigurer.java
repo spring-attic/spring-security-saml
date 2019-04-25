@@ -21,8 +21,8 @@ import javax.servlet.Filter;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;

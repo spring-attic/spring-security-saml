@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 

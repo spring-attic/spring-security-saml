@@ -22,13 +22,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration.Builder;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
 
 import static org.springframework.util.Assert.notNull;
 import static org.springframework.util.StringUtils.hasText;
 
 public class SingletonSaml2ServiceProviderRegistrationResolver
-	implements Saml2ServiceProviderRegistrationResolver<HttpServletRequest> {
+	implements Saml2ServiceProviderRegistrationResolver {
 
 	private final HostedSaml2ServiceProviderRegistration registration;
 

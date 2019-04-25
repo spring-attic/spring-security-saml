@@ -35,7 +35,7 @@ import org.springframework.security.saml2.model.metadata.Saml2NameId;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;

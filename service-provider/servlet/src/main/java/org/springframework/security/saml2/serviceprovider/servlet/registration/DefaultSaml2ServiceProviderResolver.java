@@ -21,11 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 
-public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProviderResolver<HttpServletRequest> {
+public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProviderResolver {
 
 	private final Saml2ServiceProviderMetadataResolver metadataResolver;
 	private final Saml2ServiceProviderRegistrationResolver configResolver;

@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.Filter;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -30,13 +29,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderRegistrationResolver;
-import org.springframework.security.saml2.serviceprovider.registration.Saml2ServiceProviderResolver;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationTokenResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
@@ -52,6 +48,9 @@ import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2We
 import org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -82,7 +81,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	private Saml2Transformer transformer;
 	private Saml2ServiceProviderValidator validator;
 	private Saml2ServiceProviderMetadataResolver metadataResolver;
-	private Saml2ServiceProviderResolver<HttpServletRequest> providerResolver;
+	private Saml2ServiceProviderResolver providerResolver;
 	private Saml2ServiceProviderRegistrationResolver registrationResolver;
 	private AuthenticationFailureHandler failureHandler;
 	private AuthenticationManager authenticationManager;
@@ -97,7 +96,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 	Saml2ServiceProviderConfiguration() {
 	}
 
-	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver<HttpServletRequest> resolver) {
+	Saml2ServiceProviderConfiguration setProviderResolver(Saml2ServiceProviderResolver resolver) {
 		notNull(resolver, "providerResolver must not be null");
 		isNull(registrationResolver, "registrationResolver", "providerResolver");
 		this.providerResolver = resolver;
@@ -230,7 +229,7 @@ class Saml2ServiceProviderConfiguration implements BeanClassLoaderAware {
 		return failureHandler;
 	}
 
-	Saml2ServiceProviderResolver<HttpServletRequest> getServiceProviderResolver() {
+	Saml2ServiceProviderResolver getServiceProviderResolver() {
 		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
 		providerResolver = getSharedObject(
 			http,

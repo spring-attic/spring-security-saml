@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package org.springframework.security.saml2.serviceprovider.servlet.metadata;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;

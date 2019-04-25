@@ -40,11 +40,6 @@
         <constructor-arg ref="samlTransformer"/>
     </bean>
 
-    <bean id="samlServiceProviderMetadataResolver"
-          class="org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver">
-        <constructor-arg ref="samlTransformer"/>
-    </bean>
-
     <bean id="samlServiceProviderRegistrationResolver"
           class="org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver">
         <constructor-arg ref="samlServiceProviderRegistration"/>
@@ -52,7 +47,6 @@
 
     <bean id="samlServiceProviderResolver"
           class="org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver">
-        <constructor-arg ref="samlServiceProviderMetadataResolver"/>
         <constructor-arg ref="samlServiceProviderRegistrationResolver"/>
     </bean>
 

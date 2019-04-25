@@ -31,7 +31,6 @@ import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
-import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.DefaultSaml2AuthenticationTokenResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.authentication.Saml2AuthenticationRequestResolver;
@@ -46,7 +45,6 @@ import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2Se
 import org.springframework.security.saml2.serviceprovider.servlet.filter.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.DefaultSaml2LogoutHttpMessageResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
@@ -76,7 +74,6 @@ class Saml2ServiceProviderConfiguration {
 	private HttpSecurity http;
 	private Saml2Transformer transformer;
 	private Saml2ServiceProviderValidator validator;
-	private Saml2ServiceProviderMetadataResolver metadataResolver;
 	private Saml2ServiceProviderResolver providerResolver;
 	private Saml2ServiceProviderRegistrationResolver registrationResolver;
 	private AuthenticationFailureHandler failureHandler;
@@ -145,7 +142,6 @@ class Saml2ServiceProviderConfiguration {
 		this.http = http;
 		getSamlTransformer();
 		getSamlValidator();
-		getSamlMetadataResolver();
 		getServiceProviderResolver();
 		getAuthenticationFailureHandler();
 		getAuthenticationManager();
@@ -233,17 +229,6 @@ class Saml2ServiceProviderConfiguration {
 			providerResolver
 		);
 		return providerResolver;
-	}
-
-	Saml2ServiceProviderMetadataResolver getSamlMetadataResolver() {
-		isTrue(isInitialized(), "Call initialize(HttpSecurity) first.");
-		metadataResolver = getSharedObject(
-			http,
-			Saml2ServiceProviderMetadataResolver.class,
-			() -> new DefaultSaml2ServiceProviderMetadataResolver(transformer),
-			metadataResolver
-		);
-		return metadataResolver;
 	}
 
 	Saml2ServiceProviderValidator getSamlValidator() {
@@ -380,8 +365,7 @@ class Saml2ServiceProviderConfiguration {
 					".getHttpPathPrefix() must not return null"
 			);
 
-			metadataResolver = getSamlMetadataResolver();
-			providerResolver = new DefaultSaml2ServiceProviderResolver(metadataResolver, registrationResolver);
+			providerResolver = new DefaultSaml2ServiceProviderResolver(registrationResolver, transformer);
 			setSharedObject(http, Saml2ServiceProviderResolver.class, providerResolver);
 		}
 	}

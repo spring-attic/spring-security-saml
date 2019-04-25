@@ -19,20 +19,20 @@ package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.provider.DefaultSaml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
-import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 
 public class DefaultSaml2ServiceProviderResolver implements Saml2ServiceProviderResolver {
 
-	private final Saml2ServiceProviderMetadataResolver metadataResolver;
+	private final DefaultSaml2ServiceProviderMetadataResolver metadataResolver;
 	private final Saml2ServiceProviderRegistrationResolver configResolver;
 
-	public DefaultSaml2ServiceProviderResolver(Saml2ServiceProviderMetadataResolver metadataResolver,
-											   Saml2ServiceProviderRegistrationResolver configResolver) {
+	public DefaultSaml2ServiceProviderResolver(Saml2ServiceProviderRegistrationResolver configResolver,
+											   Saml2Transformer transformer) {
 		this.configResolver = configResolver;
-		this.metadataResolver = metadataResolver;
+		this.metadataResolver = new DefaultSaml2ServiceProviderMetadataResolver(transformer);
 	}
 
 	@Override

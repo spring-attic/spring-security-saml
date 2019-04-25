@@ -5,17 +5,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.servlet.metadata;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,9 +30,6 @@ import java.util.UUID;
 import org.springframework.security.saml2.Saml2MetadataCache;
 import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
-import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
-import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
@@ -45,7 +42,9 @@ import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMet
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
 import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.model.signature.Saml2SignatureException;
-import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.serviceprovider.servlet.cache.DefaultSaml2MetadataCache;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -65,7 +64,7 @@ import static org.springframework.security.saml2.util.Saml2StringUtils.stripSlas
 import static org.springframework.security.saml2.util.Saml2StringUtils.stripStartingSlashes;
 import static org.springframework.util.StringUtils.hasText;
 
-public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2ServiceProviderMetadataResolver {
+class DefaultSaml2ServiceProviderMetadataResolver  {
 	private static Log logger = LogFactory.getLog(DefaultSaml2ServiceProviderMetadataResolver.class);
 
 	private final Saml2Transformer saml2Transformer;
@@ -85,14 +84,12 @@ public class DefaultSaml2ServiceProviderMetadataResolver implements Saml2Service
 		return this;
 	}
 
-	@Override
 	public Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> getIdentityProviders(
 		HostedSaml2ServiceProviderRegistration registration
 	) {
 		return getProviders(registration);
 	}
 
-	@Override
 	public Saml2ServiceProviderMetadata getMetadata(HostedSaml2ServiceProviderRegistration registration) {
 		return generateMetadata(registration);
 	}

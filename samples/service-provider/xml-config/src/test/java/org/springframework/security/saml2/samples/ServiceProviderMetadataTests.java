@@ -28,14 +28,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
-import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.key.Saml2KeyType;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
+import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
+import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.junit.jupiter.api.Disabled;
@@ -60,9 +59,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("SAML Service Provider Metadata")
 public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBase {
-
-	@Autowired(required = false)
-	Saml2ServiceProviderMetadataResolver metadataResolver;
 
 	@Autowired(required = false)
 	Saml2ServiceProviderResolver spResolver;
@@ -205,7 +201,6 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 	@DisplayName("static keys get added to remote provider's metadata")
 	@Test
 	void staticKeysTest() throws Exception {
-		assertNotNull(metadataResolver);
 		assertNotNull(spResolver);
 
 		final List<ExternalSaml2IdentityProviderRegistration> providers =
@@ -220,8 +215,7 @@ public class ServiceProviderMetadataTests extends AbstractServiceProviderTestBas
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		Saml2ServiceProviderInstance provider = spResolver.getServiceProvider(request);
-		Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> idps =
-			metadataResolver.getIdentityProviders(provider.getRegistration());
+		Map<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> idps = provider.getRemoteProviders();
 		Map.Entry<ExternalSaml2IdentityProviderRegistration, Saml2IdentityProviderMetadata> entry = idps.entrySet()
 			.stream()
 			.filter(

@@ -21,15 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml2.Saml2Transformer;
-import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
 import org.springframework.security.saml2.provider.validation.DefaultSaml2ServiceProviderValidator;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
+import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
+import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderRegistrationResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
-import org.springframework.security.saml2.serviceprovider.metadata.Saml2ServiceProviderMetadataResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.registration.DefaultSaml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.SingletonSaml2ServiceProviderRegistrationResolver;
-import org.springframework.security.saml2.serviceprovider.servlet.metadata.DefaultSaml2ServiceProviderMetadataResolver;
 import org.springframework.util.Assert;
 
 @Configuration
@@ -53,14 +51,9 @@ public class Saml2ServiceProviderBeans {
 	@Bean(name = "samlServiceProviderResolver")
 	public Saml2ServiceProviderResolver serviceProviderResolver() {
 		return new DefaultSaml2ServiceProviderResolver(
-			serviceProviderMetadataResolver(),
-			serviceProviderRegistrationResolver()
+			serviceProviderRegistrationResolver(),
+			transformer
 		);
-	}
-
-	@Bean(name = "samlServiceProviderMetadataResolver")
-	public Saml2ServiceProviderMetadataResolver serviceProviderMetadataResolver() {
-		return new DefaultSaml2ServiceProviderMetadataResolver(transformer);
 	}
 
 	@Bean(name = "samlServiceProviderRegistrationResolver")

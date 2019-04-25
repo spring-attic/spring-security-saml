@@ -16,7 +16,6 @@
  */
 
 include "core"
-include "transform/opensaml"
 include "service-provider/servlet"
 include "boot-config"
 include "samples/service-provider/boot-config"

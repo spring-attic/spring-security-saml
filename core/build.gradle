@@ -21,6 +21,10 @@ dependencies {
 	compile group: "org.springframework.security", name: "spring-security-core", version: "$springSecurityVersion"
 	compile group: "org.springframework.security", name: "spring-security-config", version: "$springSecurityVersion"
 
+	compile(group: "org.opensaml", name: "opensaml-core", version: "$openSamlVersion")
+	compile(group: "org.opensaml", name: "opensaml-saml-api", version: "$openSamlVersion")
+	compile(group: "org.opensaml", name: "opensaml-saml-impl", version: "$openSamlVersion")
+
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "$bcprovVersion"
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "$bcprovVersion"
 	compile group: 'joda-time', name: 'joda-time', version: "$jodaTimeVersion"

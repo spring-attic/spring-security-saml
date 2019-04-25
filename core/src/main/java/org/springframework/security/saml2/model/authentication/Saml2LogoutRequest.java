@@ -29,8 +29,8 @@ import org.joda.time.DateTime;
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
  * Page 62, Line 2686
  */
-public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Request>
-	implements Saml2SignableObject<Saml2LogoutSaml2Request> {
+public class Saml2LogoutRequest extends Saml2Request<Saml2LogoutRequest>
+	implements Saml2SignableObject<Saml2LogoutRequest> {
 
 	private Saml2KeyData signingKey;
 	private Saml2AlgorithmMethod algorithm;
@@ -43,7 +43,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return algorithm;
 	}
 
-	public Saml2LogoutSaml2Request setAlgorithm(Saml2AlgorithmMethod algorithm) {
+	public Saml2LogoutRequest setAlgorithm(Saml2AlgorithmMethod algorithm) {
 		this.algorithm = algorithm;
 		return this;
 	}
@@ -52,7 +52,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return digest;
 	}
 
-	public Saml2LogoutSaml2Request setDigest(Saml2DigestMethod digest) {
+	public Saml2LogoutRequest setDigest(Saml2DigestMethod digest) {
 		this.digest = digest;
 		return this;
 	}
@@ -61,7 +61,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return nameId;
 	}
 
-	public Saml2LogoutSaml2Request setNameId(Saml2NameIdPrincipal nameId) {
+	public Saml2LogoutRequest setNameId(Saml2NameIdPrincipal nameId) {
 		this.nameId = nameId;
 		return this;
 	}
@@ -70,7 +70,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return reason;
 	}
 
-	public Saml2LogoutSaml2Request setReason(Saml2LogoutReason reason) {
+	public Saml2LogoutRequest setReason(Saml2LogoutReason reason) {
 		this.reason = reason;
 		return this;
 	}
@@ -79,7 +79,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return notOnOrAfter;
 	}
 
-	public Saml2LogoutSaml2Request setNotOnOrAfter(DateTime notOnOrAfter) {
+	public Saml2LogoutRequest setNotOnOrAfter(DateTime notOnOrAfter) {
 		this.notOnOrAfter = notOnOrAfter;
 		return this;
 	}
@@ -88,7 +88,7 @@ public class Saml2LogoutSaml2Request extends Saml2Request<Saml2LogoutSaml2Reques
 		return signingKey;
 	}
 
-	public Saml2LogoutSaml2Request setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
+	public Saml2LogoutRequest setSigningKey(Saml2KeyData signingKey, Saml2AlgorithmMethod algorithm, Saml2DigestMethod digest) {
 		this.signingKey = signingKey;
 		this.algorithm = algorithm;
 		this.digest = digest;

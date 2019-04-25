@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
@@ -65,11 +66,13 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 		Saml2Response r = getSamlWebResponse(request, provider);
 		Saml2IdentityProviderMetadata idp = getIdentityProvider(r, provider);
 		try {
-			Saml2Signature signature = spValidator.validateSignature(r, idp.getIdentityProvider().getKeys());
-			r.setSignature(signature);
+			validateSamlResponse(provider, r);
 			for (Saml2Assertion assertion : r.getAssertions()) {
 				if (assertion.getSignature() == null) {
-					signature = spValidator.validateSignature(assertion, idp.getIdentityProvider().getKeys());
+					Saml2Signature signature = spValidator.validateSignature(
+						assertion,
+						idp.getIdentityProvider().getKeys()
+					);
 					assertion.setSignature(signature);
 				}
 			}
@@ -95,15 +98,26 @@ public class DefaultSaml2AuthenticationTokenResolver implements Saml2Authenticat
 		);
 	}
 
+	private void validateSamlResponse(Saml2ServiceProviderInstance provider, Saml2Response response) {
+		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(response.getOriginEntityId());
+		if (idp == null) {
+			throw new Saml2ProviderNotFoundException(response.getOriginEntityId());
+		}
+		Saml2Signature signature = spValidator.validateSignature(
+			response,
+			idp.getIdentityProvider().getKeys()
+		);
+		response.setSignature(signature);
+	}
+
 	private Saml2Response getSamlWebResponse(HttpServletRequest request,
 											 Saml2ServiceProviderInstance provider) {
 		String saml2Response = request.getParameter("SAMLResponse");
 		Saml2Object object = Saml2ServiceProviderUtils.parseSaml2Object(
 			saml2Response,
 			request.getMethod().equalsIgnoreCase(HttpMethod.GET.name()),
-			provider,
-			spTransformer,
-			null
+			provider.getRegistration().getKeys(),
+			spTransformer
 		);
 		if (object == null) {
 			return null;

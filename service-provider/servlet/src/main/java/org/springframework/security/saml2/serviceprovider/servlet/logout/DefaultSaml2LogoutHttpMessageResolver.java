@@ -24,12 +24,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.saml2.Saml2Exception;
+import org.springframework.security.saml2.Saml2ProviderNotFoundException;
 import org.springframework.security.saml2.Saml2Transformer;
 import org.springframework.security.saml2.Saml2ValidationResult;
 import org.springframework.security.saml2.model.Saml2Object;
+import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
@@ -38,6 +40,7 @@ import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
 import org.springframework.security.saml2.model.metadata.Saml2SsoProvider;
+import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
@@ -75,16 +78,17 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 														 HttpServletResponse response) {
 		Saml2ServiceProviderInstance provider = spResolver.getServiceProvider(request);
 
-		Saml2Object logoutRequest = getSamlRequest(request, provider);
-		Saml2Object logoutResponse = getSamlResponse(request, provider);
+		Saml2LogoutRequest logoutRequest = getSamlLogoutRequest(request, provider);
+		Saml2LogoutResponse logoutResponse = getSamlLogoutResponse(request, provider);
 		if (ofNullable(logoutRequest).isPresent()) {
-			return receivedLogoutRequest(request, response, authentication, logoutRequest, provider);
+			return receivedLogoutRequest(request, authentication, logoutRequest, provider);
 		}
 		else if (ofNullable(logoutResponse).isPresent()) {
+			//we reached the end of the logout communication
 			return null;
 		}
 		else if (authentication != null) {
-			return spInitiatedLogout(request, response, authentication, provider);
+			return spInitiatedLogout(request, authentication, provider);
 		}
 		else {
 			//just perform a simple logout
@@ -92,38 +96,78 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		}
 	}
 
-	private Saml2Object getSamlResponse(HttpServletRequest request,
-										Saml2ServiceProviderInstance provider) {
-		return Saml2ServiceProviderUtils.parseSaml2Object(
-			request.getParameter("SAMLResponse"),
-			HttpMethod.GET.matches(request.getMethod()),
+	private Saml2LogoutResponse getSamlLogoutResponse(HttpServletRequest request,
+													  Saml2ServiceProviderInstance provider) {
+		return (Saml2LogoutResponse)getSaml2Object(
+			request,
 			provider,
-			spTransformer,
-			spValidator
+			"SAMLResponse",
+			Saml2LogoutResponse.class
 		);
 	}
 
-	private Saml2Object getSamlRequest(HttpServletRequest request,
-									   Saml2ServiceProviderInstance provider) {
-		return Saml2ServiceProviderUtils.parseSaml2Object(
-			request.getParameter("SAMLRequest"),
-			HttpMethod.GET.matches(request.getMethod()),
+	private Saml2LogoutRequest getSamlLogoutRequest(HttpServletRequest request,
+													Saml2ServiceProviderInstance provider) {
+		return (Saml2LogoutRequest)getSaml2Object(
+			request,
 			provider,
-			spTransformer,
-			spValidator
+			"SAMLRequest",
+			Saml2LogoutRequest.class
 		);
+	}
+
+	private Saml2Object getSaml2Object(HttpServletRequest request,
+									   Saml2ServiceProviderInstance provider,
+									   String parameterName,
+									   Class<? extends Saml2SignableObject<?>> type) {
+		Saml2Object result = Saml2ServiceProviderUtils.parseSaml2Object(
+			request.getParameter(parameterName),
+			HttpMethod.GET.matches(request.getMethod()),
+			provider.getRegistration().getKeys(),
+			spTransformer
+		);
+		if (result == null) {
+			return null;
+		}
+		if (type.isInstance(result)) {
+			return validateLogoutObject(provider, (Saml2SignableObject) result);
+		}
+		else {
+			throw new Saml2Exception(
+				String.format(
+					"SAMLResponse is not of type %s but instead is %s",
+					type.getName(),
+					result.getClass().getName()
+				)
+			);
+		}
+	}
+
+	private <T extends Saml2Object> Saml2SignableObject<T> validateLogoutObject(
+		Saml2ServiceProviderInstance provider,
+		Saml2SignableObject<T> obj
+	) {
+		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(obj.getOriginEntityId());
+		if (idp == null) {
+			throw new Saml2ProviderNotFoundException(obj.getOriginEntityId());
+		}
+		Saml2Signature signature = spValidator.validateSignature(
+			obj,
+			idp.getIdentityProvider().getKeys()
+		);
+		obj.setSignature(signature);
+		return obj;
 	}
 
 	private Saml2HttpMessageData receivedLogoutRequest(HttpServletRequest request,
-													   HttpServletResponse response,
 													   Saml2Authentication authentication,
 													   Saml2Object logoutRequest,
 													   Saml2ServiceProviderInstance provider) {
 
-		if (!(logoutRequest instanceof Saml2LogoutSaml2Request)) {
+		if (!(logoutRequest instanceof Saml2LogoutRequest)) {
 			throw new Saml2Exception("Invalid logout request:" + logoutRequest);
 		}
-		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) logoutRequest;
+		Saml2LogoutRequest lr = (Saml2LogoutRequest) logoutRequest;
 		Saml2ValidationResult validate = spValidator.validate(lr, provider);
 		if (validate.hasErrors()) {
 			throw new Saml2Exception(validate.toString());
@@ -143,13 +187,11 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 	}
 
 	private Saml2HttpMessageData spInitiatedLogout(HttpServletRequest request,
-												   HttpServletResponse response,
 												   Saml2Authentication authentication,
 												   Saml2ServiceProviderInstance provider) {
 		logger.debug(format("Initiating SP logout for SP:%s", authentication.getHoldingEntityId()));
-		Saml2ServiceProviderMetadata sp = provider.getMetadata();
 		Saml2IdentityProviderMetadata idp = provider.getRemoteProvider(authentication.getAssertingEntityId());
-		Saml2LogoutSaml2Request lr =
+		Saml2LogoutRequest lr =
 			logoutRequest(provider.getMetadata(), idp, (Saml2NameIdPrincipal) authentication.getSamlPrincipal());
 		if (lr.getDestination() != null) {
 			logger.debug("Sending logout request through redirect.");
@@ -171,7 +213,7 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 
 	private Saml2LogoutResponse logoutResponse(
 		Saml2ServiceProviderInstance local,
-		Saml2LogoutSaml2Request request,
+		Saml2LogoutRequest request,
 		Saml2IdentityProviderMetadata recipient) {
 		List<Saml2SsoProvider> ssoProviders = recipient.getSsoProviders();
 		Saml2Endpoint destination = Saml2ServiceProviderUtils.getPreferredEndpoint(
@@ -198,12 +240,12 @@ public class DefaultSaml2LogoutHttpMessageResolver implements Saml2LogoutHttpMes
 		return request.getParameter("RelayState");
 	}
 
-	private Saml2LogoutSaml2Request logoutRequest(
+	private Saml2LogoutRequest logoutRequest(
 		Saml2ServiceProviderMetadata local,
 		Saml2IdentityProviderMetadata idp,
 		Saml2NameIdPrincipal principal) {
 		List<Saml2SsoProvider> ssoProviders = idp.getSsoProviders();
-		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
+		Saml2LogoutRequest result = new Saml2LogoutRequest()
 			.setId("LRQ" + UUID.randomUUID().toString())
 			.setDestination(
 				Saml2ServiceProviderUtils.getPreferredEndpoint(

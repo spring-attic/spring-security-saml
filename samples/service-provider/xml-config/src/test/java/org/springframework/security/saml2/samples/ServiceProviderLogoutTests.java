@@ -29,7 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.saml2.helper.SamlTestObjectHelper;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
 import org.springframework.security.saml2.model.metadata.Saml2IdentityProviderMetadata;
@@ -99,7 +99,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 		Map<String, String> params = queryParams(new URI(redirect));
 		String request = params.get("SAMLRequest");
 		assertNotNull(request);
-		Saml2LogoutSaml2Request lr = (Saml2LogoutSaml2Request) transformer.fromXml(
+		Saml2LogoutRequest lr = (Saml2LogoutRequest) transformer.fromXml(
 			transformer.samlDecode(request, true),
 			null,
 			null
@@ -127,7 +127,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			null,
 			null
 		);
-		Saml2LogoutSaml2Request request = helper.logoutRequest(
+		Saml2LogoutRequest request = helper.logoutRequest(
 			sp,
 			idp,
 			assertion.getSubject().getPrincipal()
@@ -182,7 +182,7 @@ public class ServiceProviderLogoutTests extends AbstractServiceProviderTestBase 
 			null,
 			null
 		);
-		Saml2LogoutSaml2Request request = helper.logoutRequest(
+		Saml2LogoutRequest request = helper.logoutRequest(
 			idp,
 			sp,
 			assertion.getSubject().getPrincipal()

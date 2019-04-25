@@ -26,7 +26,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.provider.Saml2IdentityProviderInstance;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2ServiceProviderMetadata;
@@ -76,8 +76,8 @@ public class DefaultSaml2IdentityProviderValidator extends AbstractSaml2Validato
 		else if (saml2Object instanceof Saml2AuthenticationRequest) {
 			result = validate((Saml2AuthenticationRequest)saml2Object, provider);
 		}
-		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
-			result = validate((Saml2LogoutSaml2Request)saml2Object, provider);
+		else if (saml2Object instanceof Saml2LogoutRequest) {
+			result = validate((Saml2LogoutRequest)saml2Object, provider);
 		}
 		else if (saml2Object instanceof Saml2LogoutResponse) {
 			result = validate((Saml2LogoutResponse)saml2Object, provider);

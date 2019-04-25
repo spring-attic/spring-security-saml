@@ -22,7 +22,7 @@ import java.util.Arrays;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutReason;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
 import org.springframework.security.saml2.model.authentication.Saml2Status;
@@ -150,7 +150,7 @@ class LogoutObjectTests {
 
 	@Test
 	public void requestFromXml() {
-		Saml2LogoutSaml2Request request = (Saml2LogoutSaml2Request) saml.fromXml(
+		Saml2LogoutRequest request = (Saml2LogoutRequest) saml.fromXml(
 			EXAMPLE_REQUEST, Arrays.asList(RSA_TEST_KEY.getSimpleKey("test")), null);
 		assertThat(request.getId(), equalTo("request-id"));
 		assertNotNull(request.getDestination());
@@ -176,7 +176,7 @@ class LogoutObjectTests {
 	@Test
 	public void requestToXml() {
 
-		Saml2LogoutSaml2Request request = new Saml2LogoutSaml2Request()
+		Saml2LogoutRequest request = new Saml2LogoutRequest()
 			.setId("request-id")
 			.setDestination(new Saml2Endpoint().setLocation(destination))
 			.setSigningKey(RSA_TEST_KEY.getSimpleKey("test"), RSA_SHA256, SHA512)

@@ -38,7 +38,7 @@ import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.encrypt.Saml2DataEncryptionMethod;
@@ -136,7 +136,7 @@ class KeycloakSaml2Signer {
 			else if (signable instanceof Saml2Assertion) {
 				return sign(signable, document);
 			}
-			else if (signable instanceof Saml2LogoutSaml2Request) {
+			else if (signable instanceof Saml2LogoutRequest) {
 				return sign(signable, document);
 			}
 			else if (signable instanceof Saml2LogoutResponse) {

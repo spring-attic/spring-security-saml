@@ -33,7 +33,7 @@ import org.springframework.security.saml2.model.authentication.Saml2AssertionCon
 import org.springframework.security.saml2.model.authentication.Saml2AudienceRestriction;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.authentication.Saml2StatusCode;
@@ -95,8 +95,8 @@ public class DefaultSaml2ServiceProviderValidator extends AbstractSaml2Validator
 		if (saml2Object instanceof Saml2IdentityProviderMetadata) {
 			result = validate((Saml2IdentityProviderMetadata) saml2Object, provider);
 		}
-		else if (saml2Object instanceof Saml2LogoutSaml2Request) {
-			result = validate((Saml2LogoutSaml2Request) saml2Object, provider);
+		else if (saml2Object instanceof Saml2LogoutRequest) {
+			result = validate((Saml2LogoutRequest) saml2Object, provider);
 		}
 		else if (saml2Object instanceof Saml2LogoutResponse) {
 			result = validate((Saml2LogoutResponse) saml2Object, provider);

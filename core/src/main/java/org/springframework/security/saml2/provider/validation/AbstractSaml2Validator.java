@@ -28,7 +28,7 @@ import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.authentication.Saml2Assertion;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2Response;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
@@ -161,7 +161,7 @@ abstract class AbstractSaml2Validator<ProviderType extends Saml2ProviderInstance
 		return uri;
 	}
 
-	Saml2ValidationResult validate(Saml2LogoutSaml2Request logoutRequest, ProviderType provider) {
+	Saml2ValidationResult validate(Saml2LogoutRequest logoutRequest, ProviderType provider) {
 		Saml2ValidationResult result = new Saml2ValidationResult(logoutRequest);
 		checkValidSignature(logoutRequest, result);
 		return result;

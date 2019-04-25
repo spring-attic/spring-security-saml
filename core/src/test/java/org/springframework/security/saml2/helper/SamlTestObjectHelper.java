@@ -36,7 +36,7 @@ import org.springframework.security.saml2.model.authentication.Saml2Authenticati
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationStatement;
 import org.springframework.security.saml2.model.authentication.Saml2Conditions;
 import org.springframework.security.saml2.model.authentication.Saml2Issuer;
-import org.springframework.security.saml2.model.authentication.Saml2LogoutSaml2Request;
+import org.springframework.security.saml2.model.authentication.Saml2LogoutRequest;
 import org.springframework.security.saml2.model.authentication.Saml2LogoutResponse;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPolicy;
 import org.springframework.security.saml2.model.authentication.Saml2NameIdPrincipal;
@@ -399,12 +399,12 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public Saml2LogoutSaml2Request logoutRequest(Saml2Metadata<? extends Saml2Metadata> recipient,
-												 Saml2Metadata<? extends Saml2Metadata> local,
-												 Saml2NameIdPrincipal principal) {
+	public Saml2LogoutRequest logoutRequest(Saml2Metadata<? extends Saml2Metadata> recipient,
+											Saml2Metadata<? extends Saml2Metadata> local,
+											Saml2NameIdPrincipal principal) {
 
 
-		Saml2LogoutSaml2Request result = new Saml2LogoutSaml2Request()
+		Saml2LogoutRequest result = new Saml2LogoutRequest()
 			.setId("LRQ"+UUID.randomUUID().toString())
 			.setDestination(getSingleLogout(recipient.getSsoProviders().get(0).getSingleLogoutService()))
 			.setIssuer(new Saml2Issuer().setValue(local.getEntityId()))
@@ -437,7 +437,7 @@ public class SamlTestObjectHelper {
 		return result;
 	}
 
-	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutRequest request,
 											  Saml2IdentityProviderMetadata recipient,
 											  Saml2ServiceProviderMetadata local) {
 		return logoutResponse(
@@ -448,7 +448,7 @@ public class SamlTestObjectHelper {
 		);
 	}
 
-	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutRequest request,
 											  Saml2Metadata<? extends Saml2Metadata> recipient,
 											  Saml2Metadata<? extends Saml2Metadata> local,
 											  Saml2Endpoint destination) {
@@ -464,7 +464,7 @@ public class SamlTestObjectHelper {
 			.setVersion("2.0");
 	}
 
-	public Saml2LogoutResponse logoutResponse(Saml2LogoutSaml2Request request,
+	public Saml2LogoutResponse logoutResponse(Saml2LogoutRequest request,
 											  Saml2ServiceProviderMetadata recipient,
 											  Saml2IdentityProviderMetadata local) {
 		return logoutResponse(

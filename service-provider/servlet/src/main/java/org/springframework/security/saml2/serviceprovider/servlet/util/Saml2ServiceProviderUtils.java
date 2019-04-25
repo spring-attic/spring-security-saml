@@ -85,9 +85,9 @@ public final class Saml2ServiceProviderUtils {
 	 * @param transformer - the transformer to transform the object from string to {@link Saml2Object}
 	 * @param validator - if not null, signature and object validation will be attempted. may be null.
 	 * @return the decoded, and possibly validated, SAML2 object
-	 * @throws {@link Saml2ProviderNotFoundException} if the origin of the message is not found in the service provider instance
-	 * @throws {@link org.springframework.security.saml2.model.signature.Saml2SignatureException} if signature validation fails
-	 * @throws {@link org.springframework.security.saml2.Saml2Exception} if decoding fails
+	 * @throws Saml2ProviderNotFoundException if the origin of the message is not found in the service provider instance
+	 * @throws org.springframework.security.saml2.model.signature.Saml2SignatureException if signature validation fails
+	 * @throws org.springframework.security.saml2.Saml2Exception if decoding fails
 	 */
 	public static Saml2Object parseSaml2Object(String encodedSamlObject,
 											   boolean inflate,

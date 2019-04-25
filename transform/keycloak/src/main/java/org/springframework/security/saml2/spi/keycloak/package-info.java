@@ -16,6 +16,6 @@
  */
 
 /**
- * OpenSAML 3.x specific code
+ * Keycloak specific code
  */
 package org.springframework.security.saml2.spi.keycloak;

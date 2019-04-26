@@ -45,7 +45,6 @@ import org.springframework.security.saml2.model.signature.Saml2SignatureExceptio
 import org.springframework.security.saml2.registration.ExternalSaml2IdentityProviderRegistration;
 import org.springframework.security.saml2.registration.HostedSaml2ProviderRegistration;
 import org.springframework.security.saml2.registration.HostedSaml2ServiceProviderRegistration;
-import org.springframework.security.saml2.serviceprovider.servlet.cache.DefaultSaml2MetadataCache;
 import org.springframework.security.saml2.util.Saml2StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;

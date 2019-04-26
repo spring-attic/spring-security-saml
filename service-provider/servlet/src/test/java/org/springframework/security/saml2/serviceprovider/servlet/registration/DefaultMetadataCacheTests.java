@@ -15,7 +15,7 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.servlet.cache;
+package org.springframework.security.saml2.serviceprovider.servlet.registration;
 
 import java.time.Clock;
 

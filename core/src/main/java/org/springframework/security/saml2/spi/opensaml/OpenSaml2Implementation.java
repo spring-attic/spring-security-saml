@@ -40,7 +40,7 @@ import javax.xml.namespace.QName;
 
 import org.springframework.security.saml2.Saml2Exception;
 import org.springframework.security.saml2.Saml2KeyException;
-import org.springframework.security.saml2.Saml2KeyStoreProvider;
+import org.springframework.security.saml2.spi.Saml2KeyStoreProvider;
 import org.springframework.security.saml2.model.Saml2ImplementationHolder;
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.Saml2SignableObject;

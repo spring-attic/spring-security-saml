@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
+import org.springframework.security.saml2.http.Saml2HttpMessageData;
 
 public interface Saml2LogoutHttpMessageResolver {
 

@@ -15,11 +15,15 @@
  *
  */
 
-package org.springframework.security.saml2.serviceprovider.binding;
+package org.springframework.security.saml2.http;
 
 import org.springframework.security.saml2.model.Saml2Object;
 import org.springframework.security.saml2.model.metadata.Saml2Endpoint;
 
+/**
+ * Model object representing an incoming or outgoing SAML message over HTTP
+ * using POST or REDIRECT bindings.
+ */
 public class Saml2HttpMessageData {
 
 	private final Saml2Object samlRequest;

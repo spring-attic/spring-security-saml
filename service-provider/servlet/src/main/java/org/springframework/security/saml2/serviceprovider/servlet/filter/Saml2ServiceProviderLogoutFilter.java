@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
+import org.springframework.security.saml2.http.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.servlet.binding.Saml2HttpMessageResponder;
 import org.springframework.security.saml2.serviceprovider.servlet.logout.Saml2LogoutHttpMessageResolver;
 import org.springframework.security.web.DefaultRedirectStrategy;

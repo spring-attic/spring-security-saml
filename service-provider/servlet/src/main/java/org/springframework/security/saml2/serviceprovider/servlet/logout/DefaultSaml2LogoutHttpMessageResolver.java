@@ -44,7 +44,7 @@ import org.springframework.security.saml2.model.signature.Saml2Signature;
 import org.springframework.security.saml2.provider.Saml2ServiceProviderInstance;
 import org.springframework.security.saml2.provider.validation.Saml2ServiceProviderValidator;
 import org.springframework.security.saml2.serviceprovider.authentication.Saml2Authentication;
-import org.springframework.security.saml2.serviceprovider.binding.Saml2HttpMessageData;
+import org.springframework.security.saml2.http.Saml2HttpMessageData;
 import org.springframework.security.saml2.serviceprovider.servlet.registration.Saml2ServiceProviderResolver;
 import org.springframework.security.saml2.serviceprovider.servlet.util.Saml2ServiceProviderUtils;
 

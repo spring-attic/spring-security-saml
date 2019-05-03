@@ -15,15 +15,7 @@
 package org.springframework.security.saml.metadata;
 
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opensaml.common.xml.SAMLConstants;
@@ -551,19 +543,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             log.debug("Created new trust manager for metadata provider {}", provider);
 
-            // Combine any existing filters with the signature verification
             MetadataFilter currentFilter = provider.getMetadataFilter();
             if (currentFilter != null) {
-                if (currentFilter instanceof MetadataFilterChain) {
-                    log.debug("Adding signature filter into existing chain");
-                    MetadataFilterChain chain = (MetadataFilterChain) currentFilter;
-                    chain.getFilters().add(filter);
-                } else {
-                    log.debug("Combining signature filter with the existing in a new chain");
-                    MetadataFilterChain chain = new MetadataFilterChain();
-                    chain.getFilters().add(currentFilter);
-                    chain.getFilters().add(filter);
-                }
+                log.debug("Adding signature filter before existing filters");
+                MetadataFilterChain chain = new MetadataFilterChain();
+                chain.setFilters(Arrays.asList(filter, currentFilter));
+                provider.setMetadataFilter(chain);
             } else {
                 log.debug("Adding signature filter");
                 provider.setMetadataFilter(filter);

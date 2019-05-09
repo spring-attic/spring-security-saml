@@ -1211,10 +1211,10 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 		auth.setNameIDPolicy(getNameIDPolicy(request.getNameIdPolicy()));
 		auth.setRequestedAuthnContext(getRequestedAuthenticationContext(request));
 		auth.setIssuer(toIssuer(request.getIssuer()));
+		auth.setScoping(getScoping(request.getScoping()));
 		if (request.getSigningKey() != null) {
 			this.signObject(auth, request.getSigningKey(), request.getAlgorithm(), request.getDigest());
 		}
-		auth.setScoping(getScoping(request.getScoping()));
 		return auth;
 	}
 

@@ -17,7 +17,7 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-public enum AuthenticationContextClassReference {
+public enum AuthenticationContextClassReferenceValue {
 	/**
 	 * Internet Protocol
 	 */
@@ -146,17 +146,21 @@ public enum AuthenticationContextClassReference {
 
 	private final String urn;
 
-	AuthenticationContextClassReference(String urn) {
+	AuthenticationContextClassReferenceValue(String urn) {
 		this.urn = urn;
 	}
 
-	public static AuthenticationContextClassReference fromUrn(String ctxRef) {
-		for (AuthenticationContextClassReference ref : values()) {
+	public static AuthenticationContextClassReferenceValue fromUrn(String ctxRef) {
+		for (AuthenticationContextClassReferenceValue ref : values()) {
 			if (ref.urn.equalsIgnoreCase(ctxRef)) {
 				return ref;
 			}
 		}
 		return UNSPECIFIED;
+	}
+
+	public String getUrn() {
+		return urn;
 	}
 
 	@Override

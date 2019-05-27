@@ -1,0 +1,11 @@
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+					xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+					ID="_ace040cdf97c2efba5aa4d973a32318217b9aaae09"
+					Version="2.0"
+					IssueInstant="2014-05-26T06:47:27Z"
+					Destination="https://sa-gw.surfconext.nl/authentication/single-sign-on">
+	<saml:Issuer>http://test-sp.example.com</saml:Issuer>
+	<samlp:RequestedAuthnContext Comparison="exact">
+		<saml:AuthnContextClassRef>http://example.nl/assurance/loa2</saml:AuthnContextClassRef>
+	</samlp:RequestedAuthnContext>
+</samlp:AuthnRequest>

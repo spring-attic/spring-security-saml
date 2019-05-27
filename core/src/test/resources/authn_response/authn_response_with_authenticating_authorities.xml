@@ -1,0 +1,33 @@
+<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+				xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+				ID="b07b804c-7c29-ea16-7300-4f3d6f7928ac"
+				Version="2.0"
+				IssueInstant="2016-03-10T15:09:25Z"
+				Destination="https://application-gateway.some-organisation.example.org/consume-assertion"
+				InResponseTo="_zQIibz9FKixdlgX8E7bHqE29wfatcgbsPdVn0NN">
+	<saml:Issuer>https://test-idp</saml:Issuer>
+	<samlp:Status>
+		<samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+	</samlp:Status>
+	<saml:Assertion
+		ID="_zQIibz9FKixdlgX8E7bHqE29wfatcgbsPdVn0NN"
+		Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+		IssueInstant="2016-03-10T15:09:25Z">
+		<saml:Issuer/>
+		<saml:Subject>
+			<saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">admin</saml:NameID>
+			<saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+				<saml:SubjectConfirmationData InResponseTo="inResponseTo"/>
+			</saml:SubjectConfirmation>
+		</saml:Subject>
+		<saml:Conditions/>
+		<saml:AuthnStatement AuthnInstant="2016-03-10T15:09:25Z">
+			<saml:AuthnContext>
+				<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</saml:AuthnContextClassRef>
+				<saml:AuthenticatingAuthority>http://authenticating_authority</saml:AuthenticatingAuthority>
+				<saml:AuthenticatingAuthority>http://authenticating_authority</saml:AuthenticatingAuthority>
+			</saml:AuthnContext>
+		</saml:AuthnStatement>
+		<saml:AttributeStatement/>
+	</saml:Assertion>
+</samlp:Response>

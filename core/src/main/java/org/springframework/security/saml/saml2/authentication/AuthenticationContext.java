@@ -19,20 +19,33 @@ package org.springframework.security.saml.saml2.authentication;
 
 import java.util.List;
 
-import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
-
+/**
+ * Implementation samlp:AuthnContext as defined by
+ * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
+ * Page 29, Line 1191
+ */
 public class AuthenticationContext {
 
-	private AuthenticationContextClassReference classReference = UNSPECIFIED;
+	private String classReference = AuthenticationContextClassReferenceValue.UNSPECIFIED.getUrn();
+	private String classDeclaration;
 
 	private List<String> authenticatingAuthorities;
 
-	public AuthenticationContextClassReference getClassReference() {
+	public String getClassReference() {
 		return classReference;
 	}
 
-	public AuthenticationContext setClassReference(AuthenticationContextClassReference classReference) {
+	public AuthenticationContext setClassReference(String classReference) {
 		this.classReference = classReference;
+		return this;
+	}
+
+	public String getClassDeclaration() {
+		return classDeclaration;
+	}
+
+	public AuthenticationContext setClassDeclaration(String classDeclaration) {
+		this.classDeclaration = classDeclaration;
 		return this;
 	}
 

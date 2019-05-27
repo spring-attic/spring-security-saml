@@ -12,9 +12,11 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationContext;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml.saml2.authentication.Comparison;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.NameIdPrincipal;
+import org.springframework.security.saml.saml2.authentication.RequestedAuthenticationContext;
 import org.springframework.security.saml.saml2.authentication.Response;
 import org.springframework.security.saml.saml2.authentication.Scoping;
 import org.springframework.security.saml.saml2.authentication.Subject;
@@ -138,19 +140,16 @@ class OpenSamlImplementationTest {
 	}
 
 	@Test
-	public void resolveAssertionWithAuthenticatinAuthorities() throws IOException {
+	public void resolveAssertionWithAuthenticationAuthorities() throws IOException {
 		AuthenticationContext authenticationContext =
-			parseAuthenticationContext("assertion_with_authenticating_authority.xml");
+			parseAuthenticationContext("authn_response_with_authenticating_authorities.xml");
 		assertEquals(2, authenticationContext.getAuthenticatingAuthorities().size());
 		assertEquals("http://authenticating_authority", authenticationContext.getAuthenticatingAuthorities().get(0));
 	}
 
 	@Test
 	public void resolveAuthnResponseWithComplexAttributeValue() throws IOException {
-		byte[] xml = StreamUtils.copyToByteArray(
-			new ClassPathResource("authn_response/authn_response_with_xml_element_attribute_value.xml").getInputStream());
-		Response response = (Response) subject.resolve(xml, Collections.emptyList(), Collections.emptyList());
-		Assertion assertion = response.getAssertions().get(0);
+		Assertion assertion = parseAssertion("authn_response_with_xml_element_attribute_value.xml");
 		Attribute attribute = assertion.getFirstAttribute("urn:mace:dir:attribute-def:eduPersonTargetedID");
 
 		List<Object> values = attribute.getValues();
@@ -160,20 +159,59 @@ class OpenSamlImplementationTest {
 		assertEquals("urn:collab:person:example.com:admin", value);
 	}
 
+	@Test
+	public void resolveAuthnRequestWithContextClassRef() throws IOException {
+		AuthenticationRequest authenticationRequest = parseAuthenticationRequest("authn_request_with_context_class_ref.xml");
+		RequestedAuthenticationContext requestedAuthenticationContext = authenticationRequest.getRequestedAuthenticationContext();
+
+		assertEquals(Comparison.exact, requestedAuthenticationContext.getComparison());
+		assertEquals("http://example.nl/assurance/loa2",
+			requestedAuthenticationContext.getAuthenticationContextClassReferences().get(0));
+	}
+
+	@Test
+	public void resolveAuthnRequestWithEmptyAuthContext() throws IOException {
+		AuthenticationRequest authenticationRequest = parseAuthenticationRequest("authn_request_with_no_auth_context.xml");
+		RequestedAuthenticationContext requestedAuthenticationContext = authenticationRequest.getRequestedAuthenticationContext();
+
+		assertNull(requestedAuthenticationContext);
+	}
+
+	@Test
+	public void resolveAuthnResponseWithConextClassReference() throws IOException {
+		AuthenticationContext authenticationContext = parseAuthenticationContext("authn_response_with_context_class_ref.xml");
+		String classReference = authenticationContext.getClassReference();
+		assertEquals("http://example.org/verified-second-factor/level2", classReference);
+
+		assertEquals("declaration", authenticationContext.getClassDeclaration());
+	}
+
+	@Test
+	public void resolveAuthnResponseWithNoAuthContext() throws IOException {
+		AuthenticationContext authenticationContext = parseAuthenticationContext("authn_response_with_empty_authn_context.xml");
+		assertNull(authenticationContext);
+	}
+
+	private Assertion parseAssertion(String fileName) throws IOException {
+		byte[] xml = StreamUtils.copyToByteArray(
+			new ClassPathResource(String.format("authn_response/%s" , fileName)).getInputStream());
+		Response response = (Response) subject.resolve(xml, Collections.emptyList(), Collections.emptyList());
+		return response.getAssertions().get(0);
+	}
+
 	private Scoping parseScoping(String fileName) throws IOException {
+		return parseAuthenticationRequest(fileName).getScoping();
+	}
+
+	private AuthenticationRequest parseAuthenticationRequest(String fileName) throws IOException {
 		byte[] xml = StreamUtils.copyToByteArray(
 			new ClassPathResource(String.format("authn_requests/%s", fileName)).getInputStream());
 		return ((AuthenticationRequest)
-			subject.resolve(xml, Collections.emptyList(), Collections.emptyList())).getScoping();
+			subject.resolve(xml, Collections.emptyList(), Collections.emptyList()));
 	}
 
 	private AuthenticationContext parseAuthenticationContext(String fileName) throws IOException {
-		byte[] xml = StreamUtils.copyToByteArray(
-			new ClassPathResource(String.format("assertions/%s", fileName)).getInputStream());
-		return ((Assertion)
-			subject.resolve(xml, Collections.emptyList(), Collections.emptyList()))
-			.getAuthenticationStatements().get(0)
-			.getAuthenticationContext();
+		return parseAssertion(fileName).getAuthenticationStatements().get(0).getAuthenticationContext();
 	}
 
 	private Endpoint endpoint(String location) {

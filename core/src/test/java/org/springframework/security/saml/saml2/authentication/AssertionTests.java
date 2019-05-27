@@ -56,9 +56,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.saml.saml2.attribute.AttributeNameFormat.BASIC;
-import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.PASSWORD;
-import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT;
-import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.UNSPECIFIED;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReferenceValue.PASSWORD;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReferenceValue.PASSWORD_PROTECTED_TRANSPORT;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReferenceValue.UNSPECIFIED;
 import static org.springframework.security.saml.saml2.authentication.StatusCode.SUCCESS;
 import static org.springframework.security.saml.saml2.authentication.SubjectConfirmationMethod.BEARER;
 import static org.springframework.security.saml.saml2.metadata.NameId.EMAIL;
@@ -219,7 +219,7 @@ public class AssertionTests extends MetadataBase {
 		assertNotNull(statements);
 		assertThat(statements.size(), equalTo(1));
 		assertNotNull(statements.get(0).getAuthenticationContext());
-		assertThat(statements.get(0).getAuthenticationContext().getClassReference(), equalTo(PASSWORD));
+		assertThat(statements.get(0).getAuthenticationContext().getClassReference(), equalTo(PASSWORD.getUrn()));
 
 		List<Attribute> attributes = assertion.getAttributes();
 		assertNotNull(attributes);
@@ -309,7 +309,7 @@ public class AssertionTests extends MetadataBase {
 
 		AuthenticationContext authenticationContext = statement.getAuthenticationContext();
 		assertNotNull(authenticationContext);
-		assertThat(authenticationContext.getClassReference(), equalTo(UNSPECIFIED));
+		assertThat(authenticationContext.getClassReference(), equalTo(UNSPECIFIED.getUrn()));
 
 		List<Attribute> attributes = assertion.getAttributes();
 		assertNotNull(attributes);
@@ -336,7 +336,7 @@ public class AssertionTests extends MetadataBase {
 		principal.setValue(username);
 
 		assertion.getAuthenticationStatements().get(0).setAuthenticationContext(
-			new AuthenticationContext().setClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT)
+			new AuthenticationContext().setClassReference(AuthenticationContextClassReferenceValue.PASSWORD_PROTECTED_TRANSPORT.getUrn())
 		);
 
 		DateTime time = new DateTime(MetadataBase.time.millis());
@@ -514,7 +514,7 @@ public class AssertionTests extends MetadataBase {
 		assertThat(stmt.getSessionIndex(), equalTo("aeb9e771-c5dd-4b9d-a5bc-71e9e0e195a9"));
 
 		assertNotNull(stmt.getAuthenticationContext());
-		assertThat(stmt.getAuthenticationContext().getClassReference(), equalTo(PASSWORD_PROTECTED_TRANSPORT));
+		assertThat(stmt.getAuthenticationContext().getClassReference(), equalTo(PASSWORD_PROTECTED_TRANSPORT.getUrn()));
 
 		assertNotNull(assertion.getAttributes());
 		assertThat(assertion.getAttributes().size(), equalTo(1));

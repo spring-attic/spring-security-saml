@@ -1,0 +1,32 @@
+<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+				xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+				ID="b07b804c-7c29-ea16-7300-4f3d6f7928ac"
+				Version="2.0"
+				IssueInstant="2016-03-10T15:09:25Z"
+				Destination="https://application-gateway.some-organisation.example.org/consume-assertion"
+				InResponseTo="_zQIibz9FKixdlgX8E7bHqE29wfatcgbsPdVn0NN">
+	<saml:Issuer>https://test-idp</saml:Issuer>
+	<samlp:Status>
+		<samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+	</samlp:Status>
+	<saml:Assertion
+		ID="_zQIibz9FKixdlgX8E7bHqE29wfatcgbsPdVn0NN"
+		Version="2.0"
+		IssueInstant="2016-03-10T15:09:25Z">
+		<saml:Issuer>https://test-idp</saml:Issuer>
+		<saml:Subject>
+			<saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+				urn:collab:person:some-organisation.example.org:m1234567890
+			</saml:NameID>
+		</saml:Subject>
+		<saml:Conditions NotBefore="2016-03-10T15:09:25Z"
+						 NotOnOrAfter="2016-03-10T15:14:25Z">
+			<saml:AudienceRestriction>
+				<saml:Audience>https://example.org/metadata</saml:Audience>
+			</saml:AudienceRestriction>
+		</saml:Conditions>
+
+		<saml:AuthnStatement AuthnInstant="2016-03-10T15:09:25Z"/>
+
+	</saml:Assertion>
+</samlp:Response>

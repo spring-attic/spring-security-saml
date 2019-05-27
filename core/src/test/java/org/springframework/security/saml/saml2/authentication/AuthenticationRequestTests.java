@@ -16,6 +16,7 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.springframework.security.saml.saml2.metadata.Binding;
@@ -27,6 +28,7 @@ import org.opensaml.saml.saml2.core.NameID;
 import org.w3c.dom.Node;
 
 import static java.lang.Boolean.FALSE;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -82,7 +84,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		String xml = config.toXml(request);
 		AuthenticationRequest data =
-			(AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+			(AuthenticationRequest) config.fromXml(xml, singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());
@@ -109,10 +111,12 @@ class AuthenticationRequestTests extends MetadataBase {
 
 	@Test
 	public void createWithAutContext() {
-
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		RequestedAuthenticationContext requestedAuthenticationContext = new RequestedAuthenticationContext()
+			.setComparison(Comparison.exact)
+			.setAuthenticationContextClassReferences(
+				singletonList(AuthenticationContextClassReferenceValue.PASSWORD_PROTECTED_TRANSPORT.getUrn()));
+		request.setRequestedAuthenticationContext(requestedAuthenticationContext);
 
 		String xml = config.toXml(request);
 
@@ -159,12 +163,16 @@ class AuthenticationRequestTests extends MetadataBase {
 	@Test
 	public void parseWithAutContext() {
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
-		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		RequestedAuthenticationContext requestedAuthenticationContext = new RequestedAuthenticationContext()
+			.setComparison(Comparison.exact)
+			.setAuthenticationContextClassReferences(
+				singletonList(AuthenticationContextClassReferenceValue.PASSWORD_PROTECTED_TRANSPORT.getUrn()))
+			.setAuthenticationContextClassDeclarations(Arrays.asList("declaration1", "declaration2"));
+		request.setRequestedAuthenticationContext(requestedAuthenticationContext);
 
 		String xml = config.toXml(request);
 		AuthenticationRequest data =
-			(AuthenticationRequest) config.fromXml(xml, Collections.singletonList(idpVerifying), null);
+			(AuthenticationRequest) config.fromXml(xml, singletonList(idpVerifying), null);
 		assertNotNull(data);
 		assertNotNull(data.getImplementation());
 		assertNotNull(data.getSignature());
@@ -177,11 +185,14 @@ class AuthenticationRequestTests extends MetadataBase {
 			data.getAssertionConsumerService().getLocation()
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
-		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
-		assertSame(
-			AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT,
-			data.getAuthenticationContextClassReference()
+		RequestedAuthenticationContext authenticationContext = data.getRequestedAuthenticationContext();
+		assertSame(Comparison.exact, authenticationContext.getComparison());
+		assertEquals(
+			AuthenticationContextClassReferenceValue.PASSWORD_PROTECTED_TRANSPORT.getUrn(),
+			authenticationContext.getAuthenticationContextClassReferences().get(0)
 		);
+		assertEquals("declaration1", authenticationContext.getAuthenticationContextClassDeclarations().get(0));
+		assertEquals("declaration2", authenticationContext.getAuthenticationContextClassDeclarations().get(1));
 
 		assertThat(data.getVersion(), equalTo("2.0"));
 		assertThat(data.getIssueInstant(), notNullValue(DateTime.class));

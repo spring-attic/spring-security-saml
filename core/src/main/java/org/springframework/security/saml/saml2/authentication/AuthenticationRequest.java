@@ -36,7 +36,6 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 	private Boolean isPassive;
 	private Endpoint assertionConsumerService;
 	private RequestedAuthenticationContext requestedAuthenticationContext;
-	private AuthenticationContextClassReference authenticationContextClassReference;
 	private SimpleKey signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
@@ -79,17 +78,6 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		RequestedAuthenticationContext requestedAuthenticationContext
 	) {
 		this.requestedAuthenticationContext = requestedAuthenticationContext;
-		return _this();
-	}
-
-	public AuthenticationContextClassReference getAuthenticationContextClassReference() {
-		return authenticationContextClassReference;
-	}
-
-	public AuthenticationRequest setAuthenticationContextClassReference(
-		AuthenticationContextClassReference authenticationContextClassReference
-	) {
-		this.authenticationContextClassReference = authenticationContextClassReference;
 		return _this();
 	}
 

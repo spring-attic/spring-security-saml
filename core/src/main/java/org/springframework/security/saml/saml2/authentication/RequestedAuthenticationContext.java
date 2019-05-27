@@ -17,14 +17,43 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
+import java.util.List;
+
 /**
- * Implementation samlp:RequestedAuthnContextType comparison values as defined by
+ * Implementation samlp:RequestedAuthnContext as defined by
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
- * Page 44, Line 1871
+ * Page 44, Line 1895
  */
-public enum RequestedAuthenticationContext {
-	exact,
-	minimum,
-	maximum,
-	better
+public class RequestedAuthenticationContext {
+
+	private Comparison comparison;
+	private List<String> authenticationContextClassReferences;
+	private List<String> authenticationContextClassDeclarations;
+
+	public Comparison getComparison() {
+		return comparison;
+	}
+
+	public RequestedAuthenticationContext setComparison(Comparison comparison) {
+		this.comparison = comparison;
+		return this;
+	}
+
+	public List<String> getAuthenticationContextClassReferences() {
+		return authenticationContextClassReferences;
+	}
+
+	public RequestedAuthenticationContext setAuthenticationContextClassReferences(List<String> authenticationContextClassReferences) {
+		this.authenticationContextClassReferences = authenticationContextClassReferences;
+		return this;
+	}
+
+	public List<String> getAuthenticationContextClassDeclarations() {
+		return authenticationContextClassDeclarations;
+	}
+
+	public RequestedAuthenticationContext setAuthenticationContextClassDeclarations(List<String> authenticationContextClassDeclarations) {
+		this.authenticationContextClassDeclarations = authenticationContextClassDeclarations;
+		return this;
+	}
 }

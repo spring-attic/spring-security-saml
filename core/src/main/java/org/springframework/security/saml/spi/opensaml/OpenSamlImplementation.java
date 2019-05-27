@@ -50,9 +50,10 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AssertionCondition;
 import org.springframework.security.saml.saml2.authentication.AudienceRestriction;
 import org.springframework.security.saml.saml2.authentication.AuthenticationContext;
-import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference;
+import org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReferenceValue;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.authentication.AuthenticationStatement;
+import org.springframework.security.saml.saml2.authentication.Comparison;
 import org.springframework.security.saml.saml2.authentication.Conditions;
 import org.springframework.security.saml.saml2.authentication.Issuer;
 import org.springframework.security.saml.saml2.authentication.LogoutReason;
@@ -147,6 +148,7 @@ import org.opensaml.saml.saml2.core.AuthenticatingAuthority;
 import org.opensaml.saml.saml2.core.AuthnContext;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.opensaml.saml.saml2.core.AuthnContextDeclRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Condition;
@@ -220,6 +222,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.EXACT;
+import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.MINIMUM;
+import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.BETTER;
+import static org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration.MAXIMUM;
 import static org.opensaml.security.crypto.KeySupport.generateKey;
 import static org.springframework.security.saml.saml2.Namespace.NS_PROTOCOL;
 import static org.springframework.util.StringUtils.hasText;
@@ -1137,9 +1142,13 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContext.class);
 			org.opensaml.saml.saml2.core.AuthnContextClassRef aref =
 				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContextClassRef.class);
+			org.opensaml.saml.saml2.core.AuthnContextDeclRef adec =
+				buildSAMLObject(org.opensaml.saml.saml2.core.AuthnContextDeclRef.class);
 			AuthenticationContext authenticationContext = stmt.getAuthenticationContext();
-			aref.setAuthnContextClassRef(authenticationContext.getClassReference().toString());
+			aref.setAuthnContextClassRef(authenticationContext.getClassReference());
+			adec.setAuthnContextDeclRef(authenticationContext.getClassDeclaration());
 			actx.setAuthnContextClassRef(aref);
+			actx.setAuthnContextDeclRef(adec);
 			if (!CollectionUtils.isEmpty(authenticationContext.getAuthenticatingAuthorities())) {
 				actx.getAuthenticatingAuthorities()
 					.addAll(authenticationContext.getAuthenticatingAuthorities().stream().map(uri -> {
@@ -1231,30 +1240,39 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 	protected RequestedAuthnContext getRequestedAuthenticationContext(AuthenticationRequest request) {
 		RequestedAuthnContext result = null;
-		if (request.getRequestedAuthenticationContext() != null) {
+		RequestedAuthenticationContext requestedAuthenticationContext = request.getRequestedAuthenticationContext();
+		if (requestedAuthenticationContext != null) {
 			result = buildSAMLObject(RequestedAuthnContext.class);
-			switch (request.getRequestedAuthenticationContext()) {
-				case exact:
-					result.setComparison(EXACT);
-					break;
+			Comparison comparison = requestedAuthenticationContext.getComparison();
+			switch (comparison) {
 				case better:
-					result.setComparison(AuthnContextComparisonTypeEnumeration.BETTER);
+					result.setComparison(BETTER);
 					break;
 				case maximum:
-					result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
+					result.setComparison(MAXIMUM);
 					break;
 				case minimum:
-					result.setComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM);
+					result.setComparison(MINIMUM);
 					break;
 				default:
 					result.setComparison(EXACT);
 					break;
 			}
-			if (request.getAuthenticationContextClassReference() != null) {
-				final AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
-				authnContextClassRef.setAuthnContextClassRef(request.getAuthenticationContextClassReference()
-					.toString());
-				result.getAuthnContextClassRefs().add(authnContextClassRef);
+			List<String> declarations = requestedAuthenticationContext.getAuthenticationContextClassDeclarations();
+			if (!CollectionUtils.isEmpty(declarations)) {
+				result.getAuthnContextDeclRefs().addAll(declarations.stream().map(declaration -> {
+					AuthnContextDeclRef authnContextDeclRef = buildSAMLObject(AuthnContextDeclRef.class);
+					authnContextDeclRef.setAuthnContextDeclRef(declaration);
+					return authnContextDeclRef;
+				}).collect(Collectors.toList()));
+			}
+			List<String> references = requestedAuthenticationContext.getAuthenticationContextClassReferences();
+			if (!CollectionUtils.isEmpty(references)) {
+				result.getAuthnContextClassRefs().addAll(references.stream().map(reference -> {
+					AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
+					authnContextClassRef.setAuthnContextClassRef(reference);
+					return authnContextClassRef;
+				}).collect(Collectors.toList()));
 			}
 		}
 		return result;
@@ -1521,28 +1539,26 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 
 		for (AuthnStatement s : ofNullable(authnStatements).orElse(emptyList())) {
 			AuthnContext authnContext = s.getAuthnContext();
-			AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
-			String ref = null;
-			if (authnContextClassRef.getAuthnContextClassRef() != null) {
-				ref = authnContextClassRef.getAuthnContextClassRef();
+			AuthenticationContext authenticationContext = null;
+			if (authnContext != null) {
+				AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
+				String classReference = authnContextClassRef != null ? authnContextClassRef.getAuthnContextClassRef() : null;
+				AuthnContextDeclRef authnContextDeclRef = authnContext.getAuthnContextDeclRef();
+				String classDeclaration = authnContextDeclRef != null ? authnContextDeclRef.getAuthnContextDeclRef() : null;
+				List<AuthenticatingAuthority> authenticatingAuthorities = authnContext.getAuthenticatingAuthorities();
+				List<String> authenticatingAuthoritiesUrns = authenticatingAuthorities != null ?
+					authenticatingAuthorities.stream().map(authority -> authority.getURI()).collect(Collectors.toList()) :
+					null;
+				authenticationContext = new AuthenticationContext()
+					.setClassReference(classReference)
+					.setClassDeclaration(classDeclaration)
+					.setAuthenticatingAuthorities(authenticatingAuthoritiesUrns);
 			}
-			List<AuthenticatingAuthority> authenticatingAuthorities = authnContext.getAuthenticatingAuthorities();
-			List<String> authenticatingAuthoritiesUrns = authenticatingAuthorities != null ?
-				authenticatingAuthorities.stream().map(authority -> authority.getURI()).collect(Collectors.toList()) :
-				null;
-			result.add(
-				new AuthenticationStatement()
-					.setSessionIndex(s.getSessionIndex())
-					.setAuthInstant(s.getAuthnInstant())
-					.setSessionNotOnOrAfter(s.getSessionNotOnOrAfter())
-					.setAuthenticationContext(
-						authnContext != null ?
-							new AuthenticationContext()
-								.setClassReference(AuthenticationContextClassReference.fromUrn(ref))
-								.setAuthenticatingAuthorities(authenticatingAuthoritiesUrns)
-							: null
-					)
-			);
+			result.add(new AuthenticationStatement()
+				.setSessionIndex(s.getSessionIndex())
+				.setAuthInstant(s.getAuthnInstant())
+				.setSessionNotOnOrAfter(s.getSessionNotOnOrAfter())
+				.setAuthenticationContext(authenticationContext));
 		}
 		return result;
 	}
@@ -1692,18 +1708,17 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setIssueInstant(request.getIssueInstant())
 			.setVersion(request.getVersion().toString())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
-			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
 			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()))
 			.setScoping(fromScoping(request.getScoping()));
 		return result;
 	}
 
-	protected AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
-		AuthenticationContextClassReference result = null;
+	protected AuthenticationContextClassReferenceValue getAuthenticationContextClassReference(AuthnRequest request) {
+		AuthenticationContextClassReferenceValue result = null;
 		final RequestedAuthnContext context = request.getRequestedAuthnContext();
 		if (context != null && !CollectionUtils.isEmpty(context.getAuthnContextClassRefs())) {
 			final String urn = context.getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
-			result = AuthenticationContextClassReference.fromUrn(urn);
+			result = AuthenticationContextClassReferenceValue.fromUrn(urn);
 		}
 		return result;
 	}
@@ -1711,10 +1726,26 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 	protected RequestedAuthenticationContext getRequestedAuthenticationContext(AuthnRequest request) {
 		RequestedAuthenticationContext result = null;
 
-		if (request.getRequestedAuthnContext() != null) {
-			AuthnContextComparisonTypeEnumeration comparison = request.getRequestedAuthnContext().getComparison();
+		RequestedAuthnContext requestedAuthnContext = request.getRequestedAuthnContext();
+		if (requestedAuthnContext != null) {
+			result = new RequestedAuthenticationContext();
+			AuthnContextComparisonTypeEnumeration comparison = requestedAuthnContext.getComparison();
 			if (null != comparison) {
-				result = RequestedAuthenticationContext.valueOf(comparison.toString());
+				result.setComparison(Comparison.valueOf(comparison.toString()));
+			}
+			List<AuthnContextDeclRef> authnContextDeclRefs = requestedAuthnContext.getAuthnContextDeclRefs();
+			if (!CollectionUtils.isEmpty(authnContextDeclRefs)) {
+				List<String> authenticationContextClassDeclarations = authnContextDeclRefs.stream()
+					.map(AuthnContextDeclRef::getAuthnContextDeclRef)
+					.collect(Collectors.toList());
+				result.setAuthenticationContextClassDeclarations(authenticationContextClassDeclarations);
+			}
+			List<AuthnContextClassRef> authnContextClassRefs = requestedAuthnContext.getAuthnContextClassRefs();
+			if (!CollectionUtils.isEmpty(authnContextClassRefs)) {
+				List<String> authenticationContextClassReferences = authnContextClassRefs.stream()
+					.map(AuthnContextClassRef::getAuthnContextClassRef)
+					.collect(Collectors.toList());
+				result.setAuthenticationContextClassReferences(authenticationContextClassReferences);
 			}
 		}
 		return result;

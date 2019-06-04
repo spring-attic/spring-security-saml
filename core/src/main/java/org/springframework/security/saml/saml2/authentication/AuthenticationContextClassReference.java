@@ -17,141 +17,192 @@
 
 package org.springframework.security.saml.saml2.authentication;
 
-public enum AuthenticationContextClassReference {
-	/**
-	 * Internet Protocol
-	 */
-	INTERNET_PROTOCOL("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol"),
 
-	/**
-	 * Internet Protocol Password
-	 */
-	INTERNET_PROTOCOL_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword"),
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-	/**
-	 * Kerberos
-	 */
-	KERBEROS("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos"),
+import org.springframework.security.saml.SamlException;
 
-	/**
-	 * Mobile One Factor Unregistered
-	 */
-	MOBILE_ONE_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered"),
-
-	/**
-	 * Mobile Two Factor Unregistered
-	 */
-	MOBILE_TWO_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered"),
-
-	/**
-	 * Mobile One Factor Contract
-	 */
-	MOBILE_ONE_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract"),
-
-	/**
-	 * Mobile Two Factor Contract
-	 */
-	MOBILE_TWO_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract"),
-
-	/**
-	 * Password
-	 */
-	PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:Password"),
-
-	/**
-	 * Password Protected Transport
-	 */
-	PASSWORD_PROTECTED_TRANSPORT("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"),
-
-	/**
-	 * Previous Session
-	 */
-	PREVIOUS_SESSION("urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession"),
-
-	/**
-	 * X509 Public Key
-	 */
-	X509_PUBLIC_KEY("urn:oasis:names:tc:SAML:2.0:ac:classes:X509"),
-
-	/**
-	 * PGP
-	 */
-	PGP("urn:oasis:names:tc:SAML:2.0:ac:classes:PGP"),
-
-	/**
-	 * SPKI
-	 */
-	SPKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI"),
-
-	/**
-	 * XML Digital Signature
-	 */
-	XML_DIGITAL_SIGNATURE("urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig"),
-
-	/**
-	 * Smart Card
-	 */
-	SMARTCARD("urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard"),
-
-	/**
-	 * Smart Card PKI
-	 */
-	SMARTCARD_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
-
-	/**
-	 * Software PKI
-	 */
-	SOFTWARE_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI"),
-
-	/**
-	 * Telephony
-	 */
-	TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony"),
-
-	/**
-	 * Nomadic Telephony
-	 */
-	NOMADIC_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony"),
-
-	/**
-	 * Personalized Telephony
-	 */
-	PERSONAL_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony"),
-
-	/**
-	 * Authenticated Telephony
-	 */
-	AUTHENTICATED_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony"),
-
-	/**
-	 * Secure Remote Password
-	 */
-	SECURE_REMOTE_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword"),
-
-	/**
-	 * SSL/TLS Client
-	 */
-	TLS_CLIENT("urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient"),
-
-	/**
-	 * Time Synchornized Token
-	 */
-	TIME_SYNC_TOKEN("urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken"),
-
-	/**
-	 * unspecified
-	 */
-	UNSPECIFIED("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.AuthenticationContextClassReferenceType.UNSPECIFIED;
 
 
-	private final String urn;
+public class AuthenticationContextClassReference {
 
-	AuthenticationContextClassReference(String urn) {
-		this.urn = urn;
+	public enum AuthenticationContextClassReferenceType {
+		/**
+		 * Internet Protocol
+		 */
+		INTERNET_PROTOCOL("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol"),
+
+		/**
+		 * Internet Protocol Password
+		 */
+		INTERNET_PROTOCOL_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword"),
+
+		/**
+		 * Kerberos
+		 */
+		KERBEROS("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos"),
+
+		/**
+		 * Mobile One Factor Unregistered
+		 */
+		MOBILE_ONE_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered"),
+
+		/**
+		 * Mobile Two Factor Unregistered
+		 */
+		MOBILE_TWO_FACTOR_UNREG("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered"),
+
+		/**
+		 * Mobile One Factor Contract
+		 */
+		MOBILE_ONE_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract"),
+
+		/**
+		 * Mobile Two Factor Contract
+		 */
+		MOBILE_TWO_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract"),
+
+		/**
+		 * Password
+		 */
+		PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:Password"),
+
+		/**
+		 * Password Protected Transport
+		 */
+		PASSWORD_PROTECTED_TRANSPORT("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"),
+
+		/**
+		 * Previous Session
+		 */
+		PREVIOUS_SESSION("urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession"),
+
+		/**
+		 * X509 Public Key
+		 */
+		X509_PUBLIC_KEY("urn:oasis:names:tc:SAML:2.0:ac:classes:X509"),
+
+		/**
+		 * PGP
+		 */
+		PGP("urn:oasis:names:tc:SAML:2.0:ac:classes:PGP"),
+
+		/**
+		 * SPKI
+		 */
+		SPKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI"),
+
+		/**
+		 * XML Digital Signature
+		 */
+		XML_DIGITAL_SIGNATURE("urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig"),
+
+		/**
+		 * Smart Card
+		 */
+		SMARTCARD("urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard"),
+
+		/**
+		 * Smart Card PKI
+		 */
+		SMARTCARD_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI"),
+
+		/**
+		 * Software PKI
+		 */
+		SOFTWARE_PKI("urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI"),
+
+		/**
+		 * Telephony
+		 */
+		TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony"),
+
+		/**
+		 * Nomadic Telephony
+		 */
+		NOMADIC_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony"),
+
+		/**
+		 * Personalized Telephony
+		 */
+		PERSONAL_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony"),
+
+		/**
+		 * Authenticated Telephony
+		 */
+		AUTHENTICATED_TELEPHONY("urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony"),
+
+		/**
+		 * Secure Remote Password
+		 */
+		SECURE_REMOTE_PASSWORD("urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword"),
+
+		/**
+		 * SSL/TLS Client
+		 */
+		TLS_CLIENT("urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient"),
+
+		/**
+		 * Time Synchornized Token
+		 */
+		TIME_SYNC_TOKEN("urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken"),
+
+		/**
+		 * unspecified
+		 */
+		UNSPECIFIED("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
+
+
+		private final String urn;
+
+		AuthenticationContextClassReferenceType(String urn) {
+			this.urn = urn;
+		}
+
+		@Override
+		public String toString() {
+			return urn;
+		}
 	}
 
-	public static AuthenticationContextClassReference fromUrn(String ctxRef) {
-		for (AuthenticationContextClassReference ref : values()) {
+	private static ConcurrentMap<AuthenticationContextClassReferenceType, AuthenticationContextClassReference>
+		singletons = new ConcurrentHashMap<>();
+
+	private final String value;
+	private final AuthenticationContextClassReferenceType type;
+
+	private AuthenticationContextClassReference(String value,
+												AuthenticationContextClassReferenceType type) {
+		this.value = value;
+		this.type = type;
+	}
+
+	private AuthenticationContextClassReference(AuthenticationContextClassReferenceType type) {
+		this(type.toString(), type);
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public URI getValueAsUri() {
+		try {
+			return new URI(getValue());
+		} catch (URISyntaxException e) {
+			throw new SamlException(e);
+		}
+	}
+
+	public AuthenticationContextClassReferenceType getType() {
+		return type;
+	}
+
+	private static AuthenticationContextClassReferenceType getType(String ctxRef) {
+		for (AuthenticationContextClassReferenceType ref : AuthenticationContextClassReferenceType.values()) {
 			if (ref.urn.equalsIgnoreCase(ctxRef)) {
 				return ref;
 			}
@@ -159,8 +210,58 @@ public enum AuthenticationContextClassReference {
 		return UNSPECIFIED;
 	}
 
+	public static AuthenticationContextClassReference fromUrn(String ctxRef) {
+		final AuthenticationContextClassReferenceType type = getType(ctxRef);
+		if (type.toString().equals(ctxRef)) {
+			final AuthenticationContextClassReference result = singletons.get(type);
+			if (result == null) {
+				final AuthenticationContextClassReference instance =
+					new AuthenticationContextClassReference(type);
+				AuthenticationContextClassReference previous = singletons.putIfAbsent(type, instance);
+				if (previous != null) {
+					return previous;
+				} else {
+					return instance;
+				}
+			} else {
+				return result;
+			}
+		} else {
+			return new AuthenticationContextClassReference(ctxRef, UNSPECIFIED);
+		}
+	}
+
+	public static AuthenticationContextClassReference fromUrn(AuthenticationContextClassReferenceType ctxRef) {
+		return fromUrn(ctxRef.toString());
+	}
+
 	@Override
 	public String toString() {
-		return urn;
+		return getValue();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof AuthenticationContextClassReference)) {
+			return false;
+		}
+
+		AuthenticationContextClassReference that = (AuthenticationContextClassReference) o;
+
+		if (!getValue().equals(that.getValue())) {
+			return false;
+		}
+		return getType() == that.getType();
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getValue().hashCode();
+		result = 31 * result + getType().hashCode();
+		return result;
 	}
 }

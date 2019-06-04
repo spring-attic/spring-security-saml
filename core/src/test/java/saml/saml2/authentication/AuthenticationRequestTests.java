@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference.Saml2AuthenticationContextClassReferenceType.PASSWORD_PROTECTED_TRANSPORT;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
@@ -150,7 +151,11 @@ class AuthenticationRequestTests extends MetadataBase {
 		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		request.setAuthenticationContextClassReference(
+			Saml2AuthenticationContextClassReference.fromUrn(
+				PASSWORD_PROTECTED_TRANSPORT.toString()
+			)
+		);
 
 		String xml = config.toXml(request);
 
@@ -199,7 +204,11 @@ class AuthenticationRequestTests extends MetadataBase {
 		Saml2AuthenticationRequest
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT);
+		request.setAuthenticationContextClassReference(
+			Saml2AuthenticationContextClassReference.fromUrn(
+				PASSWORD_PROTECTED_TRANSPORT
+			)
+		);
 
 		String xml = config.toXml(request);
 		Saml2AuthenticationRequest data =
@@ -218,7 +227,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
 		assertSame(Saml2RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
 		assertSame(
-			Saml2AuthenticationContextClassReference.PASSWORD_PROTECTED_TRANSPORT,
+			Saml2AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
 			data.getAuthenticationContextClassReference()
 		);
 

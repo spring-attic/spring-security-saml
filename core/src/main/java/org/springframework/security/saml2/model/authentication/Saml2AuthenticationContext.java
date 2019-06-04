@@ -20,11 +20,13 @@ package org.springframework.security.saml2.model.authentication;
 import java.util.Collections;
 import java.util.List;
 
-import static org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference.UNSPECIFIED;
+import static org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference.Saml2AuthenticationContextClassReferenceType.UNSPECIFIED;
 
 public class Saml2AuthenticationContext {
 
-	private Saml2AuthenticationContextClassReference classReference = UNSPECIFIED;
+	private Saml2AuthenticationContextClassReference classReference =
+		Saml2AuthenticationContextClassReference.fromUrn(UNSPECIFIED);
+
 	private List<String> authenticatingAuthorities = Collections.emptyList();
 
 

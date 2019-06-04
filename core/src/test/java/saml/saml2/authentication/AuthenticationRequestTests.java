@@ -146,6 +146,29 @@ class AuthenticationRequestTests extends MetadataBase {
 	}
 
 	@Test
+	public void custAuthenticationContextClassReference() {
+
+		Saml2AuthenticationRequest
+			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
+		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
+		final String ctxRef = "some:custom:accr";
+		request.setAuthenticationContextClassReference(
+			Saml2AuthenticationContextClassReference.fromUrn(
+				ctxRef
+			)
+		);
+
+		String xml = config.toXml(request);
+
+		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
+		Iterable<Node> nodes = getNodes(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()");
+		assertTextNodeValue(
+			nodes.iterator().next(),
+			equalTo(ctxRef)
+		);
+	}
+
+	@Test
 	public void createWithAutContext() {
 
 		Saml2AuthenticationRequest

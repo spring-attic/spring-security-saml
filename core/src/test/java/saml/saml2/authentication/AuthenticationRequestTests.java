@@ -17,6 +17,7 @@
 package saml.saml2.authentication;
 
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference;
 import org.springframework.security.saml2.model.authentication.Saml2AuthenticationRequest;
@@ -32,7 +33,9 @@ import org.w3c.dom.Node;
 import saml.saml2.metadata.MetadataBase;
 
 import static java.lang.Boolean.FALSE;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference.Saml2AuthenticationContextClassReferenceType.PASSWORD_PROTECTED_TRANSPORT;
+import static org.springframework.security.saml2.model.authentication.Saml2AuthenticationContextClassReference.Saml2AuthenticationContextClassReferenceType.SECURE_REMOTE_PASSWORD;
 import static org.springframework.security.saml2.model.metadata.Saml2NameId.PERSISTENT;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml2.util.XmlTestUtil.assertNodeCount;
@@ -152,9 +156,11 @@ class AuthenticationRequestTests extends MetadataBase {
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
 		final String ctxRef = "some:custom:accr";
+		final String ctxRef1 = "some:custom:accr1";
 		request.setAuthenticationContextClassReference(
-			Saml2AuthenticationContextClassReference.fromUrn(
-				ctxRef
+			asList(
+				Saml2AuthenticationContextClassReference.fromUrn(ctxRef),
+				Saml2AuthenticationContextClassReference.fromUrn(ctxRef1)
 			)
 		);
 
@@ -162,9 +168,14 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		assertNodeCount(xml, "//samlp:AuthnRequest", 1);
 		Iterable<Node> nodes = getNodes(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()");
+		final Iterator<Node> iterator = nodes.iterator();
 		assertTextNodeValue(
-			nodes.iterator().next(),
+			iterator.next(),
 			equalTo(ctxRef)
+		);
+		assertTextNodeValue(
+			iterator.next(),
+			equalTo(ctxRef1)
 		);
 	}
 
@@ -175,9 +186,11 @@ class AuthenticationRequestTests extends MetadataBase {
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(
-			Saml2AuthenticationContextClassReference.fromUrn(
-				PASSWORD_PROTECTED_TRANSPORT.toString()
+			asList(
+				Saml2AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
+				Saml2AuthenticationContextClassReference.fromUrn(SECURE_REMOTE_PASSWORD)
 			)
+
 		);
 
 		String xml = config.toXml(request);
@@ -213,12 +226,17 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "Comparison", equalTo("exact"));
 
 		// AuthnContextClassRef must be direct child of RequestedAuthnContext
-		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef", 1);
-		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()", 1);
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef", 2);
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()", 2);
 		nodes = getNodes(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()");
+		Iterator<Node> iterator = nodes.iterator();
 		assertTextNodeValue(
-			nodes.iterator().next(),
-			equalTo("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport")
+			iterator.next(),
+			equalTo(PASSWORD_PROTECTED_TRANSPORT.toString())
+		);
+		assertTextNodeValue(
+			iterator.next(),
+			equalTo(SECURE_REMOTE_PASSWORD.toString())
 		);
 	}
 
@@ -228,8 +246,9 @@ class AuthenticationRequestTests extends MetadataBase {
 			request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(Saml2RequestedAuthenticationContext.exact);
 		request.setAuthenticationContextClassReference(
-			Saml2AuthenticationContextClassReference.fromUrn(
-				PASSWORD_PROTECTED_TRANSPORT
+			asList(
+				Saml2AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
+				Saml2AuthenticationContextClassReference.fromUrn(SECURE_REMOTE_PASSWORD)
 			)
 		);
 
@@ -249,9 +268,12 @@ class AuthenticationRequestTests extends MetadataBase {
 		);
 		assertSame(PERSISTENT, data.getNameIdPolicy().getFormat());
 		assertSame(Saml2RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
-		assertSame(
-			Saml2AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
-			data.getAuthenticationContextClassReference()
+		assertThat(
+			data.getAuthenticationContextClassReference(),
+			containsInAnyOrder(
+				Saml2AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
+				Saml2AuthenticationContextClassReference.fromUrn(SECURE_REMOTE_PASSWORD)
+			)
 		);
 
 		assertThat(data.getVersion(), equalTo("2.0"));

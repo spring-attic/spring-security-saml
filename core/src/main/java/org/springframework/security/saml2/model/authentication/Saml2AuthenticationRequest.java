@@ -17,6 +17,8 @@
 
 package org.springframework.security.saml2.model.authentication;
 
+import java.util.List;
+
 import org.springframework.security.saml2.model.Saml2SignableObject;
 import org.springframework.security.saml2.model.key.Saml2KeyData;
 import org.springframework.security.saml2.model.metadata.Saml2Binding;
@@ -38,7 +40,7 @@ public class Saml2AuthenticationRequest extends Saml2Request<Saml2Authentication
 	private Boolean isPassive;
 	private Saml2Endpoint assertionConsumerService;
 	private Saml2RequestedAuthenticationContext requestedAuthenticationContext;
-	private Saml2AuthenticationContextClassReference authenticationContextClassReference;
+	private List<Saml2AuthenticationContextClassReference> authenticationContextClassReference;
 	private Saml2KeyData signingKey;
 	private Saml2AlgorithmMethod algorithm;
 	private Saml2DigestMethod digest;
@@ -84,12 +86,12 @@ public class Saml2AuthenticationRequest extends Saml2Request<Saml2Authentication
 		return _this();
 	}
 
-	public Saml2AuthenticationContextClassReference getAuthenticationContextClassReference() {
+	public List<Saml2AuthenticationContextClassReference> getAuthenticationContextClassReference() {
 		return authenticationContextClassReference;
 	}
 
 	public Saml2AuthenticationRequest setAuthenticationContextClassReference(
-		Saml2AuthenticationContextClassReference authenticationContextClassReference
+		List<Saml2AuthenticationContextClassReference> authenticationContextClassReference
 	) {
 		this.authenticationContextClassReference = authenticationContextClassReference;
 		return _this();

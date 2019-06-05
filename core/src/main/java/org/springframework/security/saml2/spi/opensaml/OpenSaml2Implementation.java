@@ -1243,9 +1243,8 @@ public class OpenSaml2Implementation extends Saml2JavaAbstraction<OpenSaml2Imple
 	}
 
 	private RequestedAuthnContext getRequestedAuthenticationContext(Saml2AuthenticationRequest request) {
-		RequestedAuthnContext result = null;
 		if (request.getRequestedAuthenticationContext() != null) {
-			result = buildSAMLObject(RequestedAuthnContext.class);
+			final RequestedAuthnContext result = buildSAMLObject(RequestedAuthnContext.class);
 			switch (request.getRequestedAuthenticationContext()) {
 				case exact:
 					result.setComparison(EXACT);
@@ -1264,13 +1263,17 @@ public class OpenSaml2Implementation extends Saml2JavaAbstraction<OpenSaml2Imple
 					break;
 			}
 			if (request.getAuthenticationContextClassReference() != null) {
-				final AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
-				authnContextClassRef.setAuthnContextClassRef(request.getAuthenticationContextClassReference()
-					.toString());
-				result.getAuthnContextClassRefs().add(authnContextClassRef);
+				request.getAuthenticationContextClassReference().stream().forEach(
+					accr -> {
+						final AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
+						authnContextClassRef.setAuthnContextClassRef(accr.getValue());
+						result.getAuthnContextClassRefs().add(authnContextClassRef);
+					}
+				);
 			}
+			return result;
 		}
-		return result;
+		return null;
 	}
 
 	private NameIDPolicy getNameIDPolicy(
@@ -1698,12 +1701,14 @@ public class OpenSaml2Implementation extends Saml2JavaAbstraction<OpenSaml2Imple
 		return result;
 	}
 
-	private Saml2AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
-		Saml2AuthenticationContextClassReference result = null;
+	private List<Saml2AuthenticationContextClassReference> getAuthenticationContextClassReference(AuthnRequest request) {
 		final RequestedAuthnContext context = request.getRequestedAuthnContext();
+		List<Saml2AuthenticationContextClassReference> result = new LinkedList<>();
 		if (context != null && !CollectionUtils.isEmpty(context.getAuthnContextClassRefs())) {
-			final String urn = context.getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
-			result = Saml2AuthenticationContextClassReference.fromUrn(urn);
+			for (AuthnContextClassRef ref : context.getAuthnContextClassRefs()) {
+				final String urn = ref.getAuthnContextClassRef();
+				result.add(Saml2AuthenticationContextClassReference.fromUrn(urn));
+			}
 		}
 		return result;
 	}

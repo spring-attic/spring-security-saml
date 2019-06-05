@@ -1250,11 +1250,15 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 					result.setComparison(EXACT);
 					break;
 			}
-			if (request.getAuthenticationContextClassReference() != null) {
-				final AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
-				authnContextClassRef.setAuthnContextClassRef(request.getAuthenticationContextClassReference()
-					.toString());
-				result.getAuthnContextClassRefs().add(authnContextClassRef);
+			if (!StringUtils.isEmpty(request.getAuthenticationContextClassReferences())) {
+				List<AuthnContextClassRef> authnContextClassRefs = request.getAuthenticationContextClassReferences()
+					.stream()
+					.map(authenticationContextClassReference -> {
+						AuthnContextClassRef authnContextClassRef = buildSAMLObject(AuthnContextClassRef.class);
+						authnContextClassRef.setAuthnContextClassRef(authenticationContextClassReference.getValue());
+						return authnContextClassRef;
+					}).collect(Collectors.toList());
+				result.getAuthnContextClassRefs().addAll(authnContextClassRefs);
 			}
 		}
 		return result;
@@ -1692,18 +1696,19 @@ public class OpenSamlImplementation extends SpringSecuritySaml<OpenSamlImplement
 			.setIssueInstant(request.getIssueInstant())
 			.setVersion(request.getVersion().toString())
 			.setRequestedAuthenticationContext(getRequestedAuthenticationContext(request))
-			.setAuthenticationContextClassReference(getAuthenticationContextClassReference(request))
+			.setAuthenticationContextClassReferences(getAuthenticationContextClassReferences(request))
 			.setNameIdPolicy(fromNameIDPolicy(request.getNameIDPolicy()))
 			.setScoping(fromScoping(request.getScoping()));
 		return result;
 	}
 
-	protected AuthenticationContextClassReference getAuthenticationContextClassReference(AuthnRequest request) {
-		AuthenticationContextClassReference result = null;
+	protected List<AuthenticationContextClassReference> getAuthenticationContextClassReferences(AuthnRequest request) {
+		List<AuthenticationContextClassReference> result = null;
 		final RequestedAuthnContext context = request.getRequestedAuthnContext();
 		if (context != null && !CollectionUtils.isEmpty(context.getAuthnContextClassRefs())) {
-			final String urn = context.getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
-			result = AuthenticationContextClassReference.fromUrn(urn);
+			result = context.getAuthnContextClassRefs().stream()
+				.map(ref -> AuthenticationContextClassReference.fromUrn(ref.getAuthnContextClassRef()))
+				.collect(Collectors.toList());
 		}
 		return result;
 	}

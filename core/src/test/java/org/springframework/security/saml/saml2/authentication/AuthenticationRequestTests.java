@@ -16,7 +16,9 @@
  */
 package org.springframework.security.saml.saml2.authentication;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.springframework.security.saml.saml2.metadata.Binding;
 import org.springframework.security.saml.saml2.metadata.MetadataBase;
@@ -35,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.AuthenticationContextClassReferenceType.PASSWORD_PROTECTED_TRANSPORT;
+import static org.springframework.security.saml.saml2.authentication.AuthenticationContextClassReference.AuthenticationContextClassReferenceType.PREVIOUS_SESSION;
 import static org.springframework.security.saml.saml2.metadata.NameId.PERSISTENT;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeAttribute;
 import static org.springframework.security.saml.util.XmlTestUtil.assertNodeCount;
@@ -113,8 +116,9 @@ class AuthenticationRequestTests extends MetadataBase {
 
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(
-			AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT)
+		request.setAuthenticationContextClassReferences(
+			Arrays.asList(AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
+				AuthenticationContextClassReference.fromUrn(PREVIOUS_SESSION))
 		);
 
 		String xml = config.toXml(request);
@@ -150,12 +154,17 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertNodeAttribute(nodes.iterator().next(), "Comparison", equalTo("exact"));
 
 		// AuthnContextClassRef must be direct child of RequestedAuthnContext
-		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef", 1);
-		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()", 1);
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef", 2);
+		assertNodeCount(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()", 2);
 		nodes = getNodes(xml, "//samlp:RequestedAuthnContext/saml:AuthnContextClassRef/text()");
+		Iterator<Node> iterator = nodes.iterator();
 		assertTextNodeValue(
-			nodes.iterator().next(),
-			equalTo("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport")
+			iterator.next(),
+			equalTo(PASSWORD_PROTECTED_TRANSPORT.toString())
+		);
+		assertTextNodeValue(
+			iterator.next(),
+			equalTo(PREVIOUS_SESSION.toString())
 		);
 	}
 
@@ -163,8 +172,8 @@ class AuthenticationRequestTests extends MetadataBase {
 	public void parseWithAutContext() {
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
-		request.setAuthenticationContextClassReference(
-			AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT)
+		request.setAuthenticationContextClassReferences(
+			Collections.singletonList(AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT))
 		);
 
 		String xml = config.toXml(request);
@@ -185,7 +194,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertSame(RequestedAuthenticationContext.exact, data.getRequestedAuthenticationContext());
 		assertSame(
 			AuthenticationContextClassReference.fromUrn(PASSWORD_PROTECTED_TRANSPORT),
-			data.getAuthenticationContextClassReference()
+			data.getAuthenticationContextClassReferences().get(0)
 		);
 
 		assertThat(data.getVersion(), equalTo("2.0"));
@@ -204,7 +213,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		AuthenticationRequest request = helper.authenticationRequest(serviceProviderMetadata, identityProviderMetadata);
 		request.setRequestedAuthenticationContext(RequestedAuthenticationContext.exact);
 		final String accr = "some:custom:context:class";
-		request.setAuthenticationContextClassReference(AuthenticationContextClassReference.fromUrn(accr));
+		request.setAuthenticationContextClassReferences(Collections.singletonList(AuthenticationContextClassReference.fromUrn(accr)));
 
 		String xml = config.toXml(request);
 		AuthenticationRequest data =
@@ -215,7 +224,7 @@ class AuthenticationRequestTests extends MetadataBase {
 		assertTrue(data.getSignature().isValidated());
 
 		assertThat(
-			data.getAuthenticationContextClassReference(),
+			data.getAuthenticationContextClassReferences().get(0),
 			equalTo(AuthenticationContextClassReference.fromUrn(accr))
 		);
 

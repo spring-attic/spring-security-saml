@@ -23,6 +23,8 @@ import org.springframework.security.saml.saml2.metadata.Endpoint;
 import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 
+import java.util.List;
+
 /**
  * Implementation samlp:AuthnRequestType as defined by
  * https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf
@@ -36,7 +38,7 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 	private Boolean isPassive;
 	private Endpoint assertionConsumerService;
 	private RequestedAuthenticationContext requestedAuthenticationContext;
-	private AuthenticationContextClassReference authenticationContextClassReference;
+	private List<AuthenticationContextClassReference> authenticationContextClassReferences;
 	private SimpleKey signingKey;
 	private AlgorithmMethod algorithm;
 	private DigestMethod digest;
@@ -82,14 +84,14 @@ public class AuthenticationRequest extends Request<AuthenticationRequest> {
 		return _this();
 	}
 
-	public AuthenticationContextClassReference getAuthenticationContextClassReference() {
-		return authenticationContextClassReference;
+	public List<AuthenticationContextClassReference> getAuthenticationContextClassReferences() {
+		return authenticationContextClassReferences;
 	}
 
-	public AuthenticationRequest setAuthenticationContextClassReference(
-		AuthenticationContextClassReference authenticationContextClassReference
+	public AuthenticationRequest setAuthenticationContextClassReferences(
+		List<AuthenticationContextClassReference> authenticationContextClassReferences
 	) {
-		this.authenticationContextClassReference = authenticationContextClassReference;
+		this.authenticationContextClassReferences = authenticationContextClassReferences;
 		return _this();
 	}
 

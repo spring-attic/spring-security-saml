@@ -127,7 +127,7 @@ public class ExtendedMetadata implements Serializable, Cloneable {
     /**
      * Flag indicating whether incoming LogoutResposne messages must be authenticated.
      */
-    private boolean requireLogoutResponseSigned;
+    private boolean requireLogoutResponseSigned = true;
 
     /**
      * If true received artifactResolve messages will require a signature, sent artifactResolve will be signed.

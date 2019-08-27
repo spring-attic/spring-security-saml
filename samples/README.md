@@ -24,7 +24,7 @@ Service Provider runs on `http://localhost:8081/sample-idp`
 This sample supports [SP initiated login](http://localhost:8080/sample-sp)
 and [IDP initiated login](http://localhost:8081/sample-idp/saml/idp/init?sp=http://localhost:8080/sample-sp)
 
-***Againt a running SimpleSamlPHP Server***
+***Against a running SimpleSamlPHP Server***
 
 * Spring Security SAML [as a Service Provider](http://localhost:8080/sample-sp)
 * Spring Security SAML [as an initiating Service Provider](http://localhost:8080/sample-sp/saml/sp/discovery?idp=https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php)

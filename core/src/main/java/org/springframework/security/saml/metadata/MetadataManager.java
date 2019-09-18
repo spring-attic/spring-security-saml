@@ -250,18 +250,18 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                 try {
 
-                    log.debug("Refreshing metadata provider {}", provider.toString());
+                    log.debug("Refreshing metadata provider {}", provider);
                     initializeProviderFilters(provider);
                     initializeProvider(provider);
                     initializeProviderData(provider);
 
                     // Make provider available for queries
                     super.addMetadataProvider(provider);
-                    log.debug("Metadata provider was initialized {}", provider.toString());
+                    log.debug("Metadata provider was initialized {}", provider);
 
                 } catch (MetadataProviderException e) {
 
-                    log.error("Initialization of metadata provider " + provider + " failed, provider will be ignored", e);
+                    log.error("Initialization of metadata provider {} failed, provider will be ignored", provider, e);
 
                 }
 
@@ -689,7 +689,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      */
     private void addDescriptors(List<String> result, EntitiesDescriptor descriptors) throws MetadataProviderException {
 
-        log.debug("Found metadata EntitiesDescriptor with ID", descriptors.getID());
+        log.debug("Found metadata EntitiesDescriptor with ID {}", descriptors.getID());
 
         if (descriptors.getEntitiesDescriptors() != null) {
             for (EntitiesDescriptor descriptor : descriptors.getEntitiesDescriptors()) {
@@ -715,7 +715,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     private void addDescriptor(List<String> result, EntityDescriptor descriptor) throws MetadataProviderException {
 
         String entityID = descriptor.getEntityID();
-        log.debug("Found metadata EntityDescriptor with ID", entityID);
+        log.debug("Found metadata EntityDescriptor with ID {}", entityID);
         result.add(entityID);
 
     }

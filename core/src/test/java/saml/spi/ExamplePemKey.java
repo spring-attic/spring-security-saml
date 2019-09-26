@@ -28,6 +28,43 @@ openssl x509 -passin pass:${DST}password -req -days 3650 -in server.csr -signkey
 
  */
 public enum ExamplePemKey {
+	PKCS8_ENCRYPTED_TEST_KEY(
+		"-----BEGIN ENCRYPTED PRIVATE KEY-----\n" +
+			"MIICoTAbBgkqhkiG9w0BBQMwDgQIThAglp7gJIUCAggABIICgAi4ThqaZ3zy6oz6\n" +
+			"4ef75rKASLAoLbyMquY06zYUHQbrCliLvsq6h5MTcQWSyZdgBENA0e8EDP0yzXaq\n" +
+			"+kBgSLmyTdvs7yjG9v1pmMVVm3xGFy7UylTeJroKN53VHuX1D+VFfkgmik+dbKVb\n" +
+			"qLBqiJyEZbckbSvhkaEkklGss9FpoCeI0RiGNfFtMBcStWsXCPaBgrzOgzTEgaMZ\n" +
+			"5bnUW41woG7W2bDWo5nLoGtHdtUwfvGKsbsSgjS2ntoUM6S0twlrDOzGB/NfFl4V\n" +
+			"bPCwHVaJgTOBDDSCf7RVRrYQG42CA90DXLqCXZ/pe1ccb3ilShbsIKvhDKRB/sOL\n" +
+			"cYgjGg4qTO7SwHCr/bC7d3wUoh5XMMXRkycxKkAm6ty+sJn1jva6+m3N9+tUF6CM\n" +
+			"l5pLZxjkUNCAQUDwpR/MAtlv2FOJ9i/u+sj229pxWTZL1Vn5C/sRHFqMwQR2Awog\n" +
+			"0GLINRG/5olbwpgeaUJEvk9cacoWtdtKfEHoeorckysMPVkIrNaY0RAg51omNhkY\n" +
+			"ljmd5SwzcLzR/zB0GEGyRh609LKAU1n7sMewfywfRyOvY4R0rLezRVAaWFw6454q\n" +
+			"UEzTWgjTOdswuhMeK9jySZW7rHBwlTQy/Cer+QnkU2AJUZ0Ol202msluWgWQXI8W\n" +
+			"hjRHIHZzBOsCZVtlubaLfEYgl3xptltcebG1XQidNKBViuTvbrSZC+ILksglACGw\n" +
+			"NpCwbDYjIgF7Kt2niDbE6LqRejT2K4fQglSqrO0gks9hZFI12bxRYdOg1sWYO8u1\n" +
+			"WIWcPbyIQ1BkGp+SnO+m18SLPKfWJ5GV710/Ie9Gd4Ubhc/ioQzGhdnKSEXXDzTD\n" +
+			"aZ/keQ0=\n" +
+			"-----END ENCRYPTED PRIVATE KEY-----",
+		"-----BEGIN CERTIFICATE-----\n" +
+			"MIIChTCCAe4CCQDUctgDcqmqOzANBgkqhkiG9w0BAQsFADCBhjELMAkGA1UEBhMC\n" +
+			"VVMxEzARBgNVBAgMCldhc2hpbmd0b24xEjAQBgNVBAcMCVZhbmNvdXZlcjEdMBsG\n" +
+			"A1UECgwUU3ByaW5nIFNlY3VyaXR5IFNBTUwxDDAKBgNVBAsMA2lkcDEhMB8GA1UE\n" +
+			"AwwYaWRwLnNwcmluZy5zZWN1cml0eS5zYW1sMB4XDTE5MDkyNjA1MjcxNVoXDTI5\n" +
+			"MDkyMzA1MjcxNVowgYYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApXYXNoaW5ndG9u\n" +
+			"MRIwEAYDVQQHDAlWYW5jb3V2ZXIxHTAbBgNVBAoMFFNwcmluZyBTZWN1cml0eSBT\n" +
+			"QU1MMQwwCgYDVQQLDANpZHAxITAfBgNVBAMMGGlkcC5zcHJpbmcuc2VjdXJpdHku\n" +
+			"c2FtbDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA9qWQSrWX34LedCMs5A2j\n" +
+			"vF75y1swp7TuEDukirWYxlh8GGm8TZzLeWj9mLgoF/CRdee4LSP9eD/kmioYrug3\n" +
+			"p27BJtigTd5KD6ZmM7tLhhV4ITeOaPOCbwNkLbb/uUwBgU2crplRIx/IG9I4b6Op\n" +
+			"tF8lcKm2TGqeljz4t03HZXkCAwEAATANBgkqhkiG9w0BAQsFAAOBgQC4g8UyItjz\n" +
+			"fejgmRnA8WIgfitxyK78vONg7IB/6VQry23zXsT2VnWRa1zv3NI1qG6iuN8juUqZ\n" +
+			"FogKBWwGc/llHvmeH1myzmMuh2qkGDl3u1q/PwrnO9aA7iDQV3x/2MmkV3k/ZqxX\n" +
+			"SA8NVX1Z6ezCqISBrwmM3sYJz4WPbv08yw==\n" +
+			"-----END CERTIFICATE-----",
+		"changeit"
+	),
+
 	RSA_TEST_KEY(
 		"-----BEGIN RSA PRIVATE KEY-----\n" +
 			"MIICXQIBAAKBgQDHtC5gUXxBKpEqZTLkNvFwNGnNIkggNOwOQVNbpO0WVHIivig5\n" +

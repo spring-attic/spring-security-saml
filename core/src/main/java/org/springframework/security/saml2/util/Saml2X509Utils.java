@@ -31,14 +31,19 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
-import org.springframework.security.saml2.Saml2KeyException;
-
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
+import org.springframework.security.saml2.Saml2KeyException;
 
 public class Saml2X509Utils {
 
@@ -102,6 +107,13 @@ public class Saml2X509Utils {
 					.toCharArray());
 				kp = converter.getKeyPair(ckp.decryptKeyPair(decProv));
 			}
+			else if (obj instanceof PKCS8EncryptedPrivateKeyInfo) {
+				PKCS8EncryptedPrivateKeyInfo pkcs8EncryptedInfo = (PKCS8EncryptedPrivateKeyInfo) obj;
+				InputDecryptorProvider provider = new JceOpenSSLPKCS8DecryptorProviderBuilder()
+					.build(passphrase.toCharArray());
+				PrivateKeyInfo privateKeyInfo = pkcs8EncryptedInfo.decryptPrivateKeyInfo(provider);
+				return converter.getPrivateKey(privateKeyInfo);
+			}
 			else {
 				// Unencrypted key - no password needed
 				PEMKeyPair ukp = (PEMKeyPair) obj;
@@ -110,6 +122,10 @@ public class Saml2X509Utils {
 
 			return kp.getPrivate();
 		} catch (IOException e) {
+			throw new Saml2KeyException(e);
+		} catch (OperatorCreationException e) {
+			throw new Saml2KeyException(e);
+		} catch (PKCSException e) {
 			throw new Saml2KeyException(e);
 		}
 	}

@@ -16,6 +16,7 @@
  */
 package saml.spi;
 
+import java.security.*;
 import java.time.Clock;
 
 import org.springframework.security.saml2.spi.Saml2KeyStoreProvider;
@@ -24,11 +25,15 @@ import org.springframework.security.saml2.spi.opensaml.OpenSaml2Implementation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.saml2.spi.ExamplePemKey.IDP_RSA_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.RSA_TEST_KEY;
 import static org.springframework.security.saml2.spi.ExamplePemKey.SP_RSA_KEY;
+import static saml.spi.ExamplePemKey.PKCS8_ENCRYPTED_TEST_KEY;
 
 public class Saml2KeyStoreProviderTests {
+
+	private static final String TEST_ALIAS = "alias";
 
 	@BeforeAll
 	public static void initProvider() {
@@ -48,4 +53,13 @@ public class Saml2KeyStoreProviderTests {
 	public void test_sp_1024() {
 		new Saml2KeyStoreProvider(){}.getKeyStore(SP_RSA_KEY.getSimpleKey("alias"));
 	}
+
+	@Test
+	public void test_pkcs8_encrypted() throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+		KeyStore ks = new Saml2KeyStoreProvider(){}.getKeyStore(PKCS8_ENCRYPTED_TEST_KEY.getSimpleKey(TEST_ALIAS));
+		Key info = ks.getKey(TEST_ALIAS, PKCS8_ENCRYPTED_TEST_KEY.getPassphrase().toCharArray());
+		assertTrue(ks.containsAlias(TEST_ALIAS));
+		assertTrue(info != null && info.getFormat().equals("PKCS#8"));
+	}
+
 }

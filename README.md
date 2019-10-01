@@ -4,8 +4,19 @@
 
 Spring SAML Extension allows seamless inclusion of SAML 2.0 Service Provider capabilities in Spring applications. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, Ping Federate, Okta) can be used to connect with Spring SAML Extension.
 
-## Upgrade note
+## Current status
 
+This repository is not being actively maintained, but will remain hosted for educational and reference purposes.
+It contains an independent, easier to use and abstracted through Java POJOs, SAML library on top of the OpenSAML library. 
+The concept was also validated against Keycloak as the underlying dependency.
+
+The effort continues at the code [Spring Security](https://docs.spring.io/spring-security/site/docs/5.2.0.RELEASE/reference/htmlsingle/#saml2) project.
+It's goals are to provide a framework abstraction, as opposed to a library, for SAML 2 Authentication.
+
+We continue to accept pull request for all branches, but will not actively drive feature development
+in this repository.
+
+## What it was
 This project is being rewritten. There is a base implementation in the 
 [develop](https://github.com/spring-projects/spring-security-saml/tree/develop) including 
 milestone releases in the [milestone](https://repo.spring.io/milestone/org/springframework/security/extensions/spring-security-saml2-core/)
@@ -18,8 +29,6 @@ project and release as part of Spring Security core.
 
 For that reason, we will not be publishing any official releases of the 2.0.0 milestones, but will maintain it
 until all feature functionality that exists in the milestones are part of Spring Security.
-
-We continue to accept pull request for the 1.0.x branch, but are not actively developing it.
 
 ## Code of Conduct
 This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).

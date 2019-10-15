@@ -87,8 +87,6 @@ configure(allprojects) { project ->
 
 
 	ext.javadocLinks = [
-		"https://docs.oracle.com/javase/6/docs/api",
-		"https://docs.oracle.com/javaee/6/api",
 	] as String[]
 }
 
@@ -207,7 +205,6 @@ configure(rootProject) {
 			project.sourceSets.main.allJava
 		}
 
-		maxMemory = "1024m"
 		destinationDir = new File(buildDir, "api")
 
 		doFirst {

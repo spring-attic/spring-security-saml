@@ -48,5 +48,7 @@ dependencies {
 	testCompile 'org.springframework.security:spring-security-test'
 
 	testCompile files(this.project(':spring-security-saml2-core').sourceSets.test.output)
+    testCompile group: 'org.mockito', name: 'mockito-core', version: "$mockitoVersion"
+    testCompile group: 'net.bytebuddy', name: 'byte-buddy', version: "$byteBuddyVersion"
 
 }

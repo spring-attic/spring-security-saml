@@ -53,6 +53,9 @@ configure(allprojects) { project ->
 	ext.xmlApisVersion = "1.4"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 	ext.junitVersion = "5.1.0"
+    ext.jaxbApiVersion = "2.3.1"
+    ext.mockitoVersion = "3.1.0"
+    ext.byteBuddyVersion = "1.9.10"
 
 	apply plugin: "propdeps"
 	apply plugin: "java"
@@ -301,21 +304,4 @@ configure(rootProject) {
 		archives docsZip
 		archives distZip
 	}
-
-	task wrapper(type: Wrapper) {
-		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "2.3"
-
-		doLast() {
-			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
-			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-			File wrapperFile = file("gradlew")
-			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-				"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-			File wrapperBatFile = file("gradlew.bat")
-			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-		}
-	}
-
 }

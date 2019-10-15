@@ -23,5 +23,5 @@ include "samples/boot/dsl-identity-provider"
 rootProject.name = "spring-security-saml2"
 
 rootProject.children.each { p ->
-	p.name = "spring-security-saml2-${p.name}"
+	p.name = "spring-security-saml2-${p.name}".replace("/","-")
 }

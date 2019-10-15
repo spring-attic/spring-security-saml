@@ -16,14 +16,10 @@
  */
 package org.springframework.security.samples;
 
-import java.net.URI;
-import java.time.Clock;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
@@ -62,10 +58,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import java.net.URI;
+import java.time.Clock;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -121,7 +120,7 @@ public class SimpleServiceProviderBootTest {
 
 	@BeforeEach
 	void setUp() {
-		idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php";
+		idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		spBaseUrl = "http://localhost";
 		defaultRequest = new MockHttpServletRequest("GET", spBaseUrl);
 		helper = new SamlTestObjectHelper(samlTime);
@@ -218,7 +217,7 @@ public class SimpleServiceProviderBootTest {
 	@Test
 	public void authnRequest() throws Exception {
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertNotNull(authn);
 	}
 
@@ -227,7 +226,7 @@ public class SimpleServiceProviderBootTest {
 		config.getServiceProvider().getProviders().stream()
 			.forEach(p -> p.setNameId(NameId.PERSISTENT));
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		assertThat(authn.getNameIdPolicy().getFormat(), equalTo(NameId.PERSISTENT));
 	}
 
@@ -259,9 +258,9 @@ public class SimpleServiceProviderBootTest {
 	public void processResponse() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		config.getServiceProvider().setWantAssertionsSigned(false);
-		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php";
+		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php"
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php"
 		);
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
@@ -286,9 +285,9 @@ public class SimpleServiceProviderBootTest {
 	public void processResponseSignatureInheritance() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		config.getServiceProvider().setWantAssertionsSigned(true);
-		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php";
+		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
 		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
@@ -317,9 +316,9 @@ public class SimpleServiceProviderBootTest {
 	public void invalidResponse() throws Exception {
 		config.getServiceProvider().setWantAssertionsSigned(false);
 		ServiceProviderService provider = provisioning.getHostedProvider();
-		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php";
+		String idpEntityId = "https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php";
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
 		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
@@ -344,7 +343,7 @@ public class SimpleServiceProviderBootTest {
 	public void initiateLogout() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
 		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
@@ -380,7 +379,7 @@ public class SimpleServiceProviderBootTest {
 	public void receiveLogoutRequest() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
 		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
@@ -428,7 +427,7 @@ public class SimpleServiceProviderBootTest {
 	public void receiveLogoutResponse() throws Exception {
 		ServiceProviderService provider = provisioning.getHostedProvider();
 		AuthenticationRequest authn = getAuthenticationRequestRedirect(
-			"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php");
+			"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php");
 		IdentityProviderMetadata idp = provider.getRemoteProvider(idpEntityId);
 		ServiceProviderMetadata sp = provider.getMetadata();
 		Assertion assertion = helper.assertion(sp, idp, authn, "test-user@test.com", NameId.PERSISTENT);
@@ -538,7 +537,7 @@ public class SimpleServiceProviderBootTest {
 
 	private static String IDP_METADATA_SIMPLE =
 		"<?xml version=\"1.0\"?>\n" +
-		"<md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" entityID=\"https://simplesaml-for-spring-saml.cfapps.io:80/saml2/idp/metadata.php\" ID=\"pfx82c8eef2-9b5c-578f-3b57-5f95dfb59d52\"><ds:Signature>\n" +
+		"<md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" entityID=\"https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php\" ID=\"pfx82c8eef2-9b5c-578f-3b57-5f95dfb59d52\"><ds:Signature>\n" +
 		"  <ds:SignedInfo><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
 		"    <ds:SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
 		"  <ds:Reference URI=\"#pfx82c8eef2-9b5c-578f-3b57-5f95dfb59d52\"><ds:Transforms><ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/></ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><ds:DigestValue>Ggf2m64yY0eZ8l9SWRhPGaFCFNo=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>sXIdvPdAIStwnxbv+cBiZU8Diw+YGA1ZOo6Wxxsx5wXu/nqXWqEcGoK+0duuGw95yajUO0lYmhSAngXw3R9Gf5RoE+x3NnbaNwPacv6BsQiftjnWJ29qLpBOZXvlZ4VPxHvuzQCS6QSiFjj6jSwNKJLlxKPhMFjPLfirAN1M5/XHEGS+LhPQLcAiR/0neIXsHlCBFrT1JksQE3e5GDOfY674xCIOF7KGR3Ia3UXaQxM8n6+UUgfrlqiGKJefUVifexnr804N/8OI4bo6pW7IwPxl/1Ruo8ABEc2dsBIrA3DzCxsXMjBe4PTaFNc2jWot1F0b7KY+VssqHadu9j6B+A==</ds:SignatureValue>\n" +

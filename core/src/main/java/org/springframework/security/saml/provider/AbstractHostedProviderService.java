@@ -17,14 +17,9 @@
 
 package org.springframework.security.saml.provider;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlMetadataException;
@@ -52,9 +47,13 @@ import org.springframework.security.saml.saml2.signature.SignatureException;
 import org.springframework.security.saml.validation.ValidationException;
 import org.springframework.security.saml.validation.ValidationResult;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -253,7 +252,18 @@ public abstract class AbstractHostedProviderService<
 				logger.warn("Missing signature for "+c.getMetadata() + ". Unable to trust.");
 			}
 		} catch (SignatureException e) {
-			logger.warn("Invalid signature for remote provider metadata "+c.getMetadata() + ". Unable to trust.", e);
+			if (logger.isDebugEnabled()) {
+				logger.debug(
+					"Invalid signature for remote provider metadata " + c.getMetadata() + ". Unable to trust.",
+					e
+				);
+			}
+			else {
+				logger.warn(
+					"Invalid signature for remote provider with alias: " + c.getAlias() +
+						". Unable to trust metadata. Discarding it."
+				);
+			}
 		}
 		return null;
 	}
@@ -372,11 +382,13 @@ public abstract class AbstractHostedProviderService<
 	}
 
 	private RemoteMetadata resolve(String metadata, boolean skipSslValidation) {
-		RemoteMetadata result;
+		RemoteMetadata result = null;
 		if (isUri(metadata)) {
 			try {
 				byte[] data = cache.getMetadata(metadata, skipSslValidation);
-				result = transformMetadata(new String(data, StandardCharsets.UTF_8));
+				if (data != null) {
+					result = transformMetadata(new String(data, StandardCharsets.UTF_8));
+				}
 			} catch (SamlException x) {
 				throw x;
 			} catch (Exception x) {

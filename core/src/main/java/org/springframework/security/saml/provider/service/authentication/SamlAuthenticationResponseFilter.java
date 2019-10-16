@@ -17,11 +17,8 @@
 
 package org.springframework.security.saml.provider.service.authentication;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -37,8 +34,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.util.StringUtils.hasText;
@@ -71,7 +68,7 @@ public class SamlAuthenticationResponseFilter extends AbstractAuthenticationProc
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-		throws AuthenticationException, IOException, ServletException {
+		throws AuthenticationException {
 
 		String responseData = getSamlResponseData(request);
 		if (!hasText(responseData)) {

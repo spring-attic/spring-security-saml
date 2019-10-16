@@ -18,18 +18,7 @@
 package org.springframework.security.saml.helper;
 
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.springframework.security.saml.SamlException;
+import org.joda.time.DateTime;
 import org.springframework.security.saml.key.SimpleKey;
 import org.springframework.security.saml.provider.config.LocalProviderConfiguration;
 import org.springframework.security.saml.provider.identity.config.LocalIdentityProviderConfiguration;
@@ -64,7 +53,16 @@ import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-import org.joda.time.DateTime;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -125,13 +123,9 @@ public class SamlTestObjectHelper {
 	}
 
 	protected String getAliasPath(LocalProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
+		return hasText(configuration.getAlias()) ?
+			UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
+			UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
 	}
 
 	public ServiceProviderMetadata serviceProviderMetadata(String baseUrl,

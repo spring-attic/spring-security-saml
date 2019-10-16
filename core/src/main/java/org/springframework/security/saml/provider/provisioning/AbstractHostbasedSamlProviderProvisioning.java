@@ -17,12 +17,6 @@
 
 package org.springframework.security.saml.provider.provisioning;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.security.saml.SamlException;
 import org.springframework.security.saml.SamlMetadataCache;
 import org.springframework.security.saml.SamlTransformer;
 import org.springframework.security.saml.SamlValidator;
@@ -42,6 +36,10 @@ import org.springframework.security.saml.saml2.signature.AlgorithmMethod;
 import org.springframework.security.saml.saml2.signature.DigestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.springframework.security.saml.saml2.metadata.Binding.REDIRECT;
@@ -73,13 +71,9 @@ public abstract class AbstractHostbasedSamlProviderProvisioning {
 	}
 
 	protected String getAliasPath(LocalProviderConfiguration configuration) {
-		try {
-			return hasText(configuration.getAlias()) ?
-				UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
-				UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new SamlException(e);
-		}
+		return hasText(configuration.getAlias()) ?
+			UriUtils.encode(configuration.getAlias(), StandardCharsets.ISO_8859_1.name()) :
+			UriUtils.encode(configuration.getEntityId(), StandardCharsets.ISO_8859_1.name());
 	}
 
 	protected IdentityProviderMetadata identityProviderMetadata(String baseUrl,

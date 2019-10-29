@@ -640,11 +640,13 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         // Resolve allowed certificates to build the anchors
         List<X509Certificate> certificates = new LinkedList<X509Certificate>();
+        Set<String> trustedSubjectDns = new HashSet<String>();
         for (String key : trustedKeys) {
             log.debug("Adding PKIX trust anchor {} for metadata verification of provider {}", key, provider);
             X509Certificate certificate = keyManager.getCertificate(key);
             if (certificate != null) {
                 certificates.add(certificate);
+                trustedSubjectDns.add( certificate.getSubjectDN().getName() );
             } else {
                 log.warn("Cannot construct PKIX trust anchor for key with alias {} for provider {}, key isn't included in the keystore", key, provider);
             }
@@ -652,7 +654,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();
         info.add(new BasicPKIXValidationInformation(certificates, null, 4));
-        return new StaticPKIXValidationInformationResolver(info, trustedNames) {
+        return new StaticPKIXValidationInformationResolver(info, trustedNames != null ? trustedNames : trustedSubjectDns) {
             @Override
             public Set<String> resolveTrustedNames(CriteriaSet criteriaSet)
                 throws SecurityException, UnsupportedOperationException {

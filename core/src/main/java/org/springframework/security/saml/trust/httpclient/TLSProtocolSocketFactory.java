@@ -26,10 +26,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Socket factory can be used with HTTP Client for creation of SSL/TLS sockets. Implementation uses internal KeyManager
@@ -136,14 +133,17 @@ public class TLSProtocolSocketFactory implements SecureProtocolSocketFactory {
 
         // Resolve allowed certificates to build the anchors
         List<X509Certificate> certificates = new ArrayList<X509Certificate>(trustedKeys.size());
+        Set<String> subjectDNs = new HashSet<String>(trustedKeys.size());
         for (String key : trustedKeys) {
             log.debug("Adding PKIX trust anchor {} for SSL/TLS verification {}", key);
-            certificates.add(keyManager.getCertificate(key));
+            X509Certificate cert = keyManager.getCertificate(key);
+            certificates.add(cert);
+            subjectDNs.add(cert.getSubjectDN().getName());
         }
 
         List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();
         info.add(new BasicPKIXValidationInformation(certificates, null, 4));
-        return new StaticPKIXValidationInformationResolver(info, null);
+        return new StaticPKIXValidationInformationResolver(info, subjectDNs);
 
     }
 

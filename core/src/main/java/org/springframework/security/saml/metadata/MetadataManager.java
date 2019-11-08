@@ -14,18 +14,6 @@
  */
 package org.springframework.security.saml.metadata;
 
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntitiesDescriptor;
 import org.opensaml.saml2.metadata.EntityDescriptor;
@@ -61,6 +49,19 @@ import org.springframework.security.saml.trust.AllowAllSignatureTrustEngine;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
+
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class offers extra services on top of the underlying chaining MetadataProviders. Manager keeps track of all available

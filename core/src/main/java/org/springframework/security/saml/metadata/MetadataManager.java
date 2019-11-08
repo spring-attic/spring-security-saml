@@ -258,18 +258,18 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
                 try {
 
-                    log.debug("Refreshing metadata provider {}", provider.toString());
+                    log.debug("Refreshing metadata provider {}", provider);
                     initializeProviderFilters(provider);
                     initializeProvider(provider);
                     initializeProviderData(provider);
 
                     // Make provider available for queries
                     super.addMetadataProvider(provider);
-                    log.debug("Metadata provider was initialized {}", provider.toString());
+                    log.debug("Metadata provider was initialized {}", provider);
 
                 } catch (MetadataProviderException e) {
 
-                    log.error("Initialization of metadata provider " + provider + " failed, provider will be ignored", e);
+                    log.error("Initialization of metadata provider {} failed, provider will be ignored", provider, e);
 
                 }
 
@@ -551,19 +551,12 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
             log.debug("Created new trust manager for metadata provider {}", provider);
 
-            // Combine any existing filters with the signature verification
             MetadataFilter currentFilter = provider.getMetadataFilter();
             if (currentFilter != null) {
-                if (currentFilter instanceof MetadataFilterChain) {
-                    log.debug("Adding signature filter into existing chain");
-                    MetadataFilterChain chain = (MetadataFilterChain) currentFilter;
-                    chain.getFilters().add(filter);
-                } else {
-                    log.debug("Combining signature filter with the existing in a new chain");
-                    MetadataFilterChain chain = new MetadataFilterChain();
-                    chain.getFilters().add(currentFilter);
-                    chain.getFilters().add(filter);
-                }
+                log.debug("Adding signature filter before existing filters");
+                MetadataFilterChain chain = new MetadataFilterChain();
+                chain.setFilters(Arrays.asList(filter, currentFilter));
+                provider.setMetadataFilter(chain);
             } else {
                 log.debug("Adding signature filter");
                 provider.setMetadataFilter(filter);
@@ -704,7 +697,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
      */
     private void addDescriptors(List<String> result, EntitiesDescriptor descriptors) throws MetadataProviderException {
 
-        log.debug("Found metadata EntitiesDescriptor with ID", descriptors.getID());
+        log.debug("Found metadata EntitiesDescriptor with ID {}", descriptors.getID());
 
         if (descriptors.getEntitiesDescriptors() != null) {
             for (EntitiesDescriptor descriptor : descriptors.getEntitiesDescriptors()) {

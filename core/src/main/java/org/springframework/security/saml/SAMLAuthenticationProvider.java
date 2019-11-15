@@ -121,7 +121,7 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
 
         SAMLCredential authenticationCredential = excludeCredential ? null : credential;
         ExpiringUsernameAuthenticationToken result = new ExpiringUsernameAuthenticationToken(expiration, principal, authenticationCredential, entitlements);
-        result.setDetails(userDetails);
+        result.setDetails(authentication.getDetails());
 
         samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.SUCCESS, context, result, null);
 

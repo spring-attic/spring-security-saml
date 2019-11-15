@@ -190,6 +190,8 @@ public class SAMLProcessingFilterTest {
         final Capture<SAMLMessageContext> context = new Capture<SAMLMessageContext>();
         expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost:8081/spring-security-saml2-webapp/saml/SSO"));
         expect(request.getQueryString()).andReturn(null);
+        expect(request.getRemoteAddr()).andReturn(null);
+		expect(request.getSession(false)).andReturn(null);
         expect(processor.retrieveMessage(capture(context))).andAnswer(new IAnswer<SAMLMessageContext>() {
             public SAMLMessageContext answer() throws Throwable {
                 context.getValue().setInboundSAMLBinding(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI);

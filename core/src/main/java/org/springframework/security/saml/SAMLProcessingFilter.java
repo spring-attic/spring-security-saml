@@ -89,6 +89,10 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
             context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport(), uriComparator));
 
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
+
+			// Allow subclasses to set the "details" property
+			setDetails(request, token);
+
             return getAuthenticationManager().authenticate(token);
 
         } catch (SAMLException e) {
@@ -106,6 +110,19 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         }
 
     }
+
+	/**
+	 * Provided so that subclasses may configure what is put into the authentication
+	 * request's details property.
+	 *
+	 * @param request that an authentication request is being created for
+	 * @param authRequest the authentication request object that should have its details
+	 * set
+	 */
+	protected void setDetails(HttpServletRequest request,
+							  SAMLAuthenticationToken authRequest) {
+		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+	}
 
     /**
      * Name of the profile this used for authentication.

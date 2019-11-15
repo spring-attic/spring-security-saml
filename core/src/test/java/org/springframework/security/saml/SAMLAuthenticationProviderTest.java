@@ -120,6 +120,8 @@ public class SAMLAuthenticationProviderTest {
         provider.setUserDetails(details);
 
         SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
+        Object authenticationDetails = new Object();
+        token.setDetails(authenticationDetails);
         SAMLCredential result = new SAMLCredential(nameID, assertion, "IDP", "localSP");
 
         expect(consumer.processAuthenticationResponse(context)).andReturn(result);
@@ -135,6 +137,7 @@ public class SAMLAuthenticationProviderTest {
         assertEquals(user, authentication.getPrincipal());
         assertEquals(user.getUsername(), authentication.getName());
         assertNotNull(authentication.getDetails());
+        assertEquals(authenticationDetails, authentication.getDetails());
         assertEquals(2, authentication.getAuthorities().size());
         assertTrue(authentication.getAuthorities().contains(new SimpleGrantedAuthority("role1")));
         assertTrue(authentication.getAuthorities().contains(new SimpleGrantedAuthority("role2")));

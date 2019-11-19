@@ -53,7 +53,7 @@ public abstract class SamlServiceProviderSecurityConfiguration
 			.antMatcher(filterChainPattern)
 			.csrf().disable()
 			.authorizeRequests()
-			.antMatchers("/**").permitAll();
+			.antMatchers(filterChainPattern).permitAll();
 
 
 		http

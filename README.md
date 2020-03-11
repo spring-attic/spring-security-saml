@@ -6,12 +6,12 @@ Spring SAML Extension allows seamless inclusion of SAML 2.0 Service Provider cap
 
 ## Current status
 
-This repository is not being actively maintained, but will remain hosted for educational and reference purposes.
+**This repository is not being actively maintained**, but will remain hosted for educational and reference purposes.
 It contains an independent, easier to use and abstracted through Java POJOs, SAML library on top of the OpenSAML library. 
 The concept was also validated against Keycloak as the underlying dependency.
 
 The effort continues at the code [Spring Security](https://docs.spring.io/spring-security/site/docs/5.2.0.RELEASE/reference/htmlsingle/#saml2) project.
-It's goals are to provide a framework abstraction, as opposed to a library, for SAML 2 Authentication.
+Its goals are to provide a framework abstraction, as opposed to a library, for SAML 2 Authentication.
 
 We continue to accept pull request for all branches, but will not actively drive feature development
 in this repository.

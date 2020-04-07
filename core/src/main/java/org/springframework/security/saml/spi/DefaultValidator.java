@@ -66,7 +66,7 @@ public class DefaultValidator implements SamlValidator {
 	private SpringSecuritySaml implementation;
 	private int responseSkewTimeMillis = 1000 * 60 * 2; //two minutes
 	private boolean allowUnsolicitedResponses = true;
-	private int maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
+	private long maxAuthenticationAgeMillis = 1000 * 60 * 60 * 24; //24 hours
 	private Clock time = Clock.systemUTC();
 
 	public DefaultValidator(SpringSecuritySaml implementation) {
@@ -447,13 +447,13 @@ public class DefaultValidator implements SamlValidator {
 		return new ValidationResult(response);
 	}
 
-	protected boolean isDateTimeSkewValid(int skewMillis, int forwardMillis, DateTime time) {
+	protected boolean isDateTimeSkewValid(int skewMillis, long forwardMillis, DateTime time) {
 		if (time == null) {
 			return false;
 		}
 		final DateTime reference = new DateTime();
 		final Interval validTimeInterval = new Interval(
-			reference.minusMillis(skewMillis + forwardMillis),
+			new DateTime(Long.valueOf(reference.getMillis() - (skewMillis + forwardMillis))),
 			reference.plusMillis(skewMillis)
 		);
 		return validTimeInterval.contains(time);
@@ -516,8 +516,13 @@ public class DefaultValidator implements SamlValidator {
 		return null;
 	}
 
-	public int getMaxAuthenticationAgeMillis() {
+	public long getMaxAuthenticationAgeMillis() {
 		return maxAuthenticationAgeMillis;
+	}
+
+	public DefaultValidator setMaxAuthenticationAgeMillis(long maxAuthenticationAgeMillis) {
+		this.maxAuthenticationAgeMillis = maxAuthenticationAgeMillis;
+		return this;
 	}
 
 	public Clock time() {
@@ -543,10 +548,6 @@ public class DefaultValidator implements SamlValidator {
 			return uri.substring(0, queryStringIndex);
 		}
 		return uri;
-	}
-
-	public void setMaxAuthenticationAgeMillis(int maxAuthenticationAgeMillis) {
-		this.maxAuthenticationAgeMillis = maxAuthenticationAgeMillis;
 	}
 
 

@@ -1,24 +1,24 @@
-# Spring SAML
+= Spring SAML
 
-[![Build Status](https://travis-ci.org/spring-projects/spring-security-saml.svg?branch=master)](https://github.com/spring-projects/spring-security-saml/)
+image:https://travis-ci.org/spring-projects/spring-security-saml.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-security-saml"]
 
-## Upgrade note
+== Upgrade note
 
-This project is being rewritten in [Spring Security](https://github.com/spring-projects/spring-security). As such, [new feature requests](https://github.com/spring-projects/spring-security/issues/new) should be logged there.
+This project is being rewritten in https://github.com/spring-projects/spring-security[Spring Security]. As such, https://github.com/spring-projects/spring-security/issues/new[new feature requests] should be logged there.
 
 In the past, there were `develop` and `develop-3.0` branches, though these are not maintained, and PRs are no longer being considered on these branches. No further releases will be issued from these two branches. Please feel free to fork the repository if you need to make changes.
 
 We continue to consider pull requests for the 1.0.x branch, but are not actively developing it.
 
-## Introduction
+== Introduction
 
 Spring SAML Extension allows seamless inclusion of SAML 2.0 Service Provider capabilities in Spring applications. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, Ping Federate, Okta) can be used to connect with Spring SAML Extension.
 
-## Code of Conduct
-This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md).
+== Code of Conduct
+This project adheres to the Contributor Covenant https://github.com/spring-projects/spring-security-saml/blob/master/CODE_OF_CONDUCT.adoc[code of conduct].
 By participating, you are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
-## Links
+== Links
 Web:
 https://projects.spring.io/spring-security-saml/
 

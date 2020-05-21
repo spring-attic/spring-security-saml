@@ -1,9 +1,11 @@
 package org.springframework.security.saml.util;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for SAMLUtil class.
@@ -24,4 +26,23 @@ public class SAMLUtilTest {
         assertEquals("test___2", SAMLUtil.getNCNameString("test&^%2"));
     }
 
+    @Test
+    public void isDateTimeSkewShouldReturnTrueForMaxIntegerForwardInterval() {
+        assertTrue(SAMLUtil.isDateTimeSkewValid(60, Integer.MAX_VALUE, new DateTime()));
+    }
+
+    @Test
+    public void isDateTimeSkewShouldReturnTrueForZeroForwardInterval() {
+       assertTrue(SAMLUtil.isDateTimeSkewValid(60, 0, new DateTime()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void isDateTimeSkewShouldThrowErrorForForwardIntervalHigherThanInteger() {
+        SAMLUtil.isDateTimeSkewValid(60, Integer.MAX_VALUE+1L, new DateTime());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void isDateTimeSkewShouldThrowErrorForForwardIntervalLessThanZero() {
+        SAMLUtil.isDateTimeSkewValid(60, -1, new DateTime());
+    }
 }

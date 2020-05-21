@@ -15,6 +15,15 @@
  */
 package org.springframework.security.saml.util;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.namespace.QName;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.opensaml.common.SAMLException;
@@ -55,15 +64,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.util.Assert;
 import org.w3c.dom.Element;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.namespace.QName;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Utility class for SAML entities
@@ -516,18 +518,20 @@ public class SAMLUtil {
     }
 
     /**
-     * Verifies that the current time fits into interval defined by time minus backwardInterval minus skew and time plus forward interval plus skew.
+     * Verifies that the current time fits into interval defined by time minus skew minus forwardInterval and time plus skew.
      *
      *
      * @param skewInSec skew interval in seconds
-     * @param forwardInterval forward interval in sec
+     * @param forwardInterval forward interval in seconds, allowed range is positive integer
      * @param time time the current time must fit into with the given skew
      * @return true if time matches, false otherwise
      */
     public static boolean isDateTimeSkewValid(int skewInSec, long forwardInterval, DateTime time) {
+        Assert.isTrue(forwardInterval >= 0 && forwardInterval <= Integer.MAX_VALUE,"forwardInterval param is too high. Only positive integer value is allowed.");
+
         final DateTime reference = new DateTime();
         final Interval validTimeInterval = new Interval(
-                reference.minusSeconds(skewInSec + (int)forwardInterval),
+                reference.minusSeconds(skewInSec).minusSeconds((int)forwardInterval),
                 reference.plusSeconds(skewInSec)
         );
         return validTimeInterval.contains(time);

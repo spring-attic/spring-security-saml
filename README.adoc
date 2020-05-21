@@ -15,8 +15,7 @@ We continue to consider pull requests for the 1.0.x branch, but are not actively
 Spring SAML Extension allows seamless inclusion of SAML 2.0 Service Provider capabilities in Spring applications. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, Ping Federate, Okta) can be used to connect with Spring SAML Extension.
 
 == Code of Conduct
-This project adheres to the Contributor Covenant https://github.com/spring-projects/spring-security-saml/blob/master/CODE_OF_CONDUCT.adoc[code of conduct].
-By participating, you are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+Please see our https://github.com/spring-projects/.github/blob/master/CODE_OF_CONDUCT.md[code of conduct].
 
 == Links
 Web:

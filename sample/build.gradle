@@ -1,9 +1,6 @@
 apply plugin: 'war'
 apply plugin: 'tomcat'
 
-// Do not generate POM for this module
-install.enabled = false
-
 // Disable publishing to repository for the sample project
 if (tasks.findByPath('artifactoryPublish')) {
     artifactoryPublish.enabled = false

@@ -57,10 +57,6 @@ configure(allprojects) { project ->
 	] as String[]
 }
 
-configure(subprojects) { subproject ->
-	apply from: "${gradleScriptDir}/publish-maven.gradle"
-}
-
 configure(coreProjects) { p ->
 	apply plugin: 'spring-io'
 

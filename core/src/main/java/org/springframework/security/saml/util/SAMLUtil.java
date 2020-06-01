@@ -472,11 +472,11 @@ public class SAMLUtil {
             signature.setSigningCredential(signingCredential);
 
             BasicSecurityConfiguration secConfig = null;
-            
+
             if (digestMethodAlgorithm != null)
             {
                 secConfig = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
-                
+
                 secConfig.setSignatureReferenceDigestMethod(digestMethodAlgorithm);
             }
 
@@ -507,32 +507,34 @@ public class SAMLUtil {
     }
 
     /**
-     * Verifies that the current time is within skewInSec interval from the time value.
+     * Validates the given {@code time} by checking that it matches the current time,
+     * also accounting for some possible clock skew.
      *
-     * @param skewInSec skew interval in seconds
-     * @param time time the current time must fit into with the given skew
-     * @return true if time matches, false otherwise
+     * @param skewInSeconds allowed clock skew
+     * @param time the time to check
+     * @return {@code true} if {@code time} is valid, {@code false} otherwise
      */
-    public static boolean isDateTimeSkewValid(int skewInSec, DateTime time) {
-        return isDateTimeSkewValid(skewInSec, 0, time);
+    public static boolean isDateTimeSkewValid(int skewInSeconds, DateTime time) {
+        return isDateTimeSkewValid(skewInSeconds, 0, time);
     }
 
     /**
-     * Verifies that the current time fits into interval defined by time minus skew minus forwardInterval and time plus skew.
+     * Validates the given {@code time} by checking that it falls between now and {@code expiryInSeconds} in the past,
+     * also accounting for some possible clock skew.
      *
-     *
-     * @param skewInSec skew interval in seconds
-     * @param forwardInterval forward interval in seconds, allowed range is positive integer
-     * @param time time the current time must fit into with the given skew
-     * @return true if time matches, false otherwise
+     * @param skewInSeconds allowed clock skew
+     * @param expiryInSeconds how old in seconds {@code time} can be and still be valid; allowed range is positive integer
+     * @param time the time to check
+     * @return {@code true} if {@code time} is unexpired, {@code false} otherwise
      */
-    public static boolean isDateTimeSkewValid(int skewInSec, long forwardInterval, DateTime time) {
-        Assert.isTrue(forwardInterval >= 0 && forwardInterval <= Integer.MAX_VALUE,"forwardInterval param is too high. Only positive integer value is allowed.");
+    public static boolean isDateTimeSkewValid(int skewInSeconds, long expiryInSeconds, DateTime time) {
+        Assert.isTrue(expiryInSeconds >= 0 && expiryInSeconds <= Integer.MAX_VALUE,
+			"expiryInSeconds param is too high. Only positive integer value is allowed.");
 
         final DateTime reference = new DateTime();
         final Interval validTimeInterval = new Interval(
-                reference.minusSeconds(skewInSec).minusSeconds((int)forwardInterval),
-                reference.plusSeconds(skewInSec)
+                reference.minusSeconds(skewInSeconds).minusSeconds((int)expiryInSeconds),
+                reference.plusSeconds(skewInSeconds)
         );
         return validTimeInterval.contains(time);
     }

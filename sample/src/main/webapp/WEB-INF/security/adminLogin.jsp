@@ -1,3 +1,4 @@
+<%@ page import="org.springframework.security.web.csrf.CsrfToken" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -30,7 +31,11 @@
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td><input name="submit" class="button" type="submit" value="Login"/></td>
+                                        <td>
+                                            <% CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName()); %>
+                                            <input name="<%= token.getParameterName()%>" type="hidden" value="<%=token.getToken()%>"/>
+                                            <input name="submit" class="button" type="submit" value="Login"/>
+                                        </td>
                                     </tr>
                                 </table>
                             </form>

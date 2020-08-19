@@ -32,7 +32,7 @@ Spring Security SAML publishes GA (general availability) versions to https://sea
 <dependency>
     <groupId>org.springframework.security.extensions</groupId>
     <artifactId>spring-security-saml</artifactId>
-    <verision>1.0.10.RELEASE</verision>
+    <version>1.0.10.RELEASE</version>
 </dependency>
 ----
 

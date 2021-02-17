@@ -1,5 +1,5 @@
 apply plugin: 'war'
-apply plugin: 'tomcat'
+apply plugin: 'com.bmuschko.tomcat'
 
 // Disable publishing to repository for the sample project
 if (tasks.findByPath('artifactoryPublish')) {
@@ -27,11 +27,8 @@ dependencies {
 
 	testCompile "junit:junit:4.4"
 
-	def tomcatVersion = '7.0.11'
-	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-		"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
-	tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
-		exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-	}
+	def tomcatVersion = '8.5.63'
+	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+	tomcat "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 
 }

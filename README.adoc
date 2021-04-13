@@ -1,7 +1,6 @@
 === Maintenance Mode
 
-This project is being rewritten in https://github.com/spring-projects/spring-security[Spring Security].
-As such, it is in maintenance mode, and https://github.com/spring-projects/spring-security/issues/new[new feature requests] should be logged there.
+This project is in maintenance mode and https://spring.io/blog/2020/09/22/spring-security-saml-extensions-1-x-eol-on-october-6-2021[will each End-of-Life on 6 October 2021]. Please use https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-saml2[Spring Security's SAML support] instead.
 
 NOTE: In the past, there were `develop` and `develop-3.0` branches, though these are not maintained, and PRs are no longer being considered on these branches.
 No further releases will be issued from these two branches.

@@ -20,8 +20,8 @@ dependencies {
 		exclude(group: "org.apache.velocity", module: 'velocity')
 	}
 	compile group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.0'
-	compile group:'org.bouncycastle', name:'bcprov-jdk15on', version: "$bcprovVersion"
-	compile group:'org.bouncycastle', name:'bcpkix-jdk15on', version: "$bcpkixVersion"
+	compile group:'org.bouncycastle', name:'bcprov-jdk18on', version: "$bouncyCastleVersion"
+	compile group:'org.bouncycastle', name:'bcpkix-jdk18on', version: "$bouncyCastleVersion"
 	compile group: 'org.apache.santuario', name: 'xmlsec', version: "$openSamlXmlSec"
 	compile (group:'org.owasp.esapi', name:'esapi', version: "$esapiVersion") {
 		exclude(group: 'org.beanshell', module: 'bsh-core')

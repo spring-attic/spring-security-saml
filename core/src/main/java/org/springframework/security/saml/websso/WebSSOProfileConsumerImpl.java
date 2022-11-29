@@ -233,6 +233,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                     Assert.notNull(context.getLocalDecrypter(), "Can't decrypt Assertion, no decrypter is set in the context");
                     log.debug("Decrypting assertion");
                     Assertion decryptedAssertion = context.getLocalDecrypter().decrypt(ea);
+                    decryptedAssertion.setParent(response);
                     assertionList.add(decryptedAssertion);
                 } catch (DecryptionException e) {
                     log.debug("Decryption of received assertion failed, assertion will be skipped", e);

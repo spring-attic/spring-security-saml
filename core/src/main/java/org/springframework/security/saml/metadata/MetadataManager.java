@@ -81,46 +81,46 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
     protected final Logger log = LoggerFactory.getLogger(MetadataManager.class);
 
     // Lock for the instance
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     // Lock for the refresh mechanism
-    private final ReentrantReadWriteLock refreshLock = new ReentrantReadWriteLock();
+    protected final ReentrantReadWriteLock refreshLock = new ReentrantReadWriteLock();
 
-    private String hostedSPName;
+    protected String hostedSPName;
 
-    private String defaultIDP;
+    protected String defaultIDP;
 
-    private ExtendedMetadata defaultExtendedMetadata;
+    protected ExtendedMetadata defaultExtendedMetadata;
 
     // Timer used to refresh the metadata upon changes
-    private Timer timer;
+    protected Timer timer;
 
     // Internal of metadata refresh checking in ms
-    private long refreshCheckInterval = 10000l;
+    protected long refreshCheckInterval = 10000l;
 
     // Flag indicating whether metadata needs to be reloaded
-    private boolean refreshRequired = true;
+    protected boolean refreshRequired = true;
 
     // Storage for cryptographic data used to verify metadata signatures
     protected KeyManager keyManager;
 
     // All providers which were added, not all may be active
-    private List<ExtendedMetadataDelegate> availableProviders;
+    protected List<ExtendedMetadataDelegate> availableProviders;
 
     /**
      * Set of IDP names available in the system.
      */
-    private Set<String> idpName;
+    protected Set<String> idpName;
 
     /**
      * Set of SP names available in the system.
      */
-    private Set<String> spName;
+    protected Set<String> spName;
 
     /**
      * All valid aliases.
      */
-    private Set<String> aliasSet;
+    protected Set<String> aliasSet;
 
     /**
      * Creates new metadata manager, automatically registers itself for notifications from metadata changes and calls
@@ -634,11 +634,13 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         // Resolve allowed certificates to build the anchors
         List<X509Certificate> certificates = new LinkedList<X509Certificate>();
+        Set<String> trustedSubjectDns = new HashSet<String>();
         for (String key : trustedKeys) {
             log.debug("Adding PKIX trust anchor {} for metadata verification of provider {}", key, provider);
             X509Certificate certificate = keyManager.getCertificate(key);
             if (certificate != null) {
                 certificates.add(certificate);
+                trustedSubjectDns.add( certificate.getSubjectDN().getName() );
             } else {
                 log.warn("Cannot construct PKIX trust anchor for key with alias {} for provider {}, key isn't included in the keystore", key, provider);
             }
@@ -646,7 +648,7 @@ public class MetadataManager extends ChainingMetadataProvider implements Extende
 
         List<PKIXValidationInformation> info = new LinkedList<PKIXValidationInformation>();
         info.add(new BasicPKIXValidationInformation(certificates, null, 4));
-        return new StaticPKIXValidationInformationResolver(info, trustedNames) {
+        return new StaticPKIXValidationInformationResolver(info, trustedNames != null ? trustedNames : trustedSubjectDns) {
             @Override
             public Set<String> resolveTrustedNames(CriteriaSet criteriaSet)
                 throws SecurityException, UnsupportedOperationException {
